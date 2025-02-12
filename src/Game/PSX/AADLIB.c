@@ -108,7 +108,37 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadCreateFourCharID);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadLoadDynamicSoundBank);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadLoadDynamicSoundBankReturn);
+void aadLoadDynamicSoundBankReturn2(void *loadedDataPtr, long loadedDataSize, short status, void *data1, void *data2);
+void aadLoadDynamicSoundBankReturn(void *loadedDataPtr, void *data, void *data2)
+{
+    int dynamicBankIndex;
+    int error;
+
+    dynamicBankIndex = ((AadDynamicBankLoadInfo *)data)->dynamicBankIndex;
+
+    error = aadOpenDynamicSoundBank((unsigned char *)loadedDataPtr, dynamicBankIndex);
+
+    if (error != 0)
+    {
+        aadMem->dynamicBankStatus[dynamicBankIndex] = (error | 0x80) & 0xFF;
+
+        if (aadMem->dynamicSoundBankData[dynamicBankIndex] != NULL)
+        {
+            aadMem->memoryFreeProc((char *)aadMem->dynamicSoundBankData[dynamicBankIndex]);
+
+            aadMem->dynamicSoundBankData[dynamicBankIndex] = NULL;
+        }
+
+        if (((AadDynamicBankLoadInfo *)data)->userCallbackProc != NULL)
+        {
+            ((AadDynamicBankLoadInfo *)data)->userCallbackProc(dynamicBankIndex & 0xFFFF, error);
+        }
+    }
+    else
+    {
+        aadMem->nonBlockBufferedLoadProc(((AadDynamicBankLoadInfo *)data)->smpFileName, (void *)aadLoadDynamicSoundBankReturn2, data, NULL);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadLoadDynamicSoundBankReturn2);
 
