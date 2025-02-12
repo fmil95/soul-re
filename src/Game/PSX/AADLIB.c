@@ -126,7 +126,10 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadRelocateMusicMemoryEnd);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadRelocateSfxMemory);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadGetNumLoadsQueued);
+int aadGetNumLoadsQueued()
+{
+    return aadMem->numLoadReqsQueued;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadPurgeLoadQueue);
 
