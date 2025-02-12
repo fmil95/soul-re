@@ -106,7 +106,42 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadSlotUpdate);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadCreateFourCharID);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadLoadDynamicSoundBank);
+void aadLoadDynamicSoundBankReturn(void *loadedDataPtr, void *data, void *data2);
+int aadLoadDynamicSoundBank(char *sndFileName, char *smpFileName, int dynamicBankIndex, int loadOption, void (*retProc)())
+{
+    struct AadDynamicBankLoadInfo *info = &aadMem->dynamicBankLoadInfo;
+    int i;
+    for (i = 0; i < 2; i++)
+    {
+        if (aadMem->dynamicBankStatus[i] == 1)
+        {
+            return 0x1006;
+        }
+    }
+
+    if (dynamicBankIndex >= 2)
+    {
+        return 0x1005;
+    }
+
+    if (aadMem->dynamicBankStatus[dynamicBankIndex] == 2 && aadMem->dynamicSoundBankData[dynamicBankIndex] != NULL)
+    {
+        aadFreeDynamicSoundBank(dynamicBankIndex);
+    }
+
+    aadMem->dynamicBankStatus[dynamicBankIndex] = 1;
+
+    strncpy(info->sndFileName, sndFileName, sizeof(info->sndFileName) - 1);
+    strncpy(info->smpFileName, smpFileName, sizeof(info->smpFileName) - 1);
+    info->dynamicBankIndex = dynamicBankIndex;
+    info->loadOption = loadOption;
+    info->userCallbackProc = retProc;
+    info->flags = 0;
+
+    aadMem->nonBlockLoadProc(sndFileName, (void *)&aadLoadDynamicSoundBankReturn, info, NULL, (void **)&aadMem->dynamicSoundBankData[dynamicBankIndex], 4);
+
+    return 0;
+}
 
 void aadLoadDynamicSoundBankReturn2(void *loadedDataPtr, long loadedDataSize, short status, void *data1, void *data2);
 void aadLoadDynamicSoundBankReturn(void *loadedDataPtr, void *data, void *data2)
