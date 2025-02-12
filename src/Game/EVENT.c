@@ -28,6 +28,14 @@ long NumSignalsToReset;
 
 struct SignalResetStruct ResetSignalArray[16];
 
+STATIC struct Event *currentEventInstance;
+
+STATIC short EventAbortLine;
+
+STATIC struct Level *CurrentPuzzleLevel;
+
+STATIC long EventCurrentEventIndex;
+
 void EVENT_UpdateResetSignalArrayAndWaterMovement(struct Level *oldLevel, struct Level *newLevel, long sizeOfLevel)
 {
     long offset;
@@ -177,7 +185,47 @@ long HINT_GetCurrentHint()
     return -1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ProcessTimers);
+void EVENT_ProcessTimers()
+{
+    int i;
+    EventTimer *eventTimer;
+
+    if (numActiveEventTimers != 0)
+    {
+        for (i = 0; i < 24; i++)
+        {
+            eventTimer = &eventTimerArray[i];
+
+            if (eventTimer->flags & 1)
+            {
+                if ((unsigned long)eventTimer->time < gameTrackerX.timeMult)
+                {
+                    eventTimer->time = 0;
+                }
+                else
+                {
+                    eventTimer->time = (eventTimer->time - gameTrackerX.timeMult);
+                }
+
+                if (eventTimer->time <= 0)
+                {
+                    eventTimer->time = 0;
+                    currentEventInstance = eventTimer->event;
+                    eventTimer->actionScript->conditionBits &= ~0x1;
+                    EVENT_RemoveTimer(eventTimer);
+                    EventAbortLine = 0;
+                    CurrentPuzzleLevel = eventTimer->level;
+                    EventCurrentEventIndex = eventTimer->nextEventIndex;
+
+                    if ((EVENT_DoAction(eventTimer->event, eventTimer->actionScript, eventTimer->scriptPos) != 0) && (EventCurrentEventIndex != -1))
+                    {
+                        EVENT_Process(eventTimer->event, EventCurrentEventIndex);
+                    }
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ProcessHints);
 
