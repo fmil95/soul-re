@@ -3,6 +3,15 @@
 
 #include "common.h"
 
+#define MASTER_VOLUME_SQUARED(volume, left, right) \
+    { \
+    unsigned long masterVolumeSquared; \
+    \
+    masterVolumeSquared = (volume + 1) * (volume + 1) - 1; \
+	left = (left * masterVolumeSquared) >> 14; \
+	right = (right * masterVolumeSquared) >> 14; \
+    }
+
 AadMemoryStruct *aadMem;
 
 int aadIsSfxLoaded(unsigned int toneID);

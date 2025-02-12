@@ -1,6 +1,10 @@
 #include "Game/PSX/AADVOICE.h"
 #include "Game/PSX/AADLIB.h"
 
+unsigned short aadPitchTable[85];
+
+unsigned long aadStepsPerCent[85];
+
 AadSynthVoice *aadAllocateVoice(int priority)
 {
     int i;
@@ -124,6 +128,79 @@ void SpuSetVoiceADSR1ADSR2(int vNum, unsigned short adsr1, unsigned short adsr2)
     SpuSetVoiceADSRAttr(vNum, ar, dr, sr, rr, sl, arm, srm, rrm);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADVOICE", aadPlayTone);
+void aadPlayTone(AadToneAtr *toneAtr, unsigned long waveStartAddr, AadProgramAtr *progAtr, int midiNote, int volume, int masterVolume, int masterPan, int slotVolume, int masterMasterVol, AadSynthVoice *voice, int pitchOffset)
+{
+    AadVolume voiceVol; // stack offset -32
+    int pitch; // $a1
+    int finePitch; // $a1
+    int pitchIndex; // $a3
+
+    voiceVol.right = ((volume + 1) * (volume + 1)) - 1;
+    voiceVol.left = ((volume + 1) * (volume + 1)) - 1;
+
+    if (!(aadMem->flags & 0x1))
+    {
+        if (masterPan >= 0x41)
+        {
+            voiceVol.left = (unsigned int)((short)((((volume + 1) * (volume + 1)) - 1)) * ((((0x80 - masterPan) * (0x80 - masterPan))) - 1)) >> 12;
+        }
+        else if (masterPan < 0x3F)
+        {
+            voiceVol.right = ((short)((((volume + 1) * (volume + 1)) - 1)) * ((((masterPan + 1) * (masterPan + 1))) + 1)) >> 12;
+        }
+    }
+
+    MASTER_VOLUME_SQUARED(toneAtr->volume, voiceVol.left, voiceVol.right);
+
+    if (!(aadMem->flags & 0x1))
+    {
+        if (toneAtr->panPosition >= 65)
+        {
+            voiceVol.left = (unsigned int)(voiceVol.right * (((0x80 - toneAtr->panPosition) * (0x80 - toneAtr->panPosition)) - 1)) >> 12;
+        }
+        else if (toneAtr->panPosition < 63)
+        {
+            voiceVol.right = (voiceVol.left * (((toneAtr->panPosition + 1) * (toneAtr->panPosition + 1)) + 1)) >> 12;
+        }
+    }
+
+    MASTER_VOLUME_SQUARED(masterVolume, voiceVol.left, voiceVol.right);
+    MASTER_VOLUME_SQUARED(progAtr->volume, voiceVol.left, voiceVol.right);
+    MASTER_VOLUME_SQUARED(slotVolume, voiceVol.left, voiceVol.right);
+    MASTER_VOLUME_SQUARED(masterMasterVol, voiceVol.left, voiceVol.right);
+
+    SpuSetVoiceVolume(voice->voiceNum, voiceVol.left, voiceVol.right);
+
+    pitchIndex = midiNote  + 60 - toneAtr->centerNote;
+
+    if (toneAtr->centerFine & 0x80)
+    {
+        pitch = 0x100 - toneAtr->centerFine;
+        finePitch = aadPitchTable[pitchIndex];
+        finePitch -= ((aadStepsPerCent[pitchIndex] * (pitch * 100)) >> 23);
+    }
+    else
+    {
+        pitch = toneAtr->centerFine;
+        finePitch = aadPitchTable[pitchIndex];
+        finePitch += ((aadStepsPerCent[pitchIndex] * (pitch * 100)) >> 23);
+    }
+
+    finePitch += pitchOffset;
+    SpuSetVoicePitch(voice->voiceNum, finePitch & 0xFFFF);
+    SpuSetVoiceStartAddr(voice->voiceNum, waveStartAddr);
+    SpuSetVoiceADSR1ADSR2(voice->voiceNum, toneAtr->adsr1, toneAtr->adsr2);
+
+    if (toneAtr->mode == 4)
+    {
+        aadMem->voiceReverbRequest |= voice->voiceMask;
+    }
+    else
+    {
+        aadMem->voiceReverbRequest = aadMem->voiceReverbRequest & ~voice->voiceMask;
+    }
+
+    aadMem->voiceKeyOnRequest |= voice->voiceMask;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADVOICE", aadPlayTonePitchBend);
