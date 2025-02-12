@@ -1,6 +1,7 @@
 #include "common.h"
 #include "Game/EVENT.h"
 #include "Game/INSTANCE.h"
+#include "Game/STREAM.h"
 
 STATIC long numActiveEventTimers;
 
@@ -22,7 +23,48 @@ short MovieToPlay;
 
 HintSystemStruct gHintSystem;
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_UpdateResetSignalArrayAndWaterMovement);
+long NumSignalsToReset;
+
+struct SignalResetStruct ResetSignalArray[16];
+
+void EVENT_UpdateResetSignalArrayAndWaterMovement(struct Level *oldLevel, struct Level *newLevel, long sizeOfLevel)
+{
+    long offset;
+    long i;
+    struct WaterLevelProcess *curWater;
+
+    offset = (int)newLevel - (int)oldLevel;
+
+    if (NumSignalsToReset != 0)
+    {
+        for (i = 0; i < 16; i++)
+        {
+            if (ResetSignalArray[i].timeLeft > 0)
+            {
+                if (IN_BOUNDS(ResetSignalArray[i].mSignal, oldLevel, (int)oldLevel + sizeOfLevel))
+                {
+                    ResetSignalArray[i].mSignal = (struct _MultiSignal *)OFFSET_DATA(ResetSignalArray[i].mSignal, offset);
+                }
+            }
+        }
+    }
+
+    if (WaterInUse != 0)
+    {
+        curWater = &WaterLevelArray[0];
+
+        for (i = 5; i > 0; i--, curWater++)
+        {
+            if ((curWater->flags & 1))
+            {
+                if (IN_BOUNDS(curWater->bspTree, oldLevel, (int)oldLevel + sizeOfLevel))
+                {
+                    curWater->bspTree = (struct BSPTree *)OFFSET_DATA(curWater->bspTree, offset);
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ResetAllOneTimeVariables);
 
