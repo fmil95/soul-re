@@ -595,7 +595,218 @@ void MEMPACK_DoGarbageCollection()
     newMemTracker.doingGarbageCollection = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MEMPACK", MEMPACK_RelocateAreaType);
+void MEMPACK_RelocateAreaType(MemHeader *newAddress, long offset, Level *oldLevel)
+{
+    Level *level;
+    MultiSignal *msignal;
+    long sizeOfLevel;
+    long i;
+    long d;
+
+    level = (Level *)(newAddress + 1);
+
+    sizeOfLevel = newAddress->memSize - sizeof(MemHeader);
+
+    ((Level *)(newAddress + 1))->terrain = (Terrain *)OFFSET_DATA(((Level *)(newAddress + 1))->terrain, offset);
+
+    level->lightList = (LightList *)OFFSET_DATA(level->lightList, offset);
+
+    level->razielLightGroup = (LightGroup *)OFFSET_DATA(level->razielLightGroup, offset);
+    level->razielSpectralLightGroup = (LightGroup *)OFFSET_DATA(level->razielSpectralLightGroup, offset);
+
+    level->vmobjectList = (VMObject *)OFFSET_DATA(level->vmobjectList, offset);
+    level->spotLightList = (SpotLight *)OFFSET_DATA(level->spotLightList, offset);
+    level->pointLightList = (PointLight *)OFFSET_DATA(level->pointLightList, offset);
+
+    level->spotSpecturalLightList = (SpotLight *)OFFSET_DATA(level->spotSpecturalLightList, offset);
+    level->pointSpecturalLightList = (PointLight *)OFFSET_DATA(level->pointSpecturalLightList, offset);
+
+    level->bgObjectList = (BGObject *)OFFSET_DATA(level->bgObjectList, offset);
+    level->cameraList = (void *)OFFSET_DATA(level->cameraList, offset);
+    level->vGroupList = (VGroup *)OFFSET_DATA(level->vGroupList, offset);
+
+    level->startSignal = (MultiSignal *)OFFSET_DATA(level->startSignal, offset);
+
+    level->introList = (Intro *)OFFSET_DATA(level->introList, offset);
+    level->bgAniList = (DrMoveAniTex *)OFFSET_DATA(level->bgAniList, offset);
+    level->hotSpotList = (HotSpot *)OFFSET_DATA(level->hotSpotList, offset);
+    level->objectNameList = (void *)OFFSET_DATA(level->objectNameList, offset);
+
+    level->worldName = (char *)OFFSET_DATA(level->worldName, offset);
+    level->enemyUnitsNames = (char **)OFFSET_DATA(level->enemyUnitsNames, offset);
+
+    level->timesSignalList = (long **)OFFSET_DATA(level->timesSignalList, offset);
+
+    level->spectralSignal = (MultiSignal *)OFFSET_DATA(level->spectralSignal, offset);
+    level->materialSignal = (MultiSignal *)OFFSET_DATA(level->materialSignal, offset);
+
+    level->startUnitLoadedSignal = (MultiSignal *)OFFSET_DATA(level->startUnitLoadedSignal, offset);
+    level->startUnitMainSignal = (MultiSignal *)OFFSET_DATA(level->startUnitMainSignal, offset);
+
+    level->startGoingIntoWaterSignal = (MultiSignal *)OFFSET_DATA(level->startGoingIntoWaterSignal, offset);
+    level->startGoingOutOfWaterSignal = (MultiSignal *)OFFSET_DATA(level->startGoingOutOfWaterSignal, offset);
+
+    level->SignalListStart = (MultiSignal *)OFFSET_DATA(level->SignalListStart, offset);
+    level->SignalListEnd = (MultiSignal *)OFFSET_DATA(level->SignalListEnd, offset);
+
+    level->PuzzleInstances = (EventPointers *)OFFSET_DATA(level->PuzzleInstances, offset);
+
+    level->PlanMarkerList = (PlanMkr *)OFFSET_DATA(level->PlanMarkerList, offset);
+    level->SFXMarkerList = (SFXMkr *)OFFSET_DATA(level->SFXMarkerList, offset);
+
+    for (i = 0; i < level->NumberOfSFXMarkers; i++)
+    {
+        level->SFXMarkerList[i].soundData = (unsigned char *)OFFSET_DATA(level->SFXMarkerList[i].soundData, offset);
+    }
+
+    level->dynamicMusicName = (char *)OFFSET_DATA(level->dynamicMusicName, offset);
+    level->spectrallightList = (LightList *)OFFSET_DATA(level->spectrallightList, offset);
+
+    if (level->terrain != NULL)
+    {
+        Terrain *terrain;
+
+        terrain = level->terrain;
+
+        terrain->introList = (Intro *)OFFSET_DATA(terrain->introList, offset);
+        terrain->vertexList = (TVertex *)OFFSET_DATA(terrain->vertexList, offset);
+        terrain->faceList = (TFace *)OFFSET_DATA(terrain->faceList, offset);
+        terrain->normalList = (Normal *)OFFSET_DATA(terrain->normalList, offset);
+        terrain->aniList = (DrMoveAniTex *)OFFSET_DATA(terrain->aniList, offset);
+        terrain->StreamUnits = (void *)OFFSET_DATA(terrain->StreamUnits, offset);
+        terrain->StartTextureList = (TextureFT3 *)OFFSET_DATA(terrain->StartTextureList, offset);
+        terrain->EndTextureList = (TextureFT3 *)OFFSET_DATA(terrain->EndTextureList, offset);
+        terrain->MorphDiffList = (MorphVertex *)OFFSET_DATA(terrain->MorphDiffList, offset);
+        terrain->MorphColorList = (MorphColor *)OFFSET_DATA(terrain->MorphColorList, offset);
+        terrain->BSPTreeArray = (BSPTree *)OFFSET_DATA(terrain->BSPTreeArray, offset);
+        terrain->morphNormalIdx = (short *)OFFSET_DATA(terrain->morphNormalIdx, offset);
+        terrain->signals = (MultiSignal *)OFFSET_DATA(terrain->signals, offset);
+
+        for (i = 0; i < terrain->numIntros; i++)
+        {
+            Intro *intro;
+
+            intro = &terrain->introList[i];
+
+            intro->data = (void *)OFFSET_DATA(intro->data, offset);
+            intro->multiSpline = (MultiSpline *)OFFSET_DATA(intro->multiSpline, offset);
+
+            if (intro->multiSpline != NULL)
+            {
+                MultiSpline *multiSpline;
+
+                multiSpline = intro->multiSpline;
+
+                multiSpline->positional = (Spline *)OFFSET_DATA(multiSpline->positional, offset);
+                multiSpline->rotational = (RSpline *)OFFSET_DATA(multiSpline->rotational, offset);
+                multiSpline->scaling = (Spline *)OFFSET_DATA(multiSpline->scaling, offset);
+                multiSpline->color = (Spline *)OFFSET_DATA(multiSpline->color, offset);
+
+                if (multiSpline->positional != NULL)
+                {
+                    multiSpline->positional->key = (SplineKey *)OFFSET_DATA(multiSpline->positional->key, offset);
+                }
+
+                if (multiSpline->rotational != NULL)
+                {
+                    multiSpline->rotational->key = (SplineRotKey *)OFFSET_DATA(multiSpline->rotational->key, offset);
+                }
+
+                if (multiSpline->scaling != NULL)
+                {
+                    multiSpline->scaling->key = (SplineKey *)OFFSET_DATA(multiSpline->scaling->key, offset);
+                }
+
+                if (multiSpline->color != NULL)
+                {
+                    multiSpline->color->key = (SplineKey *)OFFSET_DATA(multiSpline->color->key, offset);
+                }
+            }
+
+            intro->dsignal = (void *)OFFSET_DATA(intro->dsignal, offset);
+        }
+
+        if ((terrain->aniList != NULL) && (terrain->aniList->numAniTextues > 0))
+        {
+            DrMoveAniTexDestInfo **dest;
+
+            dest = &terrain->aniList->aniTexInfo;
+
+            for (d = 0; d < terrain->aniList->numAniTextues; d++)
+            {
+                dest[d] = (DrMoveAniTexDestInfo *)OFFSET_DATA(dest[d], offset);
+            }
+        }
+
+        if (level->lightList != NULL)
+        {
+            level->lightList->lightGroupList = (LightGroup *)OFFSET_DATA(level->lightList->lightGroupList, offset);
+        }
+
+        if (level->spectrallightList != NULL)
+        {
+            level->spectrallightList->lightGroupList = (LightGroup *)OFFSET_DATA(level->spectrallightList->lightGroupList, offset);
+        }
+
+        for (i = 0; i < level->numVMObjects; i++)
+        {
+            VMObject *vmo;
+
+            vmo = &level->vmobjectList[i];
+
+            vmo->vmoffsetTableList = (VMOffsetTable **)OFFSET_DATA(vmo->vmoffsetTableList, offset);
+
+            if (vmo->curVMOffsetTable == vmo->vmoffsetTableList[vmo->currentIdx])
+            {
+                vmo->curVMOffsetTable = (VMOffsetTable *)OFFSET_DATA(vmo->curVMOffsetTable, offset);
+            }
+
+            for (d = 0; d < vmo->numVMOffsetTables; d++)
+            {
+                vmo->vmoffsetTableList[d] = (VMOffsetTable *)OFFSET_DATA(vmo->vmoffsetTableList[d], offset);
+            }
+
+            vmo->vmvertexList = (void *)OFFSET_DATA(vmo->vmvertexList, offset);
+            vmo->vminterpolatedList = (VMInterpolated *)OFFSET_DATA(vmo->vminterpolatedList, offset);
+            vmo->name = (char *)OFFSET_DATA(vmo->name, offset);
+        }
+
+        {
+            BSPTree *bsp;
+            BSPNode *node;
+            BSPLeaf *leaf;
+
+            bsp = terrain->BSPTreeArray;
+
+            for (d = 0; d < terrain->numBSPTrees; d++, bsp++)
+            {
+                bsp->bspRoot = (BSPNode *)OFFSET_DATA(bsp->bspRoot, offset);
+                bsp->startLeaves = (BSPLeaf *)OFFSET_DATA(bsp->startLeaves, offset);
+                bsp->endLeaves = (BSPLeaf *)OFFSET_DATA(bsp->endLeaves, offset);
+
+                for (node = bsp->bspRoot; (BSPLeaf *)node < bsp->startLeaves; node++)
+                {
+                    node->front = (void *)OFFSET_DATA(node->front, offset);
+                    node->back = (void *)OFFSET_DATA(node->back, offset);
+                }
+
+                for (leaf = bsp->startLeaves; leaf < bsp->endLeaves; leaf++)
+                {
+                    leaf->faceList = (TFace *)OFFSET_DATA(leaf->faceList, offset);
+                }
+            }
+        }
+    }
+
+    for (msignal = level->SignalListStart; msignal < level->SignalListEnd; )
+    {
+        msignal = SIGNAL_RelocateSignal(msignal, offset);
+    }
+
+    EVENT_UpdatePuzzlePointers(level->PuzzleInstances, offset);
+    STREAM_UpdateLevelPointer(oldLevel, level, sizeOfLevel);
+    EVENT_RelocateInstanceList(oldLevel, level, sizeOfLevel);
+}
 
 void MEMPACK_RelocateG2AnimKeylistType(G2AnimKeylist **pKeylist, int offset, char *start, char *end)
 {
