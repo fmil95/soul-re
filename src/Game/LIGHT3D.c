@@ -1,5 +1,8 @@
 #include "common.h"
 #include "Game/HASM.h"
+#include "Game/GAMELOOP.h"
+
+STATIC struct LightGroup default_lightgroup;
 
 static inline int LIGHT3D_FixedDivision(long a, long b)
 {
@@ -24,7 +27,172 @@ static inline void LIGHT3D_FogCalc(long a, Level *level)
     level->fogNear = r;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/LIGHT3D", LIGHT_GetLightMatrix);
+static inline int LIGHT3D_FixedMultiplication3(short a, long b)
+{
+    long r;
+
+    r = a * b;
+    return r >> 12;
+}
+
+void LIGHT_GetLightMatrix(struct _Instance *instance, struct Level *level, struct MATRIX *lightM, struct MATRIX *colorM)
+{
+    MATRIX *lightGroup;
+    struct LightList *lightList;
+    int lightGrp;
+    MATRIX *tlightGroup;
+    struct LightList *tlightList;
+    int tlightGrp;
+    MATRIX *start;
+    MATRIX *end;
+    int i;
+    int j;
+    long ratio;
+
+    lightGrp = instance->lightGroup;
+    lightGroup = NULL;
+
+    if (gameTrackerX.gameData.asmData.MorphType != 0)
+    {
+        if (instance != gameTrackerX.playerInstance || level->razielSpectralLightGroup == NULL)
+        {
+            lightList = (struct LightList *)level->spectrallightList;
+
+            if (lightList != NULL && lightList->numLightGroups != 0)
+            {
+                lightGrp = instance->spectralLightGroup;
+            }
+            else
+            {
+                lightList = level->lightList;
+            }
+        }
+        else
+        {
+            lightGroup = (MATRIX *)level->razielSpectralLightGroup;
+        }
+    }
+    else
+    {
+        if (instance == gameTrackerX.playerInstance && level->razielLightGroup != NULL)
+        {
+            lightGroup = (MATRIX *)level->razielLightGroup;
+        }
+        else
+        {
+            lightList = level->lightList;
+        }
+    }
+
+    if (lightGroup == NULL)
+    {
+        if (lightList->numLightGroups == 0 || lightGrp >= lightList->numLightGroups)
+        {
+            lightGroup = (MATRIX *)&default_lightgroup;
+        }
+        else
+        {
+            lightGroup = (MATRIX *)&lightList->lightGroupList[lightGrp];
+        }
+    }
+
+    if (gameTrackerX.gameData.asmData.MorphTime != 1000)
+    {
+        tlightGrp = instance->lightGroup;
+
+        tlightGroup = NULL;
+
+        if (gameTrackerX.gameData.asmData.MorphType == 0)
+        {
+            if (instance != gameTrackerX.playerInstance || level->razielSpectralLightGroup == NULL)
+            {
+                tlightList = level->spectrallightList;
+
+                if (tlightList != NULL && tlightList->numLightGroups != 0)
+                {
+                    tlightGrp = instance->spectralLightGroup;
+                }
+                else
+                {
+                    tlightList = level->lightList;
+                }
+            }
+            else
+            {
+                tlightGroup = (MATRIX *)level->razielSpectralLightGroup;
+            }
+        }
+        else
+        {
+            if (instance == gameTrackerX.playerInstance && level->razielLightGroup != NULL)
+            {
+                tlightGroup = (MATRIX *)level->razielLightGroup;
+            }
+            else
+            {
+                tlightList = level->lightList;
+            }
+        }
+        if (tlightGroup == NULL)
+        {
+            if (tlightList->numLightGroups == 0 || tlightGrp >= tlightList->numLightGroups)
+            {
+                tlightGroup = (MATRIX *)&default_lightgroup;
+            }
+            else
+            {
+                tlightGroup = (MATRIX *)&tlightList->lightGroupList[tlightGrp];
+            }
+        }
+
+        lightM->m[0][0] = lightGroup[0].m[0][0];
+        lightM->m[0][1] = lightGroup[0].m[0][1];
+        lightM->m[0][2] = lightGroup[0].m[0][2];
+        lightM->m[1][0] = lightGroup[0].m[1][0];
+        lightM->m[1][1] = lightGroup[0].m[1][1];
+        lightM->m[1][2] = lightGroup[0].m[1][2];
+        lightM->m[2][0] = lightGroup[0].m[2][0];
+        lightM->m[2][1] = lightGroup[0].m[2][1];
+        lightM->m[2][2] = lightGroup[0].m[2][2];
+
+
+        start = tlightGroup + 1;
+        end = lightGroup + 1;
+
+
+        ratio = ((gameTrackerX.gameData.asmData.MorphTime * 4096) / 1000);
+        ratio = 0x1000 - ratio;
+
+        for (i = 0; i < 3; i++)
+        {
+            for (j = 0; j < 3; j++)
+            {
+                colorM->m[i][j] = start->m[i][j] + LIGHT3D_FixedMultiplication3((end->m[i][j] - start->m[i][j]), ratio);
+            }
+        }
+    }
+    else
+    {
+        lightM->m[0][0] = lightGroup->m[0][0];
+        lightM->m[0][1] = lightGroup->m[0][1];
+        lightM->m[0][2] = lightGroup->m[0][2];
+        lightM->m[1][0] = lightGroup->m[1][0];
+        lightM->m[1][1] = lightGroup->m[1][1];
+        lightM->m[1][2] = lightGroup->m[1][2];
+        lightM->m[2][0] = lightGroup->m[2][0];
+        lightM->m[2][1] = lightGroup->m[2][1];
+        lightM->m[2][2] = lightGroup->m[2][2];
+        colorM->m[0][0] = lightGroup[1].m[0][0];
+        colorM->m[0][1] = lightGroup[1].m[0][1];
+        colorM->m[0][2] = lightGroup[1].m[0][2];
+        colorM->m[1][0] = lightGroup[1].m[1][0];
+        colorM->m[1][1] = lightGroup[1].m[1][1];
+        colorM->m[1][2] = lightGroup[1].m[1][2];
+        colorM->m[2][0] = lightGroup[1].m[2][0];
+        colorM->m[2][1] = lightGroup[1].m[2][1];
+        colorM->m[2][2] = lightGroup[1].m[2][2];
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/LIGHT3D", LIGHT_PresetInstanceLight);
 
