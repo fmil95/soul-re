@@ -2,6 +2,7 @@
 #include "Game/EVENT.h"
 #include "Game/INSTANCE.h"
 #include "Game/STREAM.h"
+#include "Game/GAMELOOP.h"
 
 STATIC long numActiveEventTimers;
 
@@ -112,7 +113,28 @@ void HINT_ResetHint()
     memset(&gHintSystem, 0, sizeof(HintSystemStruct));
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", HINT_StartHint);
+void HINT_StartHint(short hintNumber)
+{
+    unsigned int h;  // changed type in regards to decls.h
+    unsigned int temp;  // not from decls.h
+
+    h = hintNumber + 55;
+
+    gHintSystem.flags = 0x3;
+
+    temp = gHintSystem.hintNumber = hintNumber;
+
+    if (temp >= 54)
+    {
+        h = 108;
+    }
+
+    gHintSystem.stringNumber = h;
+
+    gHintSystem.fadeTimer = 61440;
+
+    gHintSystem.spawningUnitID = gameTrackerX.playerInstance->currentStreamUnitID;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", HINT_StopHint);
 
