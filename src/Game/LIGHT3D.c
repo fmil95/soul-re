@@ -196,7 +196,23 @@ void LIGHT_GetLightMatrix(struct _Instance *instance, struct Level *level, struc
 
 INCLUDE_ASM("asm/nonmatchings/Game/LIGHT3D", LIGHT_PresetInstanceLight);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LIGHT3D", LIGHT_GetAmbient);
+void LIGHT_GetAmbient(struct _ColorType *color, struct _Instance *instance)
+{
+    int lightval;
+
+    if ((instance->object->oflags2 & 0x800))
+    {
+        lightval = 0;
+    }
+    else
+    {
+        lightval = 48;
+    }
+
+    color->b = lightval;
+    color->g = lightval;
+    color->r = lightval;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/LIGHT3D", LIGHT_CalcLightValue);
 
