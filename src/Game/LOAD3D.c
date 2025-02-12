@@ -65,7 +65,22 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_InitBuffers);
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_InitCdStreamMode);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_DumpCurrentDir);
+void LOAD_DumpCurrentDir()
+{
+    if (loadStatus.bigFile.currentDir != NULL)
+    {
+        MEMPACK_Free((char *)loadStatus.bigFile.currentDir);
+        loadStatus.bigFile.currentDir = NULL;
+        loadStatus.bigFile.currentDirID = 0;
+    }
+
+    if (loadStatus.bigFile.cachedDir != NULL)
+    {
+        MEMPACK_Free((char *)loadStatus.bigFile.cachedDir);
+        loadStatus.bigFile.cachedDir = NULL;
+        loadStatus.bigFile.cachedDirID = 0;
+    }
+}
 
 int LOAD_ChangeDirectoryByID(int id)
 {
