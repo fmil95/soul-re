@@ -2320,7 +2320,7 @@ typedef struct _Instance
     // offset: 0x01C8 (180 bytes)
     G2Anim anim;
     // offset: 0x027C (4 bytes)
-    G2Bool (*rebuildCallback)();
+    G2Bool(*rebuildCallback)();
     // offset: 0x0280
     short splineFlags;
     // offset: 0x0282
@@ -6807,7 +6807,7 @@ typedef struct _LoadStatus
     // offset: 0x0000 (44 bytes)
     ReadQueueEntry currentQueueFile;
     // offset: 0x002C
-    long state;
+    volatile long state;
     // offset: 0x0030
     long bytesTransferred;
     // offset: 0x0034
@@ -11157,7 +11157,7 @@ typedef short G2AnimChanKeyData;
 
 typedef short G2AnimChanFinalValue;
 
-typedef enum _G2Bool_Enum (*G2InstanceRebuildCallback)();
+typedef enum _G2Bool_Enum(*G2InstanceRebuildCallback)();
 
 typedef long lfixed;
 

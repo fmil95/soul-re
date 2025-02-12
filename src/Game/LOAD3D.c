@@ -1,6 +1,9 @@
 #include "common.h"
+#include "Game/HASM.h"
 
 STATIC LoadStatus loadStatus;
+
+long crap1;
 
 void LOAD_InitCd()
 {
@@ -11,7 +14,15 @@ void LOAD_InitCd()
     CdSetDebug(0);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_CdSeekCallback);
+void LOAD_CdSeekCallback(unsigned char intr, unsigned char *result)
+{
+    if (loadStatus.state == 1)
+    {
+        loadStatus.state = 2;
+
+        crap1 = (GetRCnt(0xF2000000) & 0xFFFF) | (gameTimer << 16);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_CdDataReady);
 
