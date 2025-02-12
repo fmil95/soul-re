@@ -555,4 +555,90 @@ INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ExecuteActionCommand);
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetScalerValueFromOperand);
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformOperand);
+long EVENT_TransformOperand(struct StackType *stackObject, struct _PCodeStack *stack, long item, short *codeStream)
+{
+    long retValue;
+
+    switch (stackObject->id)
+    {
+    case 2:
+        retValue = EVENT_TransformInstanceAttribute(stack, stackObject, item, codeStream);
+        break;
+    case 24:
+        retValue = EVENT_TransformConstrictAttribute(stack, stackObject, item);
+        break;
+    case 15:
+        retValue = EVENT_TransformSplineAttribute(stack, stackObject, item, codeStream);
+        break;
+    case 4:
+        retValue = EVENT_TransformIntroAttribute(stack, stackObject, item);
+        break;
+    case 9:
+        retValue = EVENT_TransformVector3dAttribute(stack, stackObject, item, codeStream);
+        break;
+    case 14:
+        retValue = EVENT_TransformRotation3dAttribute(stack, stackObject, item, codeStream);
+        break;
+    case 16:
+        retValue = EVENT_TransformEventAttribute(stack, stackObject, item, codeStream);
+        break;
+    case 17:
+        retValue = EVENT_TransformSignalAttribute(stack, stackObject, item);
+        break;
+    case 1:
+        retValue = EVENT_TransformAreaAttribute(stack, stackObject, item, codeStream);
+        break;
+    case 6:
+        EventAbortLine = 1;
+        retValue = 1;
+        break;
+    case 3:
+        retValue = EVENT_TransformGameAttribute(stack, stackObject, item, codeStream);
+        break;
+    case 18:
+        retValue = EVENT_TransformListObjectAttribute(stack, stackObject, item);
+        break;
+    case 19:
+        if (stackObject->data.subListObject.numberOfInstances == -1)
+        {
+            stackObject->data.subListObject.numberOfInstances = item;
+            retValue = 1;
+            break;
+        }
+        retValue = 0;
+        break;
+    case 27:
+        retValue = EVENT_TransformSoundObjectAttribute(stack, &stackObject->data.soundObject, item, codeStream);
+        break;
+    case 20:
+        if (stackObject->data.subListObject.numberOfAttributes == -1)
+        {
+            stackObject->data.subListObject.numberOfAttributes = item;
+            retValue = 1;
+            break;
+        }
+        retValue = 0;
+        break;
+    case 21:
+        retValue = EVENT_TransformSavedEventAttribute(stack, stackObject, item, codeStream);
+        break;
+    case 22:
+        retValue = EVENT_TransformSubListObjectAttribute(stack, stackObject, item);
+        break;
+    case 23:
+        retValue = EVENT_TransformTGroupAttribute(stack, stackObject, item, codeStream);
+        break;
+    case 25:
+        retValue = EVENT_TransformCameraObjectAttribute(stack, stackObject, item, codeStream);
+        break;
+    case 26:
+        stackObject->data.subListObject.numberOfAttributes = item;
+        retValue = 1;
+        break;
+    case 28:
+    default:
+        retValue = 0;
+        break;
+    }
+    return retValue;
+}
