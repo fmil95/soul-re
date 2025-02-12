@@ -424,7 +424,129 @@ int VRAM_InsertFreeVram(short x, short y, short w, short h, short flags)
     return 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/VRAM", VRAM_CheckVramSlot);
+// Further debugging symbols were provided by the remasters' PDB file for this function
+BlockVramEntry *VRAM_CheckVramSlot(short *x, short *y, short w, short h, short type, short startY)
+{
+    struct _BlockVramEntry *vblock; // $s1
+    short hldx; // $s4
+    short hldy; // $s5
+    short hldw; // $s0
+    short hldh; // $fp
+    long fits; // $t1
+    long offset; // $s0
+    struct _BlockVramEntry *vblockright; // $s3
+    long offsetright; // $s2
+    int xval; // $v0 line 55
+
+    vblock = openVramBlocks;
+    fits = 0;
+    vblockright = NULL;
+    offsetright = 0;
+
+    while (vblock != NULL)
+    {
+        if ((w <= vblock->w) && (((h > vblock->h) == 0)) && ((startY == -1) || ((((vblock->y < startY) == 0)) && (vblock->y < (startY + 0x100)))))
+        {
+            int newx; // $v0 line 36
+            newx = 0x40 - (vblock->x & 0x3F);
+            if ((vblock->x & 0x3F) == 0)
+            {
+                fits = 0;
+                break;
+            }
+            else
+            {
+                if (newx >= w)
+                {
+                    if ((vblock->x & 0xF) == 0)
+                    {
+                        fits = 0;
+                        break;
+                    }
+                    else
+                    {
+                        offset = 0x10 - (vblock->x & 0xF);
+                        if (((0x40 - ((vblock->x + offset) & 0x3F)) >= w) && ((vblock->w - offset) >= w))
+                        {
+                            VRAM_InsertFreeVram(vblock->x, vblock->y, offset, vblock->h, vblock->flags);
+                            fits = 0;
+                            vblock->x += offset;
+                            vblock->w -= offset;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    offset = newx;
+                    if (((0x40 - ((vblock->x + offset) & 0x3F)) >= w) && ((vblock->w - offset) >= w))
+                    {
+                        fits = 1;
+                        vblockright = vblock;
+                        offsetright = offset;
+                    }
+                }
+            }
+        }
+
+        vblock = vblock->next;
+    }
+
+    if (vblock == NULL && (vblockright != NULL) && (fits == 1))
+    {
+        vblock = vblockright;
+        VRAM_InsertFreeVram(vblock->x, vblock->y, offsetright, vblock->h, vblock->flags);
+        fits = 0;
+        vblock->x += offsetright;
+        vblock->w -= offsetright;
+    }
+
+    if (vblock != NULL && fits == 0)
+    {
+        hldx = vblock->x;
+        hldy = vblock->y;
+        hldw = vblock->w;
+        hldh = vblock->h;
+        VRAM_DeleteFreeBlock(vblock);
+        vblock->next = 0;
+        vblock->flags = 1;
+        vblock->type = type;
+        vblock->w = w;
+        vblock->h = h;
+        VRAM_InsertUsedBlock(vblock);
+        *x = vblock->x;
+        *y = vblock->y;
+        if (hldw == w)
+        {
+            if (hldh != h)
+            {
+                VRAM_InsertFreeVram(hldx, hldy + h, w, hldh - h, 1);
+            }
+        }
+        else
+        {
+            if (hldh == h)
+            {
+                VRAM_InsertFreeVram(hldx + w, hldy, hldw - w, hldh, 1);
+            }
+            else
+            {
+                if (abs(((hldw - w) * h) - (hldw * (hldh - h))) > abs(((hldw - w) * hldh) - (w * (hldh - h))))
+                {
+                    VRAM_InsertFreeVram(hldx + w, hldy, (hldw - w), h, 1);
+                    VRAM_InsertFreeVram(hldx, hldy + h, hldw, hldh - h, 1);
+                }
+                else
+                {
+                    VRAM_InsertFreeVram(hldx + w, hldy, (hldw - w), hldh, 1);
+                    VRAM_InsertFreeVram(hldx, hldy + h, w, hldh - h, 1);
+                }
+            }
+        }
+    }
+
+    return vblock;
+}
 
 void VRAM_ClearVramBlock(BlockVramEntry *block)
 {

@@ -5,7 +5,7 @@
 
 void VRAM_LoadReturn(void *dataPtr, void *data1, void *data2);
 void VRAM_ClearVramBlock(BlockVramEntry *block);
-BlockVramEntry *VRAM_CheckVramSlot(short *x, short *y, short w, short h, int type, int startY);
+BlockVramEntry *VRAM_CheckVramSlot(short *x, short *y, short w, short h, short type, short startY);
 void VRAM_RearrangeVramsLayer(long whichLayer);
 void VRAM_InitMorphPalettes();
 void AdjustVramCoordsObject(int oldx, int oldy, int newx, int newy, Object *object);
