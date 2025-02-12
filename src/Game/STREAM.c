@@ -3634,8 +3634,8 @@ int GetPlaneDist(int k, int j, int i, VECTOR *v)
     (void)i;
 
     return (((v->vx >> 12) - (theCamera.core.position.x << 4)) * theCamera.core.vvNormalWorVecMat[k].m[j][0]) +
-           (((v->vy >> 12) - (theCamera.core.position.y << 4)) * theCamera.core.vvNormalWorVecMat[k].m[j][1]) +
-           (((v->vz >> 12) - (theCamera.core.position.z << 4)) * theCamera.core.vvNormalWorVecMat[k].m[j][2]);
+        (((v->vy >> 12) - (theCamera.core.position.y << 4)) * theCamera.core.vvNormalWorVecMat[k].m[j][1]) +
+        (((v->vz >> 12) - (theCamera.core.position.z << 4)) * theCamera.core.vvNormalWorVecMat[k].m[j][2]);
 }
 
 void CalcVert(VECTOR *v, VECTOR *v1, VECTOR *v2, int dist1, int dist2, int k, int j)
@@ -3843,7 +3843,158 @@ int STREAM_GetClipRect(StreamUnitPortal *portal, RECT *rect)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/STREAM", GetFogColor);
+long GetFogColor(struct StreamUnitPortal *portal, struct _StreamUnit *mainStreamUnit, struct Level *mainLevel)
+{
+    long z1;
+    long z2;
+    long z3;
+    long zval;
+    long zval2;
+    long interp;
+    long Color;
+    long MainColor;
+    long LevelColor;
+    struct Level *level;
+    int time;
+
+    MainColor = mainStreamUnit->FogColor;
+
+    level = portal->toStreamUnit->level;
+
+    if (gameTrackerX.gameData.asmData.MorphTime != 1000)
+    {
+        time = (gameTrackerX.gameData.asmData.MorphTime << 12) / 1000;
+
+        if (gameTrackerX.gameData.asmData.MorphType == 1)
+        {
+            time = 4096 - time;
+        }
+
+        LoadAverageCol(&level->specturalColorR, &level->backColorR, time, 4096 - time, (unsigned char *)&LevelColor);
+
+        LevelColor &= 0xFFFFFF;
+    }
+    else
+    {
+        if (gameTrackerX.gameData.asmData.MorphType == 1)
+        {
+            LevelColor = ((int *)&level->specturalColorR)[0];
+        }
+        else
+        {
+            LevelColor = ((int *)&level->backColorR)[0];
+        }
+    }
+
+    gte_ldv3(&portal->t1[0], &portal->t1[1], &portal->t1[2]);
+
+    gte_nrtpt();
+
+    gte_stsz3(&z1, &z2, &z3);
+
+    if (z1 > z2)
+    {
+        zval = z3;
+
+        if (z3 < z1)
+        {
+            zval = z1;
+        }
+    }
+    else
+    {
+        zval = z3;
+
+        if (z3 < z2)
+        {
+            zval = z2;
+        }
+    }
+
+    gte_ldv3(&portal->t2[0], &portal->t2[1], &portal->t2[2]);
+
+    gte_nrtpt();
+
+    gte_stsz3(&z1, &z2, &z3);
+
+    if (z1 > z2)
+    {
+        zval2 = z3;
+
+        if (z3 < z1)
+        {
+            zval2 = z1;
+        }
+    }
+    else
+    {
+        zval2 = z3;
+
+        if (z3 < z2)
+        {
+            zval2 = z2;
+        }
+    }
+
+    if (zval < zval2)
+    {
+        zval = zval2;
+    }
+
+    zval += 128;
+
+    zval = zval < mainLevel->fogFar ? zval : mainLevel->fogFar;
+
+    s_zval = zval >> 2;
+
+    if (MainColor == LevelColor)
+    {
+        Color = LevelColor & 0xFFF8F8F8;
+
+        if (Color != 0)
+        {
+            Color |= 0x40404;
+        }
+
+        return Color;
+    }
+
+    zval -= mainLevel->fogNear;
+
+    if (zval < 0)
+    {
+        return LevelColor;
+    }
+
+    interp = ((zval << 16) / (mainLevel->fogFar - mainLevel->fogNear));
+    interp = interp >> 4;
+
+    if (interp < 0)
+    {
+        interp = 0;
+    }
+
+    if (interp >= 4097)
+    {
+        interp = 4096;
+    }
+
+    LoadAverageCol((unsigned char *)&MainColor, (unsigned char *)&LevelColor, interp, 4096 - interp, (unsigned char *)&Color);
+
+    if (interp >= 4091)
+    {
+        Color &= 0xFFF8F8F8;
+
+        if (Color != 0)
+        {
+            Color |= 0x40404;
+        }
+    }
+
+    Color &= 0xFFFFFF;
+
+    return Color;
+}
 
 void DrawFogRectangle(RECT *cliprect, PrimPool *primPool, int otzpos, unsigned long **drawot, long color)
 {
