@@ -85,7 +85,27 @@ void EVENT_ResetAllOneTimeVariables()
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddSignalToReset);
+void EVENT_AddSignalToReset(struct _MultiSignal *mSignal)
+{
+    int i;
+
+    if (NumSignalsToReset < 16)
+    {
+        for (i = 0; i < 16; i++)
+        {
+            if (ResetSignalArray[i].timeLeft == 0)
+            {
+                ResetSignalArray[i].timeLeft = 1;
+
+                ResetSignalArray[i].mSignal = mSignal;
+
+                NumSignalsToReset++;
+
+                return;
+            }
+        }
+    }
+}
 
 void HINT_ResetHint()
 {
