@@ -66,7 +66,24 @@ void EVENT_UpdateResetSignalArrayAndWaterMovement(struct Level *oldLevel, struct
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ResetAllOneTimeVariables);
+void EVENT_ResetAllOneTimeVariables()
+{
+    int i;
+
+    if (NumSignalsToReset != 0)
+    {
+        for (i = 0; i < 16; i++)
+        {
+            if (ResetSignalArray[i].timeLeft > 0 && --ResetSignalArray[i].timeLeft == 0)
+            {
+                NumSignalsToReset--;
+
+                ResetSignalArray[i].mSignal->flags &= ~0x1;
+                ResetSignalArray[i].timeLeft = 0;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddSignalToReset);
 
