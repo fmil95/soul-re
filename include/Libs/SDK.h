@@ -339,6 +339,39 @@
     :                                   \
     : "r"(r0))
 
+#define gte_ldclmv(r0) __asm__ ( \
+        "lhu    $12, 0(%0);" \
+        "lhu    $13, 6(%0);" \
+        "lhu    $14, 12(%0);" \
+        "mtc2    $12, $9;" \
+        "mtc2    $13, $10;" \
+        "mtc2    $14, $11" \
+        : : "r"(r0) \
+        : "$12", "$13", "$14" \
+    )
+
+#define gte_stclmv(r0) __asm__ ( \
+        "mfc2    $12, $9;" \
+        "mfc2    $13, $10;" \
+        "mfc2    $14, $11;" \
+        "sh    $12, 0(%0);" \
+        "sh    $13, 6(%0);" \
+        "sh    $14, 12(%0)" \
+        : : "r"(r0) \
+        : "$12", "$13", "$14", "memory" \
+    )
+
+#define gte_ldlv0(r0) __asm__ ( \
+        "lhu    $13, 4(%0);" \
+        "lhu    $12, 0(%0);" \
+        "sll    $13, $13, 16;" \
+        "or    $12, $12, $13;" \
+        "mtc2    $12, $0;" \
+        "lwc2    $1, 8(%0)" \
+        : : "r"(r0) \
+        : "$12", "$13" \
+    )
+
 // custom struct
 typedef struct _LINE_SG2
 {
@@ -395,9 +428,9 @@ typedef struct
 #define setRGB3(p, _r3, _g3, _b3) \
     (p)->r3 = _r3, (p)->g3 = _g3, (p)->b3 = _b3
 
-/*
- * Set Primitive Screen Points
- */
+ /*
+  * Set Primitive Screen Points
+  */
 #define setXY0(p, _x0, _y0) \
     (p)->x0 = (_x0), (p)->y0 = (_y0)
 

@@ -208,7 +208,67 @@ void LIGHT_SetAmbientInstance(Instance *instance, Level *level)
 
 INCLUDE_ASM("asm/nonmatchings/Game/LIGHT3D", LIGHT_SetMatrixForLightGroupInstance);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LIGHT3D", LIGHT_DrawShadow);
+void LIGHT_DrawShadow(MATRIX *wcTransform, struct _Instance *instance, struct _PrimPool *primPool, unsigned long **ot)
+{
+    SVECTOR face_orient; // $sp+0x10
+    MATRIX rot; // $sp+0x18
+    MATRIX scTransform; // $sp+0x38
+    struct _Vector scale; // $sp+0x58
+    struct _Instance *playerInstance; // $s0
+
+    playerInstance = gameTrackerX.playerInstance;
+
+    if (instance->position.z - 1280 >= instance->shadowPosition.z)
+    {
+        return;
+    }
+
+    face_orient.vx = -MATH3D_FastAtan2(instance->wNormal.y, instance->wNormal.z);
+    face_orient.vy = MATH3D_FastAtan2(instance->wNormal.x, MATH3D_FastSqrt0(0x1000000 - instance->wNormal.x * instance->wNormal.x));
+    face_orient.vz = instance->rotation.z;
+
+    RotMatrix(&face_orient, &rot);
+
+    if (playerInstance != NULL)
+    {
+        rot.t[0] = instance->shadowPosition.x;
+        rot.t[1] = instance->shadowPosition.y;
+        rot.t[2] = instance->shadowPosition.z;
+    }
+    else
+    {
+        rot.t[0] = instance->shadowPosition.x;
+        rot.t[1] = instance->shadowPosition.y;
+        rot.t[2] = instance->shadowPosition.z;
+    }
+
+    gte_SetRotMatrix(&wcTransform->m[0][0]);
+
+    gte_ldclmv(&rot.m[0][0]);
+    gte_nrtir12();
+    gte_stclmv(&scTransform);
+
+    gte_ldclmv(&rot.m[0][1]);
+    gte_nrtir12();
+    gte_stclmv(&scTransform.m[0][1]);
+
+    gte_ldclmv(&rot.m[0][2]);
+    gte_nrtir12();
+    gte_stclmv(&scTransform.m[0][2]);
+
+    gte_SetTransMatrix(wcTransform);
+    gte_ldlv0(&rot.t);
+    gte_nrtv0tr();
+    gte_stlvnl(&scTransform.t);
+
+    scale.z = (((instance->object->modelList[instance->currentModel]->maxRad) << 12) / 480 * (4096 - ((instance->position.z - instance->shadowPosition.z) << 12) / 1280)) >> 12;
+    scale.y = scale.z;
+    scale.x = scale.z;
+    ScaleMatrix(&scTransform, &scale);
+    SetRotMatrix(&scTransform);
+    SetTransMatrix(&scTransform);
+    primPool->nextPrim = DRAW_DrawShadow(primPool, 0, ot, instance->fadeValue);
+}
 
 void LIGHT_CalcShadowPositions(struct GameTracker *gameTracker)
 {
