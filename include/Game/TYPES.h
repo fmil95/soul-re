@@ -4721,7 +4721,7 @@ typedef struct _ReadQueueEntry
     // offset: 0x0010
     void *readCurDest;
     // offset: 0x0014
-    long readStatus;
+    volatile long readStatus;
     // offset: 0x0018
     long checksum;
     // offset: 0x001C

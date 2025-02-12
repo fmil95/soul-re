@@ -24,7 +24,68 @@ void LOAD_CdSeekCallback(unsigned char intr, unsigned char *result)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_CdDataReady);
+void LOAD_CdDataReady()
+{
+    struct _ReadQueueEntry *currentQueueFile;
+    long actualReadSize;
+    int status;
+
+    if (loadStatus.state == 3)
+    {
+        loadStatus.state = 4;
+    }
+    else if (loadStatus.state == 4)
+    {
+        currentQueueFile = &loadStatus.currentQueueFile;
+        actualReadSize = loadStatus.bytesTransferred;
+        currentQueueFile->readCurSize += actualReadSize;
+
+        if (currentQueueFile->readStatus == 3)
+        {
+            currentQueueFile->readCurDest = (void *)((char *)currentQueueFile->readCurDest + actualReadSize);
+
+            if (currentQueueFile->readCurSize == currentQueueFile->readSize)
+            {
+                loadStatus.state = 5;
+            }
+            else
+            {
+                loadStatus.state = 2;
+            }
+        }
+        else
+        {
+            if (currentQueueFile->readStatus == 6)
+            {
+                if (currentQueueFile->readCurSize == currentQueueFile->readSize)
+                {
+                    status = 5;
+                }
+                else
+                {
+                    status = 2;
+                }
+
+                if (currentQueueFile->retFunc != NULL)
+                {
+                    typedef void (*retFunc)(void *, long, long, void *, void *);
+                    ((retFunc)(currentQueueFile->retFunc))(currentQueueFile->readCurDest, actualReadSize, (status ^ 5) < 1, currentQueueFile->retData, currentQueueFile->retData2);
+                }
+
+                if (currentQueueFile->readCurDest == loadStatus.buffer1)
+                {
+                    currentQueueFile->readCurDest = loadStatus.buffer2;
+                }
+                else
+                {
+                    currentQueueFile->readCurDest = loadStatus.buffer1;
+                }
+
+                loadStatus.state = status;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_CdReadReady);
 
