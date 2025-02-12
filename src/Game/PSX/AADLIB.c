@@ -206,7 +206,49 @@ int aadGetSlotStatus(int slotNumber)
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadAllNotesOff);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadMuteChannels);
+void aadMuteChannels(AadSequenceSlot *slot, unsigned long channelList)
+{
+    AadSynthVoice *voice;
+    unsigned long vmask;
+    unsigned long delayedMute;
+    int channel;
+    int i;
+
+    delayedMute = slot->delayedMuteMode & channelList;
+
+    if (delayedMute != 0)
+    {
+        slot->delayedMuteCmds |= delayedMute;
+        channelList &= ~delayedMute;
+    }
+
+    vmask = 0;
+
+    slot->channelMute |= channelList;
+
+    for (channel = 0; channel < 16; channel++)
+    {
+        if ((channelList & (1 << channel)))
+        {
+            for (i = 0; i < 24; i++)
+            {
+                voice = &aadMem->synthVoice[i];
+
+                if (voice->voiceID == (slot->slotID | channel))
+                {
+                    voice->voiceID = 255;
+                    vmask |= voice->voiceMask;
+                }
+            }
+        }
+    }
+
+    if (vmask != 0)
+    {
+        aadMem->voiceKeyOffRequest |= vmask;
+        aadMem->voiceKeyOnRequest &= ~vmask;
+    }
+}
 
 void aadUnMuteChannels(AadSequenceSlot *slot, unsigned long channelList)
 {
