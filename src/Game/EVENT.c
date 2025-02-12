@@ -136,7 +136,28 @@ void HINT_StartHint(short hintNumber)
     gHintSystem.spawningUnitID = gameTrackerX.playerInstance->currentStreamUnitID;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", HINT_StopHint);
+void HINT_StopHint()
+{
+    if (!(gHintSystem.flags & 0x1))
+    {
+        return;
+    }
+
+    if (!(gHintSystem.flags & 0x2) && !(gHintSystem.flags & 0x4))
+    {
+        gHintSystem.flags |= 0x4;
+
+        if (gHintSystem.flags & 0x2)
+        {
+            gHintSystem.flags &= ~0x2;
+            gHintSystem.fadeTimer = (61440 - gHintSystem.fadeTimer);
+        }
+        else
+        {
+            gHintSystem.fadeTimer = 61440;
+        }
+    }
+}
 
 void HINT_KillSpecificHint(short hintNumber)
 {
