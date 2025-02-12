@@ -67,7 +67,54 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_InitCdStreamMode);
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_DumpCurrentDir);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_ChangeDirectoryByID);
+int LOAD_ChangeDirectoryByID(int id)
+{
+    int i;
+    struct _BigFileDir *dir;
+    struct _BigFileDir *temp;  // not from decls.h
+
+    if (id != 0)
+    {
+        if (loadStatus.bigFile.currentDirID == id)
+        {
+            return 1;
+        }
+        if (loadStatus.bigFile.cachedDirID == id)
+        {
+            temp = loadStatus.bigFile.cachedDir;
+            loadStatus.bigFile.cachedDirID = loadStatus.bigFile.currentDirID;
+            loadStatus.bigFile.currentDirID = id;
+            loadStatus.bigFile.cachedDir = loadStatus.bigFile.currentDir;
+            loadStatus.bigFile.currentDir = temp;
+            return 1;
+        }
+        else
+        {
+            for (i = 0; i < loadStatus.bigFile.numSubDirs; i++)
+            {
+                if (id == loadStatus.bigFile.subDirList[i].streamUnitID)
+                {
+                    if (loadStatus.bigFile.cachedDir != NULL)
+                    {
+                        MEMPACK_Free((char *)loadStatus.bigFile.cachedDir);
+                    }
+
+                    loadStatus.currentDirLoading = 1;
+                    loadStatus.bigFile.cachedDirID = loadStatus.bigFile.currentDirID;
+                    loadStatus.bigFile.cachedDir = loadStatus.bigFile.currentDir;
+
+                    dir = LOAD_ReadDirectory(&loadStatus.bigFile.subDirList[i]);
+                    loadStatus.bigFile.currentDir = dir;
+                    MEMPACK_SetMemoryBeingStreamed((char *)dir);
+                    loadStatus.bigFile.currentDirID = id;
+                    return 1;
+                }
+            }
+        }
+    }
+
+    return 0;
+}
 
 void LOAD_SetSearchDirectory(long id)
 {
