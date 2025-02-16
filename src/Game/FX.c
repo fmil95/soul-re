@@ -1445,7 +1445,41 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_MakeMannaIcon);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_MakeGlyphIcon);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_SoulDustProcess);
+void FX_SoulDustProcess(struct _FX_PRIM *fxPrim, struct _FXTracker *fxTracker)
+{
+    MATRIX *swTransform;
+    struct _Position position;
+    long color;
+    long black;
+    int fade;
+
+    if ((fxPrim->work1 < 32) != 0)
+    {
+        FX_Die(fxPrim, fxTracker);
+        return;
+    }
+    position = fxPrim->position;
+    swTransform = fxPrim->duo.flame.segment + fxPrim->duo.flame.parent->matrix;
+    fxPrim->position.x = (short)swTransform->t[0];
+    fxPrim->position.y = (short)swTransform->t[1];
+    fxPrim->position.z = (short)swTransform->t[2];
+    fxPrim->v1.x += fxPrim->work2;
+    fxPrim->position.x += (rcos(fxPrim->v1.x) * fxPrim->work1) / 4096;
+    fxPrim->position.y += (rsin(fxPrim->v1.x) * fxPrim->work1) / 4096;
+    fxPrim->position.z += (rcos(fxPrim->v1.y) * fxPrim->work0) / 4096;
+    black = 0;
+    color = 0x60FF60;
+    fxPrim->work1 -= fxPrim->v2.x;
+    fxPrim->v0.y -= 144;
+    fxPrim->v1.y += 64;
+    fade = fxPrim->v0.y;
+    if ((fade < 0) != 0)
+    {
+        fade = 0;
+    }
+    LoadAverageCol((u_char *)&color, (u_char *)&black, 4096 - fade, fade, (u_char *)&fxPrim->color);
+    fxPrim->color = ((fxPrim->color & 0xFFFFFF) | 0x2E000000);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_MakeSoulDust);
 
