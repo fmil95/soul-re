@@ -1565,7 +1565,75 @@ void FX_WaterTrailProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
     fxPrim->v3.z = (fxPrim->v3.z * 7) >> 3;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_MakeWaterTrail);
+void FX_SimpleQuadSetup(struct _FX_PRIM *fxPrim, void (*fxProcess)(), struct _FX_MATRIX *fxMatrix, struct _Instance *instance, struct _MFace *mface, struct _MVertex *vertexList, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct _FXTracker *fxTracker, int timeToLive);
+void FX_MakeWaterTrail(struct _Instance *instance, int depth)
+{
+    struct Object *waterfx;
+    struct _Model *wxtrail;
+    struct _SVector position;
+    int zvel;
+
+    if ((instance->matrix != NULL) && (instance->oldMatrix != NULL) && (gameTrackerX.gameData.asmData.MorphType != 1) && (gameTrackerX.gameData.asmData.MorphTime == 1000))
+    {
+        position.x = (short)instance->matrix[1].t[0];
+        position.y = (short)instance->matrix[1].t[1];
+        position.z = instance->splitPoint.z;
+
+        waterfx = (struct Object *)objectAccess[3].object;
+
+        zvel = instance->matrix[1].t[2] - instance->oldMatrix[1].t[2];
+
+        if (waterfx != NULL)
+        {
+            waterfx->oflags2 |= 0x20000000;
+
+            wxtrail = waterfx->modelList[1];
+
+            FX_BuildSingleFaceWithModel(wxtrail, wxtrail->faceList, (SVECTOR *)&position, NULL, NULL, gFXT, &FX_SimpleQuadSetup, &FX_WaterTrailProcess, 8);
+        }
+
+        if (abs(zvel) >= 21)
+        {
+            int n;
+            int deg;
+            struct _SVector vel;
+            struct _SVector accel;
+            struct _SVector startpos;
+
+            accel.y = 0;
+            accel.x = 0;
+            accel.z = -2;
+
+            startpos.z = position.z;
+
+            for (n = 0; n < 8; n++)
+            {
+                int sinVal;
+                int cosVal;
+                int spd;
+
+                deg = rand() & 0xFFF;
+
+                cosVal = rcos(deg);
+
+                sinVal = rsin(deg);
+
+                spd = (rand() & 0x3) + 11;
+
+                vel.x = (cosVal * spd) / 4096;
+                vel.y = (sinVal * spd) / 4096;
+                vel.z = 18;
+
+                startpos.x = position.x + (cosVal / 128);
+                startpos.y = position.y + (sinVal / 128);
+
+                FX_Dot(&startpos, &vel, &accel, 0, 0x404040, 24, 20, 0);
+            }
+
+            INSTANCE_Post(gameTrackerX.playerInstance, 0x40024, 0);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartRibbon);
 
