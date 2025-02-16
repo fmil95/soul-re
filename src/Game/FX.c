@@ -346,7 +346,16 @@ struct _FX_PRIM *FX_BuildSingleFaceWithModel(struct _Model *model, struct _MFace
     return _FX_BuildSingleFaceWithModel(model, mface, center, vel, accl, fxTracker, fxSetup, fxProcess, 0, timeToLive);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_SetupLighting);
+void _FX_SetupLighting(struct _Instance *instance)
+{
+    MATRIX lm;
+
+    LIGHT_PresetInstanceLight(instance, 2048, &lm);
+
+    MulMatrix0(&lm, &instance->matrix[instance->lightMatrix], &lm);
+
+    SetLightMatrix(&lm);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_DoLighting);
 
