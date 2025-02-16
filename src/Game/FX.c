@@ -307,7 +307,37 @@ void FX_DFacadeProcess(struct _FX_PRIM *fxPrim, struct _FXTracker *fxTracker)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_BuildSingleFaceWithModel);
+struct _FX_PRIM *_FX_BuildSingleFaceWithModel(struct _Model *model, struct _MFace *mface, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, struct _FXTracker *fxTracker,
+    void (*fxSetup)(struct _FX_PRIM *fxPrim, void *fxProcess, struct _FX_MATRIX *fxMatrix, int value, struct _MFace *mface, struct _MVertex *vertexList, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, struct _FXTracker *fxTracker, short timetoLive),
+    void *fxProcess, struct _FX_MATRIX *fxMatrix, short timeToLive)
+{
+    struct _FX_PRIM *fxPrim;
+    struct _MVertex *vertexList;
+    struct _FX_MATRIX *temp; // not from decls.h
+
+    temp = fxMatrix;
+
+    vertexList = model->vertexList;
+
+    fxPrim = NULL;
+
+    if ((temp != NULL) || (temp = FX_GetMatrix(fxTracker), temp != NULL))
+    {
+        fxPrim = FX_GetPrim(fxTracker);
+
+        if (fxPrim != NULL)
+        {
+            if (fxSetup != NULL)
+            {
+                fxSetup(fxPrim, fxProcess, temp, 0, mface, vertexList, center, vel, accl, fxTracker, timeToLive);
+            }
+
+            LIST_InsertFunc(&fxTracker->usedPrimList, (struct NodeType *)fxPrim);
+        }
+    }
+
+    return fxPrim;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_BuildSingleFaceWithModel);
 
