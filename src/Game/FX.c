@@ -439,7 +439,68 @@ void FX_UpdatePos(FX_PRIM *fxPrim, SVector *offset, int spriteflag)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Relocate);
+void FX_WaterBubbleProcess(struct _FX_PRIM *fxPrim, struct _FXTracker *fxTracker);
+void FX_Relocate(struct _SVector *offset)
+{
+    struct _FX_PRIM *fxPrim;
+    struct _FXTracker *fxTracker;
+    struct _FXGeneralEffect *currentEffect;
+    int i;
+    int end;
+    struct _FXRibbon *currentRibbon;
+
+    fxTracker = gFXT;
+
+    fxPrim = (struct _FX_PRIM *)fxTracker->usedPrimList.next;
+
+    while (fxPrim != NULL)
+    {
+        FX_UpdatePos(fxPrim, offset, 0);
+
+        fxPrim = (struct _FX_PRIM *)fxPrim->node.next;
+    }
+
+    fxPrim = (struct _FX_PRIM *)fxTracker->usedPrimListSprite.next;
+
+    while (fxPrim != NULL)
+    {
+        FX_UpdatePos(fxPrim, offset, 1);
+
+        if (fxPrim->process == &FX_WaterBubbleProcess)
+        {
+            fxPrim->timeToLive += offset->z;
+        }
+
+        fxPrim = (struct _FX_PRIM *)fxPrim->node.next;
+    }
+
+    currentEffect = FX_GeneralEffectTracker;
+
+    while (currentEffect != NULL)
+    {
+        if (currentEffect->effectType == 0)
+        {
+            end = ((short *)currentEffect)[8];
+
+            currentRibbon = (struct _FXRibbon *)currentEffect;
+
+            for (i = 0; i < end; i++)
+            {
+                currentRibbon->vertexPool[i].vx += offset->x;
+                currentRibbon->vertexPool[i].vy += offset->y;
+                currentRibbon->vertexPool[i].vz += offset->z;
+            }
+        }
+        else if (currentEffect->effectType == 0x84)
+        {
+            ((struct _GenericLightningParams *)currentEffect)->end_offset.x += offset->x;
+            ((struct _GenericLightningParams *)currentEffect)->end_offset.y += offset->y;
+            ((struct _GenericLightningParams *)currentEffect)->end_offset.z += offset->z;
+        }
+
+        currentEffect = (struct _FXGeneralEffect *)currentEffect->next;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdateTexturePointers);
 
