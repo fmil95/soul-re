@@ -253,7 +253,59 @@ void FX_StandardProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ShatterProcess);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DFacadeProcess);
+void FX_DFacadeProcess(struct _FX_PRIM *fxPrim, struct _FXTracker *fxTracker)
+{
+    MATRIX *swTransform;
+    struct _Rotation rot;
+    if (fxPrim->timeToLive > 0)
+    {
+        fxPrim->timeToLive = fxPrim->timeToLive - 1;
+    }
+    if (fxPrim->timeToLive == 0)
+    {
+        FX_Die(fxPrim, fxTracker);
+    }
+    else
+    {
+        if (fxPrim->flags & 0x20)
+        {
+            swTransform = (MATRIX *)fxPrim->duo.flame.parent->matrix + ((int *)&fxPrim->duo.phys.zVel)[0];
+            fxPrim->position.x = (short)swTransform->t[0];
+            fxPrim->position.y = (short)swTransform->t[1];
+            fxPrim->position.z = (short)swTransform->t[2];
+        }
+        else
+        {
+            if ((fxPrim->flags & 2) == 0)
+            {
+                fxPrim->duo.phys.xVel += fxPrim->duo.phys.xAccl;
+                fxPrim->duo.phys.yVel += fxPrim->duo.phys.yAccl;
+                fxPrim->duo.phys.zVel += fxPrim->duo.phys.zAccl;
+                fxPrim->position.x += fxPrim->duo.phys.xVel;
+                fxPrim->position.y += fxPrim->duo.phys.yVel;
+                fxPrim->position.z += fxPrim->duo.phys.zVel;
+                if (((fxPrim->flags & 0x100) != 0) && (fxPrim->work0 < fxPrim->position.z) == 0)
+                {
+                    fxPrim->position.z = fxPrim->work0;
+                    fxPrim->flags |= 2;
+                }
+            }
+        }
+        if ((fxPrim->matrix->flags & 2) == 0)
+        {
+            fxPrim->matrix->flags |= 2;
+            if ((fxPrim->flags & 0x80) != 0)
+            {
+                rot.x = ((char *)&fxPrim->work2)[1] * 4;
+                rot.y = ((char *)&fxPrim->work3)[0] * 4;
+                rot.z = ((char *)&fxPrim->work3)[1] * 4;
+                RotMatrixX(rot.x, (MATRIX *)&fxPrim->matrix->lwTransform);
+                RotMatrixY(rot.y, (MATRIX *)&fxPrim->matrix->lwTransform);
+                RotMatrixZ(rot.z, (MATRIX *)&fxPrim->matrix->lwTransform);
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_BuildSingleFaceWithModel);
 
