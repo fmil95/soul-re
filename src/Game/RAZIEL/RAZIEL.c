@@ -2092,7 +2092,7 @@ void StateHandlerJump(CharacterState *In, int CurrentSection, intptr_t Data)
                     EnMessageQueueData(&In->SectionList[CurrentSection].Defer, 0x20000001, 0);
                 }
                 else if (((In->SectionList[CurrentSection].Data1 != 0) || (In->SectionList[CurrentSection].Data1 = G2EmulationQueryFrame(In, CurrentSection) + 4,
-                                                                           In->SectionList[CurrentSection].Data1 != 0)) &&
+                    In->SectionList[CurrentSection].Data1 != 0)) &&
                          (In->SectionList[CurrentSection].Data1 < G2EmulationQueryFrame(In, CurrentSection)))
                 {
                     SetDropPhysics(In->CharacterInstance, &Raziel);
@@ -5100,7 +5100,174 @@ int GetControllerMessages(long *controlCommand)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", RazielAdditionalCollide);
+void RazielAdditionalCollide(Instance *instance, GameTracker *gameTracker)
+{
+    int rc;
+    int Mode;
+    short Height;
+    evPhysicsEdgeData *Data;
+    evPhysicsSwimData *swimData;
+    Instance *Inst;
+
+    if ((ControlFlag & 0x8))
+    {
+        rc = 1;
+    }
+    else
+    {
+        Height = 0; // this line is garbage, only needed for matching purposes
+        rc = 0;
+    }
+
+    if ((ControlFlag & 0x2000))
+    {
+        PhysicsCheckDropOff(instance, SetPhysicsDropOffData(0, -96, Raziel.dropOffHeight, (short)Raziel.slipSlope, 256), 2);
+    }
+
+    if ((rc & 0x1))
+    {
+        if (gameTrackerX.cheatMode == 1)
+        {
+            Height = 64;
+        }
+        else
+        {
+            Height = 128;
+        }
+
+        if ((instance->oldPos.z - instance->position.z) > Height)
+        {
+            Height = instance->oldPos.z - instance->position.z;
+        }
+
+        if ((PhysicsCheckGravity(instance, SetPhysicsGravityData((short)instance->matrix[1].t[2] - instance->matrix[0].t[2], Height, 0, 0, 0, (short)Raziel.slipSlope), 7) & 0x1))
+        {
+            Raziel.Senses.Flags |= 0x4;
+        }
+        else
+        {
+            Raziel.Senses.Flags &= ~0x4;
+        }
+
+        FX_UpdateInstanceWaterSplit(instance);
+    }
+    else
+    {
+        instance->oldTFace = NULL;
+        instance->tface = NULL;
+        instance->tfaceLevel = NULL;
+        instance->waterFace = NULL;
+        instance->waterFaceTerrain = NULL;
+    }
+
+    if (((ControlFlag & 0x400)) && (Raziel.Senses.heldClass != 0x3))
+    {
+        Data = (evPhysicsEdgeData *)SetPhysicsEdgeData(400, -256, 144, 0, -196, 498, &Raziel.Senses.ForwardNormal,
+        &Raziel.Senses.AboveNormal, &Raziel.Senses.Delta);
+
+        Mode = PhysicsCheckEdgeGrabbing(instance, gameTracker, (intptr_t)Data, 3);
+
+        if ((Mode & 0x6) == 6)
+        {
+            SetPhysics(instance, 0, 0, 0, 0);
+
+            Raziel.Senses.Flags |= 0x2;
+
+            if (ExtraRot != NULL)
+            {
+                G2Anim_DisableController(&instance->anim, 1, 14);
+
+                instance->rotation.z += ExtraRot->z;
+
+                ExtraRot = NULL;
+            }
+
+            if (Data != NULL)
+            {
+                PhysicsDefaultEdgeGrabResponse(instance, Data, 0);
+            }
+        }
+        else
+        {
+            Raziel.Senses.Flags &= ~0x2;
+        }
+
+        if ((Mode & 0x2))
+        {
+            Raziel.Senses.Flags |= 0x1;
+        }
+        else
+        {
+            Raziel.Senses.Flags &= ~0x1;
+        }
+    }
+
+    if ((ControlFlag & 0x100))
+    {
+        Inst = razGetHeldWeapon();
+
+        swimData = (evPhysicsSwimData *)SetPhysicsSwimData(((Raziel.Mode & (0x1 << 18))) >> 18, &Raziel.iVelocity, 256, 416, 112);
+
+        WaterStatus = PhysicsCheckSwim(instance, (intptr_t)swimData, 3);
+
+        if (((swimData->rc & 0x10)) && (Inst != NULL) && (INSTANCE_Query(Inst, 4) == 3))
+        {
+            G2Anim_SetSpeedAdjustment(&instance->anim, 2048);
+        }
+
+        if (((swimData->rc & 0x20)) && (Inst != NULL) && (INSTANCE_Query(Inst, 4) == 3))
+        {
+            G2Anim_SetSpeedAdjustment(&instance->anim, 4096);
+        }
+    }
+    else
+    {
+        WaterStatus = 32;
+
+        FX_UpdateInstanceWaterSplit(instance);
+    }
+
+    if ((ControlFlag & 0x8000))
+    {
+        Mode = PhysicsCheckBlockers(instance, gameTracker, SetPhysicsEdgeData(256, -256, 80, 0, -104, 0,
+            &Raziel.Senses.ForwardNormal, &Raziel.Senses.AboveNormal, &Raziel.Senses.Delta), 3);
+
+        if ((Mode & 0x4))
+        {
+            Raziel.Senses.Flags |= 0x2;
+        }
+        else
+        {
+            Raziel.Senses.Flags &= ~0x2;
+        }
+
+        if ((Mode & 0x2))
+        {
+            Raziel.Senses.Flags |= 0x1;
+        }
+        else
+        {
+            Raziel.Senses.Flags &= ~0x1;
+        }
+    }
+
+    if ((ControlFlag & 0x80000))
+    {
+        PhysicsFollowWall(instance, gameTracker, SetPhysicsWallCrawlData(0, -448, 160, -186), 7);
+    }
+
+    if (((ControlFlag & 0x4000000)) && (Raziel.attachedPlatform != NULL))
+    {
+        if ((INSTANCE_Query(Raziel.attachedPlatform, 2) & 0x8))
+        {
+            PhysicsCheckLinkedMove(instance, SetPhysicsLinkedMoveData(Raziel.attachedPlatform, 2, NULL, NULL), 5);
+        }
+        else
+        {
+            PhysicsCheckLinkedMove(instance, SetPhysicsLinkedMoveData(Raziel.attachedPlatform, 0, NULL, NULL), 5);
+        }
+    }
+}
 
 int GetEngageEvent(Instance *instance)
 {
