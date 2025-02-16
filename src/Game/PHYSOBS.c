@@ -2532,7 +2532,91 @@ long PhysobAnimCallback(G2Anim *anim, int sectionID, G2AnimCallbackMsg message, 
     return INSTANCE_DefaultAnimCallback(anim, sectionID, message, messageDataA, messageDataB, (Instance *)data);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PHYSOBS", CheckForceCollision);
+void CheckForceCollision(struct _Instance *instance, struct _Instance *hitinst, struct _TFace *tface, struct _CollideInfo *collideInfo, struct _SVector *dir, int obliqueFlg)
+{
+    int killImmediately; /* var s5 */
+    struct PhysObData *data; /* temp s3*/
+    struct PhysObData *data2; // ??
+    struct evObjectBirthProjectileData *temp;
+    struct __PhysObProjectileProperties *ProjProp;
+    struct __PhysObProjectileData *ProjData;
+
+    data = instance->extraData; // struct PhysObData
+
+    if (CheckPhysObFamily(instance, 7) == 0)
+    {
+        return;
+    }
+
+    killImmediately = 1;
+
+    ProjProp = instance->data; // struct __PhysObProjectileProperties
+    temp = instance->extraData; // struct evObjectBirthProjectileData
+
+    COLLIDE_SegmentCollisionOff(instance, 0);
+
+    data2 = (int)temp+4; // ??
+
+    ProjData = &ProjProp->data[temp->joint];
+
+    if (ProjData->endAnim != -1)
+    {
+
+        data->Mode = (data->Mode & 0xFFBFFFFB) | 0x1001;
+
+        instance->xVel = 0;
+        instance->yVel = 0;
+        instance->zVel = 0;
+        instance->xAccl = 0;
+        instance->yAccl = 0;
+        instance->zAccl = 0;
+
+        if ((data->Mode & 0x80000))
+        {
+            return;
+        }
+
+        if (instance->currentModel == 0)
+        {
+            FX_EndInstanceEffects(instance);
+        }
+
+        G2EmulationInstanceSetAnimation(instance, 0, ProjData->endAnim, 0, 0);
+        G2EmulationInstanceSetMode(instance, 0, 1);
+
+        killImmediately = 0;
+
+        data->Mode |= 0x80000 | 0x1000 | 0x1;
+    }
+
+    if ((instance->parent != 0) && (INSTANCE_Query(instance->parent, 1) & 1))
+    {
+        if ((tface != 0) && (gameTrackerX.gameData.asmData.MorphType == 0))
+        {
+            COLLIDE_SetBSPTreeFlag(collideInfo, 0x400);
+        }
+        else if ((hitinst != gameTrackerX.playerInstance) && (gameTrackerX.gameData.asmData.MorphType == 0))
+        {
+            if ((CheckPhysOb(hitinst) != 0) && (hitinst->introUniqueID != gameTrackerX.playerInstance->attachedID) && (obliqueFlg == 0))
+            {
+                INSTANCE_Post(hitinst, 0x800000, SetObjectData(dir->x, dir->y, 6, 0, 0));
+            }
+            if (data2->Mode == 1)
+            { // ??
+                hitinst->flags2 |= 0x10000;
+            }
+            else
+            {
+                hitinst->flags |= 0x80000000;
+            }
+        }
+    }
+
+    if (killImmediately != 0)
+    {
+        INSTANCE_KillInstance(instance);
+    }
+}
 
 int GetObliqueDirection(Instance *instance, SVector *dir)
 {
