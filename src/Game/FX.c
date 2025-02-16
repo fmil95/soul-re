@@ -390,7 +390,22 @@ void _FX_BuildSplinters(struct _Instance *instance, struct SVECTOR *center, stru
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_Build);
+// shardFlags is a different type than specified in debugging symbols 
+// void _FX_Build(struct _Instance *instance, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), int shardFlags)
+void _FX_Build(struct _Instance *instance, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short shardFlags)
+{
+    if (MEMPACK_MemoryValidFunc((char *)instance->object) != 0)
+    {
+        if (instance->object->modelList[instance->currentModel]->numSegments < 4)
+        {
+            _FX_BuildNonSegmentedSplinters(instance, center, vel, accl, NULL, fxTracker, fxSetup, fxProcess, shardFlags);
+        }
+        else
+        {
+            _FX_BuildSegmentedSplinters(instance, center, vel, accl, NULL, fxTracker, fxSetup, fxProcess, shardFlags);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Build);
 
