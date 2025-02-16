@@ -35,7 +35,82 @@ STATIC int Spiral_Mod;
 
 STATIC Instance *FX_reaver_instance;
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Init);
+STATIC Position FX_ConstrictPosition;
+
+STATIC Position *FX_ConstrictPositionPtr;
+
+STATIC short snow_amount;
+
+STATIC short rain_amount;
+
+STATIC short current_rain_fade;
+
+STATIC short FX_Frames;
+
+STATIC short FX_TimeCount;
+
+void FX_Init(struct _FXTracker *fxTracker)
+{
+    struct _FX_MATRIX *fxMatrix;
+    struct _FX_MATRIX *endFXMatrix;
+    struct _FX_PRIM *fxPrim;
+    struct _FX_PRIM *endFXPrim;
+
+    fxMatrix = fxTracker->matrixPool;
+
+    endFXMatrix = (struct _FX_MATRIX *)&fxTracker->usedMatrixList;
+
+    fxTracker->usedMatrixList.next = 0;
+    fxTracker->usedMatrixList.prev = 0;
+
+    fxTracker->freeMatrixList.next = 0;
+    fxTracker->freeMatrixList.prev = 0;
+
+    fxTracker->usedPrimList.next = 0;
+    fxTracker->usedPrimList.prev = 0;
+
+    fxTracker->usedPrimListSprite.next = 0;
+    fxTracker->usedPrimListSprite.prev = 0;
+
+    fxTracker->freePrimList.next = 0;
+    fxTracker->freePrimList.prev = 0;
+
+    while (fxMatrix < endFXMatrix)
+    {
+        LIST_InsertFunc(&fxTracker->freeMatrixList, &fxMatrix->node);
+
+        fxMatrix++;
+    }
+
+    fxPrim = fxTracker->primPool;
+
+    endFXPrim = (struct _FX_PRIM *)&fxTracker->usedPrimList.prev;
+
+    while (fxPrim < endFXPrim)
+    {
+        LIST_InsertFunc(&fxTracker->freePrimList, &fxPrim->node);
+
+        fxPrim++;
+    }
+
+    FX_LastUsedPrim = NULL;
+
+    FX_ConstrictPositionPtr = &FX_ConstrictPosition;
+
+    FX_Spiral_Init();
+
+    snow_amount = 0;
+
+    rain_amount = 0;
+
+    current_rain_fade = 0;
+
+    FX_reaver_instance = NULL;
+
+    FX_Frames = 1;
+
+    FX_TimeCount = 0;
+}
 
 void FX_Die(FX_PRIM *fxPrim, FXTracker *fxTracker)
 {
