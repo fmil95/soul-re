@@ -407,7 +407,10 @@ void _FX_Build(struct _Instance *instance, struct SVECTOR *center, struct SVECTO
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Build);
+void FX_Build(struct _Instance *instance, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)())
+{
+    _FX_Build(instance, center, vel, accl, fxTracker, fxSetup, fxProcess, 0);
+}
 
 void FX_UpdatePos(FX_PRIM *fxPrim, SVector *offset, int spriteflag)
 {
