@@ -6,7 +6,63 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/SUPPORT", sprintf);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/SUPPORT", vsprintf);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/SUPPORT", my_itoa);
+char D_800D1A74[];
+//char *my_itoa(unsigned long value, char *str, int radix)
+char *my_itoa(int value, char *str, int base)
+{
+    char buf[31 + 1];
+    char *pBuf;
+    char *tStr;
+    unsigned int radix;
+    unsigned char v;
+
+    radix = base;
+    pBuf = &buf;
+    tStr = str;
+    if (value == 0)
+    {
+        memcpy(str, D_800D1A74, 2);
+        return str;
+    }
+
+    if (radix > 36 || radix <= 1)
+    {
+        radix = 10;
+    }
+
+    if ((radix == 10) && (value < 0))
+    {
+        *str = '-';
+        tStr = str + 1;
+        value = -value;
+    }
+
+    while (value != 0)
+    {
+        *pBuf = value % radix;
+        value = (value / radix);
+        pBuf++;
+    }
+
+    pBuf--;
+    while ((uintptr_t)buf <= (uintptr_t)pBuf)
+    {
+        v = *pBuf;
+        if (v < 10)
+        {
+            *tStr = v + '0';
+        }
+        else
+        {
+            *tStr = v + 'a' - 10;
+        }
+        pBuf--;
+        tStr++;
+    }
+
+    *tStr = 0;
+    return str;
+}
 
 // int atoi(char *str)
 int atoi(const char *str)
