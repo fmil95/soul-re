@@ -339,7 +339,12 @@ struct _FX_PRIM *_FX_BuildSingleFaceWithModel(struct _Model *model, struct _MFac
     return fxPrim;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_BuildSingleFaceWithModel);
+// timeToLive parameter is a different data type than the one specified in the debugging symbols
+// struct _FX_PRIM *FX_BuildSingleFaceWithModel(struct _Model *model, struct _MFace *mface, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), int timeToLive)
+struct _FX_PRIM *FX_BuildSingleFaceWithModel(struct _Model *model, struct _MFace *mface, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short timeToLive)
+{
+    return _FX_BuildSingleFaceWithModel(model, mface, center, vel, accl, fxTracker, fxSetup, fxProcess, 0, timeToLive);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_SetupLighting);
 
