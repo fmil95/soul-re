@@ -1400,7 +1400,40 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Sprite_Insert);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_GetTextureObject);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_MakeWaterBubble);
+void FX_MakeWaterBubble(struct _SVector *position, struct _SVector *vel, struct _SVector *accl, long splashZ, struct __BubbleParams *BP)
+{
+    struct Object *waterfx; // $s3
+    struct _FX_PRIM *fxPrim; // $s1
+
+    waterfx = (struct Object *)objectAccess[3].object;
+
+    if (waterfx != NULL)
+    {
+        fxPrim = FX_GetPrim(gFXT);
+
+        if (fxPrim != NULL)
+        {
+            FX_DFacadeParticleSetup(fxPrim, (SVECTOR *)position, 12, 12, 0x2C000000, (SVECTOR *)vel, (SVECTOR *)accl, gFXT, (short)splashZ);
+
+            fxPrim->texture = FX_GetTextureObject(waterfx, 2, rand() % (BP->UniqueBubbles - 1));
+            fxPrim->flags |= 0x1;
+            fxPrim->color = ((fxPrim->texture->color & 0x03FFFFFF) | 0x2C000000);
+            fxPrim->process = &FX_WaterBubbleProcess;
+
+            fxPrim->work0 = 0;
+            fxPrim->work1 = (BP->MaxSpeed + (rand() % BP->MaxSpeedRange));
+            fxPrim->work2 = (BP->ScaleRate + (rand() % BP->ScaleRateRange));
+            fxPrim->work3 = (BP->StartScale + (rand() % BP->StartScaleRange));
+
+            fxPrim->duo.phys.xAccl = BP->DisperseFrames;
+            fxPrim->duo.phys.yAccl = BP->KillScale;
+
+            fxPrim->v1.y = BP->MinSplashSize;
+
+            FX_Sprite_Insert(&gFXT->usedPrimListSprite, fxPrim);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawScreenPoly);
 
