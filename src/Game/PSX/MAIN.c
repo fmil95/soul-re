@@ -11,6 +11,10 @@ short mainMenuFading;
 
 MainTracker mainTrackerX;
 
+int nosound;
+
+int nomusic;
+
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", ClearDisplay);
 
 void screen_to_vram(long *screen, int buffer)
@@ -78,7 +82,44 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MAIN_LoadTim);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", init_menus);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MAIN_DoMainInit);
+void DrawCallback();
+void MAIN_DoMainInit()
+{
+    InitDisplay();
+    InitGeom();
+    SetGeomOffset(256, 120);
+    SetGeomScreen(320);
+    VRAM_InitVramBlockCache();
+    FONT_Init();
+    gameTrackerX.reqDisp = NULL;
+    VSyncCallback(VblTick);
+    DrawSyncCallback(DrawCallback);
+    GAMEPAD_Init();
+    SOUND_Init();
+    VOICEXA_Init();
+
+    if (nosound != 0)
+    {
+        SOUND_SfxOff();
+        gameTrackerX.sound.gSfxOn = 0;
+        gameTrackerX.sound.gVoiceOn = 0;
+    }
+
+    if (nomusic != 0)
+    {
+        SOUND_MusicOff();
+        gameTrackerX.sound.gMusicOn = 0;
+    }
+
+    if (!(gameTrackerX.debugFlags & 0x80000))
+    {
+        gameTrackerX.sound.gVoiceOn = 0;
+    }
+
+    init_menus(&gameTrackerX);
+    SAVE_Init(&gameTrackerX);
+    srand(0);
+}
 
 void MAIN_InitVolume()
 {
