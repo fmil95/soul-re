@@ -36,7 +36,7 @@ void FX_Health_Spiral(int number, int current_health, int max_health);
 void FX_StartConstrict(Instance *instance, SVector *constrict_point, short startSegment, short endSegment);
 void FX_EndConstrict(int ConstrictEnemyFlag, Instance *instance);
 void FX_Init(FXTracker *fxTracker);
-void _FX_BuildSplinters(Instance *instance, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, FXSplinter *splintDef, FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), int shardFlags);
+void _FX_BuildSplinters(Instance *instance, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, FXSplinter *splintDef, FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short shardFlags);
 void FX_DrawReaver(PrimPool *primPool, unsigned long **ot, MATRIX *wcTransform);
 void FX_DrawList(FXTracker *fxTracker, GameTracker *gameTracker, unsigned long **ot, MATRIX *wcTransform);
 void FX_ProcessList(FXTracker *fxTracker);

@@ -363,7 +363,32 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_BuildSegmentedSplinters);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_BuildNonSegmentedSplinters);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_BuildSplinters);
+//shardflags is a different parameter than specified in debugging symbols
+//void _FX_BuildSplinters(struct _Instance *instance, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct FXSplinter *splintDef, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), int shardFlags)
+void _FX_BuildSplinters(struct _Instance *instance, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct FXSplinter *splintDef, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short shardFlags)
+{
+    if (MEMPACK_MemoryValidFunc((char *)instance->object) != 0)
+    {
+        if (splintDef != NULL)
+        {
+            shardFlags |= splintDef->flags;
+
+            if (splintDef->soundFx != 0)
+            {
+                SndPlay(splintDef->soundFx);
+            }
+        }
+
+        if ((instance->object->modelList[instance->currentModel]->numSegments < 4) || ((shardFlags & 0x20)))
+        {
+            _FX_BuildNonSegmentedSplinters(instance, center, vel, accl, splintDef, fxTracker, fxSetup, fxProcess, shardFlags);
+        }
+        else
+        {
+            _FX_BuildSegmentedSplinters(instance, center, vel, accl, splintDef, fxTracker, fxSetup, fxProcess, shardFlags);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_Build);
 
