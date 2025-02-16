@@ -6,6 +6,7 @@
 #include "Game/OBTABLE.h"
 #include "Game/LIST.h"
 #include "Game/GAMELOOP.h"
+#include "Game/STREAM.h"
 
 STATIC FXGeneralEffect *FX_GeneralEffectTracker;
 
@@ -504,7 +505,36 @@ void FX_Relocate(struct _SVector *offset)
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdateTexturePointers);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_RelocateFXPointers);
+void FX_RelocateFXPointers(struct Object *oldObject, struct Object *newObject, long sizeOfObject)
+{
+    struct _FXTracker *fxTracker; // $s0
+    struct _FXGeneralEffect *currentEffect; // $a0
+    long offset; // $s1
+    struct _FXParticle *particle; // not from SYMDUMP
+
+    fxTracker = gFXT;
+
+    offset = (int)newObject - (int)oldObject;
+
+    FX_UpdateTexturePointers((struct _FX_PRIM *)fxTracker->usedPrimList.next, oldObject, (int)sizeOfObject, (int)offset);
+    FX_UpdateTexturePointers((struct _FX_PRIM *)fxTracker->usedPrimListSprite.next, oldObject, (int)sizeOfObject, (int)offset);
+
+    currentEffect = FX_GeneralEffectTracker;
+
+    while (currentEffect != NULL)
+    {
+        if (currentEffect->effectType == 1)
+        {
+            particle = (struct _FXParticle *)currentEffect;
+            if (particle->texture != NULL && IN_BOUNDS(particle->texture, oldObject, (int)oldObject + sizeOfObject))
+            {
+                particle->texture = (struct TextureMT3 *)OFFSET_DATA(particle->texture, offset);
+            }
+        }
+
+        currentEffect = (struct _FXGeneralEffect *)currentEffect->next;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ProcessList);
 
