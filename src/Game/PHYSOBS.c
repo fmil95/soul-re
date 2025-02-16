@@ -927,7 +927,87 @@ evObjectBirthProjectileData *PHYSOB_BirthProjectile(Instance *parent, int joint,
     return rc;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PHYSOBS", BirthProjectilePhysOb);
+struct _Instance *BirthProjectilePhysOb(struct _Instance *instance, int grabJoint, int type)
+{
+    struct Object *ForceOb; // $a1
+    struct _Instance *iForce; // $s0
+    struct PhysObData *Data; // $s2
+    struct PhysObProperties *Prop; // $s1
+
+    ForceOb = (struct Object *)objectAccess[19].object;
+
+    iForce = NULL;
+
+    if (ForceOb != 0)
+    {
+        iForce = INSTANCE_BirthObject(instance, ForceOb, 0);
+        if (iForce != NULL)
+        {
+            struct __PhysObProjectileProperties *ProjProp; // $v1 line 15
+            struct __PhysObProjectileData *ProjData; // $v1 line 15
+            struct evObjectBirthProjectileData *temp;
+
+            temp = iForce->extraData;
+
+            ProjProp = iForce->data;
+
+            temp->joint = type;
+
+            ProjData = &ProjProp->data[type];
+
+            iForce->currentModel = ProjData->model;
+
+            Data = iForce->extraData;
+
+            if (ProjData->model == 0)
+            {
+                struct _Position offset; // stack offset -32 line 30
+                struct _FXForceFieldEffect *field; // $v1 line 30
+                offset.x = 0;
+                offset.y = 0;
+                offset.z = 0;
+                field = FX_StartFField(iForce, 0x78, &offset, 0x20, 0x10, 0x80, 0x202020);
+                if (field != NULL)
+                {
+                    field->type = 1;
+                }
+            }
+            INSTANCE_LinkToParent(iForce, instance, grabJoint);
+            TurnOffCollisionPhysOb(iForce, 7);
+            Prop = iForce->data;
+            if (Prop->family == 7)
+            {
+                struct __PhysObProjectileData *ProjData; // $v1 line 51
+                struct evObjectBirthProjectileData *temp;
+
+                temp = ((struct evObjectBirthProjectileData *)iForce->extraData);
+                ProjProp = iForce->data;
+                ProjData = &ProjProp->data[temp->joint];
+                if (ProjData->startAnim != -1)
+                {
+                    G2EmulationInstanceSetAnimation(iForce, 0, ProjData->startAnim, 0, 0);
+                    G2EmulationInstanceSetMode(iForce, 0, 2);
+                }
+            }
+            if (Prop->Type & 1)
+            {
+                Data->Mode = 0x1080;
+                Data->Force = NULL;
+                Data->Step = 0;
+                Data->Steps = 0;
+                iForce->xVel = 0;
+                iForce->yVel = 0;
+                iForce->zVel = 0;
+                iForce->xAccl = 0;
+                iForce->yAccl = 0;
+                iForce->zAccl = 0;
+                return iForce;
+            }
+            Data->physObTimer = 0x96000;
+        }
+    }
+    return iForce;
+}
 
 void PHYSOB_SetLightTable(PhysObLight *pLight, LightInstance *li, short burnAmplitude)
 {
