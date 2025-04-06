@@ -1408,7 +1408,41 @@ int MONSTER_StartVertexBurnt(Instance *instance, SVector *location, burntTuneTyp
     return -1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MONSTER_VertexBurnt);
+void MONSTER_VertexBurnt(Instance *instance, burntTuneType *burntTune)
+{
+    int fade;
+    Model *model;
+
+    model = (instance->object->modelList[instance->currentModel]);
+    fade = burntTune->fadeDelta;
+
+    if (instance->perVertexColor != NULL)
+    {
+        int i;
+        for (i = 0; i < model->numVertices; i++)
+        {
+            CVECTOR *c;
+            c = &instance->perVertexColor[i];
+
+            if (c->r >= fade)
+            {
+                c->r -= fade;
+            }
+
+            if (c->g >= fade)
+            {
+                c->g -= fade;
+            }
+
+            if (c->b >= fade)
+            {
+                c->b -= fade;
+            }
+
+            c->cd = 0;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_DamageEffect);
 
