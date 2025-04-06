@@ -196,7 +196,16 @@ INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_TerrainImpaleDeathEntry
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_TerrainImpaleDeath);
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_SurprisedEntry);
+void MON_SurprisedEntry(Instance *instance)
+{
+    MonsterVars *mv;
+    mv = (MonsterVars *)instance->extraData;
+
+    do {} while (0);
+
+    MON_PlayAnim(instance, MONSTER_ANIM_SURPRISED, 1);
+    mv->generalTimer = MON_GetTime(instance) + mv->subAttr->combatAttributes->surpriseTime;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Surprised);
 
