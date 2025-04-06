@@ -1242,7 +1242,38 @@ int MONSTER_CalcDamageIntensity(int hp, int maxHp)
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MONSTER_ProcessClosestVerts);
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", ProcessBloodyMess);
+void ProcessBloodyMess(Instance *instance, int vertidx, int segidx, int dist, void *cb_data)
+{
+
+    long scl;
+    struct CVECTOR *cv;
+    MonsterVars *mv;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (dist < ((bloodyMessType *)cb_data)->closestdist)
+    {
+        ((bloodyMessType *)cb_data)->closestvert = vertidx;
+        ((bloodyMessType *)cb_data)->closestdist = dist;
+        ((bloodyMessType *)cb_data)->closestseg = segidx;
+    }
+
+    if (dist < 0x64)
+    {
+
+        cv = &instance->perVertexColor[vertidx];
+
+        scl = (((0x64 - dist) * 2) * (((bloodyMessType *)cb_data)->bloodIntensity)) / 100;
+        scl = MIN(scl, 0x100);
+
+        cv->r = ~(((0xFF - mv->subAttr->bruiseRed) * scl) >> 8);
+        cv->g = ~(((0xFF - mv->subAttr->bruiseGreen) * scl) >> 8);
+        cv->b = ~(((0xFF - mv->subAttr->bruiseBlue) * scl) >> 8);
+        cv->cd = 1;
+
+        ((bloodyMessType *)cb_data)->bloodiedAVert = 1;
+    }
+}
 
 void MONSTER_InitVertexColors(Instance *instance, Model *model)
 {
