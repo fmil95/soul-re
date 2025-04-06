@@ -161,7 +161,30 @@ INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_FallEntry);
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Fall);
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_ThrownEntry);
+void MON_ThrownEntry(Instance *instance)
+{
+
+    MonsterVars *mv;
+    mv = (MonsterVars *)instance->extraData;
+
+    do {} while (0);
+
+    instance->xAccl = 0;
+    instance->yAccl = 0;
+    instance->zAccl = -8;
+
+    MON_PlayAnim(instance, MONSTER_ANIM_THROWN, 2);
+
+    mv->mode = 0x100000;
+
+    if (instance->object->oflags & 0x200)
+    {
+        instance->flags2 |= 0x40;
+    }
+
+    instance->checkMask |= 0x20;
+    mv->mvFlags &= ~2;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Thrown);
 
