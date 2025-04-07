@@ -269,7 +269,27 @@ void MON_ThrownEntry(Instance *instance)
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Thrown);
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_ImpaleDeathEntry);
+void MON_ImpaleDeathEntry(Instance *instance)
+{
+
+    MonsterVars *mv;
+    mv = (MonsterVars *)instance->extraData;
+
+    MON_PlayAnim(instance, MONSTER_ANIM_IMPALED, 1);
+
+    mv->mvFlags |= 0x200000;
+    mv->mvFlags &= ~0x10;
+
+    MON_TurnOffAllSpheres(instance);
+    mv->generalTimer = MON_GetTime(instance) + 0x7530;
+
+    instance->xAccl = 0;
+    instance->yAccl = 0;
+    instance->xVel = 0;
+    instance->yVel = 0;
+
+    MON_DropAllObjects(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_ImpaleDeath);
 
