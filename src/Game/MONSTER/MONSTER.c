@@ -415,7 +415,29 @@ void MON_Stunned(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_GrabbedEntry);
+void MON_GrabbedEntry(Instance *instance)
+{
+
+    MonsterVars *mv;
+    mv = (MonsterVars *)instance->extraData;
+
+    if ((signed char)mv->subAttr->animList[4] == (signed char)mv->subAttr->animList[0xE])
+    {
+        MON_PlayAnim(instance, MONSTER_ANIM_GRABBED, 2);
+    }
+    else
+    {
+        MON_PlayAnim(instance, MONSTER_ANIM_GRABBED, 1);
+    }
+
+    instance->flags2 &= ~0x40;
+    mv->generalTimer = MON_GetTime(instance) + mv->subAttr->combatAttributes->grabTime;
+    INSTANCE_LinkToParent(instance, gameTrackerX.playerInstance, 0x31);
+    instance->rotation.z = (mv->enemy->instance->rotation.z + 0x800);
+    mv->speed = 0;
+    instance->checkMask |= 0x20;
+
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Grabbed);
 
