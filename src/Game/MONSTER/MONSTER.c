@@ -135,7 +135,51 @@ void MON_Parry(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_LandOnFeetEntry);
+void MON_LandOnFeetEntry(Instance *instance)
+{
+    int damage;
+    MonsterVars *mv;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if ((signed char)mv->previousMainState == 0xB)
+    {
+        MON_PlayAnim(instance, MONSTER_ANIM_SPINLAND, 1);
+
+        do {} while (0);
+
+        instance->xAccl = 0;
+        instance->yAccl = 0;
+        instance->zAccl = -0x10;
+
+    }
+    else
+    {
+        MON_PlayAnim(instance, MONSTER_ANIM_LANDONFEET, 1);
+        instance->xAccl = 0;
+        instance->yAccl = 0;
+        instance->zAccl = 0;
+    }
+
+    if (instance->zVel < -0x65)
+    {
+        damage = 0x1000;
+        if (instance->zVel < -0xF6)
+        {
+            damage = 0x3000;
+            if (instance->zVel >= -0x15D)
+            {
+                damage = 0x2000;
+            }
+        }
+        MON_TakeDamage(instance, damage, 0x40000);
+    }
+    instance->xVel = 0;
+    instance->yVel = 0;
+    instance->zVel = 0;
+    instance->checkMask &= ~0x20;
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_LandOnFeet);
 
