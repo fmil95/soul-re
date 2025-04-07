@@ -201,7 +201,44 @@ INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_ImpactEntry);
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Impact);
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_FallEntry);
+void MON_FallEntry(Instance *instance)
+{
+
+    MonsterVars *mv;
+    mv = (MonsterVars *)instance->extraData;
+
+    if ((signed char)mv->previousMainState == MONSTER_STATE_BREAKHOLD)
+    {
+        MON_PlayAnim(instance, MONSTER_ANIM_BREAKFALL, 1);
+    }
+    else
+    {
+
+        if ((signed char)mv->previousMainState == MONSTER_STATE_PURSUE ||
+            (signed char)mv->previousMainState == MONSTER_STATE_FLEE ||
+            (signed char)mv->previousMainState == MONSTER_STATE_COMBAT ||
+            (signed char)mv->previousMainState == MONSTER_STATE_WANDER)
+        {
+
+            PhysicsSetVelFromRot(instance, &instance->rotation, 0x28);
+            instance->zVel = 0x28;
+
+        }
+
+        MON_PlayAnim(instance, MONSTER_ANIM_FALL, 2);
+    }
+
+    instance->xAccl = 0;
+    instance->yAccl = 0;
+    instance->zAccl = -0x10;
+
+    do {} while (0);
+
+    mv->mode = 0x100000;
+
+
+    mv->generalTimer = MON_GetTime(instance) + 0x7D0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Fall);
 
