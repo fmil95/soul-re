@@ -197,7 +197,37 @@ INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_BreakHoldEntry);
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_BreakHold);
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_ImpactEntry);
+void MON_ImpactEntry(Instance *instance)
+{
+
+    evFXHitData data; // sp10
+    MonsterVars *mv; // s1
+    MonsterCombatAttributes *combat;
+
+    mv = (MonsterVars *)instance->extraData;
+    combat = mv->subAttr->combatAttributes;
+
+    do {} while (0);
+    MON_PlayAnim(instance, MONSTER_ANIM_IMPACT, 1);
+
+    instance->xVel = 0;
+    instance->yVel = 0;
+    instance->zVel = 0;
+    mv->mode = 0x100000;
+
+    MON_TakeDamage(instance, 0x3000, 0x100);
+    MON_SetFXHitData(instance, &data, 0x40000, 0);
+
+    ((MONTABLE_DamageEffectFunc)MONTABLE_GetDamageEffectFunc(instance))(instance, (intptr_t)&data);
+
+    if (mv->hitPoints == 0)
+    {
+        mv->damageTimer = MON_GetTime(instance) + combat->damageTime;
+        mv->mvFlags |= 0x800010;
+    }
+
+    instance->checkMask &= ~0x20;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Impact);
 

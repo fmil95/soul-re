@@ -16,6 +16,8 @@ typedef struct Dummy4
     int unknown2;
 } Dummy4; // not from types.h
 
+typedef void (*MONTABLE_DamageEffectFunc)(Instance *, int);
+
 void MonsterProcess(Instance *instance, GameTracker *gameTracker);
 uintptr_t MonsterQuery(Instance *instance, unsigned long query);
 void MONAPI_AddToGenerator(Instance *instance);
