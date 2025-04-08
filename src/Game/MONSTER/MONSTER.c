@@ -26,7 +26,84 @@ INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_DoCombatTimers);
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_ChangeHumanOpinion);
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_CutOut_Monster);
+void MON_CutOut_Monster(Instance *instance, int fade_amount, int startseg, int endseg)
+{
+    SVector point;
+    SVector normal;
+    SVector p1;
+    SVector p2;
+
+    long color;
+    int tmp;
+
+    short _x0;
+    short _x1;
+    short _y0;
+    short _y1;
+    short _z0;
+    short _z1;
+
+    MATRIX *mat;
+
+    if (instance->matrix != NULL)
+    {
+
+        mat = &instance->matrix[startseg];
+
+        _x0 = mat->t[0];
+        p1.x = _x0;
+
+        _y0 = mat->t[1];
+        p1.y = _y0;
+
+        _z0 = mat->t[2];
+        p1.z = _z0;
+
+        mat = &instance->matrix[endseg];
+
+        _x1 = mat->t[0];
+        p2.x = _x1;
+
+        _y1 = mat->t[1];
+        p2.y = _y1;
+
+        _z1 = mat->t[2];
+        p2.z = mat->t[2];
+
+        tmp = (_x0 - _x1) / 8;
+        p1.x = _x0 + tmp;
+        p2.x = _x1 - tmp;
+
+        tmp = (_y0 - _y1) / 8;
+        p1.y = _y0 + tmp;
+        p2.y = _y1 - tmp;
+
+        tmp = (_z0 - _z1) / 8;
+        p1.z = _z0 + tmp;
+        p2.z = _z1 - tmp;
+
+        LoadAverageShort12((SVECTOR *)&p2, (SVECTOR *)&p1, fade_amount, 0x1000 - fade_amount, (SVECTOR *)&point);
+
+        if (!(instance->halvePlane.flags & 8))
+        {
+
+            color = 0;
+            SUB_SVEC(SVector, &normal, SVector, &p2, SVector, &p1);
+            CAMERA_Normalize(&normal);
+
+            color = 0x80FF;
+            FX_DoInstancePowerRing(instance, 0x2EE0, &color, 0, 2);
+            FX_DoInstancePowerRing(instance, 0x2EE0, &color, 0, 1);
+
+            instance->halvePlane.flags = 8U;
+            instance->halvePlane.a = normal.x;
+            instance->halvePlane.b = normal.y;
+            instance->halvePlane.c = normal.z;
+
+        }
+        instance->halvePlane.d = -((instance->halvePlane.a * point.x + instance->halvePlane.b * point.y + instance->halvePlane.c * point.z) >> 0xC);
+    }
+}
 
 void MON_DeadEntry(Instance *instance)
 {
