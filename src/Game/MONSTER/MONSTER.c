@@ -229,7 +229,24 @@ void MON_ImpactEntry(Instance *instance)
     instance->checkMask &= ~0x20;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Impact);
+void MON_Impact(Instance *instance)
+{
+
+    MonsterVars *mv;
+    mv = (MonsterVars *)instance->extraData;
+
+    if (instance->flags2 & 0x10)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_FALL);
+    }
+
+    MON_DefaultQueueHandler(instance);
+
+    if (instance->currentMainState == MONSTER_STATE_GENERALDEATH && (mv->damageType == 0x20 || mv->damageType == 0x40))
+    {
+        MON_BurnInAir(instance, MONSTER_STATE_IMPACT);
+    }
+}
 
 void MON_FallEntry(Instance *instance)
 {
