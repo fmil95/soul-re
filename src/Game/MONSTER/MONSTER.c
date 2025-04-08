@@ -488,7 +488,31 @@ void MON_GrabbedEntry(Instance *instance)
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Grabbed);
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_HitEntry);
+void MON_HitEntry(Instance *instance)
+{
+
+    MonsterIR *enemy;
+    MonsterVars *mv;
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+
+    enemy->mirConditions |= 0x400;
+    mv->mvFlags |= 0x10000;
+
+    if (MON_SetUpKnockBack(instance, enemy->instance, (evMonsterHitData *)mv->messageData) != 0)
+    {
+        MON_PlayAnim(instance, MONSTER_ANIM_HIT1, 1);
+    }
+    else
+    {
+        MON_PlayAnim(instance, MONSTER_ANIM_HIT2, 1);
+    }
+
+    mv->mode = 0x8000;
+    instance->checkMask |= 0x20;
+    mv->generalTimer2 = MON_GetTime(instance) + 0x26AC;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Hit);
 
