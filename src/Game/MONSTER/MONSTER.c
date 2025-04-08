@@ -492,7 +492,22 @@ INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_HitEntry);
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Hit);
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_AttackEntry);
+void MON_AttackEntry(Instance *instance)
+{
+    MonsterVars *mv;
+    MonsterAttackAttributes *attack;
+
+    mv = (MonsterVars *)instance->extraData;
+    attack = mv->attackType;
+
+    do {} while (0);
+
+    mv->mode = 0x200000;
+
+    MON_PlayAnimFromList(instance, attack->animList, 0, 1);
+    mv->generalTimer = MON_GetTime(instance) + ((signed char)attack->turnFrames * 0x21);
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Attack);
 
