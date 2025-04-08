@@ -13,6 +13,7 @@ void G2EmulationInstanceSetMode(Instance *instance, int CurrentSection, int Mode
 void G2EmulationInstanceSetAnimation(Instance *instance, int CurrentSection, int NewAnim, int NewFrame, int Frames);
 int G2EmulationInstanceQueryFrame(Instance *instance, int CurrentSection);
 int G2EmulationInstanceQueryAnimation(Instance *instance, int CurrentSection);
+int G2EmulationInstanceQueryPassedFrame(Instance *instance, int CurrentSection, int frame);
 void G2EmulationInstancePlayAnimation(Instance *instance);
 intptr_t SetPositionData(int x, int y, int z);
 void *CIRC_Alloc(int size);

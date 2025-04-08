@@ -3,6 +3,7 @@
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSENSE.h"
+#include "Game/MONSTER/MONTABLE.h"
 #include "Game/PHYSICS.h"
 #include "Game/MONSTER/MISSILE.h"
 #include "Game/G2/ANIMG2.h"
@@ -568,7 +569,60 @@ void MON_AttackEntry(Instance *instance)
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Attack);
+void MON_Attack(Instance *instance)
+{
+
+    MonsterAnim *anim;
+    MonsterAttackAttributes *attack;
+    MonsterVars *mv;
+    MonsterIR *enemy;
+
+    mv = (MonsterVars *)instance->extraData;
+    attack = mv->attackType;
+    enemy = mv->enemy;
+    anim = MON_GetAnim(instance, attack->animList, (signed char)mv->attackState);
+
+    if (anim->velocity != 0 && MON_TransNodeAnimation(instance) == 0)
+    {
+        mv->speed = anim->velocity;
+        MON_MoveForward(instance);
+    }
+
+    if (MON_AnimPlayingFromList(instance, attack->animList, (signed char)attack->sphereOnAnim) != 0 &&
+        G2EmulationInstanceQueryPassedFrame(instance, 0, (signed char)attack->sphereOnFrame) != 0)
+    {
+        MON_TurnOnWeaponSphere(instance, (signed char)attack->sphereSegment);
+    }
+    else if (MON_AnimPlayingFromList(instance, attack->animList, (signed char)attack->sphereOffAnim) != 0 &&
+             G2EmulationInstanceQueryPassedFrame(instance, 0, (signed char)attack->sphereOffFrame) != 0 &&
+             mv->mvFlags & 0x4000)
+    {
+        MON_TurnOffWeaponSpheres(instance);
+        enemy->mirConditions |= 0x200;
+    }
+
+    if (instance->flags2 & 0x10)
+    {
+        instance->flags2 &= ~0x10;
+        mv->attackState++;
+
+        if ((signed char)mv->attackState < (signed char)attack->numAnims)
+        {
+            MON_PlayAnimFromList(instance, attack->animList, (signed char)mv->attackState, 1);
+        }
+        else
+        {
+            MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+        }
+    }
+
+    if (enemy != NULL && (MON_GetTime(instance) < (unsigned int)mv->generalTimer || !(INSTANCE_Query(enemy->instance, 0xA) & 0x02000000)))
+    {
+        MON_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn);
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 void MON_CombatEntry(Instance *instance)
 {
