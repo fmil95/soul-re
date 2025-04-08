@@ -135,7 +135,51 @@ void MON_Parry(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_LandOnFeetEntry);
+void MON_LandOnFeetEntry(Instance *instance)
+{
+    int damage;
+    MonsterVars *mv;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if ((signed char)mv->previousMainState == 0xB)
+    {
+        MON_PlayAnim(instance, MONSTER_ANIM_SPINLAND, 1);
+
+        do {} while (0);
+
+        instance->xAccl = 0;
+        instance->yAccl = 0;
+        instance->zAccl = -0x10;
+
+    }
+    else
+    {
+        MON_PlayAnim(instance, MONSTER_ANIM_LANDONFEET, 1);
+        instance->xAccl = 0;
+        instance->yAccl = 0;
+        instance->zAccl = 0;
+    }
+
+    if (instance->zVel < -0x65)
+    {
+        damage = 0x1000;
+        if (instance->zVel < -0xF6)
+        {
+            damage = 0x3000;
+            if (instance->zVel >= -0x15D)
+            {
+                damage = 0x2000;
+            }
+        }
+        MON_TakeDamage(instance, damage, 0x40000);
+    }
+    instance->xVel = 0;
+    instance->yVel = 0;
+    instance->zVel = 0;
+    instance->checkMask &= ~0x20;
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_LandOnFeet);
 
@@ -153,11 +197,95 @@ INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_BreakHoldEntry);
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_BreakHold);
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_ImpactEntry);
+void MON_ImpactEntry(Instance *instance)
+{
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Impact);
+    evFXHitData data; // sp10
+    MonsterVars *mv; // s1
+    MonsterCombatAttributes *combat;
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_FallEntry);
+    mv = (MonsterVars *)instance->extraData;
+    combat = mv->subAttr->combatAttributes;
+
+    do {} while (0);
+    MON_PlayAnim(instance, MONSTER_ANIM_IMPACT, 1);
+
+    instance->xVel = 0;
+    instance->yVel = 0;
+    instance->zVel = 0;
+    mv->mode = 0x100000;
+
+    MON_TakeDamage(instance, 0x3000, 0x100);
+    MON_SetFXHitData(instance, &data, 0x40000, 0);
+
+    ((MONTABLE_DamageEffectFunc)MONTABLE_GetDamageEffectFunc(instance))(instance, (intptr_t)&data);
+
+    if (mv->hitPoints == 0)
+    {
+        mv->damageTimer = MON_GetTime(instance) + combat->damageTime;
+        mv->mvFlags |= 0x800010;
+    }
+
+    instance->checkMask &= ~0x20;
+}
+
+void MON_Impact(Instance *instance)
+{
+
+    MonsterVars *mv;
+    mv = (MonsterVars *)instance->extraData;
+
+    if (instance->flags2 & 0x10)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_FALL);
+    }
+
+    MON_DefaultQueueHandler(instance);
+
+    if (instance->currentMainState == MONSTER_STATE_GENERALDEATH && (mv->damageType == 0x20 || mv->damageType == 0x40))
+    {
+        MON_BurnInAir(instance, MONSTER_STATE_IMPACT);
+    }
+}
+
+void MON_FallEntry(Instance *instance)
+{
+
+    MonsterVars *mv;
+    mv = (MonsterVars *)instance->extraData;
+
+    if ((signed char)mv->previousMainState == MONSTER_STATE_BREAKHOLD)
+    {
+        MON_PlayAnim(instance, MONSTER_ANIM_BREAKFALL, 1);
+    }
+    else
+    {
+
+        if ((signed char)mv->previousMainState == MONSTER_STATE_PURSUE ||
+            (signed char)mv->previousMainState == MONSTER_STATE_FLEE ||
+            (signed char)mv->previousMainState == MONSTER_STATE_COMBAT ||
+            (signed char)mv->previousMainState == MONSTER_STATE_WANDER)
+        {
+
+            PhysicsSetVelFromRot(instance, &instance->rotation, 0x28);
+            instance->zVel = 0x28;
+
+        }
+
+        MON_PlayAnim(instance, MONSTER_ANIM_FALL, 2);
+    }
+
+    instance->xAccl = 0;
+    instance->yAccl = 0;
+    instance->zAccl = -0x10;
+
+    do {} while (0);
+
+    mv->mode = 0x100000;
+
+
+    mv->generalTimer = MON_GetTime(instance) + 0x7D0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Fall);
 
@@ -188,7 +316,27 @@ void MON_ThrownEntry(Instance *instance)
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Thrown);
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_ImpaleDeathEntry);
+void MON_ImpaleDeathEntry(Instance *instance)
+{
+
+    MonsterVars *mv;
+    mv = (MonsterVars *)instance->extraData;
+
+    MON_PlayAnim(instance, MONSTER_ANIM_IMPALED, 1);
+
+    mv->mvFlags |= 0x200000;
+    mv->mvFlags &= ~0x10;
+
+    MON_TurnOffAllSpheres(instance);
+    mv->generalTimer = MON_GetTime(instance) + 0x7530;
+
+    instance->xAccl = 0;
+    instance->yAccl = 0;
+    instance->xVel = 0;
+    instance->yVel = 0;
+
+    MON_DropAllObjects(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_ImpaleDeath);
 
@@ -314,7 +462,29 @@ void MON_Stunned(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_GrabbedEntry);
+void MON_GrabbedEntry(Instance *instance)
+{
+
+    MonsterVars *mv;
+    mv = (MonsterVars *)instance->extraData;
+
+    if ((signed char)mv->subAttr->animList[4] == (signed char)mv->subAttr->animList[0xE])
+    {
+        MON_PlayAnim(instance, MONSTER_ANIM_GRABBED, 2);
+    }
+    else
+    {
+        MON_PlayAnim(instance, MONSTER_ANIM_GRABBED, 1);
+    }
+
+    instance->flags2 &= ~0x40;
+    mv->generalTimer = MON_GetTime(instance) + mv->subAttr->combatAttributes->grabTime;
+    INSTANCE_LinkToParent(instance, gameTrackerX.playerInstance, 0x31);
+    instance->rotation.z = (mv->enemy->instance->rotation.z + 0x800);
+    mv->speed = 0;
+    instance->checkMask |= 0x20;
+
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Grabbed);
 
