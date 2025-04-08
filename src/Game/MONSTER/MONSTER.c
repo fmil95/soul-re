@@ -514,7 +514,42 @@ void MON_HitEntry(Instance *instance)
     mv->generalTimer2 = MON_GetTime(instance) + 0x26AC;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Hit);
+void MON_Hit(Instance *instance)
+{
+
+    MonsterVars *mv;
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->generalTimer < MON_GetTime(instance))
+    {
+        if (mv->mvFlags & 0x100)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_STUNNED);
+        }
+        else
+        {
+            MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+        }
+
+        instance->xVel = 0;
+        instance->yVel = 0;
+        instance->zVel = 0;
+
+    }
+    else if (instance->flags2 & 0x10)
+    {
+        MON_PlayCombatIdle(instance, 2);
+    }
+
+    MON_DefaultQueueHandler(instance);
+    PHYSICS_StopIfCloseToTarget(instance, 0, 0, 0);
+    PhysicsMove(instance, &instance->position, gameTrackerX.timeMult);
+
+    if (instance->currentMainState != MONSTER_STATE_HIT)
+    {
+        instance->checkMask &= ~0x20;
+    }
+}
 
 void MON_AttackEntry(Instance *instance)
 {
