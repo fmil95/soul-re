@@ -15,6 +15,7 @@ int MON_GetRandomDestinationInWorld(Instance *instance, Position *in, short r);
 void MON_StartSpecialFade(Instance *instance, int fadeLevel, int fadeTime);
 MonsterAnim *MON_GetAnim(Instance *instance, char *animList, int index);
 void MON_PlayAnim(Instance *instance, enum MonsterAnim animtype, int mode);
+int MON_AnimPlayingFromList(Instance *instance, char *animList, int animtype);
 void MON_ApplyPhysics(Instance *instance);
 void MON_BirthMana(Instance *instance);
 void MON_DisableHeadMove(Instance *instance);
@@ -66,5 +67,9 @@ void MON_MoveInstanceToImpalePoint(Instance *instance);
 void MON_SetFXHitData(Instance *instance, evFXHitData *data, int type, int amount);
 void MON_LaunchMonster(Instance *instance, int zDirection, int power, int loft);
 void MON_MoveForward(Instance *instance);
+void MON_TurnOffWeaponSphere(Instance *instance, int segment);
+void MON_TurnOnWeaponSphere(Instance *instance, int segment);
+void MON_BurnInAir(Instance *instance, int currentState);
+int MON_TransNodeAnimation(Instance *instance);
 
 #endif

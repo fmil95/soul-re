@@ -3,6 +3,7 @@
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSENSE.h"
+#include "Game/MONSTER/MONTABLE.h"
 #include "Game/PHYSICS.h"
 #include "Game/MONSTER/MISSILE.h"
 #include "Game/G2/ANIMG2.h"
@@ -25,7 +26,84 @@ INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_DoCombatTimers);
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_ChangeHumanOpinion);
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_CutOut_Monster);
+void MON_CutOut_Monster(Instance *instance, int fade_amount, int startseg, int endseg)
+{
+    SVector point;
+    SVector normal;
+    SVector p1;
+    SVector p2;
+
+    long color;
+    int tmp;
+
+    short _x0;
+    short _x1;
+    short _y0;
+    short _y1;
+    short _z0;
+    short _z1;
+
+    MATRIX *mat;
+
+    if (instance->matrix != NULL)
+    {
+
+        mat = &instance->matrix[startseg];
+
+        _x0 = mat->t[0];
+        p1.x = _x0;
+
+        _y0 = mat->t[1];
+        p1.y = _y0;
+
+        _z0 = mat->t[2];
+        p1.z = _z0;
+
+        mat = &instance->matrix[endseg];
+
+        _x1 = mat->t[0];
+        p2.x = _x1;
+
+        _y1 = mat->t[1];
+        p2.y = _y1;
+
+        _z1 = mat->t[2];
+        p2.z = mat->t[2];
+
+        tmp = (_x0 - _x1) / 8;
+        p1.x = _x0 + tmp;
+        p2.x = _x1 - tmp;
+
+        tmp = (_y0 - _y1) / 8;
+        p1.y = _y0 + tmp;
+        p2.y = _y1 - tmp;
+
+        tmp = (_z0 - _z1) / 8;
+        p1.z = _z0 + tmp;
+        p2.z = _z1 - tmp;
+
+        LoadAverageShort12((SVECTOR *)&p2, (SVECTOR *)&p1, fade_amount, 0x1000 - fade_amount, (SVECTOR *)&point);
+
+        if (!(instance->halvePlane.flags & 8))
+        {
+
+            color = 0;
+            SUB_SVEC(SVector, &normal, SVector, &p2, SVector, &p1);
+            CAMERA_Normalize(&normal);
+
+            color = 0x80FF;
+            FX_DoInstancePowerRing(instance, 0x2EE0, &color, 0, 2);
+            FX_DoInstancePowerRing(instance, 0x2EE0, &color, 0, 1);
+
+            instance->halvePlane.flags = 8U;
+            instance->halvePlane.a = normal.x;
+            instance->halvePlane.b = normal.y;
+            instance->halvePlane.c = normal.z;
+
+        }
+        instance->halvePlane.d = -((instance->halvePlane.a * point.x + instance->halvePlane.b * point.y + instance->halvePlane.c * point.z) >> 0xC);
+    }
+}
 
 void MON_DeadEntry(Instance *instance)
 {
@@ -488,13 +566,140 @@ void MON_GrabbedEntry(Instance *instance)
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Grabbed);
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_HitEntry);
+void MON_HitEntry(Instance *instance)
+{
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Hit);
+    MonsterIR *enemy;
+    MonsterVars *mv;
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_AttackEntry);
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Attack);
+    enemy->mirConditions |= 0x400;
+    mv->mvFlags |= 0x10000;
+
+    if (MON_SetUpKnockBack(instance, enemy->instance, (evMonsterHitData *)mv->messageData) != 0)
+    {
+        MON_PlayAnim(instance, MONSTER_ANIM_HIT1, 1);
+    }
+    else
+    {
+        MON_PlayAnim(instance, MONSTER_ANIM_HIT2, 1);
+    }
+
+    mv->mode = 0x8000;
+    instance->checkMask |= 0x20;
+    mv->generalTimer2 = MON_GetTime(instance) + 0x26AC;
+}
+
+void MON_Hit(Instance *instance)
+{
+
+    MonsterVars *mv;
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->generalTimer < MON_GetTime(instance))
+    {
+        if (mv->mvFlags & 0x100)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_STUNNED);
+        }
+        else
+        {
+            MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+        }
+
+        instance->xVel = 0;
+        instance->yVel = 0;
+        instance->zVel = 0;
+
+    }
+    else if (instance->flags2 & 0x10)
+    {
+        MON_PlayCombatIdle(instance, 2);
+    }
+
+    MON_DefaultQueueHandler(instance);
+    PHYSICS_StopIfCloseToTarget(instance, 0, 0, 0);
+    PhysicsMove(instance, &instance->position, gameTrackerX.timeMult);
+
+    if (instance->currentMainState != MONSTER_STATE_HIT)
+    {
+        instance->checkMask &= ~0x20;
+    }
+}
+
+void MON_AttackEntry(Instance *instance)
+{
+    MonsterVars *mv;
+    MonsterAttackAttributes *attack;
+
+    mv = (MonsterVars *)instance->extraData;
+    attack = mv->attackType;
+
+    do {} while (0);
+
+    mv->mode = 0x200000;
+
+    MON_PlayAnimFromList(instance, attack->animList, 0, 1);
+    mv->generalTimer = MON_GetTime(instance) + ((signed char)attack->turnFrames * 0x21);
+}
+
+
+void MON_Attack(Instance *instance)
+{
+
+    MonsterAnim *anim;
+    MonsterAttackAttributes *attack;
+    MonsterVars *mv;
+    MonsterIR *enemy;
+
+    mv = (MonsterVars *)instance->extraData;
+    attack = mv->attackType;
+    enemy = mv->enemy;
+    anim = MON_GetAnim(instance, attack->animList, (signed char)mv->attackState);
+
+    if (anim->velocity != 0 && MON_TransNodeAnimation(instance) == 0)
+    {
+        mv->speed = anim->velocity;
+        MON_MoveForward(instance);
+    }
+
+    if (MON_AnimPlayingFromList(instance, attack->animList, (signed char)attack->sphereOnAnim) != 0 &&
+        G2EmulationInstanceQueryPassedFrame(instance, 0, (signed char)attack->sphereOnFrame) != 0)
+    {
+        MON_TurnOnWeaponSphere(instance, (signed char)attack->sphereSegment);
+    }
+    else if (MON_AnimPlayingFromList(instance, attack->animList, (signed char)attack->sphereOffAnim) != 0 &&
+             G2EmulationInstanceQueryPassedFrame(instance, 0, (signed char)attack->sphereOffFrame) != 0 &&
+             mv->mvFlags & 0x4000)
+    {
+        MON_TurnOffWeaponSpheres(instance);
+        enemy->mirConditions |= 0x200;
+    }
+
+    if (instance->flags2 & 0x10)
+    {
+        instance->flags2 &= ~0x10;
+        mv->attackState++;
+
+        if ((signed char)mv->attackState < (signed char)attack->numAnims)
+        {
+            MON_PlayAnimFromList(instance, attack->animList, (signed char)mv->attackState, 1);
+        }
+        else
+        {
+            MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+        }
+    }
+
+    if (enemy != NULL && (MON_GetTime(instance) < (unsigned int)mv->generalTimer || !(INSTANCE_Query(enemy->instance, 0xA) & 0x02000000)))
+    {
+        MON_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn);
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 void MON_CombatEntry(Instance *instance)
 {
