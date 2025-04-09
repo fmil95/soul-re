@@ -28,9 +28,9 @@ sudo apt install git build-essential binutils-mips-linux-gnu python3 bchunk p7zi
 ```
 
 ### Clone the repository
-Clone `https://github.com/FedericoMilesi/soul-re` in whatever directory you wish. Make sure to clone recursively!
+Clone `https://github.com/fmil95/soul-re` in whatever directory you wish. Make sure to clone recursively!
 ```
-git clone --recursive https://github.com/FedericoMilesi/soul-re.git
+git clone --recursive https://github.com/fmil95/soul-re.git
 cd soul-re
 ```
 
