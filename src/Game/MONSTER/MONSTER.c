@@ -286,7 +286,71 @@ void MON_BreakHoldEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_BreakHold);
+void MON_BreakHold(Instance *instance)
+{
+
+    if (instance->flags2 & 0x10)
+    {
+        MON_UnlinkFromRaziel(instance);
+    }
+    else
+    {
+
+        MonsterVars *mv;
+        Message *message; // Not from decls.h
+
+        mv = instance->extraData;
+        instance->rotation.z = mv->enemy->instance->rotation.z + 0x800;
+
+        while ((message = DeMessageQueue(&mv->messageQueue)) != NULL)
+        {
+
+            evMonsterHitData *messageData; // Not from decls.h
+
+            switch (message->ID)
+            {
+            case 0x1000003:
+                messageData = (evMonsterHitData *)message->Data;
+                INSTANCE_UnlinkFromParent(instance);
+                MON_LaunchMonster(instance, (messageData)->knockBackDistance, (short)messageData->power, 0x32);
+                break;
+            case 0x1000007:
+                if (((evMonsterHitTerrainData *)message->Data)->bspFlags & 0x2000)
+                {
+                    MON_UnlinkFromRaziel(instance);
+                }
+                break;
+            case 0x1000002:
+            case 0x100000B:
+                break;
+            default:
+                MON_DefaultMessageHandler(instance, message);
+                break;
+            }
+        }
+
+        if (instance->LinkParent == NULL)
+        {
+            if (instance->currentMainState == MONSTER_STATE_BREAKHOLD && mv->speed != 0)
+            {
+                MON_TurnOnBodySpheres(instance);
+                MON_SwitchState(instance, MONSTER_STATE_FALL);
+                instance->rotation.z = gameTrackerX.playerInstance->rotation.z + 0x800;
+            }
+            instance->rotation.x = 0;
+            instance->rotation.y = 0;
+        }
+        else
+        {
+            mv->speed = 1;
+        }
+    }
+
+    if (instance->LinkParent != NULL && instance->currentMainState != MONSTER_STATE_BREAKHOLD)
+    {
+        MON_UnlinkFromRaziel(instance);
+    }
+}
 
 void MON_ImpactEntry(Instance *instance)
 {
