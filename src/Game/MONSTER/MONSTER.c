@@ -224,7 +224,7 @@ void MON_LandOnFeetEntry(Instance *instance)
     {
         MON_PlayAnim(instance, MONSTER_ANIM_SPINLAND, 1);
 
-        do {} while (0);
+        do {} while (0); // garbage code for reordering
 
         instance->xAccl = 0;
         instance->yAccl = 0;
@@ -278,14 +278,14 @@ INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_BreakHold);
 void MON_ImpactEntry(Instance *instance)
 {
 
-    evFXHitData data; // sp10
-    MonsterVars *mv; // s1
+    evFXHitData data;
+    MonsterVars *mv;
     MonsterCombatAttributes *combat;
 
     mv = (MonsterVars *)instance->extraData;
     combat = mv->subAttr->combatAttributes;
 
-    do {} while (0);
+    do {} while (0); // garbage code for reordering
     MON_PlayAnim(instance, MONSTER_ANIM_IMPACT, 1);
 
     instance->xVel = 0;
@@ -357,7 +357,7 @@ void MON_FallEntry(Instance *instance)
     instance->yAccl = 0;
     instance->zAccl = -0x10;
 
-    do {} while (0);
+    do {} while (0); // garbage code for reordering
 
     mv->mode = 0x100000;
 
@@ -431,7 +431,7 @@ void MON_ThrownEntry(Instance *instance)
     MonsterVars *mv;
     mv = (MonsterVars *)instance->extraData;
 
-    do {} while (0);
+    do {} while (0); // garbage code for reordering
 
     instance->xAccl = 0;
     instance->yAccl = 0;
@@ -485,13 +485,43 @@ void MON_SurprisedEntry(Instance *instance)
     MonsterVars *mv;
     mv = (MonsterVars *)instance->extraData;
 
-    do {} while (0);
+    do {} while (0); // garbage code for reordering
 
     MON_PlayAnim(instance, MONSTER_ANIM_SURPRISED, 1);
     mv->generalTimer = MON_GetTime(instance) + mv->subAttr->combatAttributes->surpriseTime;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Surprised);
+void MON_Surprised(Instance *instance)
+{
+
+    MonsterVars *mv;
+    mv = instance->extraData;
+
+    if (instance->flags2 & 0x10)
+    {
+        MON_PlayCombatIdle(instance, 2);
+    }
+
+    if (mv->generalTimer < MON_GetTime(instance))
+    {
+        if (mv->behaviorState == MONSTER_STATE_HIT)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_HIDE);
+        }
+        else
+        {
+            MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+        }
+    }
+
+    if (mv->enemy != NULL)
+    {
+        mv->lookAtPos = &mv->enemy->instance->position;
+        MON_TurnToPosition(instance, &mv->enemy->instance->position, mv->subAttr->speedPivotTurn);
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 void MON_StunnedEntry(Instance *instance)
 {
@@ -695,7 +725,7 @@ void MON_AttackEntry(Instance *instance)
     mv = (MonsterVars *)instance->extraData;
     attack = mv->attackType;
 
-    do {} while (0);
+    do {} while (0); // garbage code for reordering
 
     mv->mode = 0x200000;
 
