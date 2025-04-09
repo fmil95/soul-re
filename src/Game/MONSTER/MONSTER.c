@@ -527,7 +527,56 @@ void MON_ThrownEntry(Instance *instance)
     mv->mvFlags &= ~2;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Thrown);
+void MON_Thrown(Instance *instance)
+{
+
+    Message *message; // Not from decls.h
+    MonsterVars *mv;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->mvFlags & 2)
+    {
+
+        Intro *intro; // Not from decls.h
+        intro = MON_TestForTerrainImpale(instance, STREAM_GetLevelWithID(instance->currentStreamUnitID)->terrain);
+
+        if (intro != NULL)
+        {
+            INSTANCE_Post(instance, 0x0100001C, intro->UniqueID);
+            MON_DefaultQueueHandler(instance);
+            return;
+        }
+
+        instance->xAccl = 0;
+        instance->yAccl = 0;
+        instance->zAccl = 0;
+        MON_SwitchState(instance, MONSTER_STATE_LANDONFEET);
+        return;
+    }
+
+    MON_ApplyPhysics(instance);
+
+    while ((message = DeMessageQueue(&mv->messageQueue)) != NULL)
+    {
+        switch (message->ID)
+        {
+        case 0x01000008:
+            break;
+        case 0x01000007:
+            instance->rotation.z = ratan2(((evPhysicsGravityData *)message->Data)->y, ((evPhysicsGravityData *)message->Data)->x) + 0x400;
+            MON_SwitchState(instance, MONSTER_STATE_IMPACT);
+            break;
+        default:
+            MON_DefaultMessageHandler(instance, message);
+        }
+    }
+
+    if (instance->currentMainState == MONSTER_STATE_GENERALDEATH && ((mv->damageType == 0x20) || mv->damageType == 0x40))
+    {
+        MON_BurnInAir(instance, MONSTER_STATE_THROWN);
+    }
+}
 
 void MON_ImpaleDeathEntry(Instance *instance)
 {
