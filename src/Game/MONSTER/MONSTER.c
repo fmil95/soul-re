@@ -259,7 +259,84 @@ void MON_LandOnFeetEntry(Instance *instance)
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_LandOnFeet);
+void MON_LandOnFeet(Instance *instance)
+{
+
+    enum MonsterState state;
+    MonsterVars *mv;
+
+    mv = instance->extraData;
+    MON_DefaultQueueHandler(instance);
+
+    if ((instance->currentMainState == 0x10) && (mv->damageType == 0x20 || mv->damageType == 0x40))
+    {
+        MON_BurnInAir(instance, MONSTER_STATE_LANDONFEET);
+    }
+
+    if (instance->flags2 & 0x10)
+    {
+
+        MON_AnimPlaying(instance, MONSTER_ANIM_SPINLAND);
+
+        if (!(instance->flags2 & 0x08000000))
+        {
+            if (mv->mvFlags & 0x2000 && mv->hitPoints == 0)
+            {
+                mv->damageType = 0x4000U;
+                state = MONSTER_STATE_GENERALDEATH;
+            }
+            else
+            {
+                state = MONSTER_STATE_GENERALDEATH;
+                if (!(mv->mvFlags & 0x400000))
+                {
+                    if (mv->hitPoints == 0 && mv->damageType != 0)
+                    {
+                        mv->mvFlags &= ~0x100;
+                        state = MONSTER_STATE_STUNNED;
+                    }
+                    else if (mv->enemy != NULL)
+                    {
+                        state = MONSTER_STATE_COMBAT;
+                    }
+                    else
+                    {
+                        state = MONSTER_STATE_IDLE;
+                    }
+                }
+            }
+        }
+        else if (mv->enemy != NULL)
+        {
+            state = MONSTER_STATE_COMBAT;
+        }
+        else
+        {
+            state = MONSTER_STATE_IDLE;
+        }
+
+        MON_SwitchState(instance, state);
+    }
+
+    if (mv->mvFlags & 0x400)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_LANDINWATER);
+    }
+    else if (!(mv->mvFlags & 2))
+    {
+        MON_ApplyPhysics(instance);
+    }
+
+    if (instance->currentMainState != MONSTER_STATE_LANDONFEET)
+    {
+        instance->xAccl = 0;
+        instance->yAccl = 0;
+        instance->zAccl = 0;
+        instance->xVel = 0;
+        instance->yVel = 0;
+        instance->zVel = 0;
+    }
+}
 
 void MON_LandInWaterEntry(Instance *instance)
 {
