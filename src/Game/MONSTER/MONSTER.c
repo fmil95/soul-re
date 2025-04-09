@@ -365,7 +365,65 @@ void MON_FallEntry(Instance *instance)
     mv->generalTimer = MON_GetTime(instance) + 0x7D0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Fall);
+void MON_Fall(Instance *instance)
+{
+    int x;
+    int y;
+    enum MonsterState state;
+    Message *message;
+    MonsterVars *mv;
+
+    mv = (MonsterVars *)instance->extraData;
+    state = MONSTER_STATE_FALL;
+
+    if (mv->mvFlags & 2)
+    {
+        state = MONSTER_STATE_LANDONFEET;
+    }
+    else if (mv->mvFlags & 0x400)
+    {
+        state = MONSTER_STATE_LANDINWATER;
+    }
+    else
+    {
+        MON_ApplyPhysics(instance);
+    }
+
+    if (state != MONSTER_STATE_FALL)
+    {
+        MON_SwitchState(instance, state);
+    }
+
+    if (mv->generalTimer < MON_GetTime(instance))
+    {
+        if (instance->position.x == instance->oldPos.x &&
+            instance->position.y == instance->oldPos.y &&
+            instance->position.z == instance->oldPos.z)
+        {
+            x = (rand() & 0x7F) - 0x3F;
+            y = (rand() & 0x7F) - 0x3F;;
+            instance->position.x += x;
+            instance->position.y += y;
+        }
+    }
+
+
+
+    while ((message = DeMessageQueue(&mv->messageQueue)) != NULL)
+    {
+        if (message->ID != 0x01000007)
+        {
+            MON_DefaultMessageHandler(instance, message);
+        }
+    }
+
+    if (instance->currentMainState == MONSTER_STATE_GENERALDEATH &&
+        state == MONSTER_STATE_FALL &&
+        (mv->damageType == 0x20 || mv->damageType == 0x40))
+    {
+        MON_BurnInAir(instance, MONSTER_STATE_FALL);
+    }
+}
 
 void MON_ThrownEntry(Instance *instance)
 {
