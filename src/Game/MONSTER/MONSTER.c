@@ -224,7 +224,7 @@ void MON_LandOnFeetEntry(Instance *instance)
     {
         MON_PlayAnim(instance, MONSTER_ANIM_SPINLAND, 1);
 
-        do {} while (0);
+        do {} while (0); // garbage code for reordering
 
         instance->xAccl = 0;
         instance->yAccl = 0;
@@ -259,7 +259,84 @@ void MON_LandOnFeetEntry(Instance *instance)
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_LandOnFeet);
+void MON_LandOnFeet(Instance *instance)
+{
+
+    enum MonsterState state;
+    MonsterVars *mv;
+
+    mv = instance->extraData;
+    MON_DefaultQueueHandler(instance);
+
+    if ((instance->currentMainState == 0x10) && (mv->damageType == 0x20 || mv->damageType == 0x40))
+    {
+        MON_BurnInAir(instance, MONSTER_STATE_LANDONFEET);
+    }
+
+    if (instance->flags2 & 0x10)
+    {
+
+        MON_AnimPlaying(instance, MONSTER_ANIM_SPINLAND);
+
+        if (!(instance->flags2 & 0x08000000))
+        {
+            if (mv->mvFlags & 0x2000 && mv->hitPoints == 0)
+            {
+                mv->damageType = 0x4000U;
+                state = MONSTER_STATE_GENERALDEATH;
+            }
+            else
+            {
+                state = MONSTER_STATE_GENERALDEATH;
+                if (!(mv->mvFlags & 0x400000))
+                {
+                    if (mv->hitPoints == 0 && mv->damageType != 0)
+                    {
+                        mv->mvFlags &= ~0x100;
+                        state = MONSTER_STATE_STUNNED;
+                    }
+                    else if (mv->enemy != NULL)
+                    {
+                        state = MONSTER_STATE_COMBAT;
+                    }
+                    else
+                    {
+                        state = MONSTER_STATE_IDLE;
+                    }
+                }
+            }
+        }
+        else if (mv->enemy != NULL)
+        {
+            state = MONSTER_STATE_COMBAT;
+        }
+        else
+        {
+            state = MONSTER_STATE_IDLE;
+        }
+
+        MON_SwitchState(instance, state);
+    }
+
+    if (mv->mvFlags & 0x400)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_LANDINWATER);
+    }
+    else if (!(mv->mvFlags & 2))
+    {
+        MON_ApplyPhysics(instance);
+    }
+
+    if (instance->currentMainState != MONSTER_STATE_LANDONFEET)
+    {
+        instance->xAccl = 0;
+        instance->yAccl = 0;
+        instance->zAccl = 0;
+        instance->xVel = 0;
+        instance->yVel = 0;
+        instance->zVel = 0;
+    }
+}
 
 void MON_LandInWaterEntry(Instance *instance)
 {
@@ -271,21 +348,98 @@ void MON_LandInWater(Instance *instance)
     MON_SwitchState(instance, MONSTER_STATE_FALL);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_BreakHoldEntry);
+void MON_BreakHoldEntry(Instance *instance)
+{
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_BreakHold);
+    MonsterVars *mv;
+    mv = (MonsterVars *)instance->extraData;
+
+    MON_PlayAnim(instance, MONSTER_ANIM_BREAKHOLD, 1);
+    mv->mode = 0x100000;
+
+    if (instance->object->oflags & 0x200)
+    {
+        instance->flags2 |= 0x40;
+    }
+}
+
+void MON_BreakHold(Instance *instance)
+{
+
+    if (instance->flags2 & 0x10)
+    {
+        MON_UnlinkFromRaziel(instance);
+    }
+    else
+    {
+
+        MonsterVars *mv;
+        Message *message; // Not from decls.h
+
+        mv = instance->extraData;
+        instance->rotation.z = mv->enemy->instance->rotation.z + 0x800;
+
+        while ((message = DeMessageQueue(&mv->messageQueue)) != NULL)
+        {
+
+            evMonsterHitData *messageData; // Not from decls.h
+
+            switch (message->ID)
+            {
+            case 0x1000003:
+                messageData = (evMonsterHitData *)message->Data;
+                INSTANCE_UnlinkFromParent(instance);
+                MON_LaunchMonster(instance, (messageData)->knockBackDistance, (short)messageData->power, 0x32);
+                break;
+            case 0x1000007:
+                if (((evMonsterHitTerrainData *)message->Data)->bspFlags & 0x2000)
+                {
+                    MON_UnlinkFromRaziel(instance);
+                }
+                break;
+            case 0x1000002:
+            case 0x100000B:
+                break;
+            default:
+                MON_DefaultMessageHandler(instance, message);
+                break;
+            }
+        }
+
+        if (instance->LinkParent == NULL)
+        {
+            if (instance->currentMainState == MONSTER_STATE_BREAKHOLD && mv->speed != 0)
+            {
+                MON_TurnOnBodySpheres(instance);
+                MON_SwitchState(instance, MONSTER_STATE_FALL);
+                instance->rotation.z = gameTrackerX.playerInstance->rotation.z + 0x800;
+            }
+            instance->rotation.x = 0;
+            instance->rotation.y = 0;
+        }
+        else
+        {
+            mv->speed = 1;
+        }
+    }
+
+    if (instance->LinkParent != NULL && instance->currentMainState != MONSTER_STATE_BREAKHOLD)
+    {
+        MON_UnlinkFromRaziel(instance);
+    }
+}
 
 void MON_ImpactEntry(Instance *instance)
 {
 
-    evFXHitData data; // sp10
-    MonsterVars *mv; // s1
+    evFXHitData data;
+    MonsterVars *mv;
     MonsterCombatAttributes *combat;
 
     mv = (MonsterVars *)instance->extraData;
     combat = mv->subAttr->combatAttributes;
 
-    do {} while (0);
+    do {} while (0); // garbage code for reordering
     MON_PlayAnim(instance, MONSTER_ANIM_IMPACT, 1);
 
     instance->xVel = 0;
@@ -357,7 +511,7 @@ void MON_FallEntry(Instance *instance)
     instance->yAccl = 0;
     instance->zAccl = -0x10;
 
-    do {} while (0);
+    do {} while (0); // garbage code for reordering
 
     mv->mode = 0x100000;
 
@@ -365,7 +519,65 @@ void MON_FallEntry(Instance *instance)
     mv->generalTimer = MON_GetTime(instance) + 0x7D0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Fall);
+void MON_Fall(Instance *instance)
+{
+    int x;
+    int y;
+    enum MonsterState state;
+    Message *message;
+    MonsterVars *mv;
+
+    mv = (MonsterVars *)instance->extraData;
+    state = MONSTER_STATE_FALL;
+
+    if (mv->mvFlags & 2)
+    {
+        state = MONSTER_STATE_LANDONFEET;
+    }
+    else if (mv->mvFlags & 0x400)
+    {
+        state = MONSTER_STATE_LANDINWATER;
+    }
+    else
+    {
+        MON_ApplyPhysics(instance);
+    }
+
+    if (state != MONSTER_STATE_FALL)
+    {
+        MON_SwitchState(instance, state);
+    }
+
+    if (mv->generalTimer < MON_GetTime(instance))
+    {
+        if (instance->position.x == instance->oldPos.x &&
+            instance->position.y == instance->oldPos.y &&
+            instance->position.z == instance->oldPos.z)
+        {
+            x = (rand() & 0x7F) - 0x3F;
+            y = (rand() & 0x7F) - 0x3F;;
+            instance->position.x += x;
+            instance->position.y += y;
+        }
+    }
+
+
+
+    while ((message = DeMessageQueue(&mv->messageQueue)) != NULL)
+    {
+        if (message->ID != 0x01000007)
+        {
+            MON_DefaultMessageHandler(instance, message);
+        }
+    }
+
+    if (instance->currentMainState == MONSTER_STATE_GENERALDEATH &&
+        state == MONSTER_STATE_FALL &&
+        (mv->damageType == 0x20 || mv->damageType == 0x40))
+    {
+        MON_BurnInAir(instance, MONSTER_STATE_FALL);
+    }
+}
 
 void MON_ThrownEntry(Instance *instance)
 {
@@ -373,7 +585,7 @@ void MON_ThrownEntry(Instance *instance)
     MonsterVars *mv;
     mv = (MonsterVars *)instance->extraData;
 
-    do {} while (0);
+    do {} while (0); // garbage code for reordering
 
     instance->xAccl = 0;
     instance->yAccl = 0;
@@ -392,7 +604,56 @@ void MON_ThrownEntry(Instance *instance)
     mv->mvFlags &= ~2;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Thrown);
+void MON_Thrown(Instance *instance)
+{
+
+    Message *message; // Not from decls.h
+    MonsterVars *mv;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->mvFlags & 2)
+    {
+
+        Intro *intro; // Not from decls.h
+        intro = MON_TestForTerrainImpale(instance, STREAM_GetLevelWithID(instance->currentStreamUnitID)->terrain);
+
+        if (intro != NULL)
+        {
+            INSTANCE_Post(instance, 0x0100001C, intro->UniqueID);
+            MON_DefaultQueueHandler(instance);
+            return;
+        }
+
+        instance->xAccl = 0;
+        instance->yAccl = 0;
+        instance->zAccl = 0;
+        MON_SwitchState(instance, MONSTER_STATE_LANDONFEET);
+        return;
+    }
+
+    MON_ApplyPhysics(instance);
+
+    while ((message = DeMessageQueue(&mv->messageQueue)) != NULL)
+    {
+        switch (message->ID)
+        {
+        case 0x01000008:
+            break;
+        case 0x01000007:
+            instance->rotation.z = ratan2(((evPhysicsGravityData *)message->Data)->y, ((evPhysicsGravityData *)message->Data)->x) + 0x400;
+            MON_SwitchState(instance, MONSTER_STATE_IMPACT);
+            break;
+        default:
+            MON_DefaultMessageHandler(instance, message);
+        }
+    }
+
+    if (instance->currentMainState == MONSTER_STATE_GENERALDEATH && ((mv->damageType == 0x20) || mv->damageType == 0x40))
+    {
+        MON_BurnInAir(instance, MONSTER_STATE_THROWN);
+    }
+}
 
 void MON_ImpaleDeathEntry(Instance *instance)
 {
@@ -427,13 +688,43 @@ void MON_SurprisedEntry(Instance *instance)
     MonsterVars *mv;
     mv = (MonsterVars *)instance->extraData;
 
-    do {} while (0);
+    do {} while (0); // garbage code for reordering
 
     MON_PlayAnim(instance, MONSTER_ANIM_SURPRISED, 1);
     mv->generalTimer = MON_GetTime(instance) + mv->subAttr->combatAttributes->surpriseTime;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Surprised);
+void MON_Surprised(Instance *instance)
+{
+
+    MonsterVars *mv;
+    mv = instance->extraData;
+
+    if (instance->flags2 & 0x10)
+    {
+        MON_PlayCombatIdle(instance, 2);
+    }
+
+    if (mv->generalTimer < MON_GetTime(instance))
+    {
+        if (mv->behaviorState == MONSTER_STATE_HIT)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_HIDE);
+        }
+        else
+        {
+            MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+        }
+    }
+
+    if (mv->enemy != NULL)
+    {
+        mv->lookAtPos = &mv->enemy->instance->position;
+        MON_TurnToPosition(instance, &mv->enemy->instance->position, mv->subAttr->speedPivotTurn);
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 void MON_StunnedEntry(Instance *instance)
 {
@@ -637,7 +928,7 @@ void MON_AttackEntry(Instance *instance)
     mv = (MonsterVars *)instance->extraData;
     attack = mv->attackType;
 
-    do {} while (0);
+    do {} while (0); // garbage code for reordering
 
     mv->mode = 0x200000;
 
