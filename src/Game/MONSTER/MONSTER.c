@@ -271,7 +271,20 @@ void MON_LandInWater(Instance *instance)
     MON_SwitchState(instance, MONSTER_STATE_FALL);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_BreakHoldEntry);
+void MON_BreakHoldEntry(Instance *instance)
+{
+
+    MonsterVars *mv;
+    mv = (MonsterVars *)instance->extraData;
+
+    MON_PlayAnim(instance, MONSTER_ANIM_BREAKHOLD, 1);
+    mv->mode = 0x100000;
+
+    if (instance->object->oflags & 0x200)
+    {
+        instance->flags2 |= 0x40;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_BreakHold);
 
