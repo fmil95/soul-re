@@ -458,7 +458,139 @@ void G2Anim_GetSegChannelValue(G2Anim *anim, int segIndex, unsigned short *value
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/G2/ANIMG2", G2Anim_GetRootMotionFromTimeForDuration);
+void G2Anim_GetRootMotionFromTimeForDuration(G2Anim *anim, short durationStart, short duration, G2SVector3 *motionVector)
+{
+    G2Anim dummyAnim;
+    G2AnimSection *section;
+    G2AnimKeylist *keylist;
+    short storedKeyEndTime;
+    short timePerKey;
+    short keyTime;
+    long alpha;
+    G2AnimInterpInfo *interpInfo;
+
+    section = &anim->section[0];
+
+    interpInfo = section->interpInfo;
+
+    if ((interpInfo != NULL) && (interpInfo->stateBlockList != NULL))
+    {
+        // G2SVector3 *dest; // unused   
+        G2SVector3 *base;
+        G2SVector3 *offset;
+        // long alpha; // unused
+        G2AnimInterpStateBlock *stateBlockList;
+
+        timePerKey = interpInfo->duration;
+
+        stateBlockList = interpInfo->stateBlockList;
+
+        alpha = (durationStart << 12) / timePerKey;
+        alpha = _G2AnimAlphaTable_GetValue(interpInfo->alphaTable, alpha);
+
+        base = &stateBlockList->quatInfo->srcTrans;
+        offset = &stateBlockList->quatInfo->destTrans;
+
+        gte_ldlvnlsv(base);
+
+        gte_ldsv(offset);
+
+        gte_lddp(alpha);
+
+        gte_ngpl12();
+
+        gte_stlvnlsv(motionVector);
+
+        keylist = section->keylist;
+
+        alpha = (duration << 12) / keylist->timePerKey;
+
+        motionVector->x = (motionVector->x * alpha) >> 12;
+        motionVector->y = (motionVector->y * alpha) >> 12;
+        motionVector->z = (motionVector->z * alpha) >> 12;
+    }
+    else
+    {
+        G2SVector3 *vector;
+        short temp; // not from decls.h
+
+        keylist = section->keylist;
+
+        timePerKey = keylist->timePerKey;
+
+        storedKeyEndTime = (durationStart / keylist->timePerKey) + 1;
+        storedKeyEndTime = keylist->timePerKey * storedKeyEndTime;
+
+        temp = keylist->timePerKey * (keylist->keyCount - 1);
+
+        dummyAnim.sectionCount = 1;
+
+        dummyAnim.modelData = anim->modelData;
+
+        dummyAnim.section->sectionID = 0;
+
+        dummyAnim.section->firstSeg = 0;
+
+        dummyAnim.section->segCount = 1;
+
+        dummyAnim.section->keylist = keylist;
+
+        dummyAnim.section->chanStatusBlockList = NULL;
+
+        dummyAnim.section->storedTime = -timePerKey;
+
+        ((int *)&motionVector->x)[0] = 0;
+        motionVector->z = 0;
+
+        while (duration != 0)
+        {
+            // G2SVector3 *dest; // unused
+            // G2SVector3 *base; // unused
+            // long alpha; // unused      
+
+            if (durationStart >= temp)
+            {
+                timePerKey = keylist->s0TailTime;
+            }
+
+            dummyAnim.section->elapsedTime = durationStart;
+
+            _G2AnimSection_UpdateStoredFrameFromData(&dummyAnim.section[0], &dummyAnim);
+
+            keyTime = storedKeyEndTime - durationStart;
+            keyTime = (duration < keyTime) ? duration : keyTime;
+
+            if (keyTime < timePerKey)
+            {
+                alpha = (keyTime << 12) / timePerKey;
+            }
+            else
+            {
+                alpha = 4096;
+            }
+
+            gte_ldlvnlsv(motionVector);
+
+            vector = &_segValues->trans;
+
+            gte_ldsv(vector);
+
+            gte_lddp(alpha);
+
+            gte_ngpl12();
+
+            gte_stlvnlsv(motionVector);
+
+            durationStart = storedKeyEndTime;
+
+            duration -= keyTime;
+
+            storedKeyEndTime += timePerKey;
+        }
+
+        _G2Anim_FreeChanStatusBlockList(dummyAnim.section->chanStatusBlockList);
+    }
+}
 
 void G2AnimSection_SwitchToKeylistAtTime(G2AnimSection *section, G2AnimKeylist *keylist, int keylistID, short targetTime)
 {

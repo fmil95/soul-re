@@ -17,7 +17,7 @@ char *my_itoa(int value, char *str, int base)
     unsigned char v;
 
     radix = base;
-    pBuf = &buf;
+    pBuf = (char *)&buf;
     tStr = str;
     if (value == 0)
     {
