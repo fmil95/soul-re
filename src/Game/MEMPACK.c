@@ -6,6 +6,7 @@
 #include "Game/STREAM.h"
 #include "Game/GAMELOOP.h"
 #include "Game/DEBUG.h"
+#include "Game/SIGNAL.h"
 
 static NewMemTracker newMemTracker;
 

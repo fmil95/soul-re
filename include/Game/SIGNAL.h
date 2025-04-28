@@ -8,5 +8,6 @@ void COLLIDE_HandleSignal(Instance *instance, Signal *signal, long numSignals, i
 long SIGNAL_IsStreamSignal(Signal *signal, long *isWarpGate);
 void SIGNAL_InWater(Instance *instance);
 void SIGNAL_OutOfWater(Instance *instance);
+MultiSignal *SIGNAL_RelocateSignal(MultiSignal *multiSignal, long offset);
 
 #endif

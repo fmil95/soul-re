@@ -143,6 +143,7 @@ int aadLoadDynamicSoundBank(char *sndFileName, char *smpFileName, int dynamicBan
     return 0;
 }
 
+int aadOpenDynamicSoundBank(unsigned char *soundBank, int dynamicBankIndex);
 void aadLoadDynamicSoundBankReturn2(void *loadedDataPtr, long loadedDataSize, short status, void *data1, void *data2);
 void aadLoadDynamicSoundBankReturn(void *loadedDataPtr, void *data, void *data2)
 {

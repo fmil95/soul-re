@@ -102,7 +102,17 @@ void menu_item(menu_t *menu, int (*fn)(), long parameter, char *format, ...)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MENU/MENU", menu_build);
+void menu_build(menu_t *menu)
+{
+    menu_stack_t *stack;
+
+    menu->nitems = 0;
+    menu->nbytes = 0;
+
+    stack = &menu->stack[menu->nmenus] - 1;
+
+    stack->index = stack->fn(menu->opaque, stack->index);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MENU/MENU", DisplayHintBox);
 
