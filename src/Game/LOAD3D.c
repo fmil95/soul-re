@@ -1,5 +1,6 @@
 #include "common.h"
 #include "Game/HASM.h"
+#include "Game/MEMPACK.h"
 
 STATIC LoadStatus loadStatus;
 
@@ -157,6 +158,7 @@ void LOAD_DumpCurrentDir()
     }
 }
 
+BigFileDir *LOAD_ReadDirectory(BigFileDirEntry *dirEntry);
 int LOAD_ChangeDirectoryByID(int id)
 {
     int i;
