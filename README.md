@@ -47,3 +47,16 @@ Once build has finished a folder will be produced with the name `build`, inside 
 
 ## Contributing
 Contributions are welcome. If you would like to reserve a function, open a PR with the function or file name(s).
+
+## Community
+
+The primary way to discuss the project is through the `PS1/PS2 Decompilation` server on Discord, which has a dedicated channel for the decomp called `soul-reaver`. See you there!
+
+[![Join the Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/tch8h5Vw8E)](https://discord.gg/https://discord.gg/tch8h5Vw8E)
+
+## Resources
+
+Associated decomp projects:
+- [Resident Evil CODE: Veronica X](https://github.com/fmil95/recvx-decomp)
+- [Fatal Frame](https://github.com/Mikompilation/Himuro)
+- [Silent Hill](https://github.com/Vatuu/silent-hill-decomp)
