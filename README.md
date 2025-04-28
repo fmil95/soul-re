@@ -60,3 +60,7 @@ Associated decomp projects:
 - [Resident Evil CODE: Veronica X](https://github.com/fmil95/recvx-decomp)
 - [Fatal Frame](https://github.com/Mikompilation/Himuro)
 - [Silent Hill](https://github.com/Vatuu/silent-hill-decomp)
+
+## Disclaimer
+
+This repository and the code therein, is made public on this site by fmil95 for preservational and educational purposes. I do not claim to hold any affiliation to the Legacy of Kain franchise, Crystal Dynamics, Inc. or any other related party, nor mean to infringe upon the copyright of Legacy of Kain: Soul Reaver.
