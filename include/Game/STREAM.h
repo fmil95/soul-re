@@ -78,5 +78,6 @@ int WARPGATE_IsWarpgateUsable();
 int WARPGATE_IsWarpgateSpectral();
 int WARPGATE_IsWarpgateReady();
 void MORPH_ToggleMorph();
+void STREAM_UpdateLevelPointer(Level *oldLevel, Level *newLevel, long sizeOfLevel);
 
 #endif

@@ -25,5 +25,7 @@ void EVENT_ProcessHints();
 long HINT_GetCurrentHint();
 void HINT_StartHint(short hintNumber);
 void HINT_KillSpecificHint(short hintNumber);
+void EVENT_RelocateInstanceList(Level *oldLevel, Level *newLevel, long sizeOfLevel);
+void EVENT_UpdatePuzzlePointers(EventPointers *events, long offset);
 
 #endif

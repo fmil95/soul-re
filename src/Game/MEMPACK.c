@@ -7,6 +7,7 @@
 #include "Game/GAMELOOP.h"
 #include "Game/DEBUG.h"
 #include "Game/SIGNAL.h"
+#include "Game/EVENT.h"
 
 static NewMemTracker newMemTracker;
 

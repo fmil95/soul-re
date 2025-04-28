@@ -477,7 +477,51 @@ short MON_FacingOffset(Instance *instance, Instance *target)
     return MATH3D_AngleFromPosToPos(&target->position, &instance->position) - target->rotation.z;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_CheckConditions);
+int MON_CheckConditions(Instance *instance, MonsterIR *mir, char *probArray)
+{
+    MonsterVars *mv;
+    char *probability;
+    int chance;
+    int i;
+    int prob;
+    int nprob;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    chance = (signed char)mv->chance;
+
+    probability = probArray;
+
+    prob = 100;
+    nprob = 100;
+
+    for (i = 1; i < 4096; i *= 2)
+    {
+        if ((mir->mirConditions & i))
+        {
+            int conditionProb;
+
+            conditionProb = (signed char)*probability;
+
+            if (conditionProb >= 0)
+            {
+                prob *= 100 - conditionProb;
+                prob /= 100;
+            }
+            else
+            {
+                nprob *= conditionProb + 100;
+                nprob /= 100;
+            }
+        }
+
+        probability++;
+    }
+
+    prob = ((100 - prob) * nprob) / 100;
+
+    return prob > chance;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_ShouldIAttackInstance);
 
