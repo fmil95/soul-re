@@ -68,5 +68,7 @@ void G2EmulatePlayAnimation(CharacterState *In);
 int G2EmulationQueryMode(CharacterState *In, int CurrentSection);
 void StateSwitchStateDataDefault(CharacterState *In, int CurrentSection, void (*NewProcess)(), intptr_t Data);
 intptr_t SetControlInitHangData(Instance *instance, long frame, long frames);
+intptr_t SetPhysicsDropOffData(int xOffset, int yOffset, int DropOffset, int slipSlope, int UpperOffset);
+intptr_t SetPhysicsWallCrawlData(int Segment, int Length, int ForwardOffset, int NormalDistance);
 
 #endif

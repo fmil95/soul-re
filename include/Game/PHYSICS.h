@@ -32,5 +32,9 @@ void PhysicsDefaultEdgeGrabResponse(Instance *instance, evPhysicsEdgeData *Data,
 int PHYSICS_CheckForValidMove(Instance *instance, SVECTOR *startVec, SVECTOR *endVec, int segment);
 int PhysicsCheckEdgeGrabbing(Instance *instance, GameTracker *gameTracker, intptr_t Data, short Mode);
 int PHYSICS_CheckForObjectCollide(Instance *instance, SVECTOR *startVec, SVECTOR *endVec, int segment);
+int PhysicsCheckDropOff(Instance *instance, intptr_t Data, short Mode);
+int PhysicsCheckBlockers(Instance *instance, GameTracker *gameTracker, intptr_t Data, short Mode);
+int PhysicsFollowWall(Instance *instance, GameTracker *gameTracker, intptr_t Data, short Mode);
+int PhysicsCheckLinkedMove(Instance *instance, intptr_t Data, short Mode);
 
 #endif
