@@ -1,4 +1,6 @@
 #include "Game/MENU/MENU.h"
+#include "Game/MENU/MENUUTIL.h"
+#include "Game/MENU/MENUDEFS.h"
 #include "Game/GAMELOOP.h"
 
 int menu_data_size()
@@ -180,7 +182,75 @@ void menu_draw(menu_t *menu)
     }
 }*/
 
-INCLUDE_ASM("asm/nonmatchings/Game/MENU/MENU", menu_run);
+void menu_run(menu_t *menu)
+{
+    menu_ctrl_t ctrl;
+    menu_stack_t *stack;
+    int index;
+    menu_item_t *item;
+
+    ctrl = menu_get_ctrl(menu->opaque);
+
+    stack = &menu->stack[menu->nmenus] - 1;
+
+    index = stack->index;
+
+    item = &menu->items[index];
+
+    if ((index >= 0) && (ctrl != menu_ctrl_none))
+    {
+        menu_sound_t sound;
+
+        menudefs_reset_hack_attract_mode();
+
+        sound = item->fn(menu->opaque, item->parameter, ctrl);
+
+        if (sound != menu_sound_none)
+        {
+            menu_sound(sound);
+        }
+        else
+        {
+            switch (ctrl)
+            {
+            case menu_ctrl_up:
+                index = ((index + menu->nitems) - 1) % menu->nitems;
+
+                while (menu->items[index].fn == NULL)
+                {
+                    index = ((index + menu->nitems) - 1) % menu->nitems;
+                }
+
+                break;
+            case menu_ctrl_down:
+                index = (index + 1) % menu->nitems;
+
+                while (menu->items[index].fn == NULL)
+                {
+                    index = (index + 1) % menu->nitems;
+                }
+
+                break;
+            case menu_ctrl_cancel:
+                if (menu->nmenus >= 2)
+                {
+                    menu_sound(menu_sound_pop);
+
+                    menu_pop(menu);
+                }
+
+                break;
+            }
+
+            if (index != stack->index)
+            {
+                menu_sound(menu_sound_select);
+            }
+
+            stack->index = index;
+        }
+    }
+}
 
 void menu_process(menu_t *menu)
 {
