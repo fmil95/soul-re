@@ -373,7 +373,59 @@ G2AnimSection *G2Anim_GetSectionWithSeg(G2Anim *anim, int segNumber)
     return section;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/G2/ANIMG2", G2Anim_SegmentHasActiveChannels);
+G2Bool G2Anim_SegmentHasActiveChannels(G2Anim *anim, int segNumber, unsigned short chanMask)
+{
+    G2AnimSection *section;
+    unsigned char *segChanFlagStream;
+    unsigned char activeChanBits;
+    unsigned short dataFlagBits;
+    unsigned short segFlagBits;
+    int flagBytesPerSeg;
+
+    section = G2Anim_GetSectionWithSeg(anim, segNumber);
+
+    flagBytesPerSeg = ((anim->modelData->numSegments * 3) + 7) / 8;
+
+    segNumber += segNumber * 2;
+
+    segChanFlagStream = &((unsigned char *)&section->keylist->sectionData[section->keylist->sectionCount])[segNumber / 8] + 1;
+
+    segNumber -= (segNumber / 8) * 8;
+
+    activeChanBits = ((unsigned char *)&section->keylist->sectionData[section->keylist->sectionCount])[0];
+
+    segFlagBits = 0;
+
+    if ((activeChanBits & 0x1))
+    {
+        dataFlagBits = segChanFlagStream[0];
+        dataFlagBits = (segChanFlagStream[1] << 8) | dataFlagBits;
+
+        segFlagBits |= (dataFlagBits >> segNumber) & 0x7;
+
+        segChanFlagStream += flagBytesPerSeg;
+    }
+
+    if ((activeChanBits & 0x2))
+    {
+        dataFlagBits = segChanFlagStream[0];
+        dataFlagBits = (segChanFlagStream[1] << 8) | dataFlagBits;
+
+        segFlagBits |= ((dataFlagBits >> segNumber) & 0x7) << 4;
+
+        segChanFlagStream += flagBytesPerSeg;
+    }
+
+    if ((activeChanBits & 0x4))
+    {
+        dataFlagBits = segChanFlagStream[0];
+        dataFlagBits = (segChanFlagStream[1] << 8) | dataFlagBits;
+
+        segFlagBits |= ((dataFlagBits >> segNumber) & 0x7) << 8;
+    }
+
+    return (G2Bool)((segFlagBits & chanMask) > 0);
+}
 
 void G2Anim_GetSegChannelValue(G2Anim *anim, int segIndex, unsigned short *valueTable, unsigned short channelMask)
 {
