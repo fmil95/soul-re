@@ -2,6 +2,7 @@
 #include "Game/LOAD3D.h"
 #include "Game/MEMPACK.h"
 #include "Game/DRAW.h"
+#include "Game/GAMELOOP.h"
 
 STATIC ButtonTexture *FaceButtons;
 
@@ -160,4 +161,26 @@ void MENUFACE_ChangeStateRandomly(int index)
     }
 }
 
+// Matches 100% on decomp.me but differs on this project
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/MENU/MENUFACE", MENUFACE_RefreshFaces);
+#else
+void MENUFACE_RefreshFaces()
+{
+    int i;
+    menuface_t *face;
+
+    if (hack_initialized == 0)
+    {
+        return;
+    }
+
+    for (i = 0, face = MenuFaces; i < 8; i++, face++)
+    {
+        if (face->curFrame >= face->frames)
+        {
+            DRAW_DrawButton(&FaceButtons[(i * 7) + (face->curFrame / face->frames)], face->x, face->y, &gameTrackerX.dispOT[1]);
+        }
+    }
+}
+#endif

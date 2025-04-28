@@ -11,5 +11,6 @@ void DRAW_FlatQuad(CVECTOR *color, short x0, short y0, short x1, int y1, int x2,
 void DRAW_LoadingMessage();
 void DRAW_LoadButton(long *addr, ButtonTexture *button);
 void DRAW_FreeButton(ButtonTexture *button);
+void DRAW_DrawButton(ButtonTexture *button, short x, short y, unsigned long **ot);
 
 #endif

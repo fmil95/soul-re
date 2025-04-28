@@ -6,7 +6,7 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/SUPPORT", sprintf);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/SUPPORT", vsprintf);
 
-char D_800D1A74[];
+extern char D_800D1A74[];
 //char *my_itoa(unsigned long value, char *str, int radix)
 char *my_itoa(int value, char *str, int base)
 {
