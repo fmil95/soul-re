@@ -216,7 +216,7 @@ void aadPlayTonePitchBend(struct AadToneAtr *toneAtr, unsigned long waveStartAdd
     unsigned int pitch;                         // $a1
     unsigned int finePitch;                     // $a1
     unsigned int pitchIndex;                    // $a3
-    unsigned long tmp;                 // $v0 line 10
+    // unsigned long tmp; // unused
     unsigned long pitchOffset2;
     int temp_lo;
     //unsigned long tmp;                 // $v0 line 12

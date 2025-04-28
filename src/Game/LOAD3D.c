@@ -16,6 +16,9 @@ void LOAD_InitCd()
 
 void LOAD_CdSeekCallback(unsigned char intr, unsigned char *result)
 {
+    (void)intr;
+    (void)result;
+
     if (loadStatus.state == 1)
     {
         loadStatus.state = 2;

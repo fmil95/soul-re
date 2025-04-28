@@ -149,6 +149,8 @@ void aadLoadDynamicSoundBankReturn(void *loadedDataPtr, void *data, void *data2)
     int dynamicBankIndex;
     int error;
 
+    (void)data2;
+
     dynamicBankIndex = ((AadDynamicBankLoadInfo *)data)->dynamicBankIndex;
 
     error = aadOpenDynamicSoundBank((unsigned char *)loadedDataPtr, dynamicBankIndex);

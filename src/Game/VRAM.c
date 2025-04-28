@@ -436,7 +436,7 @@ BlockVramEntry *VRAM_CheckVramSlot(short *x, short *y, short w, short h, short t
     long offset; // $s0
     struct _BlockVramEntry *vblockright; // $s3
     long offsetright; // $s2
-    int xval; // $v0 line 55
+    // int xval; // unused
 
     vblock = openVramBlocks;
     fits = 0;
