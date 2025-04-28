@@ -1,6 +1,10 @@
 #include "common.h"
 #include "Game/HASM.h"
 #include "Game/GAMELOOP.h"
+#include "Game/MATH3D.h"
+#include "Game/DRAW.h"
+#include "Game/STREAM.h"
+#include "Game/COLLIDE.h"
 
 STATIC struct LightGroup default_lightgroup;
 
@@ -280,12 +284,13 @@ void LIGHT_DrawShadow(MATRIX *wcTransform, struct _Instance *instance, struct _P
     scale.z = (((instance->object->modelList[instance->currentModel]->maxRad) << 12) / 480 * (4096 - ((instance->position.z - instance->shadowPosition.z) << 12) / 1280)) >> 12;
     scale.y = scale.z;
     scale.x = scale.z;
-    ScaleMatrix(&scTransform, &scale);
+    ScaleMatrix(&scTransform, (VECTOR *)&scale);
     SetRotMatrix(&scTransform);
     SetTransMatrix(&scTransform);
     primPool->nextPrim = DRAW_DrawShadow(primPool, 0, ot, instance->fadeValue);
 }
 
+void LIGHT_CalcLightValue(TFace *tface, Instance *instance, Terrain *terrain);
 void LIGHT_CalcShadowPositions(struct GameTracker *gameTracker)
 {
     struct _InstanceList *instanceList;

@@ -12,5 +12,6 @@ void DRAW_LoadingMessage();
 void DRAW_LoadButton(long *addr, ButtonTexture *button);
 void DRAW_FreeButton(ButtonTexture *button);
 void DRAW_DrawButton(ButtonTexture *button, short x, short y, unsigned long **ot);
+unsigned long *DRAW_DrawShadow(PrimPool *primPool, Model *model, unsigned long **ot, long fadeValue);
 
 #endif

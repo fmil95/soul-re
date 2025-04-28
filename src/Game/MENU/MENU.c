@@ -1,4 +1,5 @@
 #include "Game/MENU/MENU.h"
+#include "Game/GAMELOOP.h"
 
 int menu_data_size()
 {
@@ -114,7 +115,28 @@ void menu_build(menu_t *menu)
     stack->index = stack->fn(menu->opaque, stack->index);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MENU/MENU", DisplayHintBox);
+void DRAW_TranslucentQuad(int, int, int, int, int, int, int, int, int, int, int, int, int, int);
+void DisplayHintBox(int len, int y)
+{
+    Extents2d ext;
+    int i;
+
+    do {} while (0); // garbage code for reordering
+
+    len >>= 1;
+
+    ext.xmin = 251 - len;
+    ext.xmax = 261 + len;
+
+    ext.ymin = y - 1;
+    ext.ymax = y + 13;
+
+    for (i = 0; i < 2; i++)
+    {
+        DRAW_TranslucentQuad(ext.xmin - 14, (ext.ymin + ext.ymax) >> 1, ext.xmin, ext.ymax, ext.xmin, ext.ymin, ext.xmax, ext.ymax, 0, 0, 0, 0, (intptr_t)gameTrackerX.primPool, (uintptr_t)&gameTrackerX.drawOT[1]);
+        DRAW_TranslucentQuad(ext.xmin, ext.ymin, ext.xmax, ext.ymax, ext.xmax, ext.ymin, ext.xmax + 14, (ext.ymin + ext.ymax) >> 1, 0, 0, 0, 0, (intptr_t)gameTrackerX.primPool, (uintptr_t)&gameTrackerX.drawOT[1]);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MENU/MENU", DisplayMenuBox);
 
