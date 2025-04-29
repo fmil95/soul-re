@@ -677,7 +677,73 @@ void MON_ImpaleDeathEntry(Instance *instance)
     MON_DropAllObjects(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_ImpaleDeath);
+void MON_ImpaleDeath(Instance *instance)
+{
+
+    Message *message;
+    MonsterVars *mv;
+    MonsterAttributes *ma;
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    if (MON_AnimPlaying(instance, MONSTER_ANIM_IMPALED) != 0)
+    {
+
+        int thisFrame;
+        int lastFrame;
+        thisFrame = G2EmulationInstanceQueryFrame(instance, 0);
+        lastFrame = G2EmulationInstanceQueryLastFrame(instance, 0);
+
+        if (lastFrame < ma->bloodImpaleFrame && thisFrame >= ma->bloodImpaleFrame)
+        {
+            FX_Blood_Impale(instance, ma->grabSegment, instance, ma->grabSegment);
+        }
+        else
+        {
+            if (lastFrame < ma->bloodConeFrame && thisFrame >= ma->bloodConeFrame)
+            {
+                FX_BloodCone(instance, ma->grabSegment, 0x50);
+            }
+        }
+    }
+
+    if (instance->flags2 & 0x10)
+    {
+        if (MON_AnimPlaying(instance, MONSTER_ANIM_IMPALED) == 0 || (signed char)mv->subAttr->animList[0xD] == (signed char)mv->subAttr->animList[0x16])
+        {
+            MON_SwitchState(instance, MONSTER_STATE_DEAD);
+        }
+        else
+        {
+            mv->generalTimer = MON_GetTime(instance) + 0x3E8;
+        }
+    }
+
+    if (mv->generalTimer < MON_GetTime(instance))
+    {
+        mv->mvFlags &= ~0x200000;
+        MON_TurnOnBodySpheres(instance);
+        MON_SwitchState(instance, MONSTER_STATE_FALL);
+    }
+
+    while ((message = DeMessageQueue(&mv->messageQueue)) != NULL)
+    {
+        if (message->ID == 0x0100000A)
+        {
+
+            mv->generalTimer = MON_GetTime(instance) + 0x7530;
+            mv->heldID = mv->held->introUniqueID;
+            INSTANCE_Post(mv->held, 0x800002, SetObjectData(0, 0, 0, instance, 3));
+            INSTANCE_Post(mv->held, 0x200003, 7);
+            mv->causeOfDeath = 0;
+
+            do {} while (0); // garbage code for reordering
+
+            MON_PlayAnim(instance, MONSTER_ANIM_IMPALEDEATH, 1);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_TerrainImpaleDeathEntry);
 
@@ -1027,7 +1093,48 @@ void MON_ProjectileEntry(Instance *instance)
     mv->attackState = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Projectile);
+void MON_Projectile(Instance *instance)
+{
+    MonsterVars *mv;
+    MonsterAttributes *ma;
+    MonsterMissile *missileDef;
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    missileDef = &ma->missileList[(signed char)mv->subAttr->combatAttributes->missileAttack];
+
+    if (mv->enemy == NULL)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+    }
+    else if (instance->flags2 & 0x10)
+    {
+        mv->attackState += 1;
+        if ((signed char)mv->attackState < missileDef->numAnims)
+        {
+            MON_PlayAnimFromList(instance, missileDef->animList, (signed char)mv->attackState, 1);
+        }
+        else
+        {
+            MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+        }
+    }
+    else
+    {
+        if (MON_AnimPlayingFromList(instance, missileDef->animList, missileDef->anim) != 0 &&
+            G2EmulationInstanceQueryPassedFrame(instance, 0, missileDef->frame) != 0)
+        {
+            MISSILE_FireAtInstance(instance, missileDef, mv->enemy->instance);
+            if ((signed char)missileDef->reload != 0)
+            {
+                mv->mvFlags &= ~0x20;
+            }
+        }
+        MON_TurnToPosition(instance, &mv->enemy->instance->position, mv->subAttr->speedPivotTurn);
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 void MON_IdleEntry(Instance *instance)
 {
@@ -2016,7 +2123,31 @@ int MONSTER_StartVertexBlood(Instance *instance, SVector *location, int amount)
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MONSTER_VertexBlood);
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", ProcessBurntMess);
+void ProcessBurntMess(Instance *instance, int vertidx, int segidx, int dist, void *cb_data)
+{
+
+    short scl;
+    burntTuneType *burntTune;
+
+    burntTune = ((burntMessType *)cb_data)->burntTune;
+
+    if (dist < ((burntMessType *)cb_data)->closestdist)
+    {
+        ((burntMessType *)cb_data)->closestvert = vertidx;
+        ((burntMessType *)cb_data)->closestdist = dist;
+        ((burntMessType *)cb_data)->closestseg = segidx;
+    }
+
+    if (dist >= burntTune->burntDist || (scl = (((dist << 0xC) / burntTune->burntDist) << 0x10) >> 0x14, ((scl < 0xFF) == 0)))
+    {
+        scl = 0xFE;
+    }
+
+    instance->perVertexColor[vertidx].r = scl;
+    instance->perVertexColor[vertidx].g = scl;
+    instance->perVertexColor[vertidx].b = scl;
+    instance->perVertexColor[vertidx].cd = 1;
+}
 
 int MONSTER_StartVertexBurnt(Instance *instance, SVector *location, burntTuneType *burntTune)
 {

@@ -40,6 +40,7 @@ void _FX_BuildSplinters(Instance *instance, SVECTOR *center, SVECTOR *vel, SVECT
 void FX_DrawReaver(PrimPool *primPool, unsigned long **ot, MATRIX *wcTransform);
 void FX_DrawList(FXTracker *fxTracker, GameTracker *gameTracker, unsigned long **ot, MATRIX *wcTransform);
 void FX_ProcessList(FXTracker *fxTracker);
+void FX_Spiral_Init();
 void FX_Spiral(PrimPool *primPool, unsigned long **ot);
 void FX_EndInstanceParticleEffects(Instance *instance);
 void FX_DrawAllGeneralEffects(MATRIX *wcTransform, VertexPool *vertexPool, PrimPool *primPool, unsigned long **ot);
@@ -51,5 +52,7 @@ void FX_StartPassthruFX(Instance *instance, SVector *normal, SVector *point);
 void FX_EndPassthruFX(Instance *instance);
 void FX_MakeSoulDust(Instance *instance, short segment);
 void FX_Blood2(SVector *location, SVector *input_vel, SVector *accel, int amount, long color, long dummyCrapShouldRemove);
+FXParticle *FX_BloodCone(Instance *instance, short startSegment, long time);
+void FX_Blood_Impale(Instance *locinst, short locseg, Instance *instance, short segment);
 
 #endif
