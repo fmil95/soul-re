@@ -941,7 +941,109 @@ short G2AnimSection_AdvanceOverInterval(G2AnimSection *section, short interval)
     return extraTime;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/G2/ANIMG2", G2AnimSection_RewindOverInterval);
+short G2AnimSection_RewindOverInterval(G2AnimSection *section, short interval)
+{
+    short newTime;
+    short extraTime;
+    short elapsedTime;
+    short endTime;
+    G2Anim *anim;
+    G2SVector3 motionVector;
+    unsigned long message;
+    short temp; // not from decls.h
+
+    if (((section->flags & 0x1)) || ((section->alarmFlags & 0x2)))
+    {
+        return 0;
+    }
+
+    anim = _G2AnimSection_GetAnim(section);
+
+    anim->flags |= 0x1;
+
+    G2AnimSection_ClearAlarm(section, 3);
+
+    endTime = 0;
+
+    elapsedTime = section->elapsedTime;
+
+    section->flags |= 0x4;
+
+    if ((section->flags & 0x2))
+    {
+        endTime = section->loopStartTime;
+    }
+
+    newTime = elapsedTime - ((interval * section->speedAdjustment) >> 12);
+
+    extraTime = endTime - newTime;
+
+    if (extraTime > 0)
+    {
+        if ((section->flags & 0x2))
+        {
+            section->alarmFlags |= 0x4;
+
+            G2AnimSection_JumpToTime(section, section->loopEndTime);
+
+            message = 2;
+
+            newTime = section->loopEndTime - extraTime;
+        }
+        else
+        {
+            message = 1;
+
+            newTime = endTime;
+
+            section->alarmFlags |= 0x2;
+        }
+
+        if (section->firstSeg == 0)
+        {
+            G2Anim_GetRootMotionOverInterval(anim, elapsedTime, endTime, &motionVector);
+        }
+
+        if (section->callback != NULL)
+        {
+            temp = section->callback(_G2AnimSection_GetAnim(section), section->sectionID, message, newTime, extraTime, section->callbackData);
+
+            if (((section->flags & 0x2)) || (temp != newTime))
+            {
+                newTime = temp;
+
+                G2AnimSection_JumpToTime(section, temp);
+            }
+            else
+            {
+                *(unsigned long *)&motionVector.x = 0;
+                motionVector.z = 0;
+            }
+        }
+
+        if (section->firstSeg == 0)
+        {
+            unsigned short z;
+            unsigned long xy;
+
+            xy = *(unsigned long *)&motionVector.x;
+            z = motionVector.z;
+
+            *(unsigned long *)&anim->rootTrans.x = xy;
+            anim->rootTrans.z = z;
+
+            section->flags |= 0x80;
+        }
+    }
+    else
+    {
+        extraTime = 0;
+    }
+
+    section->elapsedTime = newTime;
+
+    return extraTime;
+}
 
 void _G2Anim_BuildTransformsNoControllers(G2Anim *anim)
 {
