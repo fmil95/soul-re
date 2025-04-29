@@ -137,7 +137,13 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_RelocBinaryData);
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_CleanUpBuffers);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_InitBuffers);
+void *LOAD_InitBuffers()
+{
+    loadStatus.buffer1 = MEMPACK_Malloc(2048, 35);
+    loadStatus.buffer2 = MEMPACK_Malloc(2048, 35);
+
+    return loadStatus.buffer1;
+}
 
 void LOAD_InitCdStreamMode()
 {
