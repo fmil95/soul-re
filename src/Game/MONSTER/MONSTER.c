@@ -1093,7 +1093,48 @@ void MON_ProjectileEntry(Instance *instance)
     mv->attackState = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Projectile);
+void MON_Projectile(Instance *instance)
+{
+    MonsterVars *mv;
+    MonsterAttributes *ma;
+    MonsterMissile *missileDef;
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    missileDef = &ma->missileList[(signed char)mv->subAttr->combatAttributes->missileAttack];
+
+    if (mv->enemy == NULL)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+    }
+    else if (instance->flags2 & 0x10)
+    {
+        mv->attackState += 1;
+        if ((signed char)mv->attackState < missileDef->numAnims)
+        {
+            MON_PlayAnimFromList(instance, missileDef->animList, (signed char)mv->attackState, 1);
+        }
+        else
+        {
+            MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+        }
+    }
+    else
+    {
+        if (MON_AnimPlayingFromList(instance, missileDef->animList, missileDef->anim) != 0 &&
+            G2EmulationInstanceQueryPassedFrame(instance, 0, missileDef->frame) != 0)
+        {
+            MISSILE_FireAtInstance(instance, missileDef, mv->enemy->instance);
+            if ((signed char)missileDef->reload != 0)
+            {
+                mv->mvFlags &= ~0x20;
+            }
+        }
+        MON_TurnToPosition(instance, &mv->enemy->instance->position, mv->subAttr->speedPivotTurn);
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 void MON_IdleEntry(Instance *instance)
 {
