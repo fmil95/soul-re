@@ -677,7 +677,73 @@ void MON_ImpaleDeathEntry(Instance *instance)
     MON_DropAllObjects(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_ImpaleDeath);
+void MON_ImpaleDeath(Instance *instance)
+{
+
+    Message *message; // Not from decls.h
+    MonsterVars *mv;
+    MonsterAttributes *ma; // Not from decls.h
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    if (MON_AnimPlaying(instance, MONSTER_ANIM_IMPALED) != 0)
+    {
+
+        int firstFrame; // Not from decls.h
+        int lastFrame; // Not from decls.h
+        firstFrame = G2EmulationInstanceQueryFrame(instance, 0);
+        lastFrame = G2EmulationInstanceQueryLastFrame(instance, 0);
+
+        if (lastFrame < ma->bloodImpaleFrame && firstFrame >= ma->bloodImpaleFrame)
+        {
+            FX_Blood_Impale(instance, ma->grabSegment, instance, ma->grabSegment);
+        }
+        else
+        {
+            if (lastFrame < ma->bloodConeFrame && firstFrame >= ma->bloodConeFrame)
+            {
+                FX_BloodCone(instance, ma->grabSegment, 0x50);
+            }
+        }
+    }
+
+    if (instance->flags2 & 0x10)
+    {
+        if (MON_AnimPlaying(instance, MONSTER_ANIM_IMPALED) == 0 || (signed char)mv->subAttr->animList[0xD] == (signed char)mv->subAttr->animList[0x16])
+        {
+            MON_SwitchState(instance, MONSTER_STATE_DEAD);
+        }
+        else
+        {
+            mv->generalTimer = MON_GetTime(instance) + 0x3E8;
+        }
+    }
+
+    if (mv->generalTimer < MON_GetTime(instance))
+    {
+        mv->mvFlags &= 0xFFDFFFFF;
+        MON_TurnOnBodySpheres(instance);
+        MON_SwitchState(instance, MONSTER_STATE_FALL);
+    }
+
+    while ((message = DeMessageQueue(&mv->messageQueue)) != NULL)
+    {
+        if (message->ID == 0x0100000A)
+        {
+
+            mv->generalTimer = MON_GetTime(instance) + 0x7530;
+            mv->heldID = mv->held->introUniqueID;
+            INSTANCE_Post(mv->held, 0x800002, SetObjectData(0, 0, 0, instance, 3));
+            INSTANCE_Post(mv->held, 0x200003, 7);
+            mv->causeOfDeath = 0;
+
+            do {} while (0); // garbage code for reordering
+
+            MON_PlayAnim(instance, MONSTER_ANIM_IMPALEDEATH, 1);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_TerrainImpaleDeathEntry);
 

@@ -52,6 +52,7 @@ int G2EmulationQueryAnimation(CharacterState *In, int CurrentSection);
 void G2EmulationSwitchAnimationAlpha(CharacterState *In, int CurrentSection, int NewAnim, int NewFrame, int Frames, int Mode, int AlphaTable);
 void StateSwitchStateCharacterDataDefault(CharacterState *In, void (*NewProcess)(), intptr_t Data);
 int G2EmulationQueryFrame(CharacterState *In, int CurrentSection);
+int G2EmulationInstanceQueryLastFrame(Instance *instance, int CurrentSection);
 void G2EmulationSwitchAnimationCharacter(CharacterState *In, int NewAnim, int NewFrame, int Frames, int Mode);
 void G2EmulationSetTotalSections(CharacterState *In, short Total);
 void G2EmulationSetStartAndEndSegment(CharacterState *In, int CurrentSection, short Start, short End);
