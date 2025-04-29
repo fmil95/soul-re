@@ -22,7 +22,51 @@
 #include "Game/G2/ANMCTRLR.h"
 #include "Game/G2/ANMG2ILF.h"
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_DoCombatTimers);
+void MON_DoCombatTimers(Instance *instance)
+{
+    MonsterVars *mv;
+    unsigned long curtime;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    curtime = MON_GetTime(instance);
+
+    if ((mv->mvFlags & 0x10))
+    {
+        if (mv->damageTimer < curtime)
+        {
+            mv->mvFlags &= ~0x10;
+            mv->mvFlags &= ~0x800000;
+        }
+    }
+    else if ((!(mv->mvFlags & 0x2000)) && (mv->hitPoints < mv->maxHitPoints))
+    {
+        MonsterCombatAttributes *combat;
+
+        combat = mv->subAttr->combatAttributes;
+
+        mv->hitPoints += (combat->recovery * gameTrackerX.timeMult) / 4096;
+
+        if (mv->hitPoints > mv->maxHitPoints)
+        {
+            mv->hitPoints = mv->maxHitPoints;
+        }
+
+        MONSTER_VertexBlood(instance, mv->mainColorVertex, MONSTER_CalcDamageIntensity(mv->hitPoints, mv->maxHitPoints));
+    }
+
+    if (((mv->mvFlags & 0x100)) && (mv->stunTimer < curtime))
+    {
+        mv->mvFlags &= ~0x100;
+
+        do {} while (0); // garbage code for reordering
+    }
+
+    if ((curtime % 1000) < ((curtime - gameTrackerX.lastLoopTime) % 1000))
+    {
+        mv->chance = rand() % 100;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_ChangeHumanOpinion);
 

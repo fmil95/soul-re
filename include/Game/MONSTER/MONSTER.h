@@ -74,5 +74,7 @@ void ProcessBurntMess(Instance *instance, int vertidx, int segidx, int dist, voi
 void MONSTER_InitVertexColors(Instance *instance, Model *model);
 void MONSTER_ProcessClosestVerts(Instance *instance, SVector *location, void (*processVert_cb)(), void *cb_data);
 void ProcessBloodyMess(Instance *instance, int vertidx, int segidx, int dist, void *cb_data);
+int MONSTER_CalcDamageIntensity(int hp, int maxHp);
+void MONSTER_VertexBlood(Instance *instance, int vert, int amount);
 
 #endif
