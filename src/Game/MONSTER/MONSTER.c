@@ -680,9 +680,9 @@ void MON_ImpaleDeathEntry(Instance *instance)
 void MON_ImpaleDeath(Instance *instance)
 {
 
-    Message *message; // Not from decls.h
+    Message *message;
     MonsterVars *mv;
-    MonsterAttributes *ma; // Not from decls.h
+    MonsterAttributes *ma;
 
     mv = (MonsterVars *)instance->extraData;
     ma = (MonsterAttributes *)instance->data;
@@ -690,18 +690,18 @@ void MON_ImpaleDeath(Instance *instance)
     if (MON_AnimPlaying(instance, MONSTER_ANIM_IMPALED) != 0)
     {
 
-        int firstFrame; // Not from decls.h
-        int lastFrame; // Not from decls.h
-        firstFrame = G2EmulationInstanceQueryFrame(instance, 0);
+        int thisFrame;
+        int lastFrame;
+        thisFrame = G2EmulationInstanceQueryFrame(instance, 0);
         lastFrame = G2EmulationInstanceQueryLastFrame(instance, 0);
 
-        if (lastFrame < ma->bloodImpaleFrame && firstFrame >= ma->bloodImpaleFrame)
+        if (lastFrame < ma->bloodImpaleFrame && thisFrame >= ma->bloodImpaleFrame)
         {
             FX_Blood_Impale(instance, ma->grabSegment, instance, ma->grabSegment);
         }
         else
         {
-            if (lastFrame < ma->bloodConeFrame && firstFrame >= ma->bloodConeFrame)
+            if (lastFrame < ma->bloodConeFrame && thisFrame >= ma->bloodConeFrame)
             {
                 FX_BloodCone(instance, ma->grabSegment, 0x50);
             }
@@ -722,7 +722,7 @@ void MON_ImpaleDeath(Instance *instance)
 
     if (mv->generalTimer < MON_GetTime(instance))
     {
-        mv->mvFlags &= 0xFFDFFFFF;
+        mv->mvFlags &= ~0x200000;
         MON_TurnOnBodySpheres(instance);
         MON_SwitchState(instance, MONSTER_STATE_FALL);
     }
@@ -2123,7 +2123,31 @@ int MONSTER_StartVertexBlood(Instance *instance, SVector *location, int amount)
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MONSTER_VertexBlood);
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", ProcessBurntMess);
+void ProcessBurntMess(Instance *instance, int vertidx, int segidx, int dist, void *cb_data)
+{
+
+    short scl;
+    burntTuneType *burntTune;
+
+    burntTune = ((burntMessType *)cb_data)->burntTune;
+
+    if (dist < ((burntMessType *)cb_data)->closestdist)
+    {
+        ((burntMessType *)cb_data)->closestvert = vertidx;
+        ((burntMessType *)cb_data)->closestdist = dist;
+        ((burntMessType *)cb_data)->closestseg = segidx;
+    }
+
+    if (dist >= burntTune->burntDist || (scl = (((dist << 0xC) / burntTune->burntDist) << 0x10) >> 0x14, ((scl < 0xFF) == 0)))
+    {
+        scl = 0xFE;
+    }
+
+    instance->perVertexColor[vertidx].r = scl;
+    instance->perVertexColor[vertidx].g = scl;
+    instance->perVertexColor[vertidx].b = scl;
+    instance->perVertexColor[vertidx].cd = 1;
+}
 
 int MONSTER_StartVertexBurnt(Instance *instance, SVector *location, burntTuneType *burntTune)
 {
