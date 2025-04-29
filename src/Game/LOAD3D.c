@@ -134,10 +134,10 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_LoadTIM);
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_LoadTIM2);
 
-intptr_t LOAD_RelocBinaryData(intptr_t *data, intptr_t fileSize)
+long LOAD_RelocBinaryData(intptr_t *data, long fileSize)
 {
     intptr_t *lastMoveDest;
-    intptr_t tableSize;
+    long tableSize;
     RedirectList redirectListX;
     RedirectList *redirectList;
 
@@ -145,13 +145,13 @@ intptr_t LOAD_RelocBinaryData(intptr_t *data, intptr_t fileSize)
 
     redirectList = &redirectListX;
 
-    redirectList->data = (intptr_t *)&data[1];
+    redirectList->data = &data[1];
 
     redirectList->numPointers = data[0];
 
     tableSize = ((redirectList->numPointers + 512) / 512) * 512;
 
-    RESOLVE_Pointers(redirectList, (intptr_t *)&data[tableSize], (intptr_t *)data);
+    RESOLVE_Pointers(redirectList, &data[tableSize], data);
 
     lastMoveDest = &data[fileSize - tableSize];
 
