@@ -1,6 +1,7 @@
 #include "Game/LOAD3D.h"
 #include "Game/HASM.h"
 #include "Game/MEMPACK.h"
+#include "Game/RESOLVE.h"
 
 STATIC LoadStatus loadStatus;
 
@@ -133,7 +134,36 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_LoadTIM);
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_LoadTIM2);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_RelocBinaryData);
+intptr_t LOAD_RelocBinaryData(intptr_t *data, intptr_t fileSize)
+{
+    intptr_t *lastMoveDest;
+    intptr_t tableSize;
+    RedirectList redirectListX;
+    RedirectList *redirectList;
+
+    fileSize = (fileSize + 3) >> 2;
+
+    redirectList = &redirectListX;
+
+    redirectList->data = (intptr_t *)&data[1];
+
+    redirectList->numPointers = data[0];
+
+    tableSize = ((redirectList->numPointers + 512) / 512) * 512;
+
+    RESOLVE_Pointers(redirectList, (intptr_t *)&data[tableSize], (intptr_t *)data);
+
+    lastMoveDest = &data[fileSize - tableSize];
+
+    while (data < lastMoveDest)
+    {
+        data[0] = data[tableSize];
+
+        data++;
+    }
+
+    return tableSize * 4;
+}
 
 void LOAD_CleanUpBuffers()
 {
