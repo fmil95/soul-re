@@ -11085,7 +11085,7 @@ typedef long time_t;
 
 typedef long off_t;
 
-typedef void (*CdlCB)();
+// typedef void (*CdlCB)();
 
 typedef unsigned char u_byte;
 

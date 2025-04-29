@@ -1,4 +1,4 @@
-#include "common.h"
+#include "Game/LOAD3D.h"
 #include "Game/HASM.h"
 #include "Game/MEMPACK.h"
 
@@ -139,7 +139,17 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_CleanUpBuffers);
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_InitBuffers);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_InitCdStreamMode);
+void LOAD_InitCdStreamMode()
+{
+    unsigned char cdMode;
+
+    cdMode = CdlModeSize1 | CdlModeSpeed;
+
+    CdReadyCallback(LOAD_CdReadReady);
+    CdSyncCallback(LOAD_CdSeekCallback);
+
+    CdControl(CdlSetmode, &cdMode, NULL);
+}
 
 void LOAD_DumpCurrentDir()
 {

@@ -458,6 +458,47 @@ typedef struct
 #define setPolyF4(p) setlen(p, 5), setcode(p, 0x28)
 #define setPolyG4(p) setlen(p, 8), setcode(p, 0x38)
 
+typedef void (*CdlCB)(u_char, u_char *);
+
+/*
+ * CD-ROM Primitive Commands
+ */
+#define CdlNop		0x01
+#define CdlSetloc	0x02
+#define CdlPlay		0x03
+#define CdlForward	0x04
+#define CdlBackward	0x05
+#define CdlReadN	0x06
+#define CdlStandby	0x07
+#define CdlStop		0x08
+#define CdlPause	0x09
+#define CdlMute		0x0b
+#define CdlDemute	0x0c
+#define CdlSetfilter	0x0d
+#define CdlSetmode	0x0e
+#define CdlGetparam	0x0f
+#define CdlGetlocL	0x10
+#define CdlGetlocP	0x11
+#define CdlGetTN	0x13
+#define CdlGetTD	0x14
+#define CdlSeekL	0x15
+#define CdlSeekP	0x16
+#define CdlReadS	0x1B
+
+ /*
+  * CD-ROM Mode (used int CdlSetmode)
+  */
+#define CdlModeStream  0x100    /* Normal Streaming                     */
+#define CdlModeStream2 0x120    /* SUB HEADER information includes      */
+#define CdlModeSpeed	0x80	/* 0: normal speed	1: double speed	*/
+#define CdlModeRT	0x40	/* 0: ADPCM off		1: ADPCM on	*/
+#define CdlModeSize1	0x20	/* 0: 2048 byte		1: 2340byte	*/
+#define CdlModeSize0	0x10	/* 0: -			1: 2328byte	*/
+#define CdlModeSF	0x08	/* 0: Channel off	1: Channel on	*/
+#define CdlModeRept  	0x04	/* 0: Report off	1: Report on	*/
+#define CdlModeAP	0x02	/* 0: AutoPause off	1: AutoPause on */
+#define CdlModeDA	0x01	/* 0: CD-DA off		1: CD-DA on	*/ 
+
 void SpuSetCommonCDMix(long cd_mix);
 void SpuSetCommonMasterVolume(short mvol_left, short mvol_right);
 long EnableEvent(long);
@@ -540,6 +581,9 @@ int PadSetActAlign(int, unsigned char *);
 int ResetCallback(void);
 int CdSetDebug(int level);
 int CdInit(void);
+CdlCB CdReadyCallback(CdlCB func);
+CdlCB CdSyncCallback(CdlCB func);
+int CdControl(u_char com, u_char *param, u_char *result);
 
 extern int StCdIntrFlag;
 

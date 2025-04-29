@@ -26,5 +26,7 @@ void LOAD_UpdateBigFilePointers(BigFileDir *oldDir, BigFileDir *newDir);
 void LOAD_PlayXA(int number);
 long *LOAD_ReadFile(char *fileName, unsigned char memType);
 void LOAD_LoadTIM2(long *addr, long x_pos, long y_pos, long width, long height);
+void LOAD_CdReadReady(unsigned char intr, unsigned char *result);
+void LOAD_CdSeekCallback(unsigned char intr, unsigned char *result);
 
 #endif
