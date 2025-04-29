@@ -135,7 +135,22 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_LoadTIM2);
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_RelocBinaryData);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_CleanUpBuffers);
+void LOAD_CleanUpBuffers()
+{
+    if (loadStatus.buffer1 != NULL)
+    {
+        MEMPACK_Free(loadStatus.buffer1);
+
+        loadStatus.buffer1 = NULL;
+    }
+
+    if (loadStatus.buffer2 != NULL)
+    {
+        MEMPACK_Free(loadStatus.buffer2);
+
+        loadStatus.buffer2 = NULL;
+    }
+}
 
 void *LOAD_InitBuffers()
 {
