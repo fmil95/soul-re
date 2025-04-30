@@ -29,5 +29,6 @@ void LOAD_LoadTIM2(long *addr, long x_pos, long y_pos, long width, long height);
 void LOAD_CdReadReady(unsigned char intr, unsigned char *result);
 void LOAD_CdSeekCallback(unsigned char intr, unsigned char *result);
 BigFileEntry *LOAD_GetBigFileEntry(char *fileName);
+BigFileEntry *LOAD_GetBigFileEntryByHash(long hash);
 
 #endif

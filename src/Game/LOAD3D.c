@@ -126,7 +126,10 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_HashUnit);
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_GetBigFileEntryByHash);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_GetBigFileEntry);
+BigFileEntry *LOAD_GetBigFileEntry(char *fileName)
+{
+    return LOAD_GetBigFileEntryByHash(LOAD_HashName(fileName));
+}
 
 long LOAD_DoesFileExist(char *fileName)
 {
