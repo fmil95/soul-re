@@ -6,7 +6,7 @@
 
 Soul Reaverse is a project that seeks to reconstruct the source code of the PSX action-adventure classic Legacy of Kain: Soul Reaver. This is achieved by disassembling the executable of a prototype of the game that was built two weeks before its final release, which includes a full set of debugging symbols that makes the process of reverse-engineering the binary's MIPS instructions back to C language easier.
 
-The current progress of the project is 78% completion, excluding overlays.
+The current progress of the project is 79% completion, excluding overlays.
 
 Discord server: https://discord.gg/VwCPdfbxgm
 
