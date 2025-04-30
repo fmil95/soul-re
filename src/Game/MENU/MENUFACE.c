@@ -4,7 +4,7 @@
 #include "Game/DRAW.h"
 #include "Game/GAMELOOP.h"
 
-STATIC ButtonTexture *FaceButtons;
+static ButtonTexture *FaceButtons;
 
 STATIC int hack_initialized;
 

@@ -284,7 +284,7 @@ segments:
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D7488, name: Game/VOICEXA}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D75B0, name: Game/LOCAL/LOCALSTR}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D75B4, name: Game/MENU/MENUDEFS}
-      - {start: 0x0C28AC, type: sbss, vram: 0x800D75B8, name: Game/MENU/MENUFACE}
+      - {start: 0x0C28AC, type: .sbss, vram: 0x800D75B8, name: Game/MENU/MENUFACE}
 
       - {start: 0x0C28AC, type: .bss, vram: 0x800D75BC, name: Game/SOUND}
       - {start: 0x0C28AC, type: .bss, vram: 0x800DA984, name: Game/STRMLOAD}
