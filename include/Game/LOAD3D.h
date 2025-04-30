@@ -30,5 +30,6 @@ void LOAD_CdReadReady(unsigned char intr, unsigned char *result);
 void LOAD_CdSeekCallback(unsigned char intr, unsigned char *result);
 BigFileEntry *LOAD_GetBigFileEntry(char *fileName);
 BigFileEntry *LOAD_GetBigFileEntryByHash(long hash);
+int LOAD_SetupFileInfo(NonBlockLoadEntry *loadEntry);
 
 #endif

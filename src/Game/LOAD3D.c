@@ -118,7 +118,41 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_SetupFileInfo);
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_NonBlockingReadFile);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_CD_ReadPartOfFile);
+void LOAD_CD_ReadPartOfFile(NonBlockLoadEntry *loadEntry)
+{
+    ReadQueueEntry *currentQueueReq;
+
+    if (LOAD_SetupFileInfo(loadEntry) != 0)
+    {
+        currentQueueReq = &loadStatus.currentQueueFile;
+
+        currentQueueReq->readSize = loadEntry->loadSize;
+
+        currentQueueReq->readCurSize = 0;
+
+        currentQueueReq->readStartDest = loadEntry->loadAddr;
+        currentQueueReq->readCurDest = loadEntry->loadAddr;
+
+        currentQueueReq->readStartPos = loadEntry->filePos;
+
+        currentQueueReq->readStatus = 5;
+
+        currentQueueReq->checksumType = 0;
+
+        currentQueueReq->checksum = loadEntry->checksum;
+
+        currentQueueReq->retFunc = loadEntry->retFunc;
+
+        currentQueueReq->retData = loadEntry->retData;
+        currentQueueReq->retData2 = loadEntry->retData2;
+
+        loadStatus.changeDir = 0;
+    }
+    else
+    {
+        loadStatus.changeDir = 1;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_HashName);
 
