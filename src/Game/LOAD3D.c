@@ -128,7 +128,22 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_GetBigFileEntryByHash);
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_GetBigFileEntry);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_DoesFileExist);
+long LOAD_DoesFileExist(char *fileName)
+{
+    BigFileEntry *entry;
+    int temp; // not from decls.h
+
+    entry = LOAD_GetBigFileEntry(fileName);
+
+    temp = 0;
+
+    if (entry != NULL)
+    {
+        temp = entry->fileLen != 0;
+    }
+
+    return temp;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_LoadTIM);
 
