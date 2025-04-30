@@ -124,7 +124,36 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_HashName);
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_HashUnit);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_GetBigFileEntryByHash);
+BigFileEntry *LOAD_GetBigFileEntryByHash(long hash)
+{
+    int i;
+    BigFileEntry *entry;
+
+    if ((loadStatus.bigFile.currentDir != NULL) && (loadStatus.currentDirLoading == 0))
+    {
+        entry = &loadStatus.bigFile.currentDir->fileList[0];
+
+        for (i = loadStatus.bigFile.currentDir->numFiles; i != 0; i--, entry++)
+        {
+            if (entry->fileHash == hash)
+            {
+                return entry;
+            }
+        }
+    }
+
+    entry = &loadStatus.bigFile.rootDir->fileList[0];
+
+    for (i = loadStatus.bigFile.rootDir->numFiles; i != 0; i--, entry++)
+    {
+        if (entry->fileHash == hash)
+        {
+            return entry;
+        }
+    }
+
+    return NULL;
+}
 
 BigFileEntry *LOAD_GetBigFileEntry(char *fileName)
 {
