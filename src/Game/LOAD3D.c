@@ -145,11 +145,50 @@ long LOAD_DoesFileExist(char *fileName)
     return temp;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_LoadTIM);
+void LOAD_LoadTIM(intptr_t *addr, long x_pos, long y_pos, long clut_x, long clut_y)
+{
+    RECT rect;
+    intptr_t *clutAddr;
+
+    clutAddr = NULL;
+
+    addr += 2;
+
+    if (addr[-1] == 8)
+    {
+        clutAddr = &addr[3];
+
+        addr += 11;
+    }
+
+    rect.x = x_pos;
+    rect.y = y_pos;
+
+    rect.w = ((unsigned short *)addr)[4];
+    rect.h = ((unsigned short *)addr)[5];
+
+    LoadImage(&rect, (uintptr_t *)&addr[3]);
+
+    if (clutAddr != NULL)
+    {
+        rect.x = clut_x;
+        rect.y = clut_y;
+
+        rect.w = 16;
+        rect.h = 1;
+
+        DrawSync(0);
+
+        LoadImage(&rect, (uintptr_t *)clutAddr);
+    }
+}
 
 void LOAD_LoadTIM2(intptr_t *addr, long x_pos, long y_pos, long width, long height)
 {
     RECT rect;
+
+    (void)width;
+    (void)height;
 
     rect.x = x_pos;
     rect.y = y_pos;
