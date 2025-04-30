@@ -132,7 +132,22 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_DoesFileExist);
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_LoadTIM);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_LoadTIM2);
+void LOAD_LoadTIM2(intptr_t *addr, long x_pos, long y_pos, long width, long height)
+{
+    RECT rect;
+
+    rect.x = x_pos;
+    rect.y = y_pos;
+
+    addr += 2;
+
+    rect.w = ((unsigned short *)addr)[4];
+    rect.h = ((unsigned short *)addr)[5];
+
+    LoadImage(&rect, &((uintptr_t *)addr)[3]);
+
+    DrawSync(0);
+}
 
 long LOAD_RelocBinaryData(intptr_t *data, long fileSize)
 {
