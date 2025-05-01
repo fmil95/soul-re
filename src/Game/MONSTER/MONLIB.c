@@ -2197,7 +2197,13 @@ int MON_ValidPosition(Instance *instance)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_SphereWorldPos);
+void MON_SphereWorldPos(MATRIX *mat, HSphere *sphere, Position *ret)
+{
+    ApplyMatrixSV(mat, (SVECTOR *)&sphere->position, (SVECTOR *)ret);
+    ret->x += mat->t[0];
+    ret->y += mat->t[1];
+    ret->z += mat->t[2];
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_FindSphereForTerrain);
 
