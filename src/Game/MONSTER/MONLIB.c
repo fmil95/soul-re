@@ -2099,7 +2099,45 @@ void MON_KillMonster(Instance *instance)
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_ShouldIAmbushEnemy);
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_ShouldIFireAtTarget);
+int MON_ShouldIFireAtTarget(Instance *instance, MonsterIR *target)
+{
+
+    long distance;
+    MonsterVars *mv;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->mvFlags & 0x20 && target->mirFlags & 0x20)
+    {
+
+        MonsterMissile *missileAttack;
+        MonsterAttributes *ma = (MonsterAttributes *)instance->data;
+        missileAttack = &ma->missileList[(signed char)mv->subAttr->combatAttributes->missileAttack];
+
+        if ((signed char)mv->chance < (signed char)missileAttack->fireChance)
+        {
+            distance = target->distance;
+            if (distance < (int)missileAttack->range)
+            {
+
+                MonsterIR *known;
+                known = mv->monsterIRList;
+
+                while (known != NULL)
+                {
+                    if (known->distance < distance && known->relativePosition.y > 0 && known->relativePosition.x < 0xC8)
+                    {
+                        return 0;
+                    }
+                    known = known->next;
+                }
+                return 2;
+            }
+        }
+    }
+    return 0;
+}
+
 
 int MON_ShouldIFlee(Instance *instance)
 {
