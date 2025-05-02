@@ -1,4 +1,5 @@
 #include "Game/MONSTER/MONLIB.h"
+#include "Game/PLAN/PLANAPI.h"
 #include "Game/PLAN/ENMYPLAN.h"
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/MONSTER/MONSENSE.h"
@@ -2097,7 +2098,54 @@ void MON_KillMonster(Instance *instance)
     instance->flags |= 0x20;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_ShouldIAmbushEnemy);
+int MON_ShouldIAmbushEnemy(Instance *instance)
+{
+
+    MonsterVars *mv;
+    MonsterIR *enemy;
+
+    mv = instance->extraData;
+    enemy = mv->enemy;
+
+
+    if (instance->currentStreamUnitID == instance->birthStreamUnitID && (signed char)mv->ambushMarker != 0 && mv->ambushArc == 0x800 && mv->ambushElevation == 0x400)
+    {
+
+        Position pos;
+        Instance *inst;
+
+        if (enemy != NULL)
+        {
+            inst = enemy->instance;
+        }
+        else
+        {
+            inst = gameTrackerX.playerInstance;
+        }
+
+        if (PLANAPI_FindNodePositionInUnit(STREAM_GetStreamUnitWithID(instance->birthStreamUnitID), &pos, (signed char)mv->ambushMarker, 4) != 0 &&
+            MATH3D_LengthXYZ(inst->position.x - pos.x, inst->position.y - pos.y, inst->position.z - pos.z) < mv->ambushRange)
+        {
+            return 1;
+        }
+    }
+
+    if (enemy != NULL)
+    {
+        if (instance->currentMainState != MONSTER_STATE_PUPATE || enemy->mirFlags & 0x40)
+        {
+            if (mv->ambushArc == 0x800 && mv->ambushElevation == 0x400)
+            {
+                return enemy->distance < mv->ambushRange;
+            }
+            if (enemy->distance < mv->ambushRange)
+            {
+                return MATH3D_ConeDetect(&enemy->relativePosition, mv->ambushArc, mv->ambushElevation);
+            }
+        }
+    }
+    return 0;
+}
 
 int MON_ShouldIFireAtTarget(Instance *instance, MonsterIR *target)
 {
