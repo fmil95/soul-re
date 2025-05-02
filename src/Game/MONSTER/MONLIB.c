@@ -2243,7 +2243,42 @@ void MON_SphereWorldPos(MATRIX *mat, HSphere *sphere, Position *ret)
     ret->z += mat->t[2];
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_FindSphereForTerrain);
+HPrim *MON_FindSphereForTerrain(Instance *instance)
+{
+
+    int maxRad;
+    HPrim *usePrim;
+
+    usePrim = NULL;
+    maxRad = 0;
+
+    if (instance->hModelList != NULL)
+    {
+        int i;
+        HModel *hmodel;
+        HPrim *currentP;
+
+        hmodel = &instance->hModelList[instance->currentModel];
+        currentP = hmodel->hPrimList;
+
+        for (i = hmodel->numHPrims; i != 0; i--, currentP++)
+        {
+            if (currentP->withFlags & 0x2 && currentP->type == 1)
+            {
+
+                HSphere *tempS;
+                tempS = currentP->data.hsphere;
+
+                if (maxRad < tempS->radius)
+                {
+                    usePrim = currentP;
+                    maxRad = tempS->radius;
+                }
+            }
+        }
+    }
+    return usePrim;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_FindNearestImpalingIntro);
 
