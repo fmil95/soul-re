@@ -1,4 +1,5 @@
 #include "Game/MONSTER/MONLIB.h"
+#include "Game/PLAN/PLANAPI.h"
 #include "Game/PLAN/ENMYPLAN.h"
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/MONSTER/MONSENSE.h"
@@ -2097,9 +2098,94 @@ void MON_KillMonster(Instance *instance)
     instance->flags |= 0x20;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_ShouldIAmbushEnemy);
+int MON_ShouldIAmbushEnemy(Instance *instance)
+{
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_ShouldIFireAtTarget);
+    MonsterVars *mv;
+    MonsterIR *enemy;
+
+    mv = instance->extraData;
+    enemy = mv->enemy;
+
+
+    if (instance->currentStreamUnitID == instance->birthStreamUnitID && (signed char)mv->ambushMarker != 0 && mv->ambushArc == 0x800 && mv->ambushElevation == 0x400)
+    {
+
+        Position pos;
+        Instance *inst;
+
+        if (enemy != NULL)
+        {
+            inst = enemy->instance;
+        }
+        else
+        {
+            inst = gameTrackerX.playerInstance;
+        }
+
+        if (PLANAPI_FindNodePositionInUnit(STREAM_GetStreamUnitWithID(instance->birthStreamUnitID), &pos, (signed char)mv->ambushMarker, 4) != 0 &&
+            MATH3D_LengthXYZ(inst->position.x - pos.x, inst->position.y - pos.y, inst->position.z - pos.z) < mv->ambushRange)
+        {
+            return 1;
+        }
+    }
+
+    if (enemy != NULL)
+    {
+        if (instance->currentMainState != MONSTER_STATE_PUPATE || enemy->mirFlags & 0x40)
+        {
+            if (mv->ambushArc == 0x800 && mv->ambushElevation == 0x400)
+            {
+                return enemy->distance < mv->ambushRange;
+            }
+            if (enemy->distance < mv->ambushRange)
+            {
+                return MATH3D_ConeDetect(&enemy->relativePosition, mv->ambushArc, mv->ambushElevation);
+            }
+        }
+    }
+    return 0;
+}
+
+int MON_ShouldIFireAtTarget(Instance *instance, MonsterIR *target)
+{
+
+    long distance;
+    MonsterVars *mv;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->mvFlags & 0x20 && target->mirFlags & 0x20)
+    {
+
+        MonsterMissile *missileAttack;
+        MonsterAttributes *ma = (MonsterAttributes *)instance->data;
+        missileAttack = &ma->missileList[(signed char)mv->subAttr->combatAttributes->missileAttack];
+
+        if ((signed char)mv->chance < (signed char)missileAttack->fireChance)
+        {
+            distance = target->distance;
+            if (distance < (int)missileAttack->range)
+            {
+
+                MonsterIR *known;
+                known = mv->monsterIRList;
+
+                while (known != NULL)
+                {
+                    if (known->distance < distance && known->relativePosition.y > 0 && known->relativePosition.x < 0xC8)
+                    {
+                        return 0;
+                    }
+                    known = known->next;
+                }
+                return 2;
+            }
+        }
+    }
+    return 0;
+}
+
 
 int MON_ShouldIFlee(Instance *instance)
 {
@@ -2197,13 +2283,144 @@ int MON_ValidPosition(Instance *instance)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_SphereWorldPos);
+void MON_SphereWorldPos(MATRIX *mat, HSphere *sphere, Position *ret)
+{
+    ApplyMatrixSV(mat, (SVECTOR *)&sphere->position, (SVECTOR *)ret);
+    ret->x += mat->t[0];
+    ret->y += mat->t[1];
+    ret->z += mat->t[2];
+}
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_FindSphereForTerrain);
+HPrim *MON_FindSphereForTerrain(Instance *instance)
+{
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_FindNearestImpalingIntro);
+    int maxRad;
+    HPrim *usePrim;
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_TestForTerrainImpale);
+    usePrim = NULL;
+    maxRad = 0;
+
+    if (instance->hModelList != NULL)
+    {
+        int i;
+        HModel *hmodel;
+        HPrim *currentP;
+
+        hmodel = &instance->hModelList[instance->currentModel];
+        currentP = hmodel->hPrimList;
+
+        for (i = hmodel->numHPrims; i != 0; i--, currentP++)
+        {
+            if (currentP->withFlags & 0x2 && currentP->type == 1)
+            {
+
+                HSphere *tempS;
+                tempS = currentP->data.hsphere;
+
+                if (maxRad < tempS->radius)
+                {
+                    usePrim = currentP;
+                    maxRad = tempS->radius;
+                }
+            }
+        }
+    }
+    return usePrim;
+}
+
+Intro *MON_FindNearestImpalingIntro(int unitID, Position *position)
+{
+
+    int dist;
+    int i;
+    int min_dist;
+    Level *level;
+    Intro *res;
+    Intro *current;
+
+    level = STREAM_GetLevelWithID(unitID);
+    res = NULL;
+
+    if (level != NULL)
+    {
+
+        i = level->numIntros;
+
+        if (i > 0)
+        {
+
+            min_dist = 0x7FFFFFFF;
+            current = level->introList;
+
+            for (; i > 0; i--, current++)
+            {
+                if (current->flags & 0x8000)
+                {
+                    res = current;
+                    min_dist = MATH3D_LengthXYZ(res->position.x - position->x, res->position.y - position->y, res->position.z - position->z);
+                    current++;
+                    i--;
+                    break;
+                }
+            }
+
+            for (; i > 0; i--, current++)
+            {
+                if (current->flags & 0x8000)
+                {
+                    dist = MATH3D_LengthXYZ(current->position.x - position->x, current->position.y - position->y, current->position.z - position->z);
+                    if (dist < min_dist)
+                    {
+                        res = current;
+                        min_dist = dist;
+                    }
+                }
+            }
+        }
+    }
+    return res;
+}
+
+Intro *MON_TestForTerrainImpale(Instance *instance, Terrain *terrain)
+{
+
+    MonsterVars *mv;
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->mode == 0x100000)
+    {
+
+        HPrim *prim;
+        prim = MON_FindSphereForTerrain(instance);
+
+        if (prim != NULL)
+        {
+
+            Position spherePos;
+            Intro *current;
+            HSphere *sphere;
+            int i;
+            int radius;
+
+            sphere = prim->data.hsphere;
+            radius = sphere->radius * 3;
+            MON_SphereWorldPos(&instance->matrix[prim->segment], sphere, &spherePos);
+            current = terrain->introList;
+
+            for (i = terrain->numIntros; i != 0; i--, current++)
+            {
+                if (current->flags & 0x8000)
+                {
+                    if (MATH3D_LengthXYZ(spherePos.x - current->position.x, spherePos.y - current->position.y, spherePos.z - current->position.z) < radius)
+                    {
+                        return current;
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_MoveInstanceToImpalePoint);
 
