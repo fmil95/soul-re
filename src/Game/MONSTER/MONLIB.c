@@ -2381,7 +2381,46 @@ Intro *MON_FindNearestImpalingIntro(int unitID, Position *position)
     return res;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_TestForTerrainImpale);
+Intro *MON_TestForTerrainImpale(Instance *instance, Terrain *terrain)
+{
+
+    MonsterVars *mv;
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->mode == 0x100000)
+    {
+
+        HPrim *prim;
+        prim = MON_FindSphereForTerrain(instance);
+
+        if (prim != NULL)
+        {
+
+            Position spherePos;
+            Intro *current;
+            HSphere *sphere;
+            int i;
+            int radius;
+
+            sphere = prim->data.hsphere;
+            radius = sphere->radius * 3;
+            MON_SphereWorldPos(&instance->matrix[prim->segment], sphere, &spherePos);
+            current = terrain->introList;
+
+            for (i = terrain->numIntros; i != 0; i--, current++)
+            {
+                if (current->flags & 0x8000)
+                {
+                    if (MATH3D_LengthXYZ(spherePos.x - current->position.x, spherePos.y - current->position.y, spherePos.z - current->position.z) < radius)
+                    {
+                        return current;
+                    }
+                }
+            }
+        }
+    }
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_MoveInstanceToImpalePoint);
 
