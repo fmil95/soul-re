@@ -2328,7 +2328,58 @@ HPrim *MON_FindSphereForTerrain(Instance *instance)
     return usePrim;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_FindNearestImpalingIntro);
+Intro *MON_FindNearestImpalingIntro(int unitID, Position *position)
+{
+
+    int dist;
+    int i;
+    int min_dist;
+    Level *level;
+    Intro *res;
+    Intro *current;
+
+    level = STREAM_GetLevelWithID(unitID);
+    res = NULL;
+
+    if (level != NULL)
+    {
+
+        i = level->numIntros;
+
+        if (i > 0)
+        {
+
+            min_dist = 0x7FFFFFFF;
+            current = level->introList;
+
+            for (; i > 0; i--, current++)
+            {
+                if (current->flags & 0x8000)
+                {
+                    res = current;
+                    min_dist = MATH3D_LengthXYZ(res->position.x - position->x, res->position.y - position->y, res->position.z - position->z);
+                    current++;
+                    i--;
+                    break;
+                }
+            }
+
+            for (; i > 0; i--, current++)
+            {
+                if (current->flags & 0x8000)
+                {
+                    dist = MATH3D_LengthXYZ(current->position.x - position->x, current->position.y - position->y, current->position.z - position->z);
+                    if (dist < min_dist)
+                    {
+                        res = current;
+                        min_dist = dist;
+                    }
+                }
+            }
+        }
+    }
+    return res;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_TestForTerrainImpale);
 
