@@ -2,13 +2,19 @@
 
 <img src="https://i.imgur.com/RTQyAu8.png"/>
 
-## About
+## Description
 
 Soul Reaverse is a project that seeks to reconstruct the source code of the PSX action-adventure classic Legacy of Kain: Soul Reaver. This is achieved by disassembling the executable of a prototype of the game that was built two weeks before its final release, which includes a full set of debugging symbols that makes the process of reverse-engineering the binary's MIPS instructions back to C language easier.
 
-The current progress of the project is 79% completion, excluding overlays.
+Once its fully overhauled, the source code could then be used for many different purposes, including but not limited to: porting the game to other platforms, improving its performance on console hardware, and developing tools for it such as a level editor.  
 
-Discord server: https://discord.gg/VwCPdfbxgm
+Next is a benchmark for the progress achieved so far on the decompilation of the main game executable (SLUS_007.08): 
+```
+1803 matched functions / 2274 total (79.29%)
+452112 matching bytes / 653008 total (69.24%)
+```
+
+Note that the status above is not reflective of the actual completion rate of the project however, as Soul Reaver like many other titles for the PlayStation (especially those near the end of the system's life cycle) distributes a good amount of game logic throughout overlays. For those not familiar with the concept, overlays are binaries which contain code that is loaded at specific instances during gameplay by the primary executable. This was designed such to taper the maximum amount of memory that the game consumes at once, which could never be too high due to hardware limitations. A complete list of the overlays will be published on this repository soon.  
 
 ## Building (Linux)
 
