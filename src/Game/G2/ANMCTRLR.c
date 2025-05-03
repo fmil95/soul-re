@@ -414,8 +414,7 @@ unsigned long _G2AnimController_ApplyToSegValue(G2AnimController *controller, G2
 
     if (!(((unsigned int *)controller)[0] & 0xFF020000))
     {
-        _G2AnimController_ApplyWorldToParentMatrix(controller, parentMatrix);
-        return;
+        return _G2AnimController_ApplyWorldToParentMatrix(controller, parentMatrix);
     }
     else
     {
