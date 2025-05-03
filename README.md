@@ -14,7 +14,9 @@ Next is a benchmark for the progress achieved so far on the decompilation of the
 452112 matching bytes / 653008 total (69.24%)
 ```
 
-Note that the status above is not reflective of the actual completion rate of the project however, as Soul Reaver like many other titles for the PlayStation (especially those near the end of the system's life cycle) distributes a good amount of game logic throughout *overlays*. For those not familiar with the concept, overlays are binaries which contain code that is loaded at specific instances during gameplay by the primary executable. This was designed such to taper the maximum amount of memory that the game consumes at once, which could never be too high due to hardware limitations. A complete list of the overlays will be published on this repository soon.  
+Note that the status above is not reflective of the actual completion rate of the project however, as Soul Reaver like many other titles for the PlayStation (especially those near the end of the system's life cycle) distributes a good amount of game logic throughout *overlays*. For those not familiar with the concept, overlays are binaries which contain code that is loaded at specific instances during gameplay by the primary executable. This was designed such to taper the maximum amount of memory that the game consumes at once, which could never be too high due to hardware limitations.
+
+A complete list of overlays will be published on this repository soon.  
 
 ## Building (Linux)
 
