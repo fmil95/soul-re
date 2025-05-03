@@ -803,7 +803,61 @@ void MON_GetRandomPoint(Position *out, Position *in, short r)
     out->z = in->z;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_GetRandomDestinationInWorld);
+int MON_GetRandomDestinationInWorld(Instance *instance, Position *in, short r)
+{
+
+    int result;
+    result = 0;
+
+    if (instance->matrix != NULL)
+    {
+
+        evPhysicsLOSData data;
+        int avoidEnemy;
+        MonsterVars *mv;
+
+        mv = instance->extraData;
+        avoidEnemy = 0;
+
+        if (mv->behaviorState == MONSTER_STATE_STUNNED || mv->behaviorState == MONSTER_STATE_GRABBED)
+        {
+            avoidEnemy = mv->enemy != NULL;
+        }
+
+        if (in == NULL || (avoidEnemy != 0 && MATH3D_LengthXYZ(in->x - mv->enemy->instance->position.x, in->y - mv->enemy->instance->position.y, in->z - mv->enemy->instance->position.z) < mv->subAttr->fleeRange))
+        {
+            // garbage loop just for instruction ordering
+            do { in = &instance->position; } while (0);
+        }
+
+        data.origin.x = instance->matrix[1].t[0];
+        data.origin.y = instance->matrix[1].t[1];
+        data.origin.z = instance->matrix[1].t[2];
+
+        MON_GetRandomPoint(&data.destination, in, r);
+
+        data.destination.z += data.origin.z - instance->position.z;
+        result = MON_CheckPointSuitability(instance, &data.origin, &data.destination);
+
+        if (result != 0)
+        {
+
+            if (avoidEnemy != 0 &&
+                MATH3D_LengthXYZ(data.destination.x - mv->enemy->instance->position.x, data.destination.y - mv->enemy->instance->position.y, data.destination.z - mv->enemy->instance->position.z) < mv->subAttr->fleeRange)
+            {
+                result = 0;
+            }
+
+            if (result != 0)
+            {
+                mv->mvFlags |= 0x40000;
+                mv->destination = data.destination;
+            }
+        }
+        return result;
+    }
+    return result;
+}
 
 void MON_MoveForward(Instance *instance)
 {

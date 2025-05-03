@@ -4,6 +4,7 @@
 #include "common.h"
 
 MonsterIR *MONSENSE_SetEnemy(Instance *instance, Instance *newenemy);
+MonsterIR *MONSENSE_GetMonsterIR(MonsterVars *mv);
 void MONSENSE_DoSenses(Instance *instance);
 int MONSENSE_GetDistanceInDirection(Instance *instance, short angle);
 void MONSENSE_RemoveSenses(Instance *instance);
