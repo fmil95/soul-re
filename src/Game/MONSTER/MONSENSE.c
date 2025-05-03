@@ -69,7 +69,58 @@ int MONSENSE_Smell(Instance *instance, evCollideInstanceStatsData *data)
     return data->distance < mv->subAttr->senses->scentRadius;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSENSE", MONSENSE_FirstSense);
+MonsterIR *MONSENSE_FirstSense(Instance *instance, Instance *sensed)
+{
+
+    MonsterVars *mv;
+    MonsterIR *mir;
+
+    mv = (MonsterVars *)instance->extraData;
+    mir = MONSENSE_GetMonsterIR(mv);
+
+    if (mir != NULL)
+    {
+
+        long whatAmI;
+        MonsterAllegiances *allegiances;
+
+        whatAmI = INSTANCE_Query(sensed, 1);
+        allegiances = mv->subAttr->allegiances;
+
+        mir->mirFlags = 0x100U;
+        mir->instance = sensed;
+        mir->handle = sensed->instanceID;
+        mir->forgetTimer = MON_GetTime(instance) + (mv->subAttr->forgetTime * 0x3E8);
+        mir->next = mv->monsterIRList;
+        mv->monsterIRList = mir;
+        mir->mirConditions = 0;
+
+        if (whatAmI & allegiances->enemies && !(INSTANCE_Query(sensed, 0) & 0x44000000))
+        {
+            mir->mirFlags |= 1;
+        }
+
+        if (whatAmI & allegiances->allies)
+        {
+            mir->mirFlags |= 2;
+            if (((Object *)sensed->extraData)->oflags & 0x100000)
+            {
+                mir->mirFlags |= 0x12;
+            }
+        }
+
+        if (whatAmI & allegiances->food)
+        {
+            mir->mirFlags |= 9;
+        }
+
+        if (whatAmI & allegiances->gods)
+        {
+            mir->mirFlags |= 4;
+        }
+    }
+    return mir;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSENSE", MONSENSE_SetupMIR);
 
