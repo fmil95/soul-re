@@ -18,18 +18,39 @@ Note that the status above is not reflective of the actual completion rate of th
 
 A complete list of overlays will be published on this repository soon.  
 
-## Building (Linux)
+## Installation
 
-### Install build dependencies
-The build process has the following package requirements:
+**Notice:** The process outlined below for setting up Soul Reaverse locally on your machine will only work on Linux, because much of the required software isn't compatible with Windows. The only way to install the development environment on that operating system is through the *Windows Subsystem for Linux (WSL)*, which if you don't have it already enabled you should look for some guide on the net on how to use it.  
+
+### Fetching the ROM
+
+The commercial releases of Soul Reaver don't have debugging symbols, except for the German release. However, the .SYM file that is available on that version's CD-ROM is from an earlier build of the game, which would render reverse-engineering it confusing as the symbols would be mapped to different addresses in memory and have breaking changes in regards to the actual compiled data on the binary. Instead, you must download the **1999-07-14 build** which can be found on Internet Archive, and glean the SLUS_007.08 file from there. 
+
+### Installing the IDE and Plugins
+
+The preferred *Integrated Development Environment (IDE)* for this project is **Visual Studio Code 1.99.3 or higher**, which can be freely obtained on its official website.
+
+After installing Visual Studio Code, it is very much recommended that you add the following Extensions:
+- C/C++ Extension Pack
+- CMake
+- CMake Tools
+- Makefile Tools
+- Pylance
+- Python
+- Python Debugger
+- WSL (not necessary if you are on Linux)
+
+### Installing the project dependencies
+The setup process has the following package requirements:
 - git
 - build-essential
 - binutils-mips-linux-gnu
 - python3
 - bchunk
-- 7z
+- p7zip-full
+- p7zip-rar
 
-Under a Debian based distribution, you can install these with the following commands:
+You can install these with the following Bash commands:
 ```
 sudo apt update
 sudo apt install git build-essential binutils-mips-linux-gnu python3 bchunk p7zip-full p7zip-rar
