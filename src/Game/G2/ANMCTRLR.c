@@ -328,7 +328,83 @@ void _G2Anim_BuildTransformsWithControllers(G2Anim *anim)
     _G2Anim_UpdateControllers(anim);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/G2/ANIMG2", _G2Anim_BuildSegTransformWithControllers);
+void _G2Anim_BuildSegTransformWithControllers(G2Matrix *segMatrix, G2Matrix *parentMatrix, G2AnimController *controller, G2Bool bRootTransUpdated, int segIndex)
+{
+    G2AnimSegValue *segValue;
+    G2LVector3 scale;
+    unsigned long flags;
+    G2SVector3 *svector;
+    G2LVector3 *lvector;
+
+    segValue = &_segValues[segIndex];
+
+    _G2Anim_BuildSegLocalRotMatrix(segValue, segMatrix);
+
+    flags = 0x7;
+
+    while (controller->segNumber == segIndex)
+    {
+        flags &= _G2AnimController_ApplyToSegValue(controller, segValue, segMatrix, parentMatrix);
+
+        controller = &_controllerPool.blockPool[controller->next];
+    }
+
+    gte_SetRotMatrix(parentMatrix);
+
+    scale.x = segValue->scale.x;
+    scale.y = segValue->scale.y;
+    scale.z = segValue->scale.z;
+
+    if ((scale.x | scale.y | scale.z) != 4096)
+    {
+        ScaleMatrix((MATRIX *)segMatrix, (VECTOR *)&scale);
+
+        segMatrix->scaleFlag = 1;
+    }
+
+    if ((flags & 0x1))
+    {
+        hasm_segmatrixop(segMatrix);
+    }
+
+    if ((flags & 0x4))
+    {
+        if (segIndex == 0)
+        {
+            gte_SetRotMatrix(segMatrix);
+        }
+
+        svector = &segValue->trans;
+        lvector = &segMatrix->trans;
+
+        gte_ldv0(svector);
+
+        gte_nrtv0();
+
+        gte_stlvnl(lvector);
+    }
+    else
+    {
+        segMatrix->trans.x = segValue->trans.x;
+        segMatrix->trans.y = segValue->trans.y;
+        segMatrix->trans.z = segValue->trans.z;
+    }
+
+    if (bRootTransUpdated != G2FALSE)
+    {
+        parentMatrix->trans.x += segMatrix->trans.x;
+        parentMatrix->trans.y += segMatrix->trans.y;
+        parentMatrix->trans.z += segMatrix->trans.z;
+
+        segMatrix->trans.x = 0;
+        segMatrix->trans.y = 0;
+        segMatrix->trans.z = 0;
+    }
+
+    segMatrix->trans.x += parentMatrix->trans.x;
+    segMatrix->trans.y += parentMatrix->trans.y;
+    segMatrix->trans.z += parentMatrix->trans.z;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/G2/ANIMG2", _G2AnimController_ApplyToSegValue);
 
