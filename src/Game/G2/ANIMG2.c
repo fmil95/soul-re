@@ -1148,7 +1148,7 @@ void _G2Anim_BuildSegTransformNoControllers(G2Matrix *segMatrix, G2Matrix *paren
     gte_nrtv0();
     gte_stlvnl(lvector);
 
-    if (bRootTransUpdated != 0)
+    if (bRootTransUpdated != G2FALSE)
     {
         parentMatrix->trans.x += segMatrix->trans.x;
         parentMatrix->trans.y += segMatrix->trans.y;
