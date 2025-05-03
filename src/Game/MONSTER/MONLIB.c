@@ -6,6 +6,7 @@
 #include "Game/MONSTER/MONAPI.h"
 #include "Game/PHYSOBS.h"
 #include "Game/INSTANCE.h"
+#include "Game/COLLIDE.h"
 #include "Game/MONSTER/MONTABLE.h"
 #include "Game/PLAN/ENMYPLAN.h"
 #include "Game/STATE.h"
@@ -2422,7 +2423,31 @@ Intro *MON_TestForTerrainImpale(Instance *instance, Terrain *terrain)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_MoveInstanceToImpalePoint);
+void MON_MoveInstanceToImpalePoint(Instance *instance)
+{
+
+    Position offset;
+    Intro *impaler;
+    MonsterVars *mv;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (instance->matrix == NULL) { return; }
+
+    impaler = INSTANCE_FindIntro(instance->currentStreamUnitID, mv->terrainImpaleID);
+
+    if (impaler == NULL) { return; }
+
+    offset.x = impaler->position.x - instance->matrix[3].t[0];
+    offset.y = impaler->position.y - instance->matrix[3].t[1];
+    offset.z = impaler->position.z - instance->matrix[3].t[2];
+
+    ADD_SVEC(Position, &instance->position, Position, &instance->position, Position, &offset);
+    COPY_SVEC(Rotation, &instance->rotation, Rotation, &impaler->rotation);
+
+    COLLIDE_UpdateAllTransforms(instance, (SVECTOR *)&offset);
+
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_ReachableIntro);
 
