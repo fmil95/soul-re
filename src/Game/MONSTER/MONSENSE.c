@@ -38,7 +38,76 @@ MonsterIR *MONSENSE_FindIR(MonsterVars *mv, Instance *instance)
     return mir;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSENSE", MONSENSE_See);
+int MONSENSE_See(Instance *instance, evCollideInstanceStatsData *data)
+{
+
+    int arc;
+    MonsterVars *mv;
+    MonsterSenses *senses;
+
+    mv = (MonsterVars *)instance->extraData;
+    senses = mv->subAttr->senses;
+    arc = data->distance;
+
+    if ((unsigned)arc < (unsigned)senses->sightRadius)
+    {
+
+        int elevation;
+        Instance *target;
+        evPhysicsLOSData losData;
+
+        elevation = MATH3D_FastAtan2(500, arc);
+        arc = elevation;
+
+        if (elevation < senses->sightArc)
+        {
+            arc = senses->sightArc;
+        }
+
+        if (elevation < senses->sightElevation)
+        {
+            elevation = senses->sightElevation;
+        }
+
+        if (MATH3D_ConeDetect(&data->relativePosition, arc, elevation) != 0)
+        {
+
+            target = data->instance;
+
+            if (INSTANCE_Query(target, 1) & 1)
+            {
+                if (instance->matrix != NULL)
+                {
+                    MATRIX *mat;
+                    mat = &instance->matrix[((MonsterAttributes *)instance->data)->headSegment];
+                    losData.origin.x = mat->t[0];
+                    losData.origin.y = mat->t[1];
+                    losData.origin.z = mat->t[2];
+                }
+                else
+                {
+                    COPY_SVEC(Position, &losData.origin, Position, &instance->position);
+                }
+
+                if (target->matrix != NULL)
+                {
+                    MATRIX *mat;
+                    mat = &target->matrix[1];
+                    losData.destination.x = mat->t[0];
+                    losData.destination.y = mat->t[1];
+                    losData.destination.z = mat->t[2];
+                }
+                else
+                {
+                    COPY_SVEC(Position, &losData.destination, Position, &target->position);
+                }
+                return PhysicsCheckLOS(instance, (intptr_t)&losData, 4);
+            }
+            return 1;
+        }
+    }
+    return 0;
+}
 
 int MONSENSE_Hear(Instance *instance, evCollideInstanceStatsData *data)
 {
