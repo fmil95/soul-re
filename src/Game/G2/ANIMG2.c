@@ -1112,7 +1112,57 @@ void _G2Anim_BuildTransformsNoControllers(G2Anim *anim)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/G2/ANIMG2", _G2Anim_BuildSegTransformNoControllers);
+void _G2Anim_BuildSegTransformNoControllers(G2Matrix *segMatrix, G2Matrix *parentMatrix, G2Bool bRootTransUpdated, int segIndex)
+{
+    G2AnimSegValue *segValue;
+    G2LVector3 scale;
+    G2SVector3 *svector;
+    G2LVector3 *lvector;
+    int temp; // not from decls.h
+
+    segValue = &_segValues[segIndex];
+
+    scale.x = segValue->scale.x;
+    scale.y = segValue->scale.y;
+    scale.z = segValue->scale.z;
+
+    temp = (scale.x | scale.y | scale.z) != 4096;
+
+    _G2Anim_BuildSegLocalRotMatrix(segValue, segMatrix);
+
+    if (temp != 0)
+    {
+        ScaleMatrix((MATRIX *)segMatrix, (VECTOR *)&scale);
+
+        segMatrix->scaleFlag = temp;
+    }
+
+    gte_SetRotMatrix(parentMatrix);
+
+    hasm_segmatrixop(segMatrix);
+
+    svector = &segValue->trans;
+    lvector = &segMatrix->trans;
+
+    gte_ldv0(svector);
+    gte_nrtv0();
+    gte_stlvnl(lvector);
+
+    if (bRootTransUpdated != 0)
+    {
+        parentMatrix->trans.x += segMatrix->trans.x;
+        parentMatrix->trans.y += segMatrix->trans.y;
+        parentMatrix->trans.z += segMatrix->trans.z;
+
+        segMatrix->trans.x = 0;
+        segMatrix->trans.y = 0;
+        segMatrix->trans.z = 0;
+    }
+
+    segMatrix->trans.x += parentMatrix->trans.x;
+    segMatrix->trans.y += parentMatrix->trans.y;
+    segMatrix->trans.z += parentMatrix->trans.z;
+}
 
 void _G2Anim_BuildSegLocalRotMatrix(G2AnimSegValue *segValue, G2Matrix *segMatrix)
 {
