@@ -328,9 +328,181 @@ void _G2Anim_BuildTransformsWithControllers(G2Anim *anim)
     _G2Anim_UpdateControllers(anim);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/G2/ANIMG2", _G2Anim_BuildSegTransformWithControllers);
+void _G2Anim_BuildSegTransformWithControllers(G2Matrix *segMatrix, G2Matrix *parentMatrix, G2AnimController *controller, G2Bool bRootTransUpdated, int segIndex)
+{
+    G2AnimSegValue *segValue;
+    G2LVector3 scale;
+    unsigned long flags;
+    G2SVector3 *svector;
+    G2LVector3 *lvector;
 
-INCLUDE_ASM("asm/nonmatchings/Game/G2/ANIMG2", _G2AnimController_ApplyToSegValue);
+    segValue = &_segValues[segIndex];
+
+    _G2Anim_BuildSegLocalRotMatrix(segValue, segMatrix);
+
+    flags = 0x7;
+
+    while (controller->segNumber == segIndex)
+    {
+        flags &= _G2AnimController_ApplyToSegValue(controller, segValue, segMatrix, parentMatrix);
+
+        controller = &_controllerPool.blockPool[controller->next];
+    }
+
+    gte_SetRotMatrix(parentMatrix);
+
+    scale.x = segValue->scale.x;
+    scale.y = segValue->scale.y;
+    scale.z = segValue->scale.z;
+
+    if ((scale.x | scale.y | scale.z) != 4096)
+    {
+        ScaleMatrix((MATRIX *)segMatrix, (VECTOR *)&scale);
+
+        segMatrix->scaleFlag = 1;
+    }
+
+    if ((flags & 0x1))
+    {
+        hasm_segmatrixop(segMatrix);
+    }
+
+    if ((flags & 0x4))
+    {
+        if (segIndex == 0)
+        {
+            gte_SetRotMatrix(segMatrix);
+        }
+
+        svector = &segValue->trans;
+        lvector = &segMatrix->trans;
+
+        gte_ldv0(svector);
+
+        gte_nrtv0();
+
+        gte_stlvnl(lvector);
+    }
+    else
+    {
+        segMatrix->trans.x = segValue->trans.x;
+        segMatrix->trans.y = segValue->trans.y;
+        segMatrix->trans.z = segValue->trans.z;
+    }
+
+    if (bRootTransUpdated != G2FALSE)
+    {
+        parentMatrix->trans.x += segMatrix->trans.x;
+        parentMatrix->trans.y += segMatrix->trans.y;
+        parentMatrix->trans.z += segMatrix->trans.z;
+
+        segMatrix->trans.x = 0;
+        segMatrix->trans.y = 0;
+        segMatrix->trans.z = 0;
+    }
+
+    segMatrix->trans.x += parentMatrix->trans.x;
+    segMatrix->trans.y += parentMatrix->trans.y;
+    segMatrix->trans.z += parentMatrix->trans.z;
+}
+
+unsigned long _G2AnimController_ApplyToSegValue(G2AnimController *controller, G2AnimSegValue *segValue, G2Matrix *segMatrix, G2Matrix *parentMatrix)
+{
+    G2Matrix tempMatrix;
+    G2SVector3 tempVector;
+    unsigned long flags;
+
+    if (!(((unsigned int *)controller)[0] & 0xFF020000))
+    {
+        return _G2AnimController_ApplyWorldToParentMatrix(controller, parentMatrix);
+    }
+    else
+    {
+        flags = 0x7;
+
+        switch (controller->type)
+        {
+        case 0:
+            break;
+        case 1:
+            flags = controller->data.callback.function(controller, segValue, parentMatrix, segMatrix, controller->data.callback.fnData);
+            break;
+        case 8:
+            flags &= ~0x1;
+        case 10:
+            _G2AnimController_GetMatrix(controller, segMatrix);
+            break;
+        case 76:
+            flags &= ~0x1;
+
+            gte_SetRotMatrix(parentMatrix);
+
+            hasm_segmatrixop(segMatrix);
+        case 14:
+            _G2AnimController_GetMatrix(controller, &tempMatrix);
+
+            gte_SetRotMatrix(&tempMatrix);
+
+            hasm_segmatrixop(segMatrix);
+            break;
+        case 16:
+            flags &= ~0x2;
+        case 18:
+        {
+            unsigned short z;
+            unsigned long xy;
+
+            _G2AnimController_GetVector(controller, &tempVector);
+
+            xy = *(unsigned long *)&tempVector.x;
+            z = tempVector.z;
+
+            *(unsigned long *)&segValue->scale.x = xy;
+            segValue->scale.z = z;
+            break;
+        }
+        case 22:
+            _G2AnimController_GetVector(controller, &tempVector);
+
+            segValue->scale.x += tempVector.x;
+            segValue->scale.y += tempVector.y;
+            segValue->scale.z += tempVector.z;
+            break;
+        case 32:
+            flags &= ~0x4;
+
+            _G2AnimController_GetVector(controller, &tempVector);
+
+            segValue->trans.x = tempVector.x - parentMatrix->trans.x;
+            segValue->trans.y = tempVector.y - parentMatrix->trans.y;
+            segValue->trans.z = tempVector.z - parentMatrix->trans.z;
+            break;
+        case 34:
+        {
+            unsigned short z;
+            unsigned long xy;
+
+            _G2AnimController_GetVector(controller, &tempVector);
+
+            xy = *(unsigned long *)&tempVector.x;
+            z = tempVector.z;
+
+            *(unsigned long *)&segValue->trans.x = xy;
+            segValue->trans.z = z;
+            break;
+        }
+        case 38:
+            _G2AnimController_GetVector(controller, &tempVector);
+
+            segValue->trans.x += tempVector.x;
+            segValue->trans.y += tempVector.y;
+            segValue->trans.z += tempVector.z;
+            break;
+        }
+    }
+
+    return flags;
+}
 
 void _G2Anim_UpdateControllers(G2Anim *anim)
 {

@@ -36,6 +36,56 @@
 #define GETP_ZW(b) *(long *)(&b->z);
 #define SETP_ZW(b, c) *(long *)(&b->z) = c;
 
+#define hasm_segmatrixop(r0) __asm__ ( \
+    "lhu    $12, 0(%0);\n" \
+    "lhu    $13, 6(%0);\n" \
+    "lhu    $14, 12(%0);\n" \
+    "mtc2    $12, $9;\n" \
+    "mtc2    $13, $10;\n" \
+    "mtc2    $14, $11;\n" \
+    "lhu    $8, 2(%0);\n" \
+    "lhu    $9, 8(%0);\n" \
+    "nop\n" \
+    /* gte_rtir12 */ \
+    ".word   0x4A49E012;\n" \
+    "lhu    $10, 14(%0);\n" \
+    "lhu    $11, 4(%0);\n" \
+    "mfc2    $13, $9;\n" \
+    "mfc2    $14, $10;\n" \
+    "mfc2    $15, $11;\n" \
+    "mtc2    $8, $9;\n" \
+    "mtc2    $9, $10;\n" \
+    "mtc2    $10, $11;\n" \
+    "sh      $13, 0(%0);\n" \
+    "sh      $14, 6(%0);\n" \
+    "nop;\n" \
+    /* gte_rtir12 */ \
+    ".word   0x4A49E012;\n" \
+    "lhu     $12, 10(%0);\n" \
+    "lhu     $13, 16(%0);\n" \
+    "mfc2    $8, $9;\n" \
+    "mfc2    $9, $10;\n" \
+    "mfc2    $10, $11;\n" \
+    "mtc2    $11, $9;\n" \
+    "mtc2    $12, $10;\n" \
+    "mtc2    $13, $11;\n" \
+    "sh      $15, 12(%0);\n" \
+    "sh      $8, 2(%0);\n" \
+    "nop;\n" \
+    /* gte_rtir12 */ \
+    ".word   0x4A49E012;\n" \
+    "sh      $9, 8(%0);\n" \
+    "sh      $10, 14(%0);\n" \
+    "mfc2    $8, $9;\n" \
+    "mfc2    $9, $10;\n" \
+    "mfc2    $10, $11;\n" \
+    "sh      $8, 4(%0);\n" \
+    "sh      $9, 10(%0);\n" \
+    "sh      $10, 16(%0);\n" \
+    : : "r"(r0) \
+    : "$8", "$9", "$10", "$11", "$12", "$13", "$14", "$15", "memory" \
+)
+
 void G2Anim_Restore(G2Anim *anim);
 void G2Anim_Free(G2Anim *anim);
 G2Bool G2Anim_SegmentHasActiveChannels(G2Anim *anim, int segNumber, unsigned short chanMask);

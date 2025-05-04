@@ -191,7 +191,158 @@ MonsterIR *MONSENSE_FirstSense(Instance *instance, Instance *sensed)
     return mir;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSENSE", MONSENSE_SetupMIR);
+void MONSENSE_SetupMIR(Instance *instance, evCollideInstanceStatsData *data, int flags)
+{
+    MonsterIR *mir;
+    MonsterVars *mv;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    mir = MONSENSE_FindIR(mv, data->instance);
+
+    if (mir == NULL)
+    {
+        if (flags != 0)
+        {
+            mir = MONSENSE_FirstSense(instance, data->instance);
+        }
+    }
+    else if (flags != 0)
+    {
+        mir->forgetTimer = MON_GetTime(instance) + (mv->subAttr->forgetTime * 1000);
+    }
+
+    if (mir != NULL)
+    {
+        long mode;
+
+        mir->mirFlags |= flags;
+
+        mir->distance = data->distance;
+
+        COPY_SVEC(SVector, &mir->relativePosition, SVector, &data->relativePosition);
+
+        if ((mv->subAttr->combatAttributes != NULL) && (mv->subAttr->combatAttributes->combatRange > mir->distance))
+        {
+            mir->mirConditions |= 0x8;
+        }
+        else
+        {
+            mir->mirConditions &= ~0x8;
+        }
+
+        if (((short)((MATH3D_AngleFromPosToPos(&mir->instance->position, &instance->position) - mir->instance->rotation.z) + 1024) & 0xFFF) > 2048)
+        {
+            mir->mirConditions |= 0x2;
+        }
+        else
+        {
+            mir->mirConditions &= ~0x2;
+        }
+
+        mode = INSTANCE_Query(mir->instance, 10);
+
+        if ((mode & 0x208000) == 0x208000)
+        {
+            mode &= ~0x200000;
+        }
+
+        if ((mode & 0x4))
+        {
+            mir->mirConditions |= 0x1;
+        }
+        else
+        {
+            mir->mirConditions &= ~0x1;
+        }
+
+        if ((mir->mirFlags & 0x400))
+        {
+            if (!(mode & 0x200000))
+            {
+                mir->mirFlags &= ~0x400;
+                mir->mirConditions &= ~0x820;
+
+                if (((mir->mirFlags & 0x1)) && (!(mir->mirConditions & 0x400)))
+                {
+                    mir->mirConditions |= 0x4;
+                }
+            }
+        }
+        else
+        {
+            if ((mode & 0x200000))
+            {
+                int run;
+                int distance;
+
+                run = mode & 0x4;
+
+                if (mv->subAttr->combatAttributes != NULL)
+                {
+                    if (run != 0)
+                    {
+                        distance = mv->subAttr->combatAttributes->enemyRunAttackRange;
+                    }
+                    else
+                    {
+                        distance = mv->subAttr->combatAttributes->enemyAttackRange;
+                    }
+
+                    mir->mirConditions &= ~0xE4;
+                    mir->mirFlags |= 0x400;
+
+                    if ((mir->distance < distance) && (((short)((MATH3D_AngleFromPosToPos(&mir->instance->position, &instance->position) - mir->instance->rotation.z) + 512) & 0xFFF) < 2048))
+                    {
+                        if (run != 0)
+                        {
+                            mir->mirConditions |= 0x20;
+                        }
+
+                        mir->mirConditions |= 0x800;
+                    }
+                }
+            }
+        }
+
+        if ((mir->mirFlags & 0x800))
+        {
+            if (mode != 1)
+            {
+                mir->mirFlags &= ~0x800;
+                mir->mirConditions &= ~0x10;
+            }
+            else
+            {
+                do
+                {
+                    if ((!(mir->mirConditions & 0x10)) && (mir->idleTime < MON_GetTime(instance)))
+                    {
+                        mir->mirConditions |= 0x10;
+                    }
+                } while (0); // this loop isn't really necessary (it's garbage), however the if statement inside of it is
+            }
+        }
+        else if (mode == 1)
+        {
+            mir->mirFlags |= 0x800;
+
+            mir->idleTime = MON_GetTime(instance) + 4950;
+        }
+
+        if ((mir->mirFlags & 0x200))
+        {
+            if ((mir->distance > (mv->subAttr->combatAttributes->allyRange + 300)) || ((INSTANCE_Query(mir->instance, 0) & 0x44000000)))
+            {
+                mir->mirFlags &= ~0x200;
+            }
+        }
+        else if (((mir->mirFlags & 0x2)) && (mir->distance < mv->subAttr->combatAttributes->allyRange))
+        {
+            mir->mirFlags |= 0x200;
+        }
+    }
+}
 
 void MONSENSE_SenseInstance(Instance *instance, evCollideInstanceStatsData *data)
 {
