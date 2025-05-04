@@ -5,5 +5,6 @@
 
 void aadUpdateSlotVolPan(AadSequenceSlot *slot);
 int aadGetReverbMode();
+void aadUpdateChannelVolPan(AadSequenceSlot *slot, int channel);
 
 #endif

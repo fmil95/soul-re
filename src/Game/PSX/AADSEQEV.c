@@ -40,7 +40,19 @@ void midiControlBankSelect()
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", midiControlVolume);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", midiControlPan);
+void midiControlPan(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int channel;
+
+    channel = event->statusByte & 0xF;
+
+    slot->panPosition[channel] = event->dataByte[1];
+
+    if (((slot->enableSustainUpdate >> channel) & 0x1))
+    {
+        aadUpdateChannelVolPan(slot, channel);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", midiControlCallback);
 
