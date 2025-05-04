@@ -6,7 +6,11 @@
 #include "Game/MEMPACK.h"
 #include "Game/CINEMA/CINEPSX.h"
 #include "Game/DEBUG.h"
+#include "Game/VRAM.h"
 #include "Game/MENU/MENU.h"
+#include "Game/MENU/MENUDEFS.h"
+#include "Game/MENU/MENUFACE.h"
+#include "Game/PSX/AADLIB.h"
 
 short mainMenuFading;
 
@@ -17,6 +21,8 @@ int nosound;
 int nomusic;
 
 int devstation;
+
+int mainMenuSfx;
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", ClearDisplay);
 
@@ -178,7 +184,22 @@ void MAIN_ResetGame()
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MAIN_MainMenuInit);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MAIN_FreeMainMenuStuff);
+void MAIN_FreeMainMenuStuff(void)
+{
+
+    menuface_terminate();
+    VRAM_DisableTerrainArea();
+
+    if (mainMenuScreen != NULL)
+    {
+        MEMPACK_Free((char *)mainMenuScreen);
+        mainMenuScreen = NULL;
+    }
+
+    aadFreeDynamicSfx(mainMenuSfx);
+    while (aadGetNumLoadsQueued() != 0) { aadProcessLoadQueue(); }
+
+}
 
 void MAIN_StartGame()
 {

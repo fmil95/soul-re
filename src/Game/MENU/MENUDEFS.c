@@ -19,8 +19,6 @@ static char *the_attract_movies[] = {
     "\\KAINDEM4.STR;1",
 };
 
-long *mainMenuScreen;
-
 static int MAIN_YPOS = 30;
 
 static int PAUSE_YPOS = 60;

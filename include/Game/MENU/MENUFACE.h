@@ -4,5 +4,6 @@
 #include "common.h"
 
 void MENUFACE_ChangeStateRandomly(int index);
+void menuface_terminate();
 
 #endif
