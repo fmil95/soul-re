@@ -30,18 +30,16 @@ The commercial releases of Soul Reaver don't have debugging symbols, except for 
 
 The preferred *Integrated Development Environment (IDE)* for this project is **Visual Studio Code 1.99.3 or higher**, which can be freely obtained on its official website.
 
-After installing Visual Studio Code, it is very much recommended that you add the following Extensions:
+After installing Visual Studio Code, it is very much recommended that you add the following Extensions to it:
 - C/C++ Extension Pack
-- CMake
 - CMake Tools
 - Makefile Tools
-- Pylance
 - Python
-- Python Debugger
 - WSL (not necessary if you are on Linux)
 
-### Installing the project dependencies
-The setup process has the following package requirements:
+### Installing the required packages
+
+You'll need to have the following packets installed on your system:
 - git
 - build-essential
 - binutils-mips-linux-gnu
@@ -50,18 +48,20 @@ The setup process has the following package requirements:
 - p7zip-full
 - p7zip-rar
 
-You can install these with the following Bash commands:
+You might already have some of these but if you don't have any of them or are missing a select few, you can grab them all with the following two Bash commands:
 ```
 sudo apt update
 sudo apt install git build-essential binutils-mips-linux-gnu python3 bchunk p7zip-full p7zip-rar
 ```
 
-### Clone the repository
-Clone `https://github.com/fmil95/soul-re` in whatever directory you wish. Make sure to clone recursively!
+### Cloning the repository
+
+In order to clone this repository locally on your desktop, you might enter the following Bash command in the directory where you want to put up the decompile:  
 ```
 git clone --recursive https://github.com/fmil95/soul-re.git
-cd soul-re
 ```
+
+If you want to do the cloning by some other means, don't forget to do so recursively or else the submodules in the tools folder of the project won't be copied correctly.
 
 ### Install Python3 requirements
 Run `python3 -m install -r requirements.txt`
