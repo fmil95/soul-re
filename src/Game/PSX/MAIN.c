@@ -16,6 +16,8 @@ int nosound;
 
 int nomusic;
 
+int devstation;
+
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", ClearDisplay);
 
 void screen_to_vram(long *screen, int buffer)
@@ -75,7 +77,26 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", DrawCallback);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", FadeOutSayingLoading);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", CheckForDevStation);
+void CheckForDevStation()
+{
+    long *volatile a1;
+    long *volatile a2;
+
+    a1 = (long *)0x80180000;
+    a2 = (long *)0x80380000;
+
+    *a1 = 0;
+    *a2 = 0x12345678;
+
+    if (*a1 == *a2)
+    {
+        devstation = 0;
+    }
+    else
+    {
+        devstation = 1;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MAIN_ShowLoadingScreen);
 
