@@ -608,7 +608,7 @@ SavedLevel *SAVE_CreatedSavedLevel(long areaID, Level *level)
                             slevel->bspTreeArray->importantFlagsSaved = bspTree->flags;
 
                             slevel = (ActualSavedLevel *)&slevel->bspTreeArray;
-                        } while (0);
+                        } while (0); // this loop isn't really necessary (it's garbage), however the four lines inside of it are
                     }
                 }
             }
