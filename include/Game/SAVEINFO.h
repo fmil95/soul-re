@@ -17,6 +17,7 @@ void SAVE_Instance(Instance *instance, Level *level);
 SavedLevel *SAVE_CreatedSavedLevel(long areaID, Level *level);
 void SAVE_IntroForStreamID(StreamUnit *streamUnit);
 void SAVE_UpdateLevelWithSave(StreamUnit *streamUnit);
+void SAVE_Init(GameTracker *gt);
 void SAVE_SaveGame();
 long SAVE_SizeOfFreeSpace();
 void SAVE_RestoreGame();

@@ -1,12 +1,19 @@
 #include "Game/PSX/MAIN.h"
+#include "Game/FONT.h"
 #include "Game/GAMELOOP.h"
+#include "Game/GAMEPAD.h"
+#include "Game/SAVEINFO.h"
 #include "Game/RAZIEL/RAZLIB.h"
 #include "Game/PSX/AADLIB.h"
 #include "Game/LOAD3D.h"
 #include "Game/MEMPACK.h"
 #include "Game/CINEMA/CINEPSX.h"
 #include "Game/DEBUG.h"
+#include "Game/VRAM.h"
 #include "Game/MENU/MENU.h"
+#include "Game/MENU/MENUDEFS.h"
+#include "Game/MENU/MENUFACE.h"
+#include "Game/PSX/AADLIB.h"
 
 short mainMenuFading;
 
@@ -18,7 +25,21 @@ int nomusic;
 
 int devstation;
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", ClearDisplay);
+int mainMenuSfx;
+
+short mainMenuTimeOut;
+
+void ClearDisplay(void)
+{
+    PutDrawEnv(&draw[gameTrackerX.gameData.asmData.dispPage]);
+    clearRect[gameTrackerX.gameData.asmData.dispPage].r0 = 0;
+    clearRect[gameTrackerX.gameData.asmData.dispPage].g0 = 0;
+    clearRect[gameTrackerX.gameData.asmData.dispPage].b0 = 0;
+    DrawPrim(&clearRect[gameTrackerX.gameData.asmData.dispPage]);
+    DrawSync(0);
+    PutDispEnv(&disp[gameTrackerX.gameData.asmData.dispPage]);
+    SetDispMask(1);
+}
 
 void screen_to_vram(long *screen, int buffer)
 {
@@ -100,7 +121,10 @@ void CheckForDevStation()
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MAIN_ShowLoadingScreen);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MAIN_LoadTim);
+long *MAIN_LoadTim(char *name)
+{
+    return LOAD_ReadFile(name, 11);
+}
 
 void init_menus(GameTracker *gt)
 {
@@ -175,7 +199,22 @@ void MAIN_ResetGame()
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MAIN_MainMenuInit);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MAIN_FreeMainMenuStuff);
+void MAIN_FreeMainMenuStuff(void)
+{
+
+    menuface_terminate();
+    VRAM_DisableTerrainArea();
+
+    if (mainMenuScreen != NULL)
+    {
+        MEMPACK_Free((char *)mainMenuScreen);
+        mainMenuScreen = NULL;
+    }
+
+    aadFreeDynamicSfx(mainMenuSfx);
+    while (aadGetNumLoadsQueued() != 0) { aadProcessLoadQueue(); }
+
+}
 
 void MAIN_StartGame()
 {
@@ -203,6 +242,35 @@ void MAIN_StartGame()
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MAIN_DoMainMenu);
+long MAIN_DoMainMenu(GameTracker *gameTracker, MainTracker *mainTracker, long menuPos)
+{
+
+    unsigned long **drawot;
+
+    gameTrackerX.timeMult = 0x1000;
+    drawot = gameTracker->drawOT;
+
+    DrawPrim(&clearRect[gameTracker->drawPage]);
+    GAMEPAD_Process(gameTracker);
+    DEBUG_Process(gameTracker);
+
+    if (mainMenuScreen != 0)
+    {
+        screen_to_vram(mainMenuScreen, gameTracker->drawPage);
+    }
+
+    GAMELOOP_HandleScreenWipes(drawot);
+    MENUFACE_RefreshFaces();
+    FONT_Flush();
+    mainMenuTimeOut++;
+    GAMELOOP_FlipScreenAndDraw(gameTracker, drawot);
+
+    if (mainMenuFading != 0 && gameTracker->wipeTime == -1)
+    {
+        MAIN_StartGame();
+    }
+
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MainG2);
