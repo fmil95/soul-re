@@ -302,7 +302,72 @@ long MATH3D_FastSqrt(long square)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MATH3D", MATH3D_FastSqrt0);
+long MATH3D_FastSqrt0(long square)
+{
+    unsigned long result;
+    long remainder;
+    long mask;
+    long shift;
+    long mask_squared;
+    long result_shift;
+
+    shift = 31;
+
+    if (square != 0)
+    {
+        mask = 0x80000000;
+
+        if (square >= 0)
+        {
+            do
+            {
+                mask >>= 1;
+
+                remainder = mask & square;
+
+                shift--;
+            } while (remainder == 0);
+        }
+
+        shift >>= 1;
+
+        result = 1 << shift;
+
+        mask = result;
+
+        result_shift = 1 << (shift << 1);
+
+        mask_squared = result_shift;
+
+        square -= result_shift;
+
+        while (--shift != -1)
+        {
+            mask >>= 1;
+
+            mask_squared >>= 2;
+
+            remainder = square - result_shift;
+
+            remainder -= mask_squared;
+
+            result_shift >>= 1;
+
+            if (remainder >= 0)
+            {
+                square = remainder;
+
+                result_shift += mask_squared;
+
+                result |= mask;
+            }
+        }
+
+        return result;
+    }
+
+    return 0;
+}
 
 long MATH3D_DistanceBetweenPositions(Position *pos1, Position *pos2)
 {
