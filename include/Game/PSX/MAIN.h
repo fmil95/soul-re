@@ -5,6 +5,7 @@
 
 void MAIN_StartGame();
 void VblTick();
+void DrawCallback();
 int MainG2(void *appData);
 long *MAIN_LoadTim(char *name);
 void MAIN_InitVolume();

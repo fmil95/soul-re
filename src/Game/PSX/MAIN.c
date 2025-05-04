@@ -82,7 +82,6 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MAIN_LoadTim);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", init_menus);
 
-void DrawCallback();
 void MAIN_DoMainInit()
 {
     InitDisplay();
