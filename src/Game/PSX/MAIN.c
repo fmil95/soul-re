@@ -6,6 +6,7 @@
 #include "Game/MEMPACK.h"
 #include "Game/CINEMA/CINEPSX.h"
 #include "Game/DEBUG.h"
+#include "Game/MENU/MENU.h"
 
 short mainMenuFading;
 
@@ -80,7 +81,16 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MAIN_ShowLoadingScreen);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MAIN_LoadTim);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", init_menus);
+void init_menus(GameTracker *gt)
+{
+    menu_t *menu;
+
+    menu = (menu_t *)MEMPACK_Malloc(menu_data_size(), 45);
+
+    menu_initialize(menu, gt);
+
+    gt->menu = menu;
+}
 
 void MAIN_DoMainInit()
 {
