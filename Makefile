@@ -108,6 +108,7 @@ $(BUILD_DIR)/src/Game/PLAN/ENMYPLAN.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/PLAN/PLANPOOL.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/PLAN/PLANAPI.c.o: CFLAGS += -funsigned-char
 
+$(BUILD_DIR)/src/Game/PSX/AADLIB.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/PSX/AADSFX.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/PSX/AADVOICE.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/PSX/SUPPORT.c.o: CFLAGS += -funsigned-char

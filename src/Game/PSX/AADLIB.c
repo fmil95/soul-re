@@ -104,7 +104,10 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadSlotUpdateWrapper);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadSlotUpdate);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadCreateFourCharID);
+unsigned long aadCreateFourCharID(char a, char b, char c, char d)
+{
+    return d | (c << 8) | (b << 16) | (a << 24);
+}
 
 void aadLoadDynamicSoundBankReturn(void *loadedDataPtr, void *data, void *data2);
 int aadLoadDynamicSoundBank(char *sndFileName, char *smpFileName, int dynamicBankIndex, int loadOption, void (*retProc)())
