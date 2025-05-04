@@ -1,3 +1,4 @@
+#include "Game/PSX/AADLIB.h"
 #include "Game/PSX/AADSEQEV.h"
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", aadQueueNextEvent);
@@ -54,7 +55,13 @@ void midiControlPan(AadSeqEvent *event, AadSequenceSlot *slot)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", midiControlCallback);
+void midiControlCallback(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    if (aadMem->controller11Callback != NULL)
+    {
+        aadMem->controller11Callback(aadMem->controller11CallbackData, slot->thisSlotNumber, event->statusByte & 0xF, event->dataByte[1]);
+    }
+}
 
 void midiControlDummy()
 {
