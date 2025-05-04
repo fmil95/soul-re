@@ -29,7 +29,17 @@ int mainMenuSfx;
 
 short mainMenuTimeOut;
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", ClearDisplay);
+void ClearDisplay(void)
+{
+    PutDrawEnv(&draw[gameTrackerX.gameData.asmData.dispPage]);
+    clearRect[gameTrackerX.gameData.asmData.dispPage].r0 = 0;
+    clearRect[gameTrackerX.gameData.asmData.dispPage].g0 = 0;
+    clearRect[gameTrackerX.gameData.asmData.dispPage].b0 = 0;
+    DrawPrim(&clearRect[gameTrackerX.gameData.asmData.dispPage]);
+    DrawSync(0);
+    PutDispEnv(&disp[gameTrackerX.gameData.asmData.dispPage]);
+    SetDispMask(1);
+}
 
 void screen_to_vram(long *screen, int buffer)
 {
