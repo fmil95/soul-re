@@ -1,6 +1,7 @@
 #include "common.h"
 #include "Game/DRAW.h"
 #include "Game/VRAM.h"
+#include "Game/CAMERA.h"
 
 SVECTOR shadow_vertices[11];
 
@@ -60,7 +61,58 @@ INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_GlowQuad);
 
 INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_CreateAGlowingCircle);
 
-INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_DrawGlowPoints2);
+unsigned long *DRAW_DrawGlowPoints2(Instance *instance, long seg1, long seg2, PrimPool *primPool, unsigned long **ot, long color, long height)
+{
+
+    Position glowPoints1;
+    Position glowPoints2;
+    Vector f1;
+    Vector f2;
+    Vector f3;
+
+    long otz;
+    long otz2;
+    long angle;
+    long length;
+    long z;
+
+    otz = PIPE3D_Segment2ScreenPt(instance, theCamera.core.wcTransform, seg1, &glowPoints1) + 0x14;
+    otz2 = PIPE3D_Segment2ScreenPt(instance, theCamera.core.wcTransform, seg2, &glowPoints2) + 0x14;
+
+    if (otz < otz2)
+    {
+        otz = otz2;
+    }
+
+    if (otz <= 0) { return primPool->nextPrim; }
+
+    f1.x = glowPoints1.x;
+    f1.y = glowPoints1.y;
+    f2.x = glowPoints2.x;
+    f2.y = glowPoints2.y;
+
+    f3.x = glowPoints2.x - glowPoints1.x;
+    f3.y = glowPoints2.y - glowPoints1.y;
+
+    length = MATH3D_veclen2(f3.x, f3.y) + height;
+    angle = ratan2(f3.y, -f3.x) & 0xFFF;
+
+    f3.x = f2.x + f1.x;
+    f3.y = f2.y + f1.y;
+    f3.z = 0;
+
+    f3.x = (f3.x * 2) / 4;
+    f3.y = (f3.y * 2) / 4;
+    z = ((otz + otz2) / 2) * 4;
+    otz += 0xA;
+
+    if (otz < 0xC00)
+    {
+        DRAW_CreateAGlowingCircle(&f3, z, primPool, ot, otz, color, length, height, angle);
+    }
+
+    return primPool->nextPrim;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_DrawGlowPoint);
 
