@@ -13,5 +13,6 @@ long PIPE3D_TransformAnimatedSplitInstanceVertices(MVertex *vertexList, PVertex 
 void PIPE3D_AnimateTerrainTextures(DrMoveAniTex *aniTextures, long req_frame, PrimPool *primPool, unsigned long **drawot);
 void PIPE3D_InstanceListTransformAndDraw(StreamUnit *unit, GameTracker *gameTracker, unsigned long **ot, CameraCore *cameraCore);
 void PIPE3D_CalculateWCTransform(CameraCore *cameraCore);
+long PIPE3D_Segment2ScreenPt(Instance *instance, MATRIX *wcTransform, int segIndex, Position *pos);
 
 #endif
