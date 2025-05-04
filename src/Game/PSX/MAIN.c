@@ -100,7 +100,10 @@ void CheckForDevStation()
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MAIN_ShowLoadingScreen);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MAIN_LoadTim);
+long *MAIN_LoadTim(char *name)
+{
+    return LOAD_ReadFile(name, 11);
+}
 
 void init_menus(GameTracker *gt)
 {
