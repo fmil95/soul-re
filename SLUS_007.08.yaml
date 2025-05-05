@@ -255,7 +255,7 @@ segments:
       - {start: 0x0C28AC, type: comm, vram: 0x800D3060, name: Game/GAMEPAD}
       - {start: 0x0C28AC, type: sbss, vram: 0x800D310C, name: Game/LIGHT3D}
       - {start: 0x0C28AC, type: sbss, vram: 0x800D311C, name: Game/LOAD3D}
-      - {start: 0x0C28AC, type: sbss, vram: 0x800D31D0, name: Game/PSX/MAIN}
+      - {start: 0x0C28AC, type: .sbss, vram: 0x800D31D0, name: Game/PSX/MAIN}
       - {start: 0x0C28AC, type: comm, vram: 0x800D31D4, name: Game/PSX/MAIN}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D3664, name: Game/GENERIC}
       - {start: 0x0C28AC, type: sbss, vram: 0x800D3670, name: Game/SOUND}

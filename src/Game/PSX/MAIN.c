@@ -27,7 +27,7 @@ int nomusic;
 
 int devstation;
 
-STATIC int mainMenuSfx;
+static int mainMenuSfx;
 
 short mainMenuTimeOut;
 
