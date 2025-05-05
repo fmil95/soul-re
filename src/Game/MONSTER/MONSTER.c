@@ -21,6 +21,7 @@
 #include "Game/INSTANCE.h"
 #include "Game/G2/ANMCTRLR.h"
 #include "Game/G2/ANMG2ILF.h"
+#include "Game/MONSTER/HUMAN.h"
 
 void MON_DoCombatTimers(Instance *instance)
 {
@@ -68,7 +69,44 @@ void MON_DoCombatTimers(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_ChangeHumanOpinion);
+void MON_ChangeHumanOpinion(Instance *instance)
+{
+    int good;
+
+    good = INSTANCE_Query(instance, 1);
+
+    if ((good & 0xC000))
+    {
+        int opinion;
+
+        opinion = GlobalSave->humanOpinionOfRaziel;
+
+        if (opinion < -40)
+        {
+            opinion -= 5;
+        }
+        else
+        {
+            opinion = -40;
+        }
+
+        if (opinion < -32767)
+        {
+            opinion = -32767;
+        }
+        else if (opinion > 32767)
+        {
+            opinion = 32767;
+        }
+
+        if ((opinion <= 0) && (GlobalSave->humanOpinionOfRaziel > 0))
+        {
+            HUMAN_GetAngry();
+        }
+
+        GlobalSave->humanOpinionOfRaziel = opinion;
+    }
+}
 
 void MON_CutOut_Monster(Instance *instance, int fade_amount, int startseg, int endseg)
 {

@@ -17,6 +17,7 @@ uintptr_t HUMAN_Query(Instance *instance, unsigned long query);
 void HUMAN_IdleEntry(Instance *instance);
 void HUMAN_Idle(Instance *instance);
 void HUMAN_Flee(Instance *instance);
+void HUMAN_GetAngry();
 
 extern MonsterFunctionTable HUMAN_FunctionTable;
 extern MonsterStateChoice HUMAN_StateChoiceTable[];
