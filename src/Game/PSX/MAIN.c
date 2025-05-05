@@ -27,11 +27,17 @@ int nomusic;
 
 int devstation;
 
-int mainMenuSfx;
+STATIC int mainMenuSfx;
 
 short mainMenuTimeOut;
 
 long DoMainMenu;
+
+DebugMenuLine mainMenu[8924 + 8];
+
+long mainMenuMode;
+
+intptr_t *mainMenuScreen;
 
 void ClearDisplay(void)
 {
@@ -272,6 +278,42 @@ void CheckForDevStation()
 }
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MAIN_ShowLoadingScreen);
+/* TODO: requires migration of .sdata
+void MAIN_ShowLoadingScreen()
+{
+    long *loadingScreen;
+    char langChar[5];
+    int lang;
+    char* temp; // not from decls.h
+
+    temp = langChar;
+
+    strcpy(temp, "FGIS");
+
+    VSync(0);
+
+    lang = localstr_get_language();
+
+    if (lang != language_english)
+    {
+        char filename[64];
+
+        sprintf(filename, "\\kain2\\game\\psx\\loading%c.tim", temp[lang - 1]);
+
+        loadingScreen = LOAD_ReadFile(filename, 11);
+    }
+    else
+    {
+        loadingScreen = LOAD_ReadFile("\\kain2\\game\\psx\\loading.tim", 11);
+    }
+
+    if (loadingScreen != NULL)
+    {
+        screen_to_vram(loadingScreen, gameTrackerX.gameData.asmData.dispPage);
+
+        MEMPACK_Free((char*)loadingScreen);
+    }
+}*/
 
 long *MAIN_LoadTim(char *name)
 {
@@ -350,6 +392,45 @@ void MAIN_ResetGame()
 }
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MAIN_MainMenuInit);
+/* TODO: requires migration of .sdata
+void MAIN_MainMenuInit()
+{
+    char sfxFileName[64];
+    char* temp; // not from decls.h
+
+    mainMenuMode = 0;
+    mainMenuTimeOut = 0;
+
+    temp = sfxFileName;
+
+    strcpy(temp, "\\kain2\\sfx\\object\\mainmenu\\mainmenu.snf");
+
+    memset(&sfxFileName[strlen("\\kain2\\sfx\\object\\mainmenu\\mainmenu.snf") + 1], 0, sizeof(sfxFileName) - strlen("\\kain2\\sfx\\object\\mainmenu\\mainmenu.snf") - 1);
+
+    mainMenuSfx = 0;
+
+    if (LOAD_DoesFileExist(sfxFileName) != 0)
+    {
+        mainMenuSfx = aadLoadDynamicSfx("mainmenu", 0, 0);
+
+        while (aadGetNumLoadsQueued() != 0)
+        {
+            aadProcessLoadQueue();
+        }
+    }
+
+    mainMenuScreen = (intptr_t*)MAIN_LoadTim("\\kain2\\game\\psx\\frontend\\title1.tim");
+
+    VRAM_EnableTerrainArea();
+
+    menuface_initialize();
+
+    currentMenu = mainMenu;
+
+    gameTrackerX.gameMode = 4;
+
+    menu_set(gameTrackerX.menu, menudefs_main_menu);
+}*/
 
 void MAIN_FreeMainMenuStuff(void)
 {
