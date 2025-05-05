@@ -30,18 +30,16 @@ The commercial releases of Soul Reaver don't have debugging symbols, except for 
 
 The preferred *Integrated Development Environment (IDE)* for this project is **Visual Studio Code 1.99.3 or higher**, which can be freely obtained on its official website.
 
-After installing Visual Studio Code, it is very much recommended that you add the following Extensions:
+After installing Visual Studio Code, it is very much recommended that you add the following Extensions to it:
 - C/C++ Extension Pack
-- CMake
 - CMake Tools
 - Makefile Tools
-- Pylance
 - Python
-- Python Debugger
 - WSL (not necessary if you are on Linux)
 
-### Installing the project dependencies
-The setup process has the following package requirements:
+### Installing the required packages
+
+You'll need to have the following packets installed on your system:
 - git
 - build-essential
 - binutils-mips-linux-gnu
@@ -50,31 +48,40 @@ The setup process has the following package requirements:
 - p7zip-full
 - p7zip-rar
 
-You can install these with the following Bash commands:
+You might already have some of these but if you don't have any of them or are missing a select few, you can grab them all with the following two Bash commands:
 ```
 sudo apt update
 sudo apt install git build-essential binutils-mips-linux-gnu python3 bchunk p7zip-full p7zip-rar
 ```
 
-### Clone the repository
-Clone `https://github.com/fmil95/soul-re` in whatever directory you wish. Make sure to clone recursively!
+### Cloning the repository
+
+In order to clone this repository locally on your desktop, you can enter the next Bash command in the directory where you want to put up the decompile:  
 ```
 git clone --recursive https://github.com/fmil95/soul-re.git
-cd soul-re
 ```
 
-### Install Python3 requirements
-Run `python3 -m install -r requirements.txt`
+If you want to do the cloning by some other means, don't forget to do it recursively or else the submodules in the **tools** folder of the project won't be copied correctly.
 
 ### Placing the ROM
-You will need to provide your own rom dump of the game. The required version is the 1999-07-14 Prototype Version of Legacy of Kain: Soul Reaver.
-If done correctly, you will end up with a .IMG and a .CUE file that you can mount on your PC to get the required binary, SLUS_007.08, which needs to be placed inside the `soul-re` folder.
 
-### Build the code
-Run `make setup` to extract needed stuff from the SLUS_007.08 file, if that succeeds, run `make -j12` to build it.
-Once build has finished a folder will be produced with the name `build`, inside this, you will find the output.
+Now that you have set up the repository, place the SLUS_007.08 file that you obtained earlier from the prototype's disc in the root folder.  
 
+### Installing the Python 3 prerequisites
+
+On the root directory which is where the **requirements.txt** file is, run this command on your terminal to install the Python 3 essentials for the project: 
+```
+python3 -m install -r requirements.txt
+```
+
+### Building the code
+
+Enter `make setup` on the terminal to extract the source assets from the ROM, then input `make -j12` to compile the binary. If the build process is succesfully performed a folder named `build` will appear, which is where you'll find the result: **KAIN2.EXE**. 
+
+In case of an error, you can use `make clean` to do this step once more from scratch.
+ 
 ## Contributing
+
 Contributions are welcome. If you would like to reserve a function, open a PR with the function or file name(s).
 
 ## Community
