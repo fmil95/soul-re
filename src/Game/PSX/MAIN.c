@@ -31,6 +31,8 @@ int mainMenuSfx;
 
 short mainMenuTimeOut;
 
+long DoMainMenu;
+
 void ClearDisplay(void)
 {
     PutDrawEnv(&draw[gameTrackerX.gameData.asmData.dispPage]);
@@ -143,7 +145,100 @@ void ExtractLevelNum(char *levelNum, char *levelName)
     *levelNum = '\0';
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", ProcessArgs);
+extern char D_800D0B60[];
+extern char D_800D0B7C[];
+extern char D_800D0B84[];
+extern char D_800D0B90[];
+extern char D_800D0B9C[];
+extern char D_800D0BA8[];
+extern char D_800D0BB4[];
+extern char D_800D0BC0[];
+extern char D_800D0BC8[];
+extern char D_800D0BD4[];
+extern char D_800D0BE0[];
+extern char D_800D0BEC[];
+void ProcessArgs(char *baseAreaName, GameTracker *gameTracker)
+{
+    char levelNum[32];
+    char worldName[32];
+    intptr_t *argData;
+
+    // argData = (intptr_t*)LOAD_ReadFile("\\kain2\\game\\psx\\kain2.arg", 10);
+    argData = (intptr_t *)LOAD_ReadFile(D_800D0B60, 10);
+
+    if (argData != NULL)
+    {
+        ExtractWorldName(worldName, (char *)argData);
+        ExtractLevelNum(levelNum, (char *)argData);
+
+        // sprintf(baseAreaName, "%s%s", worldName, levelNum);
+        sprintf(baseAreaName, D_800D0B7C, worldName, levelNum);
+
+        // if (FindTextInLine("-NOSOUND", (char*)argData) != 0) 
+        if (FindTextInLine(D_800D0B84, (char *)argData) != 0)
+        {
+            nosound = 1;
+            nomusic = 1;
+        }
+
+        // if (FindTextInLine("-NOMUSIC", (char*)argData) != 0) 
+        if (FindTextInLine(D_800D0B90, (char *)argData) != 0)
+        {
+            nomusic = 1;
+        }
+
+        // if (FindTextInLine("-TIMEOUT", (char*)argData) != 0)
+        if (FindTextInLine(D_800D0B9C, (char *)argData) != 0)
+        {
+            gameTracker->debugFlags |= 0x20000;
+        }
+
+        // if (FindTextInLine("-MAINMENU", (char*)argData) != 0) 
+        if (FindTextInLine(D_800D0BA8, (char *)argData) != 0)
+        {
+            DoMainMenu = 1;
+        }
+
+        // if (FindTextInLine("-INSPECTRAL", (char*)argData) != 0) 
+        if (FindTextInLine(D_800D0BB4, (char *)argData) != 0)
+        {
+            gameTrackerX.gameData.asmData.MorphType = 1;
+        }
+
+        // if (FindTextInLine("-VOICE", (char*)argData) != 0)
+        if (FindTextInLine(D_800D0BC0, (char *)argData) != 0)
+        {
+            gameTracker->debugFlags |= 0x80000;
+        }
+
+        // if (FindTextInLine("-DEBUG_CD", (char*)argData) != 0) 
+        if (FindTextInLine(D_800D0BC8, (char *)argData) != 0)
+        {
+            gameTracker->debugFlags |= 0x80000000;
+        }
+
+        // if (FindTextInLine("-LOADGAME", (char*)argData) != 0)
+        if (FindTextInLine(D_800D0BD4, (char *)argData) != 0)
+        {
+            gameTrackerX.streamFlags |= 0x200000;
+        }
+
+        // if (FindTextInLine("-ALLWARP", (char*)argData) != 0) 
+        if (FindTextInLine(D_800D0BE0, (char *)argData) != 0)
+        {
+            gameTrackerX.streamFlags |= 0x400000;
+        }
+
+        gameTracker->debugFlags |= 0x80000;
+
+        MEMPACK_Free((char *)argData);
+    }
+    else
+    {
+        // memcpy(baseAreaName, "under1", sizeof("under1"));
+        memcpy(baseAreaName, D_800D0BEC, 7);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", InitDisplay);
 
