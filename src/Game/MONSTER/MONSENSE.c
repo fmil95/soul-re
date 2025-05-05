@@ -506,7 +506,62 @@ void MONSENSE_InitIRList(MonsterVars *mv, MonsterIR *list, int num)
     mv->monsterIRList = NULL;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSENSE", MONSENSE_SetEnemy);
+MonsterIR *MONSENSE_SetEnemy(Instance *instance, Instance *newenemy)
+{
+    MonsterVars *mv;
+    MonsterIR *mir;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    mir = MONSENSE_FindIR(mv, newenemy);
+
+    if (mir == NULL)
+    {
+        mir = MONSENSE_FirstSense(instance, newenemy);
+
+        if (mir == NULL)
+        {
+            mir = mv->monsterIRList;
+
+            mv->monsterIRList = mir->next;
+
+            mir->next = mv->freeIRs;
+
+            mv->freeIRs = mir;
+
+            mir = MONSENSE_FirstSense(instance, newenemy);
+        }
+
+        if (mir != NULL)
+        {
+            long angle;
+
+            angle = (((instance->rotation.z & 0xFFF) > 2048) ? (instance->rotation.z & 0xFFF) - 4096 : instance->rotation.z & 0xFFF) - (((newenemy->rotation.z & 0xFFF) > 2048) ? (newenemy->rotation.z & 0xFFF) - 4096 : newenemy->rotation.z & 0xFFF);
+
+            if (abs(angle) >= 1024)
+            {
+                mir->relativePosition.y = -100;
+            }
+            else
+            {
+                mir->relativePosition.y = 100;
+            }
+
+            mir->mirFlags |= 0x1;
+        }
+    }
+    else
+    {
+        mir->mirFlags |= 0x1;
+    }
+
+    if ((mv->enemy == NULL) || (newenemy == gameTrackerX.playerInstance))
+    {
+        mv->enemy = mir;
+    }
+
+    return mir;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSENSE", MONSENSE_ProcessIRList);
 
