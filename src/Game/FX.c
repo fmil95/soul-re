@@ -517,7 +517,7 @@ void FX_RelocateFXPointers(struct Object *oldObject, struct Object *newObject, l
 
     fxTracker = gFXT;
 
-    offset = (int)newObject - (int)oldObject;
+    offset = (intptr_t)newObject - (intptr_t)oldObject;
 
     FX_UpdateTexturePointers((struct _FX_PRIM *)fxTracker->usedPrimList.next, oldObject, (int)sizeOfObject, (int)offset);
     FX_UpdateTexturePointers((struct _FX_PRIM *)fxTracker->usedPrimListSprite.next, oldObject, (int)sizeOfObject, (int)offset);
@@ -529,7 +529,7 @@ void FX_RelocateFXPointers(struct Object *oldObject, struct Object *newObject, l
         if (currentEffect->effectType == 1)
         {
             particle = (struct _FXParticle *)currentEffect;
-            if (particle->texture != NULL && IN_BOUNDS(particle->texture, oldObject, (int)oldObject + sizeOfObject))
+            if (particle->texture != NULL && IN_BOUNDS(particle->texture, oldObject, (intptr_t)oldObject + sizeOfObject))
             {
                 particle->texture = (struct TextureMT3 *)OFFSET_DATA(particle->texture, offset);
             }

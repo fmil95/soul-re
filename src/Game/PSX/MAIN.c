@@ -125,7 +125,23 @@ void ExtractWorldName(char *worldName, char *levelName)
     *worldName = '\0';
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", ExtractLevelNum);
+void ExtractLevelNum(char *levelNum, char *levelName)
+{
+    for (; *levelName != '-'; levelName++)
+    {
+        if ((*levelName == '0') || (*levelName == '1') || (*levelName == '2') || (*levelName == '3') || (*levelName == '4') || (*levelName == '5') || (*levelName == '6') || (*levelName == '7') || (*levelName == '8') || (*levelName == '9'))
+        {
+            break;
+        }
+    }
+
+    while ((*levelName == '0') || (*levelName == '1') || (*levelName == '2') || (*levelName == '3') || (*levelName == '4') || (*levelName == '5') || (*levelName == '6') || (*levelName == '7') || (*levelName == '8') || (*levelName == '9'))
+    {
+        *levelNum++ = *levelName++;
+    }
+
+    *levelNum = '\0';
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", ProcessArgs);
 
