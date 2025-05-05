@@ -12,6 +12,18 @@
 	right = (right * masterVolumeSquared) >> 14; \
     }
 
+#define PAN_VOLUME(pan, left, right) \
+{ \
+    if ((pan) >= 65) \
+    { \
+        (left) = ((unsigned long)((right) * ((((0x80 - (pan)) * (0x80 - (pan))) - 1)))  ) >> 12; \
+    }  \
+    else if ((pan) < 63)  \
+    {\
+        (right) = (((left) * ((((pan) + 1) * ((pan) + 1)) + 1))  ) >> 12; \
+    }\
+}
+
 AadMemoryStruct *aadMem;
 
 int aadIsSfxLoaded(unsigned int toneID);
