@@ -563,7 +563,102 @@ MonsterIR *MONSENSE_SetEnemy(Instance *instance, Instance *newenemy)
     return mir;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSENSE", MONSENSE_ProcessIRList);
+void MONSENSE_ProcessIRList(Instance *instance)
+{
+    MonsterVars *mv;
+    MonsterIR *mir;
+    MonsterIR *closestEnemy;
+    MonsterIR *closestLeader;
+    MonsterIR *closestAlly;
+    MonsterIR *player;
+    MonsterCombatAttributes *combatAttr;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    closestEnemy = NULL;
+
+    closestLeader = NULL;
+
+    closestAlly = NULL;
+
+    player = NULL;
+
+    combatAttr = mv->subAttr->combatAttributes;
+
+    for (mir = mv->monsterIRList; mir != NULL; mir = mir->next)
+    {
+        if (mir->instance->instanceID == mir->handle)
+        {
+            if ((mir->mirFlags & 0x1))
+            {
+                if ((INSTANCE_Query(mir->instance, 1) & 0x1))
+                {
+                    player = mir;
+                }
+
+                if (closestEnemy == NULL)
+                {
+                    closestEnemy = mir;
+                }
+                else if (closestEnemy->distance > mir->distance)
+                {
+                    closestEnemy = mir;
+                }
+
+                if ((mir->mirFlags & 0x100))
+                {
+                    if ((combatAttr != NULL) && (combatAttr->surpriseRange > mir->distance))
+                    {
+                        INSTANCE_Post(instance, 0x100000E, (intptr_t)mir);
+                    }
+                    else
+                    {
+                        INSTANCE_Post(instance, 0x1000012, (intptr_t)mir);
+                    }
+                }
+            }
+
+            if ((mir->mirFlags & 0x10))
+            {
+                if (closestLeader == NULL)
+                {
+                    closestLeader = mir;
+                }
+                else if (closestLeader->distance > mir->distance)
+                {
+                    closestLeader = mir;
+                }
+            }
+
+            if (((mir->mirFlags & 0x2)) && (!(INSTANCE_Query(mir->instance, 1) & 0x4)))
+            {
+                if (closestAlly == NULL)
+                {
+                    closestAlly = mir;
+                }
+                else if (closestAlly->distance > mir->distance)
+                {
+                    closestAlly = mir;
+                }
+            }
+
+            mir->mirFlags &= ~0x100;
+        }
+    }
+
+    if ((player != NULL) && (((combatAttr == NULL) || ((signed char)combatAttr->hitPoints == 0)) || (mv->hitPoints != 0)))
+    {
+        mv->enemy = player;
+    }
+    else
+    {
+        mv->enemy = closestEnemy;
+    }
+
+    mv->leader = closestLeader;
+
+    mv->ally = closestAlly;
+}
 
 void MONSENSE_SetupSenses(Instance *instance)
 {
