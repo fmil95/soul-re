@@ -315,20 +315,12 @@ void sfxCmdStopAllTones(AadSfxCommand *sfxCmd)
     aadMem->voiceKeyOnRequest &= ~vmask;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSFX", sfxCmdSetToneVolumeAndPan);
-/* TODO: this function gives build error, further investigate
-void sfxCmdSetToneVolPanPitch(AadSfxCommand *sfxCmd)
+void sfxCmdSetToneVolumeAndPan(AadSfxCommand *sfxCmd)
 {
     unsigned long handle;
     AadSynthVoice *voice;
-    AadVolume voiceVol;
-    unsigned short pitch;
-    unsigned short finePitch;
-    unsigned short pitchIndex;
-    short volumeSquaredLeft;
-    short volumeSquaredRight;
-    unsigned long volumeSquared;
     unsigned short i;
+    AadVolume newVoiceVol;
 
     handle = sfxCmd->ulongParam;
 
@@ -338,34 +330,34 @@ void sfxCmdSetToneVolPanPitch(AadSfxCommand *sfxCmd)
 
         if (((voice->voiceID == 208) && (voice->handle == handle)) && ((aadMem->voiceStatus[i] != 0) && (aadMem->voiceStatus[i] != 2)))
         {
-            voiceVol.left = voice->volume * voice->volume;
-            voiceVol.right = voice->volume * voice->volume;
+            newVoiceVol.left = voice->volume * voice->volume;
+            newVoiceVol.right = voice->volume * voice->volume;
 
             if (!(aadMem->flags & 0x1))
             {
-                PAN_VOLUME(sfxCmd->dataByte[1], voiceVol.left, voiceVol.right);
+                PAN_VOLUME(sfxCmd->dataByte[1], newVoiceVol.left, newVoiceVol.right);
             }
 
-            MASTER_VOLUME_SQUARED(voice->toneAtr->volume, voiceVol.left, voiceVol.right);
+            MASTER_VOLUME_SQUARED(voice->toneAtr->volume, newVoiceVol.left, newVoiceVol.right);
 
             if (!(aadMem->flags & 0x1))
             {
-                PAN_VOLUME(voice->toneAtr->panPosition, voiceVol.left, voiceVol.right);
+                PAN_VOLUME(voice->toneAtr->panPosition, newVoiceVol.left, newVoiceVol.right);
             }
 
-            MASTER_VOLUME_SQUARED(sfxCmd->dataByte[0], voiceVol.left, voiceVol.right);
+            MASTER_VOLUME_SQUARED(sfxCmd->dataByte[0], newVoiceVol.left, newVoiceVol.right);
 
             voice->updateVol = sfxCmd->dataByte[0];
 
-            MASTER_VOLUME_SQUARED(voice->progAtr->volume, voiceVol.left, voiceVol.right);
-            MASTER_VOLUME_SQUARED(aadMem->sfxSlot.sfxVolume, voiceVol.left, voiceVol.right);
-            MASTER_VOLUME_SQUARED(aadMem->sfxMasterVol, voiceVol.left, voiceVol.right);
+            MASTER_VOLUME_SQUARED(voice->progAtr->volume, newVoiceVol.left, newVoiceVol.right);
+            MASTER_VOLUME_SQUARED(aadMem->sfxSlot.sfxVolume, newVoiceVol.left, newVoiceVol.right);
+            MASTER_VOLUME_SQUARED(aadMem->sfxMasterVol, newVoiceVol.left, newVoiceVol.right);
 
-            SpuSetVoiceVolume(i, voiceVol.left, voiceVol.right);
+            SpuSetVoiceVolume(i, newVoiceVol.left, newVoiceVol.right);
             break;
         }
     }
-}*/
+}
 
 void sfxCmdSetToneVolPanPitch(AadSfxCommand *sfxCmd)
 {
