@@ -22,5 +22,6 @@ void GAMEPAD_HandleDualShock();
 void GAMEPAD_RestoreControllers();
 void GAMEPAD_SaveControllers();
 int GAMEPAD_ControllerIsDualShock();
+void GAMEPAD_Init();
 
 #endif

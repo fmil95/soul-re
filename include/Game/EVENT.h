@@ -27,5 +27,24 @@ void HINT_StartHint(short hintNumber);
 void HINT_KillSpecificHint(short hintNumber);
 void EVENT_RelocateInstanceList(Level *oldLevel, Level *newLevel, long sizeOfLevel);
 void EVENT_UpdatePuzzlePointers(EventPointers *events, long offset);
+void EVENT_RemoveTimer(EventTimer *timer);
+long EVENT_DoAction(Event *eventInstance, ScriptPCode *actionScript, short *scriptData);
+void EVENT_Process(Event *eventInstance, long startIndex);
+long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream);
+long EVENT_TransformConstrictAttribute(PCodeStack *stack, StackType *stackObject, long item);
+long EVENT_TransformSplineAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream);
+long EVENT_TransformIntroAttribute(PCodeStack *stack, StackType *stackObject, long item);
+long EVENT_TransformVector3dAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream);
+long EVENT_TransformRotation3dAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream);
+long EVENT_TransformEventAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream);
+long EVENT_TransformSignalAttribute(PCodeStack *stack, StackType *stackObject, long item);
+long EVENT_TransformAreaAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream);
+long EVENT_TransformGameAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream);
+long EVENT_TransformListObjectAttribute(PCodeStack *stack, StackType *stackObject, long item);
+long EVENT_TransformSoundObjectAttribute(PCodeStack *stack, SoundObject *soundObject, long item, short *codeStream);
+long EVENT_TransformSavedEventAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream);
+long EVENT_TransformSubListObjectAttribute(PCodeStack *stack, StackType *stackObject, long item);
+long EVENT_TransformTGroupAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream);
+long EVENT_TransformCameraObjectAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream);
 
 #endif

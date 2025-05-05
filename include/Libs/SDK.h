@@ -584,6 +584,9 @@ int CdInit(void);
 CdlCB CdReadyCallback(CdlCB func);
 CdlCB CdSyncCallback(CdlCB func);
 int CdControl(u_char com, u_char *param, u_char *result);
+void SetDispMask(int mask);
+void InitGeom();
+void SetGeomOffset(long ofx, long ofy);
 
 extern int StCdIntrFlag;
 

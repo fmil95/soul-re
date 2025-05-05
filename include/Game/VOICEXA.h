@@ -14,5 +14,6 @@ int VOICEXA_IsPlaying();
 void VOICEXA_Tick();
 void VOICEXA_Resume();
 void VOICEXA_Pause();
+void VOICEXA_Init();
 
 #endif

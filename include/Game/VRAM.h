@@ -17,6 +17,7 @@ int VRAM_DeleteFreeVram(short x, short y, short w, short h);
 void VRAM_DeleteFreeBlock(BlockVramEntry *block);
 void VRAM_UpdateMorphPalettes();
 void VRAM_DisableTerrainArea();
+void VRAM_InitVramBlockCache();
 
 extern long VRAM_NeedToUpdateMorph;
 

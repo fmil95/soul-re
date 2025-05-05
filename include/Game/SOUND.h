@@ -44,5 +44,6 @@ void SOUND_SetMusicVolume(int newVolume);
 void SOUND_SetVoiceVolume(int newVolume);
 void SOUND_SetMusicModifier(long modifier);
 void SOUND_ResetMusicModifier(long modifier);
+void SOUND_Init();
 
 #endif

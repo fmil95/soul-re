@@ -14,6 +14,8 @@
 #include "Game/MENU/MENUDEFS.h"
 #include "Game/MENU/MENUFACE.h"
 #include "Game/PSX/AADLIB.h"
+#include "Game/SOUND.h"
+#include "Game/VOICEXA.h"
 
 short mainMenuFading;
 
@@ -246,6 +248,9 @@ long MAIN_DoMainMenu(GameTracker *gameTracker, MainTracker *mainTracker, long me
 {
 
     unsigned long **drawot;
+
+    (void)mainTracker;
+    (void)menuPos;
 
     gameTrackerX.timeMult = 0x1000;
     drawot = gameTracker->drawOT;

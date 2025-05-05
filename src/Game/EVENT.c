@@ -42,7 +42,7 @@ void EVENT_UpdateResetSignalArrayAndWaterMovement(struct Level *oldLevel, struct
     long i;
     struct WaterLevelProcess *curWater;
 
-    offset = (int)newLevel - (int)oldLevel;
+    offset = (intptr_t)newLevel - (intptr_t)oldLevel;
 
     if (NumSignalsToReset != 0)
     {
@@ -50,7 +50,7 @@ void EVENT_UpdateResetSignalArrayAndWaterMovement(struct Level *oldLevel, struct
         {
             if (ResetSignalArray[i].timeLeft > 0)
             {
-                if (IN_BOUNDS(ResetSignalArray[i].mSignal, oldLevel, (int)oldLevel + sizeOfLevel))
+                if (IN_BOUNDS(ResetSignalArray[i].mSignal, oldLevel, (intptr_t)oldLevel + sizeOfLevel))
                 {
                     ResetSignalArray[i].mSignal = (struct _MultiSignal *)OFFSET_DATA(ResetSignalArray[i].mSignal, offset);
                 }
@@ -66,7 +66,7 @@ void EVENT_UpdateResetSignalArrayAndWaterMovement(struct Level *oldLevel, struct
         {
             if ((curWater->flags & 1))
             {
-                if (IN_BOUNDS(curWater->bspTree, oldLevel, (int)oldLevel + sizeOfLevel))
+                if (IN_BOUNDS(curWater->bspTree, oldLevel, (intptr_t)oldLevel + sizeOfLevel))
                 {
                     curWater->bspTree = (struct BSPTree *)OFFSET_DATA(curWater->bspTree, offset);
                 }

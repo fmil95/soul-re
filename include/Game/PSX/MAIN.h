@@ -11,6 +11,7 @@ long *MAIN_LoadTim(char *name);
 void MAIN_InitVolume();
 void ClearDisplay();
 void MAIN_FreeMainMenuStuff();
+void InitDisplay();
 
 DISPENV disp[2];
 BLK_FILL clearRect[2];
