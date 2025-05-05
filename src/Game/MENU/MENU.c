@@ -141,6 +141,42 @@ void DisplayHintBox(int len, int y)
 }
 
 INCLUDE_ASM("asm/nonmatchings/Game/MENU/MENU", DisplayMenuBox);
+/* TODO: this function requires migration of .sdata
+void DisplayMenuBox(int x0, int x1, int y0, int y1)
+{
+    Extents2d ext = { .xmin = x0 - 12, .xmax = x1 + 12, .ymin = y0 - 5, .ymax = y1 + 5 };
+    static int dy[16] = { 40, 30, 20, 15, 10, 8, 6, 5, 4, 3, 2, 2, 1, 1, 1, 0 };
+    int i;
+    int j;
+    int k;
+    int slice0;
+    unsigned long **ot;
+    PrimPool *primPool;
+
+    ot = &gameTrackerX.drawOT[1];
+
+    primPool = gameTrackerX.primPool;
+
+    slice0 = 0;
+
+    while ((y1 - y0) < (dy[slice0] << 1))
+    {
+        slice0++;
+    }
+
+    for (j = 0; j < 2; j++)
+    {
+        for (i = slice0; i < 15; i++)
+        {
+            k = i + 1;
+
+            DRAW_TranslucentQuad(ext.xmin + i, ext.ymax - dy[i], ext.xmin + k, ext.ymax - dy[k], ext.xmin + i, ext.ymin + dy[i], ext.xmin + k, ext.ymin + dy[k], 0, 0, 0, 0, primPool, ot);
+            DRAW_TranslucentQuad(ext.xmax - i, ext.ymax - dy[i], ext.xmax - k, ext.ymax - dy[k], ext.xmax - i, ext.ymin + dy[i], ext.xmax - k, ext.ymin + dy[k], 0, 0, 0, 0, primPool, ot);
+        }
+
+        DRAW_TranslucentQuad(ext.xmin + 15, ext.ymax, ext.xmax - 15, ext.ymax, ext.xmin + 15, ext.ymin, ext.xmax - 15, ext.ymin, 0, 0, 0, 0, primPool, ot);
+    }
+}*/
 
 INCLUDE_ASM("asm/nonmatchings/Game/MENU/MENU", menu_draw_item);
 
