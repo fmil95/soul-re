@@ -54,5 +54,6 @@ void FX_MakeSoulDust(Instance *instance, short segment);
 void FX_Blood2(SVector *location, SVector *input_vel, SVector *accel, int amount, long color, long dummyCrapShouldRemove);
 FXParticle *FX_BloodCone(Instance *instance, short startSegment, long time);
 void FX_Blood_Impale(Instance *locinst, short locseg, Instance *instance, short segment);
+FXForceFieldEffect *FX_StartFField(Instance *instance, int size, Position *offset, int size_diff, int size_change, int deg_change, long color);
 
 #endif

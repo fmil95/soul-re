@@ -112,6 +112,7 @@ $(BUILD_DIR)/src/Game/PSX/AADLIB.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/PSX/AADSEQEV.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/PSX/AADSFX.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/PSX/AADVOICE.c.o: CFLAGS += -funsigned-char
+$(BUILD_DIR)/src/Game/PSX/MAIN.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/PSX/SUPPORT.c.o: CFLAGS += -funsigned-char
 
 $(BUILD_DIR)/src/Game/STRMLOAD.c.o: CFLAGS += -funsigned-char

@@ -82,7 +82,31 @@ void InitMainTracker(MainTracker *mainTracker)
     mainTracker->done = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", FindTextInLine);
+char *FindTextInLine(char *search_match, char *search_str)
+{
+    char *match_pos;
+
+    match_pos = search_match;
+
+    while ((*search_str != '\0') && (*search_str != '\n') && (*search_str != '\r'))
+    {
+        if ((*search_str++ | ' ') == (*match_pos | ' '))
+        {
+            match_pos++;
+        }
+        else
+        {
+            match_pos = search_match;
+        }
+
+        if (*match_pos == '\0')
+        {
+            return search_str;
+        }
+    }
+
+    return NULL;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", ExtractWorldName);
 

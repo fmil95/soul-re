@@ -2635,7 +2635,7 @@ void CheckForceCollision(struct _Instance *instance, struct _Instance *hitinst, 
 
     COLLIDE_SegmentCollisionOff(instance, 0);
 
-    data2 = (int)temp+4; // ??
+    data2 = (struct PhysObData *)((intptr_t)temp+4); // ??
 
     ProjData = &ProjProp->data[temp->joint];
 
