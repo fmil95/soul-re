@@ -7,6 +7,9 @@
 #include "Game/LIST.h"
 #include "Game/GAMELOOP.h"
 #include "Game/STREAM.h"
+#include "Game/LIGHT3D.h"
+#include "Game/INSTANCE.h"
+#include "Game/SOUND.h"
 
 STATIC FXGeneralEffect *FX_GeneralEffectTracker;
 
@@ -1572,6 +1575,8 @@ void FX_MakeWaterTrail(struct _Instance *instance, int depth)
     struct _Model *wxtrail;
     struct _SVector position;
     int zvel;
+
+    (void)depth;
 
     if ((instance->matrix != NULL) && (instance->oldMatrix != NULL) && (gameTrackerX.gameData.asmData.MorphType != 1) && (gameTrackerX.gameData.asmData.MorphTime == 1000))
     {

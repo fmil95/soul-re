@@ -108,7 +108,22 @@ char *FindTextInLine(char *search_match, char *search_str)
     return NULL;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", ExtractWorldName);
+void ExtractWorldName(char *worldName, char *levelName)
+{
+    for (; *levelName != '-'; levelName++)
+    {
+        if (((*levelName >= 'A') && (*levelName <= 'Z')) || ((*levelName >= 'a') && (*levelName <= 'z')))
+        {
+            *worldName++ = *levelName;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    *worldName = '\0';
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", ExtractLevelNum);
 
