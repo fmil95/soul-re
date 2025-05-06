@@ -32,7 +32,20 @@ INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_Init);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_ReloadFont);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_DrawChar);
+void FONT_DrawChar(FontChar *fontChar)
+{
+
+    char c;
+    long x;
+    long y;
+
+    c = fontChar->c;
+    x = fontChar->x;
+    y = fontChar->y;
+    fontTracker.color_local = fontChar->color;
+
+    FONT_DrawChar2D(c & 0xFF, x, y);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_Get2DImageIndex);
 
