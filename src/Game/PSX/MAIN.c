@@ -254,7 +254,52 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", VblTick);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", DrawCallback);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", FadeOutSayingLoading);
+void FadeOutSayingLoading(GameTracker *gameTracker)
+{
+    POLY_F4_SEMITRANS *transPrim;
+    unsigned long **drawot;
+    long fadeTime;
+
+    fadeTime = 0;
+
+    drawot = gameTracker->drawOT;
+
+    transPrim = (POLY_F4_SEMITRANS *)gameTracker->primPool->nextPrim;
+
+    DRAW_TranslucentQuad(0, 0, 512, 0, 0, 240, 512, 240, 0, 0, 0, 2, gameTracker->primPool, drawot);
+
+    FONT_Flush();
+
+    while (fadeTime != 255)
+    {
+        fadeTime += 16;
+
+        if (fadeTime >= 256)
+        {
+            fadeTime = 255;
+        }
+
+        gameTracker->drawPage = 1 - gameTracker->drawPage;
+
+        transPrim->r0 = fadeTime;
+        transPrim->g0 = fadeTime;
+        transPrim->b0 = fadeTime;
+
+        while (CheckVolatile(gameTracker->drawTimerReturn) != 0);
+
+        PutDrawEnv(draw + gameTracker->drawPage);
+
+        while (CheckVolatile(gameTracker->reqDisp) != 0);
+
+        gameTracker->drawTimerReturn = &gameTracker->drawTime;
+
+        gameTracker->gameData.asmData.dispPage = 1 - gameTracker->gameData.asmData.dispPage;
+
+        VSync(0);
+
+        DrawOTag((unsigned long *)&drawot[3071]);
+    }
+}
 
 void CheckForDevStation()
 {
