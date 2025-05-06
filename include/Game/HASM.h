@@ -17,6 +17,7 @@ int *DRAW_AnimatedModel_S(Model *model, PVertex *poolVertex, PrimPool *primPool,
 unsigned long *DRAW_DisplayPolytopeList_S(PolytopeList *polytopeList, Terrain *terrain, Camera *camera, PrimPool *primPool, unsigned long **drawot, Position *globalOffset);
 void BSP_MarkVisibleLeaves_S(BSPTree *bsp, Camera *camera, PolytopeList *polytopeList);
 void VM_ProcessVMObjectList_S(Level *level, Camera *camera);
+long TimerTick();
 
 long depthQFogStart;
 long depthQBlendStart;

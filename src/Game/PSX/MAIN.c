@@ -42,6 +42,10 @@ long mainMenuMode;
 
 intptr_t *mainMenuScreen;
 
+unsigned long __timerEvent;
+
+long gTimerEnabled;
+
 void ClearDisplay(void)
 {
     PutDrawEnv(&draw[gameTrackerX.gameData.asmData.dispPage]);
@@ -251,7 +255,22 @@ void ProcessArgs(char *baseAreaName, GameTracker *gameTracker)
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", InitDisplay);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", StartTimer);
+void StartTimer()
+{
+    EnterCriticalSection();
+
+    __timerEvent = OpenEvent(0xF2000000, 2, 4096, TimerTick);
+
+    EnableEvent(__timerEvent);
+
+    SetRCnt(0xF2000000, 0xFFFF, 4097);
+
+    StartRCnt(0xF2000000);
+
+    ExitCriticalSection();
+
+    gTimerEnabled = 1;
+}
 
 void VblTick()
 {
