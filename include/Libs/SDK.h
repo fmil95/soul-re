@@ -591,6 +591,8 @@ void SetGeomOffset(long ofx, long ofy);
 int ClearImage(RECT *rect, u_char r, u_char g, u_char b);
 int ResetGraph(int mode);
 int SetGraphDebug(int level);
+unsigned long SpuSetReverbVoice(long on_off, unsigned long voice_bit);
+void SpuGetAllKeysStatus(char *status);
 
 extern int StCdIntrFlag;
 

@@ -11,5 +11,6 @@ void aadStopAllSfx();
 void aadPutSfxCommand(int statusByte, int dataByte0, int dataByte1, unsigned long ulongParam, short shortParam);
 unsigned long createSfxHandle(unsigned int toneID);
 int aadIsSfxTypePlaying(unsigned int toneID);
+// void aadExecuteSfxCommand(AadSfxCommand *sfxCmd); // TODO: include this declaration
 
 #endif

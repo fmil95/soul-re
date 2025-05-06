@@ -1,5 +1,6 @@
 #include "Game/PSX/AADLIB.h"
 #include "Game/PSX/AADSEQEV.h"
+#include "Game/PSX/AADSFX.h"
 
 AadMemoryStruct *aadMem;
 
@@ -117,7 +118,219 @@ long aadSlotUpdateWrapper()
     return 0;
 }*/
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadSlotUpdate);
+void aadSlotUpdate()
+{
+    AadSequenceSlot *slot;
+    AadSeqEvent *seqEventPtr;
+    int slotNumber;
+    int i;
+    int fadeComplete;
+    int track;
+    int newVol;
+    int slotDone;
+
+    if (aadMem == NULL)
+    {
+        return;
+    }
+
+    if (!(aadMem->flags & 0x2))
+    {
+        unsigned long vmask;
+
+        SpuGetAllKeysStatus(aadMem->voiceStatus);
+
+        i = 0;
+
+        vmask = 1;
+
+        for (; i < 24; i++)
+        {
+            if (aadMem->voiceStatus[i] == 3)
+            {
+                aadMem->voiceKeyOffRequest |= vmask;
+            }
+            else if (((aadMem->voiceKeyOffRequest & vmask)) && ((aadMem->voiceStatus[i] == 0) || (aadMem->voiceStatus[i] == 2)))
+            {
+                aadMem->voiceKeyOffRequest &= ~vmask;
+            }
+
+            vmask <<= 1;
+        }
+
+        if (!(aadMem->flags & 0x4))
+        {
+            for (slotNumber = 0; slotNumber < aadMem->numSlots; slotNumber++)
+            {
+                slot = aadMem->sequenceSlots[slotNumber];
+
+                if (((slot->status & 0x1)) && (!(slot->slotFlags & 0x1)))
+                {
+                    slot->tempo.currentTick += slot->tempo.ticksPerUpdate;
+                    slot->tempo.currentError += slot->tempo.errorPerUpdate;
+
+                    if (slot->tempo.currentError >= slot->tempo.tickTimeFixed)
+                    {
+                        slot->tempo.currentError -= slot->tempo.tickTimeFixed;
+
+                        slot->tempo.currentTick++;
+                    }
+
+                    for (slotDone = 0; slotDone == 0; )
+                    {
+                        for (track = 0; track < 16; track++)
+                        {
+                            if (slot->sequencePosition[track] == NULL)
+                            {
+                                break;
+                            }
+
+                            while (slot->eventsInQueue[track] < 3)
+                            {
+                                if (aadQueueNextEvent(slot, track) != 0)
+                                {
+                                    break;
+                                }
+                            }
+                        }
+
+                        slotDone = 1;
+
+                        for (track = 0; track < 16; track++)
+                        {
+                            if (slot->sequencePosition[track] == NULL)
+                            {
+                                break;
+                            }
+
+                            while (slot->eventsInQueue[track] != 0)
+                            {
+                                seqEventPtr = &slot->eventQueue[slot->eventOut[track]][track];
+
+                                if (slot->tempo.currentTick < (seqEventPtr->deltaTime + slot->lastEventExecutedTime[track]))
+                                {
+                                    break;
+                                }
+
+                                slot->lastEventExecutedTime[track] += seqEventPtr->deltaTime;
+
+                                slot->eventsInQueue[track]--;
+                                slot->eventOut[track]++;
+
+                                if (slot->eventOut[track] == 4)
+                                {
+                                    slot->eventOut[track] = 0;
+                                }
+
+                                aadExecuteEvent(seqEventPtr, slot);
+
+                                slotDone = 0;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        while (aadMem->sfxSlot.commandsInQueue != 0)
+        {
+            newVol = 32;
+
+            aadExecuteSfxCommand(&aadMem->sfxSlot.commandQueue[aadMem->sfxSlot.commandOut]);
+
+            aadMem->sfxSlot.commandsInQueue--;
+
+            if (++aadMem->sfxSlot.commandOut == newVol)
+            {
+                aadMem->sfxSlot.commandOut = 0;
+            }
+        }
+
+        aadMem->voiceKeyOffRequest &= ~aadMem->voiceKeyOnRequest;
+
+        if (aadMem->voiceKeyOffRequest != 0)
+        {
+            SpuSetKey(0, aadMem->voiceKeyOffRequest);
+        }
+
+        SpuSetReverbVoice(1, aadMem->voiceReverbRequest);
+        SpuSetReverbVoice(0, ~aadMem->voiceReverbRequest);
+
+        if (aadMem->voiceKeyOnRequest != 0)
+        {
+            SpuSetKey(1, aadMem->voiceKeyOnRequest);
+
+            aadMem->voiceKeyOnRequest = 0;
+        }
+    }
+
+
+    if (aadMem->masterVolFader.volumeStep != 0)
+    {
+        fadeComplete = 0;
+
+        newVol = aadMem->masterVolume;
+
+        newVol += aadMem->masterVolFader.volumeStep;
+
+        if (aadMem->masterVolFader.volumeStep < 0)
+        {
+            fadeComplete = newVol < aadMem->masterVolFader.targetVolume;
+        }
+        else if (newVol > aadMem->masterVolFader.targetVolume)
+        {
+            fadeComplete = 1;
+        }
+
+        if (fadeComplete != 0)
+        {
+            newVol = aadMem->masterVolFader.targetVolume;
+
+            aadMem->masterVolFader.volumeStep = 0;
+
+            if (aadMem->masterVolFader.fadeCompleteCallback != NULL)
+            {
+                aadMem->masterVolFader.fadeCompleteCallback();
+            }
+        }
+
+        aadSetMasterVolume(newVol);
+    }
+
+    if ((aadMem->musicMasterVolFader.volumeStep != 0) && (!(aadMem->updateCounter & 0x1)))
+    {
+        fadeComplete = 0;
+
+        newVol = aadMem->musicMasterVol;
+
+        newVol += aadMem->musicMasterVolFader.volumeStep;
+
+        if (aadMem->musicMasterVolFader.volumeStep < 0)
+        {
+            fadeComplete = newVol <= aadMem->musicMasterVolFader.targetVolume;
+        }
+        else if (newVol >= aadMem->musicMasterVolFader.targetVolume)
+        {
+            fadeComplete = 1;
+        }
+
+        if (fadeComplete != 0)
+        {
+            newVol = aadMem->musicMasterVolFader.targetVolume;
+
+            aadMem->musicMasterVolFader.volumeStep = 0;
+
+            if (aadMem->musicMasterVolFader.fadeCompleteCallback != NULL)
+            {
+                aadMem->musicMasterVolFader.fadeCompleteCallback();
+            }
+        }
+
+        aadSetMusicMasterVolume(newVol);
+    }
+
+    aadMem->updateCounter++;
+}
 
 unsigned long aadCreateFourCharID(char a, char b, char c, char d)
 {
