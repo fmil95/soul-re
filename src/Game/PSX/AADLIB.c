@@ -12,6 +12,129 @@ unsigned long aadGetMemorySize(AadInitAttr *attributes)
 }
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadInit);
+/* TODO: need to import aadGp into the project
+int aadInit(AadInitAttr *attributes, unsigned char *memoryPtr)
+{
+    AadSequenceSlot* slot;
+    unsigned long size;
+    int slotNumber;
+    int i;
+
+    aadGp = GetGp();
+
+    EnterCriticalSection();
+
+    size = aadGetMemorySize(attributes);
+
+    aadMem = (AadMemoryStruct*)memoryPtr;
+
+    if (aadMem == NULL)
+    {
+        return 0x1009;
+    }
+    else
+    {
+        memset(memoryPtr, 0, size);
+
+        if ((attributes->nonBlockLoadProc == NULL) || (attributes->nonBlockBufferedLoadProc == NULL) || (attributes->memoryMallocProc == NULL))
+        {
+            return 0x1008;
+        }
+
+        aadMem->nonBlockLoadProc = attributes->nonBlockLoadProc;
+        aadMem->nonBlockBufferedLoadProc = attributes->nonBlockBufferedLoadProc;
+
+        aadMem->memoryMallocProc = attributes->memoryMallocProc;
+        aadMem->memoryFreeProc = attributes->memoryFreeProc;
+
+        memset(aadMem->sfxToneMasterList, 255, sizeof(aadMem->sfxToneMasterList));
+        memset(aadMem->sfxWaveMasterList, 255, sizeof(aadMem->sfxWaveMasterList));
+
+        aadMem->nextSramDescIndex = 1;
+
+        aadMem->sramDescriptorTbl->waveID = 32768;
+
+        aadMem->sramDescriptorTbl->address = 514;
+
+        aadMem->firstSramBlockDescIndex = 0;
+
+        aadMem->sramDescriptorTbl->size = 37336;
+
+        aadMem->sramDescriptorTbl->prevIndex = 255;
+        aadMem->sramDescriptorTbl->nextIndex = 255;
+
+        aadPurgeLoadQueue();
+
+        SpuInit();
+
+        SpuSetCommonMasterVolume(0, 0);
+
+        for (slotNumber = 0; slotNumber < attributes->numSlots; slotNumber++)
+        {
+            slot = aadMem->sequenceSlots[slotNumber] = &((AadSequenceSlot*)&aadMem[1])[slotNumber]; // TODO: doesn't look very natural, reverify
+
+            slot->thisSlotNumber = slotNumber;
+
+            slot->sequenceNumberAssigned = 255;
+
+            slot->slotID = slotNumber * 16;
+            slot->slotVolume = 127;
+            slot->slotPan = 63;
+
+            slot->masterVolPtr = &aadMem->musicMasterVol;
+
+            for (i = 0; i < 16; i++)
+            {
+                slot->currentProgram[i] = 255;
+
+                slot->volume[i] = 127;
+
+                slot->panPosition[i] = 63;
+
+                slot->pitchWheel[i] = 8192;
+            }
+
+            slot->selectedSlotPtr = slot;
+            slot->selectedSlotNum = slotNumber;
+        }
+
+        aadMem->sfxSlot.handleCounter = 12345;
+
+        aadMem->sfxSlot.sfxVolume = 127;
+
+        aadMem->numSlots = attributes->numSlots & 0xFF;
+
+        aadMem->updateMode = attributes->updateMode & 0xFF;
+
+        aadMem->sfxMasterVol = 127;
+        aadMem->musicMasterVol = 127;
+
+        aadMem->endSequenceCallback = NULL;
+        aadMem->controller11Callback = NULL;
+
+        for (i = 0; i < 24; i++)
+        {
+            aadMem->synthVoice[i].voiceMask = 1 << i;
+            aadMem->synthVoice[i].voiceID = 255;
+            aadMem->synthVoice[i].voiceNum = i;
+        }
+
+        aadMem->voiceKeyOffRequest = 0;
+        aadMem->voiceKeyOnRequest = 0;
+        aadMem->voiceReverbRequest = 0;
+
+        if (aadMem->updateMode < 4)
+        {
+            aadInstallUpdateFunc(aadSlotUpdateWrapper, aadHblanksPerUpdate[aadMem->updateMode]);
+        }
+
+        aadMem->flags = 0;
+
+        ExitCriticalSection();
+    }
+
+    return 0;
+}*/
 
 void aadInstallUpdateFunc(long (*updateFuncPtr)(), int hblanksPerUpdate)
 {
