@@ -1,6 +1,24 @@
 #include "Game/PSX/SUPPORT.h"
 
+#define PRT_BUF_SIZE	0x100
+
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/SUPPORT", printf);
+/* TODO: gives conflicting types error
+// int printf(char *fmt)
+int printf(char *fmt, ...)
+{
+    int len;
+    char string[PRT_BUF_SIZE];
+    va_list ap; // not from decls.h
+
+    va_start(ap, fmt);
+
+    len = vsprintf(&string, fmt, ap);
+
+    puts(&string);
+
+    return len;
+}*/
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/SUPPORT", sprintf);
 /* TODO: gives conflicting types error
