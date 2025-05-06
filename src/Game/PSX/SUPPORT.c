@@ -3,6 +3,17 @@
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/SUPPORT", printf);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/SUPPORT", sprintf);
+/* TODO: gives conflicting types error
+// int sprintf(char *string, char *fmt)
+int sprintf(char *string, char *fmt, ...)
+{
+    int len; // not from decls.h
+    va_list ap; // not from decls.h
+
+    va_start(ap, fmt);
+
+    return vsprintf(string, fmt, ap);
+}*/
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/SUPPORT", vsprintf);
 
