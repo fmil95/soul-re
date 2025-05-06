@@ -34,7 +34,82 @@ int MON_GroundMoveQueueHandler(Instance *instance)
     return ret;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONMSG", MON_PupateMessageHandler);
+void MON_PupateMessageHandler(Instance *instance, Message *message)
+{
+    MonsterVars *mv;
+    long id;
+    typedef int (*fn)(); // not from decls.h
+    fn temp; // not from decls.h
+
+    mv = (MonsterVars *)instance->extraData;
+
+    id = message->ID;
+
+    switch (id)
+    {
+    case 0x1000000:
+        mv->mvFlags &= ~0x80;
+        break;
+    case 0x1000011:
+    {
+        evMonsterAlarmData *data;
+
+        data = (evMonsterAlarmData *)message->Data;
+
+        if (MATH3D_LengthXYZ(data->position.x - instance->position.x, data->position.y - instance->position.y, data->position.z - instance->position.z) < mv->subAttr->senses->alarmRadius)
+        {
+            mv->mvFlags &= ~0x80;
+
+            if ((mv->enemy == NULL) && ((data->sender != NULL) && ((INSTANCE_Query(data->sender, 1) & 0xB))))
+            {
+                MONSENSE_SetEnemy(instance, data->sender);
+            }
+        }
+
+        break;
+    }
+    case 0x80005:
+        if ((mv->subAttr->fireVuln != 0) && (!(mv->mvFlags & 0x400)))
+        {
+            evFXHitData data;
+
+            MON_SetFXHitData(instance, &data, 0x20, 1);
+
+            mv->damageType = 0x20;
+
+            temp = MONTABLE_GetDamageEffectFunc(instance);
+
+            temp(instance, &data);
+
+            MON_SwitchState(instance, MONSTER_STATE_GENERALDEATH);
+            break;
+        }
+    case 0x80006:
+        if (mv->subAttr->sunVuln != 0)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_STUNNED);
+
+            MON_MonsterGlow(instance, 0xFFFFFF, 70, 10, 20);
+
+            mv->damageType = 0x40;
+        }
+
+        break;
+    case 0x80004:
+        if (mv->subAttr->waterVuln != 0)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_STUNNED);
+
+            mv->damageType = 0x10;
+        }
+
+        break;
+    case 0x80001:
+    case 0x80002:
+    case 0x80003:
+        break;
+    }
+}
 
 void MON_IdleMessageHandler(Instance *instance, Message *message)
 {
