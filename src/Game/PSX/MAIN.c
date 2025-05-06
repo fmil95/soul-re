@@ -253,7 +253,25 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", InitDisplay);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", StartTimer);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", VblTick);
+void VblTick()
+{
+    if (devstation != 0)
+    {
+        _break(0x400);
+    }
+
+    gameTrackerX.vblFrames++;
+    gameTrackerX.vblCount++;
+
+    if ((gameTrackerX.reqDisp != NULL) && (gameTrackerX.vblFrames > (unsigned long)gameTrackerX.frameRateLock))
+    {
+        PutDispEnv(gameTrackerX.reqDisp);
+
+        gameTrackerX.reqDisp = NULL;
+
+        gameTrackerX.vblFrames = 0;
+    }
+}
 
 void DrawCallback()
 {
