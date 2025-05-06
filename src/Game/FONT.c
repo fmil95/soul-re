@@ -3,7 +3,30 @@
 
 static char fp_str[512];
 
-INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_MakeSpecialFogClut);
+void FONT_MakeSpecialFogClut(int x, int y)
+{
+
+    int n;
+    short cl[16];
+    RECT myrect;
+
+    for (n = 0; n < 16; n++)
+    {
+        cl[n] = 0x4210;
+    }
+
+    cl[0] = 0;
+
+    myrect.x = x;
+    myrect.y = y;
+    myrect.w = 0x10;
+    myrect.h = 1;
+
+    SpecialFogClut = getClut(x, y);
+    DrawSync(0);
+    LoadImage(&myrect, (u_long *)cl);
+    DrawSync(0);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_Init);
 
