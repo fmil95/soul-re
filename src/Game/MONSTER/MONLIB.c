@@ -824,10 +824,13 @@ int MON_GetRandomDestinationInWorld(Instance *instance, Position *in, short r)
             avoidEnemy = mv->enemy != NULL;
         }
 
-        if (in == NULL || (avoidEnemy != 0 && MATH3D_LengthXYZ(in->x - mv->enemy->instance->position.x, in->y - mv->enemy->instance->position.y, in->z - mv->enemy->instance->position.z) < mv->subAttr->fleeRange))
+        if (in == NULL)
         {
-            // garbage loop just for instruction ordering
-            do { in = &instance->position; } while (0);
+            in = &instance->position;
+        }
+        else if (avoidEnemy != 0 && MATH3D_LengthXYZ(in->x - mv->enemy->instance->position.x, in->y - mv->enemy->instance->position.y, in->z - mv->enemy->instance->position.z) < mv->subAttr->fleeRange)
+        {
+            in = &instance->position;
         }
 
         data.origin.x = instance->matrix[1].t[0];

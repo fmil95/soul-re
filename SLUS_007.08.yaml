@@ -248,7 +248,7 @@ segments:
       - {start: 0x0C28AC, type: comm, vram: 0x800D2228, name: Game/CAMERA}
       - {start: 0x0C28AC, type: sbss, vram: 0x800D26F8, name: Game/COLLIDE}
       - {start: 0x0C28AC, type: sbss, vram: 0x800D271C, name: Game/DRAW}
-      - {start: 0x0C28AC, type: sbss, vram: 0x800D277C, name: Game/FONT}
+      - {start: 0x0C28AC, type: .sbss, vram: 0x800D277C, name: Game/FONT}
       - {start: 0x0C28AC, type: comm, vram: 0x800D297C, name: Game/FONT}
       - {start: 0x0C28AC, type: sbss, vram: 0x800D2FA4, name: Game/GAMELOOP}
       - {start: 0x0C28AC, type: sbss, vram: 0x800D2FF8, name: Game/GAMEPAD}
