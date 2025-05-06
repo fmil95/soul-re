@@ -1,6 +1,8 @@
 #include "common.h"
 #include "Game/FONT.h"
 
+static char fp_str[512];
+
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_MakeSpecialFogClut);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_Init);
