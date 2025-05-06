@@ -254,6 +254,51 @@ void ProcessArgs(char *baseAreaName, GameTracker *gameTracker)
 }
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", InitDisplay);
+/* TODO: requires migration of .sdata
+void InitDisplay()
+{
+    int i;
+    RECT r;
+
+    memcpy(&r, D_800D0BF4, sizeof(r));
+
+    ResetGraph(3);
+
+    SetGraphDebug(0);
+
+    SetDefDrawEnv(&draw[0], 0, 0, 512, 240);
+    SetDefDispEnv(&disp[0], 0, 0, 512, 240);
+
+    SetDefDrawEnv(&draw[1], 0, 256, 512, 240);
+    SetDefDispEnv(&disp[1], 0, 256, 512, 240);
+
+    draw[0].dtd = draw[1].dtd = 1;
+    draw[0].dfe = draw[1].dfe = 1;
+
+    draw[0].isbg = draw[1].isbg = 0;
+
+    setRGB0(&draw[0], 0, 0, 0);
+    setRGB0(&draw[1], 0, 0, 0);
+
+    for (i = 0; i < 2; i++)
+    {
+        clearRect[i].tag.bytes[3] = 3;
+
+        clearRect[i].code = 2;
+
+        setXY0(&clearRect[i], 0, i * 256);
+        setWH(&clearRect[i], 512, 240);
+
+        setRGB0(&clearRect[i], 0, 0, 0);
+    }
+
+    ClearDisplay();
+
+    ClearOTagR((unsigned long*)gameTrackerX.drawOT, 3072);
+    ClearOTagR((unsigned long*)gameTrackerX.dispOT, 3072);
+
+    ClearImage(&r, 0, 255, 0);
+}*/
 
 void StartTimer()
 {

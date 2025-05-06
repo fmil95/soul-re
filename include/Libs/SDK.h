@@ -513,7 +513,7 @@ void TransposeMatrix(MATRIX *, MATRIX *);
 void EnterCriticalSection();
 void ExitCriticalSection();
 int GetRCnt(int);
-void ClearOTagR(unsigned long *, int);
+u_long *ClearOTagR(u_long *ot, int n);
 MATRIX *RotMatrix(SVECTOR *, MATRIX *);
 long ratan2(long y, long x);
 MATRIX *RotMatrixX(long r, MATRIX *m);
@@ -535,6 +535,7 @@ MATRIX *TransMatrix(MATRIX *m, VECTOR *v);
 int rcos(int);
 int rsin(int);
 void ScaleMatrix(MATRIX *, VECTOR *);
+DRAWENV *SetDefDrawEnv(DRAWENV *env, int x, int y, int w, int h);
 DISPENV *SetDefDispEnv(DISPENV *env, int x, int y, int w, int h);
 u_long *BreakDraw(void);
 int DrawSync(int mode);
@@ -587,6 +588,9 @@ int CdControl(u_char com, u_char *param, u_char *result);
 void SetDispMask(int mask);
 void InitGeom();
 void SetGeomOffset(long ofx, long ofy);
+int ClearImage(RECT *rect, u_char r, u_char g, u_char b);
+int ResetGraph(int mode);
+int SetGraphDebug(int level);
 
 extern int StCdIntrFlag;
 
