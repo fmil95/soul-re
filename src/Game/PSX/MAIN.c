@@ -16,6 +16,8 @@
 #include "Game/PSX/AADLIB.h"
 #include "Game/SOUND.h"
 #include "Game/VOICEXA.h"
+#include "Game/DRAW.h"
+#include "Game/HASM.h"
 
 short mainMenuFading;
 
@@ -287,11 +289,11 @@ void FadeOutSayingLoading(GameTracker *gameTracker)
 
         while (CheckVolatile(gameTracker->drawTimerReturn) != 0);
 
-        PutDrawEnv(draw + gameTracker->drawPage);
+        PutDrawEnv(&draw[gameTracker->drawPage]);
 
         while (CheckVolatile(gameTracker->reqDisp) != 0);
 
-        gameTracker->drawTimerReturn = &gameTracker->drawTime;
+        gameTracker->drawTimerReturn = (long *)&gameTracker->drawTime;
 
         gameTracker->gameData.asmData.dispPage = 1 - gameTracker->gameData.asmData.dispPage;
 
