@@ -52,7 +52,11 @@ INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_GetStringWidth);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_Flush);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_SetCursor);
+void FONT_SetCursor(short x, short y)
+{
+    fontTracker.font_xpos = x;
+    fontTracker.font_ypos = y;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_VaReallyPrint);
 
