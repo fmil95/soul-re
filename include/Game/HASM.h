@@ -18,6 +18,8 @@ unsigned long *DRAW_DisplayPolytopeList_S(PolytopeList *polytopeList, Terrain *t
 void BSP_MarkVisibleLeaves_S(BSPTree *bsp, Camera *camera, PolytopeList *polytopeList);
 void VM_ProcessVMObjectList_S(Level *level, Camera *camera);
 long TimerTick();
+unsigned long GetGp();
+void SetGp(unsigned long);
 
 long depthQFogStart;
 long depthQBlendStart;

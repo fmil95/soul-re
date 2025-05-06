@@ -101,6 +101,21 @@ void aadShutdown()
 }
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadSlotUpdateWrapper);
+/* TODO: need to import aadGp into the project
+long aadSlotUpdateWrapper()
+{
+    unsigned long curGp;
+
+    curGp = GetGp();
+
+    SetGp(aadGp);
+
+    aadSlotUpdate();
+
+    SetGp(curGp);
+
+    return 0;
+}*/
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadSlotUpdate);
 
