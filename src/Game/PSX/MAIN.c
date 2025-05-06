@@ -18,6 +18,7 @@
 #include "Game/VOICEXA.h"
 #include "Game/DRAW.h"
 #include "Game/HASM.h"
+#include "Game/TIMER.h"
 
 short mainMenuFading;
 
@@ -254,7 +255,17 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", StartTimer);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", VblTick);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", DrawCallback);
+void DrawCallback()
+{
+    if (gameTrackerX.drawTimerReturn != NULL)
+    {
+        *gameTrackerX.drawTimerReturn = TIMER_TimeDiff(gameTrackerX.usecsStartDraw);
+
+        gameTrackerX.drawTimerReturn = NULL;
+
+        gameTrackerX.reqDisp = gameTrackerX.disp + (gameTrackerX.gameData.asmData.dispPage * 20);
+    }
+}
 
 void FadeOutSayingLoading(GameTracker *gameTracker)
 {
