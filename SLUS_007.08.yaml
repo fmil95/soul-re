@@ -175,7 +175,7 @@ segments:
       - [0x0BCCD0, data, Game/MONSTER/MONSTER]
       - [0x0BCCD4, .data, Game/MONSTER/MONTABLE]
       - [0x0BCDFC, .data, Game/MONSTER/SLUAGH]
-      - [0x0BCE80, data, Game/MONSTER/VWRAITH]
+      - [0x0BCE80, .data, Game/MONSTER/VWRAITH]
       - [0x0BCED4, .data, Game/MONSTER/WORSHIP]
       - [0x0BCF10, .data, Game/G2/ANIMG2]
       - [0x0BD050, .data, Game/ENTRYPOINT]

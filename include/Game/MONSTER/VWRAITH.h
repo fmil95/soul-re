@@ -22,5 +22,10 @@ typedef struct Dummy5
 int VWRAITH_ShouldISwoop(Instance *instance);
 void VWRAITH_VerticalMove(Instance *instance);
 void VWRAITH_PursueEntry(Instance *instance);
+void VWRAITH_CombatEntry(Instance *instance);
+void VWRAITH_Combat(Instance *instance);
+void VWRAITH_Pursue(Instance *instance);
+void VWRAITH_EmbraceEntry(Instance *instance);
+void VWRAITH_Embrace(Instance *instance);
 
 #endif

@@ -1,9 +1,21 @@
 #include "Game/MONSTER/VWRAITH.h"
+#include "Game/MONSTER/SLUAGH.h"
+#include "Game/MONSTER/SOUL.h"
 #include "Game/FX.h"
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/MONSTER/MONAPI.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONMSG.h"
+
+MonsterStateChoice VWRAITH_StateChoiceTable[7] = {
+    {MONSTER_STATE_ATTACK, {SLUAGH_AttackEntry, SLUAGH_Attack}},
+    {MONSTER_STATE_COMBAT, {VWRAITH_CombatEntry, VWRAITH_Combat}},
+    {MONSTER_STATE_PURSUE, {VWRAITH_PursueEntry, VWRAITH_Pursue}},
+    {MONSTER_STATE_GENERALDEATH, {SLUAGH_DeathEntry, SLUAGH_Death}},
+    {MONSTER_STATE_GRABBED, {SOUL_SoulSuckEntry, SOUL_SoulSuck}},
+    {MONSTER_STATE_EMBRACE, {VWRAITH_EmbraceEntry, VWRAITH_Embrace}},
+    {-1, {NULL, NULL}}
+};
 
 void VWRAITH_MoveVertical(Instance *instance, long targetZ, int velocity)
 {
