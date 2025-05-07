@@ -275,7 +275,7 @@ segments:
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D62B4, name: Game/MONSTER/MONSENSE}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D6380, name: Game/G2/ANIMG2}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D6B30, name: Game/PSX/PSX_G2/MAINVM}
-      - {start: 0x0C28AC, type: sbss, vram: 0x800D6B38, name: Game/PLAN/PLANAPI}
+      - {start: 0x0C28AC, type: .sbss, vram: 0x800D6B38, name: Game/PLAN/PLANAPI}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D6B88, name: Game/RAZIEL/CONTROL}
       - {start: 0x0C28AC, type: sbss, vram: 0x800D6BB8, name: Game/RAZIEL/RAZIEL}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D7364, name: Game/UNDRWRLD}

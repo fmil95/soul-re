@@ -9,13 +9,13 @@
 #include "Game/PLAN/PLANCOLL.h"
 #include "Game/HASM.h"
 
-STATIC PoolManagementData poolManagementDataStorage;
+static PoolManagementData poolManagementDataStorage;
 
-STATIC long timerArray[10];
+static long timerArray[10];
 
-STATIC long timerIndex;
+static long timerIndex;
 
-STATIC PoolManagementData *poolManagementData;
+PoolManagementData *poolManagementData;
 
 void PLANAPI_ConvertPlanIntoEnmyPlanDataFormat(PlanningNode *goalNode, EnemyPlanData *planData, PlanningNode *planningPool)
 {

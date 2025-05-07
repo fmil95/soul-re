@@ -14,6 +14,6 @@ int PLANAPI_FindPathInGraphToTarget(Position *startPos, EnemyPlanData *planData,
 void PLANAPI_InitPlanning(void *planningPool);
 void PLANAPI_UpdatePlanningDatabase(GameTracker *gameTracker, Instance *player);
 
-PoolManagementData *poolManagementData;
+extern PoolManagementData *poolManagementData;
 
 #endif
