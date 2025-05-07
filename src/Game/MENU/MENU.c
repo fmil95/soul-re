@@ -3,7 +3,7 @@
 #include "Game/MENU/MENUDEFS.h"
 #include "Game/GAMELOOP.h"
 
-static int D_800D1EFC[16] = {0x00000028, 0x0000001E, 0x00000014, 0x0000000F, 0x0000000A, 0x00000008, 0x00000006, 0x00000005, 0x00000004, 0x00000003, 0x00000002, 0x00000002, 0x00000001, 0x00000001, 0x00000001, 0x00000000};
+static int D_800D1EFC[16] = {40, 30, 20, 15, 10, 8, 6, 5, 4, 3, 2, 2, 1, 1, 1, 0}; // dy
 
 static char D_800D1F3C[2] = "\t"; // goes into menu_draw_item
 
@@ -144,12 +144,14 @@ void DisplayHintBox(int len, int y)
     }
 }
 
+// Matches 100% on decomp.me but differs on this project
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/MENU/MENU", DisplayMenuBox);
-/* TODO: this function requires migration of .sdata
+#else
 void DisplayMenuBox(int x0, int x1, int y0, int y1)
 {
-    Extents2d ext = { .xmin = x0 - 12, .xmax = x1 + 12, .ymin = y0 - 5, .ymax = y1 + 5 };
-    static int dy[16] = { 40, 30, 20, 15, 10, 8, 6, 5, 4, 3, 2, 2, 1, 1, 1, 0 };
+    Extents2d ext = {.xmin = x0 - 12, .xmax = x1 + 12, .ymin = y0 - 5, .ymax = y1 + 5};
+    static int dy[16] = {40, 30, 20, 15, 10, 8, 6, 5, 4, 3, 2, 2, 1, 1, 1, 0};
     int i;
     int j;
     int k;
@@ -180,7 +182,8 @@ void DisplayMenuBox(int x0, int x1, int y0, int y1)
 
         DRAW_TranslucentQuad(ext.xmin + 15, ext.ymax, ext.xmax - 15, ext.ymax, ext.xmin + 15, ext.ymin, ext.xmax - 15, ext.ymin, 0, 0, 0, 0, primPool, ot);
     }
-}*/
+}
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/Game/MENU/MENU", menu_draw_item);
 
