@@ -23,6 +23,12 @@
 #include "Game/G2/ANMG2ILF.h"
 #include "Game/MONSTER/HUMAN.h"
 
+static burntTuneType burntTest = {300, 2};
+
+static int D_800D1B38[2] = {0, 65534};
+
+static int D_800D1B40[2] = {0, 1};
+
 void MON_DoCombatTimers(Instance *instance)
 {
     MonsterVars *mv;
