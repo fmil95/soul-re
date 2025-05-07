@@ -241,7 +241,7 @@ segments:
       - [0x0C26DC, .sdata, Game/LOCAL/LOCALSTR]
       - [0x0C26FC, .sdata, Game/MENU/MENU]
       - [0x0C2750, .sdata, Game/MENU/MENUDEFS]
-      - [0x0C2804, sdata, Game/MENU/MENUFACE]
+      - [0x0C2804, .sdata, Game/MENU/MENUFACE]
 
       - {start: 0x0C28AC, type: sbss, vram: 0x800D20AC, name: Game/DEBUG}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D20FC, name: Game/CAMERA}

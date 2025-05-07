@@ -4,11 +4,20 @@
 #include "Game/DRAW.h"
 #include "Game/GAMELOOP.h"
 
+static menuface_t MenuFaces[8] = {
+    {236, 49,  48, 48, 2, -1, 0, 0, 0},
+    {268, 97,  48, 48, 2, -1, 0, 0, 0},
+    {273, 156, 48, 48, 2, -1, 0, 0, 0},
+    {326, 49,  48, 48, 2, -1, 0, 0, 0},
+    {342, 120, 48, 48, 2, -1, 0, 0, 0},
+    {409, 14,  64, 64, 2, -1, 0, 0, 0},
+    {383, 78,  48, 48, 2, -1, 0, 0, 0},
+    {400, 150, 48, 48, 2, -1, 0, 0, 0},
+};
+
+static int hack_initialized = 0;
+
 static ButtonTexture *FaceButtons;
-
-STATIC int hack_initialized;
-
-STATIC menuface_t MenuFaces[8];
 
 char *NextTimAddr(char *addr, int w, int h, bdepth bpp)
 {
@@ -32,7 +41,6 @@ char *NextTimAddr(char *addr, int w, int h, bdepth bpp)
     return &addr[addtl];
 }
 
-extern char D_800D2088[];
 void menuface_initialize()
 {
     char *addr;
@@ -42,8 +50,7 @@ void menuface_initialize()
 
     if (hack_initialized == 0)
     {
-        // buttonAddr = addr = (char*)LOAD_ReadFile("\\kain2\\game\\psx\\frontend\\faces.tim", 11);
-        buttonAddr = addr = (char *)LOAD_ReadFile(D_800D2088, 11);
+        buttonAddr = addr = (char *)LOAD_ReadFile("\\kain2\\game\\psx\\frontend\\faces.tim", 11);
 
         if (buttonAddr != NULL)
         {
@@ -161,7 +168,6 @@ void MENUFACE_ChangeStateRandomly(int index)
     }
 }
 
-// Matches 100% on decomp.me but differs on this project
 #ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/MENU/MENUFACE", MENUFACE_RefreshFaces);
 #else
