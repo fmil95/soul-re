@@ -15,6 +15,7 @@ void SOUL_WanderEntry(Instance *instance);
 void SOUL_Wander(Instance *instance);
 void SOUL_ReanimateEntry(Instance *instance);
 void SOUL_Reanimate(Instance *instance);
+void SOUL_CleanUp(Instance *instance);
 
 extern MonsterFunctionTable SOUL_FunctionTable;
 

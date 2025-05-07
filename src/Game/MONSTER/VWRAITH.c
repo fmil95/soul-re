@@ -6,8 +6,9 @@
 #include "Game/MONSTER/MONAPI.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONMSG.h"
+#include "Game/SAVEINFO.h"
 
-MonsterStateChoice VWRAITH_StateChoiceTable[7] = {
+MonsterStateChoice VWRAITH_StateChoiceTable[] = {
     {MONSTER_STATE_ATTACK, {SLUAGH_AttackEntry, SLUAGH_Attack}},
     {MONSTER_STATE_COMBAT, {VWRAITH_CombatEntry, VWRAITH_Combat}},
     {MONSTER_STATE_PURSUE, {VWRAITH_PursueEntry, VWRAITH_Pursue}},
@@ -15,6 +16,17 @@ MonsterStateChoice VWRAITH_StateChoiceTable[7] = {
     {MONSTER_STATE_GRABBED, {SOUL_SoulSuckEntry, SOUL_SoulSuck}},
     {MONSTER_STATE_EMBRACE, {VWRAITH_EmbraceEntry, VWRAITH_Embrace}},
     {-1, {NULL, NULL}}
+};
+
+MonsterFunctionTable VWRAITH_FunctionTable = {
+    VWRAITH_Init,
+    SOUL_CleanUp,
+    SLUAGH_DamageEffect,
+    SLUAGH_Query,
+    NULL,
+    VWRAITH_StateChoiceTable,
+    monVersion,
+    NULL
 };
 
 void VWRAITH_MoveVertical(Instance *instance, long targetZ, int velocity)
