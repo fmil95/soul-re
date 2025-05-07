@@ -239,7 +239,7 @@ segments:
       - [0x0C25D8, .sdata, Game/SAVEINFO]
       - [0x0C26B0, .sdata, Game/VOICEXA]
       - [0x0C26DC, .sdata, Game/LOCAL/LOCALSTR]
-      - [0x0C26FC, sdata, Game/MENU/MENU]
+      - [0x0C26FC, .sdata, Game/MENU/MENU]
       - [0x0C2750, .sdata, Game/MENU/MENUDEFS]
       - [0x0C2804, sdata, Game/MENU/MENUFACE]
 

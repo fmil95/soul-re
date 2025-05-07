@@ -3,6 +3,12 @@
 #include "Game/MENU/MENUDEFS.h"
 #include "Game/GAMELOOP.h"
 
+static int D_800D1EFC[16] = {0x00000028, 0x0000001E, 0x00000014, 0x0000000F, 0x0000000A, 0x00000008, 0x00000006, 0x00000005, 0x00000004, 0x00000003, 0x00000002, 0x00000002, 0x00000001, 0x00000001, 0x00000001, 0x00000000};
+
+static char D_800D1F3C[2] = "\t"; // goes into menu_draw_item
+
+static Extents2d D_800D1F40 = {0x7FFFFFFF, 0x80000000, 0x7FFFFFFF, 0x80000000};
+
 int menu_data_size()
 {
     return sizeof(menu_t);
