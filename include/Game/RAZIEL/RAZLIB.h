@@ -45,5 +45,6 @@ int razUpdateSoundRamp(Instance *instance, SoundRamp *sound);
 void razSelectMotionAnim(CharacterState *In, int CurrentSection, int Frames, int *Anim);
 void razCenterWithBlock(Instance *inst, Instance *target, int dist);
 void RAZIEL_StartNewGame();
+void razSwitchVAnimSingle(Instance *instance, int section, int anim, int frame, int frames);
 
 #endif
