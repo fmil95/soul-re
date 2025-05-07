@@ -104,6 +104,8 @@ $(BUILD_DIR)/src/Game/MCARD/MCASSERT.c.o: CFLAGS += -G0
 
 $(BUILD_DIR)/src/Game/MENU/MENUUTIL.c.o: CFLAGS += -G0
 
+$(BUILD_DIR)/src/Game/MONSTER/WORSHIP.c.o: CFLAGS += -G0
+
 $(BUILD_DIR)/src/Game/G2/QUATG2.c.o: CFLAGS += -funsigned-char
 
 $(BUILD_DIR)/src/Game/PLAN/ENMYPLAN.c.o: CFLAGS += -funsigned-char

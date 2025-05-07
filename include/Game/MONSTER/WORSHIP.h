@@ -5,4 +5,6 @@
 
 extern MonsterFunctionTable WORSHIP_FunctionTable;
 
+void WORSHIP_CombatEntry(Instance *instance);
+
 #endif

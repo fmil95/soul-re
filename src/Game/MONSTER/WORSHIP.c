@@ -5,6 +5,14 @@
 #include "Game/INSTANCE.h"
 #include "Game/COLLIDE.h"
 
+MonsterStateChoice WORSHIP_StateChoiceTable[5] = {
+    {MONSTER_STATE_STUNNED, {HUMAN_StunnedEntry, HUMAN_Stunned}},
+    {MONSTER_STATE_DEAD, {HUMAN_DeadEntry, HUMAN_Dead}},
+    {MONSTER_STATE_EMBRACE, {HUMAN_EmbraceEntry, HUMAN_Embrace}},
+    {MONSTER_STATE_COMBAT, {WORSHIP_CombatEntry, MON_Combat}},
+    {-1, {NULL, NULL}}
+};
+
 void WORSHIP_Init(Instance *instance)
 {
     MonsterAttributes *ma;
