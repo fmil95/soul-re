@@ -4,7 +4,13 @@
 
 AadMemoryStruct *aadMem;
 
-STATIC unsigned long __hblankEvent;
+static unsigned long __hblankEvent;
+
+static unsigned char *smfDataPtr;
+
+static unsigned long smfBytesLeft;
+
+static AadDynamicSfxLoadInfo *smfInfo;
 
 unsigned long aadGetMemorySize(AadInitAttr *attributes)
 {
