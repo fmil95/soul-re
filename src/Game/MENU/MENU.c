@@ -49,7 +49,18 @@ void menu_set(menu_t *menu, int (*fn)())
     menu_push(menu, fn);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MENU/MENU", menu_push);
+void menu_push(menu_t *menu, int (*fn)())
+{
+    menu_stack_t *stack;
+
+    stack = &menu->stack[menu->nmenus++];
+
+    stack->fn = fn;
+
+    stack->index = -1;
+
+    stack->format = stack[-1].format;
+}
 
 void menu_pop(menu_t *menu)
 {
