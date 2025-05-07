@@ -25,9 +25,11 @@
 
 static burntTuneType burntTest = {300, 2};
 
-static int D_800D1B38[2] = {0, 65534};
+static int D_800D1B38[2] = {0, 65534}; // for use on MON_DamageEffect
 
-static int D_800D1B40[2] = {0, 1};
+static int D_800D1B40[2] = {0, 1}; // for use on MON_DamageEffect
+
+static unsigned char D_800CC4D0[] = {15, 17, 16, 18}; // pupateObjects
 
 void MON_DoCombatTimers(Instance *instance)
 {

@@ -172,7 +172,7 @@ segments:
       - [0x0BCC5C, .data, Game/MONSTER/HUMAN]
       - [0x0BCCA4, .data, Game/MONSTER/MISSILE]
       - [0x0BCCAC, .data, Game/MONSTER/MONMSG]
-      - [0x0BCCD0, data, Game/MONSTER/MONSTER]
+      - [0x0BCCD0, .data, Game/MONSTER/MONSTER]
       - [0x0BCCD4, .data, Game/MONSTER/MONTABLE]
       - [0x0BCDFC, .data, Game/MONSTER/SLUAGH]
       - [0x0BCE80, .data, Game/MONSTER/VWRAITH]
