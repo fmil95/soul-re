@@ -3664,7 +3664,231 @@ void DefaultStateHandler(CharacterState *In, int CurrentSection, intptr_t Data)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", RazielAnimCallback);
+long RazielAnimCallback(G2Anim *anim, int sectionID, G2AnimCallbackMsg message, long messageDataA, long messageDataB, void *data)
+{
+    State *pSection;
+    G2AnimSection *animSection;
+
+    pSection = &Raziel.State.SectionList[sectionID];
+
+    animSection = &anim->section[sectionID];
+
+    switch (message)
+    {
+    case 1:
+        EnMessageQueueData(&pSection->Event, 0x8000000, animSection->keylistID);
+        break;
+    case 2:
+        EnMessageQueueData(&pSection->Event, 0x8000001, animSection->keylistID);
+        break;
+    case 4:
+    {
+        evAnimationControllerDoneData *ControllerData;
+
+        ControllerData = (evAnimationControllerDoneData *)SetAnimationControllerDoneData(Raziel.State.CharacterInstance, messageDataB, messageDataA, (intptr_t)data);
+
+        if (ControllerData->data == 2)
+        {
+            AlgorithmicWings(Raziel.State.CharacterInstance, ControllerData);
+        }
+        else if (ControllerData->data == 0)
+        {
+            G2Anim_InterpDisableController(&ControllerData->instance->anim, ControllerData->segment, ControllerData->type, 300);
+        }
+        else if (ControllerData->data == 4)
+        {
+            G2Anim_DisableController(&ControllerData->instance->anim, ControllerData->segment, ControllerData->type);
+        }
+
+        break;
+    }
+    case 3:
+        EnMessageQueueData(&pSection->Event, 0x8000003, animSection->keylistID);
+        break;
+    case 5:
+        animSection->swAlarmTable = NULL;
+
+        EnMessageQueueData(&pSection->Event, 0x8000004, 0);
+        break;
+    case 6:
+        if (messageDataA == 2)
+        {
+            AlarmData *data;
+            Instance *inst;
+
+            data = (AlarmData *)messageDataB;
+
+            inst = razGetHeldWeapon();
+
+            switch (data->command)
+            {
+            case 1:
+                if (inst != NULL)
+                {
+                    INSTANCE_Post(inst, 0x200002, data->data);
+                }
+                else
+                {
+                    EnableWristCollision(gameTrackerX.playerInstance, data->data);
+                }
+
+                break;
+            case 2:
+                if (inst != NULL)
+                {
+                    INSTANCE_Post(inst, 0x200003, data->data);
+                }
+                else
+                {
+                    DisableWristCollision(gameTrackerX.playerInstance, data->data);
+                }
+
+                ControlFlag |= 0x10000000;
+                break;
+            case 3:
+                razSetCowlNoDraw(0);
+
+                ControlFlag |= 0x40;
+                break;
+            case 4:
+                razSetCowlNoDraw(1);
+
+                ControlFlag &= ~0x40;
+                break;
+            case 5:
+                if (data->data >= 32)
+                {
+                    Raziel.passedMask = ~0x0;
+                }
+                else
+                {
+                    Raziel.passedMask |= 1 << data->data;
+                }
+
+                break;
+            case 6:
+                if (data->data >= 32)
+                {
+                    Raziel.passedMask = 0;
+                }
+                else
+                {
+                    Raziel.passedMask &= ~(1 << data->data);
+                }
+
+                break;
+            case 7:
+                Raziel.effectsFadeSource = gameTrackerX.playerInstance->fadeValue;
+                Raziel.effectsFadeDest = data->data;
+
+                Raziel.effectsFlags |= 0x1;
+                break;
+            case 8:
+                Raziel.effectsFadeSteps = 0;
+
+                Raziel.effectsFlags |= 0x1;
+
+                Raziel.effectsFadeStep = data->data;
+                break;
+            case 9:
+                if (inst != NULL)
+                {
+                    INSTANCE_Post(inst, 0x200005, data->data);
+                }
+
+                break;
+            case 10:
+                if (inst != NULL)
+                {
+                    INSTANCE_Post(inst, 0x200006, data->data);
+                }
+
+                break;
+            case 11:
+            {
+                int test;
+
+                test = 0;
+
+                switch (data->data)
+                {
+                case 0:
+                case 1:
+                    test = 1;
+                    break;
+                case 2:
+                    if (Raziel.currentSoulReaver == 1)
+                    {
+                        test = 1;
+                    }
+
+                    break;
+                case 3:
+                    if (Raziel.currentSoulReaver == 6)
+                    {
+                        test = 1;
+                    }
+
+                    break;
+                }
+
+                if (test != 0)
+                {
+                    SoundRamp *soundRamp;
+
+                    soundRamp = (SoundRamp *)&Raziel.soundHandle;
+
+                    razSetupSoundRamp(gameTrackerX.playerInstance, &soundRamp[cannedSound[data->data].bank], cannedSound[data->data].sound, cannedSound[data->data].startPitch, cannedSound[data->data].endPitch, cannedSound[data->data].startVolume, cannedSound[data->data].endVolume, cannedSound[data->data].time, cannedSound[data->data].distance);
+
+                    if (cannedSound[data->data].bank == 0)
+                    {
+                        Raziel.effectsFlags |= 0x4;
+                    }
+
+                    if (cannedSound[data->data].bank == 1)
+                    {
+                        Raziel.effectsFlags |= 0x8;
+                    }
+                }
+            }
+
+            break;
+            }
+        }
+        else
+        {
+            if (messageDataA == 0)
+            {
+                if (((AlarmData *)messageDataB)->command == 45)
+                {
+                    if (!(ControlFlag & 0x100000))
+                    {
+                        Instance *heldInstance;
+
+                        heldInstance = razGetHeldWeapon();
+
+                        if ((heldInstance != NULL) && (((INSTANCE_Query(heldInstance, 2) & 0x20)) && ((INSTANCE_Query(heldInstance, 3) & 0x10000))))
+                        {
+                            INSTANCE_DefaultAnimCallback(anim, sectionID, message, 0, messageDataB, Raziel.State.CharacterInstance);
+                        }
+                    }
+                }
+                else
+                {
+                    INSTANCE_DefaultAnimCallback(anim, sectionID, message, 0, messageDataB, Raziel.State.CharacterInstance);
+                }
+            }
+            else
+            {
+                INSTANCE_DefaultAnimCallback(anim, sectionID, message, messageDataA, messageDataB, Raziel.State.CharacterInstance);
+            }
+        }
+
+        break;
+    }
+
+    return messageDataA;
+}
 
 long RazielAnimCallbackDuringPause(G2Anim *anim, int sectionID, G2AnimCallbackMsg message, long messageDataA, long messageDataB, void *data)
 {

@@ -52,5 +52,6 @@ void StateHandlerPushObject(CharacterState *In, int CurrentSection, intptr_t Dat
 void StateHandlerPullSwitch(CharacterState *In, int CurrentSection, intptr_t Data);
 void StateHandlerBreakOff(CharacterState *In, int CurrentSection, intptr_t Data);
 int CheckHolding(Instance *instance);
+void EnableWristCollision(Instance *instance, int Side);
 
 #endif
