@@ -5577,9 +5577,79 @@ void EnableWristCollision(Instance *instance, int Side)
     }
 }
 
-/* TODO: migrate to GetCollisionType*/
-static char D_800D1DB8[0xA] = "MultiHit\n";
-INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", GetCollisionType);
+int GetCollisionType(Instance *instance)
+{
+    CollideInfo *collideInfo;
+    HSphere *S;
+
+    collideInfo = instance->collideInfo;
+
+    S = collideInfo->prim0;
+
+    if (S->id == 9)
+    {
+        if (collideInfo->type1 != 3)
+        {
+            Instance *inst;
+
+            inst = collideInfo->inst1;
+
+            inst->flags |= 0x4;
+        }
+        else
+        {
+            COLLIDE_SetBSPTreeFlag(collideInfo, 0x800);
+        }
+
+        if (collideInfo->type1 != 1)
+        {
+            COLLIDE_SegmentCollisionOff(instance, collideInfo->segment);
+
+            if (Raziel.Senses.HitMonster != NULL)
+            {
+                INSTANCE_Post(Raziel.Senses.HitMonster, 0x1000024, 0);
+            }
+
+            Raziel.Senses.HitMonster = NULL;
+
+            return 1;
+        }
+    }
+
+    if ((*(int *)&collideInfo->flags & 0xFFFF0000) == 0x1010000) // TODO: this is probably a compiler optimization, find the real form
+    {
+        if ((ControlFlag & 0x1000))
+        {
+            return 1;
+        }
+
+        if ((*(char *)&collideInfo->prim0[4] == 9) && (*(char *)&collideInfo->prim1[4] == 8)) // TODO: find what the actual castings of prim0 and prim1 are
+        {
+            if (Raziel.Senses.HitMonster == NULL)
+            {
+                Raziel.Senses.HitMonster = collideInfo->inst1;
+            }
+            else
+            {
+                if (Raziel.Senses.HitMonster == collideInfo->inst1)
+                {
+                    return 1;
+                }
+
+                printf("MultiHit\n");
+            }
+
+            return 1;
+        }
+    }
+
+    if (((collideInfo->type0 == 5) || (collideInfo->type1 == 5) || (collideInfo->type0 == 2) || (collideInfo->type1 == 2)) && ((ControlFlag & 0x8000000)))
+    {
+        return 1;
+    }
+
+    return 0;
+}
 
 void InitGlyphSystem(Instance *instance)
 {
