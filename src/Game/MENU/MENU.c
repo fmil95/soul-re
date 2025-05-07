@@ -7,8 +7,6 @@ static int D_800D1EFC[16] = {0x00000028, 0x0000001E, 0x00000014, 0x0000000F, 0x0
 
 static char D_800D1F3C[2] = "\t"; // goes into menu_draw_item
 
-static Extents2d D_800D1F40 = {0x7FFFFFFF, 0x80000000, 0x7FFFFFFF, 0x80000000};
-
 int menu_data_size()
 {
     return sizeof(menu_t);
@@ -186,11 +184,9 @@ void DisplayMenuBox(int x0, int x1, int y0, int y1)
 
 INCLUDE_ASM("asm/nonmatchings/Game/MENU/MENU", menu_draw_item);
 
-INCLUDE_ASM("asm/nonmatchings/Game/MENU/MENU", menu_draw);
-/* TODO: this function requires migration of .sdata
 void menu_draw(menu_t *menu)
 {
-    Extents2d ext = {2147483647, -2147483648, 2147483647, -2147483648};
+    Extents2d ext = {0x7FFFFFFF, 0x80000000, 0x7FFFFFFF, 0x80000000};
     menu_stack_t *stack;
     int index;
     int ypos;
@@ -222,7 +218,7 @@ void menu_draw(menu_t *menu)
     {
         DisplayMenuBox(ext.xmin, ext.xmax, ext.ymin, ext.ymax);
     }
-}*/
+}
 
 void menu_run(menu_t *menu)
 {
