@@ -2,15 +2,27 @@
 #include "Game/MONSTER/HUMAN.h"
 #include "Game/MONSTER/MONAPI.h"
 #include "Game/MONSTER/MONSTER.h"
+#include "Game/SAVEINFO.h"
 #include "Game/INSTANCE.h"
 #include "Game/COLLIDE.h"
 
-MonsterStateChoice WORSHIP_StateChoiceTable[5] = {
+MonsterStateChoice WORSHIP_StateChoiceTable[] = {
     {MONSTER_STATE_STUNNED, {HUMAN_StunnedEntry, HUMAN_Stunned}},
     {MONSTER_STATE_DEAD, {HUMAN_DeadEntry, HUMAN_Dead}},
     {MONSTER_STATE_EMBRACE, {HUMAN_EmbraceEntry, HUMAN_Embrace}},
     {MONSTER_STATE_COMBAT, {WORSHIP_CombatEntry, MON_Combat}},
     {-1, {NULL, NULL}}
+};
+
+MonsterFunctionTable WORSHIP_FunctionTable = {
+    WORSHIP_Init,
+    HUMAN_CleanUp,
+    NULL,
+    HUMAN_Query,
+    NULL,
+    WORSHIP_StateChoiceTable,
+    monVersion,
+    NULL,
 };
 
 void WORSHIP_Init(Instance *instance)
