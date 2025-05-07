@@ -13,11 +13,11 @@ STATIC int gNumSpectralMonsters;
 
 STATIC int gNumMaterialMonsters;
 
-STATIC MonsterVars *monsterSenseArray[40];
+static MonsterVars *monsterSenseArray[40];
 
-STATIC int lastSenseFrame;
+static char monsterSensed[40];
 
-STATIC char monsterSensed[40];
+static int lastSenseFrame;
 
 STATIC RadarInfo radarDir[8];
 

@@ -272,7 +272,7 @@ segments:
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D61E4, name: Game/PHYSICS}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D626C, name: Game/REAVER}
       - {start: 0x0C28AC, type: sbss, vram: 0x800D6270, name: Game/GLYPH}
-      - {start: 0x0C28AC, type: sbss, vram: 0x800D62B4, name: Game/MONSTER/MONSENSE}
+      - {start: 0x0C28AC, type: .sbss, vram: 0x800D62B4, name: Game/MONSTER/MONSENSE}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D6380, name: Game/G2/ANIMG2}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D6B30, name: Game/PSX/PSX_G2/MAINVM}
       - {start: 0x0C28AC, type: sbss, vram: 0x800D6B38, name: Game/PLAN/PLANAPI}
