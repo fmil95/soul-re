@@ -2,7 +2,7 @@
 #include "Game/FONT.h"
 #include "Game/SOUND.h"
 
-STATIC menu_sound_entry_t the_menu_sounds[8924 + 6];
+static menu_sound_entry_t the_menu_sounds[6] = {{menu_sound_none, 5}, {menu_sound_default, 5}, {menu_sound_select, 5}, {menu_sound_adjust, 5}, {menu_sound_engage, 5}, {menu_sound_pop, 5}};
 
 menu_ctrl_t menu_get_ctrl(void *gt)
 {

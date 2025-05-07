@@ -180,7 +180,7 @@ segments:
       - [0x0BCF10, .data, Game/G2/ANIMG2]
       - [0x0BD050, .data, Game/ENTRYPOINT]
       - [0x0BD074, .data, Game/CINEMA/CINEPSX]
-      - [0x0BD07C, data, Game/MENU/MENUUTIL]
+      - [0x0BD07C, .data, Game/MENU/MENUUTIL]
       - [0x0BD0AC, .data, Game/MENU/MENUDEFS]
       - [0x0BD0BC, data, LIBS]
 
