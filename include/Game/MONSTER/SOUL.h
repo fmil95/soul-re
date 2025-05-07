@@ -16,6 +16,8 @@ void SOUL_Wander(Instance *instance);
 void SOUL_ReanimateEntry(Instance *instance);
 void SOUL_Reanimate(Instance *instance);
 void SOUL_CleanUp(Instance *instance);
+void SOUL_Init(Instance *instance);
+void SOUL_Effect(Instance *instance, evFXHitData *data);
 
 extern MonsterFunctionTable SOUL_FunctionTable;
 

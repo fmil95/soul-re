@@ -16,6 +16,18 @@
 #include "Game/SOUND.h"
 #include "Game/STREAM.h"
 #include "Game/G2/ANMG2ILF.h"
+#include "Game/MONSTER/SLUAGH.h"
+
+MonsterFunctionTable SOUL_FunctionTable = {
+    SOUL_Init,
+    SOUL_CleanUp,
+    SOUL_Effect,
+    NULL,
+    NULL,
+    SOUL_StateChoiceTable,
+    monVersion,
+    NULL
+};
 
 void SOUL_QueueHandler(Instance *instance)
 {
@@ -780,6 +792,6 @@ void SOUL_Reanimate(Instance *instance)
     }
 }
 
-void SOUL_Effect()
+void SOUL_Effect(Instance *instance, evFXHitData *data)
 {
 }

@@ -11,5 +11,6 @@ void SLUAGH_DamageEffect(Instance *instance, evFXHitData *data);
 uintptr_t SLUAGH_Query(Instance *instance, unsigned long query);
 
 extern MonsterFunctionTable SLUAGH_FunctionTable;
+extern MonsterStateChoice SOUL_StateChoiceTable[];
 
 #endif

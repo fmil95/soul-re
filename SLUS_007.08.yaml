@@ -228,7 +228,7 @@ segments:
       - [0x0C2330, sdata, Game/MONSTER/MONSTER]
       - [0x0C2348, .sdata, Game/MONSTER/MONTABLE]
       - [0x0C2368, .sdata, Game/MONSTER/SLUAGH]
-      - [0x0C2390, sdata, Game/MONSTER/SOUL]
+      - [0x0C2390, .sdata, Game/MONSTER/SOUL]
       - [0x0C23B0, .sdata, Game/MONSTER/VWRAITH]
       - [0x0C23D0, .sdata, Game/MONSTER/WORSHIP]
       - [0x0C23F0, .sdata, Game/MONSTER/MBMISS]
