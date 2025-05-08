@@ -124,7 +124,77 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_CdReadFromBigFile);
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_ReadDirectory);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_InitCdLoader);
+void LOAD_InitCdLoader(char *bigFileName, char *voiceFileName)
+{
+    CdlFILE fp;
+    long i;
+
+    (void)voiceFileName;
+
+    loadStatus.state = 0;
+
+    for (i = 0; i < 10; i++)
+    {
+        if (CdSearchFile(&fp, bigFileName) != NULL)
+        {
+            break;
+        }
+
+        CdReset(0);
+    }
+
+    if (i != 10)
+    {
+        char *ptr;
+
+        LOAD_InitCdStreamMode();
+
+        loadStatus.bigFile.bigfileBaseOffset = CdPosToInt(&fp.pos);
+
+        loadStatus.cdWaitTime = 0;
+
+        loadStatus.currentQueueFile.readStatus = 0;
+
+        loadStatus.bigFile.currentDir = NULL;
+        loadStatus.bigFile.currentDirID = 0;
+
+        loadStatus.bigFile.cachedDir = NULL;
+        loadStatus.bigFile.cachedDirID = 0;
+
+        loadStatus.bigFile.searchDirID = 0;
+
+        LOAD_CdReadFromBigFile(0, (uintptr_t *)&loadStatus.bigFile.numSubDirs, sizeof(loadStatus.bigFile.numSubDirs), 0, 0);
+
+        do
+        {
+            LOAD_ProcessReadQueue();
+        } while (LOAD_IsFileLoading() != 0);
+
+        CdControlF(CdlPause, NULL);
+
+        i = (loadStatus.bigFile.numSubDirs * 8) + 4;
+
+        ptr = MEMPACK_Malloc(i, 8);
+
+        CdSync(0, NULL);
+
+        LOAD_CdReadFromBigFile(0, (uintptr_t *)ptr, i, 0, 0);
+
+        loadStatus.bigFile.subDirList = (BigFileDirEntry *)&ptr[4];
+
+        do
+        {
+            LOAD_ProcessReadQueue();
+        } while (LOAD_IsFileLoading() != 0);
+
+        loadStatus.bigFile.rootDir = LOAD_ReadDirectory(loadStatus.bigFile.subDirList);
+
+        do
+        {
+            LOAD_ProcessReadQueue();
+        } while (LOAD_IsFileLoading() != 0);
+    }
+}
 
 extern char D_800D095C[];
 int LOAD_SetupFileInfo(NonBlockLoadEntry *loadEntry)
@@ -228,7 +298,9 @@ long LOAD_HashName(char *string)
 
     length = 0;
 
-    ext = ext = 0;
+    ext = 0;
+
+    ext = 0;
 
     endPos = 0;
 
@@ -528,7 +600,6 @@ void LOAD_DumpCurrentDir()
     }
 }
 
-BigFileDir *LOAD_ReadDirectory(BigFileDirEntry *dirEntry);
 int LOAD_ChangeDirectoryByID(int id)
 {
     int i;

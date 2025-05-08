@@ -593,6 +593,9 @@ int ResetGraph(int mode);
 int SetGraphDebug(int level);
 unsigned long SpuSetReverbVoice(long on_off, unsigned long voice_bit);
 void SpuGetAllKeysStatus(char *status);
+int CdReset(int mode);
+int CdControlF(u_char com, u_char *param);
+int CdSync(int mode, u_char *result);
 
 extern int StCdIntrFlag;
 
