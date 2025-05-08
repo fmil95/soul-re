@@ -112,7 +112,51 @@ void LOAD_UpdateCheckSum(long bytes)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_DoCDReading);
+void LOAD_DoCDReading()
+{
+    long bytesLoaded;
+    long readSoFar;
+    long state;
+    long lastCheck;
+
+    state = loadStatus.state;
+
+    readSoFar = loadStatus.currentQueueFile.readCurSize;
+
+    lastCheck = loadStatus.lastCheckPos;
+
+    bytesLoaded = readSoFar - lastCheck;
+
+    loadStatus.lastCheckPos = readSoFar;
+
+    if ((bytesLoaded != 0) && (loadStatus.currentQueueFile.checksumType != 0))
+    {
+        LOAD_UpdateCheckSum(bytesLoaded);
+    }
+
+    // the following two lines are garbage code for reordering
+    state++;
+    state--;
+
+    if (state == 5)
+    {
+        if ((loadStatus.currentQueueFile.checksumType != 0) && (loadStatus.checksum != loadStatus.currentQueueFile.checksum))
+        {
+            loadStatus.currentQueueFile.readStatus = 7;
+        }
+        else
+        {
+            loadStatus.currentQueueFile.readStatus = 0;
+
+            if (loadStatus.currentDirLoading != 0)
+            {
+                loadStatus.currentDirLoading = 0;
+
+                MEMPACK_SetMemoryDoneStreamed((char *)loadStatus.bigFile.currentDir);
+            }
+        }
+    }
+}
 
 void LOAD_DoCDBufferedReading()
 {
