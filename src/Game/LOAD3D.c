@@ -120,7 +120,19 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_ProcessReadQueue);
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_ReadFileFromCD);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_CdReadFromBigFile);
+void LOAD_CdReadFromBigFile(long fileOffset, unsigned long *loadAddr, long bytes, long chksumLevel, long checksum)
+{
+    loadStatus.currentQueueFile.readSize = bytes;
+    loadStatus.currentQueueFile.readCurSize = 0;
+
+    loadStatus.currentQueueFile.readStartDest = loadAddr;
+    loadStatus.currentQueueFile.readStartPos = fileOffset;
+
+    loadStatus.currentQueueFile.readStatus = 1;
+
+    loadStatus.currentQueueFile.checksumType = chksumLevel;
+    loadStatus.currentQueueFile.checksum = checksum;
+}
 
 BigFileDir *LOAD_ReadDirectory(BigFileDirEntry *dirEntry)
 {
