@@ -7,6 +7,8 @@ STATIC LoadStatus loadStatus;
 
 long crap1;
 
+char HashExtensions[7][4];
+
 void LOAD_InitCd()
 {
     CdInit();
@@ -163,7 +165,76 @@ void LOAD_CD_ReadPartOfFile(NonBlockLoadEntry *loadEntry)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_HashName);
+long LOAD_HashName(char *string)
+{
+    long sum;
+    long xor;
+    long length;
+    long ext;
+    char c;
+    long strl;
+    long endPos;
+    long i;
+    char *pos;
+
+    endPos = 0;
+
+    sum = 0;
+
+    xor = 0;
+
+    length = 0;
+
+    ext = ext = 0;
+
+    endPos = 0;
+
+    strl = strlen(string) - 1;
+
+    pos = (char *)strchr(string, '.');
+
+    if (pos != NULL)
+    {
+        pos++;
+
+        for (i = 0; i < 7; i++)
+        {
+            if (strcmpi(pos, HashExtensions[i]) == 0)
+            {
+                ext = i;
+                break;
+            }
+        }
+
+        if (i < 7)
+        {
+            strl -= 4;
+        }
+    }
+
+    for (; strl >= endPos; strl--)
+    {
+        c = string[strl];
+
+        if (c != '\\')
+        {
+            if ((c >= 'a') && (c <= 'z'))
+            {
+                c &= ~' ';
+            }
+
+            c -= '\x1A';
+
+            sum += c;
+
+            xor ^= c * length;
+
+            length++;
+        }
+    }
+
+    return (length << 27) | (sum << 15) | (xor << 3) | ext;
+}
 
 long LOAD_HashUnit(char *name)
 {
