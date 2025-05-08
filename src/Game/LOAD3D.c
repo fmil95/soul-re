@@ -118,7 +118,58 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_SetupFileToDoBufferedCDReading)
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_ProcessReadQueue);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_ReadFileFromCD);
+char *LOAD_ReadFileFromCD(char *filename, int memType)
+{
+    CdlFILE fp;
+    int i;
+    char *readBuffer;
+
+    for (i = 0; i < 10; i++)
+    {
+        if (CdSearchFile(&fp, filename) != NULL)
+        {
+            break;
+        }
+
+        CdReset(0);
+    }
+
+    if (i != 10)
+    {
+        readBuffer = MEMPACK_Malloc(fp.size, memType);
+
+        if (readBuffer != NULL)
+        {
+            int temp; // not from decls.h
+
+            temp = CdPosToInt(&fp.pos);
+
+            loadStatus.currentQueueFile.readCurSize = 0;
+
+            loadStatus.currentQueueFile.readStartDest = readBuffer;
+
+            loadStatus.currentQueueFile.readStatus = 1;
+
+            loadStatus.currentQueueFile.checksumType = 0;
+            loadStatus.currentQueueFile.checksum = 0;
+
+            loadStatus.currentQueueFile.readSize = fp.size;
+
+            loadStatus.currentQueueFile.readStartPos = (temp - loadStatus.bigFile.bigfileBaseOffset) << 11;
+
+            do
+            {
+                LOAD_ProcessReadQueue();
+            } while (LOAD_IsFileLoading() != 0);
+
+            CdControlF(CdlPause, NULL);
+
+            return readBuffer;
+        }
+    }
+
+    return NULL;
+}
 
 void LOAD_CdReadFromBigFile(long fileOffset, unsigned long *loadAddr, long bytes, long chksumLevel, long checksum)
 {
