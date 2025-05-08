@@ -815,7 +815,50 @@ void MONSENSE_Radar(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSENSE", MONSENSE_GetClosestFreeDirection);
+short MONSENSE_GetClosestFreeDirection(Instance *instance, short angle, long range)
+{
+    MonsterVars *mv;
+    int bit;
+    int search;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    bit = ((angle + 256) & 0xFFF) / 512;
+
+    search = 1;
+
+    if ((mv->radarDistance[bit] == 0) && (mv->radarDistance[(bit + 4) & 0x7] > range))
+    {
+        return radarDir[(bit + 4) & 0x7].angle;
+    }
+
+    while (mv->radarDistance[bit] < range)
+    {
+        if (search > 0)
+        {
+            bit -= 1 - (search * 2);
+
+            search = -search;
+        }
+        else
+        {
+            bit += search * 2;
+
+            search = 1 - search;
+        }
+
+        if (search >= 4)
+        {
+            break;
+        }
+
+        bit &= 0x7;
+
+        angle = radarDir[bit].angle;
+    }
+
+    return angle;
+}
 
 int MONSENSE_GetDistanceInDirection(Instance *instance, short angle)
 {
