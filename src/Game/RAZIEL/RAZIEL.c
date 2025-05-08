@@ -5623,7 +5623,7 @@ int GetCollisionType(Instance *instance)
             return 1;
         }
 
-        if ((*(char *)&collideInfo->prim0[4] == 9) && (*(char *)&collideInfo->prim1[4] == 8)) // TODO: find what the actual castings of prim0 and prim1 are
+        if ((((char *)collideInfo->prim0)[4] == 9) && (((char *)collideInfo->prim1)[4] == 8)) // TODO: find what the actual castings of prim0 and prim1 are
         {
             if (Raziel.Senses.HitMonster == NULL)
             {

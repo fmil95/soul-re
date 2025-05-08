@@ -794,4 +794,6 @@ void SOUL_Reanimate(Instance *instance)
 
 void SOUL_Effect(Instance *instance, evFXHitData *data)
 {
+    (void)instance;
+    (void)data;
 }
