@@ -116,7 +116,30 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_DoCDReading);
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_DoCDBufferedReading);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_SetupFileToDoCDReading);
+void LOAD_SetupFileToDoCDReading()
+{
+    CdlLOC loc;
+
+    loadStatus.currentQueueFile.readStatus = 3;
+
+    loadStatus.checksum = 0;
+
+    loadStatus.lastCheckPos = 0;
+
+    loadStatus.state = 1;
+
+    loadStatus.currentQueueFile.readCurDest = loadStatus.currentQueueFile.readStartDest;
+
+    loadStatus.checkAddr = loadStatus.currentQueueFile.readStartDest;
+
+    loadStatus.currentSector = loadStatus.bigFile.bigfileBaseOffset + (loadStatus.currentQueueFile.readStartPos / 2048);
+
+    CdIntToPos(loadStatus.currentSector, &loc);
+
+    CdControl(CdlReadN, &loc.minute, NULL);
+
+    loadStatus.cdWaitTime = TIMER_GetTimeMS();
+}
 
 void LOAD_SetupFileToDoBufferedCDReading()
 {
