@@ -94,7 +94,16 @@ void LOAD_CdDataReady()
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_CdReadReady);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_UpdateCheckSum);
+void LOAD_UpdateCheckSum(long bytes)
+{
+    if (loadStatus.currentQueueFile.checksumType == 1)
+    {
+        for (; bytes != 0; bytes -= sizeof(int))
+        {
+            loadStatus.checksum += *loadStatus.checkAddr++;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_DoCDReading);
 
