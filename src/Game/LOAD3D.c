@@ -2,6 +2,7 @@
 #include "Game/HASM.h"
 #include "Game/MEMPACK.h"
 #include "Game/RESOLVE.h"
+#include "Game/DEBUG.h"
 
 STATIC LoadStatus loadStatus;
 
@@ -125,7 +126,32 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_ReadDirectory);
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_InitCdLoader);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_SetupFileInfo);
+extern char D_800D095C[];
+int LOAD_SetupFileInfo(NonBlockLoadEntry *loadEntry)
+{
+    BigFileEntry *fileInfo;
+
+    fileInfo = LOAD_GetBigFileEntryByHash(loadEntry->fileHash);
+
+    if (fileInfo == NULL)
+    {
+        if (loadEntry->dirHash == loadStatus.bigFile.currentDirID)
+        {
+            // DEBUG_FatalError("CD ERROR: File %s does not exist\n", loadEntry->fileName);
+            DEBUG_FatalError(D_800D095C, loadEntry->fileName);
+        }
+
+        return 0;
+    }
+
+    loadEntry->filePos = fileInfo->filePos;
+
+    loadEntry->loadSize = fileInfo->fileLen;
+
+    loadEntry->checksum = fileInfo->checkSumFull;
+
+    return 1;
+}
 
 void LOAD_NonBlockingReadFile(NonBlockLoadEntry *loadEntry)
 {
