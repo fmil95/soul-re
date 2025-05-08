@@ -33,5 +33,9 @@ BigFileEntry *LOAD_GetBigFileEntryByHash(long hash);
 int LOAD_SetupFileInfo(NonBlockLoadEntry *loadEntry);
 void LOAD_CdReadFromBigFile(long fileOffset, unsigned long *loadAddr, long bytes, long chksumLevel, long checksum);
 BigFileDir *LOAD_ReadDirectory(BigFileDirEntry *dirEntry);
+void LOAD_DoCDReading();
+void LOAD_DoCDBufferedReading();
+void LOAD_SetupFileToDoCDReading();
+void LOAD_SetupFileToDoBufferedCDReading();
 
 #endif

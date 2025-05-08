@@ -6845,7 +6845,7 @@ typedef struct _LoadStatus
     // offset: 0x0094
     long currentSector;
     // offset: 0x0098
-    long sectorTime;
+    volatile long sectorTime;
     // offset: 0x009C
     long seekTime;
 } LoadStatus;

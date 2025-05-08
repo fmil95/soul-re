@@ -3,6 +3,10 @@
 #include "Game/MEMPACK.h"
 #include "Game/RESOLVE.h"
 #include "Game/DEBUG.h"
+#include "Game/GAMELOOP.h"
+#include "Game/FONT.h"
+#include "Game/TIMER.h"
+#include "Game/VOICEXA.h"
 
 STATIC LoadStatus loadStatus;
 
@@ -116,7 +120,73 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_SetupFileToDoCDReading);
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_SetupFileToDoBufferedCDReading);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_ProcessReadQueue);
+extern char D_800D0934[];
+void LOAD_ProcessReadQueue()
+{
+    if (gameTrackerX.debugFlags < 0)
+    {
+        // FONT_Print("CD St %d LS %d sk %d tm %d rd %d cs %d\n", loadStatus.currentQueueFile.readStatus, loadStatus.state, loadStatus.seekTime, loadStatus.sectorTime, loadStatus.currentQueueFile.readCurSize, loadStatus.currentSector);
+        FONT_Print(D_800D0934, loadStatus.currentQueueFile.readStatus, loadStatus.state, loadStatus.seekTime, loadStatus.sectorTime, loadStatus.currentQueueFile.readCurSize, loadStatus.currentSector);
+    }
+
+    switch (loadStatus.currentQueueFile.readStatus)
+    {
+    case 3:
+        LOAD_DoCDReading();
+        break;
+    case 6:
+        LOAD_DoCDBufferedReading();
+        break;
+    case 1:
+        LOAD_SetupFileToDoCDReading();
+        break;
+    case 5:
+        LOAD_SetupFileToDoBufferedCDReading();
+        break;
+    }
+
+    if (loadStatus.currentQueueFile.readStatus == 7)
+    {
+        loadStatus.currentQueueFile.readStatus = 1;
+    }
+    else if (loadStatus.cdWaitTime != 0)
+    {
+        long cdWaitTimeDiff;
+
+        cdWaitTimeDiff = TIMER_GetTimeMS() - loadStatus.cdWaitTime;
+
+        if (cdWaitTimeDiff > 8400)
+        {
+            if ((loadStatus.currentQueueFile.readStatus == 3) || (loadStatus.currentQueueFile.readStatus == 6))
+            {
+                CdlLOC loc;
+
+                loadStatus.state = 0;
+
+                CdReset(0);
+
+                LOAD_InitCdStreamMode();
+
+                loadStatus.state = 1;
+
+                CdIntToPos(loadStatus.currentSector, &loc);
+
+                CdControl(CdlReadN, &loc.minute, NULL);
+
+                loadStatus.cdWaitTime = TIMER_GetTimeMS();
+            }
+            else
+            {
+                if (VOICEXA_IsPlaying() == 0)
+                {
+                    CdControlF(CdlPause, NULL);
+                }
+
+                loadStatus.cdWaitTime = 0;
+            }
+        }
+    }
+}
 
 char *LOAD_ReadFileFromCD(char *filename, int memType)
 {
