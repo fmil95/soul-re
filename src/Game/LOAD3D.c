@@ -165,7 +165,58 @@ void LOAD_CD_ReadPartOfFile(NonBlockLoadEntry *loadEntry)
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_HashName);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_HashUnit);
+long LOAD_HashUnit(char *name)
+{
+    int val;
+    int last;
+    int hash;
+    int num;
+    int flag;
+    char *c;
+
+    last = 0;
+
+    hash = 0;
+
+    num = 0;
+
+    flag = 0;
+
+    for (c = name; *c != 0; c++)
+    {
+        val = *c;
+
+        if ((val >= '0') && (val <= '9'))
+        {
+            num *= 10;
+
+            num += val - '0';
+        }
+        else
+        {
+            if ((val >= 'A') && (val <= 'Z'))
+            {
+                val -= 'A';
+            }
+            else
+            {
+                val -= 'a';
+            }
+
+            hash <<= 2;
+
+            hash += (flag != 0) ? (val - last) << 5 : val - last;
+
+            flag ^= 0x1;
+
+            last = val;
+        }
+    }
+
+    hash += num;
+
+    return (short)hash;
+}
 
 BigFileEntry *LOAD_GetBigFileEntryByHash(long hash)
 {
