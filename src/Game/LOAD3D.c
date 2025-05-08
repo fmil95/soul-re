@@ -122,7 +122,19 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_ReadFileFromCD);
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_CdReadFromBigFile);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_ReadDirectory);
+BigFileDir *LOAD_ReadDirectory(BigFileDirEntry *dirEntry)
+{
+    BigFileDir *dir;
+    long sizeOfDir;
+
+    sizeOfDir = (dirEntry->numFiles * sizeof(BigFileEntry)) + sizeof(long);
+
+    dir = (BigFileDir *)MEMPACK_Malloc(sizeOfDir, 44);
+
+    LOAD_CdReadFromBigFile(dirEntry->subDirOffset, (uintptr_t *)dir, sizeOfDir, 0, 0);
+
+    return dir;
+}
 
 void LOAD_InitCdLoader(char *bigFileName, char *voiceFileName)
 {
