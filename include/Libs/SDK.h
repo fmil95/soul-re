@@ -499,6 +499,16 @@ typedef void (*CdlCB)(u_char, u_char *);
 #define CdlModeAP	0x02	/* 0: AutoPause off	1: AutoPause on */
 #define CdlModeDA	0x01	/* 0: CD-DA off		1: CD-DA on	*/ 
 
+  /*
+   * Interrupts
+   */
+#define CdlNoIntr	0x00	/* No interrupt */
+#define CdlDataReady	0x01	/* Data Ready */
+#define CdlComplete	0x02	/* Command Complete */
+#define CdlAcknowledge	0x03	/* Acknowledge (reserved) */
+#define CdlDataEnd	0x04	/* End of Data Detected */
+#define CdlDiskError	0x05	/* Error Detected */
+
 void SpuSetCommonCDMix(long cd_mix);
 void SpuSetCommonMasterVolume(short mvol_left, short mvol_right);
 long EnableEvent(long);
@@ -596,6 +606,7 @@ void SpuGetAllKeysStatus(char *status);
 int CdReset(int mode);
 int CdControlF(u_char com, u_char *param);
 int CdSync(int mode, u_char *result);
+int CdGetSector(void *madr, int size);
 
 extern int StCdIntrFlag;
 
