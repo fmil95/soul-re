@@ -127,7 +127,24 @@ INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_InitCdLoader);
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_SetupFileInfo);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_NonBlockingReadFile);
+void LOAD_NonBlockingReadFile(NonBlockLoadEntry *loadEntry)
+{
+    if (LOAD_SetupFileInfo(loadEntry) != 0)
+    {
+        if (loadEntry->loadAddr == NULL)
+        {
+            loadEntry->loadAddr = (long *)MEMPACK_Malloc(loadEntry->loadSize, loadEntry->memType);
+        }
+
+        LOAD_CdReadFromBigFile(loadEntry->filePos, (uintptr_t *)loadEntry->loadAddr, loadEntry->loadSize, loadEntry->checksumType, loadEntry->checksum);
+
+        loadStatus.changeDir = 0;
+    }
+    else
+    {
+        loadStatus.changeDir = 1;
+    }
+}
 
 void LOAD_CD_ReadPartOfFile(NonBlockLoadEntry *loadEntry)
 {
