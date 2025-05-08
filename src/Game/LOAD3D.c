@@ -114,7 +114,13 @@ void LOAD_UpdateCheckSum(long bytes)
 
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_DoCDReading);
 
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_DoCDBufferedReading);
+void LOAD_DoCDBufferedReading()
+{
+    if (loadStatus.state == 5)
+    {
+        loadStatus.currentQueueFile.readStatus = 0;
+    }
+}
 
 void LOAD_SetupFileToDoCDReading()
 {
