@@ -12,6 +12,8 @@ void MAIN_InitVolume();
 void ClearDisplay();
 void MAIN_FreeMainMenuStuff();
 void InitDisplay();
+void MAIN_MainMenuInit();
+void MAIN_ShowLoadingScreen();
 
 DISPENV disp[2];
 BLK_FILL clearRect[2];

@@ -19,6 +19,10 @@
 #include "Game/DRAW.h"
 #include "Game/HASM.h"
 #include "Game/TIMER.h"
+#include "Game/G2/MAING2.h"
+#include "Game/STREAM.h"
+#include "Game/LOCAL/LOCALSTR.h"
+#include "Game/PSX/AADSFX.h"
 
 short mainMenuFading;
 
@@ -45,6 +49,10 @@ intptr_t *mainMenuScreen;
 unsigned long __timerEvent;
 
 long gTimerEnabled;
+
+char mainOptionsInit;
+
+InterfaceItem InterfaceItems[6];
 
 void ClearDisplay(void)
 {
@@ -649,4 +657,311 @@ long MAIN_DoMainMenu(GameTracker *gameTracker, MainTracker *mainTracker, long me
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MainG2);
+extern char D_800D0CDC[];
+extern char D_800D0CEC[];
+extern char D_800D0CF0[];
+int MainG2(void *appData)
+{
+    MainTracker *mainTracker;
+    GameTracker *gameTracker;
+    long menuPos;
+
+    menuPos = 0;
+
+    CheckForDevStation();
+
+    mainTracker = &mainTrackerX;
+    gameTracker = &gameTrackerX;
+
+    mainOptionsInit = 0;
+
+    if (MainG2_InitEngine(appData, 512, 240, NULL) != 0)
+    {
+        MEMPACK_Init();
+        LOAD_InitCd();
+
+        StartTimer();
+
+        // STREAM_InitLoader("\\BIGFILE.DAT;1", "");
+        STREAM_InitLoader(D_800D0CDC, D_800D0CEC);
+
+        localstr_set_language(language_default);
+
+        GAMELOOP_SystemInit(gameTracker);
+
+        gameTracker->currentLvl = gameTracker->lastLvl = -1;
+
+        gameTracker->disp = disp;
+
+        ProcessArgs(gameTracker->baseAreaName, gameTracker);
+
+        InitMainTracker(mainTracker);
+
+        MAIN_DoMainInit();
+
+        mainTracker->mainState = 6;
+
+        mainTracker->movieNum = 0;
+
+        do
+        {
+            mainTracker->previousState = mainTracker->mainState;
+
+            switch (mainTracker->mainState)
+            {
+            case 6:
+                CINE_Load();
+
+                while (mainTracker->movieNum >= 0)
+                {
+                    if (CINE_Loaded() != 0)
+                    {
+                        CINE_Play(InterfaceItems[mainTracker->movieNum].name, 0xFFFF, 2);
+
+                        ClearDisplay();
+                    }
+
+                    mainTracker->movieNum = InterfaceItems[mainTracker->movieNum].nextItem;
+
+                    if (InterfaceItems[mainTracker->movieNum].itemType != 0)
+                    {
+                        mainTracker->mainState = 4;
+                        break;
+                    }
+                }
+
+                CINE_Unload();
+
+                if (mainTracker->movieNum < 0)
+                {
+                    mainTracker->mainState = 8;
+                }
+
+                if (nosound == 0)
+                {
+                    SOUND_StopAllSound();
+                }
+
+                break;
+            case 4:
+                // LOAD_ChangeDirectory("Menustuff");
+                LOAD_ChangeDirectory(D_800D0CF0);
+
+                while ((unsigned long)mainTracker->movieNum < 6)
+                {
+                    InterfaceItem *item;
+                    int timer;
+
+                    item = &InterfaceItems[mainTracker->movieNum];
+
+                    gameTrackerX.gameFlags &= ~0x1;
+
+                    show_screen(item->name);
+
+                    for (timer = 0; timer++ < item->timeout; )
+                    {
+                        GAMEPAD_Process(gameTracker);
+
+                        if ((timer > item->buttonTimeout) && ((gameTracker->controlCommand[0][1] & 0x80)))
+                        {
+                            break;
+                        }
+
+                        VSync(0);
+                    }
+
+                    mainTracker->movieNum = item->nextItem;
+
+                    if ((mainTracker->movieNum >= 0) && (InterfaceItems[mainTracker->movieNum].itemType != 1))
+                    {
+                        mainTracker->mainState = 6;
+                        break;
+                    }
+                }
+
+                FONT_ReloadFont();
+
+                if (mainTracker->mainState != 6)
+                {
+                    if (DoMainMenu == 0)
+                    {
+                        MAIN_ResetGame();
+
+                        gameTrackerX.gameMode = 0;
+
+                        mainMenuFading = 1;
+
+                        MAIN_StartGame();
+                    }
+                    else
+                    {
+                        mainTracker->mainState = 8;
+                    }
+                }
+
+                break;
+            case 8:
+                gameTrackerX.gameData.asmData.MorphType = 0;
+
+                ProcessArgs(gameTracker->baseAreaName, gameTracker);
+
+                MAIN_ResetGame();
+
+                // LOAD_ChangeDirectory("Menustuff");
+                LOAD_ChangeDirectory(D_800D0CF0);
+
+                MAIN_MainMenuInit();
+                MAIN_InitVolume();
+
+                SAVE_ClearMemory(&gameTrackerX);
+
+                mainTracker->mainState = 9;
+
+                FONT_ReloadFont();
+                break;
+            case 9:
+                menuPos = MAIN_DoMainMenu(gameTracker, mainTracker, menuPos);
+                break;
+            case 2:
+                if ((gameTrackerX.streamFlags & 0x1000000))
+                {
+                    play_movie(InterfaceItems[2].name);
+
+                    gameTrackerX.streamFlags &= ~0x1000000;
+                }
+
+                if ((gameTrackerX.streamFlags & 0x200000))
+                {
+                    gameTrackerX.streamFlags &= ~0x200000;
+                }
+
+                if (nosound == 0)
+                {
+                    MAIN_InitVolume();
+                }
+
+                MAIN_ShowLoadingScreen();
+
+                FONT_ReloadFont();
+
+                DrawSync(0);
+
+                gameTracker->frameCount = 0;
+
+                STREAM_Init();
+
+                GAMELOOP_LevelLoadAndInit(gameTracker->baseAreaName, gameTracker);
+
+                gameTracker->levelDone = 0;
+
+                mainTracker->mainState = 1;
+
+                while (STREAM_PollLoadQueue() != 0);
+
+                gameTrackerX.vblFrames = 0;
+                break;
+            case 1:
+                SOUND_UpdateSound();
+
+                if ((gameTracker->debugFlags & 0x80000))
+                {
+                    VOICEXA_Tick();
+                }
+
+                PSX_GameLoop(gameTracker);
+
+                if (gameTracker->levelDone != 0)
+                {
+                    FadeOutSayingLoading(gameTracker);
+
+                    aadStopAllSfx();
+
+                    STREAM_DumpAllLevels(0, 0);
+
+                    RemoveAllObjects(gameTracker);
+
+                    while ((aadGetNumLoadsQueued() != 0) || (aadMem->sramDefragInfo.status != 0))
+                    {
+                        SOUND_UpdateSound();
+
+                        STREAM_PollLoadQueue();
+                    }
+
+                    SOUND_ShutdownMusic();
+
+                    MEMPACK_FreeByType(14);
+
+                    GAMELOOP_ResetGameStates();
+
+                    MEMPACK_DoGarbageCollection();
+
+                    if (gameTracker->levelDone == 2)
+                    {
+                        mainTracker->mainState = 8;
+                    }
+                    else if (gameTracker->levelDone == 3)
+                    {
+                        mainTracker->mainState = 6;
+
+                        mainTracker->movieNum = 3;
+                    }
+                    else if (gameTracker->levelDone == 4)
+                    {
+                        mainTracker->mainState = 2;
+
+                        if (!(gameTrackerX.streamFlags & 0x200000))
+                        {
+                            SAVE_ClearMemory(&gameTrackerX);
+                        }
+                    }
+                    else
+                    {
+                        mainTracker->mainState = 2;
+                    }
+                }
+
+                break;
+            case 7:
+                mainTracker->done = 1;
+                break;
+            case 3:
+            case 5:
+            }
+
+            STREAM_PollLoadQueue();
+        } while (mainTracker->done == 0);
+
+        SOUND_StopAllSound();
+
+        SOUND_Free();
+
+        SetDispMask(0);
+
+        DrawSync(0);
+        VSync(0);
+
+        DrawSyncCallback(NULL);
+        VSyncCallback(NULL);
+
+        EnterCriticalSection();
+
+        StopRCnt(0xF2000000);
+
+        DisableEvent(__timerEvent);
+        CloseEvent(__timerEvent);
+
+        ExitCriticalSection();
+
+        VSync(5);
+
+        StopCallback();
+
+        PadStopCom();
+
+        ResetGraph(3);
+    }
+
+    MainG2_ShutDownEngine(appData);
+
+    return 0;
+}

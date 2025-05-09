@@ -37,5 +37,7 @@ void LOAD_DoCDReading();
 void LOAD_DoCDBufferedReading();
 void LOAD_SetupFileToDoCDReading();
 void LOAD_SetupFileToDoBufferedCDReading();
+void LOAD_InitCd();
+void LOAD_ChangeDirectory(char *name);
 
 #endif

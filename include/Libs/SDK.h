@@ -607,6 +607,8 @@ int CdReset(int mode);
 int CdControlF(u_char com, u_char *param);
 int CdSync(int mode, u_char *result);
 int CdGetSector(void *madr, int size);
+int StopCallback(void);
+void PadStopCom(void);
 
 extern int StCdIntrFlag;
 

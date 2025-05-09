@@ -79,5 +79,9 @@ int WARPGATE_IsWarpgateSpectral();
 int WARPGATE_IsWarpgateReady();
 void MORPH_ToggleMorph();
 void STREAM_UpdateLevelPointer(Level *oldLevel, Level *newLevel, long sizeOfLevel);
+void STREAM_InitLoader(char *bigFileName, char *voiceFileName);
+void STREAM_Init();
+int STREAM_PollLoadQueue();
+void RemoveAllObjects(GameTracker *gameTracker);
 
 #endif

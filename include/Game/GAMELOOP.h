@@ -26,6 +26,10 @@ void GAMELOOP_DrawSavedOT(unsigned long **newOT);
 void GAMELOOP_SetScreenWipe(int time, int maxTime, int type);
 void GAMELOOP_FlipScreenAndDraw(GameTracker *gameTracker, unsigned long **drawot);
 void GAMELOOP_HandleScreenWipes(unsigned long **drawot);
+void GAMELOOP_SystemInit(GameTracker *gameTracker);
+void GAMELOOP_LevelLoadAndInit(char *baseAreaName, struct GameTracker *gameTracker);
+void PSX_GameLoop(GameTracker *gameTracker);
+void GAMELOOP_ResetGameStates();
 
 GameTracker gameTrackerX;
 GameTracker *gameTracker;

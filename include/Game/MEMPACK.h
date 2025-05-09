@@ -15,5 +15,7 @@ void MEMPACK_RelocateObjectType(MemHeader *newAddress, long offset, Object *oldO
 void MEMPACK_RelocateAreaType(MemHeader *newAddress, long offset, Level *oldLevel);
 char *MEMPACK_GarbageCollectMalloc(unsigned long *allocSize, unsigned char memType, unsigned long *freeSize);
 void MEMPACK_ReportMemory2();
+void MEMPACK_Init();
+void MEMPACK_FreeByType(unsigned char memType);
 
 #endif
