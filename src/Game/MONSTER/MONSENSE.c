@@ -918,4 +918,65 @@ void MONSENSE_DoSenses(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSENSE", MONSENSE_AdjustRadarFromObjects);
+void MONSENSE_AdjustRadarFromObjects(Instance *instance)
+{
+    MonsterVars *mv;
+    Instance *physob;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    for (physob = gameTrackerX.instanceList->first; physob != NULL; physob = physob->next)
+    {
+        if ((physob->object->oflags2 & 0x40000))
+        {
+            PhysObProperties *prop;
+
+            prop = (PhysObProperties *)physob->data;
+
+            if ((prop->family == 3) && ((((PhysObInteractProperties *)prop)->conditions & 0x40)) && (abs(physob->position.z - instance->position.z) < 400))
+            {
+                long dist;
+
+                dist = MATH3D_LengthXY(physob->position.x - instance->position.x, physob->position.y - instance->position.y);
+
+                if (dist < (((PhysObInteractProperties *)prop)->engageXYDistance + 1280))
+                {
+                    int i;
+                    int min;
+                    int max;
+                    int ang;
+
+                    ang = MATH3D_AngleFromPosToPos(&instance->position, &physob->position);
+
+                    min = MATH3D_FastAtan2(((PhysObInteractProperties *)prop)->engageXYDistance, dist);
+
+                    max = ang + min;
+                    min = ang - min;
+
+                    max = ((max + 256) & 0xFFF) / 512;
+                    min = ((min + 256) & 0xFFF) / 512;
+
+                    if (min < max)
+                    {
+                        for (i = min; i <= max; i++)
+                        {
+                            mv->radarDistance[i] = 0;
+                        }
+                    }
+                    else
+                    {
+                        for (i = 0; i <= max; i++)
+                        {
+                            mv->radarDistance[i] = 0;
+                        }
+
+                        for (i = min; i < 8; i++)
+                        {
+                            mv->radarDistance[i] = 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
