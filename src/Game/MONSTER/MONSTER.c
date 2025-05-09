@@ -266,7 +266,36 @@ void MON_MissileHitEntry(Instance *instance)
     SOUND_Play3dSound(&instance->position, 39, -100, 100, 16000);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_MissileHit);
+void MON_MissileHit(Instance *instance)
+{
+    MonsterVars *mv;
+    MonsterAttributes *ma;
+    int thisFrame;
+    int lastFrame;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    ma = (MonsterAttributes *)instance->data;
+
+    thisFrame = G2EmulationInstanceQueryFrame(instance, 0);
+    lastFrame = G2EmulationInstanceQueryLastFrame(instance, 0);
+
+    if ((lastFrame < ma->bloodImpaleFrame) && (thisFrame >= ma->bloodImpaleFrame))
+    {
+        FX_Blood_Impale(instance, ma->grabSegment, instance, ma->grabSegment);
+    }
+    else if ((lastFrame < ma->bloodConeFrame) && (thisFrame >= ma->bloodConeFrame))
+    {
+        FX_BloodCone(instance, ma->grabSegment, 80);
+    }
+
+    if ((instance->flags2 & 0x10))
+    {
+        MON_SwitchState(instance, MONSTER_STATE_DEAD);
+    }
+
+    while (DeMessageQueue(&mv->messageQueue) != NULL);
+}
 
 void MON_BirthEntry(Instance *instance)
 {
