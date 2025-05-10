@@ -551,7 +551,7 @@ int MON_ShouldIAttackInstance(Instance *instance, Instance *ei)
                 return 0;
             }
 
-            if ((mv->behaviorState == MONSTER_STATE_IMPALEDEATH) && ((instance->intro != NULL) && ((instance->matrix != NULL)) && (((MATH3D_LengthXYZ(ei->position.x - instance->intro->position.x, ei->position.y - instance->intro->position.y, ei->position.z - instance->intro->position.z) > (mv->guardRange + 640)) != 0))))
+            if ((mv->behaviorState == MONSTER_STATE_IMPALEDEATH) && ((instance->intro != NULL) && (instance->matrix != NULL)) && (((MATH3D_LengthXYZ(ei->position.x - instance->intro->position.x, ei->position.y - instance->intro->position.y, ei->position.z - instance->intro->position.z) > (mv->guardRange + 640)) != 0)))
             {
                 return 0;
             }
