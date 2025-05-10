@@ -2,9 +2,20 @@
 #include "Game/PSX/AADLIB.h"
 #include "Game/PSX/AADVOICE.h"
 
-STATIC void (*sfxCmdFunction[9])();
+static void(*sfxCmdFunction[9])(AadSfxCommand *) =
+{
+    sfxCmdPlayTone,
+    sfxCmdStopTone,
+    sfxCmdSetToneVolumeAndPan,
+    sfxCmdSetToneVolPanPitch,
+    sfxCmdStopAllTones,
+    sfxCmdLockVoice,
+    sfxCmdSetVoiceAttr,
+    sfxCmdSetVoiceKeyOn,
+    sfxCmdSetVoiceKeyOff
+};
 
-STATIC AadProgramAtr aadDummySfxProgram;
+static AadProgramAtr aadDummySfxProgram = {1, 0, 127, 64, 0};
 
 unsigned short aadPitchTable[85];
 
