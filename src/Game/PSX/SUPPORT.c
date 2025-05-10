@@ -2,23 +2,21 @@
 
 #define PRT_BUF_SIZE	0x100
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/SUPPORT", printf);
-/* TODO: gives conflicting types error
 // int printf(char *fmt)
-int printf(char *fmt, ...)
+int printf(const char *format, ...)
 {
     int len;
     char string[PRT_BUF_SIZE];
     va_list ap; // not from decls.h
 
-    va_start(ap, fmt);
+    va_start(ap, format);
 
-    len = vsprintf(&string, fmt, ap);
+    len = vsprintf(string, format, ap);
 
-    puts(&string);
+    puts(string);
 
     return len;
-}*/
+}
 
 // int sprintf(char *string, char *fmt)
 int sprintf(char *str, const char *format, ...)
