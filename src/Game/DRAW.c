@@ -47,7 +47,33 @@ void DRAW_InitShadow()
 
 INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_DrawShadow);
 
-INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_FlatQuad);
+void DRAW_FlatQuad(CVECTOR *color, short x0, short y0, short x1, short y1, short x2, short y2, short x3, short y3, PrimPool *primPool, unsigned long **ot)
+{
+    unsigned long *prim;
+
+    prim = primPool->nextPrim;
+
+    if ((char *)prim < ((char *)primPool->lastPrim - (sizeof(POLY_F4) * 2)))
+    {
+        long temp; // not from decls.h
+
+        temp = *(long *)color;
+
+        setXY4((POLY_F4 *)prim, x0, y0, x1, y1, x2, y2, x3, y3);
+        // setRGB0((POLY_F4*)prim, color->r, color->g, color->b);
+        *(long *)&((POLY_F4 *)prim)->r0 = temp;
+        // setPolyF4((POLY_F4*)prim);
+        ((POLY_F4 *)prim)->code = 0x28;
+
+        // addPrim(ot, prim);
+        *(int *)prim = getaddr(ot) | 0x5000000;
+        *(int *)ot = (uintptr_t)prim & 0xFFFFFF;
+
+        primPool->nextPrim = (uintptr_t *)((char *)primPool->nextPrim + sizeof(POLY_F4));
+
+        primPool->numPrims++;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_TranslucentQuad);
 
