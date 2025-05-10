@@ -13,5 +13,6 @@ void DRAW_LoadButton(long *addr, ButtonTexture *button);
 void DRAW_FreeButton(ButtonTexture *button);
 void DRAW_DrawButton(ButtonTexture *button, short x, short y, unsigned long **ot);
 unsigned long *DRAW_DrawShadow(PrimPool *primPool, Model *model, unsigned long **ot, long fadeValue);
+void DRAW_GlowQuad(PrimPool *primPool, unsigned long **ot, long otz, long color, Vector *v0, Vector *v1, Vector *v2, Vector *v3);
 
 #endif

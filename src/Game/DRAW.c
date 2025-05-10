@@ -67,7 +67,102 @@ INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_DrawRingPoints);
 
 INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_GlowQuad);
 
-INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_CreateAGlowingCircle);
+void DRAW_CreateAGlowingCircle(Vector *f1, long z, PrimPool *primPool, unsigned long **ot, long otz, long color, long w, long h, long angle)
+{
+    long hold;
+    long x;
+    long y;
+    long diagScale;
+    Vector width;
+    Vector height;
+    Vector diag1;
+    Vector diag2;
+    Vector points[9];
+    int temp, temp2; // not from decls.h
+
+    f1->z = 0;
+
+    if ((z > 0) && (otz < 3072))
+    {
+        diagScale = 3072;
+
+        temp = (320 * w) / z;
+        temp2 = (320 * h) / z;
+
+        height.x = 0;
+        height.y = -temp2;
+        height.z = 0;
+
+        x = ((rcos(angle) * height.x) + (rsin(angle) * height.y)) >> 12;
+        y = ((-rsin(angle) * height.x) + (rcos(angle) * height.y)) >> 12;
+
+        height.x = (x << 9) / 240;
+        height.y = y;
+
+        width.x = -temp;
+        width.y = 0;
+        width.z = 0;
+
+        x = ((rcos(angle) * width.x) + (rsin(angle) * width.y)) >> 12;
+        y = ((-rsin(angle) * width.x) + (rcos(angle) * width.y)) >> 12;
+
+        width.x = (x << 9) / 240;
+        width.y = y;
+
+        ADD_LVEC(Vector, &diag1, Vector, f1, Vector, &height);
+        ADD_LVEC(Vector, &diag1, Vector, &diag1, Vector, &width);
+
+        SUB_LVEC(Vector, &diag1, Vector, &diag1, Vector, f1);
+
+        hold = diag1.x * diagScale;
+
+        diag1.x = hold >> 12;
+
+        hold = diag1.y * diagScale;
+
+        diag1.y = hold >> 12;
+
+        ADD_LVEC(Vector, &diag2, Vector, f1, Vector, &height);
+
+        SUB_LVEC(Vector, &diag2, Vector, &diag2, Vector, &width);
+        SUB_LVEC(Vector, &diag2, Vector, &diag2, Vector, f1);
+
+        hold = diag2.x * diagScale;
+
+        diag2.x = hold >> 12;
+
+        hold = diag2.y * diagScale;
+
+        diag2.y = hold >> 12;
+
+        ADD_LVEC(Vector, &points[0], Vector, f1, Vector, &diag1);
+        ADD_LVEC(Vector, &points[1], Vector, f1, Vector, &height);
+        ADD_LVEC(Vector, &points[2], Vector, f1, Vector, &diag2);
+        ADD_LVEC(Vector, &points[3], Vector, f1, Vector, &width);
+
+        memcpy(&points[4], f1, sizeof(Vector));
+
+        SUB_LVEC(Vector, &points[5], Vector, f1, Vector, &width);
+        SUB_LVEC(Vector, &points[6], Vector, f1, Vector, &diag2);
+        SUB_LVEC(Vector, &points[7], Vector, f1, Vector, &height);
+        SUB_LVEC(Vector, &points[8], Vector, f1, Vector, &diag1);
+
+        points[0].z = 4096;
+        points[1].z = 4096;
+        points[2].z = 4096;
+        points[3].z = 4096;
+        points[4].z = 0;
+        points[5].z = 4096;
+        points[6].z = 4096;
+        points[7].z = 4096;
+        points[8].z = 4096;
+
+        DRAW_GlowQuad(primPool, ot, otz, color, &points[3], &points[0], &points[4], &points[1]);
+        DRAW_GlowQuad(primPool, ot, otz, color, &points[3], &points[4], &points[6], &points[7]);
+        DRAW_GlowQuad(primPool, ot, otz, color, &points[1], &points[2], &points[4], &points[5]);
+        DRAW_GlowQuad(primPool, ot, otz, color, &points[7], &points[4], &points[8], &points[5]);
+    }
+}
 
 unsigned long *DRAW_DrawGlowPoints2(Instance *instance, long seg1, long seg2, PrimPool *primPool, unsigned long **ot, long color, long height)
 {
