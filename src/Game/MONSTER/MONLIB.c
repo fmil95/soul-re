@@ -525,7 +525,41 @@ int MON_CheckConditions(Instance *instance, MonsterIR *mir, char *probArray)
     return prob > chance;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_ShouldIAttackInstance);
+int MON_ShouldIAttackInstance(Instance *instance, Instance *ei)
+{
+    if (ei == gameTrackerX.playerInstance)
+    {
+        Instance *enemyAttackee;
+        long mode;
+        MonsterVars *mv;
+
+        enemyAttackee = (Instance *)INSTANCE_Query(ei, 34);
+
+        mode = INSTANCE_Query(ei, 10);
+
+        mv = (MonsterVars *)instance->extraData;
+
+        if ((mode & 0x20010000)) return 0;
+        {
+            if (((enemyAttackee != NULL) && (enemyAttackee != instance)) && ((mode & 0x2000000)))
+            {
+                return 0;
+            }
+
+            if (INSTANCE_Query(ei, 46) != 0)
+            {
+                return 0;
+            }
+
+            if ((mv->behaviorState == MONSTER_STATE_IMPALEDEATH) && ((instance->intro != NULL) && ((instance->matrix != NULL)) && (((MATH3D_LengthXYZ(ei->position.x - instance->intro->position.x, ei->position.y - instance->intro->position.y, ei->position.z - instance->intro->position.z) > (mv->guardRange + 640)) != 0))))
+            {
+                return 0;
+            }
+        }
+    }
+
+    return 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_ShouldIAttack);
 
