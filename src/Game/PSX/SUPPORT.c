@@ -30,7 +30,6 @@ int sprintf(char *str, const char *format, ...)
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/SUPPORT", vsprintf);
 
-extern char D_800D1A74[];
 //char *my_itoa(unsigned long value, char *str, int radix)
 char *my_itoa(int value, char *str, int base)
 {
