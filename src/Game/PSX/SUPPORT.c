@@ -20,18 +20,15 @@ int printf(char *fmt, ...)
     return len;
 }*/
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/SUPPORT", sprintf);
-/* TODO: gives conflicting types error
 // int sprintf(char *string, char *fmt)
-int sprintf(char *string, char *fmt, ...)
+int sprintf(char *str, const char *format, ...)
 {
-    int len; // not from decls.h
     va_list ap; // not from decls.h
 
-    va_start(ap, fmt);
+    va_start(ap, format);
 
-    return vsprintf(string, fmt, ap);
-}*/
+    return vsprintf(str, format, ap);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/SUPPORT", vsprintf);
 
