@@ -220,7 +220,7 @@ segments:
       - [0x0C221C, .sdata, Game/RAZCNTRL]
       - [0x0C2250, .sdata, Game/STATE]
       - [0x0C2270, .sdata, Game/VRAM]
-      - [0x0C2274, sdata, Game/PSX/SUPPORT]
+      - [0x0C2274, .sdata, Game/PSX/SUPPORT]
       - [0x0C2278, .sdata, Game/PHYSICS]
       - [0x0C2288, sdata, Game/GLYPH]
       - [0x0C229C, .sdata, Game/MONSTER/HUMAN]

@@ -45,7 +45,7 @@ char *my_itoa(int value, char *str, int base)
     tStr = str;
     if (value == 0)
     {
-        memcpy(str, D_800D1A74, 2);
+        memcpy(str, "0", 2);
         return str;
     }
 
