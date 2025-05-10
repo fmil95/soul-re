@@ -9,7 +9,8 @@
 #include "Game/CAMERA.h"
 #include "Game/PSX/MAIN.h"
 #include "Game/LOCAL/LOCALSTR.h"
-#include "Game//MENU/MENU.h"
+#include "Game/MENU/MENU.h"
+#include "Game/FX.h"
 
 SVECTOR shadow_vertices[11];
 
@@ -61,7 +62,43 @@ void DRAW_FreeButton(ButtonTexture *button)
 
 INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_RingLine);
 
-INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_RingPoint);
+void DRAW_RingPoint(PrimPool *primPool, unsigned long **ot, long color, SVector *vel, SVector *acc)
+{
+    SVector outpoint;
+    int temp; // not from decls.h
+
+    (void)primPool;
+    (void)ot;
+
+    if ((rand() & 0x3F) >= 24)
+    {
+        vel->x = (rand() & 0x1F) - 15;
+        vel->y = (rand() & 0x1F) - 15;
+        vel->z = rand() & 0xF;
+
+        gte_stsv(&outpoint);
+
+        temp = rand() & 0x3;
+
+        outpoint.x--;
+
+        outpoint.x += temp;
+
+        temp = rand() & 0x3;
+
+        outpoint.y--;
+
+        outpoint.y += temp;
+
+        temp = rand() & 0x3;
+
+        outpoint.z--;
+
+        outpoint.z += temp;
+
+        FX_Dot(&outpoint, vel, acc, 0, color, 10, 7, 1);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_DrawRingPoints);
 
