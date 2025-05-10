@@ -2508,7 +2508,55 @@ void MON_MoveInstanceToImpalePoint(Instance *instance)
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_ReachableIntro);
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_SetVelocityTowardsImpalingObject);
+int MON_SetVelocityTowardsImpalingObject(Instance *instance, int checkOrientation)
+{
+    Level *level;
+    Intro *currentI;
+    HPrim *usePrim;
+    int i;
+    Position spherePos;
+
+    level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
+
+    if (!(((Dummy6 *)instance->data)->unknown & 0x8)) // TODO: find the suitable parsing here, could be instanceID
+    {
+        usePrim = MON_FindSphereForTerrain(instance);
+
+        if (usePrim != NULL)
+        {
+            Instance *target;
+
+            MON_SphereWorldPos(&instance->matrix[usePrim->segment], usePrim->data.hsphere, &spherePos);
+
+            currentI = level->terrain->introList;
+
+            for (i = level->terrain->numIntros; i != 0; i--, currentI++)
+            {
+                if (((currentI->flags & 0x8000)) && (MON_ReachableIntro(instance, &spherePos, &currentI->position, &currentI->rotation, checkOrientation) != 0))
+                {
+                    return 1;
+                }
+            }
+
+            for (target = gameTrackerX.instanceList->first; target != NULL; target = target->next)
+            {
+                if ((INSTANCE_Query(target, 1) & 0x20))
+                {
+                    PhysObProperties *prop;
+
+                    prop = target->data;
+
+                    if ((prop->family == 3) && ((((PhysObInteractProperties *)prop)->conditions & 0x58)) && (MON_ReachableIntro(instance, &spherePos, &target->position, NULL, checkOrientation) != 0))
+                    {
+                        return 1;
+                    }
+                }
+            }
+        }
+    }
+
+    return 0;
+}
 
 void MON_TurnOffSphereCollisions(Instance *instance)
 {

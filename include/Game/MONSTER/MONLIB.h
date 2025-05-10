@@ -3,6 +3,12 @@
 
 #include "common.h"
 
+typedef struct Dummy6
+{
+    char pad[16];
+    int unknown;
+} Dummy6; // not from types.h
+
 unsigned long MON_GetTime(Instance *instance);
 void MON_PlayRandomIdle(Instance *instance, int mode);
 void MON_TurnOnBodySpheres(Instance *instance);
@@ -72,5 +78,6 @@ void MON_TurnOffWeaponSphere(Instance *instance, int segment);
 void MON_TurnOnWeaponSphere(Instance *instance, int segment);
 void MON_BurnInAir(Instance *instance, int currentState);
 int MON_TransNodeAnimation(Instance *instance);
+int MON_ReachableIntro(Instance *instance, Position *pos, Position *introPos, Rotation *introRot, int checkOrientation);
 
 #endif
