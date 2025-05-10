@@ -122,7 +122,38 @@ unsigned long *DRAW_DrawGlowPoints2(Instance *instance, long seg1, long seg2, Pr
     return primPool->nextPrim;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_DrawGlowPoint);
+unsigned long *DRAW_DrawGlowPoint(Instance *instance, long seg1, PrimPool *primPool, unsigned long **ot, long color, short width, short height)
+{
+    Position glowPoints1;
+    Vector f1;
+    long otz;
+    long z;
+    long angle;
+    int temp; // not from decls.h
+
+    angle = (gameTrackerX.currentTime & 0x7FF) * 2;
+
+    temp = PIPE3D_Segment2ScreenPt(instance, theCamera.core.wcTransform, seg1, &glowPoints1);
+
+    otz = temp + 20;
+
+    z = otz * 4;
+
+    if (z > 0)
+    {
+        otz = temp + 30;
+
+        f1.x = glowPoints1.x;
+        f1.y = glowPoints1.y;
+
+        if (otz < 3072)
+        {
+            DRAW_CreateAGlowingCircle(&f1, z, primPool, ot, otz, color, width, height, angle);
+        }
+    }
+
+    return primPool->nextPrim;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_DisplayTFace_zclipped_C);
 
