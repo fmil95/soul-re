@@ -60,5 +60,8 @@ void FX_Sprite_Insert(NodeType *list, FX_PRIM *fxPrim);
 void _FX_BuildNonSegmentedSplinters(Instance *instance, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, FXSplinter *splintDef, FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), int shardFlags);
 void _FX_BuildSegmentedSplinters(Instance *instance, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, FXSplinter *splintDef, FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), int shardFlags);
 void FX_UpdateTexturePointers(FX_PRIM *fxPrim, Object *oldObject, long sizeOfObject, long offset);
+void FX_MakeWarpArrow(int x, int y, int xsize, int ysize, int fade);
+void FX_MakeMannaIcon(int x, int y, int xsize, int ysize);
+void FX_DrawModel(Object *object, int model_num, SVector *rotation, SVector *position, SVector *offset, int transflag);
 
 #endif

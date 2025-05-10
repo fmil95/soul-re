@@ -10,6 +10,8 @@
 #include "Game/MATH3D.h"
 #include "Game/DRAW.h"
 #include "Game/INSTANCE.h"
+#include "Game/OBTABLE.h"
+#include "Game/FONT.h"
 
 STATIC short HUD_Captured;
 
@@ -1008,4 +1010,214 @@ void HUD_Update()
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/GLYPH", HUD_Draw);
+extern char D_800D1A94[];
+extern char D_800D1A98[];
+void HUD_Draw()
+{
+    SVector Rotation;
+    SVector Pos;
+    SVector offset;
+    int n;
+    ObjectAccess *temp; // not from decls.h
+
+    if (((theCamera.instance_mode & 0x80000000)) || (warpDraw != 0))
+    {
+        DVECTOR center;
+        int glow;
+        int left;
+        int right;
+
+        if ((theCamera.instance_mode & 0x80000000))
+        {
+            warpDraw += gameTrackerX.timeMult / 16;
+
+            if (warpDraw > 4096)
+            {
+                warpDraw = 4096;
+            }
+        }
+        else
+        {
+            warpDraw -= gameTrackerX.timeMult / 16;
+
+            if (warpDraw < 0)
+            {
+                warpDraw = 0;
+            }
+        }
+
+        HUD_GetPlayerScreenPt(&center);
+
+        glow = (warpDraw / 3) + (((warpDraw / 10) * rcos(glowdeg)) / 4096);
+
+        if (glow < 0)
+        {
+            glow = 0;
+        }
+
+        glowdeg += gameTrackerX.timeMult / 32;
+
+        if (hud_warp_arrow_flash > 0)
+        {
+            right = glow + hud_warp_arrow_flash;
+
+            hud_warp_arrow_flash -= gameTrackerX.timeMult / 8;
+
+            if (hud_warp_arrow_flash < 0)
+            {
+                hud_warp_arrow_flash = 0;
+            }
+        }
+        else
+        {
+            right = glow;
+        }
+
+        if (hud_warp_arrow_flash < 0)
+        {
+            left = glow - hud_warp_arrow_flash;
+
+            hud_warp_arrow_flash += gameTrackerX.timeMult / 8;
+
+            if (hud_warp_arrow_flash > 0)
+            {
+                hud_warp_arrow_flash = 0;
+            }
+        }
+        else
+        {
+            left = glow;
+        }
+
+        FX_MakeWarpArrow(center.vx - 64, center.vy, -64, 32, left);
+        FX_MakeWarpArrow(center.vx + 64, center.vy, 64, 32, right);
+    }
+
+    HUD_Update();
+
+    offset.x = 0;
+    offset.y = 0;
+    offset.z = 135;
+
+    if (MANNA_Position > -64)
+    {
+        int oldx;
+        int oldy;
+        int MANNA_Count;
+        int MANNA_Max;
+
+        oldx = fontTracker.font_xpos;
+        oldy = fontTracker.font_ypos;
+
+        MANNA_Count = INSTANCE_Query(gameTrackerX.playerInstance, 32);
+        MANNA_Max = INSTANCE_Query(gameTrackerX.playerInstance, 45);
+
+        FX_MakeMannaIcon(MANNA_Position, 23, 51, 32);
+
+        FONT_Flush();
+
+        FONT_SetCursor(MANNA_Position + 58, 32);
+
+        if (glyph_cost != -1)
+        {
+            // FONT_Print("%d/", glyph_cost);
+            FONT_Print(D_800D1A94, glyph_cost);
+        }
+
+        if (MANNA_Count >= MANNA_Max)
+        {
+            FONT_SetColorIndex(2);
+        }
+
+        // FONT_Print("%d", MANNA_Count);
+        FONT_Print(D_800D1A98, MANNA_Count);
+
+        FONT_SetColorIndex(0);
+        FONT_SetCursor(oldx, oldy);
+
+        FONT_Flush();
+    }
+
+    if (HUD_Position > -1000)
+    {
+        SVector targetPos;
+        SVector accl;
+        SVector HUD_Cap_Rot;
+
+        if ((HUD_Captured != 0) && (gameTrackerX.gameMode != 6))
+        {
+            HUD_Cap_Rot.x = 1024;
+            HUD_Cap_Rot.y = 0;
+            HUD_Cap_Rot.z = 0;
+
+            targetPos.x = -1536;
+            targetPos.z = 2560;
+
+            if (HUD_State < 4)
+            {
+                targetPos.y = 288;
+            }
+            else
+            {
+                targetPos.y = 608;
+            }
+
+            CriticalDampPosition(1, (Position *)&HUD_Cap_Pos, (Position *)&targetPos, &HUD_Cap_Vel, &accl, 128);
+
+            if ((HUD_Cap_Vel.x == 0) && (HUD_Cap_Vel.y == 0) && (HUD_Cap_Vel.z == 0))
+            {
+                if (HUD_State == 3)
+                {
+                    HUD_State = 4;
+                }
+                else if (HUD_State == 4)
+                {
+                    HUD_State = 5;
+                }
+            }
+
+            FX_DrawModel((Object *)objectAccess[21].object, 0, &HUD_Cap_Rot, &HUD_Cap_Pos, &offset, 0);
+        }
+
+        Rotation.x = 1024;
+        Rotation.y = 0;
+        Rotation.z = HUD_Rotation;
+
+        Pos.x = HUD_Position - 1536;
+        Pos.y = 608;
+        Pos.z = 2560;
+
+        offset.z = 0;
+
+        if ((HUD_Count != 0) || (HUD_Count_Overall < 15))
+        {
+            for (n = 0; n < 5; n++)
+            {
+                temp = objectAccess;
+
+                switch (n)
+                {
+                case 0:
+                    Rotation.z = 0;
+                    break;
+                case 1:
+                    Rotation.z = 3277;
+                    break;
+                case 2:
+                    Rotation.z = 2458;
+                    break;
+                case 3:
+                    Rotation.z = 1638;
+                    break;
+                case 4:
+                    Rotation.z = 819;
+                    break;
+                }
+
+                Rotation.z = (Rotation.z - HUD_Rotation) & 0xFFF;
+
+                FX_DrawModel((Object *)temp[24].object, 0, &Rotation, &Pos, &offset, (n < HUD_Count) == 0);
+            }
+        }
+    }
+}
