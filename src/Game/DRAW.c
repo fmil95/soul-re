@@ -45,7 +45,84 @@ void DRAW_InitShadow()
     shadow_vertices[10].vz = shadow_vertices[0].vz;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_DrawShadow);
+unsigned long *DRAW_DrawShadow(PrimPool *primPool, Model *model, unsigned long **ot, long fadeValue)
+{
+    POLY_G3_SEMITRANS *sg3;
+    SVECTOR zero_vertex;
+    long clip;
+    long n;
+    long p;
+    long otz;
+    unsigned long color;
+
+    (void)model;
+
+    sg3 = (POLY_G3_SEMITRANS *)primPool->nextPrim;
+
+    zero_vertex.vx = zero_vertex.vy = zero_vertex.vz = 0;
+
+    gte_ldv0(&zero_vertex);
+    gte_nrtps();
+
+    color = 0x606060;
+
+    gte_stdp(&p);
+
+    if ((p < fadeValue) && (fadeValue <= 4096))
+    {
+        p = fadeValue;
+    }
+
+    gte_SetRGBcd(&color);
+    gte_lddp(p);
+    gte_ndpcs();
+    gte_strgb(&color);
+
+    color |= 0x32000000;
+
+    for (n = 0; n < 10; n++)
+    {
+        gte_ldv1(&shadow_vertices[n]);
+        gte_ldv2(&shadow_vertices[n + 1]);
+        gte_nrtpt();
+
+        if ((unsigned long *)sg3 > (primPool->lastPrim - 12))
+        {
+            return (unsigned long *)sg3;
+        }
+
+        gte_nclip();
+        gte_stopz(&clip);
+
+        if (clip < 0)
+        {
+            gte_navsz3();
+            gte_stotz(&otz);
+
+            if ((otz >= 64) && (otz < 3072))
+            {
+                gte_stsxy3(&sg3->x0, &sg3->x1, &sg3->x2);
+
+                *(int *)&sg3->r0 = color;
+                *(int *)&sg3->r1 = 0;
+                *(int *)&sg3->r2 = 0;
+
+                // setDrawTPage(sg3, 1, 1, 64);
+                sg3->dr_tpage = _get_mode(1, 1, 64);
+
+                // addPrim(ot[otz], sg3);
+                sg3->tag = getaddr(&ot[otz]) | 0x7000000;
+                ot[otz] = (uintptr_t *)((intptr_t)sg3 & 0xFFFFFF);
+
+                sg3++;
+
+                primPool->numPrims++;
+            }
+        }
+    }
+
+    return (unsigned long *)sg3;
+}
 
 void DRAW_FlatQuad(CVECTOR *color, short x0, short y0, short x1, short y1, short x2, short y2, short x3, short y3, PrimPool *primPool, unsigned long **ot)
 {

@@ -372,6 +372,53 @@
         : "$12", "$13" \
     )
 
+#define gte_ldv1(r0) __asm__ ( \
+        "lwc2    $2, 0(%0);" \
+        "lwc2    $3, 4(%0)" \
+        : : "r"(r0) \
+    )
+
+#define gte_ldv2(r0) __asm__ ( \
+        "lwc2    $4, 0(%0);" \
+        "lwc2    $5, 4(%0)" \
+        : : "r"(r0) \
+    )
+
+#define gte_SetRGBcd(r0) __asm__ ( \
+        "lwc2    $6, 0(%0)" \
+        : : "r"(r0) \
+    )
+
+#define gte_strgb(r0) __asm__ ( \
+        "swc2    $22, 0(%0)" \
+        : : "r"(r0) \
+        : "memory" \
+    )
+
+#define gte_ndpcs() __asm__ ( \
+        "nop;" \
+        "nop;" \
+        ".word 0x4A780010" \
+    )
+
+#define gte_stotz(r0) __asm__ ( \
+        "swc2    $7, 0(%0)" \
+        : : "r"(r0) \
+        : "memory" \
+    )
+
+#define gte_navsz3() __asm__ ( \
+        "nop;" \
+        "nop;" \
+        ".word 0x4B58002D" \
+    )
+
+#define gte_nclip() __asm__ ( \
+        "nop;" \
+        "nop;" \
+        ".word 0x4B400006" \
+    )
+
 // custom struct
 typedef struct _LINE_SG2
 {
