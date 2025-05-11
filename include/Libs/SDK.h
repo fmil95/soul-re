@@ -177,6 +177,21 @@
     : : "r"(r0)               \
     : "memory")
 
+#define gte_stflg(r0) __asm__ ( \
+        "cfc2    $12, $31;" \
+        "nop;" \
+        "sw    $12, 0(%0)" \
+        : : "r"(r0) \
+        : "$12", "memory" \
+    )
+
+#define gte_stsxy01( r0, r1 ) __asm__ ( \
+        "swc2    $12, 0(%0);" \
+        "swc2    $13, 0(%1)" \
+        : : "r"(r0), "r"(r1) \
+        : "memory" \
+    )
+
 // custom macro
 #define gte_ldlvnlsv(r0) __asm__ volatile( \
     "lhu	$12, 0( %0 );"                    \

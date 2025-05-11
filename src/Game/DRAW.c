@@ -232,7 +232,73 @@ void DRAW_FreeButton(ButtonTexture *button)
     VRAM_ClearVramBlock(button->vramBlock);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_RingLine);
+void DRAW_RingLine(PrimPool *primPool, unsigned long **ot, long color)
+{
+    unsigned long *prim;
+    long flag;
+    long clip;
+    long z0;
+    long z1;
+    long z2;
+    long otz;
+    long p;
+
+    prim = primPool->nextPrim;
+
+    if (prim <= (primPool->lastPrim - 12))
+    {
+        gte_stflg(&flag);
+
+        if (!(flag & 0x60000))
+        {
+            gte_nclip();
+            gte_stopz(&p);
+            gte_stsz3(&z0, &z1, &z2);
+
+            if (z0 < z1)
+            {
+                otz = z2;
+
+                if (z0 < z2)
+                {
+                    otz = z0;
+                }
+            }
+            else
+            {
+                otz = z2;
+
+                if (z1 < z2)
+                {
+                    otz = z1;
+                }
+            }
+
+            otz >>= 2;
+
+            if ((unsigned long)otz < 3072)
+            {
+                if (otz > 2)
+                {
+                    otz -= 2;
+                }
+
+                gte_stdp(&clip);
+
+                *(int *)&((BLK_FILL *)prim)->r0 = color | 0x40000000;
+
+                gte_stsxy01(&((BLK_FILL *)prim)->x0, &((BLK_FILL *)prim)->w);
+
+                *(int *)prim = getaddr(&ot[otz]) | 0x3000000;
+                ot[otz] = (unsigned long *)((intptr_t)prim & 0xFFFFFF);
+
+                prim += 4;
+            }
+        }
+
+        primPool->nextPrim = prim;
+    }
+}
 
 void DRAW_RingPoint(PrimPool *primPool, unsigned long **ot, long color, SVector *vel, SVector *acc)
 {
