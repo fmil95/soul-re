@@ -67,7 +67,7 @@ void DRAW_FlatQuad(CVECTOR *color, short x0, short y0, short x1, short y1, short
 
         // addPrim(ot, prim);
         *(int *)prim = getaddr(ot) | 0x5000000;
-        *(int *)ot = (uintptr_t)prim & 0xFFFFFF;
+        *(int *)ot = (intptr_t)prim & 0xFFFFFF;
 
         primPool->nextPrim = (uintptr_t *)((char *)primPool->nextPrim + sizeof(POLY_F4));
 
@@ -137,7 +137,7 @@ void DRAW_DrawButton(ButtonTexture *button, short x, short y, unsigned long **ot
 
         // addPrim(ot, prim);
         *(int *)prim = getaddr(ot) | 0x9000000;
-        *(int *)ot = (uintptr_t)prim & 0xFFFFFF;
+        *(int *)ot = (intptr_t)prim & 0xFFFFFF;
 
         prim += sizeof(POLY_FT4) / sizeof(unsigned long);
 
@@ -197,7 +197,80 @@ void DRAW_RingPoint(PrimPool *primPool, unsigned long **ot, long color, SVector 
 
 INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_DrawRingPoints);
 
-INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_GlowQuad);
+void DRAW_GlowQuad(PrimPool *primPool, unsigned long **ot, long otz, long color, Vector *v0, Vector *v1, Vector *v2, Vector *v3)
+{
+    unsigned long *prim;
+    POLY_NG4 *sg4;
+    int *temp; // not from decls.h
+
+    prim = primPool->nextPrim;
+
+    if (prim <= (primPool->lastPrim - 12))
+    {
+        sg4 = (POLY_NG4 *)prim;
+
+        primPool->numPrims++;
+
+        prim += 10;
+
+        if ((color & 0x1000000))
+        {
+            // setDrawTPage(sg4, 1, 1, 64);
+            sg4->drawTPage1 = _get_mode(1, 1, 64);
+
+            color &= 0xFFFFFF;
+        }
+        else
+        {
+            // setDrawTPage(sg4, 1, 1, 32);
+            sg4->drawTPage1 = _get_mode(1, 1, 32);
+        }
+
+        gte_lddp(4096 - (short)v0->z);
+        gte_ldcv(&color);
+        gte_ngpf(1);
+
+        sg4->p1.x0 = v0->x;
+        sg4->p1.y0 = v0->y;
+
+        gte_stcv(&sg4->p1.r0);
+        gte_lddp(4096 - (short)v1->z);
+        gte_ldcv(&color);
+        gte_ngpf(1);
+
+        sg4->p1.x1 = v1->x;
+        sg4->p1.y1 = v1->y;
+
+        gte_stcv(&sg4->p1.r1);
+        gte_lddp(4096 - (short)v2->z);
+        gte_ldcv(&color);
+        gte_ngpf(1);
+
+        sg4->p1.x2 = v2->x;
+        sg4->p1.y2 = v2->y;
+
+        gte_stcv(&sg4->p1.r2);
+        gte_lddp(4096 - (short)v3->z);
+        gte_ldcv(&color);
+        gte_ngpf(1);
+
+        sg4->p1.x3 = v3->x;
+        sg4->p1.y3 = v3->y;
+
+        gte_stcv(&sg4->p1.r3);
+
+        // addPrim(ot[otz], sg4);
+
+        temp = (int *)((otz * 4) + (uintptr_t)ot);
+
+        *(int *)sg4 = getaddr(&ot[otz]) | 0x9000000;
+        *(int *)temp = (intptr_t)sg4 & 0xFFFFFF;
+
+        sg4->p1.code = 0x3A;
+
+        primPool->nextPrim = prim;
+    }
+}
 
 void DRAW_CreateAGlowingCircle(Vector *f1, long z, PrimPool *primPool, unsigned long **ot, long otz, long color, long w, long h, long angle)
 {
