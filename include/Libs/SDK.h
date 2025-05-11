@@ -672,6 +672,7 @@ int CdGetSector(void *madr, int size);
 int StopCallback(void);
 void PadStopCom(void);
 void SetPolyFT4(POLY_FT4 *p);
+void SetColorMatrix(MATRIX *m);
 
 extern int StCdIntrFlag;
 

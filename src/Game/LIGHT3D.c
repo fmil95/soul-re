@@ -31,12 +31,49 @@ static inline void LIGHT3D_FogCalc(long a, Level *level)
     level->fogNear = r;
 }
 
+static inline int LIGHT3D_FixedMultiplication(long a, long b)
+{
+    long r;
+
+    r = a * b;
+
+    return r >> 12;
+}
+
+static inline int LIGHT3D_FixedMultiplication2(short a, short b)
+{
+    long r;
+
+    r = a * b;
+
+    return r >> 12;
+}
+
 static inline int LIGHT3D_FixedMultiplication3(short a, long b)
 {
     long r;
 
     r = a * b;
     return r >> 12;
+}
+
+static inline int LIGHT3D_FixedNormalization(long a, long b, long x, long y)
+{
+    long r;
+
+    r = LIGHT3D_FixedMultiplication2(a, b);
+
+    if (r < x)
+    {
+        r = x;
+    }
+
+    if (y < r)
+    {
+        r = y;
+    }
+
+    return r;
 }
 
 void LIGHT_GetLightMatrix(struct _Instance *instance, struct Level *level, struct MATRIX *lightM, struct MATRIX *colorM)
@@ -199,6 +236,73 @@ void LIGHT_GetLightMatrix(struct _Instance *instance, struct Level *level, struc
 }
 
 INCLUDE_ASM("asm/nonmatchings/Game/LIGHT3D", LIGHT_PresetInstanceLight);
+/* TODO: requires migration of sdata
+void LIGHT_PresetInstanceLight(Instance *instance, short attenuate, MATRIX *lm)
+{
+    MATRIX cm;
+    long scale;
+    long scaleRGB[3];
+    int i;
+    int j;
+    Level* level;
+    CDLight* extraLight = (CDLight*)instance->extraLight;
+    short tempRGB[3] = {16, 16, 16};
+    short* todRGB;
+
+    level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
+
+    LIGHT_GetLightMatrix(instance, level, lm, &cm);
+
+    if ((instance->flags & 0x200000))
+    {
+        scale = 2048;
+    }
+    else
+    {
+        scale = 4096;
+    }
+
+    if (attenuate != 4096)
+    {
+        scale = LIGHT3D_FixedMultiplication(scale, attenuate);
+    }
+
+    if ((instance->extraLight != NULL) && (!(instance->flags & 0x200000)))
+    {
+        scale = LIGHT3D_FixedMultiplication(4096 - instance->extraLightScale, scale);
+
+        scaleRGB[0] = scale + ((instance->extraLightScale * extraLight->r) >> 6);
+        scaleRGB[1] = scale + ((instance->extraLightScale * extraLight->g) >> 6);
+        scaleRGB[2] = scale + ((instance->extraLightScale * extraLight->b) >> 6);
+    }
+    else
+    {
+        scaleRGB[0] = scale;
+        scaleRGB[1] = scale;
+        scaleRGB[2] = scale;
+    }
+
+    if (level != NULL)
+    {
+        todRGB = &level->TODRedScale;
+    }
+    else
+    {
+        todRGB = tempRGB;
+    }
+
+    for (i = 0; i < 3; i++)
+    {
+        scale = LIGHT3D_FixedMultiplication(scaleRGB[i], todRGB[i]);
+
+        for (j = 0; j < 3; j++)
+        {
+            cm.m[i][j] = LIGHT3D_FixedNormalization(cm.m[i][j], scale, -32768, 32767);
+        }
+    }
+
+    SetColorMatrix(&cm);
+}*/
 
 void LIGHT_GetAmbient(struct _ColorType *color, struct _Instance *instance)
 {
