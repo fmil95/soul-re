@@ -6,7 +6,7 @@
 #include "Game/STREAM.h"
 #include "Game/COLLIDE.h"
 
-STATIC struct LightGroup default_lightgroup;
+STATIC LightGroup default_lightgroup;
 
 static inline int LIGHT3D_FixedDivision(long a, long b)
 {
@@ -331,6 +331,130 @@ void LIGHT_SetAmbientInstance(Instance *instance, Level *level)
 }
 
 INCLUDE_ASM("asm/nonmatchings/Game/LIGHT3D", LIGHT_SetMatrixForLightGroupInstance);
+/* TODO: requires migration of sdata
+void LIGHT_SetMatrixForLightGroupInstance(Instance *instance, Level *level)
+{
+    MATRIX *lgt;
+    MATRIX lgt_cat;
+    MATRIX lm;
+    MATRIX cm;
+    VECTOR half = {2048, 2048, 2048};
+    LightList* lightList;
+    int lightGrp;
+    typedef struct
+    {
+        long m[5];
+    } cmm;
+
+    lightGrp = instance->lightGroup;
+
+    if (instance->matrix != NULL)
+    {
+        if ((gameTrackerX.gameData.asmData.MorphType != 0) && (lightList = level->spectrallightList, lightList != NULL) && (lightList->numLightGroups != 0))
+        {
+            lightGrp = instance->spectralLightGroup;
+
+            if (lightList->numLightGroups < lightGrp)
+            {
+                instance->spectralLightGroup = 0;
+
+                lightGrp = 0;
+            }
+        }
+        else
+        {
+            lightList = level->lightList;
+
+            if ((lightList != NULL) && (lightList->numLightGroups < lightGrp))
+            {
+                instance->lightGroup = 0;
+
+                lightGrp = 0;
+            }
+        }
+
+        LIGHT_SetAmbientInstance(instance, level);
+
+        if (lightList->numLightGroups == 0)
+        {
+            lgt = (MATRIX*)&default_lightgroup;
+        }
+        else
+        {
+            lgt = &lightList->lightGroupList[lightGrp].lightMatrix;
+        }
+
+        if (instance->lightMatrix != 0)
+        {
+            lgt_cat = instance->matrix[instance->lightMatrix];
+        }
+        else if ((instance->flags & 0x1))
+        {
+            lgt_cat = *instance->matrix;
+        }
+        else
+        {
+            RotMatrix((SVECTOR*)&instance->rotation, &lgt_cat);
+        }
+
+        if (instance->extraLight != NULL)
+        {
+            lm.m[0][0] = lgt->m[0][0];
+            lm.m[0][1] = lgt->m[0][1];
+            lm.m[0][2] = lgt->m[0][2];
+
+            lm.m[1][0] = lgt->m[1][0];
+            lm.m[1][1] = lgt->m[1][1];
+            lm.m[1][2] = lgt->m[1][2];
+
+            lm.m[2][0] = (instance->extraLightDir.x * instance->extraLightScale) >> 12;
+            lm.m[2][1] = (instance->extraLightDir.y * instance->extraLightScale) >> 12;
+            lm.m[2][2] = (instance->extraLightDir.z * instance->extraLightScale) >> 12;
+
+            cm.m[0][0] = lgt[1].m[0][0];
+            cm.m[1][0] = lgt[1].m[1][0];
+            cm.m[2][0] = lgt[1].m[2][0];
+
+            cm.m[0][1] = lgt[1].m[0][1];
+            cm.m[1][1] = lgt[1].m[1][1];
+            cm.m[2][1] = lgt[1].m[2][1];
+
+            cm.m[0][2] = ((CDLight*)instance->extraLight)->r << 4;
+            cm.m[1][2] = ((CDLight*)instance->extraLight)->g << 4;
+            cm.m[2][2] = ((CDLight*)instance->extraLight)->b << 4;
+
+            MulMatrix0(&lm, &lgt_cat, &lgt_cat);
+
+            SetLightMatrix(&lgt_cat);
+
+            if ((instance->flags & 0x200000))
+            {
+                ScaleMatrix(&cm, &half);
+            }
+
+            SetColorMatrix(&cm);
+        }
+        else
+        {
+            MulMatrix0(lgt, &lgt_cat, &lgt_cat);
+
+            SetLightMatrix(&lgt_cat);
+
+            if ((instance->flags & 0x200000))
+            {
+                *(cmm*)&cm = *(cmm*)&lgt[1];
+
+                ScaleMatrix(&cm, &half);
+
+                SetColorMatrix(&cm);
+            }
+            else
+            {
+                SetColorMatrix(&lgt[1]);
+            }
+        }
+    }
+}*/
 
 void LIGHT_DrawShadow(MATRIX *wcTransform, struct _Instance *instance, struct _PrimPool *primPool, unsigned long **ot)
 {
