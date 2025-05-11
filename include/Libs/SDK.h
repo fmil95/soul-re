@@ -609,6 +609,7 @@ int CdSync(int mode, u_char *result);
 int CdGetSector(void *madr, int size);
 int StopCallback(void);
 void PadStopCom(void);
+void SetPolyFT4(POLY_FT4 *p);
 
 extern int StCdIntrFlag;
 

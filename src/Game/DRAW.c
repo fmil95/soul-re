@@ -77,7 +77,76 @@ void DRAW_FlatQuad(CVECTOR *color, short x0, short y0, short x1, short y1, short
 
 INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_TranslucentQuad);
 
+// Matches 100% on decomp.me but differs on this project
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_DrawButton);
+#else
+void DRAW_DrawButton(ButtonTexture *button, short x, short y, unsigned long **ot)
+{
+    PrimPool *primPool;
+    unsigned long *prim;
+    short w;
+    short h;
+    short offsetx;
+    short offsety;
+
+    primPool = gameTrackerX.primPool;
+
+    prim = primPool->nextPrim;
+
+    if (primPool->nextPrim <= (primPool->lastPrim - 12))
+    {
+        w = button->textureW << button->xshift;
+        h = button->textureH;
+
+        offsetx = (button->vramBlock->x & 0x3F) << button->xshift;
+        offsety = (char)button->vramBlock->y;
+
+        SetPolyFT4((POLY_FT4 *)prim);
+
+        // setShadeTex(((POLY_FT4*)prim), 1);
+        ((POLY_FT4 *)prim)->code |= 0x1;
+
+        ((POLY_FT4 *)prim)->tpage = button->tpage;
+
+        ((POLY_FT4 *)prim)->clut = button->clut;
+
+        ((POLY_FT4 *)prim)->x0 = x;
+        ((POLY_FT4 *)prim)->y0 = y;
+
+        ((POLY_FT4 *)prim)->u0 = offsetx;
+        ((POLY_FT4 *)prim)->v0 = offsety;
+
+        ((POLY_FT4 *)prim)->x1 = (x + w) - 1;
+        ((POLY_FT4 *)prim)->y1 = y;
+
+        ((POLY_FT4 *)prim)->u1 = (offsetx + w) - 1;
+        ((POLY_FT4 *)prim)->v1 = offsety;
+
+        ((POLY_FT4 *)prim)->x2 = x;
+        ((POLY_FT4 *)prim)->y2 = (y + h) - 1;
+
+        ((POLY_FT4 *)prim)->u2 = offsetx;
+        ((POLY_FT4 *)prim)->v2 = (offsety + h) - 1;
+
+        ((POLY_FT4 *)prim)->x3 = (x + w) - 1;
+        ((POLY_FT4 *)prim)->y3 = (y + h) - 1;
+
+        ((POLY_FT4 *)prim)->u3 = (offsetx + w) - 1;
+        ((POLY_FT4 *)prim)->v3 = (offsety + h) - 1;
+
+        // addPrim(ot, prim);
+        *(int *)prim = getaddr(ot) | 0x9000000;
+        *(int *)ot = (uintptr_t)prim & 0xFFFFFF;
+
+        prim += sizeof(POLY_FT4) / sizeof(unsigned long);
+
+        primPool->nextPrim = prim;
+
+        primPool->numPrims++;
+    }
+}
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_LoadButton);
 
