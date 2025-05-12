@@ -561,7 +561,72 @@ int MON_ShouldIAttackInstance(Instance *instance, Instance *ei)
     return 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_ShouldIAttack);
+int MON_ShouldIAttack(Instance *instance, MonsterIR *enemy, MonsterAttackAttributes *attack)
+{
+
+    MonsterVars *mv;
+    int rv;
+    Instance *ei;
+
+    ei = enemy->instance;
+    mv = (MonsterVars *)instance->extraData;
+
+    if (MON_ShouldIAttackInstance(instance, ei) == 0)
+    {
+        return 0;
+    }
+
+    if (attack == NULL)
+    {
+        rv = 0;
+    }
+    else if (ei == gameTrackerX.playerInstance && MON_CheckConditions(instance, enemy, attack->attackProbability) == 0)
+    {
+        rv = 0;
+    }
+    else
+    {
+
+        long distance;
+        distance = attack->attackRange - enemy->distance;
+
+        if (enemy->mirFlags & 0x08)
+        {
+            rv = abs(distance) < 0x3E8 ? 1 : 5;
+        }
+        else if (distance < -0x96)
+        {
+            rv = 5;
+        }
+        else if (distance > 0x96)
+        {
+            rv = 4;
+        }
+        else if (enemy->relativePosition.y > 0 || abs(enemy->relativePosition.x) > -enemy->relativePosition.y)
+        {
+            rv = 6;
+        }
+        else if ((enemy->mirFlags & 0x20) ==0)
+        {
+            rv = 3;
+        }
+        else if (!(mv->ally == NULL || (INSTANCE_Query(mv->ally->instance, 0xA) & 0x200000) == 0))
+        {
+            rv = 7;
+        }
+        else if (mv->auxFlags & 0x20000000 || MONSENSE_GetDistanceInDirection(instance, MATH3D_AngleFromPosToPos(&instance->position, &ei->position)) > enemy->distance)
+        {
+            rv = 1;
+            enemy->mirConditions = 0;
+        }
+        else
+        {
+            rv = 0;
+        }
+    }
+
+    return rv;
+}
 
 MonsterAttackAttributes *MON_ChooseAttack(Instance *instance, MonsterIR *enemy)
 {
