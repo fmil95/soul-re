@@ -728,7 +728,209 @@ int MON_ChooseEvadeMove(Instance *instance)
     return anim;
 }
 
+// Matches 100% on decomp.me but differs on this project
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_ChooseCombatMove);
+#else
+int MON_ChooseCombatMove(Instance *instance, int reason)
+{
+    struct _MonsterVars *mv;
+    struct _MonsterSubAttributes *subAttr;
+    int anim;
+    int data;
+    struct _MonsterIR *enemy;
+    int infront;
+    struct _MonsterAnim *manim;
+    int dir;
+    short zrot;
+    struct _Position temp;
+    struct SVECTOR New;
+    struct VECTOR OutTrans;
+    int temp2;   // not from decls.h
+    short temp3; // not from decls.h
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+    subAttr = mv->subAttr;
+
+    infront = (unsigned)enemy->relativePosition.y >> 0x1F;
+
+    if (mv->ally != NULL)
+    {
+        if (mv->ally->distance < 0x2BC)
+        {
+            anim = MONSTER_ANIM_JUMPLEFT;
+            if (mv->ally->relativePosition.x > 0)
+            {
+                anim = MONSTER_ANIM_JUMPRIGHT;
+            }
+            goto block_21;
+        }
+    }
+
+    if (reason != 4)
+    {
+        anim = MONSTER_ANIM_JUMPFORWARD;
+        if (reason != 5)
+        {
+            if (abs(enemy->relativePosition.y) < subAttr->combatAttributes->preferredCombatRange)
+            {
+                if (infront == 0)
+                {
+                    goto block_21;
+                }
+                else
+                {
+                label:
+                    anim = MONSTER_ANIM_JUMPBACK;
+                    goto block_21;
+                }
+            }
+            else if ((short)(MON_FacingOffset(instance, enemy->instance) + 0x2A9) < 0x553U)
+            {
+                temp2 = MON_ChooseLeftOrRight(instance, enemy);
+                anim = MONSTER_ANIM_JUMPLEFT;
+                if (temp2 >= 0)
+                {
+                    anim = MONSTER_ANIM_JUMPRIGHT;
+                    if (temp2 <= 0)
+                    {
+                        if (!(rand() & 3))
+                        {
+                            anim = MONSTER_ANIM_JUMPLEFT;
+                            if (rand() & 1)
+                            {
+                                anim = MONSTER_ANIM_JUMPRIGHT;
+                            }
+                        }
+                        else
+                        {
+                            anim = (signed char)mv->lastSideMove;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                anim = MONSTER_ANIM_HIT1;
+            }
+            if (anim != MONSTER_STATE_BIRTH)
+            {
+                data = anim;
+            }
+        }
+    }
+    else
+    {
+        goto label;
+    }
+
+block_21:
+    if (anim != MONSTER_ANIM_HIT1)
+    {
+        zrot = instance->rotation.z;
+
+        switch (anim)
+        {
+        case MONSTER_ANIM_JUMPLEFT:
+            zrot += 0x400;
+            break;
+        case MONSTER_ANIM_JUMPRIGHT:
+            zrot -= 0x400;
+            break;
+        case MONSTER_ANIM_JUMPBACK:
+            zrot += 0x800;
+            break;
+        }
+
+        MONSENSE_AdjustRadarFromObjects(instance);
+        dir = ((MONSENSE_GetClosestFreeDirection(instance, zrot, 0x2EE) - (unsigned short)instance->rotation.z) + 0x200) & 0xFFF;
+        anim = MONSTER_ANIM_JUMPFORWARD;
+        if (dir >= 0x400)
+        {
+            anim = MONSTER_ANIM_JUMPLEFT;
+            if (dir >= 0x800)
+            {
+                anim = MONSTER_ANIM_JUMPRIGHT;
+                if (dir < 0xC00)
+                {
+                    anim = MONSTER_ANIM_JUMPBACK;
+                }
+            }
+        }
+
+        manim = &((MonsterAttributes *)instance->data)->animList[(signed char)subAttr->animList[anim]];
+
+        if (mv->behaviorState == MONSTER_STATE_IMPALEDEATH && instance->intro != NULL)
+        {
+            if (instance->matrix != NULL)
+            {
+
+                New.vx = 0;
+                New.vz = 0;
+
+                if (anim == MONSTER_ANIM_JUMPLEFT || anim == MONSTER_ANIM_JUMPBACK)
+                {
+                    New.vy = manim->distance;
+                }
+                else
+                {
+                    New.vy = -manim->distance;
+                }
+
+                ApplyMatrix(instance->matrix, &New, &OutTrans);
+                temp.x = instance->position.x + OutTrans.vx;
+                temp.y = instance->position.y + OutTrans.vy;
+                temp.z = instance->position.z + OutTrans.vz;
+                if (MATH3D_LengthXYZ(temp.x - instance->intro->position.x, temp.y - instance->intro->position.y, temp.z - instance->intro->position.z) > (mv->guardRange + 0x140))
+                {
+                    temp3 = (MATH3D_AngleFromPosToPos(&instance->position, &instance->intro->position) - instance->rotation.z) & 0xFFF;
+                    anim = MONSTER_ANIM_JUMPFORWARD;
+                    if (temp3 >= 0x400)
+                    {
+                        anim = MONSTER_ANIM_JUMPLEFT;
+                        if (temp3 >= 0x800)
+                        {
+                            anim = MONSTER_ANIM_JUMPRIGHT;
+                            if (temp3 < 0xC00)
+                            {
+                                anim = MONSTER_ANIM_JUMPBACK;
+                            }
+                        }
+                    }
+                    manim = &((MonsterAttributes *)instance->data)->animList[(signed char)subAttr->animList[anim]];
+                }
+            }
+        }
+
+        switch (anim)
+        {
+        case MONSTER_ANIM_JUMPLEFT:
+            data = SetPhysicsDropOffData(manim->distance, 0, 0xC8, 0x800, 0x190);
+            break;
+        case MONSTER_ANIM_JUMPRIGHT:
+            data = SetPhysicsDropOffData(-manim->distance, 0, 0xC8, 0x800, 0x190);
+            break;
+        case MONSTER_ANIM_JUMPBACK:
+            data = SetPhysicsDropOffData(0, manim->distance, 0xC8, 0x800, 0x190);
+            break;
+        default:
+            data = SetPhysicsDropOffData(0, -manim->distance, 0xC8, 0x800, 0x190);
+            break;
+        }
+
+        if (PhysicsCheckDropOff(instance, data, 4) != 0)
+        {
+            anim = MONSTER_ANIM_HIT1;
+        }
+        else if (anim == MONSTER_ANIM_JUMPLEFT || anim == MONSTER_ANIM_JUMPRIGHT)
+        {
+            mv->lastSideMove = anim;
+        }
+    }
+    return anim;
+}
+#endif
 
 void MON_PlayRandomIdle(Instance *instance, int mode)
 {
