@@ -14,6 +14,7 @@ void MONSENSE_SenseInstance(Instance *instance, evCollideInstanceStatsData *data
 int MONSENSE_See(Instance *instance, evCollideInstanceStatsData *data);
 void MONSENSE_SetupMIR(Instance *instance, evCollideInstanceStatsData *data, int flags);
 void MONSENSE_Radar(Instance *instance);
+void MONSENSE_AdjustRadarFromObjects(Instance *instance);
 void MONSENSE_ProcessIRList(Instance *instance);
 short MONSENSE_GetClosestFreeDirection(Instance *instance, short angle, long range);
 MonsterIR *MONSENSE_FindIR(MonsterVars *mv, Instance *instance);
