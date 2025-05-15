@@ -384,7 +384,58 @@ WaterLevelProcess *EVENT_GetNextTerrainMove()
     return NULL;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ProcessMovingWater);
+void EVENT_ProcessMovingWater()
+{
+    int i;
+    int inUse;
+    int temp; // not from decls.h
+
+    inUse = 0;
+
+    if (WaterInUse != 0)
+    {
+        WaterLevelProcess *curWater;
+
+        curWater = WaterLevelArray;
+
+        for (i = 5; i > 0; i--, curWater++)
+        {
+            if ((curWater->flags & 0x1))
+            {
+                inUse = 1;
+
+                curWater->curStep += gameTrackerX.timeMult;
+
+                if (curWater->curStep > curWater->maxSteps)
+                {
+                    curWater->curStep = curWater->maxSteps;
+                }
+
+                temp = ((curWater->zValueTo - curWater->zValueFrom) * (curWater->curStep >> 12)) / (curWater->maxSteps >> 12);
+
+                curWater->bspTree->globalOffset.z = curWater->oldGlobalOffset + temp;
+                curWater->bspTree->localOffset.z = curWater->zValueFrom + temp;
+
+                if ((curWater->flags & 0x2))
+                {
+                    curWater->streamUnit->level->waterZLevel = curWater->oldWaterZ + temp;
+
+                    curWater->streamUnit->level->terrain->UnitChangeFlags |= 0x1;
+                }
+
+                if (curWater->curStep == curWater->maxSteps)
+                {
+                    curWater->flags = 0;
+                }
+            }
+        }
+    }
+
+    if (inUse == 0)
+    {
+        WaterInUse = 0;
+    }
+}
 
 void EVENT_DoProcess()
 {
