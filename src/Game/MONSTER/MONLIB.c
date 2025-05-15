@@ -4,6 +4,7 @@
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/MONSTER/MONSENSE.h"
 #include "Game/MONSTER/MONAPI.h"
+#include "Game/MONSTER/MONMSG.h"
 #include "Game/PHYSOBS.h"
 #include "Game/INSTANCE.h"
 #include "Game/COLLIDE.h"
@@ -2033,7 +2034,131 @@ void MON_GetPlanSlot(MonsterVars *mv)
     mv->pathSlotID = ENMYPLAN_GetInitializedPlanningWorkspaceFinal();
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_DefaultPlanMovement);
+int MON_DefaultPlanMovement(Instance *instance, int anim, long distance)
+{
+    MonsterVars *mv;
+    int rc;
+    int felloff;
+    long length;
+    MonsterAnim *manim;
+    long dist; // not from decls.h
+
+    dist = distance;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    manim = MON_GetAnim(instance, mv->subAttr->animList, anim);
+
+    length = MATH3D_LengthXYZ(instance->position.x - mv->destination.x, instance->position.y - mv->destination.y, instance->position.z - mv->destination.z);
+
+    if ((signed char)mv->pathSlotID == -1)
+    {
+        return 3;
+    }
+
+    if ((!(mv->mvFlags & 0x20000)) && (MON_AnimPlaying(instance, anim) != 0))
+    {
+        mv->mvFlags |= 0x20000;
+    }
+
+    felloff = MON_GroundMoveQueueHandler(instance);
+
+    rc = 6;
+
+    if (!(mv->mvFlags & 0x1))
+    {
+        if (felloff == 0)
+        {
+            rc = 4;
+
+            if (length >= dist)
+            {
+                Position pos;
+                int planresult;
+
+                planresult = ENMYPLAN_MoveToTargetFinal(instance, &pos, (signed char)mv->pathSlotID, &mv->destination, 0x1F);
+
+                if (planresult == 3)
+                {
+                    rc = 2;
+
+                    goto label_2;
+                }
+
+                if (planresult == 0)
+                {
+                    MON_TurnToPosition(instance, &mv->destination, mv->subAttr->speedPivotTurn);
+
+                    rc = 1;
+                }
+                else
+                {
+                    if (!(mv->mvFlags & 0x20000))
+                    {
+                        mv->mvFlags |= 0x20000;
+
+                        goto label_1;
+                    }
+
+                    rc = 0;
+
+                    if ((instance->flags2 & 0x2))
+                    {
+                    label_1:
+                        MON_PlayAnimIfNotPlaying(instance, anim, 2);
+
+                        rc = 0;
+                    }
+                }
+
+                if ((mv->mvFlags & 0x20000))
+                {
+                    short turnSpeed;
+
+                    switch (anim)
+                    {
+                    case 2:
+                        turnSpeed = mv->subAttr->speedWalkTurn;
+                        break;
+                    case 3:
+                        turnSpeed = mv->subAttr->speedRunTurn;
+                        break;
+                    default:
+                        turnSpeed = mv->subAttr->speedPivotTurn;
+                    }
+
+                    if ((length * 3) < ((manim->velocity << 12) / turnSpeed))
+                    {
+                        turnSpeed *= 2;
+                    }
+
+                    MON_MoveToPosition(instance, &pos, turnSpeed);
+                }
+            }
+
+            return rc;
+        }
+
+        rc = 3;
+
+        if (!(mv->mvFlags & 0x20000))
+        {
+            if (MON_TurnToPosition(instance, &mv->destination, mv->subAttr->speedPivotTurn) != 0)
+            {
+                rc = 3;
+            }
+            else
+            {
+                rc = 0;
+            }
+        }
+
+        return rc;
+    }
+
+label_2:
+    return rc;
+}
 
 void MON_DropAllObjects(Instance *instance)
 {
