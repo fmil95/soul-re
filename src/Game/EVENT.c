@@ -3,6 +3,9 @@
 #include "Game/INSTANCE.h"
 #include "Game/STREAM.h"
 #include "Game/GAMELOOP.h"
+#include "Game/LOCAL/LOCALSTR.h"
+#include "Game/FONT.h"
+#include "Game/MENU/MENU.h"
 
 STATIC long numActiveEventTimers;
 
@@ -227,7 +230,73 @@ void EVENT_ProcessTimers()
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ProcessHints);
+extern char D_800D1A08[];
+extern char D_800D1A0C[];
+void EVENT_ProcessHints()
+{
+    if ((gHintSystem.flags & 0x1))
+    {
+        char string[128];
+        long y;
+
+        // sprintf(string, "%s\n", localstr_get(gHintSystem.stringNumber));
+        sprintf(string, D_800D1A08, localstr_get(gHintSystem.stringNumber));
+
+        if ((gHintSystem.flags & 0x2))
+        {
+            y = ((gHintSystem.fadeTimer * 52) / 61440) + 200;
+        }
+        else
+        {
+            y = 200;
+
+            if ((gHintSystem.flags & 0x4))
+            {
+                y = 252 - ((gHintSystem.fadeTimer * 52) / 61440);
+            }
+        }
+
+        FONT_FontPrintCentered(string, y);
+        // FONT_FontPrintCentered("$\n", y);
+        FONT_FontPrintCentered(D_800D1A0C, y);
+
+        DisplayHintBox(FONT_GetStringWidth(string), y);
+
+        if (gHintSystem.fadeTimer != 0)
+        {
+            if ((unsigned long)gHintSystem.fadeTimer <= gameTrackerX.timeMult)
+            {
+                gHintSystem.fadeTimer = 0;
+
+                if ((gHintSystem.flags & 0x2))
+                {
+                    gHintSystem.flags &= ~0x2;
+                }
+                else if ((gHintSystem.flags & 0x4))
+                {
+                    gHintSystem.flags = 0;
+
+                    gHintSystem.hintNumber = -1;
+                    gHintSystem.stringNumber = -1;
+                }
+            }
+            else
+            {
+                gHintSystem.fadeTimer -= gameTrackerX.timeMult;
+            }
+        }
+
+        if (gHintSystem.spawningUnitID != gameTrackerX.playerInstance->currentStreamUnitID)
+        {
+            HINT_StopHint();
+        }
+
+        if ((gameTrackerX.gameFlags & 0x10))
+        {
+            HINT_StopHint();
+        }
+    }
+}
 
 EventTimer *EVENT_GetNextTimer()
 {
