@@ -7,5 +7,6 @@ int CINE_Load();
 void CINE_Play(char *strfile, unsigned short mask, int buffers);
 void CINE_Unload();
 int CINE_Loaded();
+void CINE_PlayIngame(int number);
 
 #endif

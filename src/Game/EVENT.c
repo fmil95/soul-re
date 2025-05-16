@@ -7,6 +7,7 @@
 #include "Game/FONT.h"
 #include "Game/MENU/MENU.h"
 #include "Game/COLLIDE.h"
+#include "Game/CINEMA/CINEPSX.h"
 
 STATIC long numActiveEventTimers;
 
@@ -640,7 +641,32 @@ void EVENT_ProcessPuppetShow(Event *eventInstance, long startIndex)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ProcessEvents);
+void EVENT_ProcessEvents(EventPointers *eventPointers, Level *level)
+{
+    long i;
+
+    CurrentPuzzleLevel = level;
+
+    for (i = 0; i < eventPointers->numPuzzles; i++)
+    {
+        if (eventPointers->eventInstances[i]->eventNumber >= 0)
+        {
+            EVENT_Process(eventPointers->eventInstances[i], 0);
+        }
+        else if (eventPointers->eventInstances[i]->processingPuppetShow != 0)
+        {
+            EVENT_ProcessPuppetShow(eventPointers->eventInstances[i], eventPointers->eventInstances[i]->processingPuppetShow - 1);
+        }
+    }
+
+    if (MovieToPlay != -1)
+    {
+        CINE_PlayIngame(MovieToPlay);
+
+        MovieToPlay = -1;
+        MoviePlayed = 1;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoAction);
 
