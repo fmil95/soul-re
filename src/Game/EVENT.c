@@ -45,6 +45,10 @@ STATIC long CurrentEventLine;
 
 STATIC short EventJustRecievedTimer;
 
+STATIC ScriptPCode *currentActionScript;
+
+STATIC short *EventAbortedPosition;
+
 void EVENT_UpdateResetSignalArrayAndWaterMovement(struct Level *oldLevel, struct Level *newLevel, long sizeOfLevel)
 {
     long offset;
@@ -668,7 +672,70 @@ void EVENT_ProcessEvents(EventPointers *eventPointers, Level *level)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoAction);
+long EVENT_DoAction(Event *eventInstance, ScriptPCode *actionScript, short *scriptData)
+{
+    long retValue;
+    long operateOnStack;
+    PCodeStack stack;
+
+    stack.topOfStack = 0;
+
+    retValue = 1;
+
+    currentActionScript = actionScript;
+
+    EventJustRecievedTimer = 0;
+
+    EventAbortedPosition = scriptData;
+
+    if ((!(actionScript->conditionBits & 0x1)) && (scriptData != NULL))
+    {
+        while (EventAbortLine == 0)
+        {
+            scriptData = EVENT_ParseOpcode(&stack, scriptData, &operateOnStack);
+
+            if ((EventAbortLine != 0) && (EventJustRecievedTimer == 0))
+            {
+                EventTimer *timer;
+
+                timer = EVENT_GetNextTimer();
+
+                if (timer != NULL)
+                {
+                    retValue = 0;
+
+                    timer->event = eventInstance;
+
+                    timer->actionScript = actionScript;
+
+                    timer->time = 0;
+
+                    timer->scriptPos = EventAbortedPosition;
+
+                    actionScript->conditionBits |= 0x1;
+
+                    timer->level = CurrentPuzzleLevel;
+
+                    timer->nextEventIndex = EventCurrentEventIndex;
+                }
+            }
+
+            if ((operateOnStack != 0) && (EventAbortLine == 0) && (stack.topOfStack > 0))
+            {
+                stack.topOfStack--;
+
+                EVENT_ExecuteActionCommand(&stack.stack[stack.topOfStack], NULL, &stack, scriptData);
+            }
+
+            if (scriptData == NULL)
+            {
+                break;
+            }
+        }
+    }
+
+    return retValue;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_IsConditionTrue);
 

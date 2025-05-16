@@ -47,5 +47,7 @@ long EVENT_TransformSubListObjectAttribute(PCodeStack *stack, StackType *stackOb
 long EVENT_TransformTGroupAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream);
 long EVENT_TransformCameraObjectAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream);
 long EVENT_IsConditionTrue(Event *eventInstance, ScriptPCode *conditionScript);
+short *EVENT_ParseOpcode(PCodeStack *stack, short *codeStream, long *operateOnStack);
+void EVENT_ExecuteActionCommand(StackType *operand1, StackType *operand2, PCodeStack *stack, short *codeStream);
 
 #endif
