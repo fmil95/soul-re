@@ -6,6 +6,7 @@
 #include "Game/LOCAL/LOCALSTR.h"
 #include "Game/FONT.h"
 #include "Game/MENU/MENU.h"
+#include "Game/COLLIDE.h"
 
 STATIC long numActiveEventTimers;
 
@@ -443,7 +444,82 @@ void EVENT_DoProcess()
     EVENT_ProcessTimers();
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_BSPProcess);
+void EVENT_BSPProcess(StreamUnit *streamUnit)
+{
+    long curTree;
+    Level *level;
+    Terrain *terrain;
+
+    level = streamUnit->level;
+
+    terrain = level->terrain;
+
+    for (curTree = 0; curTree < terrain->numBSPTrees; curTree++)
+    {
+        BSPTree *bspTree;
+
+        bspTree = &terrain->BSPTreeArray[curTree];
+
+        if (bspTree->ID >= 0)
+        {
+            Instance *instance;
+
+            instance = bspTree->instanceSpline;
+
+            if (instance != NULL)
+            {
+                short dx;
+                short dy;
+                short dz;
+
+                if ((instance->matrix != NULL) && (instance->oldMatrix != NULL))
+                {
+                    dx = instance->matrix->t[0] - instance->oldMatrix->t[0];
+                    dy = instance->matrix->t[1] - instance->oldMatrix->t[1];
+                    dz = instance->matrix->t[2] - instance->oldMatrix->t[2];
+                }
+                else
+                {
+                    dx = instance->position.x - instance->oldPos.x;
+                    dy = instance->position.y - instance->oldPos.y;
+                    dz = instance->position.z - instance->oldPos.z;
+                }
+
+                if ((dx << 16) || (dy << 16) || (dz << 16))
+                {
+                    Instance *attachedInstance;
+                    SVECTOR offset;
+
+                    bspTree->globalOffset.x += dx;
+                    bspTree->globalOffset.y += dy;
+                    bspTree->globalOffset.z += dz;
+
+                    bspTree->localOffset.x += dx;
+                    bspTree->localOffset.y += dy;
+                    bspTree->localOffset.z += dz;
+
+                    terrain->UnitChangeFlags |= 0x2;
+
+                    offset.vx = dx;
+                    offset.vy = dy;
+                    offset.vz = dz;
+
+                    for (attachedInstance = gameTrackerX.instanceList->first; attachedInstance != NULL; attachedInstance = attachedInstance->next)
+                    {
+                        if ((instance->attachedID == 0) && (attachedInstance->tface != NULL) && (attachedInstance->currentStreamUnitID == streamUnit->StreamUnitID) && (attachedInstance->bspTree == curTree))
+                        {
+                            attachedInstance->position.x += dx;
+                            attachedInstance->position.y += dy;
+                            attachedInstance->position.z += dz;
+
+                            COLLIDE_UpdateAllTransforms(attachedInstance, &offset);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_Process);
 
