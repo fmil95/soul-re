@@ -40,6 +40,8 @@ STATIC struct Level *CurrentPuzzleLevel;
 
 STATIC long EventCurrentEventIndex;
 
+STATIC long CurrentEventLine;
+
 void EVENT_UpdateResetSignalArrayAndWaterMovement(struct Level *oldLevel, struct Level *newLevel, long sizeOfLevel)
 {
     long offset;
@@ -521,7 +523,53 @@ void EVENT_BSPProcess(StreamUnit *streamUnit)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_Process);
+void EVENT_Process(Event *eventInstance, long startIndex)
+{
+    long i;
+
+    currentEventInstance = eventInstance;
+
+    for (i = startIndex; i < eventInstance->numActions; i++)
+    {
+        EventCurrentEventIndex = i + 1;
+
+        if (EventCurrentEventIndex == eventInstance->numActions)
+        {
+            EventCurrentEventIndex = -1;
+        }
+
+        if (eventInstance->conditionalList[i] != NULL)
+        {
+            CurrentEventLine = EventAbortLine = 0;
+
+            if (EVENT_IsConditionTrue(eventInstance, eventInstance->conditionalList[i]) != 0)
+            {
+                while (eventInstance->actionList[i] == NULL)
+                {
+                    if (i >= eventInstance->numActions)
+                    {
+                        break;
+                    }
+
+                    i++;
+                }
+
+                if ((i < eventInstance->numActions) && (!(eventInstance->actionList[i]->conditionBits & 0x2)))
+                {
+                    EventAbortLine = 0;
+
+                    EVENT_DoAction(eventInstance, eventInstance->actionList[i], eventInstance->actionList[i]->data);
+                }
+            }
+        }
+        else if (!(eventInstance->actionList[i]->conditionBits & 0x2))
+        {
+            EventAbortLine = 0;
+
+            EVENT_DoAction(eventInstance, eventInstance->actionList[i], eventInstance->actionList[i]->data);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ProcessPuppetShow);
 
