@@ -42,6 +42,8 @@ STATIC long EventCurrentEventIndex;
 
 STATIC long CurrentEventLine;
 
+STATIC short EventJustRecievedTimer;
+
 void EVENT_UpdateResetSignalArrayAndWaterMovement(struct Level *oldLevel, struct Level *newLevel, long sizeOfLevel)
 {
     long offset;
@@ -571,7 +573,72 @@ void EVENT_Process(Event *eventInstance, long startIndex)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ProcessPuppetShow);
+void EVENT_ProcessPuppetShow(Event *eventInstance, long startIndex)
+{
+    long i;
+    long conditionIsStatisfied;
+
+    i = startIndex;
+
+    EventJustRecievedTimer = 0;
+
+    currentEventInstance = eventInstance;
+
+    conditionIsStatisfied = 1;
+
+    if (!(eventInstance->actionList[startIndex]->conditionBits & 0x2))
+    {
+        EventCurrentEventIndex = startIndex + 1;
+
+        if (EventCurrentEventIndex == eventInstance->numActions)
+        {
+            EventCurrentEventIndex = -1;
+        }
+
+        if (eventInstance->conditionalList[startIndex] == NULL)
+        {
+            if (!(eventInstance->actionList[startIndex]->conditionBits & 0x2))
+            {
+                EventAbortLine = 0;
+
+                EVENT_DoAction(eventInstance, eventInstance->actionList[startIndex], eventInstance->actionList[i]->data);
+            }
+        }
+        else
+        {
+            CurrentEventLine = EventAbortLine = 0;
+
+            if (EVENT_IsConditionTrue(eventInstance, eventInstance->conditionalList[i]) != 0)
+            {
+                while ((eventInstance->actionList[i] == NULL) && (i < eventInstance->numActions))
+                {
+                    i++;
+                }
+
+                if (i < eventInstance->numActions)
+                {
+                    EventAbortLine = 0;
+
+                    EVENT_DoAction(eventInstance, eventInstance->actionList[i], eventInstance->actionList[i]->data);
+                }
+            }
+            else
+            {
+                conditionIsStatisfied = 0;
+            }
+        }
+
+        if (((EventAbortLine == 0) || (EventJustRecievedTimer == 1)) && (conditionIsStatisfied == 1))
+        {
+            eventInstance->processingPuppetShow = i + 2;
+
+            if (eventInstance->processingPuppetShow >= (eventInstance->numActions + 1))
+            {
+                eventInstance->processingPuppetShow = 0;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ProcessEvents);
 
