@@ -51,6 +51,10 @@ STATIC ScriptPCode *currentActionScript;
 
 STATIC short *EventAbortedPosition;
 
+long eventListNumInstances[20];
+
+Instance *eventListArray[20][10]; // order of indexes from decls.h has been reversed
+
 void EVENT_UpdateResetSignalArrayAndWaterMovement(struct Level *oldLevel, struct Level *newLevel, long sizeOfLevel)
 {
     long offset;
@@ -1203,7 +1207,36 @@ void EVENT_ChangeOperandRotation3d(StackType *operand, Rotation3d *rotation)
     operand->data.rotation3d.attribute = -1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddSubListObjectToStack);
+long EVENT_AddSubListObjectToStack(PCodeStack *stack, long listNumber)
+{
+    if (stack->topOfStack < 32)
+    {
+        StackType *stackEntry;
+
+        stackEntry = &stack->stack[stack->topOfStack];
+
+        stackEntry->id = 22;
+
+        if (eventListNumInstances[listNumber] >= 1)
+        {
+            stackEntry->data.subListObject.instanceList = eventListArray[listNumber];
+
+            stackEntry->data.subListObject.numberOfInstances = eventListNumInstances[listNumber];
+        }
+        else
+        {
+            stackEntry->data.subListObject.instanceList = NULL;
+
+            stackEntry->data.subListObject.numberOfInstances = eventListNumInstances[listNumber];
+        }
+
+        stackEntry->data.subListObject.numberOfAttributes = 0;
+
+        stack->topOfStack++;
+    }
+
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_StackDuplicate);
 
