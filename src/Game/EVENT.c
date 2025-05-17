@@ -1100,7 +1100,21 @@ void EVENT_AddObjectToStack(PCodeStack *stack, long item)
     stack->topOfStack = topOfStack;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddCharPointerToStack);
+void EVENT_AddCharPointerToStack(PCodeStack *stack, char *pointer)
+{
+    if (stack->topOfStack < 32)
+    {
+        StackType *stackEntry;
+
+        stackEntry = &stack->stack[stack->topOfStack];
+
+        stackEntry->id = 28;
+
+        stackEntry->data.CharPointer.pointer = pointer;
+
+        stack->topOfStack++;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddShortPointerToStack);
 
