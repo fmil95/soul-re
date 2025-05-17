@@ -15,6 +15,7 @@
 #include "Game/CAMERA.h"
 #include "Game/LOAD3D.h"
 #include "Game/GAMEPAD.h"
+#include "Game/SCRIPT.h"
 
 STATIC long numActiveEventTimers;
 
@@ -1389,7 +1390,441 @@ long EVENT_TransformConstrictAttribute(PCodeStack *stack, StackType *stackObject
     return retValue;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformInstanceAttribute);
+long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream)
+{
+    long retValue;
+    long x;
+    long y;
+    long z;
+    Instance *instance;
+
+    (void)stack;
+
+    instance = stackObject->data.instanceObject.instance;
+
+    retValue = 0;
+
+    switch (item)
+    {
+    case 5:
+    {
+        evPositionData *position;
+
+        position = (evPositionData *)INSTANCE_Query(instance, 6);
+
+        if (position == NULL)
+        {
+            x = instance->position.x;
+            y = instance->position.y;
+            z = instance->position.z;
+        }
+        else
+        {
+            x = position->x;
+            y = position->y;
+            z = position->z;
+        }
+
+        EVENT_ChangeOperandVector3d(stackObject, x, y, z, instance->currentStreamUnitID);
+
+        retValue = 1;
+        break;
+    }
+    case 9:
+    {
+        evPositionData *rotation;
+        Rotation3d vector;
+
+        rotation = (evPositionData *)INSTANCE_Query(instance, 7);
+
+        if (rotation == NULL)
+        {
+            vector.vx = instance->rotation.x;
+            vector.vy = instance->rotation.y;
+            vector.vz = instance->rotation.z;
+        }
+        else
+        {
+            vector.vx = rotation->x;
+            vector.vy = rotation->y;
+            vector.vz = rotation->z;
+        }
+
+        vector.errorx = 512;
+        vector.errorz = 512;
+        vector.errory = 512;
+
+        EVENT_ChangeOperandRotation3d(stackObject, &vector);
+
+        retValue = 1;
+        break;
+    }
+    case 12:
+        stackObject->id = 15;
+
+        stackObject->data.instanceSpline.instance = instance;
+
+        stackObject->data.instanceSpline.spline = SCRIPT_GetMultiSpline(instance, (unsigned long *)&stackObject->data.instanceSpline.isParent, (unsigned long *)&stackObject->data.instanceSpline.isClass);
+
+        stackObject->data.instanceSpline.splineFlags = 0;
+
+        stackObject->data.instanceSpline.attribute = -1;
+
+        retValue = 1;
+        break;
+    case 126:
+    {
+        int status;
+
+        stackObject->id = 27;
+
+        stackObject->data.soundObject.data.instance = instance;
+
+        stackObject->data.soundObject.attribute = -1;
+
+        if (codeStream != NULL)
+        {
+            MoveCodeStreamExtra = 1;
+
+            stackObject->data.soundObject.soundNumber = *++codeStream;
+        }
+
+        status = SOUND_IsInstanceSoundLoaded(instance->object->soundData, stackObject->data.soundObject.soundNumber);
+
+        if (status == 0)
+        {
+            WaitingToLoadSound -= gameTrackerX.timeMult;
+
+            if (WaitingToLoadSound > 0)
+            {
+                EventAbortLine = 1;
+
+                retValue = 1;
+            }
+            else
+            {
+                WaitingToLoadSound = 614400;
+            }
+        }
+        else if (status != -1)
+        {
+            WaitingToLoadSound = 614400;
+        }
+
+        retValue = 1;
+        break;
+    }
+    case 29:
+        if (instance->object->animList != NULL)
+        {
+            retValue = 1;
+
+            stackObject->id = 19;
+
+            stackObject->data.instanceAnimate.instance = instance;
+
+            stackObject->data.instanceAnimate.attribute = -1;
+        }
+
+        break;
+    case 19:
+        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 10), 3);
+
+        retValue = 1;
+        break;
+    case 159:
+        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 43), 0);
+
+        retValue = 1;
+        break;
+    case 169:
+        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 31), 0);
+
+        retValue = 1;
+        break;
+    case 170:
+        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 32), 0);
+
+        retValue = 1;
+        break;
+    case 161:
+    {
+        Instance *tmpI;
+        long value;
+
+        tmpI = (Instance *)INSTANCE_Query(instance, 44);
+
+        if (tmpI == NULL)
+        {
+            value = 0;
+        }
+        else
+        {
+            if ((INSTANCE_Query(tmpI, 1) & 0x20))
+            {
+                if ((INSTANCE_Query(tmpI, 4) & 0x3))
+                {
+                    return 1;
+                }
+
+                return 2;
+            }
+
+            value = 3;
+        }
+
+        EVENT_ChangeOperandToNumber(stackObject, value, 0);
+
+        retValue = 1;
+        break;
+    }
+    case 139:
+    case 166:
+        EVENT_ChangeOperandToNumber(stackObject, (INSTANCE_Query(instance, 0) >> 30) & 0x1, 0);
+
+        retValue = 1;
+        break;
+    case 167:
+        EVENT_ChangeOperandToNumber(stackObject, (INSTANCE_Query(instance, 0) >> 26) & 0x1, 0);
+
+        retValue = 1;
+        break;
+    case 160:
+    {
+        unsigned long temp; // not from decls.h
+
+        temp = INSTANCE_Query(instance, 1) & 0x4;
+
+        EVENT_ChangeOperandToNumber(stackObject, temp > 0, 0);
+
+        retValue = 1;
+        break;
+    }
+    case 18:
+        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 9), 1);
+
+        retValue = 1;
+        break;
+    case 56:
+        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 30), 0);
+
+        retValue = 1;
+        break;
+    case 63:
+        EVENT_ChangeOperandToNumber(stackObject, 1, 0);
+
+        retValue = 1;
+        break;
+    case 33:
+        stackObject->id = 20;
+
+        stackObject->data.instanceAniTexture.instance = instance;
+
+        retValue = 1;
+
+        stackObject->data.instanceAniTexture.aniTextures = instance->object->modelList[instance->currentModel]->aniTextures;
+
+        stackObject->data.instanceAniTexture.attribute = -1;
+        break;
+    case 43:
+    {
+        int temp; // not from decls.h
+        StreamUnit *temp2; // not from decls.h
+
+        temp = 0;
+
+        if (instance->attachedID == 0)
+        {
+            temp2 = STREAM_GetStreamUnitWithID(instance->currentStreamUnitID);
+
+            if ((temp2 != NULL) && (instance->bspTree < temp2->level->terrain->numBSPTrees))
+            {
+                temp = -((instance->currentStreamUnitID * 256) + temp2->level->terrain->BSPTreeArray[instance->bspTree].ID);
+            }
+        }
+        else
+        {
+            temp = instance->attachedID;
+        }
+
+        EVENT_ChangeOperandToNumber(stackObject, temp, 0);
+
+        retValue = 1;
+        break;
+    }
+    case 146:
+        EVENT_ChangeOperandToNumber(stackObject, 0, 0);
+
+        retValue = 1;
+        break;
+    case 151:
+        EVENT_ChangeOperandToNumber(stackObject, instance->currentStreamUnitID, 0);
+
+        retValue = 1;
+        break;
+    case 153:
+        EVENT_ChangeOperandToNumber(stackObject, instance->tface != NULL, 0);
+
+        retValue = 1;
+        break;
+    case 57:
+        retValue = 1;
+
+        stackObject->id = 24;
+
+        stackObject->data.instanceAnimate.instance = instance;
+
+        stackObject->data.instanceAnimate.attribute = -1;
+        break;
+    case 60:
+    {
+        long value;
+
+        value = 0;
+
+        if ((instance->flags & 0x4))
+        {
+            value = 1;
+
+            instance->flags &= ~0x4;
+        }
+
+        EVENT_ChangeOperandToNumber(stackObject, value, 0);
+
+        retValue = 1;
+        break;
+    }
+    case 121:
+    {
+        long value;
+
+        value = 0;
+
+        if ((instance->flags & 0x8))
+        {
+            value = 1;
+
+            instance->flags &= ~0x8;
+        }
+
+        EVENT_ChangeOperandToNumber(stackObject, value, 0);
+
+        retValue = 1;
+        break;
+    }
+    case 122:
+    {
+        long value;
+
+        value = 0;
+
+        if ((instance->flags & 0x10))
+        {
+            value = 1;
+
+            instance->flags &= ~0x10;
+        }
+
+        EVENT_ChangeOperandToNumber(stackObject, value, 0);
+
+        retValue = 1;
+        break;
+    }
+    case 106:
+    {
+        long value;
+
+        value = 0;
+
+        if (instance->flags < 0)
+        {
+            value = 1;
+
+            instance->flags &= ~0x80000000;
+        }
+
+        EVENT_ChangeOperandToNumber(stackObject, value, 0);
+
+        retValue = 1;
+        break;
+    }
+    case 125:
+    {
+        long value;
+
+        value = 0;
+
+        if ((instance->flags2 & 0x10000))
+        {
+            value = 1;
+
+            instance->flags2 &= ~0x10000;
+        }
+
+        EVENT_ChangeOperandToNumber(stackObject, value, 0);
+
+        retValue = 1;
+        break;
+    }
+    case 137:
+        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 36), 3);
+
+        retValue = 1;
+        break;
+    case 4:
+    case 10:
+    case 11:
+    case 20:
+    case 21:
+    case 32:
+    case 36:
+    case 37:
+    case 38:
+    case 39:
+    case 51:
+    case 52:
+    case 53:
+    case 54:
+    case 55:
+    case 62:
+    case 64:
+    case 75:
+    case 76:
+    case 77:
+    case 78:
+    case 79:
+    case 80:
+    case 83:
+    case 84:
+    case 85:
+    case 91:
+    case 92:
+    case 94:
+    case 95:
+    case 103:
+    case 108:
+    case 109:
+    case 110:
+    case 111:
+    case 114:
+    case 116:
+    case 123:
+    case 124:
+    case 138:
+    case 140:
+    case 141:
+    case 143:
+    case 144:
+    case 163:
+    case 164:
+    case 165:
+        stackObject->data.instanceObject.attribute = item;
+
+        retValue = 1;
+    }
+
+    return retValue;
+}
 
 long EVENT_TransformSoundObjectAttribute(PCodeStack *stack, SoundObject *soundObject, long item, short *codeStream)
 {
