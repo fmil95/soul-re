@@ -2275,7 +2275,90 @@ long EVENT_TransformSplineAttribute(PCodeStack *stack, StackType *stackObject, l
     return retValue;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformIntroAttribute);
+long EVENT_TransformIntroAttribute(PCodeStack *stack, StackType *stackObject, long item)
+{
+    long retValue;
+    long x;
+    long y;
+    long z;
+    Intro *intro;
+
+    (void)stack;
+
+    retValue = 0;
+
+    intro = stackObject->data.introObject.intro;
+
+    switch (item)
+    {
+    case 5:
+        if (!(intro->flags & 0x4000))
+        {
+            EventAbortLine = 1;
+        }
+        else
+        {
+            x = intro->position.x;
+            y = intro->position.y;
+            z = intro->position.z;
+
+            EVENT_ChangeOperandVector3d(stackObject, x, y, z, STREAM_WhichUnitPointerIsIn(intro)->StreamUnitID);
+        }
+
+        retValue = 1;
+        break;
+    case 9:
+    {
+        Rotation3d vector;
+
+        vector.vx = intro->rotation.x;
+        vector.vy = intro->rotation.y;
+        vector.vz = intro->rotation.z;
+
+        vector.errorx = 512;
+        vector.errorz = 512;
+        vector.errory = 512;
+
+        EVENT_ChangeOperandRotation3d(stackObject, &vector);
+
+        retValue = 1;
+        break;
+    }
+    case 63:
+        EVENT_ChangeOperandToNumber(stackObject, 0, 0);
+
+        retValue = 1;
+        break;
+    case 4:
+    case 62:
+    case 138:
+    case 146:
+    case 160:
+    case 166:
+        stackObject->data.introObject.attribute = item;
+
+        retValue = 1;
+        break;
+    case 7:
+    case 10:
+    case 16:
+    case 32:
+    case 80:
+    case 112:
+    case 144:
+    case 165:
+        EventAbortLine = 1;
+
+        retValue = 1;
+        break;
+    default:
+        EventAbortLine = 1;
+
+        retValue = 1;
+    }
+
+    return retValue;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ParseOperand2);
 
