@@ -8,6 +8,7 @@
 #include "Game/MENU/MENU.h"
 #include "Game/COLLIDE.h"
 #include "Game/CINEMA/CINEPSX.h"
+#include "Game/SAVEINFO.h"
 
 STATIC long numActiveEventTimers;
 
@@ -789,7 +790,58 @@ long EVENT_IsConditionTrue(Event *eventInstance, ScriptPCode *conditionScript)
     return retValue;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_WriteEventObject);
+long EVENT_WriteEventObject(StackType *stackEntry, long areaID, Event *event, long number)
+{
+    long retValue;
+
+    retValue = 0;
+
+    if (event != NULL)
+    {
+        stackEntry->id = 16;
+
+        stackEntry->data.eventObject.event = event;
+
+        stackEntry->data.eventObject.attribute = -1;
+    }
+    else
+    {
+        SavedBasic *savedEvent;
+
+        savedEvent = SAVE_GetSavedEvent(areaID, number);
+
+        if (savedEvent != NULL)
+        {
+            stackEntry->id = 21;
+
+            stackEntry->data.savedEventObject.savedEvent = savedEvent;
+
+            stackEntry->data.savedEventObject.areaID = areaID;
+
+            stackEntry->data.savedEventObject.eventNumber = number;
+
+            stackEntry->data.savedEventObject.attribute = -1;
+
+            retValue = 1;
+        }
+        else
+        {
+            stackEntry->id = 21;
+
+            stackEntry->data.savedEventObject.savedEvent = EVENT_CreateSaveEvent(areaID, number);
+
+            stackEntry->data.savedEventObject.areaID = areaID;
+
+            stackEntry->data.savedEventObject.eventNumber = number;
+
+            stackEntry->data.savedEventObject.attribute = -1;
+
+            retValue = 1;
+        }
+    }
+
+    return retValue;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ResolveObjectSignal);
 
