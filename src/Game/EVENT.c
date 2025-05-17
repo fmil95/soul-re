@@ -887,7 +887,30 @@ Intro *EVENT_ResolveObjectIntro(EventInstanceObject *instanceObject)
     return INSTANCE_FindIntro(instanceObject->unitID, instanceObject->introUniqueID);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ResolveSFXMarker);
+SFXMkr *EVENT_ResolveSFXMarker(StreamUnit *stream, EventInstanceObject *instanceObject)
+{
+    int i;
+    Level *level;
+    SFXMkr *result;
+
+    level = stream->level;
+
+    result = NULL;
+
+    if (level->NumberOfSFXMarkers != 0)
+    {
+        for (i = 0; i < level->NumberOfSFXMarkers; i++)
+        {
+            if (instanceObject->introUniqueID == level->SFXMarkerList[i].uniqueID)
+            {
+                result = &level->SFXMarkerList[i];
+                break;
+            }
+        }
+    }
+
+    return result;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddGameObjectToStack);
 
