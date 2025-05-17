@@ -2041,7 +2041,55 @@ long EVENT_TransformEventAttribute(PCodeStack *stack, StackType *stackObject, lo
     return retValue;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformSavedEventAttribute);
+long EVENT_TransformSavedEventAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream)
+{
+    long retValue;
+    long offset;
+    SavedBasic *temp; // not from decls.h
+
+    retValue = 0;
+
+    switch (item)
+    {
+    case 3:
+        MoveCodeStreamExtra = 1;
+
+        offset = *++codeStream;
+
+        if ((unsigned long)offset < 6)
+        {
+            temp = stackObject->data.savedEventObject.savedEvent;
+
+            if (temp != NULL)
+            {
+                if (temp->savedID == 2)
+                {
+                    stack->topOfStack--;
+
+                    EVENT_AddShortPointerToStack(stack, &((SavedEvent *)temp)->eventVariables[offset]);
+
+                    retValue = 1;
+                    break;
+                }
+
+                stack->topOfStack--;
+
+                EVENT_AddCharPointerToStack(stack, &((SavedEventSmallVars *)temp)->eventVariables[offset]);
+
+                retValue = 1;
+                break;
+            }
+
+            EVENT_ChangeOperandToNumber(stackObject, 0, 0);
+
+            retValue = 1;
+        }
+
+        break;
+    }
+
+    return retValue;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformSubListObjectAttribute);
 
