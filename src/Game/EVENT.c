@@ -2360,7 +2360,26 @@ long EVENT_TransformIntroAttribute(PCodeStack *stack, StackType *stackObject, lo
     return retValue;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ParseOperand2);
+long EVENT_ParseOperand2(StackType *operand2, long *error, long *trueValue)
+{
+    long number;
+
+    number = -1;
+
+    if (operand2 != NULL)
+    {
+        short flags;
+
+        number = EVENT_GetScalerValueFromOperand(operand2, error, &flags);
+
+        if ((*error == 0) && (number == 0))
+        {
+            *trueValue = 0;
+        }
+    }
+
+    return number;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoVMObjectAction);
 
