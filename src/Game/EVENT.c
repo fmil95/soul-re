@@ -10,6 +10,7 @@
 #include "Game/CINEMA/CINEPSX.h"
 #include "Game/SAVEINFO.h"
 #include "Game/SIGNAL.h"
+#include "Game/SOUND.h"
 
 STATIC long numActiveEventTimers;
 
@@ -1398,7 +1399,98 @@ long EVENT_TransformConstrictAttribute(PCodeStack *stack, StackType *stackObject
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformInstanceAttribute);
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformSoundObjectAttribute);
+long EVENT_TransformSoundObjectAttribute(PCodeStack *stack, SoundObject *soundObject, long item, short *codeStream)
+{
+    long retValue;
+
+    (void)stack;
+
+    retValue = 0;
+
+    switch (item)
+    {
+    case 126:
+    {
+        int status;
+
+        if (codeStream != NULL)
+        {
+            MoveCodeStreamExtra = 1;
+
+            codeStream++;
+
+            soundObject->soundNumber = *codeStream;
+        }
+
+        status = SOUND_IsInstanceSoundLoaded(soundObject->data.sfxMarker->soundData, soundObject->soundNumber);
+
+        if (status == 0)
+        {
+            WaitingToLoadSFX -= gameTrackerX.timeMult;
+
+            if (WaitingToLoadSFX > 0)
+            {
+                EventAbortLine = 1;
+            }
+            else
+            {
+                WaitingToLoadSFX = 614400;
+            }
+        }
+        else if (status != -1)
+        {
+            WaitingToLoadSFX = 614400;
+        }
+
+        retValue = 1;
+        break;
+    }
+    case 127:
+        soundObject->attribute = item;
+
+        if (codeStream != NULL)
+        {
+            MoveCodeStreamExtra = 2;
+
+            codeStream++;
+
+            soundObject->value = *codeStream;
+
+            codeStream++;
+
+            soundObject->duration = *codeStream;
+        }
+
+        retValue = 1;
+        break;
+    case 13:
+    case 14:
+        soundObject->attribute = item;
+
+        retValue = 1;
+        break;
+    case 128:
+        soundObject->attribute = item;
+
+        if (codeStream != NULL)
+        {
+            MoveCodeStreamExtra = 2;
+
+            codeStream++;
+
+            soundObject->value = *codeStream;
+
+            codeStream++;
+
+            soundObject->duration = *codeStream;
+        }
+
+        retValue = 1;
+        break;
+    }
+
+    return retValue;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetGameValue);
 

@@ -47,5 +47,6 @@ void SOUND_ResetMusicModifier(long modifier);
 void SOUND_Init();
 void SOUND_UpdateSound();
 void SOUND_Free();
+int SOUND_IsInstanceSoundLoaded(unsigned char *sfxFileData, long soundNumber);
 
 #endif
