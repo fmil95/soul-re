@@ -2137,7 +2137,80 @@ long EVENT_TransformListObjectAttribute(PCodeStack *stack, StackType *stackObjec
     return retValue;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformCameraObjectAttribute);
+long EVENT_TransformCameraObjectAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream)
+{
+    long retValue;
+    Camera *camera;
+
+    camera = stackObject->data.cameraObject.camera;
+
+    retValue = 0;
+
+    switch (item)
+    {
+    case 67:
+    case 68:
+    case 69:
+    case 70:
+    case 71:
+    case 72:
+    case 73:
+        stackObject->data.cameraObject.attribute = item;
+
+        retValue = 1;
+        break;
+    case 93:
+    {
+        short time;
+
+        if (codeStream != NULL)
+        {
+            codeStream++;
+
+            MoveCodeStreamExtra = 2;
+
+            time = *codeStream++;
+
+            CAMERA_SetShake(camera, time, (*codeStream << 12) / 100);
+
+            stack->topOfStack--;
+        }
+
+        retValue = 1;
+        break;
+    }
+    case 104:
+        stackObject->data.cameraObject.attribute = item;
+
+        retValue = 1;
+        break;
+    case 105:
+        if (codeStream != NULL)
+        {
+            MoveCodeStreamExtra = 1;
+
+            stackObject->data.cameraObject.frames = *++codeStream;
+        }
+
+        stackObject->data.cameraObject.attribute = item;
+
+        retValue = 1;
+        break;
+    case 117:
+        EVENT_ChangeOperandToNumber(stackObject, camera->data.Cinematic.cinema_done != 0, 0);
+
+        retValue = 1;
+        break;
+    case 9:
+    case 16:
+        stackObject->data.cameraObject.attribute = item;
+
+        retValue = 1;
+        break;
+    }
+
+    return retValue;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformSplineAttribute);
 
