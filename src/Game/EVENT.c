@@ -1152,7 +1152,16 @@ void EVENT_AddNumberToStack(PCodeStack *stack, long item, long flags)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ChangeOperandToNumber);
+void EVENT_ChangeOperandToNumber(StackType *operand, long item, long flags)
+{
+    operand->id = 7;
+
+    operand->data.Number.currentNumber = item;
+
+    operand->data.Number.error = 0;
+
+    operand->data.Number.flags = flags;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ChangeOperandVector3d);
 
