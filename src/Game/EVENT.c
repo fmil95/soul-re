@@ -912,7 +912,21 @@ SFXMkr *EVENT_ResolveSFXMarker(StreamUnit *stream, EventInstanceObject *instance
     return result;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddGameObjectToStack);
+void EVENT_AddGameObjectToStack(PCodeStack *stack)
+{
+    if (stack->topOfStack < 32)
+    {
+        StackType *stackEntry;
+
+        stackEntry = &stack->stack[stack->topOfStack];
+
+        stackEntry->id = 3;
+
+        stackEntry->data.gameObject.attribute = -1;
+
+        stack->topOfStack++;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddPlayerObjectToStack);
 
