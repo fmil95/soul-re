@@ -2091,7 +2091,28 @@ long EVENT_TransformSavedEventAttribute(PCodeStack *stack, StackType *stackObjec
     return retValue;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformSubListObjectAttribute);
+long EVENT_TransformSubListObjectAttribute(PCodeStack *stack, StackType *stackObject, long item)
+{
+    long retValue;
+    int temp; // not from decls.h
+
+    (void)stack;
+
+    temp = stackObject->data.subListObject.numberOfAttributes;
+
+    retValue = 0;
+
+    if (temp < 5)
+    {
+        retValue = 1;
+
+        stackObject->data.subListObject.attribute[temp] = item;
+
+        stackObject->data.subListObject.numberOfAttributes = temp + 1;
+    }
+
+    return retValue;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformListObjectAttribute);
 
