@@ -1188,7 +1188,20 @@ void EVENT_Addvector3dToStack(PCodeStack *stack, short x, short y, short z, long
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ChangeOperandRotation3d);
+void EVENT_ChangeOperandRotation3d(StackType *operand, Rotation3d *rotation)
+{
+    operand->id = 14;
+
+    operand->data.rotation3d.vx = rotation->vx;
+    operand->data.rotation3d.vy = rotation->vy;
+    operand->data.rotation3d.vz = rotation->vz;
+
+    operand->data.rotation3d.errorx = rotation->errorx;
+    operand->data.rotation3d.errory = rotation->errory;
+    operand->data.rotation3d.errorz = rotation->errorz;
+
+    operand->data.rotation3d.attribute = -1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddSubListObjectToStack);
 
