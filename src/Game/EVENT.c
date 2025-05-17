@@ -1116,7 +1116,21 @@ void EVENT_AddCharPointerToStack(PCodeStack *stack, char *pointer)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddShortPointerToStack);
+void EVENT_AddShortPointerToStack(PCodeStack *stack, short *pointer)
+{
+    if (stack->topOfStack < 32)
+    {
+        StackType *stackEntry;
+
+        stackEntry = &stack->stack[stack->topOfStack];
+
+        stackEntry->id = 10;
+
+        stackEntry->data.ShortPointer.pointer = (char *)pointer;
+
+        stack->topOfStack++;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddNumberToStack);
 
