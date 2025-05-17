@@ -1530,7 +1530,61 @@ long EVENT_GetGameValue(GameObject *gameObject)
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformGameAttribute);
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformAreaAttribute);
+long EVENT_TransformAreaAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream)
+{
+    long retValue;
+    long offset;
+    StreamUnit *streamUnit;
+
+    streamUnit = stackObject->data.areaObject.streamUnit;
+
+    retValue = 0;
+
+    if (streamUnit == NULL)
+    {
+        EventAbortLine = 1;
+
+        retValue = 1;
+    }
+    else
+    {
+        switch (item)
+        {
+        case 3:
+            MoveCodeStreamExtra = 1;
+
+            codeStream++;
+
+            offset = *codeStream;
+
+            if ((offset >= 0) && (offset <= 5))
+            {
+                stack->topOfStack--;
+
+                EVENT_AddShortPointerToStack(stack, &streamUnit->eventVariables[offset]);
+
+                retValue = 1;
+            }
+
+            break;
+        case 65:
+            stack->topOfStack--;
+
+            EVENT_AddShortPointerToStack(stack, (short *)&streamUnit->level->waterZLevel);
+
+            retValue = 1;
+            break;
+        case 113:
+        case 112:
+            stackObject->data.areaObject.attribute = item;
+
+            retValue = 1;
+            break;
+        }
+    }
+
+    return retValue;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformEventAttribute);
 
