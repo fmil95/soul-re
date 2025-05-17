@@ -49,5 +49,6 @@ long EVENT_TransformCameraObjectAttribute(PCodeStack *stack, StackType *stackObj
 long EVENT_IsConditionTrue(Event *eventInstance, ScriptPCode *conditionScript);
 short *EVENT_ParseOpcode(PCodeStack *stack, short *codeStream, long *operateOnStack);
 void EVENT_ExecuteActionCommand(StackType *operand1, StackType *operand2, PCodeStack *stack, short *codeStream);
+long EVENT_GetScalerValueFromOperand(StackType *operand, long *error, short *flags);
 
 #endif

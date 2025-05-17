@@ -737,7 +737,57 @@ long EVENT_DoAction(Event *eventInstance, ScriptPCode *actionScript, short *scri
     return retValue;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_IsConditionTrue);
+long EVENT_IsConditionTrue(Event *eventInstance, ScriptPCode *conditionScript)
+{
+    long retValue;
+    long error;
+    long operateOnStack;
+    short flags;
+    PCodeStack stack;
+    short *scriptData;
+
+    (void)eventInstance;
+
+    stack.topOfStack = 0;
+
+    scriptData = conditionScript->data;
+
+    currentActionScript = NULL;
+
+    retValue = 0;
+
+    while ((scriptData != NULL) && (EventAbortLine == 0))
+    {
+        scriptData = EVENT_ParseOpcode(&stack, scriptData, &operateOnStack);
+
+        if ((operateOnStack != 0) && (EventAbortLine == 0))
+        {
+            CurrentEventLine++;
+
+            if (stack.topOfStack > 0)
+            {
+                retValue = EVENT_GetScalerValueFromOperand(&stack.stack[--stack.topOfStack], &error, &flags);
+
+                if (error != 0)
+                {
+                    retValue = 0;
+                    break;
+                }
+                else if (retValue == 0)
+                {
+                    break;
+                }
+            }
+        }
+    }
+
+    if (EventAbortLine == 1)
+    {
+        retValue = 0;
+    }
+
+    return retValue;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_WriteEventObject);
 
