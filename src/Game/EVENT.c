@@ -55,6 +55,8 @@ long eventListNumInstances[20];
 
 Instance *eventListArray[20][10]; // order of indexes from decls.h has been reversed
 
+STATIC long MoveCodeStreamExtra;
+
 void EVENT_UpdateResetSignalArrayAndWaterMovement(struct Level *oldLevel, struct Level *newLevel, long sizeOfLevel)
 {
     long offset;
@@ -1248,7 +1250,123 @@ void EVENT_StackDuplicate(PCodeStack *stack)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformTGroupAttribute);
+long EVENT_TransformTGroupAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream)
+{
+    long retValue;
+
+    (void)stack;
+
+    retValue = 0;
+
+    if (stackObject->data.terrainGroup.attribute == -1)
+    {
+        stackObject->data.terrainGroup.attribute = item;
+
+        retValue = 1;
+
+        switch (item)
+        {
+        case 5:
+        case 6:
+        case 7:
+        case 8:
+        case 9:
+        case 10:
+        case 11:
+        case 12:
+        case 13:
+        case 14:
+        case 15:
+        case 16:
+        case 17:
+        case 18:
+        case 19:
+        case 20:
+        case 21:
+        case 22:
+        case 23:
+        case 24:
+        case 25:
+        case 26:
+        case 27:
+        case 28:
+        case 29:
+        case 30:
+        case 31:
+        case 32:
+        case 33:
+        case 34:
+        case 35:
+        case 36:
+        case 37:
+        case 38:
+        case 39:
+        case 40:
+        case 41:
+        case 42:
+        case 43:
+            break;
+        case 44:
+            if (codeStream != NULL)
+            {
+                MoveCodeStreamExtra = 2;
+
+                codeStream++;
+
+                stackObject->data.terrainGroup.arg[0] = *codeStream;
+
+                codeStream++;
+
+                stackObject->data.terrainGroup.arg[1] = *codeStream;
+            }
+
+            retValue = 1;
+            break;
+        case 45:
+            if (codeStream != NULL)
+            {
+                MoveCodeStreamExtra = 1;
+
+                codeStream++;
+
+                stackObject->data.terrainGroup.arg[0] = *codeStream;
+            }
+
+            retValue = 1;
+            break;
+        case 46:
+            if (codeStream != NULL)
+            {
+                MoveCodeStreamExtra = 2;
+
+                codeStream++;
+
+                stackObject->data.terrainGroup.arg[0] = *codeStream;
+
+                codeStream++;
+
+                stackObject->data.terrainGroup.arg[1] = *codeStream;
+            }
+
+            retValue = 1;
+            break;
+        case 47:
+            if (codeStream != NULL)
+            {
+                MoveCodeStreamExtra = 1;
+
+                codeStream++;
+
+                stackObject->data.terrainGroup.arg[0] = *codeStream;
+            }
+
+            retValue = 1;
+            break;
+        }
+    }
+
+    return retValue;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformConstrictAttribute);
 
