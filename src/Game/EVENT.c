@@ -928,7 +928,23 @@ void EVENT_AddGameObjectToStack(PCodeStack *stack)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddPlayerObjectToStack);
+void EVENT_AddPlayerObjectToStack(PCodeStack *stack)
+{
+    if (stack->topOfStack < 32)
+    {
+        StackType *stackEntry;
+
+        stackEntry = &stack->stack[stack->topOfStack];
+
+        stackEntry->id = 2;
+
+        stackEntry->data.instanceObject.instance = gameTrackerX.playerInstance;
+
+        stackEntry->data.instanceObject.attribute = -1;
+
+        stack->topOfStack++;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddObjectToStack);
 
