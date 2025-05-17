@@ -2001,7 +2001,45 @@ long EVENT_TransformAreaAttribute(PCodeStack *stack, StackType *stackObject, lon
     return retValue;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformEventAttribute);
+long EVENT_TransformEventAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream)
+{
+    long retValue;
+    long offset;
+    Event *event;
+
+    event = stackObject->data.eventObject.event;
+
+    retValue = 0;
+
+    switch (item)
+    {
+    case 3:
+        MoveCodeStreamExtra = 1;
+
+        offset = *++codeStream;
+
+        if ((unsigned long)offset < 6)
+        {
+            stack->topOfStack--;
+
+            EVENT_AddShortPointerToStack(stack, &event->eventVariables[offset]);
+
+            retValue = 1;
+        }
+
+        break;
+    case 26:
+        if (event->processingPuppetShow == 0)
+        {
+            event->processingPuppetShow = 1;
+        }
+
+        retValue = 1;
+        break;
+    }
+
+    return retValue;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformSavedEventAttribute);
 
