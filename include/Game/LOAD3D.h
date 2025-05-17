@@ -39,5 +39,6 @@ void LOAD_SetupFileToDoCDReading();
 void LOAD_SetupFileToDoBufferedCDReading();
 void LOAD_InitCd();
 void LOAD_ChangeDirectory(char *name);
+int LOAD_IsXAInQueue();
 
 #endif

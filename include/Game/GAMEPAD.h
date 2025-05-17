@@ -23,5 +23,6 @@ void GAMEPAD_RestoreControllers();
 void GAMEPAD_SaveControllers();
 int GAMEPAD_ControllerIsDualShock();
 void GAMEPAD_Init();
+void GAMEPAD_Shock(int motor0_speed, int motor0_time, int motor1_speed, int motor1_time);
 
 #endif

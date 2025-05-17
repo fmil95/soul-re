@@ -11,6 +11,10 @@
 #include "Game/SAVEINFO.h"
 #include "Game/SIGNAL.h"
 #include "Game/SOUND.h"
+#include "Game/PSX/MAIN.h"
+#include "Game/CAMERA.h"
+#include "Game/LOAD3D.h"
+#include "Game/GAMEPAD.h"
 
 STATIC long numActiveEventTimers;
 
@@ -1312,13 +1316,9 @@ long EVENT_TransformTGroupAttribute(PCodeStack *stack, StackType *stackObject, l
             {
                 MoveCodeStreamExtra = 2;
 
-                codeStream++;
+                stackObject->data.terrainGroup.arg[0] = *++codeStream;
 
-                stackObject->data.terrainGroup.arg[0] = *codeStream;
-
-                codeStream++;
-
-                stackObject->data.terrainGroup.arg[1] = *codeStream;
+                stackObject->data.terrainGroup.arg[1] = *++codeStream;
             }
 
             retValue = 1;
@@ -1328,9 +1328,7 @@ long EVENT_TransformTGroupAttribute(PCodeStack *stack, StackType *stackObject, l
             {
                 MoveCodeStreamExtra = 1;
 
-                codeStream++;
-
-                stackObject->data.terrainGroup.arg[0] = *codeStream;
+                stackObject->data.terrainGroup.arg[0] = *++codeStream;
             }
 
             retValue = 1;
@@ -1340,13 +1338,9 @@ long EVENT_TransformTGroupAttribute(PCodeStack *stack, StackType *stackObject, l
             {
                 MoveCodeStreamExtra = 2;
 
-                codeStream++;
+                stackObject->data.terrainGroup.arg[0] = *++codeStream;
 
-                stackObject->data.terrainGroup.arg[0] = *codeStream;
-
-                codeStream++;
-
-                stackObject->data.terrainGroup.arg[1] = *codeStream;
+                stackObject->data.terrainGroup.arg[1] = *++codeStream;
             }
 
             retValue = 1;
@@ -1356,9 +1350,7 @@ long EVENT_TransformTGroupAttribute(PCodeStack *stack, StackType *stackObject, l
             {
                 MoveCodeStreamExtra = 1;
 
-                codeStream++;
-
-                stackObject->data.terrainGroup.arg[0] = *codeStream;
+                stackObject->data.terrainGroup.arg[0] = *++codeStream;
             }
 
             retValue = 1;
@@ -1417,9 +1409,7 @@ long EVENT_TransformSoundObjectAttribute(PCodeStack *stack, SoundObject *soundOb
         {
             MoveCodeStreamExtra = 1;
 
-            codeStream++;
-
-            soundObject->soundNumber = *codeStream;
+            soundObject->soundNumber = *++codeStream;
         }
 
         status = SOUND_IsInstanceSoundLoaded(soundObject->data.sfxMarker->soundData, soundObject->soundNumber);
@@ -1452,13 +1442,9 @@ long EVENT_TransformSoundObjectAttribute(PCodeStack *stack, SoundObject *soundOb
         {
             MoveCodeStreamExtra = 2;
 
-            codeStream++;
+            soundObject->value = *++codeStream;
 
-            soundObject->value = *codeStream;
-
-            codeStream++;
-
-            soundObject->duration = *codeStream;
+            soundObject->duration = *++codeStream;
         }
 
         retValue = 1;
@@ -1476,13 +1462,9 @@ long EVENT_TransformSoundObjectAttribute(PCodeStack *stack, SoundObject *soundOb
         {
             MoveCodeStreamExtra = 2;
 
-            codeStream++;
+            soundObject->value = *++codeStream;
 
-            soundObject->value = *codeStream;
-
-            codeStream++;
-
-            soundObject->duration = *codeStream;
+            soundObject->duration = *++codeStream;
         }
 
         retValue = 1;
@@ -1553,9 +1535,7 @@ long EVENT_TransformAreaAttribute(PCodeStack *stack, StackType *stackObject, lon
         case 3:
             MoveCodeStreamExtra = 1;
 
-            codeStream++;
-
-            offset = *codeStream;
+            offset = *++codeStream;
 
             if ((offset >= 0) && (offset <= 5))
             {
