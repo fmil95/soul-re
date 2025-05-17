@@ -1163,7 +1163,20 @@ void EVENT_ChangeOperandToNumber(StackType *operand, long item, long flags)
     operand->data.Number.flags = flags;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ChangeOperandVector3d);
+void EVENT_ChangeOperandVector3d(StackType *operand, short x, short y, short z, long streamUnitID)
+{
+    operand->id = 9;
+
+    operand->data.vector3d.vx = x;
+    operand->data.vector3d.vy = y;
+    operand->data.vector3d.vz = z;
+
+    operand->data.vector3d.errorx = 160;
+    operand->data.vector3d.errory = 160;
+    operand->data.vector3d.errorz = 160;
+
+    operand->data.vector3d.streamUnitID = streamUnitID;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_Addvector3dToStack);
 
