@@ -17,7 +17,7 @@ typedef struct Dummy5
     char unkE;
     char unkF;
     char unk10;
-} Dummy5;
+} Dummy5; // not from types.h
 
 int VWRAITH_ShouldISwoop(Instance *instance);
 void VWRAITH_VerticalMove(Instance *instance);

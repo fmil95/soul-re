@@ -946,7 +946,159 @@ void EVENT_AddPlayerObjectToStack(PCodeStack *stack)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddObjectToStack);
+void EVENT_AddObjectToStack(PCodeStack *stack, long item)
+{
+    EventBasicObject *basicObject;
+    int topOfStack;
+
+    topOfStack = stack->topOfStack;
+
+    if (topOfStack < 32)
+    {
+        StackType *stackEntry;
+
+        stackEntry = &stack->stack[topOfStack];
+
+        basicObject = currentEventInstance->instanceList[item];
+
+        switch ((short)(basicObject->id - 1))
+        {
+        case 5:
+            if (((EventSignalObject *)basicObject)->signal != NULL)
+            {
+                stackEntry->id = 17;
+
+                stackEntry->data.signalObject.msignal = ((EventSignalObject *)basicObject)->signal;
+
+                stackEntry->data.signalObject.attribute = -1;
+            }
+            else
+            {
+                stackEntry->id = 6;
+
+                stackEntry->data.Object.instanceNumber = item;
+
+                stackEntry->data.Object.attribute = -1;
+            }
+
+            break;
+        case 3:
+            if (((EventTGroupObject *)basicObject)->bspTree != NULL)
+            {
+                stackEntry->id = 23;
+
+                stackEntry->data.terrainGroup.bspTree = ((EventTGroupObject *)basicObject)->bspTree;
+
+                stackEntry->data.terrainGroup.streamUnit = ((EventTGroupObject *)basicObject)->stream;
+
+                stackEntry->data.terrainGroup.attribute = -1;
+            }
+            else
+            {
+                stackEntry->id = 6;
+
+                stackEntry->data.Object.instanceNumber = item;
+
+                stackEntry->data.Object.attribute = -1;
+            }
+
+            break;
+        case 1:
+            stackEntry->id = 18;
+
+            stackEntry->data.listObject.eventInstance = (EventWildCardObject *)basicObject;
+
+            stackEntry->data.listObject.numberOfAttributes = 0;
+
+            stackEntry->data.listObject.lineID = CurrentEventLine;
+            break;
+        case 2:
+            EVENT_WriteEventObject(stackEntry, ((EventEventObject *)basicObject)->unitID, ((EventEventObject *)basicObject)->event, ((EventEventObject *)basicObject)->eventNumber);
+            break;
+        case 4:
+            stackEntry->id = 1;
+
+            stackEntry->data.areaObject.streamUnit = (StreamUnit *)((EventAreaObject *)basicObject)->stream;
+
+            stackEntry->data.areaObject.attribute = -1;
+
+            stackEntry->data.areaObject.unitID = ((EventAreaObject *)basicObject)->unitID;
+            break;
+        case 0:
+            if ((((EventInstanceObject *)basicObject)->flags & 0x1))
+            {
+                stackEntry->id = 27;
+
+                stackEntry->data.soundObject.flags = 0x1;
+
+                stackEntry->data.soundObject.data.sfxMarker = ((EventInstanceObject *)basicObject)->data.sfxMarker;
+
+                stackEntry->data.soundObject.attribute = -1;
+
+                stackEntry->data.soundObject.soundNumber = -1;
+
+                stackEntry->data.soundObject.value = -1;
+
+                stackEntry->data.soundObject.duration = -1;
+            }
+            else
+            {
+                if (((EventInstanceObject *)basicObject)->instance != NULL)
+                {
+                    stackEntry->id = 2;
+
+                    stackEntry->data.instanceObject.instance = ((EventInstanceObject *)basicObject)->instance;
+
+                    stackEntry->data.instanceObject.attribute = -1;
+                    break;
+                }
+
+                if (((EventInstanceObject *)basicObject)->data.intro != NULL)
+                {
+                    stackEntry->id = 4;
+
+                    stackEntry->data.introObject.intro = ((EventInstanceObject *)basicObject)->data.intro;
+
+                    stackEntry->data.introObject.attribute = -1;
+                    break;
+                }
+
+                stackEntry->id = 6;
+
+                stackEntry->data.Object.instanceNumber = item;
+
+                stackEntry->data.Object.attribute = -1;
+            }
+
+            break;
+        case 6:
+            if (((EventVMO *)basicObject)->vmObjectPtr != NULL)
+            {
+                stackEntry->id = 26;
+
+                stackEntry->data.vmObject.vmObjectPtr = ((EventVMO *)basicObject)->vmObjectPtr;
+
+                stackEntry->data.vmObject.level = STREAM_GetLevelWithID(((EventVMO *)basicObject)->unitID);
+
+                stackEntry->data.vmObject.attribute = -1;
+            }
+            else
+            {
+                stackEntry->id = 6;
+
+                stackEntry->data.Object.instanceNumber = item;
+
+                stackEntry->data.Object.attribute = -1;
+            }
+
+            break;
+        }
+
+        topOfStack++;
+    }
+
+    stack->topOfStack = topOfStack;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddCharPointerToStack);
 

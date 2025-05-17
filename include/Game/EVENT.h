@@ -3,6 +3,32 @@
 
 #include "common.h"
 
+// Further debugging symbols were provided by the remasters' PDB file for the following structs
+typedef struct EventVMO
+{
+    short id;
+    short spad;
+    long unitID;
+    char vmObjectName[12];
+    struct _VMObject *vmObjectPtr;
+} EventVMO;
+
+typedef struct EventSignalObject
+{
+    short id;
+    short signalNumber;
+    long unitID;
+    void *signal;
+} EventSignalObject;
+
+typedef struct EventAreaObject
+{
+    short id;
+    short spad;
+    long unitID;
+    struct _StreamUnit *stream;
+} EventAreaObject;
+
 void EVENT_Init();
 void EVENT_AddInstanceToInstanceList(Instance *instance);
 void EVENT_RemoveInstanceFromInstanceList(Instance *instance);
