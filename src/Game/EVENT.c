@@ -2212,7 +2212,68 @@ long EVENT_TransformCameraObjectAttribute(PCodeStack *stack, StackType *stackObj
     return retValue;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformSplineAttribute);
+long EVENT_TransformSplineAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream)
+{
+    long retValue;
+    Instance *instance;
+
+    (void)stack;
+
+    retValue = 0;
+
+    instance = stackObject->data.instanceSpline.instance;
+
+    switch (item)
+    {
+    case 31:
+        MoveCodeStreamExtra = 2;
+
+        instance->clipBeg = *++codeStream;
+        instance->clipEnd = *++codeStream;
+
+        instance->splineFlags |= 0x2;
+
+        if ((instance->clipBeg == -1) && (instance->clipEnd == -1))
+        {
+            instance->splineFlags &= ~0x2000002;
+        }
+        else
+        {
+            long maxKeyFrames;
+
+            maxKeyFrames = SCRIPTCountFramesInSpline(instance);
+
+            if (instance->clipEnd >= maxKeyFrames)
+            {
+                instance->clipEnd = maxKeyFrames;
+            }
+
+            if (instance->clipBeg < 0)
+            {
+                instance->clipBeg = 0;
+            }
+        }
+
+        retValue = 1;
+        break;
+    case 34:
+        stackObject->data.instanceSpline.splineFlags |= 0x4;
+
+        retValue = 1;
+        break;
+    case 35:
+        stackObject->data.instanceSpline.splineFlags |= 0x8;
+
+        retValue = 1;
+        break;
+    default:
+        stackObject->data.instanceSpline.attribute = item;
+
+        retValue = 1;
+    }
+
+    return retValue;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformIntroAttribute);
 
