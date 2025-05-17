@@ -1492,7 +1492,41 @@ long EVENT_TransformSoundObjectAttribute(PCodeStack *stack, SoundObject *soundOb
     return retValue;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetGameValue);
+long EVENT_GetGameValue(GameObject *gameObject)
+{
+    long value;
+
+    value = 0;
+
+    switch (gameObject->attribute)
+    {
+    case -1:
+        value = 1;
+        break;
+    case 2:
+        value = GAMELOOP_GetTimeOfDay();
+
+        switch (value)
+        {
+        case 600:
+            value = 1;
+            break;
+        case 700:
+            value = 2;
+            break;
+        case 1800:
+            value = 3;
+            break;
+        case 1900:
+            value = 4;
+            break;
+        }
+
+        break;
+    }
+
+    return value;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformGameAttribute);
 
