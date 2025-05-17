@@ -1238,7 +1238,15 @@ long EVENT_AddSubListObjectToStack(PCodeStack *stack, long listNumber)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_StackDuplicate);
+void EVENT_StackDuplicate(PCodeStack *stack)
+{
+    if ((stack->topOfStack < 32) && (stack->topOfStack != 0))
+    {
+        stack->stack[stack->topOfStack] = stack->stack[stack->topOfStack - 1];
+
+        stack->topOfStack++;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformTGroupAttribute);
 
