@@ -1368,7 +1368,33 @@ long EVENT_TransformTGroupAttribute(PCodeStack *stack, StackType *stackObject, l
     return retValue;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformConstrictAttribute);
+long EVENT_TransformConstrictAttribute(PCodeStack *stack, StackType *stackObject, long item)
+{
+    long retValue;
+    Instance *instance;
+
+    (void)stack;
+
+    instance = stackObject->data.constrictInfo.instance;
+
+    retValue = 0;
+
+    switch (item)
+    {
+    case 58:
+        EVENT_ChangeOperandToNumber(stackObject, instance->constrictAngle < -1, 0);
+
+        retValue = 1;
+        break;
+    case 59:
+        EVENT_ChangeOperandToNumber(stackObject, (instance->constrictAngle < 2) == 0, 0);
+
+        retValue = 1;
+        break;
+    }
+
+    return retValue;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformInstanceAttribute);
 
