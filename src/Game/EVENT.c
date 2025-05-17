@@ -9,6 +9,7 @@
 #include "Game/COLLIDE.h"
 #include "Game/CINEMA/CINEPSX.h"
 #include "Game/SAVEINFO.h"
+#include "Game/SIGNAL.h"
 
 STATIC long numActiveEventTimers;
 
@@ -843,7 +844,43 @@ long EVENT_WriteEventObject(StackType *stackEntry, long areaID, Event *event, lo
     return retValue;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ResolveObjectSignal);
+MultiSignal *EVENT_ResolveObjectSignal(StreamUnit *stream, long signalNumber)
+{
+    MultiSignal *retValue;
+    Level *level;
+
+    level = stream->level;
+
+    retValue = NULL;
+
+    if (signalNumber < 0)
+    {
+        switch (signalNumber)
+        {
+        case -1:
+            retValue = level->startSignal;
+            break;
+        case -2:
+            retValue = level->spectralSignal;
+            break;
+        case -3:
+            retValue = level->materialSignal;
+            break;
+        case -4:
+            retValue = level->startUnitLoadedSignal;
+            break;
+        case -5:
+            retValue = level->startUnitMainSignal;
+            break;
+        }
+    }
+    else
+    {
+        retValue = SIGNAL_FindSignal(level, signalNumber);
+    }
+
+    return retValue;
+}
 
 Intro *EVENT_ResolveObjectIntro(EventInstanceObject *instanceObject)
 {
