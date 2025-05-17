@@ -1178,7 +1178,15 @@ void EVENT_ChangeOperandVector3d(StackType *operand, short x, short y, short z, 
     operand->data.vector3d.streamUnitID = streamUnitID;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_Addvector3dToStack);
+void EVENT_Addvector3dToStack(PCodeStack *stack, short x, short y, short z, long streamUnitID)
+{
+    if (stack->topOfStack < 32)
+    {
+        EVENT_ChangeOperandVector3d(&stack->stack[stack->topOfStack], x, y, z, streamUnitID);
+
+        stack->topOfStack++;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ChangeOperandRotation3d);
 
