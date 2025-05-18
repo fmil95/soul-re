@@ -2648,7 +2648,33 @@ long EVENT_DoSignalAction(SignalObject *signalObject, StackType *operand2)
     return temp;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformSignalAttribute);
+long EVENT_TransformSignalAttribute(PCodeStack *stack, StackType *stackObject, long item)
+{
+    long retValue;
+    MultiSignal *msignal;
+
+    (void)stack;
+
+    retValue = 0;
+
+    msignal = stackObject->data.signalObject.msignal;
+
+    switch (item)
+    {
+    case 26:
+        stackObject->data.signalObject.attribute = item;
+
+        retValue = 1;
+        break;
+    case 50:
+        EVENT_ChangeOperandToNumber(stackObject, msignal->flags & 0x1, 0);
+
+        retValue = 1;
+        break;
+    }
+
+    return retValue;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformRotation3dAttribute);
 
