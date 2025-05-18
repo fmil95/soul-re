@@ -2737,11 +2737,11 @@ long EVENT_TransformVector3dAttribute(PCodeStack *stack, StackType *stackObject,
     case 24:
         MoveCodeStreamExtra = 2;
 
-        retValue = 1;
-
         stackObject->data.vector3d.errorx = *++codeStream;
         stackObject->data.vector3d.errory = *++codeStream;
         stackObject->data.vector3d.errorz = -1;
+
+        retValue = 1;
         break;
     case 25:
         MoveCodeStreamExtra = 3;
@@ -2767,7 +2767,60 @@ void EVENT_ModifyObjectToStackWithAttribute(PCodeStack *stack, long item, short 
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoInstanceAnimateTextureAction);
+long EVENT_DoInstanceAnimateTextureAction(InstanceAnimateTexture *instanceAniTexture, StackType *operand2)
+{
+    long trueValue;
+    long number;
+    long result;
+    long error;
+
+    number = -1;
+
+    result = 0;
+
+    trueValue = 1;
+
+    error = 1;
+
+    if (instanceAniTexture->attribute == -1)
+    {
+        result = 1;
+    }
+    else
+    {
+        number = EVENT_ParseOperand2(operand2, &error, &trueValue);
+
+        switch (instanceAniTexture->attribute)
+        {
+        case 14:
+            trueValue ^= 1;
+        case 13:
+        case 41:
+            result = 1;
+
+            if (trueValue != 0)
+            {
+                instanceAniTexture->instance->flags &= ~0x80;
+            }
+            else
+            {
+                instanceAniTexture->instance->flags |= 0x80;
+            }
+
+            break;
+        case 15:
+        case 40:
+            if (error == 0)
+            {
+                instanceAniTexture->instance->currentTextureAnimFrame = number;
+            }
+
+            break;
+        }
+    }
+
+    return result;
+}
 
 void EVENT_ResetAllSplineFlags(MultiSpline *spline)
 {
