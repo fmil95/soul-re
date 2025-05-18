@@ -2702,7 +2702,62 @@ long EVENT_TransformRotation3dAttribute(PCodeStack *stack, StackType *stackObjec
     return retValue;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformVector3dAttribute);
+long EVENT_TransformVector3dAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream)
+{
+    long retValue;
+
+    (void)stack;
+
+    switch (item)
+    {
+    case 6:
+        EVENT_ChangeOperandToNumber(stackObject, stackObject->data.vector3d.vx, 0);
+
+        retValue = 1;
+        break;
+    case 7:
+        EVENT_ChangeOperandToNumber(stackObject, stackObject->data.vector3d.vy, 0);
+
+        retValue = 1;
+        break;
+    case 8:
+        EVENT_ChangeOperandToNumber(stackObject, stackObject->data.vector3d.vz, 0);
+
+        retValue = 1;
+        break;
+    case 23:
+        stackObject->data.vector3d.errorx = *++codeStream;
+        stackObject->data.vector3d.errory = -1;
+        stackObject->data.vector3d.errorz = -1;
+
+        MoveCodeStreamExtra = 1;
+
+        retValue = 1;
+        break;
+    case 24:
+        MoveCodeStreamExtra = 2;
+
+        retValue = 1;
+
+        stackObject->data.vector3d.errorx = *++codeStream;
+        stackObject->data.vector3d.errory = *++codeStream;
+        stackObject->data.vector3d.errorz = -1;
+        break;
+    case 25:
+        MoveCodeStreamExtra = 3;
+
+        stackObject->data.vector3d.errorx = *++codeStream;
+        stackObject->data.vector3d.errory = *++codeStream;
+        stackObject->data.vector3d.errorz = *++codeStream;
+
+        retValue = 1;
+        break;
+    default:
+        retValue = 0;
+    }
+
+    return retValue;
+}
 
 void EVENT_ModifyObjectToStackWithAttribute(PCodeStack *stack, long item, short *codeStream)
 {
