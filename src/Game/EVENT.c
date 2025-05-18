@@ -18,6 +18,8 @@
 #include "Game/SCRIPT.h"
 #include "Game/HASM.h"
 #include "Game/VM.h"
+#include "Game/FX.h"
+#include "Game/VOICEXA.h"
 
 STATIC long numActiveEventTimers;
 
@@ -684,6 +686,7 @@ void EVENT_ProcessEvents(EventPointers *eventPointers, Level *level)
         CINE_PlayIngame(MovieToPlay);
 
         MovieToPlay = -1;
+
         MoviePlayed = 1;
     }
 }
@@ -2491,7 +2494,133 @@ long EVENT_GetVMObjectValue(EventVmObject *vmobject)
     return value;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoGameAction);
+long EVENT_DoGameAction(GameObject *gameObject, StackType *operand2)
+{
+    long error;
+    long number;
+    long trueValue;
+
+    error = 1;
+
+    trueValue = 1;
+
+    if (gameObject->attribute != -1)
+    {
+        number = EVENT_ParseOperand2(operand2, &error, &trueValue);
+
+        switch (gameObject->attribute)
+        {
+        case 88:
+            if (error != 0)
+            {
+                FX_Start_Snow(100);
+            }
+            else
+            {
+                FX_Start_Snow(number);
+            }
+
+            break;
+        case 89:
+            if (error != 0)
+            {
+                FX_Start_Rain(100);
+            }
+            else
+            {
+                FX_Start_Rain(number);
+            }
+
+            break;
+        case 118:
+            if ((number >= 0) && ((gameTrackerX.debugFlags & 0x80000)))
+            {
+                if (WaitingForVoiceNumber != number)
+                {
+                    if (LOAD_IsXAInQueue() == 0)
+                    {
+                        LOAD_PlayXA(number);
+
+                        EventAbortLine = 1;
+
+                        WaitingForVoiceNumber = number;
+                    }
+                    else
+                    {
+                        EventAbortLine = 1;
+                    }
+                }
+                else if (VOICEXA_IsPlaying() != 2)
+                {
+                    EventAbortLine = 1;
+                }
+                else
+                {
+                    WaitingForVoiceNumber = -1;
+                }
+            }
+
+            break;
+        case 119:
+            if ((number > 0) && (number < 128))
+            {
+                SOUND_SetVoiceVolume(number);
+            }
+
+            break;
+        case 142:
+            HINT_StartHint(number);
+            break;
+        case 156:
+            HINT_KillSpecificHint(number);
+            break;
+        case 147:
+            HINT_StopHint();
+            break;
+        case 2:
+            switch (number)
+            {
+            case 1:
+                GAMELOOP_SetGameTime(600);
+                break;
+            case 2:
+                GAMELOOP_SetGameTime(700);
+                break;
+            case 3:
+                GAMELOOP_SetGameTime(1800);
+                break;
+            case 4:
+                GAMELOOP_SetGameTime(1900);
+                break;
+            }
+
+            break;
+        case 135:
+            SOUND_SetMusicModifier(number);
+            break;
+        case 136:
+            SOUND_ResetMusicModifier(number);
+            break;
+        case 150:
+            if (MoviePlayed == 0)
+            {
+                MovieToPlay = number;
+
+                EventAbortLine = 1;
+            }
+            else
+            {
+                MoviePlayed = 0;
+
+                MovieToPlay = -1;
+            }
+
+            break;
+        }
+    }
+
+    return 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoSignalAction);
 
