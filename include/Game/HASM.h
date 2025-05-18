@@ -20,6 +20,7 @@ void VM_ProcessVMObjectList_S(Level *level, Camera *camera);
 long TimerTick();
 unsigned long GetGp();
 void SetGp(unsigned long);
+void VM_ProcessVMObjectSetColor_S(Level *level, VMObject *vmobject);
 
 long depthQFogStart;
 long depthQBlendStart;

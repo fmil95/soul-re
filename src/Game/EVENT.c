@@ -16,6 +16,8 @@
 #include "Game/LOAD3D.h"
 #include "Game/GAMEPAD.h"
 #include "Game/SCRIPT.h"
+#include "Game/HASM.h"
+#include "Game/VM.h"
 
 STATIC long numActiveEventTimers;
 
@@ -2381,7 +2383,77 @@ long EVENT_ParseOperand2(StackType *operand2, long *error, long *trueValue)
     return number;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoVMObjectAction);
+long EVENT_DoVMObjectAction(EventVmObject *vmobject, StackType *operand2)
+{
+    long result;
+    long trueValue;
+    long number;
+    long error;
+
+    result = 0;
+
+    trueValue = 1;
+
+    number = -1;
+
+    error = 1;
+
+    if (vmobject->attribute != -1)
+    {
+        number = EVENT_ParseOperand2(operand2, &error, &trueValue);
+
+        switch (vmobject->attribute)
+        {
+        case 14:
+            trueValue = trueValue == 0;
+        case 13:
+            if (trueValue != 0)
+            {
+                vmobject->vmObjectPtr->flags &= ~0x2;
+            }
+            else
+            {
+                vmobject->vmObjectPtr->flags |= 0X2;
+            }
+
+            result = 1;
+            break;
+        case 99:
+            if (number != -1)
+            {
+                if ((number >= 0) && (number < vmobject->vmObjectPtr->numVMOffsetTables))
+                {
+                    VM_VMObjectSetTable(vmobject->level, vmobject->vmObjectPtr, number);
+
+                    if (((vmobject->vmObjectPtr->flags & 0x2)) && (vmobject->level != NULL))
+                    {
+                        VM_ProcessVMObjectSetColor_S(vmobject->level, vmobject->vmObjectPtr);
+                    }
+                }
+            }
+
+            break;
+        case 100:
+            if (number != -1)
+            {
+                vmobject->vmObjectPtr->timer = number;
+
+                if (((vmobject->vmObjectPtr->flags & 0x2)) && (vmobject->level != NULL))
+                {
+                    VM_ProcessVMObjectSetColor_S(vmobject->level, vmobject->vmObjectPtr);
+
+                    result = 1;
+                    break;
+                }
+            }
+
+            result = 1;
+            break;
+        }
+    }
+
+    return result;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetVMObjectValue);
 
