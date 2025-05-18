@@ -77,5 +77,6 @@ short *EVENT_ParseOpcode(PCodeStack *stack, short *codeStream, long *operateOnSt
 void EVENT_ExecuteActionCommand(StackType *operand1, StackType *operand2, PCodeStack *stack, short *codeStream);
 long EVENT_GetScalerValueFromOperand(StackType *operand, long *error, short *flags);
 SavedBasic *EVENT_CreateSaveEvent(long levelID, long eventNumber);
+long EVENT_TransformObjectOnStack(PCodeStack *stack, long item, short *codeStream);
 
 #endif

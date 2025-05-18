@@ -2704,7 +2704,13 @@ long EVENT_TransformRotation3dAttribute(PCodeStack *stack, StackType *stackObjec
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformVector3dAttribute);
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ModifyObjectToStackWithAttribute);
+void EVENT_ModifyObjectToStackWithAttribute(PCodeStack *stack, long item, short *codeStream)
+{
+    if (stack->topOfStack != 0)
+    {
+        EVENT_TransformObjectOnStack(stack, item, codeStream);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoInstanceAnimateTextureAction);
 
