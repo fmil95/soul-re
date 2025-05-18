@@ -2676,7 +2676,31 @@ long EVENT_TransformSignalAttribute(PCodeStack *stack, StackType *stackObject, l
     return retValue;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformRotation3dAttribute);
+long EVENT_TransformRotation3dAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream)
+{
+    long retValue;
+
+    (void)stack;
+    (void)codeStream;
+
+    switch (item)
+    {
+    case 6:
+    case 7:
+    case 8:
+    case 96:
+    case 97:
+    case 98:
+        stackObject->data.rotation3d.attribute = item;
+
+        retValue = 1;
+        break;
+    default:
+        retValue = 0;
+    }
+
+    return retValue;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformVector3dAttribute);
 
