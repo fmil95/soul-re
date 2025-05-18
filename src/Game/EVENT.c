@@ -3114,7 +3114,156 @@ long EVENT_GetTGroupValue(TGroupObject *terrainGroup)
     return value;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoTGroupAction);
+long EVENT_DoTGroupAction(TGroupObject *terrainGroup, StackType *operand2)
+{
+    long trueValue;
+    long number;
+    long error;
+    long result;
+
+    number = -1;
+
+    trueValue = 1;
+
+    result = 0;
+
+    if (terrainGroup->attribute != number)
+    {
+        BSPTree *bspTree;
+
+        bspTree = terrainGroup->bspTree;
+
+        EVENT_ParseOperand2(operand2, &error, &trueValue);
+
+        switch (terrainGroup->attribute)
+        {
+        case 46:
+        case 44:
+        {
+            WaterLevelProcess *curWater;
+
+            curWater = EVENT_GetNextTerrainMove();
+
+            if (curWater != NULL)
+            {
+                curWater->bspTree = bspTree;
+
+                curWater->streamUnit = terrainGroup->streamUnit;
+
+                curWater->oldWaterZ = terrainGroup->streamUnit->level->waterZLevel;
+                curWater->oldGlobalOffset = bspTree->globalOffset.z;
+
+                curWater->zValueFrom = bspTree->localOffset.z;
+                curWater->zValueTo = terrainGroup->arg[0];
+
+                curWater->maxSteps = terrainGroup->arg[1] << 12;
+
+                curWater->curStep = 0;
+
+                curWater->flags = 0x1;
+
+                WaterInUse = 1;
+
+                if (terrainGroup->attribute == 46)
+                {
+                    curWater->flags |= 0x2;
+                }
+            }
+
+            break;
+        }
+        case 45:
+        case 47:
+        {
+            long offsetz;
+
+            if (bspTree->localOffset.z != terrainGroup->arg[0])
+            {
+                offsetz = terrainGroup->arg[0] - bspTree->localOffset.z;
+
+                bspTree->globalOffset.z += offsetz;
+                bspTree->localOffset.z = terrainGroup->arg[0];
+
+                result = 1;
+
+                if (terrainGroup->attribute == 47)
+                {
+                    terrainGroup->streamUnit->level->waterZLevel += offsetz;
+
+                    terrainGroup->streamUnit->level->terrain->UnitChangeFlags |= 0x3;
+                }
+            }
+
+            result = 1;
+            break;
+        }
+        case 115:
+            if (trueValue != 0)
+            {
+                bspTree->flags |= 0x40;
+            }
+            else
+            {
+                bspTree->flags &= ~0x40;
+            }
+
+            result = 1;
+            break;
+        case 149:
+            if (trueValue != 0)
+            {
+                bspTree->flags |= 0x20;
+            }
+            else
+            {
+                bspTree->flags &= ~0x20;
+            }
+
+            result = 1;
+            break;
+        case 52:
+            if (trueValue != 0)
+            {
+                bspTree->flags |= 0x1;
+            }
+            else
+            {
+                bspTree->flags &= ~0x1;
+            }
+
+            result = 1;
+            break;
+        case 53:
+            if (trueValue != 0)
+            {
+                bspTree->flags |= 0x2;
+            }
+            else
+            {
+                bspTree->flags &= ~0x2;
+            }
+
+            result = 1;
+            break;
+        case 11:
+            trueValue ^= 1;
+        case 10:
+            if (trueValue != 0)
+            {
+                bspTree->flags |= 0x3;
+            }
+            else
+            {
+                bspTree->flags &= ~0x3;
+            }
+
+            result = 1;
+            break;
+        }
+    }
+
+    return result;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoCameraAction);
 
