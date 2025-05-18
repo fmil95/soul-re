@@ -20,6 +20,7 @@
 #include "Game/VM.h"
 #include "Game/FX.h"
 #include "Game/VOICEXA.h"
+#include "Game/STATE.h"
 
 STATIC long numActiveEventTimers;
 
@@ -2870,7 +2871,149 @@ void EVENT_SetSplineLoop(MultiSpline *spline)
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoSplineAction);
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoAnimateAction);
+long EVENT_DoAnimateAction(InstanceAnimate *instanceAnimate, StackType *operand2)
+{
+    long trueValue;
+    long number;
+    long result;
+    long error;
+    Instance *instance;
+    int temp, temp3; // not from decls.h
+    Instance *temp2; // not from decls.h
+
+    number = -1;
+
+    result = 0;
+
+    trueValue = 1;
+
+    if (instanceAnimate->attribute != -1)
+    {
+        instance = instanceAnimate->instance;
+
+        number = EVENT_ParseOperand2(operand2, &error, &trueValue);
+
+        switch (instanceAnimate->attribute)
+        {
+        case 121:
+            break;
+        case 132:
+            instance->aliasCommand.speed = number;
+            break;
+        case 30:
+            result = 1;
+
+            if (number != -1)
+            {
+                instance->aliasCommand.newanim = number;
+            }
+
+            break;
+        case 15:
+        case 40:
+            if (number != -1)
+            {
+                instance->aliasCommand.newframe = number;
+            }
+
+            break;
+        case 102:
+            if (number != -1)
+            {
+                instance->aliasCommand.interpframes = number;
+            }
+
+            break;
+        case 101:
+            if (operand2 != NULL)
+            {
+                if (operand2->id == 2)
+                {
+                    instance->aliasCommand.hostInstance = operand2->data.instanceAnimate.instance;
+                }
+                else
+                {
+                    EventAbortLine = 1;
+                }
+            }
+
+            break;
+        case 14:
+            trueValue ^= 1;
+        case 13:
+        case 41:
+            if (trueValue != 0)
+            {
+                Instance *hostInstance;
+
+                hostInstance = instance->aliasCommand.hostInstance;
+
+                if (hostInstance == NULL)
+                {
+                    temp = SetAnimationInstanceSwitchData(instance, instance->aliasCommand.newanim, instance->aliasCommand.newframe, instance->aliasCommand.interpframes, 1);
+
+                    temp2 = instance;
+
+                    temp3 = 0x8000008;
+                }
+                else
+                {
+                    temp = SetActionPlayHostAnimationData(instance, instance->aliasCommand.hostInstance, instance->aliasCommand.newanim, instance->aliasCommand.newframe, instance->aliasCommand.interpframes, 1);
+
+                    temp2 = instance;
+
+                    temp3 = 0x40003;
+                }
+
+                INSTANCE_Post(temp2, temp3, temp);
+            }
+            else
+            {
+                INSTANCE_Post(instance, 0x8000010, 0);
+            }
+
+            result = 1;
+
+            memset(&instance->aliasCommand.hostInstance, 0, sizeof(struct EventAliasCommandStruct));
+            break;
+        case 42:
+            if (instance->aliasCommand.hostInstance == NULL)
+            {
+                INSTANCE_Post(instance, 0x8000008, SetAnimationInstanceSwitchData(instance, instance->aliasCommand.newanim, instance->aliasCommand.newframe, instance->aliasCommand.interpframes, 2));
+            }
+            else
+            {
+                INSTANCE_Post(instance, 0x40003, SetActionPlayHostAnimationData(instance, instance->aliasCommand.hostInstance, instance->aliasCommand.newanim, instance->aliasCommand.newframe, instance->aliasCommand.interpframes, 2));
+            }
+
+            memset(&instance->aliasCommand.hostInstance, 0, sizeof(struct EventAliasCommandStruct));
+
+            result = 1;
+            break;
+        case 107:
+            if (instance->aliasCommand.hostInstance == NULL)
+            {
+                INSTANCE_Post(instance, 0x8000008, SetAnimationInstanceSwitchData(instance, instance->aliasCommand.newanim, instance->aliasCommand.newframe, instance->aliasCommand.interpframes, 0));
+            }
+            else
+            {
+                INSTANCE_Post(instance, 0x40003, SetActionPlayHostAnimationData(instance, instance->aliasCommand.hostInstance, instance->aliasCommand.newanim, instance->aliasCommand.newframe, instance->aliasCommand.interpframes, 0));
+            }
+
+            if (instance->aliasCommand.speed > 0)
+            {
+                INSTANCE_Post(instance, 0x40020, instance->aliasCommand.speed);
+            }
+
+            memset(&instance->aliasCommand.hostInstance, 0, sizeof(struct EventAliasCommandStruct));
+
+            result = 1;
+            break;
+        }
+    }
+
+    return result;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoInstanceAction);
 
