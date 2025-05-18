@@ -3265,7 +3265,172 @@ long EVENT_DoTGroupAction(TGroupObject *terrainGroup, StackType *operand2)
     return result;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoCameraAction);
+long EVENT_DoCameraAction(CameraObject *cameraObject, StackType *operand2, short *codeStream)
+{
+    long trueValue;
+    long number;
+    long error;
+    Camera *camera;
+
+    (void)codeStream;
+
+    trueValue = 1;
+
+    error = 1;
+
+    number = -1;
+
+    camera = cameraObject->camera;
+
+    if (cameraObject->attribute != number)
+    {
+        number = EVENT_ParseOperand2(operand2, &error, &trueValue);
+
+        switch (cameraObject->attribute)
+        {
+        case 67:
+            if (error == 0)
+            {
+                CAMERA_SetSmoothValue(camera, number);
+            }
+
+            break;
+        case 68:
+        case 69:
+        {
+            Intro *intro;
+
+            intro = NULL;
+
+            if (operand2 != NULL)
+            {
+                switch (operand2->id)
+                {
+                case 2:
+                    intro = operand2->data.instanceObject.instance->intro;
+                    break;
+                case 4:
+                    intro = operand2->data.introObject.intro;
+                    break;
+                }
+            }
+
+            if (intro != NULL)
+            {
+                if (cameraObject->attribute == 68)
+                {
+                    camera->Spline00 = intro->multiSpline;
+                }
+                else
+                {
+                    camera->Spline01 = intro->multiSpline;
+                }
+            }
+
+            break;
+        }
+        case 9:
+        case 70:
+        {
+            long angle;
+
+            if (error == 0)
+            {
+                if (cameraObject->attribute == 70)
+                {
+                    angle = -number;
+
+                    angle %= 360;
+
+                    if (angle < 0)
+                    {
+                        angle += 360;
+                    }
+
+                    CAMERA_Adjust_tilt(cameraObject->camera, (angle * 4096) / 360);
+                }
+                else
+                {
+                    angle = -number;
+
+                    angle %= 360;
+
+                    if (angle < 0)
+                    {
+                        angle += 360;
+                    }
+
+                    CAMERA_Adjust_rotation(cameraObject->camera, (angle * 4096) / 360);
+                }
+            }
+
+            break;
+        }
+        case 105:
+        {
+            long angle;
+
+            if (error == 0)
+            {
+                angle = number % 360;
+
+                if (angle < 0)
+                {
+                    angle += 360;
+                }
+
+                CAMERA_Adjust_roll((angle * 4096) / 360, cameraObject->frames);
+            }
+
+            break;
+        }
+        case 104:
+        {
+            long angle;
+
+            if (error == 0)
+            {
+                angle = number % 360;
+
+                if (angle < 0)
+                {
+                    angle += 360;
+                }
+
+                CAMERA_Adjust_roll((angle * 4096) / 360, 0);
+            }
+
+            break;
+        }
+        case 71:
+            if (error == 0)
+            {
+                CAMERA_Adjust_distance(cameraObject->camera, number);
+            }
+
+            break;
+        case 72:
+            CAMERA_RestoreMode(camera);
+            break;
+        case 73:
+            if ((operand2 != NULL) && (operand2->id == 2))
+            {
+                CAMERA_SetInstanceFocus(camera, operand2->data.instanceObject.instance);
+            }
+
+            break;
+        case 16:
+            if (error == 0)
+            {
+                CAMERA_SetMode(camera, number);
+            }
+
+            break;
+        }
+    }
+
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoObjectSoundAction);
 

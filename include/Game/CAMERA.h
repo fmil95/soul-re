@@ -75,6 +75,7 @@ void CAMERA_UpdateFocusRotate(Camera *camera);
 void CAMERA_Process(Camera *camera);
 void CAMERA_SetViewVolume(Camera *camera);
 void CAMERA_Control(Camera *camera, Instance *playerInstance);
+void CAMERA_Adjust_roll(long roll_degrees, int frames);
 
 extern int CameraCenterDelay;
 Camera theCamera;
