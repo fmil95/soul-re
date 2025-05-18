@@ -2413,7 +2413,7 @@ long EVENT_DoVMObjectAction(EventVmObject *vmobject, StackType *operand2)
             }
             else
             {
-                vmobject->vmObjectPtr->flags |= 0X2;
+                vmobject->vmObjectPtr->flags |= 0x2;
             }
 
             result = 1;
@@ -2455,7 +2455,41 @@ long EVENT_DoVMObjectAction(EventVmObject *vmobject, StackType *operand2)
     return result;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetVMObjectValue);
+long EVENT_GetVMObjectValue(EventVmObject *vmobject)
+{
+    long value;
+    long trueValue;
+
+    value = 0;
+
+    trueValue = 1;
+
+    switch (vmobject->attribute)
+    {
+    case -1:
+        value = 1;
+        break;
+    case 14:
+        trueValue = 0;
+    case 13:
+        value = trueValue;
+
+        if ((vmobject->vmObjectPtr->flags & 0x2))
+        {
+            value = value == 0;
+        }
+
+        break;
+    case 99:
+        value = vmobject->vmObjectPtr->currentIdx;
+        break;
+    case 100:
+        value = vmobject->vmObjectPtr->timer % vmobject->vmObjectPtr->curVMOffsetTable->numVMOffsets;
+        break;
+    }
+
+    return value;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoGameAction);
 
