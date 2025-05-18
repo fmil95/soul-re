@@ -2622,7 +2622,31 @@ long EVENT_DoGameAction(GameObject *gameObject, StackType *operand2)
     return 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoSignalAction);
+long EVENT_DoSignalAction(SignalObject *signalObject, StackType *operand2)
+{
+    long trueValue;
+    long number;
+    long error;
+    long temp; // not from decls.h 
+
+    number = -1;
+
+    trueValue = 1;
+
+    temp = 0;
+
+    if (signalObject->attribute != number)
+    {
+        EVENT_ParseOperand2(operand2, &error, &trueValue);
+
+        if ((signalObject->attribute == 26) && (trueValue != 0))
+        {
+            COLLIDE_HandleSignal(gameTrackerX.playerInstance, signalObject->msignal->signalList, signalObject->msignal->numSignals, 0);
+        }
+    }
+
+    return temp;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformSignalAttribute);
 
