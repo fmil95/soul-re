@@ -2974,7 +2974,7 @@ long EVENT_DoAnimateAction(InstanceAnimate *instanceAnimate, StackType *operand2
 
             result = 1;
 
-            memset(&instance->aliasCommand.hostInstance, 0, sizeof(struct EventAliasCommandStruct));
+            instance->aliasCommand = (EventAliasCommandStruct){0};
             break;
         case 42:
             if (instance->aliasCommand.hostInstance == NULL)
@@ -2986,7 +2986,7 @@ long EVENT_DoAnimateAction(InstanceAnimate *instanceAnimate, StackType *operand2
                 INSTANCE_Post(instance, 0x40003, SetActionPlayHostAnimationData(instance, instance->aliasCommand.hostInstance, instance->aliasCommand.newanim, instance->aliasCommand.newframe, instance->aliasCommand.interpframes, 2));
             }
 
-            memset(&instance->aliasCommand.hostInstance, 0, sizeof(struct EventAliasCommandStruct));
+            instance->aliasCommand = (EventAliasCommandStruct){0};
 
             result = 1;
             break;
@@ -3005,7 +3005,7 @@ long EVENT_DoAnimateAction(InstanceAnimate *instanceAnimate, StackType *operand2
                 INSTANCE_Post(instance, 0x40020, instance->aliasCommand.speed);
             }
 
-            memset(&instance->aliasCommand.hostInstance, 0, sizeof(struct EventAliasCommandStruct));
+            instance->aliasCommand = (EventAliasCommandStruct){0};
 
             result = 1;
             break;
@@ -3017,7 +3017,102 @@ long EVENT_DoAnimateAction(InstanceAnimate *instanceAnimate, StackType *operand2
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoInstanceAction);
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetTGroupValue);
+long EVENT_GetTGroupValue(TGroupObject *terrainGroup)
+{
+    long value;
+    long trueValue;
+    BSPTree *bspTree;
+
+    value = 0;
+
+    trueValue = 1;
+
+    bspTree = terrainGroup->bspTree;
+
+    switch (terrainGroup->attribute)
+    {
+    case -1:
+        value = -((terrainGroup->streamUnit->StreamUnitID << 8) + bspTree->ID);
+        break;
+    case 52:
+        if ((bspTree->flags & 0x1))
+        {
+            value = 1;
+        }
+        else
+        {
+            value = 0;
+        }
+
+        break;
+    case 53:
+        if ((bspTree->flags & 0x2))
+        {
+            value = 1;
+        }
+        else
+        {
+            value = 0;
+        }
+
+        break;
+    case 11:
+        trueValue = 0;
+    case 10:
+        value = trueValue;
+
+        if ((bspTree->flags & 0x3) != 0x3)
+        {
+            value ^= 1;
+        }
+
+        break;
+    case 60:
+        if ((bspTree->flags & 0x800))
+        {
+            value = 1;
+
+            bspTree->flags &= ~0x800;
+        }
+
+        break;
+    case 106:
+        if ((bspTree->flags & 0x400))
+        {
+            value = 1;
+
+            bspTree->flags &= ~0x400;
+        }
+
+        break;
+    case 125:
+        break;
+    case 115:
+        if ((bspTree->flags & 0x40))
+        {
+            value = 1;
+        }
+        else
+        {
+            value = 0;
+        }
+
+        break;
+    case 149:
+        if ((bspTree->flags & 0x20))
+        {
+            value = 1;
+        }
+        else
+        {
+            value = 0;
+        }
+
+        break;
+    }
+
+    return value;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoTGroupAction);
 
