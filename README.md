@@ -80,23 +80,8 @@ Enter `make setup` on the terminal to extract the source assets from the ROM, th
 
 In case of an error, you can use `make clean` to do this step once more from scratch.
  
-## Contributing
+## Contact
 
-Contributions are welcome. If you would like to reserve a function, open a PR with the function or file name(s).
+The `PS1/PS2 Decompilation` Discord server has an exclusive channel for this decompilation titled `soul-reaver`, which is the main medium of communication for anything in relation to it: https://discord.gg/VwCPdfbxgm
 
-## Community
-
-The primary way to discuss the project is through the `PS1/PS2 Decompilation` server on Discord, which has a dedicated channel for the decomp called `soul-reaver`. See you there!
-
-[![Join the Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/tch8h5Vw8E)](https://discord.gg/https://discord.gg/tch8h5Vw8E)
-
-## Resources
-
-Associated decomp projects:
-- [Resident Evil CODE: Veronica X](https://github.com/fmil95/recvx-decomp)
-- [Fatal Frame](https://github.com/Mikompilation/Himuro)
-- [Silent Hill](https://github.com/Vatuu/silent-hill-decomp)
-
-## Disclaimer
-
-This repository and the code therein, is made public on this site by fmil95 for preservational and educational purposes. I do not claim to hold any affiliation to the Legacy of Kain franchise, Crystal Dynamics, Inc. or any other related party, nor mean to infringe upon the copyright of Legacy of Kain: Soul Reaver.
+Alternatively, if you aren't able to join the server for some reason, you can write me an email to fmilesi_soft@hotmail.com with any query you might have. 
