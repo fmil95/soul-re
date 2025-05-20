@@ -866,7 +866,76 @@ void MON_ImpaleDeath(Instance *instance)
 
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_TerrainImpaleDeathEntry);
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_TerrainImpaleDeath);
+void MON_TerrainImpaleDeath(Instance *instance)
+{
+    MonsterVars *mv;
+    MonsterAttributes *ma;
+    Intro *impaler;
+    int temp; // not from decls.h
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (!(mv->mvFlags & 0x200))
+    {
+        MON_MoveInstanceToImpalePoint(instance);
+
+        if ((instance->flags2 & 0x10))
+        {
+            if ((mv->enemy != NULL) && ((INSTANCE_Query(mv->enemy->instance, 1) & 0x1)))
+            {
+                MON_ChangeHumanOpinion(instance);
+            }
+
+            mv->mvFlags |= 0x200;
+
+            instance->flags2 &= ~0x40;
+
+            if ((mv->soulID == 0) && (mv->soulJuice != 0))
+            {
+                MON_BirthSoul(instance, 1);
+            }
+        }
+    }
+    else
+    {
+        if (mv->soulID != 0)
+        {
+            if (INSTANCE_Find(mv->soulID) == NULL)
+            {
+                MON_BirthSoul(instance, 1);
+            }
+        }
+        else
+        {
+            ma = (MonsterAttributes *)instance->data;
+
+            temp = MON_GetTime(instance) - mv->damageTimer;
+
+            MON_CutOut_Monster(instance, temp, ma->headSegment, ma->rightFootSegment);
+
+            if (temp >= 4096)
+            {
+                impaler = INSTANCE_FindIntro(instance->currentStreamUnitID, mv->terrainImpaleID);
+
+                if (impaler != NULL)
+                {
+                    impaler->flags |= 0x8000;
+                }
+
+                MON_KillMonster(instance);
+            }
+        }
+
+        if (((mv->mvFlags & 0x400000)) && (mv->effectTimer < MON_GetTime(instance)))
+        {
+            mv->mvFlags &= ~0x400000;
+
+            FX_StopAllGlowEffects(instance, 64);
+        }
+
+        while (DeMessageQueue(&mv->messageQueue) != NULL);
+    }
+}
 
 void MON_SurprisedEntry(Instance *instance)
 {
