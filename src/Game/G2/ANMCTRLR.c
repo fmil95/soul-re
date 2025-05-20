@@ -139,7 +139,72 @@ G2Bool G2Anim_IsControllerInterpolating(G2Anim *anim, int segNumber, int type)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/G2/ANIMG2", G2Anim_GetControllerCurrentInterpVector);
+void G2Anim_GetControllerCurrentInterpVector(G2Anim *anim, int segNumber, int type, G2SVector3 *vector)
+{
+    G2AnimController *controller;
+    G2SVector3 *base;
+    G2SVector3 *offset;
+    G2Matrix *segMatrix;
+    G2SVector3 *source;
+    G2SVector3 *dest;
+    unsigned short z;
+    unsigned long xy;
+    long alpha;
+
+    controller = _G2Anim_FindController(anim, segNumber, type);
+
+    if (controller->duration != 0)
+    {
+        base = &controller->data.vector.base;
+
+        offset = &controller->data.vector.offset;
+
+        if ((controller->flags & 0x2000))
+        {
+            source = base;
+
+            dest = vector;
+
+            xy = *(unsigned long *)&source->x;
+            z = source->z;
+
+            *(unsigned long *)&dest->x = xy;
+            dest->z = z;
+        }
+        else
+        {
+            alpha = controller->elapsedTime;
+
+            gte_ldlvnlsv(base);
+            gte_ldsv(offset);
+            gte_lddp(alpha);
+            gte_ngpl(1);
+            gte_stlvnlsv(vector);
+        }
+    }
+    else
+    {
+        if ((controller->type == 18) || (controller->type == 34))
+        {
+            if (controller->type == 18)
+            {
+                G2Anim_GetSegChannelValue(anim, controller->segNumber, (unsigned short *)vector, 0x70);
+            }
+            else
+            {
+                G2Anim_GetSegChannelValue(anim, controller->segNumber, (unsigned short *)vector, 0x700);
+            }
+        }
+        else if (controller->type == 32)
+        {
+            segMatrix = &anim->segMatrices[controller->segNumber];
+
+            vector->x = segMatrix->trans.x;
+            vector->y = segMatrix->trans.y;
+            vector->z = segMatrix->trans.z;
+        }
+    }
+}
 
 void G2Anim_SetControllerCallbackData(G2Anim *anim, int segNumber, int type, void *callbackData)
 {

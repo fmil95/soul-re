@@ -149,13 +149,13 @@
     : : "r"(r0)                     \
     : "$12", "$13")
 
-#define gte_nGPL(sf) __asm__( \
+#define gte_ngpl(sf) __asm__( \
     "nop;"                    \
     "nop;"                    \
     ".word %0"                \
     : : "g"(0x4BA0003E | ((sf) & 0x1) << 19))
 
-#define gte_ngpl12() gte_nGPL(1)
+#define gte_ngpl12() gte_ngpl(1)
 
 #define gte_stsv(r0) __asm__( \
     "mfc2    $12, $9;"        \
