@@ -1109,7 +1109,88 @@ void MON_GrabbedEntry(Instance *instance)
 
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Grabbed);
+void MON_Grabbed(Instance *instance)
+{
+    MonsterVars *mv;
+    Message *message;
+    int time;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if ((instance->flags2 & 0x10))
+    {
+        MON_PlayAnim(instance, MONSTER_ANIM_STRUGGLE, 2);
+    }
+
+    time = mv->generalTimer - MON_GetTime(instance);
+
+    if ((time <= 0) && (INSTANCE_Query(mv->enemy->instance, 10) != 0x20000))
+    {
+        MON_SwitchState(instance, MONSTER_STATE_BREAKHOLD);
+    }
+
+    instance->rotation.z = mv->enemy->instance->rotation.z + 2048;
+
+    while ((message = DeMessageQueue(&mv->messageQueue)) != NULL)
+    {
+        switch (message->ID)
+        {
+        case 0x1000003:
+        {
+            evMonsterThrownData *data;
+
+            data = (evMonsterThrownData *)message->Data;
+
+            INSTANCE_UnlinkFromParent(instance);
+
+            MON_LaunchMonster(instance, data->direction.z, data->power, 50);
+            break;
+        }
+        case 0x1000007:
+        {
+            evMonsterHitTerrainData *data;
+
+            data = (evMonsterHitTerrainData *)message->Data;
+
+            if ((data->bspFlags & 0x2000))
+            {
+                MON_UnlinkFromRaziel(instance);
+            }
+
+            break;
+        }
+        case 0x1000002:
+        case 0x100000B:
+            break;
+        default:
+            MON_DefaultMessageHandler(instance, message);
+        }
+    }
+
+    if (instance->LinkParent == NULL)
+    {
+        if ((instance->currentMainState == MONSTER_STATE_GRABBED) && (mv->speed != 0))
+        {
+            MON_TurnOnBodySpheres(instance);
+
+            MON_SwitchState(instance, MONSTER_STATE_FALL);
+
+            instance->rotation.z = gameTrackerX.playerInstance->rotation.z + 2048;
+        }
+
+        instance->rotation.x = 0;
+        instance->rotation.y = 0;
+    }
+    else
+    {
+        mv->speed = 1;
+    }
+
+    if ((instance->LinkParent != NULL) && ((instance->currentMainState != MONSTER_STATE_GRABBED) && (instance->currentMainState != MONSTER_STATE_BREAKHOLD)))
+    {
+        MON_UnlinkFromRaziel(instance);
+    }
+}
 
 void MON_HitEntry(Instance *instance)
 {
