@@ -1,6 +1,8 @@
 #include "common.h"
 #include "Game/FONT.h"
 
+unsigned char fontTransTable[128];
+
 static char fp_str[512];
 
 void FONT_MakeSpecialFogClut(int x, int y)
@@ -47,7 +49,10 @@ void FONT_DrawChar(FontChar *fontChar)
     FONT_DrawChar2D(c & 0xFF, x, y);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_Get2DImageIndex);
+long FONT_Get2DImageIndex(unsigned char c)
+{
+    return fontTransTable[c];
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", drawChar2DPoly);
 
