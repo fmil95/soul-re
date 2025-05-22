@@ -55,7 +55,32 @@ INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_DrawChar2D);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_CharSpacing);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_AddCharToBuffer);
+void FONT_AddCharToBuffer(char c, long x, long y)
+{
+    FontChar *fontChar;
+
+    fontChar = &fontTracker.font_buffer[fontTracker.font_buffIndex];
+
+    if (fontTracker.font_buffIndex < 255)
+    {
+        if (c == '@')
+        {
+            fontChar->x = x & 0xFF;
+            fontChar->y = y & 0xFF;
+        }
+        else
+        {
+            fontChar->x = x;
+            fontChar->y = y;
+        }
+
+        fontChar->c = c;
+
+        fontTracker.font_buffIndex++;
+
+        fontChar->color = fontTracker.color_global;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_Print);
 

@@ -124,6 +124,7 @@ $(BUILD_DIR)/src/Game/DEBUG.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/SOUND.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/MEMPACK.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/LOAD3D.c.o: CFLAGS += -funsigned-char
+$(BUILD_DIR)/src/Game/FONT.c.o: CFLAGS += -funsigned-char
 
 $(BUILD_DIR)/src/Game/MONSTER/MONMSG.c.o: CFLAGS += -funsigned-char
 
