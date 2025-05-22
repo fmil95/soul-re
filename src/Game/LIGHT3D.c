@@ -250,8 +250,10 @@ void LIGHT_GetLightMatrix(struct _Instance *instance, struct Level *level, struc
     }
 }
 
+// Matches 100% on decomp.me but differs on this project
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/LIGHT3D", LIGHT_PresetInstanceLight);
-/* TODO: requires migration of sdata
+#else
 void LIGHT_PresetInstanceLight(Instance *instance, short attenuate, MATRIX *lm)
 {
     MATRIX cm;
@@ -259,10 +261,10 @@ void LIGHT_PresetInstanceLight(Instance *instance, short attenuate, MATRIX *lm)
     long scaleRGB[3];
     int i;
     int j;
-    Level* level;
-    CDLight* extraLight = (CDLight*)instance->extraLight;
+    Level *level;
+    CDLight *extraLight = (CDLight *)instance->extraLight;
     short tempRGB[3] = {16, 16, 16};
-    short* todRGB;
+    short *todRGB;
 
     level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
 
@@ -317,7 +319,8 @@ void LIGHT_PresetInstanceLight(Instance *instance, short attenuate, MATRIX *lm)
     }
 
     SetColorMatrix(&cm);
-}*/
+}
+#endif
 
 void LIGHT_GetAmbient(struct _ColorType *color, struct _Instance *instance)
 {
@@ -345,8 +348,10 @@ void LIGHT_SetAmbientInstance(Instance *instance, Level *level)
     SetBackColor(((ColorType *)&instance->light_color)->r, ((ColorType *)&instance->light_color)->g, ((ColorType *)&instance->light_color)->b);
 }
 
+// Matches 100% on decomp.me but differs on this project
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/LIGHT3D", LIGHT_SetMatrixForLightGroupInstance);
-/* TODO: requires migration of sdata
+#else
 void LIGHT_SetMatrixForLightGroupInstance(Instance *instance, Level *level)
 {
     MATRIX *lgt;
@@ -354,7 +359,7 @@ void LIGHT_SetMatrixForLightGroupInstance(Instance *instance, Level *level)
     MATRIX lm;
     MATRIX cm;
     VECTOR half = {2048, 2048, 2048};
-    LightList* lightList;
+    LightList *lightList;
     int lightGrp;
     typedef struct
     {
@@ -392,7 +397,7 @@ void LIGHT_SetMatrixForLightGroupInstance(Instance *instance, Level *level)
 
         if (lightList->numLightGroups == 0)
         {
-            lgt = (MATRIX*)&default_lightgroup;
+            lgt = (MATRIX *)&default_lightgroup;
         }
         else
         {
@@ -409,7 +414,7 @@ void LIGHT_SetMatrixForLightGroupInstance(Instance *instance, Level *level)
         }
         else
         {
-            RotMatrix((SVECTOR*)&instance->rotation, &lgt_cat);
+            RotMatrix((SVECTOR *)&instance->rotation, &lgt_cat);
         }
 
         if (instance->extraLight != NULL)
@@ -434,9 +439,9 @@ void LIGHT_SetMatrixForLightGroupInstance(Instance *instance, Level *level)
             cm.m[1][1] = lgt[1].m[1][1];
             cm.m[2][1] = lgt[1].m[2][1];
 
-            cm.m[0][2] = ((CDLight*)instance->extraLight)->r << 4;
-            cm.m[1][2] = ((CDLight*)instance->extraLight)->g << 4;
-            cm.m[2][2] = ((CDLight*)instance->extraLight)->b << 4;
+            cm.m[0][2] = ((CDLight *)instance->extraLight)->r << 4;
+            cm.m[1][2] = ((CDLight *)instance->extraLight)->g << 4;
+            cm.m[2][2] = ((CDLight *)instance->extraLight)->b << 4;
 
             MulMatrix0(&lm, &lgt_cat, &lgt_cat);
 
@@ -457,7 +462,7 @@ void LIGHT_SetMatrixForLightGroupInstance(Instance *instance, Level *level)
 
             if ((instance->flags & 0x200000))
             {
-                *(cmm*)&cm = *(cmm*)&lgt[1];
+                *(cmm *)&cm = *(cmm *)&lgt[1];
 
                 ScaleMatrix(&cm, &half);
 
@@ -469,7 +474,8 @@ void LIGHT_SetMatrixForLightGroupInstance(Instance *instance, Level *level)
             }
         }
     }
-}*/
+}
+#endif
 
 void LIGHT_DrawShadow(MATRIX *wcTransform, struct _Instance *instance, struct _PrimPool *primPool, unsigned long **ot)
 {
