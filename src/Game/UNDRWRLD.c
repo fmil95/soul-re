@@ -13,7 +13,7 @@
 #include "Game/SIGNAL.h"
 #include "Game/STREAM.h"
 
-static UW_ScreenXY *ScreenMorphArray = 0;
+static UW_ScreenXY *ScreenMorphArray = NULL;
 
 static long UW_angle;
 
