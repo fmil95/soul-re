@@ -22,13 +22,25 @@
 #include "Game/VOICEXA.h"
 #include "Game/STATE.h"
 
+static short EventAbortLine = 0;
+
+static short EventJustRecievedTimer = 0;
+
+static long MoveCodeStreamExtra = 0;
+
+static long CurrentEventLine = 0;
+
+static long EventCurrentEventIndex = -1;
+
+long WaterInUse = 0;
+
+long NumSignalsToReset = 0;
+
 STATIC long numActiveEventTimers;
 
 STATIC EventTimer eventTimerArray[24];
 
 STATIC WaterLevelProcess WaterLevelArray[5];
-
-long WaterInUse;
 
 long WaitingForVoiceNumber;
 
@@ -42,21 +54,11 @@ short MovieToPlay;
 
 HintSystemStruct gHintSystem;
 
-long NumSignalsToReset;
-
 struct SignalResetStruct ResetSignalArray[16];
 
 STATIC struct Event *currentEventInstance;
 
-STATIC short EventAbortLine;
-
 STATIC struct Level *CurrentPuzzleLevel;
-
-STATIC long EventCurrentEventIndex;
-
-STATIC long CurrentEventLine;
-
-STATIC short EventJustRecievedTimer;
 
 STATIC ScriptPCode *currentActionScript;
 
@@ -65,8 +67,6 @@ STATIC short *EventAbortedPosition;
 long eventListNumInstances[20];
 
 Instance *eventListArray[20][10]; // order of indexes from decls.h has been reversed
-
-STATIC long MoveCodeStreamExtra;
 
 void EVENT_UpdateResetSignalArrayAndWaterMovement(struct Level *oldLevel, struct Level *newLevel, long sizeOfLevel)
 {
@@ -259,8 +259,6 @@ void EVENT_ProcessTimers()
     }
 }
 
-extern char D_800D1A08[];
-extern char D_800D1A0C[];
 void EVENT_ProcessHints()
 {
     if ((gHintSystem.flags & 0x1))
@@ -268,8 +266,7 @@ void EVENT_ProcessHints()
         char string[128];
         long y;
 
-        // sprintf(string, "%s\n", localstr_get(gHintSystem.stringNumber));
-        sprintf(string, D_800D1A08, localstr_get(gHintSystem.stringNumber));
+        sprintf(string, "%s\n", localstr_get(gHintSystem.stringNumber));
 
         if ((gHintSystem.flags & 0x2))
         {
@@ -286,8 +283,7 @@ void EVENT_ProcessHints()
         }
 
         FONT_FontPrintCentered(string, y);
-        // FONT_FontPrintCentered("$\n", y);
-        FONT_FontPrintCentered(D_800D1A0C, y);
+        FONT_FontPrintCentered("$\n", y);
 
         DisplayHintBox(FONT_GetStringWidth(string), y);
 

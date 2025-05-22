@@ -215,7 +215,7 @@ segments:
       - [0x0C1BE8, sdata] # Game/PSX/AADVOICE?
       - [0x0C1E94, .sdata, Game/STREAM]
       - [0x0C2178, .sdata, Game/STRMLOAD]
-      - [0x0C21F0, sdata, Game/EVENT]
+      - [0x0C21F0, .sdata, Game/EVENT]
       - [0x0C2210, .sdata, Game/PHYSOBS]
       - [0x0C221C, .sdata, Game/RAZCNTRL]
       - [0x0C2250, .sdata, Game/STATE]
