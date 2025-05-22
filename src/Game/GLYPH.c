@@ -13,45 +13,47 @@
 #include "Game/OBTABLE.h"
 #include "Game/FONT.h"
 
-STATIC short HUD_Count;
+static short MANNA_Position;
 
-STATIC short HUD_Count_Overall;
+static short MANNA_Pos_vel;
 
-STATIC short HUD_Pos_vel;
+static short glyph_time;
 
-STATIC short HUD_Position;
+static short glyph_trigger;
 
-STATIC short HUD_Rot_vel;
+static short glyph_cost;
 
-STATIC short HUD_Rotation;
+static short HUD_Count;
 
-STATIC short HUD_State;
+static short HUD_Count_Overall;
 
-STATIC short HUD_Wait;
+static int blast_range;
 
-STATIC int warpDraw;
+static int fx_radius_old;
 
-STATIC int glowdeg;
+static int MANNA_Pickup_Time;
 
-STATIC SVector HUD_Cap_Pos;
+static short HUD_Rotation;
 
-STATIC SVector HUD_Cap_Vel;
+static short HUD_Rot_vel;
 
-STATIC int fx_radius_old;
+static short HUD_Position;
 
-STATIC int blast_range;
+static short HUD_Pos_vel;
 
-STATIC short glyph_trigger;
+static short HUD_State;
 
-STATIC short glyph_time;
+static short HUD_Wait;
 
-STATIC short glyph_cost;
+static SVector HUD_Cap_Pos;
 
-STATIC int MANNA_Pickup_Time;
+static SVector HUD_Cap_Vel;
 
-STATIC short MANNA_Position;
+static int warpDraw;
 
-STATIC short MANNA_Pos_vel;
+static int glowdeg;
+
+int hud_warp_arrow_flash;
 
 static short fx_going = 0;
 
