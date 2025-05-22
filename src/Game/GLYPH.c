@@ -13,8 +13,6 @@
 #include "Game/OBTABLE.h"
 #include "Game/FONT.h"
 
-STATIC short HUD_Captured;
-
 STATIC short HUD_Count;
 
 STATIC short HUD_Count_Overall;
@@ -39,8 +37,6 @@ STATIC SVector HUD_Cap_Pos;
 
 STATIC SVector HUD_Cap_Vel;
 
-STATIC short fx_going;
-
 STATIC int fx_radius_old;
 
 STATIC int blast_range;
@@ -57,7 +53,11 @@ STATIC short MANNA_Position;
 
 STATIC short MANNA_Pos_vel;
 
-FXBlastringEffect *fx_blastring;
+static short fx_going = 0;
+
+FXBlastringEffect *fx_blastring = NULL;
+
+static short HUD_Captured = 0;
 
 void GlyphInit(Instance *instance, GameTracker *gameTracker)
 {
@@ -1120,8 +1120,7 @@ void HUD_Draw()
 
         if (glyph_cost != -1)
         {
-            // FONT_Print("%d/", glyph_cost);
-            FONT_Print(D_800D1A94, glyph_cost);
+            FONT_Print("%d/", glyph_cost);
         }
 
         if (MANNA_Count >= MANNA_Max)
@@ -1129,8 +1128,7 @@ void HUD_Draw()
             FONT_SetColorIndex(2);
         }
 
-        // FONT_Print("%d", MANNA_Count);
-        FONT_Print(D_800D1A98, MANNA_Count);
+        FONT_Print("%d", MANNA_Count);
 
         FONT_SetColorIndex(0);
         FONT_SetCursor(oldx, oldy);
