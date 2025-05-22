@@ -8,6 +8,14 @@
 
 STATIC LightGroup default_lightgroup;
 
+long (*light_sourceAndVertexFunc)();
+
+void *light_light;
+
+Terrain *light_terrain;
+
+LightInfo *light_lightInfo;
+
 static inline int LIGHT3D_FixedDivision(long a, long b)
 {
     long r;
