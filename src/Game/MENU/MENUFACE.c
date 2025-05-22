@@ -168,9 +168,6 @@ void MENUFACE_ChangeStateRandomly(int index)
     }
 }
 
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/MENU/MENUFACE", MENUFACE_RefreshFaces);
-#else
 void MENUFACE_RefreshFaces()
 {
     int i;
@@ -185,8 +182,7 @@ void MENUFACE_RefreshFaces()
     {
         if (face->curFrame >= face->frames)
         {
-            DRAW_DrawButton(&FaceButtons[(i * 7) + (face->curFrame / face->frames)], face->x, face->y, &gameTrackerX.dispOT[1]);
+            DRAW_DrawButton(&FaceButtons[(i * 7) + (face->curFrame / face->frames)], face->x, face->y, &gameTrackerX.drawOT[1]);
         }
     }
 }
-#endif

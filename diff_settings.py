@@ -1,7 +1,7 @@
 def apply(config, args):
     config["baseimg"] = "SLUS_007.08"
-    config["myimg"] = "build/KAIN2.exe"
-    config["mapfile"] = "build/KAIN2.map"
+    config["myimg"] = "build/KAIN2.EXE"
+    config["mapfile"] = "build/KAIN2.MAP"
     config["source_directories"] = ["."]
     # config["show_line_numbers_default"] = True
     config["arch"] = "mipsel"
