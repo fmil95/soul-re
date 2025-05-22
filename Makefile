@@ -117,6 +117,7 @@ $(BUILD_DIR)/src/Game/PSX/AADVOICE.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/PSX/MAIN.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/PSX/SUPPORT.c.o: CFLAGS += -funsigned-char
 
+$(BUILD_DIR)/src/Game/DRAW.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/STRMLOAD.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/INSTANCE.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/DEBUG.c.o: CFLAGS += -funsigned-char

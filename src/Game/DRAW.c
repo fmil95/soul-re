@@ -154,10 +154,6 @@ void DRAW_FlatQuad(CVECTOR *color, short x0, short y0, short x1, short y1, short
 
 INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_TranslucentQuad);
 
-// Matches 100% on decomp.me but differs on this project
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_DrawButton);
-#else
 void DRAW_DrawButton(ButtonTexture *button, short x, short y, unsigned long **ot)
 {
     PrimPool *primPool;
@@ -223,7 +219,6 @@ void DRAW_DrawButton(ButtonTexture *button, short x, short y, unsigned long **ot
         primPool->numPrims++;
     }
 }
-#endif
 
 INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_LoadButton);
 
