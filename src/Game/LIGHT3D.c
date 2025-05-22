@@ -6,7 +6,14 @@
 #include "Game/STREAM.h"
 #include "Game/COLLIDE.h"
 
-STATIC LightGroup default_lightgroup;
+static LightGroup default_lightgroup = {
+    {{{63461, 64216, 3274}, {3363, 64057, 1809}, {2579, 2683, 1709}}, {0, 0, 0}},
+    {{{2056, 2056, 2056}, {2056, 2056, 2056}, {2056, 2056, 2056}}, {0, 0, 0}}
+};
+
+static int D_800D0908[2] = {0x10001000, 4096};
+
+static int D_800D0910[5] = {2048, 2048, 2048, 0, 0};
 
 long (*light_sourceAndVertexFunc)();
 

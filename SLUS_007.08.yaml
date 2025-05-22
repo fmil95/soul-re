@@ -193,7 +193,7 @@ segments:
       - [0x0C0F0C, .sdata, Game/GAMELOOP]
       - [0x0C0FC0, .sdata, Game/GAMEPAD]
       - [0x0C1010, .sdata, Game/INSTANCE]
-      - [0x0C10C8, sdata, Game/LIGHT3D]
+      - [0x0C10C8, .sdata, Game/LIGHT3D]
       - [0x0C1124, sdata, Game/LOAD3D]
       - [0x0C119C, sdata, Game/PSX/MAIN]
       - [0x0C14FC, sdata, Game/MATH3D]
