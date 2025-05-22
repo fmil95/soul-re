@@ -794,10 +794,6 @@ int MON_ChooseEvadeMove(Instance *instance)
     return anim;
 }
 
-// Matches 100% on decomp.me but differs on this project
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_ChooseCombatMove);
-#else
 int MON_ChooseCombatMove(Instance *instance, int reason)
 {
     struct _MonsterVars *mv;
@@ -852,7 +848,7 @@ int MON_ChooseCombatMove(Instance *instance, int reason)
                     goto block_21;
                 }
             }
-            else if ((short)(MON_FacingOffset(instance, enemy->instance) + 0x2A9) < 0x553U)
+            else if ((unsigned short)(MON_FacingOffset(instance, enemy->instance) + 0x2A9) < 0x553U)
             {
                 temp2 = MON_ChooseLeftOrRight(instance, enemy);
                 anim = MONSTER_ANIM_JUMPLEFT;
@@ -910,7 +906,7 @@ block_21:
         }
 
         MONSENSE_AdjustRadarFromObjects(instance);
-        dir = ((MONSENSE_GetClosestFreeDirection(instance, zrot, 0x2EE) - (unsigned short)instance->rotation.z) + 0x200) & 0xFFF;
+        dir = (short)((MONSENSE_GetClosestFreeDirection(instance, zrot, 0x2EE) - (unsigned short)instance->rotation.z) + 0x200) & 0xFFF;
         anim = MONSTER_ANIM_JUMPFORWARD;
         if (dir >= 0x400)
         {
@@ -996,7 +992,6 @@ block_21:
     }
     return anim;
 }
-#endif
 
 void MON_PlayRandomIdle(Instance *instance, int mode)
 {
