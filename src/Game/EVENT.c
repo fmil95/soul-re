@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/EVENT.h"
 #include "Game/INSTANCE.h"
 #include "Game/STREAM.h"
