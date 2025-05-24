@@ -3485,7 +3485,62 @@ long EVENT_DoObjectSoundAction(SoundObject *soundObject, StackType *operand2)
     return result;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoSoundMarkerAction);
+long EVENT_DoSoundMarkerAction(SoundObject *soundObject, StackType *operand2)
+{
+    long trueValue;
+    long number;
+    long error;
+    long result;
+    SFXMkr *sfxMarker;
+
+    trueValue = 1;
+
+    result = 1;
+
+    number = -1;
+
+    sfxMarker = soundObject->data.sfxMarker;
+
+    if (soundObject->attribute != number)
+    {
+        SoundInstance *soundInstance;
+
+        soundInstance = &sfxMarker->sfxTbl[soundObject->soundNumber];
+
+        EVENT_ParseOperand2(operand2, &error, &trueValue);
+
+        switch (soundObject->attribute)
+        {
+        case 14:
+            trueValue = trueValue == 0;
+        case 13:
+            if (trueValue != 0)
+            {
+                SOUND_StartInstanceSound(soundInstance);
+            }
+            else
+            {
+                SOUND_StopInstanceSound(soundInstance);
+            }
+
+            break;
+        case 127:
+            SOUND_SetInstanceSoundVolume(soundInstance, soundObject->value, soundObject->duration);
+            break;
+        case 128:
+            SOUND_SetInstanceSoundPitch(soundInstance, soundObject->value, soundObject->duration);
+            break;
+        case 129:
+        case 130:
+        case 131:
+            break;
+        default:
+            result = 0;
+        }
+    }
+
+    return result;
+}
 
 long EVENT_GetSoundValue(SoundObject *soundObject)
 {
