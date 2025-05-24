@@ -22,6 +22,7 @@
 #include "Game/VOICEXA.h"
 #include "Game/STATE.h"
 #include "Game/MATH3D.h"
+#include "Game/PHYSOBS.h"
 
 static short EventAbortLine = 0;
 
@@ -4704,7 +4705,100 @@ long EVENT_CompareVector3d(Vector3d *vector1, Vector3d *vector2)
     return retValue;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_CompareRotationVectors);
+long EVENT_CompareRotationVectors(Rotation3d *rot1, Rotation3d *rot2, long trueValue)
+{
+    MATRIX matrix1;
+    MATRIX matrix2;
+    long result;
+    long c1;
+    long attribute;
+    SVector axis;
+    long doSoft;
+
+    result = trueValue == 0;
+
+    attribute = rot1->attribute;
+
+    doSoft = 0;
+
+    if (attribute == -1)
+    {
+        attribute = rot2->attribute;
+    }
+
+    RotMatrixZYX((SVECTOR *)rot1, &matrix1);
+    RotMatrixZYX((SVECTOR *)rot2, &matrix2);
+
+    switch (attribute)
+    {
+    case -1:
+        axis.x = 4096;
+        axis.y = 0;
+        axis.z = 0;
+
+        if (((unsigned int)PHYSOBS_CheckObjectAxisAlignment(&matrix1, &matrix2, &axis) - 3968) < 257)
+        {
+            axis.x = 0;
+            axis.y = 4096;
+            axis.z = 0;
+
+            if (((unsigned int)PHYSOBS_CheckObjectAxisAlignment(&matrix1, &matrix2, &axis) - 3968) < 257)
+            {
+                result = trueValue;
+            }
+        }
+
+        break;
+    case 96:
+        doSoft = 1;
+    case 6:
+        axis.x = 4096;
+        axis.y = 0;
+        axis.z = 0;
+        break;
+    case 97:
+        doSoft = 1;
+    case 7:
+        axis.x = 0;
+        axis.y = 4096;
+        axis.z = 0;
+        break;
+    case 98:
+        doSoft = 1;
+    case 8:
+        axis.x = 0;
+        axis.y = 0;
+        axis.z = 4096;
+        break;
+    }
+
+    if (attribute != -1)
+    {
+        c1 = PHYSOBS_CheckObjectAxisAlignment(&matrix1, &matrix2, &axis);
+
+        if (doSoft != 0)
+        {
+            if (((unsigned long)(c1 - 3968) <= 256) || ((unsigned long)(c1 + 4224) <= 256))
+            {
+                result = trueValue;
+            }
+            else
+            {
+                result = trueValue == 0;
+            }
+        }
+        else if ((unsigned long)(c1 - 3968) <= 256)
+        {
+            result = trueValue;
+        }
+        else
+        {
+            result = trueValue == 0;
+        }
+    }
+
+    return result;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_CompareListWithOperation);
 

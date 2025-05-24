@@ -50,5 +50,6 @@ void ExecuteThrow(Instance *instance);
 void ExecuteFollow(Instance *instance);
 int PHYSOB_CheckSlide(Instance *instance, int x, int y, evPhysicsSlideData **data);
 int PHYSOB_CheckDropOnSlope(Instance *instance, int x, int y, evPhysicsSlideData **data);
+int PHYSOBS_CheckObjectAxisAlignment(MATRIX *m0, MATRIX *m1, SVector *axis);
 
 #endif
