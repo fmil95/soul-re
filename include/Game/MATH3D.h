@@ -5,6 +5,8 @@
 
 #define abs_diff(a, b) (a - b < 0 ? b - a : a - b)
 
+#define POW2(x) ((x) * (x))
+
 #define COPY_VEC(TYPE, TDEST, DEST, TSRC, SRC) \
 	{                                          \
 		TYPE _x1;                              \

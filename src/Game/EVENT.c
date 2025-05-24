@@ -21,6 +21,7 @@
 #include "Game/FX.h"
 #include "Game/VOICEXA.h"
 #include "Game/STATE.h"
+#include "Game/MATH3D.h"
 
 static short EventAbortLine = 0;
 
@@ -4653,7 +4654,55 @@ void EVENT_DoStackOperationEquals(PCodeStack *stack, short *codeStream)
     EVENT_ExecuteActionCommand(&operand1, &operand2, stack, codeStream);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_CompareVector3d);
+long EVENT_CompareVector3d(Vector3d *vector1, Vector3d *vector2)
+{
+    long retValue;
+
+    retValue = 0;
+
+    if (vector1->streamUnitID == vector2->streamUnitID)
+    {
+        if ((vector1->errory != -1) && (vector1->errorz != -1))
+        {
+            if ((vector2->vx >= (vector1->vx - vector1->errorx)) && (vector2->vx <= (vector1->vx + vector1->errorx)) && (vector2->vy >= (vector1->vy - vector1->errory)) && (vector2->vy <= (vector1->vy + vector1->errory)) && (vector2->vz >= (vector1->vz - vector1->errorz)))
+            {
+                long dist;
+
+                dist = vector1->vz + vector1->errorz;
+
+                retValue = dist >= vector2->vz;
+            }
+        }
+        else if ((vector1->errory != -1) && (vector1->errory != vector1->errorz))
+        {
+            if ((POW2(vector2->vx - vector1->vx) + POW2(vector2->vy - vector1->vy)) < POW2(vector1->errorx))
+            {
+                long dist;
+
+                dist = vector2->vz - vector1->vz;
+
+                if (dist >= 0)
+                {
+                    if (dist < vector1->errory)
+                    {
+                        goto label;
+                    }
+                }
+                else if ((vector1->vz - vector2->vz) < vector1->errory)
+                {
+                    retValue = 1;
+                }
+            }
+        }
+        else if ((POW2(vector2->vx - vector1->vx) + POW2(vector2->vy - vector1->vy) + POW2(vector2->vz - vector1->vz)) < POW2(vector1->errorx))
+        {
+        label:
+            retValue = 1;
+        }
+    }
+
+    return retValue;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_CompareRotationVectors);
 
