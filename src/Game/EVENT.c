@@ -4531,7 +4531,111 @@ long EVENT_DoAreaAction(AreaObject *areaObject, StackType *operand2)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoIntroAction);
+long EVENT_DoIntroAction(IntroObject *introObject, StackType *operand2)
+{
+    long trueValue;
+    long number;
+    long error;
+    long result;
+    StreamUnit *temp; // not from decls.h
+
+    number = -1;
+
+    result = 0;
+
+    trueValue = 1;
+
+    if (introObject->attribute != number)
+    {
+        Intro *intro;
+
+        intro = introObject->intro;
+
+        number = EVENT_ParseOperand2(operand2, &error, &trueValue);
+
+        switch (introObject->attribute)
+        {
+        case 20:
+            trueValue ^= 1;
+            break;
+        case 11:
+            trueValue ^= 1;
+        case 10:
+            if (trueValue != 0)
+            {
+                intro->flags |= 0x80;
+                intro->flags &= ~0x8;
+            }
+            else
+            {
+                intro->flags &= ~0x80;
+            }
+
+            result = 1;
+            break;
+        case 138:
+            if (trueValue != 0)
+            {
+                intro->flags |= 0x400;
+            }
+            else
+            {
+                intro->flags &= ~0x400;
+            }
+
+            break;
+        case 4:
+            result = 0;
+
+            if (number == 0)
+            {
+                SAVE_SetDeadDeadBit(intro->UniqueID, 0);
+            }
+
+            break;
+        case 61:
+            break;
+        case 62:
+        {
+            int i;
+            int j;
+            int id;
+
+            id = 0;
+
+            for (i = 0; i < 16; i++)
+            {
+                temp = &StreamTracker.StreamList[i];
+
+                if (temp->used == 2)
+                {
+                    Intro *intro1;
+
+                    intro1 = temp->level->introList;
+
+                    for (j = temp->level->numIntros; j != 0; j--, intro1++)
+                    {
+                        if (intro1 == intro)
+                        {
+                            id = temp->StreamUnitID;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (INSTANCE_IntroduceInstance(intro, id) == NULL)
+            {
+                EventAbortLine = 1;
+            }
+
+            break;
+        }
+        }
+    }
+
+    return result;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoStackOperationEquals);
 
