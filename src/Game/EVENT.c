@@ -4964,7 +4964,61 @@ void EVENT_DoStackMathOperation(PCodeStack *stack, long operation)
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ParseOpcode);
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetIntroValue);
+long EVENT_GetIntroValue(IntroObject *introObject)
+{
+    long value;
+    long trueValue;
+
+    value = 0;
+
+    trueValue = 1;
+
+    switch (introObject->attribute)
+    {
+    case -1:
+        value = 1;
+        break;
+    case 20:
+    case 21:
+        value = -1;
+        break;
+    case 11:
+        trueValue ^= 1;
+    case 10:
+        value = trueValue;
+
+        if (!(introObject->intro->flags & 0x80))
+        {
+            value ^= 1;
+        }
+
+        break;
+    case 146:
+    case 166:
+        value = trueValue;
+
+        if (!(introObject->intro->flags & 0x8))
+        {
+            value ^= 1;
+        }
+
+        break;
+    case 5:
+    case 9:
+    case 12:
+    case 16:
+    case 36:
+    case 37:
+    case 43:
+    case 126:
+    case 143:
+    case 144:
+    case 160:
+        value = 0;
+    }
+
+    return value;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoSubListAction);
 
