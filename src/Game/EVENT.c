@@ -4836,7 +4836,7 @@ long EVENT_CompareListWithOperation(PCodeStack *stack, ListObject *listObject, S
 
     instance = NULL;
 
-    while ((instance = INSTANCE_FindWithName(areaID, (char *)&objectName, instance)) != 0)
+    while ((instance = INSTANCE_FindWithName(areaID, (char *)&objectName, instance)) != NULL)
     {
         operand1.id = 2;
 
