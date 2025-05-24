@@ -1947,7 +1947,278 @@ long EVENT_GetGameValue(GameObject *gameObject)
     return value;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformGameAttribute);
+long EVENT_TransformGameAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream)
+{
+    long value;
+    long retValue;
+
+    retValue = 0;
+
+    switch (item)
+    {
+    case 1:
+        EVENT_ChangeOperandToNumber(stackObject, (long)((gameTrackerX.currentTime * 30) / 1000), 0);
+
+        retValue = 1;
+        break;
+    case 61:
+        EVENT_ChangeOperandToNumber(stackObject, gameTrackerX.timeOfDay, 0);
+
+        retValue = 1;
+        break;
+    case 27:
+        value = gameTrackerX.controlCommand[0][0];
+
+        if (((value & 0x80)) && ((value & 0x10)))
+        {
+            value &= ~0x90;
+        }
+
+        EVENT_ChangeOperandToNumber(stackObject, value, 1);
+
+        retValue = 1;
+        break;
+    case 157:
+        EVENT_ChangeOperandToNumber(stackObject, HINT_GetCurrentHint(), 0);
+
+        retValue = 1;
+        break;
+    case 158:
+        EVENT_ChangeOperandToNumber(stackObject, gameTrackerX.streamFlags & 0x100000, 0);
+
+        retValue = 1;
+        break;
+    case 20:
+        value = INSTANCE_Query(gameTrackerX.playerInstance, 11) >> 1;
+
+        value &= 0x1;
+
+        if (STREAM_IsMorphInProgress() != 0)
+        {
+            value = 0;
+        }
+
+        EVENT_ChangeOperandToNumber(stackObject, value, 0);
+
+        retValue = 1;
+        break;
+    case 21:
+        value = INSTANCE_Query(gameTrackerX.playerInstance, 11) & 0x1;
+
+        if (STREAM_IsMorphInProgress() != 0)
+        {
+            value = 0;
+        }
+
+        EVENT_ChangeOperandToNumber(stackObject, value, 0);
+
+        retValue = 1;
+        break;
+    case 49:
+    {
+        EventTimer *timer;
+        short time;
+
+        timer = EVENT_GetNextTimer();
+
+        if ((timer != NULL) && (codeStream != NULL))
+        {
+            MoveCodeStreamExtra = 1;
+
+            codeStream++;
+
+            time = *codeStream++;
+
+            EventAbortLine = 1;
+
+            EventJustRecievedTimer = 1;
+
+            timer->time = time << 12;
+
+            timer->event = currentEventInstance;
+
+            timer->actionScript = currentActionScript;
+
+            timer->scriptPos = codeStream;
+
+            currentActionScript->conditionBits |= 0x1;
+
+            timer->level = CurrentPuzzleLevel;
+
+            timer->nextEventIndex = EventCurrentEventIndex;
+        }
+
+        retValue = 1;
+        break;
+    }
+    case 66:
+        stackObject->id = 25;
+
+        stackObject->data.cameraObject.camera = &theCamera;
+
+        stackObject->data.cameraObject.attribute = -1;
+
+        retValue = 1;
+        break;
+    case 145:
+        stack->topOfStack--;
+
+        EVENT_AddShortPointerToStack(stack, &gEndGameNow);
+
+        retValue = 1;
+        break;
+    case 74:
+        if (codeStream != NULL)
+        {
+            long wipeType;
+            long wipeTime;
+
+            MoveCodeStreamExtra = 2;
+
+            wipeType = *++codeStream;
+            wipeTime = *++codeStream;
+
+            gameTrackerX.maxWipeTime = (*codeStream < 0) ? -*codeStream : *codeStream;
+
+            gameTrackerX.wipeTime = wipeTime;
+            gameTrackerX.wipeType = wipeType;
+
+            if (wipeType == 11)
+            {
+                if (wipeTime < 0)
+                {
+                    gameTrackerX.streamFlags |= 0x2000000;
+                }
+                else
+                {
+                    gameTrackerX.streamFlags &= ~0x2000000;
+                }
+            }
+
+            stack->topOfStack--;
+        }
+
+        retValue = 1;
+        break;
+    case 162:
+        if (codeStream != NULL)
+        {
+            long motor0Time;
+            long motor0Speed;
+            long motor1Time;
+            long motor1Speed;
+
+            MoveCodeStreamExtra = 4;
+
+            motor0Speed = *++codeStream;
+            motor0Time = *++codeStream;
+
+            codeStream++;
+
+            do
+            {
+                motor1Time = codeStream[1];
+                motor1Speed = codeStream[0];
+            } while (0); // this loop isn't really necessary (it's garbage), however the two lines inside of it are
+
+            stack->topOfStack--;
+
+            GAMEPAD_Shock(motor0Speed, motor0Time << 12, motor1Speed, motor1Time << 12);
+        }
+
+        retValue = 1;
+        break;
+    case 82:
+        INSTANCE_Broadcast(NULL, 42, 0x4000E, 1);
+
+        stack->topOfStack--;
+
+        retValue = 1;
+        break;
+    case 81:
+        INSTANCE_Broadcast(NULL, 10, 0x4000E, 0);
+
+        stack->topOfStack--;
+
+        retValue = 1;
+        break;
+    case 90:
+        if (codeStream != NULL)
+        {
+            short rand1;
+            short rand2;
+
+            MoveCodeStreamExtra = 2;
+
+            rand1 = *++codeStream;
+            rand2 = *++codeStream;
+
+            EVENT_ChangeOperandToNumber(stackObject, (rand() % (rand2 - rand1)) + rand1, 0);
+        }
+
+        retValue = 1;
+        break;
+    case 120:
+        EVENT_ChangeOperandToNumber(stackObject, LOAD_IsXAInQueue() == 0, 0);
+
+        retValue = 1;
+        break;
+    case 134:
+    {
+        int number;
+
+        number = ((unsigned long)gameTrackerX.streamFlags >> 23) & 0x1;
+
+        EVENT_ChangeOperandToNumber(stackObject, number, 0);
+
+        retValue = 1;
+        break;
+    }
+    case 154:
+        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(gameTrackerX.playerInstance, 41), 3);
+
+        retValue = 1;
+        break;
+    case 155:
+        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(gameTrackerX.playerInstance, 42), 3);
+
+        retValue = 1;
+        break;
+    case 168:
+        stack->topOfStack--;
+
+        if (((gameTrackerX.debugFlags & 0x80000)) && (LOAD_IsXAInQueue() != 0))
+        {
+            EventAbortLine = 1;
+        }
+
+        retValue = 1;
+        break;
+    case 2:
+    case 88:
+    case 89:
+    case 108:
+    case 109:
+    case 110:
+    case 111:
+    case 118:
+    case 119:
+    case 135:
+    case 136:
+    case 137:
+    case 140:
+    case 142:
+    case 147:
+    case 150:
+    case 156:
+        stackObject->data.gameObject.attribute = item;
+
+        retValue = 1;
+        break;
+    }
+
+    return retValue;
+}
 
 long EVENT_TransformAreaAttribute(PCodeStack *stack, StackType *stackObject, long item, short *codeStream)
 {
