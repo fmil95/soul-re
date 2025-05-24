@@ -79,5 +79,11 @@ void MON_TurnOnWeaponSphere(Instance *instance, int segment);
 void MON_BurnInAir(Instance *instance, int currentState);
 int MON_TransNodeAnimation(Instance *instance);
 int MON_ReachableIntro(Instance *instance, Position *pos, Position *introPos, Rotation *introRot, int checkOrientation);
+int MON_ShouldIEvade(Instance *instance);
+int MON_ChooseEvadeMove(Instance *instance);
+int MON_ShouldIFireAtTarget(Instance *instance, MonsterIR *target);
+int MON_ShouldIAttack(Instance *instance, MonsterIR *enemy, MonsterAttackAttributes *attack);
+MonsterAttackAttributes *MON_ChooseAttack(Instance *instance, MonsterIR *enemy);
+int MON_ChooseCombatMove(Instance *instance, int reason);
 
 #endif

@@ -48,5 +48,9 @@ void SOUND_Init();
 void SOUND_UpdateSound();
 void SOUND_Free();
 int SOUND_IsInstanceSoundLoaded(unsigned char *sfxFileData, long soundNumber);
+void SOUND_StartInstanceSound(SoundInstance *soundInst);
+void SOUND_StopInstanceSound(SoundInstance *soundInst);
+void SOUND_SetInstanceSoundVolume(SoundInstance *soundInst, long volumeChangeAmt, long time);
+void SOUND_SetInstanceSoundPitch(SoundInstance *soundInst, long pitchChangeAmt, long time);
 
 #endif
