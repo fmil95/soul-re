@@ -3492,7 +3492,475 @@ long EVENT_DoAnimateAction(InstanceAnimate *instanceAnimate, StackType *operand2
     return result;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoInstanceAction);
+long EVENT_DoInstanceAction(InstanceObject *instanceObject, StackType *operand2, short *codeStream)
+{
+    long trueValue;
+    long number;
+    long error;
+    long result;
+    Instance *instance;
+
+    number = -1;
+
+    trueValue = 1;
+
+    instance = instanceObject->instance;
+
+    result = 0;
+
+    if (instanceObject->attribute != number)
+    {
+        number = EVENT_ParseOperand2(operand2, &error, &trueValue);
+
+        switch (instanceObject->attribute)
+        {
+        case 38:
+            trueValue ^= 1;
+        case 39:
+            if (trueValue != 0)
+            {
+                INSTANCE_Post(instance, 0x800021, 0);
+            }
+            else
+            {
+                INSTANCE_Post(instance, 0x800022, 0);
+            }
+
+            break;
+        case 37:
+            trueValue ^= 1;
+        case 36:
+            if (trueValue != 0)
+            {
+                if (!(INSTANCE_Query(instanceObject->instance, 5) & 0x1))
+                {
+                    INSTANCE_Post(instance, 0x800020, 0);
+                }
+            }
+            else if ((INSTANCE_Query(instanceObject->instance, 5) & 0x1))
+            {
+                INSTANCE_Post(instance, 0x800020, 0);
+            }
+
+            break;
+        case 20:
+            trueValue ^= 1;
+        case 21:
+            if (trueValue != 0)
+            {
+                INSTANCE_Post(instance, 0x10002002, 0);
+
+                result = 1;
+            }
+            else
+            {
+                INSTANCE_Post(instance, 0x10002001, 0);
+
+                result = 1;
+            }
+
+            break;
+        case 52:
+            if (trueValue != 0)
+            {
+                instance->flags |= 0x800;
+            }
+            else
+            {
+                instance->flags &= ~0x800;
+            }
+
+            result = 1;
+            break;
+        case 53:
+            if (trueValue != 0)
+            {
+                instance->flags2 |= 0x20000000;
+                instance->flags |= 0x40000;
+            }
+            else
+            {
+                instance->flags2 &= ~0x20000000;
+                instance->flags &= ~0x40000;
+            }
+
+            result = 1;
+            break;
+        case 11:
+            trueValue ^= 1;
+        case 10:
+            if (trueValue != 0)
+            {
+                instance->flags |= 0x800;
+                instance->flags2 |= 0x20000000;
+
+                instance->flags |= 0x40000;
+
+                if ((instance->object->oflags2 & 0x80000))
+                {
+                    instance->flags2 |= 0x10000000;
+                }
+            }
+            else
+            {
+                instance->flags &= ~0x800;
+                instance->flags2 &= ~0x20000000;
+
+                instance->flags &= ~0x40000;
+
+                if ((instance->object->oflags2 & 0x80000))
+                {
+                    instance->flags2 &= ~0x10000000;
+                }
+            }
+
+            if ((INSTANCE_Query(instance, 1) & 0xE))
+            {
+                INSTANCE_Post(instance, 0x40013, trueValue);
+            }
+
+            result = 1;
+            break;
+        case 32:
+            switch (number)
+            {
+            case 1:
+                INSTANCE_Post(instance, 0x40000, 0);
+                break;
+            case 2:
+                INSTANCE_Post(instance, 0x40012, 0);
+                break;
+            case 3:
+                INSTANCE_Post(instance, 0x40014, 0);
+                break;
+            case 4:
+                INSTANCE_Post(instance, 0x40005, 0xA000);
+            }
+
+            break;
+        case 54:
+        {
+            int x;
+            int y;
+
+            x = 0;
+
+            if ((unsigned long)number < 4)
+            {
+                y = 0;
+
+                switch (number)
+                {
+                case 0:
+                    y = 1;
+                    break;
+                case 1:
+                    x = 1;
+                    break;
+                case 2:
+                    x = 0;
+                    y = -1;
+                    break;
+                case 3:
+                    x = -1;
+                    break;
+                }
+
+                INSTANCE_Post(instance, 0x800000, SetObjectData(x, y, 6, NULL, 0));
+            }
+
+            break;
+        }
+        case 55:
+        {
+            Object *object;
+            int i;
+
+            object = instance->object;
+
+            if (object->numberOfEffects != 0)
+            {
+                if (number == -1)
+                {
+                    for (i = 0; i < object->numberOfEffects; i++)
+                    {
+                        FX_StartInstanceEffect(instance, &object->effectList[i], 0);
+                    }
+
+                    break;
+                }
+                else if (number < object->numberOfEffects)
+                {
+                    FX_StartInstanceEffect(instance, &object->effectList[number], 0);
+                }
+            }
+
+            break;
+        }
+        case 51:
+            if (number == -1)
+            {
+                number = 0;
+            }
+
+            INSTANCE_Post(instance, 0x1000017, number);
+            break;
+        case 64:
+            if (number != 0)
+            {
+                number = 1;
+            }
+
+            INSTANCE_Post(instance, 0x100001A, number);
+            break;
+        case 138:
+        {
+            Intro *intro;
+
+            intro = instance->intro;
+
+            if (intro != NULL)
+            {
+                if (trueValue != 0)
+                {
+                    intro->flags |= 0x400;
+                }
+                else
+                {
+                    intro->flags &= ~0x400;
+                }
+            }
+
+            break;
+        }
+        case 4:
+            if (number >= 256)
+            {
+                INSTANCE_Post(instance, 0x40017, number - 256);
+            }
+            else if ((number == 1) || (number == 2) || (number == 3) || (number == 4) || (number == 5) || (number == 6) || (number == 7))
+            {
+                ScriptKillInstance(instance, number);
+            }
+            else if (number == 0)
+            {
+                SAVE_UndestroyInstance(instance);
+            }
+
+            break;
+        case 76:
+        {
+            Vector3d *vector3d;
+
+            if ((operand2 != NULL) && (operand2->id == 9))
+            {
+                vector3d = &operand2->data.vector3d;
+
+                INSTANCE_Post(instance, 0x4000A, SetPositionData(vector3d->vx, vector3d->vy, vector3d->vz));
+
+                instance->currentStreamUnitID = vector3d->streamUnitID;
+            }
+
+            break;
+        }
+        case 77:
+            if ((operand2 != NULL) && (operand2->id == 14))
+            {
+                INSTANCE_Post(instance, 0x4000B, SetPositionData(operand2->data.rotation3d.vx, operand2->data.rotation3d.vy, operand2->data.rotation3d.vz));
+            }
+
+            break;
+        case 80:
+            if ((operand2 != NULL) && (operand2->id == 14))
+            {
+                INSTANCE_Post(instance, 0x4000D, SetPositionData(operand2->data.rotation3d.vx, operand2->data.rotation3d.vy, operand2->data.rotation3d.vz));
+            }
+
+            break;
+        case 133:
+            INSTANCE_Post(instance, 0x40021, number);
+            break;
+        case 123:
+            if ((operand2 != NULL) && (operand2->id == 9))
+            {
+                INSTANCE_Post(instance, 0x40018, SetPositionData(operand2->data.vector3d.vx, operand2->data.vector3d.vy, operand2->data.vector3d.vz));
+            }
+
+            break;
+        case 75:
+            if ((operand2 != NULL) && (operand2->id == 9))
+            {
+                INSTANCE_Post(instance, 0x40016, SetPositionData(operand2->data.vector3d.vx, operand2->data.vector3d.vy, operand2->data.vector3d.vz));
+            }
+
+            break;
+        case 114:
+            if ((operand2 != NULL) && (operand2->id == 9))
+            {
+                INSTANCE_Post(instance, 0x4000C, SetPositionData(operand2->data.vector3d.vx, operand2->data.vector3d.vy, operand2->data.vector3d.vz));
+            }
+
+            break;
+        case 79:
+            trueValue = trueValue == 0;
+        case 78:
+            if (instance == gameTrackerX.playerInstance)
+            {
+                INSTANCE_Post(instance, 0x4000E, trueValue);
+
+                if (trueValue != 0)
+                {
+                    gameTrackerX.gameFlags |= 0x90;
+                }
+                else
+                {
+                    gameTrackerX.gameFlags &= ~0x80;
+                    gameTrackerX.gameFlags &= ~0x10;
+                }
+
+                if (trueValue != 0)
+                {
+                    EventTimer *timer;
+
+                    timer = EVENT_GetNextTimer();
+
+                    if (timer != NULL)
+                    {
+                        timer->time = 4096;
+
+                        timer->event = currentEventInstance;
+
+                        timer->scriptPos = codeStream;
+
+                        timer->actionScript = currentActionScript;
+
+                        currentActionScript->conditionBits |= 0x1;
+
+                        timer->level = CurrentPuzzleLevel;
+
+                        timer->nextEventIndex = EventCurrentEventIndex;
+
+                        EventAbortLine = 1;
+
+                        EventJustRecievedTimer = 1;
+                    }
+                }
+            }
+            else
+            {
+                INSTANCE_Post(instance, 0x4000E, trueValue);
+            }
+
+            break;
+        case 141:
+            if (number >= 0)
+            {
+                INSTANCE_Broadcast(NULL, 10, 0x1000011, SetMonsterAlarmData(instance, NULL, number));
+            }
+
+            break;
+        case 83:
+            if ((operand2 != NULL) && (operand2->id == 9))
+            {
+                INSTANCE_Post(instance, 0x4000F, SetPositionData(operand2->data.vector3d.vx, operand2->data.vector3d.vy, operand2->data.vector3d.vz));
+            }
+
+            break;
+        case 84:
+            if (trueValue != 0)
+            {
+                INSTANCE_Post(instance, 0x40010, 0);
+            }
+
+            break;
+        case 85:
+            INSTANCE_Post(instance, 0x800027, trueValue);
+            break;
+        case 91:
+            if (number >= 0)
+            {
+                instance->lightGroup = number;
+            }
+
+            break;
+        case 92:
+            if (number >= 0)
+            {
+                instance->spectralLightGroup = number;
+            }
+
+            break;
+        case 95:
+            trueValue = 0;
+        case 94:
+            INSTANCE_Post(instance, 0x800029, trueValue);
+            break;
+        case 103:
+            if (trueValue != 0)
+            {
+                instance->flags &= ~0x400000;
+            }
+            else
+            {
+                instance->flags |= 0x400000;
+            }
+
+            break;
+        case 140:
+            INSTANCE_Post(instance, 0x40022, number);
+            break;
+        case 108:
+            number %= 360;
+
+            if (number < 0)
+            {
+                number += 360;
+            }
+
+            number = (number << 12) / 360;
+
+            INSTANCE_Post(instance, 0x4000005, rcos(number));
+            break;
+        case 109:
+            INSTANCE_Post(instance, 0x4000006, 0);
+            break;
+        case 111:
+            INSTANCE_Post(instance, 0x40015, 1 << number);
+            break;
+        case 110:
+            INSTANCE_Post(instance, 0x40011, 0);
+            break;
+        case 116:
+            INSTANCE_Post(instance, 0x40006, number << 12);
+            break;
+        case 124:
+            number <<= 12;
+
+            INSTANCE_Post(instance, 0x40019, number);
+        case 163:
+            INSTANCE_Post(instance, 0x1000022, number);
+            break;
+        case 164:
+            INSTANCE_Post(instance, 0x1000022, 0);
+            break;
+        case 165:
+            if (instance == gameTrackerX.playerInstance)
+            {
+                if (trueValue != 0)
+                {
+                    gameTrackerX.gameFlags |= 0x90;
+                }
+                else
+                {
+                    gameTrackerX.gameFlags &= ~0x80;
+                    gameTrackerX.gameFlags &= ~0x10;
+                }
+            }
+        }
+    }
+
+    return result;
+}
 
 long EVENT_GetTGroupValue(TGroupObject *terrainGroup)
 {
