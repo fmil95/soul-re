@@ -4498,7 +4498,38 @@ long EVENT_GetSoundValue(SoundObject *soundObject)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoAreaAction);
+long EVENT_DoAreaAction(AreaObject *areaObject, StackType *operand2)
+{
+    long trueValue;
+    long number;
+    long error;
+    StreamUnit *streamUnit;
+
+    number = -1;
+
+    trueValue = 1;
+
+    streamUnit = areaObject->streamUnit;
+
+    if (areaObject->attribute != number)
+    {
+        number = EVENT_ParseOperand2(operand2, &error, &trueValue);
+
+        if (areaObject->attribute != 112)
+        {
+            if ((areaObject->attribute == 113) && (error == 0))
+            {
+                streamUnit->level->fogNear = streamUnit->TargetFogNear = number;
+            }
+        }
+        else if (error == 0)
+        {
+            streamUnit->level->fogFar = streamUnit->TargetFogFar = number;
+        }
+    }
+
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoIntroAction);
 
