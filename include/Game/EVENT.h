@@ -79,5 +79,7 @@ long EVENT_GetScalerValueFromOperand(StackType *operand, long *error, short *fla
 SavedBasic *EVENT_CreateSaveEvent(long levelID, long eventNumber);
 long EVENT_TransformObjectOnStack(PCodeStack *stack, long item, short *codeStream);
 long EVENT_GetSplineFrameNumber(InstanceSpline *instanceSpline);
+long EVENT_TransformOperand(StackType *stackObject, PCodeStack *stack, long item, short *codeStream);
+long EVENT_CompareOperandsWithOperation(PCodeStack *stack, StackType *operand1, StackType *operand2, long operation);
 
 #endif

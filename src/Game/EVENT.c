@@ -4800,7 +4800,90 @@ long EVENT_CompareRotationVectors(Rotation3d *rot1, Rotation3d *rot2, long trueV
     return result;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_CompareListWithOperation);
+long EVENT_CompareListWithOperation(PCodeStack *stack, ListObject *listObject, StackType *operand2, long operation)
+{
+    long retValue;
+    long d;
+    StackType operand1;
+    char objectName[16];
+    char *temp;
+    Instance *instance;
+    long areaID;
+    int temp2; // not from decls.h
+
+    retValue = 0;
+
+    if (CurrentEventLine < 20)
+    {
+        eventListNumInstances[CurrentEventLine] = 0;
+    }
+
+    strcpy((char *)&objectName, listObject->eventInstance->objectName);
+
+    temp = (char *)strchr((char *)&objectName, 63);
+
+    if (temp != NULL)
+    {
+        *temp = 0;
+    }
+
+    areaID = listObject->eventInstance->unitID;
+
+    if (areaID == 63)
+    {
+        areaID = 0;
+    }
+
+    instance = NULL;
+
+    while ((instance = INSTANCE_FindWithName(areaID, (char *)&objectName, instance)) != 0)
+    {
+        operand1.id = 2;
+
+        operand1.data.listObject.eventInstance = (EventWildCardObject *)instance;
+
+        operand1.data.listObject.attribute[0] = -1;
+
+        for (d = 0; d < listObject->numberOfAttributes; d++)
+        {
+            EVENT_TransformOperand(&operand1, stack, listObject->attribute[d], NULL);
+        }
+
+        if (EVENT_CompareOperandsWithOperation(stack, &operand1, operand2, operation) != 0)
+        {
+            if (CurrentEventLine < 20)
+            {
+                temp2 = eventListNumInstances[CurrentEventLine];
+
+                if (temp2 < 10)
+                {
+                    eventListArray[CurrentEventLine][temp2] = instance;
+
+                    eventListNumInstances[CurrentEventLine] = temp2 + 1;
+                }
+            }
+
+            retValue = 1;
+        }
+        else if (operation == 11)
+        {
+            if (eventListNumInstances[CurrentEventLine] < 10)
+            {
+                eventListNumInstances[CurrentEventLine] = 0;
+            }
+
+            retValue = 0;
+            break;
+        }
+
+        if (instance == NULL)
+        {
+            break;
+        }
+    }
+
+    return retValue;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_CompareSubListWithOperation);
 
@@ -4858,7 +4941,7 @@ INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ExecuteActionCommand);
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetScalerValueFromOperand);
 
-long EVENT_TransformOperand(struct StackType *stackObject, struct _PCodeStack *stack, long item, short *codeStream)
+long EVENT_TransformOperand(StackType *stackObject, PCodeStack *stack, long item, short *codeStream)
 {
     long retValue;
 

@@ -36,5 +36,6 @@ void INSTANCE_ProcessFunctions(InstanceList *instanceList);
 void INSTANCE_CleanUpInstanceList(InstanceList *list, long reset);
 void INSTANCE_DeactivateFarInstances(GameTracker *gameTracker);
 void INSTANCE_AdditionalCollideFunctions(InstanceList *instanceList);
+Instance *INSTANCE_FindWithName(long areaID, char *instanceName, Instance *startInstance);
 
 #endif
