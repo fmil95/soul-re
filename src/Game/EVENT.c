@@ -4637,7 +4637,21 @@ long EVENT_DoIntroAction(IntroObject *introObject, StackType *operand2)
     return result;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoStackOperationEquals);
+void EVENT_DoStackOperationEquals(PCodeStack *stack, short *codeStream)
+{
+    StackType operand1;
+    StackType operand2;
+
+    stack->topOfStack--;
+
+    operand2 = stack->stack[stack->topOfStack];
+
+    stack->topOfStack--;
+
+    operand1 = stack->stack[stack->topOfStack];
+
+    EVENT_ExecuteActionCommand(&operand1, &operand2, stack, codeStream);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_CompareVector3d);
 
