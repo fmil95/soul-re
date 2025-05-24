@@ -4885,7 +4885,54 @@ long EVENT_CompareListWithOperation(PCodeStack *stack, ListObject *listObject, S
     return retValue;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_CompareSubListWithOperation);
+long EVENT_CompareSubListWithOperation(PCodeStack *stack, SubListObject *subListObject, StackType *operand2, long operation)
+{
+    long i;
+    long retValue;
+    long d;
+    StackType operand1;
+    int temp; // not from decls.h
+
+    retValue = 0;
+
+    if (CurrentEventLine < 20)
+    {
+        eventListNumInstances[CurrentEventLine] = 0;
+    }
+
+    for (i = 0; i < subListObject->numberOfInstances; i++)
+    {
+        operand1.id = 2;
+
+        operand1.data.subListObject.instanceList = (Instance **)subListObject->instanceList[i];
+
+        operand1.data.subListObject.numberOfInstances = -1;
+
+        for (d = 0; d < subListObject->numberOfAttributes; d++)
+        {
+            EVENT_TransformOperand(&operand1, stack, subListObject->attribute[d], NULL);
+        }
+
+        if (EVENT_CompareOperandsWithOperation(stack, &operand1, operand2, operation) != 0)
+        {
+            if (CurrentEventLine < 20)
+            {
+                temp = eventListNumInstances[CurrentEventLine];
+
+                if (temp < 10)
+                {
+                    eventListArray[CurrentEventLine][temp] = subListObject->instanceList[i];
+
+                    eventListNumInstances[CurrentEventLine] = temp + 1;
+                }
+            }
+
+            retValue = 1;
+        }
+    }
+
+    return retValue;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_CompareOperandsWithOperation);
 
