@@ -4936,7 +4936,31 @@ long EVENT_CompareSubListWithOperation(PCodeStack *stack, SubListObject *subList
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_CompareOperandsWithOperation);
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoStackMathOperation);
+void EVENT_DoStackMathOperation(PCodeStack *stack, long operation)
+{
+    StackType operand1;
+    StackType operand2;
+
+    stack->topOfStack--;
+
+    operand2 = stack->stack[stack->topOfStack];
+
+    stack->topOfStack--;
+
+    operand1 = stack->stack[stack->topOfStack];
+
+    if ((operand2.id == 18) || (operand2.id == 22))
+    {
+        StackType holdOperand;
+
+        holdOperand = operand1;
+
+        operand1 = operand2;
+        operand2 = holdOperand;
+    }
+
+    EVENT_AddNumberToStack(stack, EVENT_CompareOperandsWithOperation(stack, &operand1, &operand2, operation), 0);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ParseOpcode);
 
