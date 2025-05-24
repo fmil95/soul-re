@@ -1339,7 +1339,130 @@ void MON_CombatEntry(Instance *instance)
     mv->mvFlags |= 0x10000;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Combat);
+void MON_Combat(Instance *instance)
+{
+    MonsterVars *mv;
+    MonsterIR *enemy;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    enemy = mv->enemy;
+
+    if ((enemy == NULL) || ((mv->mvFlags & 0x4)))
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+
+        MON_IdleQueueHandler(instance);
+    }
+    else if (((mv->mvFlags & 0x10000000)) && ((enemy->mirFlags & 0x1000)))
+    {
+        MON_SwitchState(instance, MONSTER_STATE_EMBRACE);
+
+        MON_IdleQueueHandler(instance);
+    }
+    else if ((MON_ValidPosition(instance) == 0) && (MON_GetTime(instance) >= mv->generalTimer2))
+    {
+        MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+
+        MON_IdleQueueHandler(instance);
+    }
+    else
+    {
+        MonsterCombatAttributes *combat;
+
+        combat = mv->subAttr->combatAttributes;
+
+        mv->lookAtPos = &enemy->instance->position;
+
+        if (MON_ShouldIFlee(instance) != 0)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_FLEE);
+        }
+        else if ((enemy->distance < combat->combatRange) || (mv->behaviorState == MONSTER_STATE_GRABBED))
+        {
+            int reason;
+
+            if (((mv->mvFlags & 0x20000)) && ((instance->flags2 & 0x12)))
+            {
+                mv->mvFlags &= ~0x20000;
+                mv->mvFlags &= ~0x40000000;
+            }
+
+            if (MON_ShouldIEvade(instance) != 0)
+            {
+                int anim;
+
+                anim = MON_ChooseEvadeMove(instance);
+
+                if (anim != MONSTER_ANIM_HIT1)
+                {
+                    MON_PlayAnim(instance, anim, 1);
+
+                    mv->mvFlags |= 0x20000;
+                    mv->mvFlags |= 0x40000000;
+                }
+            }
+            else if (!(mv->mvFlags & 0x40000000))
+            {
+                if (mv->behaviorState == MONSTER_STATE_GRABBED)
+                {
+                    reason = MON_ShouldIFireAtTarget(instance, enemy);
+                }
+                else
+                {
+                    reason = MON_ShouldIAttack(instance, enemy, MON_ChooseAttack(instance, enemy));
+                }
+
+                if (reason == 1)
+                {
+                    MON_SwitchState(instance, MONSTER_STATE_ATTACK);
+                }
+                else if (reason == 2)
+                {
+                    MON_SwitchState(instance, MONSTER_STATE_PROJECTILE);
+                }
+                else if (!(mv->mvFlags & 0x20000))
+                {
+                    int anim;
+
+                    anim = MON_ChooseCombatMove(instance, reason);
+
+                    if (anim != MONSTER_ANIM_HIT1)
+                    {
+                        MON_PlayAnim(instance, anim, 1);
+
+                        mv->mvFlags |= 0x20000;
+                    }
+                    else
+                    {
+                        MON_PlayCombatIdle(instance, 2);
+                    }
+                }
+            }
+
+            MON_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn);
+        }
+        else
+        {
+            int state;
+
+            state = MONSTER_STATE_PURSUE;
+
+            if (mv->behaviorState == MONSTER_STATE_STUNNED)
+            {
+                state = MONSTER_STATE_WANDER;
+            }
+            else if (((mv->mvFlags & 0x2000000)) && (mv->ally == NULL))
+            {
+                state = MONSTER_STATE_FLEE;
+            }
+
+            MON_SwitchState(instance, state);
+        }
+
+        MON_IdleQueueHandler(instance);
+    }
+}
 
 void MON_ProjectileEntry(Instance *instance)
 {
