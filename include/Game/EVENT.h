@@ -78,5 +78,6 @@ void EVENT_ExecuteActionCommand(StackType *operand1, StackType *operand2, PCodeS
 long EVENT_GetScalerValueFromOperand(StackType *operand, long *error, short *flags);
 SavedBasic *EVENT_CreateSaveEvent(long levelID, long eventNumber);
 long EVENT_TransformObjectOnStack(PCodeStack *stack, long item, short *codeStream);
+long EVENT_GetSplineFrameNumber(InstanceSpline *instanceSpline);
 
 #endif

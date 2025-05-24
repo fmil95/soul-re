@@ -2865,7 +2865,217 @@ void EVENT_SetSplineLoop(MultiSpline *spline)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoSplineAction);
+long EVENT_DoSplineAction(InstanceSpline *instanceSpline, StackType *operand2)
+{
+    long trueValue;
+    long number;
+    long result;
+    long error;
+
+    number = -1;
+
+    result = 0;
+
+    trueValue = 1;
+
+    if (instanceSpline->attribute == number)
+    {
+        result = 1;
+    }
+    else
+    {
+        Instance *instance;
+        MultiSpline *spline;
+
+        instance = instanceSpline->instance;
+
+        spline = instanceSpline->spline;
+
+        number = EVENT_ParseOperand2(operand2, &error, &trueValue);
+
+        switch (instanceSpline->attribute)
+        {
+        case 14:
+            trueValue ^= 1;
+        case 13:
+        case 41:
+            if (trueValue != 0)
+            {
+                instance->flags |= 0x2000000;
+
+                result = 1;
+            }
+            else
+            {
+                instance->flags &= ~0x2000000;
+
+                result = 1;
+            }
+
+            break;
+        case 15:
+        case 40:
+            if (number != -1)
+            {
+                SCRIPT_InstanceSplineSet(instance, number, NULL, NULL, NULL);
+
+                instance->flags &= ~0x2000000;
+            }
+
+            break;
+        case 17:
+            if (number > 0)
+            {
+                instance->flags &= ~0x1000000;
+            }
+            else
+            {
+                instance->flags |= 0x1000000;
+            }
+
+            break;
+        case 28:
+        {
+            long curKeyFrame;
+
+            if (number < 0)
+            {
+                number = 0;
+            }
+            else
+            {
+                long maxKeyFrames;
+
+                maxKeyFrames = SCRIPTCountFramesInSpline(instance);
+
+                if (number >= maxKeyFrames)
+                {
+                    number = maxKeyFrames;
+                }
+            }
+
+            curKeyFrame = EVENT_GetSplineFrameNumber(instanceSpline);
+
+            if (curKeyFrame == number)
+            {
+                SCRIPT_InstanceSplineSet(instance, number, NULL, NULL, NULL);
+
+                instance->flags &= ~0x2000000;
+            }
+            else
+            {
+                instance->splineFlags |= 0x1;
+
+                instance->targetFrame = number;
+
+                instance->flags |= 0x2000000;
+
+                if (number < curKeyFrame)
+                {
+                    instanceSpline->splineFlags &= 0x4;
+
+                    if (instanceSpline->splineFlags != 0)
+                    {
+                        EVENT_ResetAllSplineFlags(spline);
+
+                        EVENT_SetSplineLoop(spline);
+
+                        instance->splineFlags |= 0x20;
+
+                        instance->flags &= ~0x1000000;
+                    }
+                    else
+                    {
+                        instance->flags |= 0x1000000;
+                    }
+                }
+                else
+                {
+                    instanceSpline->splineFlags &= 0x8;
+
+                    if (instanceSpline->splineFlags != 0)
+                    {
+                        EVENT_ResetAllSplineFlags(spline);
+
+                        EVENT_SetSplineLoop(spline);
+
+                        instance->splineFlags |= 0x20;
+
+                        instance->flags |= 0x1000000;
+                    }
+                    else
+                    {
+                        instance->flags &= ~0x1000000;
+                    }
+                }
+            }
+
+            break;
+        }
+        case 16:
+            EVENT_ResetAllSplineFlags(spline);
+
+            instance->splineFlags &= ~0x70;
+
+            switch (number)
+            {
+            case 1:
+                if (spline->positional != NULL)
+                {
+                    spline->positional->flags |= 0x1;
+                }
+
+                if (spline->rotational != NULL)
+                {
+                    spline->rotational->flags |= 0x1;
+                }
+
+                if (spline->scaling != NULL)
+                {
+                    spline->scaling->flags |= 0x1;
+                }
+
+                if (spline->color != NULL)
+                {
+                    spline->color->flags |= 0x1;
+                }
+
+                instance->splineFlags |= 0x10;
+                break;
+            case 2:
+                EVENT_SetSplineLoop(spline);
+
+                instance->splineFlags |= 0x20;
+                break;
+            case 3:
+            default:
+                if (spline->positional != NULL)
+                {
+                    spline->positional->flags |= 0x4;
+                }
+
+                if (spline->rotational != NULL)
+                {
+                    spline->rotational->flags |= 0x4;
+                }
+
+                if (spline->scaling != NULL)
+                {
+                    spline->scaling->flags |= 0x4;
+                }
+
+                if (spline->color != NULL)
+                {
+                    spline->color->flags |= 0x4;
+                }
+
+                instance->splineFlags |= 0x40;
+            }
+        }
+    }
+
+    return result;
+}
 
 long EVENT_DoAnimateAction(InstanceAnimate *instanceAnimate, StackType *operand2)
 {
