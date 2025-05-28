@@ -5454,7 +5454,58 @@ long EVENT_GetSplineFrameNumber(InstanceSpline *instanceSpline)
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetSplineValue);
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetAnimateTextureValue);
+long EVENT_GetAnimateTextureValue(InstanceAnimateTexture *instanceAniTexture)
+{
+    long value;
+    long trueValue;
+    Instance *instance;
+
+    trueValue = 1;
+
+    instance = instanceAniTexture->instance;
+
+    value = 0;
+
+    switch (instanceAniTexture->attribute)
+    {
+    case 13:
+    case 41:
+        trueValue = trueValue != 1;
+    case 14:
+        value = trueValue;
+
+        if (!(instance->flags & 0x80))
+        {
+            value ^= 1;
+        }
+
+        break;
+    case 15:
+    case 40:
+    {
+        AniTexInfo *ani_tex_info;
+
+        if (instanceAniTexture->aniTextures != NULL)
+        {
+            ani_tex_info = &instanceAniTexture->aniTextures->aniTexInfo;
+
+            value = (instance->currentTextureAnimFrame / ani_tex_info->speed) % ani_tex_info->numFrames;
+        }
+        else
+        {
+            value = 0;
+        }
+
+        break;
+    }
+    case -1:
+    case 17:
+        value = 1;
+        break;
+    }
+
+    return value;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetAnimateValue);
 
