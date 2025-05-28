@@ -5908,7 +5908,40 @@ void EVENT_UpdatePuzzleWithInstance(EventPointers *puzzle, Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddInstanceToInstanceList);
+void EVENT_AddInstanceToInstanceList(Instance *instance)
+{
+    int d;
+    int curTree;
+    EventPointers *puzzle;
+    Level *level;
+
+    for (d = 0; d < 16; d++)
+    {
+        if (StreamTracker.StreamList[d].used == 2)
+        {
+            level = StreamTracker.StreamList[d].level;
+
+            puzzle = level->PuzzleInstances;
+
+            if (puzzle != NULL)
+            {
+                EVENT_UpdatePuzzleWithInstance(puzzle, instance);
+            }
+
+            for (curTree = 0; curTree < level->terrain->numBSPTrees; curTree++)
+            {
+                BSPTree *bspTree;
+
+                bspTree = &level->terrain->BSPTreeArray[curTree];
+
+                if ((bspTree->ID >= 0) && (bspTree->splineID == instance->introUniqueID))
+                {
+                    bspTree->instanceSpline = instance;
+                }
+            }
+        }
+    }
+}
 
 VMObject *EVENT_FindVMObject(StreamUnit *stream, char *vmoName)
 {
