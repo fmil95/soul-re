@@ -5684,7 +5684,89 @@ void EVENT_UpdatePuzzlePointers(EventPointers *events, long offset)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_SaveEventsFromLevel);
+void EVENT_SaveEventsFromLevel(long levelID, Level *level)
+{
+    EventPointers *eventPointers;
+    Event *eventInstance;
+    long i;
+    long d;
+    long saveEvent;
+    short temp; // not from decls.h
+    unsigned short temp2; // not from decls.h
+
+    eventPointers = level->PuzzleInstances;
+
+    if (eventPointers != NULL)
+    {
+        for (i = 0; i < eventPointers->numPuzzles; i++)
+        {
+            long useBigSave;
+
+            useBigSave = 0;
+
+            saveEvent = 0;
+
+            eventInstance = eventPointers->eventInstances[i];
+
+            for (d = 0; d < 5; d++)
+            {
+                temp = eventInstance->eventVariables[d];
+
+                temp2 = temp;
+
+                if (temp != 0)
+                {
+                    saveEvent = 1;
+
+                    if (((unsigned short)(temp2 + 127)) >= 255)
+                    {
+                        useBigSave = 1;
+                    }
+                }
+            }
+
+            SAVE_DeleteSavedEvent(levelID, eventInstance->eventNumber);
+
+            if (saveEvent != 0)
+            {
+                if (useBigSave != 0)
+                {
+                    SavedEvent *savedEvent;
+
+                    savedEvent = (SavedEvent *)SAVE_GetSavedBlock(2, 0);
+
+                    savedEvent->savedID = 2;
+                    savedEvent->areaID = levelID;
+
+                    savedEvent->eventNumber = eventInstance->eventNumber;
+
+                    for (d = 0; d < 5; d++)
+                    {
+                        savedEvent->eventVariables[d] = eventInstance->eventVariables[d];
+                    }
+                }
+                else
+                {
+                    SavedEventSmallVars *savedEvent;
+
+                    savedEvent = (SavedEventSmallVars *)SAVE_GetSavedBlock(9, 0);
+
+                    savedEvent->savedID = 9;
+                    savedEvent->areaID = levelID;
+
+                    savedEvent->eventNumber = eventInstance->eventNumber;
+
+                    for (d = 0; d < 5; d++)
+                    {
+                        savedEvent->eventVariables[d] = eventInstance->eventVariables[d];
+                    }
+                }
+            }
+
+            useBigSave = 0;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_LoadEventsForLevel);
 
