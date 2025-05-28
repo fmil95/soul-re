@@ -70,6 +70,16 @@ long eventListNumInstances[20];
 
 Instance *eventListArray[20][10]; // order of indexes from decls.h has been reversed
 
+static inline int EVENT_CheckFlagSet(int Flag, int ID)
+{
+    return (Flag & ID) != 0;
+}
+
+static inline int EVENT_CheckFlagUnset(int Flag, int ID)
+{
+    return (Flag & ID) == 0;
+}
+
 void EVENT_UpdateResetSignalArrayAndWaterMovement(struct Level *oldLevel, struct Level *newLevel, long sizeOfLevel)
 {
     long offset;
@@ -5341,7 +5351,101 @@ void EVENT_DoSubListAction(SubListObject *subListObject, StackType *operand2, PC
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetInstanceValue);
+long EVENT_GetInstanceValue(InstanceObject *instanceObject)
+{
+    long value;
+    Instance *instance;
+
+    instance = instanceObject->instance;
+
+    value = 0;
+
+    switch (instanceObject->attribute)
+    {
+    case -1:
+        value = instance->introUniqueID;
+        break;
+    case 20:
+        value = INSTANCE_Query(instance, 11) >> 1;
+
+        value &= 0x1;
+
+        if (STREAM_IsMorphInProgress() != 0)
+        {
+            value = 0;
+        }
+
+        break;
+    case 21:
+        value = INSTANCE_Query(instance, 11);
+
+        value &= 0x1;
+
+        if (STREAM_IsMorphInProgress() != 0)
+        {
+            value = 0;
+        }
+
+        break;
+    case 5:
+    case 9:
+    case 12:
+    case 32:
+    case 54:
+    case 55:
+    case 94:
+    case 95:
+    case 126:
+        value = 0;
+        break;
+    case 16:
+        value = INSTANCE_Query(instance, 10);
+        break;
+    case 53:
+        value = EVENT_CheckFlagSet(instance->flags2, 0x20000000);
+        break;
+    case 10:
+    case 52:
+        value = EVENT_CheckFlagSet(instance->flags, 0x800);
+        break;
+    case 11:
+        value = EVENT_CheckFlagUnset(instance->flags, 0x800);
+        break;
+    case 36:
+        value = (INSTANCE_Query(instance, 5) & 0x5) == 1;
+        break;
+    case 37:
+        value = (INSTANCE_Query(instance, 5) & 0x9) == 0;
+        break;
+    case 143:
+        value = INSTANCE_Query(instance, 5) >> 2;
+
+        value &= 0x1;
+        break;
+    case 144:
+        value = INSTANCE_Query(instance, 5) >> 3;
+
+        value &= 0x1;
+        break;
+    case 38:
+        value = INSTANCE_Query(instance, 27);
+        break;
+    case 39:
+        value = INSTANCE_Query(instance, 26);
+        break;
+    case 91:
+        value = instance->lightGroup;
+        break;
+    case 103:
+        value = EVENT_CheckFlagUnset(instance->flags, 0x400000);
+        break;
+    case 92:
+        value = instance->spectralLightGroup;
+        break;
+    }
+
+    return value;
+}
 
 long EVENT_GetSplineFrameNumber(InstanceSpline *instanceSpline)
 {
