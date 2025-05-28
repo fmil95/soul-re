@@ -22,6 +22,7 @@
 #include "Game/STATE.h"
 #include "Game/MATH3D.h"
 #include "Game/PHYSOBS.h"
+#include "Game/PSX/SUPPORT.h"
 
 static short EventAbortLine = 0;
 
@@ -5071,7 +5072,27 @@ INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_UpdatePuzzleWithInstance);
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddInstanceToInstanceList);
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_FindVMObject);
+VMObject *EVENT_FindVMObject(StreamUnit *stream, char *vmoName)
+{
+    int i;
+    VMObject *vmObject;
+    Level *level;
+
+    level = stream->level;
+
+    vmObject = NULL;
+
+    for (i = 0; i < level->numVMObjects; i++)
+    {
+        if (strcmpi(level->vmobjectList[i].name, vmoName) == 0)
+        {
+            vmObject = &level->vmobjectList[i];
+            break;
+        }
+    }
+
+    return vmObject;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_FixPuzzlesForStream);
 
