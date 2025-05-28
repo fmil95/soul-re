@@ -4934,7 +4934,194 @@ long EVENT_CompareSubListWithOperation(PCodeStack *stack, SubListObject *subList
     return retValue;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_CompareOperandsWithOperation);
+long EVENT_CompareOperandsWithOperation(PCodeStack *stack, StackType *operand1, StackType *operand2, long operation)
+{
+    long number;
+    long number1;
+    long number2;
+    long error;
+    long trueValue;
+    short flags1;
+    short flags2;
+    int temp; // not from decls.h
+
+    number = 0;
+
+    trueValue = 1;
+
+    switch (operand1->id)
+    {
+    case 8:
+        break;
+    case 9:
+        if (operand2->id != 9)
+        {
+            break;
+        }
+
+        switch (operation)
+        {
+        case 1:
+            EVENT_Addvector3dToStack(stack, operand1->data.vector3d.vx + operand2->data.vector3d.vx, operand1->data.vector3d.vy + operand2->data.vector3d.vy, operand1->data.vector3d.vz + operand2->data.vector3d.vz, 0);
+
+            number = -1;
+            break;
+        case 2:
+            EVENT_Addvector3dToStack(stack, operand1->data.vector3d.vx - operand2->data.vector3d.vx, operand1->data.vector3d.vy - operand2->data.vector3d.vy, operand1->data.vector3d.vz - operand2->data.vector3d.vz, 0);
+
+            number = -1;
+            break;
+        case 11:
+            trueValue = 0;
+        case 10:
+            temp = EVENT_CompareVector3d(&operand1->data.vector3d, &operand2->data.vector3d);
+
+            number = trueValue;
+
+            if (temp == 0)
+            {
+                number ^= 1;
+            }
+
+            break;
+        }
+
+        break;
+    case 14:
+        if (operand2->id != 14)
+        {
+            break;
+        }
+
+        switch (operation)
+        {
+        case 11:
+            trueValue = 0;
+        case 10:
+            number = EVENT_CompareRotationVectors(&operand1->data.rotation3d, &operand2->data.rotation3d, trueValue);
+            break;
+        }
+
+        break;
+    case 22:
+        temp = EVENT_CompareSubListWithOperation(stack, &operand1->data.subListObject, operand2, operation);
+
+        number = trueValue;
+
+        if (temp == 0)
+        {
+            number ^= 1;
+        }
+
+        break;
+    case 18:
+        temp = EVENT_CompareListWithOperation(stack, &operand1->data.listObject, operand2, operation);
+
+        number = trueValue;
+
+        if (temp == 0)
+        {
+            number ^= 1;
+        }
+
+        break;
+    default:
+        number1 = EVENT_GetScalerValueFromOperand(operand1, &error, &flags1);
+        number2 = EVENT_GetScalerValueFromOperand(operand2, &error, &flags2);
+
+        switch (operation)
+        {
+        case 1:
+            number = number1 + number2;
+            break;
+        case 2:
+            number = number1 - number2;
+            break;
+        case 3:
+            number = number1 * number2;
+            break;
+        case 4:
+            number = 0;
+
+            if (number2 != 0)
+            {
+                number = number1 / number2;
+            }
+
+            break;
+        case 5:
+            number = number1 % number2;
+
+            if (number < 0)
+            {
+                number += number2;
+            }
+
+            break;
+        case 9:
+            trueValue = 0;
+        case 6:
+            number = trueValue;
+
+            temp = number1 > number2;
+
+            if (temp == 0)
+            {
+                number ^= 1;
+            }
+
+            break;
+        case 8:
+            trueValue = 0;
+        case 7:
+            number = trueValue;
+
+            temp = number1 < number2;
+
+            if (temp == 0)
+            {
+                number ^= 1;
+            }
+
+            break;
+        case 11:
+            trueValue = 0;
+        case 10:
+            if ((!(flags1 & 0x1)) && (!(flags2 & 0x1)))
+            {
+                number = trueValue;
+
+                if (number1 != number2)
+                {
+                    number ^= 1;
+                }
+            }
+            else
+            {
+                if ((flags1 & 0x2))
+                {
+                    number2 = 1 << number2;
+                }
+
+                number = trueValue;
+
+                if ((number1 & number2) != number2)
+                {
+                    number ^= 1;
+                }
+            }
+
+            break;
+        case 12:
+            number = (number1 & number2) != 0;
+            break;
+        }
+
+        break;
+    }
+
+    return number;
+}
 
 void EVENT_DoStackMathOperation(PCodeStack *stack, long operation)
 {
