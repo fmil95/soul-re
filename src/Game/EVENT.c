@@ -5507,7 +5507,36 @@ long EVENT_GetAnimateTextureValue(InstanceAnimateTexture *instanceAniTexture)
     return value;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetAnimateValue);
+long EVENT_GetAnimateValue(InstanceAnimate *instanceAnimate)
+{
+    long value;
+    Instance *instance;
+
+    value = 0;
+
+    instance = instanceAnimate->instance;
+
+    switch (instanceAnimate->attribute)
+    {
+    case -1:
+    case 14:
+        value = 1;
+        break;
+    case 13:
+    case 41:
+        value = 0;
+        break;
+    case 15:
+    case 40:
+        value = INSTANCE_Query(instance, 18);
+        break;
+    case 30:
+        value = INSTANCE_Query(instance, 17);
+        break;
+    }
+
+    return value;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformObjectOnStack);
 
