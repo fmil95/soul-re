@@ -1890,7 +1890,32 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DoInstanceOneSegmentGlowWithTime);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StopAllGlowEffects);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StopGlowEffect);
+void FX_StopGlowEffect(FXGlowEffect *glowEffect, int fadeout_time)
+{
+    FXGeneralEffect *currentEffect;
+    FXGeneralEffect *previousEffect;
+
+    if (glowEffect != NULL)
+    {
+        if (fadeout_time != 0)
+        {
+            glowEffect->fadeout_time = fadeout_time * 33;
+            glowEffect->lifeTime = fadeout_time * 33;
+        }
+        else
+        {
+            for (currentEffect = FX_GeneralEffectTracker; currentEffect != NULL; currentEffect = previousEffect)
+            {
+                previousEffect = currentEffect->next;
+
+                if ((currentEffect->effectType == 131) && ((FXGlowEffect *)currentEffect == glowEffect))
+                {
+                    FX_DeleteGeneralEffect(currentEffect);
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawLightning);
 
