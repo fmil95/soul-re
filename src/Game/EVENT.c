@@ -5969,7 +5969,94 @@ INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_FixPuzzlesForStream);
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddStreamToInstanceList);
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_RemoveStreamToInstanceList);
+void EVENT_RemoveStreamToInstanceList(StreamUnit *stream)
+{
+    int d;
+    int i;
+    int i2;
+    EventPointers *puzzle;
+    EventBasicObject **basicEventObject;
+    EventAreaObject *temp; // not from decls.h
+    EventEventObject *temp2; // not from decls.h
+    EventTGroupObject *temp3; // not from decls.h
+    EventSignalObject *temp4; // not from decls.h
+    EventInstanceObject *temp5; // not from decls.h
+
+    for (d = 0; d < 16; d++)
+    {
+        if ((StreamTracker.StreamList[d].used == 2) && (&StreamTracker.StreamList[d] != stream))
+        {
+            puzzle = StreamTracker.StreamList[d].level->PuzzleInstances;
+
+            if (puzzle != NULL)
+            {
+                for (i = 0; i < puzzle->numPuzzles; i++)
+                {
+                    basicEventObject = puzzle->eventInstances[i]->instanceList;
+
+                    for (i2 = 0; i2 < puzzle->eventInstances[i]->numInstances; i2++)
+                    {
+                        if (basicEventObject[i2]->id == 5)
+                        {
+                            temp = (EventAreaObject *)basicEventObject[i2];
+
+                            if (temp->unitID == stream->StreamUnitID)
+                            {
+                                temp->stream = NULL;
+                            }
+                        }
+                        else if (basicEventObject[i2]->id == 3)
+                        {
+                            temp2 = (EventEventObject *)basicEventObject[i2];
+
+                            if (temp2->unitID == stream->StreamUnitID)
+                            {
+                                temp2->event = NULL;
+                            }
+                        }
+                        else if (basicEventObject[i2]->id == 4)
+                        {
+                            temp3 = (EventTGroupObject *)basicEventObject[i2];
+
+                            if (temp3->unitID == stream->StreamUnitID)
+                            {
+                                temp3->bspTree = NULL;
+
+                                temp3->stream = NULL;
+                            }
+                        }
+                        else if (basicEventObject[i2]->id == 6)
+                        {
+                            temp4 = (EventSignalObject *)basicEventObject[i2];
+
+                            if (temp4->unitID == stream->StreamUnitID)
+                            {
+                                temp4->signal = NULL;
+                            }
+                        }
+                        else if (basicEventObject[i2]->id == 1)
+                        {
+                            temp5 = (EventInstanceObject *)basicEventObject[i2];
+
+                            if (temp5->unitID == stream->StreamUnitID)
+                            {
+                                temp5->data.sfxMarker = NULL;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for (i = 0; i < 24; i++)
+    {
+        if (((eventTimerArray[i].flags & 0x1)) && (eventTimerArray[i].level == stream->level))
+        {
+            EVENT_RemoveTimer(&eventTimerArray[i]);
+        }
+    }
+}
 
 void EVENT_RelocateInstanceList(Level *oldLevel, Level *newLevel, long sizeOfLevel)
 {
@@ -5981,8 +6068,8 @@ void EVENT_RelocateInstanceList(Level *oldLevel, Level *newLevel, long sizeOfLev
     long offset;
     EventEventObject *temp; // not from decls.h
     EventTGroupObject *temp2; // not from decls.h
-    EventInstanceObject *temp4; // not from decls.h
     EventSignalObject *temp3; // not from decls.h
+    EventInstanceObject *temp4; // not from decls.h
     EventVMO *temp5; // not from decls.h
 
     offset = (intptr_t)newLevel - (intptr_t)oldLevel;
@@ -6054,7 +6141,7 @@ void EVENT_RelocateInstanceList(Level *oldLevel, Level *newLevel, long sizeOfLev
 
     for (i = 0; i < 24; i++)
     {
-        if ((eventTimerArray[i].flags & 0x1) && (eventTimerArray[i].level == oldLevel))
+        if (((eventTimerArray[i].flags & 0x1)) && (eventTimerArray[i].level == oldLevel))
         {
             eventTimerArray[i].event = (Event *)OFFSET_DATA(eventTimerArray[i].event, offset);
 
