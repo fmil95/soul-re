@@ -5967,7 +5967,139 @@ VMObject *EVENT_FindVMObject(StreamUnit *stream, char *vmoName)
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_FixPuzzlesForStream);
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddStreamToInstanceList);
+void EVENT_AddStreamToInstanceList(StreamUnit *stream)
+{
+    int d;
+    int i;
+    int i2;
+    int p;
+    EventPointers *puzzle;
+    EventBasicObject **basicEventObject;
+    EventEventObject *eventEventObject;
+    EventTGroupObject *tgroupEventObject;
+    EventAreaObject *temp; // not from decls.h
+    EventSignalObject *temp2; // not from decls.h
+    EventInstanceObject *temp3; // not from decls.h
+    EventVMO *temp4; // not from decls.h
+
+    for (d = 0; d < 16; d++)
+    {
+        if (StreamTracker.StreamList[d].used == 2)
+        {
+            puzzle = StreamTracker.StreamList[d].level->PuzzleInstances;
+
+            if (puzzle != NULL)
+            {
+                for (i = 0; i < puzzle->numPuzzles; i++)
+                {
+                    basicEventObject = puzzle->eventInstances[i]->instanceList;
+
+                    for (i2 = 0; i2 < puzzle->eventInstances[i]->numInstances; i2++)
+                    {
+                        if (basicEventObject[i2]->id == 5)
+                        {
+                            temp = (EventAreaObject *)basicEventObject[i2];
+
+                            if (temp->unitID == stream->StreamUnitID)
+                            {
+                                temp->stream = stream;
+                            }
+                        }
+                        else if (basicEventObject[i2]->id == 3)
+                        {
+                            eventEventObject = (EventEventObject *)basicEventObject[i2];
+
+                            if (eventEventObject->unitID == stream->StreamUnitID)
+                            {
+                                EventPointers *puzzleInstances;
+
+                                puzzleInstances = stream->level->PuzzleInstances;
+
+                                if (puzzleInstances != NULL)
+                                {
+                                    for (p = 0; p < puzzleInstances->numPuzzles; p++)
+                                    {
+                                        if (puzzleInstances->eventInstances[p]->eventNumber == eventEventObject->eventNumber)
+                                        {
+                                            eventEventObject->event = puzzleInstances->eventInstances[p];
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else if (basicEventObject[i2]->id == 4)
+                        {
+                            tgroupEventObject = (EventTGroupObject *)basicEventObject[i2];
+
+                            if (tgroupEventObject->unitID == stream->StreamUnitID)
+                            {
+                                Terrain *terrain;
+
+                                terrain = stream->level->terrain;
+
+                                for (p = 0; p < terrain->numBSPTrees; p++)
+                                {
+                                    if (terrain->BSPTreeArray[p].ID == tgroupEventObject->tgroupNumber)
+                                    {
+                                        tgroupEventObject->bspTree = &terrain->BSPTreeArray[p];
+
+                                        tgroupEventObject->stream = stream;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        else if (basicEventObject[i2]->id == 6)
+                        {
+                            temp2 = (EventSignalObject *)basicEventObject[i2];
+
+                            if (temp2->unitID == stream->StreamUnitID)
+                            {
+                                temp2->signal = EVENT_ResolveObjectSignal(stream, temp2->signalNumber);
+                            }
+                        }
+                        else if (basicEventObject[i2]->id == 1)
+                        {
+                            void *pointer;
+
+                            temp3 = (EventInstanceObject *)basicEventObject[i2];
+
+                            pointer = EVENT_ResolveObjectIntro(temp3);
+
+                            if (pointer != NULL)
+                            {
+                                temp3->data.intro = (Intro *)pointer;
+                            }
+                            else
+                            {
+                                pointer = EVENT_ResolveSFXMarker(stream, temp3);
+
+                                if (pointer != NULL)
+                                {
+                                    temp3->data.sfxMarker = (SFXMkr *)pointer;
+
+                                    temp3->flags |= 0x1;
+                                }
+                            }
+                        }
+                        else if (basicEventObject[i2]->id == 7)
+                        {
+                            temp4 = (EventVMO *)basicEventObject[i2];
+
+                            if (stream->StreamUnitID == temp4->unitID)
+                            {
+                                temp4->vmObjectPtr = (VMObject *)EVENT_FindVMObject(stream, temp4->vmObjectName);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    EVENT_FixPuzzlesForStream(stream);
+}
 
 void EVENT_RemoveStreamToInstanceList(StreamUnit *stream)
 {

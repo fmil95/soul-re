@@ -85,5 +85,6 @@ long EVENT_GetInstanceValue(InstanceObject *instanceObject);
 long EVENT_GetSplineValue(InstanceSpline *instanceSpline);
 long EVENT_GetAnimateValue(InstanceAnimate *instanceAnimate);
 long EVENT_GetAnimateTextureValue(InstanceAnimateTexture *instanceAniTexture);
+void EVENT_FixPuzzlesForStream(StreamUnit *stream);
 
 #endif
