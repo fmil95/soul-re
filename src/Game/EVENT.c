@@ -5193,7 +5193,94 @@ void EVENT_ExecuteActionCommand(StackType *operand1, StackType *operand2, PCodeS
     }
 }*/
 
+// Matches 100% on decomp.me but differs on this project
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetScalerValueFromOperand);
+#else
+long EVENT_GetScalerValueFromOperand(StackType *operand, long *error, short *flags)
+{
+    long value;
+
+    *error = 0;
+    *flags = 0;
+
+    value = 32767;
+
+    switch (operand->id)
+    {
+    case 2:
+        value = EVENT_GetInstanceValue(&operand->data.instanceObject);
+        break;
+    case 21:
+        value = 0;
+        break;
+    case 27:
+        if (operand->data.soundObject.flags == 1)
+        {
+            value = 0;
+        }
+        else
+        {
+            value = EVENT_GetSoundValue(&operand->data.soundObject);
+        }
+
+        break;
+    case 10:
+        value = *operand->data.ShortPointer.pointer;
+        break;
+    case 28:
+        value = *operand->data.CharPointer.pointer;
+        break;
+    case 11:
+        value = *operand->data.LongPointer.pointer;
+        break;
+    case 15:
+        value = EVENT_GetSplineValue(&operand->data.instanceSpline);
+        break;
+    case 7:
+        value = operand->data.Number.currentNumber;
+
+        *flags = operand->data.Number.flags;
+        break;
+    case 4:
+        value = EVENT_GetIntroValue(&operand->data.introObject);
+        break;
+    case 19:
+        value = EVENT_GetAnimateValue(&operand->data.instanceAnimate);
+        break;
+    case 20:
+        value = EVENT_GetAnimateTextureValue(&operand->data.instanceAniTexture);
+        break;
+    case 23:
+        value = EVENT_GetTGroupValue(&operand->data.terrainGroup);
+        break;
+    case 24:
+        value = operand->data.constrictInfo.instance->constrictAngle;
+
+        if ((value < -1) || (value > 1))
+        {
+            value = 1;
+        }
+        else
+        {
+            value = 0;
+        }
+
+        break;
+    case 26:
+        value = EVENT_GetVMObjectValue(&operand->data.vmObject);
+        break;
+    case 3:
+        value = EVENT_GetGameValue(&operand->data.gameObject);
+        break;
+    case 1:
+        value = operand->data.areaObject.unitID;
+        break;
+    }
+
+    return value;
+}
+#endif
 
 long EVENT_TransformOperand(StackType *stackObject, PCodeStack *stack, long item, short *codeStream)
 {
