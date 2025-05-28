@@ -5149,7 +5149,118 @@ void EVENT_DoStackMathOperation(PCodeStack *stack, long operation)
     EVENT_AddNumberToStack(stack, EVENT_CompareOperandsWithOperation(stack, &operand1, &operand2, operation), 0);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ParseOpcode);
+short *EVENT_ParseOpcode(PCodeStack *stack, short *codeStream, long *operateOnStack)
+{
+    short pcode;
+
+    pcode = *codeStream++ - 1;
+
+    MoveCodeStreamExtra = 0;
+
+    *operateOnStack = 0;
+
+    switch (pcode)
+    {
+    case 0:
+        EVENT_AddObjectToStack(stack, *codeStream);
+
+        codeStream++;
+        break;
+    case 11:
+        EVENT_AddNumberToStack(stack, *codeStream, 0);
+
+        codeStream++;
+        break;
+    case 1:
+        EVENT_ModifyObjectToStackWithAttribute(stack, *codeStream, codeStream);
+
+        codeStream++;
+        break;
+    case 3:
+        EVENT_DoStackMathOperation(stack, 10);
+        break;
+    case 22:
+        EVENT_DoStackMathOperation(stack, 11);
+        break;
+    case 4:
+        EventAbortedPosition = codeStream;
+
+        *operateOnStack = 1;
+        break;
+    case 31:
+        EVENT_DoStackMathOperation(stack, 12);
+        break;
+    case 12:
+        EVENT_DoStackMathOperation(stack, 1);
+        break;
+    case 13:
+        EVENT_DoStackMathOperation(stack, 2);
+        break;
+    case 14:
+        EVENT_DoStackMathOperation(stack, 3);
+        break;
+    case 15:
+        EVENT_DoStackMathOperation(stack, 4);
+        break;
+    case 23:
+        EVENT_DoStackMathOperation(stack, 5);
+        break;
+    case 16:
+        EVENT_StackDuplicate(stack);
+
+        EVENT_AddNumberToStack(stack, 1, 0);
+
+        EVENT_DoStackMathOperation(stack, 1);
+        EVENT_DoStackOperationEquals(stack, codeStream);
+        break;
+    case 17:
+        EVENT_StackDuplicate(stack);
+
+        EVENT_AddNumberToStack(stack, 1, 0);
+
+        EVENT_DoStackMathOperation(stack, 2);
+        EVENT_DoStackOperationEquals(stack, codeStream);
+        break;
+    case 2:
+        EVENT_DoStackOperationEquals(stack, codeStream);
+        break;
+    case 18:
+        EVENT_DoStackMathOperation(stack, 6);
+        break;
+    case 19:
+        EVENT_DoStackMathOperation(stack, 8);
+        break;
+    case 20:
+        EVENT_DoStackMathOperation(stack, 7);
+        break;
+    case 21:
+        EVENT_DoStackMathOperation(stack, 9);
+        break;
+    case 6:
+    case 8:
+    case 9:
+        codeStream = NULL;
+        break;
+    case 27:
+        EVENT_AddGameObjectToStack(stack);
+        break;
+    case 28:
+        EVENT_AddPlayerObjectToStack(stack);
+        break;
+    case 29:
+        EVENT_AddSubListObjectToStack(stack, *codeStream);
+
+        codeStream++;
+        break;
+    case 30:
+        if (currentActionScript != NULL)
+        {
+            currentActionScript->conditionBits |= 0x2;
+        }
+    }
+
+    return &codeStream[MoveCodeStreamExtra];
+}
 
 long EVENT_GetIntroValue(IntroObject *introObject)
 {
