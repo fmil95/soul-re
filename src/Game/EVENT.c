@@ -5107,6 +5107,91 @@ void EVENT_PrintVars()
 }
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ExecuteActionCommand);
+/* TODO: Gives "small-data section too large" issue when compiling
+void EVENT_ExecuteActionCommand(StackType *operand1, StackType *operand2, PCodeStack *stack, short *codeStream)
+{
+    long error;
+    long value;
+    short flags;
+
+    switch (operand1->id)
+    {
+    case 27:
+        if (operand1->data.soundObject.flags == 1)
+        {
+            EVENT_DoSoundMarkerAction(&operand1->data.soundObject, operand2);
+        }
+        else
+        {
+            EVENT_DoObjectSoundAction(&operand1->data.soundObject, operand2);
+        }
+
+        break;
+    case 1:
+        EVENT_DoAreaAction(&operand1->data.areaObject, operand2);
+        break;
+    case 4:
+        EVENT_DoIntroAction(&operand1->data.introObject, operand2);
+        break;
+    case 10:
+        value = EVENT_GetScalerValueFromOperand(operand2, &error, &flags);
+
+        if (error == 0)
+        {
+            *operand1->data.ShortPointer.pointer = value;
+        }
+
+        break;
+    case 28:
+        value = EVENT_GetScalerValueFromOperand(operand2, &error, &flags);
+
+        if (error == 0)
+        {
+            *operand1->data.CharPointer.pointer = value;
+        }
+
+        break;
+    case 11:
+        value = EVENT_GetScalerValueFromOperand(operand2, &error, &flags);
+
+        if (error == 0)
+        {
+            *operand1->data.LongPointer.pointer = value;
+        }
+
+        break;
+    case 15:
+        EVENT_DoSplineAction(&operand1->data.instanceSpline, operand2);
+        break;
+    case 2:
+        EVENT_DoInstanceAction(&operand1->data.instanceObject, operand2, codeStream);
+        break;
+    case 17:
+        EVENT_DoSignalAction(&operand1->data.signalObject, operand2);
+        break;
+    case 19:
+        EVENT_DoAnimateAction(&operand1->data.instanceAnimate, operand2);
+        break;
+    case 20:
+        EVENT_DoInstanceAnimateTextureAction(&operand1->data.instanceAniTexture, operand2);
+        break;
+    case 23:
+        EVENT_DoTGroupAction(&operand1->data.terrainGroup, operand2);
+        break;
+    case 25:
+        EVENT_DoCameraAction(&operand1->data.cameraObject, operand2, codeStream);
+        break;
+    case 26:
+        EVENT_DoVMObjectAction(&operand1->data.vmObject, operand2);
+        break;
+    case 3:
+        EVENT_DoGameAction(&operand1->data.gameObject, operand2);
+        break;
+    case 22:
+        EVENT_DoSubListAction(&operand1->data.subListObject, operand2, stack, codeStream);
+        break;
+    }
+}*/
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetScalerValueFromOperand);
 
