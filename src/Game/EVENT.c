@@ -5452,7 +5452,91 @@ long EVENT_GetSplineFrameNumber(InstanceSpline *instanceSpline)
     return SCRIPT_GetSplineFrameNumber(instanceSpline->instance, SCRIPT_GetPosSplineDef(instanceSpline->instance, instanceSpline->spline, instanceSpline->isParent, instanceSpline->isClass));
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetSplineValue);
+long EVENT_GetSplineValue(InstanceSpline *instanceSpline)
+{
+    long value;
+    Instance *instance;
+
+    instance = instanceSpline->instance;
+
+    value = 0;
+
+    switch (instanceSpline->attribute)
+    {
+    case 14:
+        if ((instance->flags & 0x2000000))
+        {
+            value = 0;
+        }
+        else
+        {
+            value = 1;
+        }
+
+        break;
+    case 13:
+    case 41:
+        if ((instance->flags & 0x2000000))
+        {
+            value = 1;
+        }
+        else
+        {
+            value = 0;
+        }
+
+        break;
+    case 15:
+    case 40:
+        value = EVENT_GetSplineFrameNumber(instanceSpline);
+        break;
+    case 22:
+        value = SCRIPTCountFramesInSpline(instance);
+        break;
+    case 17:
+        if ((instance->flags & 0x1000000))
+        {
+            value = -1;
+        }
+        else
+        {
+            value = 1;
+        }
+
+        break;
+    case 16:
+        value = 0;
+
+        if (instanceSpline->spline->positional != NULL)
+        {
+            MultiSpline *spline;
+
+            spline = instanceSpline->spline;
+
+            if ((spline->positional->flags & 0x1))
+            {
+                value = 1;
+            }
+
+            if ((spline->positional->flags & 0x2))
+            {
+                value = 2;
+            }
+
+            if ((spline->positional->flags & 0x4))
+            {
+                value = 1;
+            }
+        }
+
+        break;
+    case -1:
+        value = 1;
+        break;
+    }
+
+    return value;
+}
 
 long EVENT_GetAnimateTextureValue(InstanceAnimateTexture *instanceAniTexture)
 {
