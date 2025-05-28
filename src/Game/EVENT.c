@@ -5853,7 +5853,39 @@ SavedBasic *EVENT_CreateSaveEvent(long levelID, long eventNumber)
     return (SavedBasic *)savedEvent;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_RemoveInstanceFromInstanceList);
+void EVENT_RemoveInstanceFromInstanceList(Instance *instance)
+{
+    int d;
+    int i;
+    int i2;
+    EventPointers *puzzle;
+    EventBasicObject **basicEventObject;
+
+    for (d = 0; d < 16; d++)
+    {
+        if (StreamTracker.StreamList[d].used == 2)
+        {
+            puzzle = StreamTracker.StreamList[d].level->PuzzleInstances;
+
+            if (puzzle != NULL)
+            {
+                for (i = 0; i < puzzle->numPuzzles; i++)
+                {
+                    basicEventObject = puzzle->eventInstances[i]->instanceList;
+
+                    for (i2 = 0; i2 < puzzle->eventInstances[i]->numInstances; i2++)
+                    {
+                        if ((basicEventObject[i2]->id == 1) && (((EventInstanceObject *)basicEventObject[i2])->instance == instance))
+                        {
+                            ((EventInstanceObject *)basicEventObject[i2])->instance = NULL;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_UpdatePuzzleWithInstance);
 
