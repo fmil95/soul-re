@@ -5887,7 +5887,26 @@ void EVENT_RemoveInstanceFromInstanceList(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_UpdatePuzzleWithInstance);
+void EVENT_UpdatePuzzleWithInstance(EventPointers *puzzle, Instance *instance)
+{
+    int i;
+    int i2;
+    EventBasicObject **basicEventObject;
+
+    for (i = 0; i < puzzle->numPuzzles; i++)
+    {
+        basicEventObject = puzzle->eventInstances[i]->instanceList;
+
+        for (i2 = 0; i2 < puzzle->eventInstances[i]->numInstances; i2++)
+        {
+            if ((basicEventObject[i2]->id == 1) && (instance->introUniqueID == ((EventInstanceObject *)basicEventObject[i2])->introUniqueID))
+            {
+                ((EventInstanceObject *)basicEventObject[i2])->instance = instance;
+                break;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddInstanceToInstanceList);
 
