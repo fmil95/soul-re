@@ -5827,7 +5827,31 @@ void EVENT_LoadEventsForLevel(long levelID, Level *level)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_CreateSaveEvent);
+SavedBasic *EVENT_CreateSaveEvent(long levelID, long eventNumber)
+{
+    SavedEventSmallVars *savedEvent;
+    long d;
+    char *temp; // not from decls.h
+
+    savedEvent = (SavedEventSmallVars *)SAVE_GetSavedBlock(9, 0);
+
+    if (savedEvent != NULL)
+    {
+        savedEvent->savedID = 9;
+        savedEvent->areaID = levelID;
+
+        savedEvent->eventNumber = eventNumber;
+
+        d = 4;
+
+        for (temp = &savedEvent->eventNumber; d >= 0; d--, temp--)
+        {
+            temp[5] = 0;
+        }
+    }
+
+    return (SavedBasic *)savedEvent;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_RemoveInstanceFromInstanceList);
 
