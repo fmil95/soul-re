@@ -1731,7 +1731,48 @@ FXParticle *FX_BloodCone(Instance *instance, short startSegment, long time)
     return currentParticle;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_GetTorchParticle);
+FXParticle *FX_GetTorchParticle(Instance *instance, short startSegment, int tex, int birthRadius, int num)
+{
+    FXParticle *currentParticle;
+
+    currentParticle = FX_GetParticle(instance, startSegment);
+
+    if (currentParticle != NULL)
+    {
+        currentParticle->type = 1;
+
+        currentParticle->fxprim_process = FX_FlamePrimProcess;
+
+        currentParticle->texture = FX_GetTextureObject(instance->object, 1, tex);
+
+        currentParticle->startColor = 0x20040F0;
+
+        currentParticle->primLifeTime = 16;
+
+        currentParticle->acceleration.z = 1;
+
+        currentParticle->lifeTime = -1;
+
+        currentParticle->startFadeValue = 5;
+
+        currentParticle->fadeStep = 5;
+
+        currentParticle->size = 48;
+
+        currentParticle->endColor = 0;
+
+        currentParticle->scaleSpeed = 100;
+
+        currentParticle->birthRadius = birthRadius;
+        currentParticle->numberBirthParticles = num;
+
+        currentParticle->flag_bits |= 0x1;
+
+        FX_InsertGeneralEffect(currentParticle);
+    }
+
+    return currentParticle;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_TorchFlame);
 

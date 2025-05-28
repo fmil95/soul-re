@@ -66,5 +66,6 @@ void FX_DrawModel(Object *object, int model_num, SVector *rotation, SVector *pos
 FX_PRIM *FX_Dot(SVector *location, SVector *vel, SVector *accel, int scale_speed, long color, long size, int lifetime, int texture_num);
 void FX_Start_Snow(int percent);
 void FX_Start_Rain(int percent);
+void FX_FlamePrimProcess(FX_PRIM *fxPrim, FXTracker *fxTracker);
 
 #endif
