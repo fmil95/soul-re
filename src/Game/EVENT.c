@@ -5768,7 +5768,64 @@ void EVENT_SaveEventsFromLevel(long levelID, Level *level)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_LoadEventsForLevel);
+void EVENT_LoadEventsForLevel(long levelID, Level *level)
+{
+    long d;
+    EventPointers *eventPointers;
+    Event *eventInstance;
+    SavedBasic *savedEvent;
+
+    eventPointers = level->PuzzleInstances;
+
+    if (eventPointers != NULL)
+    {
+        for (savedEvent = SAVE_GetSavedNextEvent(levelID, NULL); savedEvent != NULL; savedEvent = SAVE_GetSavedNextEvent(levelID, savedEvent))
+        {
+            if (eventPointers->numPuzzles != 0)
+            {
+                long eventNumber;
+
+                eventInstance = NULL;
+
+                if (savedEvent->savedID == 2)
+                {
+                    eventNumber = ((SavedEvent *)savedEvent)->eventNumber;
+                }
+                else
+                {
+                    eventNumber = ((SavedEventSmallVars *)savedEvent)->eventNumber;
+                }
+
+                for (d = 0; d < eventPointers->numPuzzles; d++)
+                {
+                    if (eventPointers->eventInstances[d]->eventNumber == eventNumber)
+                    {
+                        eventInstance = eventPointers->eventInstances[d];
+                        break;
+                    }
+                }
+
+                if (eventInstance != NULL)
+                {
+                    if (savedEvent->savedID == 2)
+                    {
+                        for (d = 0; d < 5; d++)
+                        {
+                            eventInstance->eventVariables[d] = ((SavedEvent *)savedEvent)->eventVariables[d];
+                        }
+                    }
+                    else
+                    {
+                        for (d = 0; d < 5; d++)
+                        {
+                            eventInstance->eventVariables[d] = ((SavedEventSmallVars *)savedEvent)->eventVariables[d];
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_CreateSaveEvent);
 

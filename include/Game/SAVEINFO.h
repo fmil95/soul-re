@@ -39,6 +39,7 @@ long SAVE_PurgeAMemoryBlock();
 void SAVE_IntroduceBufferIntros();
 void SAVE_UndestroyInstance(Instance *instance);
 void SAVE_DeleteSavedEvent(long areaID, long eventNumber);
+SavedBasic *SAVE_GetSavedNextEvent(long areaID, SavedBasic *curSave);
 
 extern GlobalSaveTracker *GlobalSave;
 extern char monVersion[];
