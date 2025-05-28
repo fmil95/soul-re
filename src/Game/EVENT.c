@@ -5622,7 +5622,19 @@ long EVENT_GetAnimateValue(InstanceAnimate *instanceAnimate)
     return value;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_TransformObjectOnStack);
+long EVENT_TransformObjectOnStack(PCodeStack *stack, long item, short *codeStream)
+{
+    long retValue;
+
+    retValue = 0;
+
+    if (stack->topOfStack != 0)
+    {
+        retValue = EVENT_TransformOperand(&stack->stack[stack->topOfStack - 1], stack, item, codeStream);
+    }
+
+    return retValue;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_UpdatePuzzlePointers);
 
