@@ -5019,7 +5019,28 @@ long EVENT_GetIntroValue(IntroObject *introObject)
     return value;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_DoSubListAction);
+void EVENT_DoSubListAction(SubListObject *subListObject, StackType *operand2, PCodeStack *stack, short *codeStream)
+{
+    long i;
+    long d;
+    StackType operand1;
+
+    for (i = 0; i < subListObject->numberOfInstances; i++)
+    {
+        operand1.id = 2;
+
+        operand1.data.subListObject.instanceList = (Instance **)subListObject->instanceList[i];
+
+        operand1.data.subListObject.numberOfInstances = -1;
+
+        for (d = 0; d < subListObject->numberOfAttributes; d++)
+        {
+            EVENT_TransformOperand(&operand1, stack, subListObject->attribute[d], 0);
+        }
+
+        EVENT_ExecuteActionCommand(&operand1, operand2, stack, codeStream);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetInstanceValue);
 
