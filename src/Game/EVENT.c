@@ -5636,7 +5636,53 @@ long EVENT_TransformObjectOnStack(PCodeStack *stack, long item, short *codeStrea
     return retValue;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_UpdatePuzzlePointers);
+void EVENT_UpdatePuzzlePointers(EventPointers *events, long offset)
+{
+    long d;
+    long d2;
+    Event *curEvent;
+
+    if (events != NULL)
+    {
+        for (d = 0; d < events->numPuzzles; d++)
+        {
+            events->eventInstances[d] = (Event *)OFFSET_DATA(events->eventInstances[d], offset);
+
+            curEvent = events->eventInstances[d];
+
+            curEvent->instanceList = (EventBasicObject **)OFFSET_DATA(curEvent->instanceList, offset);
+            curEvent->conditionalList = (ScriptPCode **)OFFSET_DATA(curEvent->conditionalList, offset);
+            curEvent->actionList = (ScriptPCode **)OFFSET_DATA(curEvent->actionList, offset);
+
+            for (d2 = 0; d2 < curEvent->numInstances; d2++)
+            {
+                curEvent->instanceList[d2] = (EventBasicObject *)OFFSET_DATA(curEvent->instanceList[d2], offset);
+
+                if (curEvent->instanceList[d2]->id == 2)
+                {
+                    ((EventWildCardObject *)curEvent->instanceList[d2])->objectName = (char *)OFFSET_DATA(((EventWildCardObject *)curEvent->instanceList[d2])->objectName, offset);
+                }
+            }
+
+            for (d2 = 0; d2 < curEvent->numActions; d2++)
+            {
+                if (curEvent->conditionalList[d2] != NULL)
+                {
+                    curEvent->conditionalList[d2] = (ScriptPCode *)OFFSET_DATA(curEvent->conditionalList[d2], offset);
+
+                    curEvent->conditionalList[d2]->data = (short *)OFFSET_DATA(curEvent->conditionalList[d2]->data, offset);
+                }
+
+                if (curEvent->actionList[d2] != NULL)
+                {
+                    curEvent->actionList[d2] = (ScriptPCode *)OFFSET_DATA(curEvent->actionList[d2], offset);
+
+                    curEvent->actionList[d2]->data = (short *)OFFSET_DATA(curEvent->actionList[d2]->data, offset);
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_SaveEventsFromLevel);
 
