@@ -5971,7 +5971,100 @@ INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_AddStreamToInstanceList);
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_RemoveStreamToInstanceList);
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_RelocateInstanceList);
+void EVENT_RelocateInstanceList(Level *oldLevel, Level *newLevel, long sizeOfLevel)
+{
+    int d;
+    int i;
+    int i2;
+    EventPointers *puzzle;
+    EventBasicObject **basicEventObject;
+    long offset;
+    EventEventObject *temp; // not from decls.h
+    EventTGroupObject *temp2; // not from decls.h
+    EventInstanceObject *temp4; // not from decls.h
+    EventSignalObject *temp3; // not from decls.h
+    EventVMO *temp5; // not from decls.h
+
+    offset = (intptr_t)newLevel - (intptr_t)oldLevel;
+
+    for (d = 0; d < 16; d++)
+    {
+        if (StreamTracker.StreamList[d].used == 2)
+        {
+            puzzle = StreamTracker.StreamList[d].level->PuzzleInstances;
+
+            if (puzzle != NULL)
+            {
+                for (i = 0; i < puzzle->numPuzzles; i++)
+                {
+                    basicEventObject = puzzle->eventInstances[i]->instanceList;
+
+                    for (i2 = 0; i2 < puzzle->eventInstances[i]->numInstances; i2++)
+                    {
+                        if (basicEventObject[i2]->id == 3)
+                        {
+                            temp = (EventEventObject *)basicEventObject[i2];
+
+                            if (IN_BOUNDS(temp->event, oldLevel, (uintptr_t)oldLevel + sizeOfLevel))
+                            {
+                                temp->event = (Event *)OFFSET_DATA(temp->event, offset);
+                            }
+                        }
+                        else if (basicEventObject[i2]->id == 4)
+                        {
+                            temp2 = (EventTGroupObject *)basicEventObject[i2];
+
+                            if (IN_BOUNDS(temp2->bspTree, oldLevel, (uintptr_t)oldLevel + sizeOfLevel))
+                            {
+                                temp2->bspTree = (BSPTree *)OFFSET_DATA(temp2->bspTree, offset);
+                            }
+                        }
+                        else if (basicEventObject[i2]->id == 6)
+                        {
+                            temp3 = (EventSignalObject *)basicEventObject[i2];
+
+                            if (IN_BOUNDS(temp3->signal, oldLevel, (uintptr_t)oldLevel + sizeOfLevel))
+                            {
+                                temp3->signal = (MultiSignal *)OFFSET_DATA(temp3->signal, offset);
+                            }
+                        }
+                        else if (basicEventObject[i2]->id == 1)
+                        {
+                            temp4 = (EventInstanceObject *)basicEventObject[i2];
+
+                            if (IN_BOUNDS(temp4->data.sfxMarker, oldLevel, (uintptr_t)oldLevel + sizeOfLevel))
+                            {
+                                temp4->data.sfxMarker = (SFXMkr *)OFFSET_DATA(temp4->data.sfxMarker, offset);
+                            }
+                        }
+                        else if (basicEventObject[i2]->id == 7)
+                        {
+                            temp5 = (EventVMO *)basicEventObject[i2];
+
+                            if (IN_BOUNDS(temp5->vmObjectPtr, oldLevel, (uintptr_t)oldLevel + sizeOfLevel))
+                            {
+                                temp5->vmObjectPtr = (VMObject *)OFFSET_DATA(temp5->vmObjectPtr, offset);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for (i = 0; i < 24; i++)
+    {
+        if ((eventTimerArray[i].flags & 0x1) && (eventTimerArray[i].level == oldLevel))
+        {
+            eventTimerArray[i].event = (Event *)OFFSET_DATA(eventTimerArray[i].event, offset);
+
+            eventTimerArray[i].actionScript = (ScriptPCode *)OFFSET_DATA(eventTimerArray[i].actionScript, offset);
+            eventTimerArray[i].scriptPos = (short *)OFFSET_DATA(eventTimerArray[i].scriptPos, offset);
+
+            eventTimerArray[i].level = newLevel;
+        }
+    }
+}
 
 void EVENT_PrintVars()
 {
