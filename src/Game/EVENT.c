@@ -5044,7 +5044,10 @@ void EVENT_DoSubListAction(SubListObject *subListObject, StackType *operand2, PC
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetInstanceValue);
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetSplineFrameNumber);
+long EVENT_GetSplineFrameNumber(InstanceSpline *instanceSpline)
+{
+    return SCRIPT_GetSplineFrameNumber(instanceSpline->instance, SCRIPT_GetPosSplineDef(instanceSpline->instance, instanceSpline->spline, instanceSpline->isParent, instanceSpline->isClass));
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetSplineValue);
 
