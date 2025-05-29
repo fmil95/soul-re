@@ -1878,7 +1878,75 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_InsertGeneralEffect);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DeleteGeneralEffect);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DoInstanceOneSegmentGlow);
+FXGlowEffect *FX_DoInstanceOneSegmentGlow(Instance *instance, long segment, long *color, long numColors, long atuColorCycleRate, long width, long height)
+{
+    FXGlowEffect *glowEffect;
+
+    atuColorCycleRate *= 33;
+
+    glowEffect = (FXGlowEffect *)MEMPACK_Malloc((numColors * 4) + sizeof(FXGlowEffect), 13);
+
+    if (glowEffect != NULL)
+    {
+        glowEffect->effectType = 131;
+
+        glowEffect->continue_process = FX_UpdateGlowEffect;
+
+        glowEffect->colorArray = NULL;
+        glowEffect->numColors = numColors;
+        glowEffect->colorBlendCycle = atuColorCycleRate;
+
+        glowEffect->width = width;
+        glowEffect->height = height;
+
+        glowEffect->instance = instance;
+
+        glowEffect->segment = segment;
+
+        glowEffect->lifeTime = -1;
+        glowEffect->diffTime = 0;
+
+        glowEffect->fadein_time = 0;
+        glowEffect->fadeout_time = 0;
+
+        glowEffect->SegmentInc = 1;
+        glowEffect->numSegments = 1;
+
+        if (numColors < 2)
+        {
+            if (color == NULL)
+            {
+                glowEffect->currentColor = 0xFF8010;
+            }
+            else
+            {
+                glowEffect->currentColor = color[0];
+            }
+        }
+        else
+        {
+            int i;
+
+            glowEffect->colorArray = (long *)&glowEffect[1]; // does not look quite valid 
+
+            for (i = 0; i < numColors; i++)
+            {
+                glowEffect->colorArray[i] = color[i];
+            }
+
+            glowEffect->colorBlendCycle = atuColorCycleRate / (numColors - 1);
+            glowEffect->currentColor = color[0];
+        }
+
+        glowEffect->next = FX_GeneralEffectTracker;
+
+        FX_GeneralEffectTracker = (FXGeneralEffect *)glowEffect;
+    }
+
+    instance->flags2 |= 0x200;
+
+    return glowEffect;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_SetGlowFades);
 

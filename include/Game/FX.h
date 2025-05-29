@@ -67,5 +67,6 @@ FX_PRIM *FX_Dot(SVector *location, SVector *vel, SVector *accel, int scale_speed
 void FX_Start_Snow(int percent);
 void FX_Start_Rain(int percent);
 void FX_FlamePrimProcess(FX_PRIM *fxPrim, FXTracker *fxTracker);
+void FX_UpdateGlowEffect(FXGlowEffect *effect, FXTracker *fxTracker);
 
 #endif
