@@ -1853,7 +1853,63 @@ void FX_ReaverBladeInit()
 {
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_SoulReaverWinding);
+void FX_SoulReaverWinding(Instance *instance, PrimPool *primPool, unsigned long **ot, MATRIX *wcTransform)
+{
+    MATRIX mat;
+    MATRIX *swTransform;
+    SVector start;
+    SVector end;
+    ReaverData *data;
+    long color;
+    long glow_color;
+    short temp; // not from decls.h
+
+    data = (ReaverData *)instance->extraData;
+
+    if (((unsigned char)data->ReaverPickedUp != 0) && ((unsigned char)data->ReaverOn != 0))
+    {
+        temp = -data->ReaverDeg;
+
+        swTransform = gameTrackerX.playerInstance->matrix;
+
+        CompMatrix(wcTransform, &swTransform[40], &mat);
+
+        start.z = 0;
+        start.y = 0;
+        start.x = 0;
+
+        end.y = 0;
+        end.x = 0;
+        end.z = -128;
+
+        color = data->ReaverBladeColor;
+
+        glow_color = data->ReaverBladeGlowColor;
+
+        FX_Lightning(wcTransform, ot, &mat, temp, &start, &end, 30, 10, 16, 32, 0, color, glow_color);
+
+        swTransform = gameTrackerX.playerInstance->matrix;
+
+        CompMatrix(wcTransform, &swTransform[39], &mat);
+
+        end.z = -96;
+
+        FX_Lightning(wcTransform, ot, &mat, temp, &start, &end, 30, 10, 16, 32, 0, color, glow_color);
+
+        swTransform = &instance->matrix[1];
+
+        end.z = -(((data->ReaverSize * data->ReaverScale) / 4096) * 380) / 4096;
+
+        if (data->CurrentReaver == 1)
+        {
+            color = 0xFCFFD3;
+        }
+
+        CompMatrix(wcTransform, swTransform, &mat);
+
+        FX_Lightning(wcTransform, ot, &mat, temp, &start, &end, 0, 25, 4, 8, 0, color, glow_color);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdateInstanceWaterSplit);
 
