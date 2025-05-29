@@ -1949,7 +1949,33 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericBlastring);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericFlash);
 
+// Matches 100% on decomp.me but differs on this project
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_GetHealthColor);
+#else
+long FX_GetHealthColor(int currentHealth)
+{
+    STATIC long HealthColors[8924 + 6];
+    long color;
+
+    if (currentHealth <= 0)
+    {
+        color = HealthColors[0];
+    }
+    else if ((currentHealth >= 0) && (currentHealth < 6))
+    {
+        color = HealthColors[currentHealth - 1];
+    }
+    else
+    {
+        color = HealthColors[5];
+    }
+
+    color &= 0xFFFCFCFC;
+
+    return color;
+}
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Start_Snow);
 
