@@ -1876,7 +1876,46 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdateGlowEffect);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_InsertGeneralEffect);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DeleteGeneralEffect);
+void FX_DeleteGeneralEffect(FXGeneralEffect *effect)
+{
+    FXGeneralEffect *currentEffect;
+    FXGeneralEffect *previousEffect;
+
+    if (effect == NULL)
+    {
+        return;
+    }
+
+    previousEffect = NULL;
+
+    for (currentEffect = FX_GeneralEffectTracker; currentEffect != NULL; currentEffect = currentEffect->next)
+    {
+        if (currentEffect == effect)
+        {
+            if (previousEffect != NULL)
+            {
+                previousEffect->next = effect->next;
+            }
+            else
+            {
+                FX_GeneralEffectTracker = currentEffect->next;
+            }
+
+            break;
+        }
+        else
+        {
+            previousEffect = currentEffect;
+        }
+    }
+
+    if (effect->effectType == 0)
+    {
+        MEMPACK_Free((char *)effect[1].continue_process);
+    }
+
+    MEMPACK_Free((char *)effect);
+}
 
 FXGlowEffect *FX_DoInstanceOneSegmentGlow(Instance *instance, long segment, long *color, long numColors, long atuColorCycleRate, long width, long height)
 {
@@ -1966,7 +2005,7 @@ void FX_StopAllGlowEffects(Instance *instance, int fadeout_time)
 
     for (currentEffect = (FXGlowEffect *)FX_GeneralEffectTracker; currentEffect != NULL; currentEffect = previousEffect)
     {
-        previousEffect = (FXGlowEffect *)currentEffect->next;
+        previousEffect = currentEffect->next;
 
         if ((currentEffect->effectType == 131) && (currentEffect->instance == instance))
         {
