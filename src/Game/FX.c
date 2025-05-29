@@ -1845,7 +1845,10 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_MakeHitFX);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueLightning);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_SetReaverInstance);
+void FX_SetReaverInstance(Instance *instance)
+{
+    FX_reaver_instance = instance;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_SoulReaverBlade);
 
@@ -1863,6 +1866,8 @@ void FX_SoulReaverWinding(Instance *instance, PrimPool *primPool, unsigned long 
     long color;
     long glow_color;
     short temp; // not from decls.h
+
+    (void)primPool;
 
     data = (ReaverData *)instance->extraData;
 
@@ -1883,7 +1888,6 @@ void FX_SoulReaverWinding(Instance *instance, PrimPool *primPool, unsigned long 
         end.z = -128;
 
         color = data->ReaverBladeColor;
-
         glow_color = data->ReaverBladeGlowColor;
 
         FX_Lightning(wcTransform, ot, &mat, temp, &start, &end, 30, 10, 16, 32, 0, color, glow_color);
