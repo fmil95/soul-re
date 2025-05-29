@@ -1888,7 +1888,31 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DoInstanceManySegmentGlow);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DoInstanceOneSegmentGlowWithTime);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StopAllGlowEffects);
+void FX_StopAllGlowEffects(Instance *instance, int fadeout_time)
+{
+    FXGlowEffect *currentEffect;
+    FXGlowEffect *previousEffect;
+    int temp; // not from decls.h
+
+    temp = fadeout_time * 33;
+
+    for (currentEffect = (FXGlowEffect *)FX_GeneralEffectTracker; currentEffect != NULL; currentEffect = previousEffect)
+    {
+        previousEffect = (FXGlowEffect *)currentEffect->next;
+
+        if ((currentEffect->effectType == 131) && (currentEffect->instance == instance))
+        {
+            if (temp != 0)
+            {
+                currentEffect->lifeTime = currentEffect->fadeout_time = temp;
+            }
+            else
+            {
+                FX_DeleteGeneralEffect((FXGeneralEffect *)currentEffect);
+            }
+        }
+    }
+}
 
 void FX_StopGlowEffect(FXGlowEffect *glowEffect, int fadeout_time)
 {
