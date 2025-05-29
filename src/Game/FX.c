@@ -2160,7 +2160,21 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", fx_get_startz);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawRing);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", fx_setTex);
+void fx_setTex(DVECTOR *x, unsigned char *uv, int tx, int offset)
+{
+    uv[0] = x->vx - tx;
+
+    if (x->vy > 255)
+    {
+        uv[1] = 255;
+    }
+    else
+    {
+        uv[1] = x->vy;
+    }
+
+    x->vy += offset;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawRing2);
 
