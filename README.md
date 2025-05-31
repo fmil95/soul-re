@@ -43,6 +43,7 @@ You'll need to have the following packets installed on your system:
 - git
 - build-essential
 - binutils-mips-linux-gnu
+- cpp-mips-linux-gnu
 - python3
 - bchunk
 - p7zip-full
@@ -51,7 +52,7 @@ You'll need to have the following packets installed on your system:
 You might already have some of these but if you don't have any of them or are missing a select few, you can grab them all with the following two Bash commands:
 ```
 sudo apt update
-sudo apt install git build-essential binutils-mips-linux-gnu python3 bchunk p7zip-full p7zip-rar
+sudo apt install git build-essential binutils-mips-linux-gnu cpp-mips-linux-gnu python3 bchunk p7zip-full p7zip-rar
 ```
 
 ### Cloning the repository
@@ -71,7 +72,7 @@ Now that you have set up the repository, place the SLUS_007.08 file that you obt
 
 On the root directory which is where the **requirements.txt** file is, run this command on your terminal to install the Python 3 essentials for the project: 
 ```
-python3 -m install -r requirements.txt
+python3 -m pip install -r requirements.txt
 ```
 
 ### Building the code
