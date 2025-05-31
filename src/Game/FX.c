@@ -54,6 +54,14 @@ STATIC short FX_Frames;
 
 STATIC short FX_TimeCount;
 
+STATIC short windx;
+
+STATIC short windy;
+
+STATIC short wind_deg;
+
+STATIC short wind_speed;
+
 void FX_Init(struct _FXTracker *fxTracker)
 {
     struct _FX_MATRIX *fxMatrix;
@@ -1787,7 +1795,53 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ProcessSnow);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueSnow);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdateWind);
+void FX_UpdateWind(FXTracker *fxTracker)
+{
+    short change;
+
+    (void)fxTracker;
+
+    change = rand() % 4;
+
+    if ((rand() & 0x1))
+    {
+        change = -change;
+    }
+
+    wind_speed += change;
+
+    if (wind_speed > 40)
+    {
+        wind_speed = 40;
+    }
+
+    if (wind_speed < 15)
+    {
+        wind_speed = 15;
+    }
+
+    change = rand() % 8;
+
+    if ((rand() & 0x1))
+    {
+        change = -change;
+    }
+
+    wind_deg += change;
+
+    if (wind_deg > 1280)
+    {
+        wind_deg = 1280;
+    }
+
+    if (wind_deg < 768)
+    {
+        wind_deg = 768;
+    }
+
+    windx = (rcos(wind_deg) * wind_speed) / 4096;
+    windy = (rsin(wind_deg) * wind_speed) / 4096;
+}
 
 void FX_ProcessRain(FX_PRIM *fxPrim, FXTracker *fxTracker)
 {
