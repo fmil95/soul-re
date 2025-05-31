@@ -10,6 +10,7 @@
 #include "Game/LIGHT3D.h"
 #include "Game/INSTANCE.h"
 #include "Game/SOUND.h"
+#include "Game/CAMERA.h"
 
 STATIC FXGeneralEffect *FX_GeneralEffectTracker;
 
@@ -1788,7 +1789,34 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueSnow);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdateWind);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ProcessRain);
+void FX_ProcessRain(FX_PRIM *fxPrim, FXTracker *fxTracker)
+{
+    int zvel;
+
+    zvel = fxPrim->duo.phys.zVel + theCamera.focusInstanceVelVec.z;
+
+    if (fxPrim->timeToLive > 0)
+    {
+        fxPrim->timeToLive--;
+    }
+
+    fxPrim->v1.z += zvel;
+
+    if ((fxPrim->work0 >= fxPrim->v1.z) || (fxPrim->timeToLive == 0))
+    {
+        FX_Die(fxPrim, fxTracker);
+    }
+    else
+    {
+        fxPrim->v0.x += fxPrim->duo.phys.xVel;
+        fxPrim->v1.x += fxPrim->duo.phys.xVel;
+
+        fxPrim->v0.y += fxPrim->duo.phys.yVel;
+        fxPrim->v1.y += fxPrim->duo.phys.yVel;
+
+        fxPrim->v0.z += zvel;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueRain);
 
