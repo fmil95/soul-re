@@ -673,6 +673,9 @@ int StopCallback(void);
 void PadStopCom(void);
 void SetPolyFT4(POLY_FT4 *p);
 void SetColorMatrix(MATRIX *m);
+long SpuSetReverbModeType(long mode);
+void SpuSetReverbModeDepth(short depth_left, short depth_right);
+long SpuSetReverb(long on_off);
 
 extern int StCdIntrFlag;
 

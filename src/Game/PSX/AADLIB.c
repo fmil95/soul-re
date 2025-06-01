@@ -610,7 +610,20 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadInitSequenceSlot);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadWaitForSramTransferComplete);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadInitReverb);
+void aadInitReverb()
+{
+    SpuSetReverbModeType(aadGetReverbMode());
+
+    SpuSetReverbVoice(0, 0xFFFFFF);
+
+    if (aadWaitForSramTransferComplete() != 0)
+    {
+        SpuClearReverbWorkArea(aadGetReverbMode());
+    }
+
+    SpuSetReverbModeDepth(aadGetReverbDepth(), aadGetReverbDepth());
+    SpuSetReverb(1);
+}
 
 void aadShutdownReverb()
 {
