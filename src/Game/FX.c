@@ -2674,7 +2674,22 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_MakeParticleTexFX);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_MakeHitFX);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueLightning);
+void FX_ContinueLightning(FXLightning *zap, FXTracker *fxTracker)
+{
+    (void)fxTracker;
+
+    zap->deg += zap->deg_inc;
+
+    if (zap->lifeTime > 0)
+    {
+        zap->lifeTime = zap->lifeTime - FX_Frames;
+
+        if (zap->lifeTime <= 0)
+        {
+            FX_DeleteGeneralEffect((FXGeneralEffect *)zap);
+        }
+    }
+}
 
 void FX_SetReaverInstance(Instance *instance)
 {
