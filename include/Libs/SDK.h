@@ -677,6 +677,7 @@ long SpuSetReverbModeType(long mode);
 void SpuSetReverbModeDepth(short depth_left, short depth_right);
 long SpuSetReverb(long on_off);
 SpuTransferCallbackProc SpuSetTransferCallback(SpuTransferCallbackProc func);
+long SpuIsTransferCompleted(long flag);
 
 extern int StCdIntrFlag;
 

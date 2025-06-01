@@ -616,7 +616,22 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadIsSfxLoaded);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadInitSequenceSlot);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadWaitForSramTransferComplete);
+int aadWaitForSramTransferComplete()
+{
+    int n;
+
+    for (n = 100000; n != 0; )
+    {
+        if (SpuIsTransferCompleted(0) != 0)
+        {
+            return 1;
+        }
+
+        n--;
+    }
+
+    return 0;
+}
 
 void aadInitReverb()
 {
