@@ -559,7 +559,33 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadFreeDynamicSoundBank);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadOpenDynamicSoundBank);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadLoadDynamicSfx);
+int aadLoadDynamicSfx(char *fileName, long directoryID, long flags)
+{
+    AadDynamicLoadRequest *loadReq;
+
+    if (aadMem->numLoadReqsQueued < 16)
+    {
+        loadReq = &aadMem->loadRequestQueue[aadMem->nextLoadReqIn];
+
+        loadReq->type = 0;
+
+        loadReq->handle = (aadMem->nextFileHandle++ & 0x3FFF) | 0x4000;
+
+        loadReq->directoryID = directoryID;
+
+        loadReq->flags = flags;
+
+        strncpy(loadReq->fileName, fileName, sizeof(loadReq->fileName) - 1);
+
+        aadMem->nextLoadReqIn = (aadMem->nextLoadReqIn + 1) & 0xF;
+
+        aadMem->numLoadReqsQueued++;
+
+        return loadReq->handle;
+    }
+
+    return 0;
+}
 
 int aadFreeDynamicSfx(int handle)
 {
