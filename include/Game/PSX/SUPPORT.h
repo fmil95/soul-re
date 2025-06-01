@@ -5,7 +5,7 @@
 
 int strcmpi(char *s1, char *s2);
 #ifdef TARGET_PSX
-int sprintf(char *string, char *fmt, ...);
+int sprintf(char *string, const char *fmt, ...);
 #endif
 
 #endif

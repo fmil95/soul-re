@@ -93,7 +93,7 @@ void VOICEXA_CdSyncCallback(unsigned char status, unsigned char *result)
 
         vt->cdCmdsQueued--;
 
-        CdSyncCallback(vt->prevCallback);
+        CdSyncCallback((CdlCB)vt->prevCallback);
     }
     else
     {
@@ -119,7 +119,7 @@ void processCdCommands(XAVoiceTracker *vt)
 
         cmd = &vt->cdCmdQueue[vt->cdCmdOut];
 
-        vt->prevCallback = CdSyncCallback((void *)VOICEXA_CdSyncCallback);
+        vt->prevCallback = (void *)CdSyncCallback((void *)VOICEXA_CdSyncCallback);
 
         CdControl(cmd->cdCommand, cmd->cdCmdParam, vt->cdResult);
     }

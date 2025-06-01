@@ -365,7 +365,7 @@ struct _FX_PRIM *_FX_BuildSingleFaceWithModel(struct _Model *model, struct _MFac
 
 struct _FX_PRIM *FX_BuildSingleFaceWithModel(struct _Model *model, struct _MFace *mface, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short timeToLive)
 {
-    return _FX_BuildSingleFaceWithModel(model, mface, center, vel, accl, fxTracker, fxSetup, fxProcess, 0, timeToLive);
+    return _FX_BuildSingleFaceWithModel(model, mface, center, vel, accl, fxTracker, (void *)fxSetup, fxProcess, 0, timeToLive);
 }
 
 void _FX_SetupLighting(struct _Instance *instance)
@@ -1918,7 +1918,7 @@ void FX_MakeWaterTrail(struct _Instance *instance, int depth)
 
             wxtrail = waterfx->modelList[1];
 
-            FX_BuildSingleFaceWithModel(wxtrail, wxtrail->faceList, (SVECTOR *)&position, NULL, NULL, gFXT, &FX_SimpleQuadSetup, &FX_WaterTrailProcess, 8);
+            FX_BuildSingleFaceWithModel(wxtrail, wxtrail->faceList, (SVECTOR *)&position, NULL, NULL, gFXT, (void *)&FX_SimpleQuadSetup, &FX_WaterTrailProcess, 8);
         }
 
         if (abs(zvel) >= 21)
