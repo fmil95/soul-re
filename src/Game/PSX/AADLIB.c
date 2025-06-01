@@ -687,7 +687,13 @@ int aadGetNumLoadsQueued()
     return aadMem->numLoadReqsQueued;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadPurgeLoadQueue);
+void aadPurgeLoadQueue()
+{
+    aadMem->nextLoadReqIn = 0;
+    aadMem->nextLoadReqOut = 0;
+
+    aadMem->numLoadReqsQueued = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadProcessLoadQueue);
 
