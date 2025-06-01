@@ -1685,7 +1685,90 @@ void FX_MakeWarpArrow(int x, int y, int xsize, int ysize, int fade)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_MakeMannaIcon);
+void FX_MakeMannaIcon(int x, int y, int xsize, int ysize)
+{
+    // Object *manna; // unused
+    TextureMT3 *texture;
+    POLY_GT4 *poly;
+    int n;
+    int newx;
+    int newy;
+    int sizex;
+    int sizey;
+    unsigned long color;
+
+    if (objectAccess[20].object != NULL)
+    {
+        texture = FX_GetTextureObject((Object *)objectAccess[20].object, 0, 7);
+
+        poly = FX_SetupPolyGT4(x, y, x + xsize, y + ysize, 3, texture, 0x2962828, 0x2962828, 0x2962828, 0x2962828);
+
+        if (poly != NULL)
+        {
+            poly->tpage |= 0x20;
+        }
+
+        if (objectAccess[10].object != NULL)
+        {
+            texture = FX_GetTextureObject((Object *)objectAccess[10].object, 0, 2);
+
+            for (n = 0; n < 5; n++)
+            {
+                switch (n)
+                {
+                default:
+                case 0:
+                    newx = x + 33;
+                    newy = y - 1;
+
+                    sizex = 14;
+                    sizey = 12;
+
+                    color = 0x24B3232;
+                    break;
+                case 1:
+                    newx = x + 3;
+                    newy = y + 5;
+
+                    sizex = 14;
+                    sizey = 12;
+
+                    color = 0x2704B4B;
+                    break;
+                case 2:
+                    newx = x + 13;
+                    newy = y + 4;
+
+                    sizex = 19;
+                    sizey = 16;
+
+                    color = 0x2966464;
+                    break;
+                case 3:
+                    newx = x + 3;
+                    newy = y + 16;
+
+                    sizex = 19;
+                    sizey = 16;
+
+                    color = 0x24B3232;
+                    break;
+                case 4:
+                    newx = x + 32;
+                    newy = y + 13;
+
+                    sizex = 19;
+                    sizey = 16;
+
+                    color = 0x2966464;
+                    break;
+                }
+
+                FX_SetupPolyGT4(newx, newy, newx + sizex, newy + sizey, 3, texture, color, color, color, color);
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_MakeGlyphIcon);
 
