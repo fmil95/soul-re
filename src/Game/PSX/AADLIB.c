@@ -655,7 +655,32 @@ void aadRelocateMusicMemoryBegin()
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadRelocateMusicMemoryEnd);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadRelocateSfxMemory);
+void aadRelocateSfxMemory(void *oldAddress, int offset)
+{
+    AadDynSfxSnfFileHdr *snfFile;
+
+    snfFile = aadMem->firstDynSfxFile;
+
+    if ((char *)oldAddress == (char *)snfFile)
+    {
+        snfFile = (AadDynSfxSnfFileHdr *)((char *)snfFile + offset);
+
+        aadMem->firstDynSfxFile = snfFile;
+    }
+
+    for (; snfFile != NULL; snfFile = snfFile->nextDynSfxFile)
+    {
+        if ((char *)oldAddress == (char *)snfFile->prevDynSfxFile)
+        {
+            snfFile->prevDynSfxFile = (AadDynSfxSnfFileHdr *)((char *)oldAddress + offset);
+        }
+
+        if ((char *)oldAddress == (char *)snfFile->nextDynSfxFile)
+        {
+            snfFile->nextDynSfxFile = (AadDynSfxSnfFileHdr *)((char *)oldAddress + offset);
+        }
+    }
+}
 
 int aadGetNumLoadsQueued()
 {
