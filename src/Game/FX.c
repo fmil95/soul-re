@@ -1602,7 +1602,19 @@ void FX_Sprite_Insert(NodeType *list, FX_PRIM *fxPrim)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_GetTextureObject);
+TextureMT3 *FX_GetTextureObject(Object *object, int modelnum, int texnum)
+{
+    Model *model;
+    TextureMT3 *texture;
+
+    object->oflags2 |= 0x20000000;
+
+    model = object->modelList[modelnum];
+
+    texture = (TextureMT3 *)&((char *)(((FX_PRIM *)model->faceList)->process))[(texnum * 16) + 16];
+
+    return texture;
+}
 
 void FX_MakeWaterBubble(struct _SVector *position, struct _SVector *vel, struct _SVector *accl, long splashZ, struct __BubbleParams *BP)
 {
