@@ -516,7 +516,16 @@ void FX_Relocate(struct _SVector *offset)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdateTexturePointers);
+void FX_UpdateTexturePointers(FX_PRIM *fxPrim, Object *oldObject, long sizeOfObject, long offset)
+{
+    for (; fxPrim != NULL; fxPrim = (FX_PRIM *)fxPrim->node.next)
+    {
+        if (((fxPrim->flags & 0x1)) && (fxPrim->texture >= (TextureMT3 *)oldObject) && (((char *)oldObject + sizeOfObject) >= (char *)fxPrim->texture))
+        {
+            fxPrim->texture = fxPrim->texture != NULL ? (TextureMT3 *)((char *)fxPrim->texture + offset) : NULL;
+        }
+    }
+}
 
 void FX_RelocateFXPointers(struct Object *oldObject, struct Object *newObject, long sizeOfObject)
 {
