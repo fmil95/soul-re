@@ -1659,7 +1659,44 @@ void FX_MakeWaterTrail(struct _Instance *instance, int depth)
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartRibbon);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_RibbonProcess);
+void FX_RibbonProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
+{
+    int d;
+    // long fade; // unused
+
+    if (fxPrim->timeToLive > 0)
+    {
+        fxPrim->timeToLive--;
+    }
+
+    if (fxPrim->timeToLive == 0)
+    {
+        FX_Die(fxPrim, fxTracker);
+        return;
+    }
+
+    for (d = 0; d < 4; d++)
+    {
+        fxPrim->fadeValue[d] += fxPrim->fadeStep;
+
+        if (fxPrim->fadeValue[d] > 4096)
+        {
+            fxPrim->fadeValue[d] = 4096;
+        }
+    }
+
+    if (fxPrim->startColor != fxPrim->endColor)
+    {
+        fxPrim->colorFadeValue += fxPrim->colorFadeStep;
+
+        if (fxPrim->colorFadeValue > 4096)
+        {
+            fxPrim->colorFadeValue = 4096;
+        }
+
+        LoadAverageCol((unsigned char *)&fxPrim->startColor, (unsigned char *)&fxPrim->endColor, 4096 - fxPrim->colorFadeValue, fxPrim->colorFadeValue, (unsigned char *)&fxPrim->color);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ConstrictProcess);
 
