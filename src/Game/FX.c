@@ -62,6 +62,14 @@ STATIC short wind_deg;
 
 STATIC short wind_speed;
 
+STATIC FXRibbon *FX_ConstrictRibbon;
+
+STATIC Position FX_ConstrictPosition;
+
+STATIC Position *FX_ConstrictPositionPtr;
+
+STATIC short FX_ConstrictStage;
+
 void FX_Init(struct _FXTracker *fxTracker)
 {
     struct _FX_MATRIX *fxMatrix;
@@ -1655,7 +1663,24 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_RibbonProcess);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ConstrictProcess);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartConstrict);
+void FX_StartConstrict(Instance *instance, SVector *constrict_point, short startSegment, short endSegment)
+{
+    if (FX_ConstrictRibbon == NULL)
+    {
+        if (constrict_point != NULL)
+        {
+            FX_ConstrictPosition.x = constrict_point->x;
+            FX_ConstrictPosition.y = constrict_point->y;
+            FX_ConstrictPosition.z = instance->position.z + 256;
+
+            FX_ConstrictPositionPtr = (Position *)constrict_point;
+        }
+
+        FX_ConstrictRibbon = FX_StartRibbon(instance, startSegment, endSegment, 2, -1, 40, 0, 0xE84040, 0xE84040);
+
+        FX_ConstrictStage = 0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_EndConstrict);
 
