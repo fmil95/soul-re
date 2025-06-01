@@ -1671,7 +1671,52 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_FlamePrimProcess);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DFacadeParticleSetup);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Dot);
+FX_PRIM *FX_Dot(SVector *location, SVector *vel, SVector *accel, int scale_speed, long color, long size, int lifetime, int texture_num)
+{
+    FX_PRIM *fxPrim;
+
+    fxPrim = FX_GetPrim(gFXT);
+
+    if (fxPrim != NULL)
+    {
+        if (texture_num >= 0)
+        {
+            FX_MakeParticleTexFX(fxPrim, location, NULL, 0, texture_num, vel, accel, color, size, lifetime);
+        }
+        else
+        {
+            FX_DFacadeParticleSetup(fxPrim, (SVECTOR *)location, size, size, color, (SVECTOR *)vel, (SVECTOR *)accel, gFXT, (short)lifetime);
+
+            if (color != 0)
+            {
+                fxPrim->flags |= 0xC0000;
+            }
+
+            fxPrim->startColor = color;
+            fxPrim->endColor = 0;
+
+            fxPrim->fadeValue[3] = 0;
+            fxPrim->fadeValue[2] = 0;
+            fxPrim->fadeValue[1] = 0;
+            fxPrim->fadeValue[0] = 0;
+
+            fxPrim->fadeStep = 4096 / lifetime;
+        }
+
+        if (scale_speed != 0)
+        {
+            fxPrim->v0.y = 4096;
+
+            fxPrim->work3 = scale_speed;
+
+            fxPrim->flags |= 0x2000;
+        }
+
+        FX_Sprite_Insert(&gFXT->usedPrimListSprite, fxPrim);
+    }
+
+    return fxPrim;
+}
 
 void FX_Blood(SVector *location, SVector *input_vel, SVector *accel, int amount, long color, long size)
 {

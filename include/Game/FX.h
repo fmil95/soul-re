@@ -68,5 +68,6 @@ void FX_Start_Snow(int percent);
 void FX_Start_Rain(int percent);
 void FX_FlamePrimProcess(FX_PRIM *fxPrim, FXTracker *fxTracker);
 void FX_UpdateGlowEffect(FXGlowEffect *effect, FXTracker *fxTracker);
+void FX_MakeParticleTexFX(FX_PRIM *fxPrim, SVector *position, Object *object, int modelnum, int texnum, SVector *vel, SVector *accl, long color, int size, int life);
 
 #endif
