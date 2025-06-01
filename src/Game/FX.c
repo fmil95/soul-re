@@ -2522,7 +2522,19 @@ FXParticle *FX_GetTorchParticle(Instance *instance, short startSegment, int tex,
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_TorchFlame);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_GetMorphFadeVal);
+int FX_GetMorphFadeVal()
+{
+    int fade;
+
+    fade = (gameTrackerX.gameData.asmData.MorphTime * 4096) / 1000;
+
+    if (gameTrackerX.gameData.asmData.MorphType == 1)
+    {
+        fade = 4096 - fade;
+    }
+
+    return fade;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ConvertCamPersToWorld);
 
