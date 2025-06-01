@@ -629,7 +629,15 @@ int aadGetReverbDepth()
     return 10000;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadGetNumDynamicSequences);
+int aadGetNumDynamicSequences(int bank)
+{
+    if (aadMem->dynamicBankStatus[bank] == 2)
+    {
+        return aadMem->dynamicSoundBankHdr[bank]->numSequences;
+    }
+
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadAssignDynamicSequence);
 
