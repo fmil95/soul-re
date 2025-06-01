@@ -555,7 +555,31 @@ void aadLoadDynamicSoundBankReturn(void *loadedDataPtr, void *data, void *data2)
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadLoadDynamicSoundBankReturn2);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadFreeDynamicSoundBank);
+int aadFreeDynamicSoundBank(int dynamicBankIndex)
+{
+    if (dynamicBankIndex >= 2)
+    {
+        return 0x1005;
+    }
+
+    if (aadMem->dynamicBankStatus[dynamicBankIndex] != 2)
+    {
+        return 0x1007;
+    }
+
+    if (aadMem->dynamicSoundBankData[dynamicBankIndex] == NULL)
+    {
+        return 0x1007;
+    }
+
+    aadMem->dynamicBankStatus[dynamicBankIndex] = 0;
+
+    aadMem->memoryFreeProc(aadMem->dynamicSoundBankData[dynamicBankIndex]);
+
+    aadMem->dynamicSoundBankData[dynamicBankIndex] = NULL;
+
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadOpenDynamicSoundBank);
 
