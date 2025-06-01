@@ -2682,7 +2682,7 @@ void FX_ContinueLightning(FXLightning *zap, FXTracker *fxTracker)
 
     if (zap->lifeTime > 0)
     {
-        zap->lifeTime = zap->lifeTime - FX_Frames;
+        zap->lifeTime -= FX_Frames;
 
         if (zap->lifeTime <= 0)
         {
@@ -2780,7 +2780,12 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdateInstanceSplitRing);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdateGlowEffect);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_InsertGeneralEffect);
+void FX_InsertGeneralEffect(void *ptr)
+{
+    ((FXGeneralEffect *)ptr)->next = FX_GeneralEffectTracker;
+
+    FX_GeneralEffectTracker = ptr;
+}
 
 void FX_DeleteGeneralEffect(FXGeneralEffect *effect)
 {
