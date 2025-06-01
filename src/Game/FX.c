@@ -1665,7 +1665,26 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueRibbon);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StandardFXPrimProcess);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_AttachedParticlePrimProcess);
+void FX_AttachedParticlePrimProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
+{
+    MATRIX *swTransform;
+    MATRIX *swTransformOld;
+    Instance *instance;
+
+    instance = (Instance *)fxPrim->matrix;
+
+    swTransform = &instance->matrix[fxPrim->work0];
+    swTransformOld = &instance->oldMatrix[fxPrim->work0];
+
+    if ((instance->matrix != NULL) && (instance->oldMatrix != NULL))
+    {
+        fxPrim->position.x += swTransform->t[0] - swTransformOld->t[0];
+        fxPrim->position.y += swTransform->t[1] - swTransformOld->t[1];
+        fxPrim->position.z += swTransform->t[2] - swTransformOld->t[2];
+    }
+
+    FX_StandardFXPrimProcess(fxPrim, fxTracker);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_FlamePrimProcess);
 
