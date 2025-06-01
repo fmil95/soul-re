@@ -639,7 +639,45 @@ int aadGetNumDynamicSequences(int bank)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadAssignDynamicSequence);
+int aadAssignDynamicSequence(int bank, int sequenceNumber, int slotNumber)
+{
+    AadTempo tempo;
+    AadSequenceSlot *slot;
+    int i;
+
+    if (aadMem->dynamicBankStatus[bank] != 2)
+    {
+        return 0x1007;
+    }
+
+    slot = aadMem->sequenceSlots[slotNumber];
+
+    slot->sequenceNumberAssigned = sequenceNumber;
+
+    slot->sequenceAssignedDynamicBank = bank;
+
+    aadInitSequenceSlot(slot);
+
+    aadAllNotesOff(slotNumber);
+
+    if (slot->tempo.ticksPerUpdate == 0)
+    {
+        aadSetSlotTempo(slotNumber, aadGetTempoFromDynamicSequence(bank, sequenceNumber, &tempo));
+    }
+
+    slot->channelMute = 0;
+
+    slot->enableSustainUpdate = 0;
+
+    slot->ignoreTranspose = 0;
+
+    for (i = 0; i < 16; i++)
+    {
+        slot->transpose[i] = 0;
+    }
+
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadGetTempoFromDynamicSequence);
 

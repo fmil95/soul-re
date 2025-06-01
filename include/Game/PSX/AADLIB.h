@@ -62,5 +62,7 @@ void aadStartMasterVolumeFade(int targetVolume, int volumeStep, void (*fadeCompl
 void aadSetNoUpdateMode(int noUpdate);
 void aadAllNotesOff(int slotNumber);
 void aadInitSequenceSlot(AadSequenceSlot *slot);
+void aadSetSlotTempo(int slotNumber, AadTempo *tempo);
+AadTempo *aadGetTempoFromDynamicSequence(int bank, int sequenceNumber, AadTempo *tempo);
 
 #endif
