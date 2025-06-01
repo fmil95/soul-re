@@ -621,7 +621,10 @@ int aadGetReverbMode()
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadGetReverbSize);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadGetReverbDepth);
+int aadGetReverbDepth()
+{
+    return 10000;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadGetNumDynamicSequences);
 
