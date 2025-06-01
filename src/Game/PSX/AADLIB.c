@@ -631,7 +631,22 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadGetTempoFromDynamicSequence);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadSetSlotTempo);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadStartSlot);
+void aadStartSlot(int slotNumber)
+{
+    AadSequenceSlot *slot;
+
+    if (slotNumber < aadMem->numSlots)
+    {
+        slot = aadMem->sequenceSlots[slotNumber];
+
+        if ((!(slot->status & 0x1)) && (slot->sequenceNumberAssigned != 255))
+        {
+            aadInitSequenceSlot(slot);
+
+            slot->status |= 0x1;
+        }
+    }
+}
 
 void aadStopSlot(int slotNumber)
 {
