@@ -70,6 +70,8 @@ STATIC Position *FX_ConstrictPositionPtr;
 
 STATIC short FX_ConstrictStage;
 
+STATIC Instance *FX_ConstrictInstance;
+
 void FX_Init(struct _FXTracker *fxTracker)
 {
     struct _FX_MATRIX *fxMatrix;
@@ -2028,7 +2030,28 @@ void FX_StartConstrict(Instance *instance, SVector *constrict_point, short start
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_EndConstrict);
+void FX_EndConstrict(int ConstrictEnemyFlag, Instance *instance)
+{
+    if (ConstrictEnemyFlag != 0)
+    {
+        FX_ConstrictStage = 1;
+
+        FX_ConstrictInstance = instance;
+
+        if (instance != NULL)
+        {
+            COPY_SVEC(Position, &FX_ConstrictPosition, Position, &instance->position);
+        }
+        else
+        {
+            COPY_SVEC(Position, &FX_ConstrictPosition, Position, FX_ConstrictPositionPtr);
+        }
+    }
+
+    FX_DeleteGeneralEffect((FXGeneralEffect *)FX_ConstrictRibbon);
+
+    FX_ConstrictRibbon = NULL;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_SubDividePrim);
 
