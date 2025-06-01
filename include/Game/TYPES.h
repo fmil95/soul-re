@@ -4759,7 +4759,8 @@ typedef struct _FX_PRIM
     // offset: 0x0012
     short curFrame;
     // offset: 0x0014
-    void *process;
+    // void *process;
+    void (*process)();
     // offset: 0x0018 (4 bytes)
     FX_MATRIX *matrix;
     // offset: 0x001C
@@ -7564,7 +7565,8 @@ typedef struct _FXGeneralEffect
     // offset: 0x0000
     void *next;
     // offset: 0x0004
-    void *continue_process;
+    // void *continue_process;
+    void (*continue_process)();
     // offset: 0x0008 (4 bytes)
     Instance *instance;
     // offset: 0x000C

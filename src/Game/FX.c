@@ -549,7 +549,102 @@ void FX_RelocateFXPointers(struct Object *oldObject, struct Object *newObject, l
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ProcessList);
+void FX_ProcessList(FXTracker *fxTracker)
+{
+    FX_PRIM *fxPrim;
+    FX_PRIM *nextFXPrim;
+    FX_MATRIX *fxMatrix;
+    FX_MATRIX *nextFXMatrix;
+
+    FX_TimeCount += gameTrackerX.timeMult;
+
+    FX_Frames = FX_TimeCount / 4096;
+
+    FX_TimeCount -= FX_Frames << 12;
+
+    for (fxMatrix = (FX_MATRIX *)fxTracker->usedMatrixList.next; fxMatrix != NULL; fxMatrix = (FX_MATRIX *)fxMatrix->node.next)
+    {
+        if ((fxMatrix->flags & 0x4))
+        {
+            fxMatrix->flags |= 0x1;
+        }
+        else
+        {
+            fxMatrix->flags &= ~0x1;
+        }
+
+        fxMatrix->flags &= ~0x2;
+    }
+
+    for (fxPrim = (FX_PRIM *)fxTracker->usedPrimList.next; fxPrim != NULL; fxPrim = nextFXPrim)
+    {
+        nextFXPrim = (FX_PRIM *)fxPrim->node.next;
+
+        if (fxPrim->matrix != NULL)
+        {
+            fxPrim->matrix->flags |= 0x1;
+        }
+
+        if (fxPrim->process != NULL)
+        {
+            fxPrim->process(fxPrim, fxTracker);
+        }
+    }
+
+    for (fxPrim = (FX_PRIM *)fxTracker->usedPrimListSprite.next; fxPrim != NULL; fxPrim = nextFXPrim)
+    {
+        nextFXPrim = (FX_PRIM *)fxPrim->node.next;
+
+        if (fxPrim->process != NULL)
+        {
+            fxPrim->process(fxPrim, fxTracker);
+        }
+    }
+
+    for (fxMatrix = (FX_MATRIX *)fxTracker->usedMatrixList.next; fxMatrix != NULL; fxMatrix = nextFXMatrix)
+    {
+        nextFXMatrix = (FX_MATRIX *)fxMatrix->node.next;
+
+        if (!(fxMatrix->flags & 0x1))
+        {
+            LIST_DeleteFunc((NodeType *)fxMatrix);
+
+            LIST_InsertFunc(&fxTracker->freeMatrixList, (NodeType *)fxMatrix);
+        }
+    }
+
+    {
+        FXGeneralEffect *currentEffect;
+        FXGeneralEffect *nextEffect;
+
+        for (currentEffect = FX_GeneralEffectTracker; currentEffect != NULL; currentEffect = nextEffect)
+        {
+            nextEffect = (FXGeneralEffect *)currentEffect->next;
+
+            if (currentEffect->continue_process != NULL)
+            {
+                currentEffect->continue_process(currentEffect, fxTracker);
+            }
+        }
+
+        if (FX_ConstrictStage == 1)
+        {
+            FX_ConstrictStage = 0;
+        }
+
+        if (snow_amount != 0)
+        {
+            FX_ContinueSnow(fxTracker);
+        }
+
+        if (rain_amount != 0)
+        {
+            FX_ContinueRain(fxTracker);
+        }
+
+        FX_UpdateWind(fxTracker);
+    }
+}
 
 void FX_DrawReaver(PrimPool *primPool, unsigned long **ot, MATRIX *wcTransform)
 {

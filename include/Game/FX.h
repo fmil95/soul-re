@@ -72,5 +72,8 @@ void FX_MakeParticleTexFX(FX_PRIM *fxPrim, SVector *position, Object *object, in
 void FX_ContinueRibbon(FXRibbon *ribbon, FXTracker *fxTracker);
 void FX_SimpleQuadSetup(FX_PRIM *fxPrim, void (*fxProcess)(), FX_MATRIX *fxMatrix, Instance *instance, MFace *mface, MVertex *vertexList, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, FXTracker *fxTracker, short timeToLive);
 void FX_WaterBubbleProcess(FX_PRIM *fxPrim, FXTracker *fxTracker);
+void FX_ContinueSnow(FXTracker *fxTracker);
+void FX_ContinueRain(FXTracker *fxTracker);
+void FX_UpdateWind(FXTracker *fxTracker);
 
 #endif
