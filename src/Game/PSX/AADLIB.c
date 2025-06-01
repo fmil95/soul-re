@@ -612,7 +612,13 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadWaitForSramTransferComplete);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadInitReverb);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadShutdownReverb);
+void aadShutdownReverb()
+{
+    if (aadWaitForSramTransferComplete() != 0)
+    {
+        SpuClearReverbWorkArea(aadGetReverbMode());
+    }
+}
 
 int aadGetReverbMode()
 {
