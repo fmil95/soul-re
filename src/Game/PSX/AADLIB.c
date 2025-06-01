@@ -691,7 +691,37 @@ int aadGetSlotStatus(int slotNumber)
     return aadMem->sequenceSlots[slotNumber]->status;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadAllNotesOff);
+void aadAllNotesOff(int slotNumber)
+{
+    AadSynthVoice *voice;
+    unsigned long vmask;
+    int i;
+    AadSequenceSlot *slot;
+
+    vmask = 0;
+
+    slot = aadMem->sequenceSlots[slotNumber];
+
+    for (i = 0; i < 24; i++)
+    {
+        voice = &aadMem->synthVoice[i];
+
+        if ((voice->voiceID & 0xF0) == slot->slotID)
+        {
+            voice->voiceID = 255;
+
+            vmask |= voice->voiceMask;
+
+            voice->flags |= 0x2;
+        }
+    }
+
+    if (vmask != 0)
+    {
+        aadMem->voiceKeyOffRequest |= vmask;
+        aadMem->voiceKeyOnRequest &= ~vmask;
+    }
+}
 
 void aadMuteChannels(AadSequenceSlot *slot, unsigned long channelList)
 {
