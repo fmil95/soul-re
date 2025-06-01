@@ -61,5 +61,6 @@ void aadInitVolume();
 void aadStartMasterVolumeFade(int targetVolume, int volumeStep, void (*fadeCompleteCallback)());
 void aadSetNoUpdateMode(int noUpdate);
 void aadAllNotesOff(int slotNumber);
+void aadInitSequenceSlot(AadSequenceSlot *slot);
 
 #endif
