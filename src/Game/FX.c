@@ -360,8 +360,6 @@ struct _FX_PRIM *_FX_BuildSingleFaceWithModel(struct _Model *model, struct _MFac
     return fxPrim;
 }
 
-// timeToLive parameter is a different data type than the one specified in the debugging symbols
-// struct _FX_PRIM *FX_BuildSingleFaceWithModel(struct _Model *model, struct _MFace *mface, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), int timeToLive)
 struct _FX_PRIM *FX_BuildSingleFaceWithModel(struct _Model *model, struct _MFace *mface, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short timeToLive)
 {
     return _FX_BuildSingleFaceWithModel(model, mface, center, vel, accl, fxTracker, fxSetup, fxProcess, 0, timeToLive);
@@ -384,8 +382,6 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_BuildSegmentedSplinters);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_BuildNonSegmentedSplinters);
 
-//shardflags is a different parameter than specified in debugging symbols
-//void _FX_BuildSplinters(struct _Instance *instance, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct FXSplinter *splintDef, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), int shardFlags)
 void _FX_BuildSplinters(struct _Instance *instance, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct FXSplinter *splintDef, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short shardFlags)
 {
     if (MEMPACK_MemoryValidFunc((char *)instance->object) != 0)
@@ -411,8 +407,6 @@ void _FX_BuildSplinters(struct _Instance *instance, struct SVECTOR *center, stru
     }
 }
 
-// shardFlags is a different type than specified in debugging symbols 
-// void _FX_Build(struct _Instance *instance, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), int shardFlags)
 void _FX_Build(struct _Instance *instance, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short shardFlags)
 {
     if (MEMPACK_MemoryValidFunc((char *)instance->object) != 0)
@@ -460,7 +454,6 @@ void FX_UpdatePos(FX_PRIM *fxPrim, SVector *offset, int spriteflag)
     }
 }
 
-void FX_WaterBubbleProcess(struct _FX_PRIM *fxPrim, struct _FXTracker *fxTracker);
 void FX_Relocate(struct _SVector *offset)
 {
     struct _FX_PRIM *fxPrim;
@@ -1398,7 +1391,86 @@ void FX_DrawList(FXTracker *fxTracker, GameTracker *gameTracker, unsigned long *
     FX_DrawAllGeneralEffects(wcTransform, gameTrackerX.vertexPool, primPool, ot);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_SimpleQuadSetup);
+void FX_SimpleQuadSetup(FX_PRIM *fxPrim, void (*fxProcess)(), FX_MATRIX *fxMatrix, Instance *instance, MFace *mface, MVertex *vertexList, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, FXTracker *fxTracker, short timeToLive)
+{
+    MVertex *vertex1;
+    MVertex *vertex2;
+    MVertex *vertex3;
+
+    (void)instance;
+    (void)fxTracker;
+
+    vertex1 = (MVertex *)&vertexList[1].vertex;
+    vertex2 = (MVertex *)&vertexList[3].vertex;
+    vertex3 = (MVertex *)&vertexList[2].vertex;
+
+    MATH3D_SetUnityMatrix(&fxMatrix->lwTransform);
+
+    COPY_SVEC(Position, &fxPrim->position, Position, (Position *)center);
+
+    COPY_SVEC(Position, &fxPrim->v0, Position, (Position *)&vertexList->vertex);
+    COPY_SVEC(Position, &fxPrim->v1, Position, (Position *)&vertex1->vertex);
+    COPY_SVEC(Position, &fxPrim->v2, Position, (Position *)&vertex2->vertex);
+    COPY_SVEC(Position, &fxPrim->v3, Position, (Position *)&vertex3->vertex);
+
+    fxPrim->flags |= 0x8;
+
+    if ((mface->flags & 0x2))
+    {
+        fxPrim->flags |= 0x9;
+
+        fxPrim->texture = (TextureMT3 *)mface->color;
+
+        fxPrim->color = (fxPrim->texture->color & 0x3FFFFFF) | 0x2C000000;
+    }
+    else
+    {
+        fxPrim->flags &= ~0x1;
+
+        fxPrim->color = (mface->color & 0x3FFFFFF) | 0x28000000;
+    }
+
+    if (fxProcess != NULL)
+    {
+        fxPrim->process = fxProcess;
+    }
+    else
+    {
+        fxPrim->process = FX_StandardProcess;
+    }
+
+    fxPrim->matrix = fxMatrix;
+
+    if (vel != NULL)
+    {
+        fxPrim->duo.phys.xVel = vel->vx;
+        fxPrim->duo.phys.yVel = vel->vy;
+        fxPrim->duo.phys.zVel = vel->vz;
+    }
+    else
+    {
+        fxPrim->duo.phys.xVel = 0;
+        fxPrim->duo.phys.yVel = 0;
+        fxPrim->duo.phys.zVel = 0;
+    }
+
+    if (accl != NULL)
+    {
+        fxPrim->duo.phys.xAccl = accl->vx;
+        fxPrim->duo.phys.yAccl = accl->vy;
+        fxPrim->duo.phys.zAccl = accl->vz;
+    }
+    else
+    {
+        fxPrim->duo.phys.xAccl = 0;
+        fxPrim->duo.phys.yAccl = 0;
+        fxPrim->duo.phys.zAccl = 0;
+    }
+
+    fxPrim->timeToLive = timeToLive;
+
+    fxPrim->flags |= 0x4000;
+}
 
 void FX_WaterRingProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
 {
@@ -1585,7 +1657,6 @@ void FX_WaterTrailProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
     fxPrim->v3.z = (fxPrim->v3.z * 7) >> 3;
 }
 
-void FX_SimpleQuadSetup(struct _FX_PRIM *fxPrim, void (*fxProcess)(), struct _FX_MATRIX *fxMatrix, struct _Instance *instance, struct _MFace *mface, struct _MVertex *vertexList, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct _FXTracker *fxTracker, int timeToLive);
 void FX_MakeWaterTrail(struct _Instance *instance, int depth)
 {
     struct Object *waterfx;
@@ -2100,6 +2171,7 @@ void FX_Blood(SVector *location, SVector *input_vel, SVector *accel, int amount,
 void FX_Blood2(SVector *location, SVector *input_vel, SVector *accel, int amount, long color, long dummyCrapShouldRemove)
 {
     (void)dummyCrapShouldRemove;
+
     FX_Blood(location, input_vel, accel, amount, color, 4);
 }
 

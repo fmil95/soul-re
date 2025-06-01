@@ -70,5 +70,7 @@ void FX_FlamePrimProcess(FX_PRIM *fxPrim, FXTracker *fxTracker);
 void FX_UpdateGlowEffect(FXGlowEffect *effect, FXTracker *fxTracker);
 void FX_MakeParticleTexFX(FX_PRIM *fxPrim, SVector *position, Object *object, int modelnum, int texnum, SVector *vel, SVector *accl, long color, int size, int life);
 void FX_ContinueRibbon(FXRibbon *ribbon, FXTracker *fxTracker);
+void FX_SimpleQuadSetup(FX_PRIM *fxPrim, void (*fxProcess)(), FX_MATRIX *fxMatrix, Instance *instance, MFace *mface, MVertex *vertexList, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, FXTracker *fxTracker, short timeToLive);
+void FX_WaterBubbleProcess(FX_PRIM *fxPrim, FXTracker *fxTracker);
 
 #endif
