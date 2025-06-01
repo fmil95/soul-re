@@ -1669,7 +1669,54 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_AttachedParticlePrimProcess);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_FlamePrimProcess);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DFacadeParticleSetup);
+void FX_DFacadeParticleSetup(FX_PRIM *fxPrim, SVECTOR *center, short halveWidth, short halveHeight, long color, SVECTOR *vel, SVECTOR *accl, FXTracker *fxTracker, int timeToLive)
+{
+    short temp; // not from decls.h
+
+    (void)fxTracker;
+
+    COPY_SVEC(Position, &fxPrim->position, Position, (Position *)center);
+
+    fxPrim->flags |= 0x8;
+
+    fxPrim->v0.x = halveWidth;
+    fxPrim->v0.y = 4096;
+    fxPrim->v0.z = halveHeight;
+
+    fxPrim->color = (color & 0x3FFFFFF) | 0x20000000;
+
+    fxPrim->process = FX_StandardFXPrimProcess;
+
+    temp = timeToLive;
+
+    if (vel != NULL)
+    {
+        fxPrim->duo.phys.xVel = vel->vx;
+        fxPrim->duo.phys.yVel = vel->vy;
+        fxPrim->duo.phys.zVel = vel->vz;
+    }
+    else
+    {
+        fxPrim->duo.phys.xVel = 0;
+        fxPrim->duo.phys.yVel = 0;
+        fxPrim->duo.phys.zVel = 0;
+    }
+
+    if (accl != NULL)
+    {
+        fxPrim->duo.phys.xAccl = accl->vx;
+        fxPrim->duo.phys.yAccl = accl->vy;
+        fxPrim->duo.phys.zAccl = accl->vz;
+    }
+    else
+    {
+        fxPrim->duo.phys.xAccl = 0;
+        fxPrim->duo.phys.yAccl = 0;
+        fxPrim->duo.phys.zAccl = 0;
+    }
+
+    fxPrim->timeToLive = temp;
+}
 
 FX_PRIM *FX_Dot(SVector *location, SVector *vel, SVector *accel, int scale_speed, long color, long size, int lifetime, int texture_num)
 {
