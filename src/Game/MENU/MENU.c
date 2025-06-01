@@ -286,6 +286,8 @@ void menu_run(menu_t *menu)
                 }
 
                 break;
+            default:
+                break;
             }
 
             if (index != stack->index)

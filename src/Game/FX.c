@@ -1787,6 +1787,7 @@ void FX_SoulDustProcess(struct _FX_PRIM *fxPrim, struct _FXTracker *fxTracker)
         return;
     }
     position = fxPrim->position;
+    (void)position;
     swTransform = fxPrim->duo.flame.segment + fxPrim->duo.flame.parent->matrix;
     fxPrim->position.x = (short)swTransform->t[0];
     fxPrim->position.y = (short)swTransform->t[1];

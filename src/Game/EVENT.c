@@ -521,7 +521,7 @@ void EVENT_BSPProcess(StreamUnit *streamUnit)
                     dz = instance->position.z - instance->oldPos.z;
                 }
 
-                if ((dx << 16) || (dy << 16) || (dz << 16))
+                if (((dx << 16) != 0) || ((dy << 16) != 0) || ((dz << 16) != 0))
                 {
                     Instance *attachedInstance;
                     SVECTOR offset;
