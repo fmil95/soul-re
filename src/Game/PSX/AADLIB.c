@@ -619,7 +619,10 @@ int aadGetReverbMode()
     return 3;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadGetReverbSize);
+unsigned long aadGetReverbSize()
+{
+    return aadReverbModeSize[aadGetReverbMode()] + 64;
+}
 
 int aadGetReverbDepth()
 {
