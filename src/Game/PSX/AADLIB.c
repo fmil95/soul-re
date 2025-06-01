@@ -596,7 +596,12 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", setSramFullAlarm);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadLoadSingleDynSfx);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", HackCallback);
+void HackCallback()
+{
+    SpuSetTransferCallback(NULL);
+
+    aadLoadDynamicSfxReturn2(smfDataPtr, smfBytesLeft, 0, smfInfo, NULL);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadLoadDynamicSfxReturn2);
 
@@ -613,7 +618,6 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadWaitForSramTransferComplete);
 void aadInitReverb()
 {
     SpuSetReverbModeType(aadGetReverbMode());
-
     SpuSetReverbVoice(0, 0xFFFFFF);
 
     if (aadWaitForSramTransferComplete() != 0)

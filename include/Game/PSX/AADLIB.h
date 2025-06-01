@@ -66,5 +66,6 @@ void aadSetSlotTempo(int slotNumber, AadTempo *tempo);
 AadTempo *aadGetTempoFromDynamicSequence(int bank, int sequenceNumber, AadTempo *tempo);
 int aadWaitForSramTransferComplete();
 int aadGetReverbDepth();
+void aadLoadDynamicSfxReturn2(void *loadedDataPtr, long loadedDataSize, short status, void *data1, void *data2);
 
 #endif
