@@ -1657,7 +1657,33 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawScreenPoly);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_SetupPolyGT4);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_MakeWarpArrow);
+void FX_MakeWarpArrow(int x, int y, int xsize, int ysize, int fade)
+{
+    Object *particle;
+    long color;
+    POLY_GT4 *poly;
+
+    particle = (Object *)objectAccess[10].object;
+
+    if (particle != NULL)
+    {
+        if (fade < 0)
+        {
+            fade = 0;
+        }
+
+        color = fade / 32;
+
+        color = color | (color << 8) | (color << 16);
+
+        poly = FX_SetupPolyGT4(x + xsize, y, x, y + ysize, 3, FX_GetTextureObject(particle, 0, 9), color, color, color, color);
+
+        if (poly != NULL)
+        {
+            poly->code |= 0x2;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_MakeMannaIcon);
 
