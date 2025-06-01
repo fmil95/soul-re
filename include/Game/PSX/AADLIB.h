@@ -67,5 +67,6 @@ AadTempo *aadGetTempoFromDynamicSequence(int bank, int sequenceNumber, AadTempo 
 int aadWaitForSramTransferComplete();
 int aadGetReverbDepth();
 void aadLoadDynamicSfxReturn2(void *loadedDataPtr, long loadedDataSize, short status, void *data1, void *data2);
+void aadWaveFree(int handle);
 
 #endif

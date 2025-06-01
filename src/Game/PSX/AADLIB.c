@@ -715,7 +715,7 @@ void aadLoadDynamicSfxAbort(AadDynamicSfxLoadInfo *info, int error)
             }
         }
 
-        aadMem->memoryFreeProc((char *)info->snfFile);
+        aadMem->memoryFreeProc(info->snfFile);
     }
 
     info->flags = 0;
@@ -730,7 +730,19 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadLoadDynamicSfxReturn);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadWaveMalloc);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadGetSramBlockAddr);
+unsigned long aadGetSramBlockAddr(int handle)
+{
+    AadNewSramBlockDesc *sramDesc;
+
+    if (handle < 128)
+    {
+        sramDesc = &aadMem->sramDescriptorTbl[handle];
+
+        return sramDesc->address << 3;
+    }
+
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadWaveFree);
 
