@@ -635,7 +635,23 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadStartSlot);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadStopSlot);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadStopAllSlots);
+void aadStopAllSlots()
+{
+    AadSequenceSlot *slot;
+    int slotNumber;
+
+    for (slotNumber = 0; slotNumber < aadMem->numSlots; slotNumber++)
+    {
+        slot = aadMem->sequenceSlots[slotNumber];
+
+        if ((slot->status & 0x1))
+        {
+            aadStopSlot(slotNumber);
+        }
+
+        slot->sequenceNumberAssigned = 255;
+    }
+}
 
 void aadDisableSlot(int slotNumber)
 {
