@@ -30,7 +30,7 @@ void FX_DeleteGeneralEffect(FXGeneralEffect *effect);
 void FX_StandardFXPrimProcess(FX_PRIM *fxPrim, FXTracker *fxTracker);
 long FX_GetHealthColor(int currentHealth);
 FXGlowEffect *FX_DoInstanceOneSegmentGlow(Instance *instance, long segment, long *color, long numColors, long atuColorCycleRate, long width, long height);
-FXRibbon *FX_StartRibbon(Instance *instance, short startSegment, short endSegment, short type, int ribbonLifeTime, int faceLifeTime, int startFadeValue, long startColor, long endColor);
+FXRibbon *FX_StartRibbon(Instance *instance, short startSegment, short endSegment, short type, short ribbonLifeTime, short faceLifeTime, short startFadeValue, long startColor, long endColor);
 void FX_StopGlowEffect(FXGlowEffect *glowEffect, int fadeout_time);
 void FX_Health_Spiral(int number, int current_health, int max_health);
 void FX_StartConstrict(Instance *instance, SVector *constrict_point, short startSegment, short endSegment);
@@ -69,5 +69,6 @@ void FX_Start_Rain(int percent);
 void FX_FlamePrimProcess(FX_PRIM *fxPrim, FXTracker *fxTracker);
 void FX_UpdateGlowEffect(FXGlowEffect *effect, FXTracker *fxTracker);
 void FX_MakeParticleTexFX(FX_PRIM *fxPrim, SVector *position, Object *object, int modelnum, int texnum, SVector *vel, SVector *accl, long color, int size, int life);
+void FX_ContinueRibbon(FXRibbon *ribbon, FXTracker *fxTracker);
 
 #endif

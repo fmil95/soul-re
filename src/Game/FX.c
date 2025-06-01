@@ -1657,7 +1657,121 @@ void FX_MakeWaterTrail(struct _Instance *instance, int depth)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartRibbon);
+FXRibbon *FX_StartRibbon(Instance *instance, short startSegment, short endSegment, short type, short ribbonLifeTime, short faceLifeTime, short startFadeValue, long startColor, long endColor)
+{
+    MATRIX *swTransform;
+    FXRibbon *ribbon;
+    int i;
+    int number;
+
+    number = (endSegment - startSegment) + 1;
+
+    if (number < 2)
+    {
+        return NULL;
+    }
+
+    ribbon = (FXRibbon *)MEMPACK_Malloc(sizeof(FXRibbon), 13);
+
+    if (ribbon == NULL)
+    {
+        return NULL;
+    }
+
+    ribbon->continue_process = FX_ContinueRibbon;
+
+    ribbon->effectType = 0;
+
+    ribbon->endIndex = 0;
+
+    if (type == 1)
+    {
+        ribbon->numberVerts = number * 2;
+    }
+    else
+    {
+        ribbon->numberVerts = 4;
+    }
+
+    ribbon->vertexPool = (SVECTOR *)MEMPACK_Malloc(ribbon->numberVerts * 8, 13);
+
+    if (ribbon->vertexPool == NULL)
+    {
+        MEMPACK_Free((char *)ribbon);
+
+        return NULL;
+    }
+
+    ribbon->faceLifeTime = faceLifeTime;
+
+    ribbon->startSegment = startSegment;
+    ribbon->endSegment = endSegment;
+
+    ribbon->instance = instance;
+
+    ribbon->type = type;
+
+    ribbon->lifeTime = ribbonLifeTime;
+
+    ribbon->startColor = startColor;
+    ribbon->endColor = endColor;
+
+    ribbon->startFadeValue = startFadeValue;
+
+    ribbon->colorStepValue = 4096 / faceLifeTime;
+
+    ribbon->fadeStep = (4096 - startFadeValue) / ribbon->faceLifeTime;
+
+    if (ribbon->type == 2)
+    {
+        ribbon->fadeStep = (ribbon->fadeStep * 6) / 8;
+    }
+
+    swTransform = instance->matrix;
+
+    if (swTransform != NULL)
+    {
+        if (ribbon->type == 1)
+        {
+            swTransform = &swTransform[startSegment];
+
+            for (i = 0; i < number; i++)
+            {
+                ribbon->vertexPool[i].vx = swTransform->t[0];
+                ribbon->vertexPool[i].vy = swTransform->t[1];
+                ribbon->vertexPool[i].vz = swTransform->t[2];
+
+                ribbon->endIndex++;
+
+                swTransform++;
+            }
+        }
+        else
+        {
+            swTransform = &instance->matrix[startSegment];
+
+            ribbon->vertexPool->vx = swTransform->t[0];
+            ribbon->vertexPool->vy = swTransform->t[1];
+            ribbon->vertexPool->vz = swTransform->t[2];
+
+            swTransform = &instance->matrix[endSegment];
+
+            ribbon->vertexPool[1].vx = swTransform->t[0];
+            ribbon->vertexPool[1].vy = swTransform->t[1];
+            ribbon->vertexPool[1].vz = swTransform->t[2];
+
+            ribbon->endIndex = 2;
+        }
+    }
+    else
+    {
+        ribbon->endIndex = -1;
+    }
+
+    FX_InsertGeneralEffect(ribbon);
+
+    return ribbon;
+}
 
 void FX_RibbonProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
 {
