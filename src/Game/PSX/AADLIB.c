@@ -679,7 +679,21 @@ int aadAssignDynamicSequence(int bank, int sequenceNumber, int slotNumber)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadGetTempoFromDynamicSequence);
+AadTempo *aadGetTempoFromDynamicSequence(int bank, int sequenceNumber, AadTempo *tempo)
+{
+    AadSequenceHdr *seqHdr;
+
+    if (aadMem->dynamicBankStatus[bank] == 2)
+    {
+        seqHdr = (AadSequenceHdr *)aadMem->dynamicSequenceAddressTbl[bank][sequenceNumber];
+
+        tempo->quarterNoteTime = seqHdr->quarterNoteTime;
+
+        tempo->ppqn = seqHdr->ppqn;
+    }
+
+    return tempo;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadSetSlotTempo);
 
