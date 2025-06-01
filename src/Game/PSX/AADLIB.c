@@ -697,7 +697,29 @@ void aadPurgeLoadQueue()
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadProcessLoadQueue);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadLoadDynamicSfxAbort);
+void aadLoadDynamicSfxAbort(AadDynamicSfxLoadInfo *info, int error)
+{
+    (void)error;
+
+    if (info->snfFile != NULL)
+    {
+        if ((info->flags & 0x2))
+        {
+            if (info->snfFile->prevDynSfxFile != NULL)
+            {
+                info->snfFile->prevDynSfxFile->nextDynSfxFile = NULL;
+            }
+            else
+            {
+                aadMem->firstDynSfxFile = NULL;
+            }
+        }
+
+        aadMem->memoryFreeProc((char *)info->snfFile);
+    }
+
+    info->flags = 0;
+}
 
 void aadLoadDynamicSfxDone(AadDynamicSfxLoadInfo *info)
 {
