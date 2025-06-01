@@ -11,6 +11,7 @@
 #include "Game/INSTANCE.h"
 #include "Game/SOUND.h"
 #include "Game/CAMERA.h"
+#include "Game/COLLIDE.h"
 
 STATIC FXGeneralEffect *FX_GeneralEffectTracker;
 
@@ -2761,7 +2762,33 @@ void FX_SoulReaverWinding(Instance *instance, PrimPool *primPool, unsigned long 
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdateInstanceWaterSplit);
+void FX_UpdateInstanceWaterSplit(Instance *instance)
+{
+    SVector normal;
+
+    if ((instance->waterFace != NULL) && (instance->waterFaceTerrain != NULL))
+    {
+        if (!(instance->halvePlane.flags & 0x8))
+        {
+            COLLIDE_GetNormal(instance->waterFace->normal, (short *)instance->waterFaceTerrain->normalList, &normal);
+
+            instance->halvePlane.flags = 0x2;
+
+            FX_GetPlaneEquation(&normal, &instance->splitPoint, &instance->halvePlane);
+        }
+
+        FX_MakeWaterTrail(instance, instance->splitPoint.z);
+    }
+    else
+    {
+        instance->halvePlane.flags &= ~0x2;
+    }
+
+    instance->oldWaterFace = instance->waterFace;
+
+    instance->waterFace = NULL;
+    instance->waterFaceTerrain = NULL;
+}
 
 void FX_GetPlaneEquation(SVector *normal, SVector *poPlane, PlaneConstants *plane)
 {

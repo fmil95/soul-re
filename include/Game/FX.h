@@ -76,5 +76,6 @@ void FX_ContinueSnow(FXTracker *fxTracker);
 void FX_ContinueRain(FXTracker *fxTracker);
 void FX_UpdateWind(FXTracker *fxTracker);
 POLY_GT4 *FX_SetupPolyGT4(int x1, int y1, int x2, int y2, int otz, TextureMT3 *texture, long color0, long color1, long color2, long color3);
+void FX_GetPlaneEquation(SVector *normal, SVector *poPlane, PlaneConstants *plane);
 
 #endif
