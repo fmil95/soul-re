@@ -1592,7 +1592,15 @@ void FX_WaterRingProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_WaterBubbleProcess);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Sprite_Insert);
+void FX_Sprite_Insert(NodeType *list, FX_PRIM *fxPrim)
+{
+    LIST_InsertFunc(list, &fxPrim->node);
+
+    if (FX_LastUsedPrim == NULL)
+    {
+        FX_LastUsedPrim = fxPrim;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_GetTextureObject);
 
