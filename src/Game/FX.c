@@ -1663,7 +1663,129 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_SubDividePrim);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueRibbon);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StandardFXPrimProcess);
+void FX_StandardFXPrimProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
+{
+    long flags;
+
+    if (fxPrim->timeToLive > 0)
+    {
+        fxPrim->timeToLive--;
+    }
+
+    if (fxPrim->timeToLive == 0)
+    {
+        FX_Die(fxPrim, fxTracker);
+        return;
+    }
+
+    flags = fxPrim->flags;
+
+    if ((flags & 0x40000))
+    {
+        long start;
+        long end;
+
+        start = fxPrim->startColor;
+        end = fxPrim->endColor;
+
+        fxPrim->fadeValue[0] += fxPrim->fadeStep;
+
+        if (fxPrim->fadeValue[0] > 4096)
+        {
+            fxPrim->fadeValue[0] = 4096;
+        }
+
+        gte_lddp(4096 - fxPrim->fadeValue[0]);
+        gte_ldcv(&start);
+        gte_ngpf12();
+
+        gte_lddp(fxPrim->fadeValue[0]);
+        gte_ldcv(&end);
+        gte_ngpl12();
+
+        gte_stcv(&fxPrim->color);
+
+        if ((flags & 0x1))
+        {
+            fxPrim->color = (fxPrim->color & 0x3FFFFFF) | 0x2C000000;
+        }
+    }
+
+    if ((flags & 0x2000))
+    {
+        int current_scale;
+
+        current_scale = fxPrim->v0.y - fxPrim->work3;
+
+        if (current_scale <= 0)
+        {
+            FX_Die(fxPrim, fxTracker);
+            return;
+        }
+
+        fxPrim->v0.y = current_scale;
+    }
+
+    if ((flags & 0x20))
+    {
+        MATRIX *swTransform;
+
+        swTransform = &fxPrim->duo.flame.segment[fxPrim->duo.flame.parent->matrix];
+
+        fxPrim->position.x = swTransform->t[0];
+        fxPrim->position.y = swTransform->t[1];
+        fxPrim->position.z = swTransform->t[2];
+    }
+    else if (!(flags & 0x2))
+    {
+        fxPrim->duo.phys.xVel += fxPrim->duo.phys.xAccl;
+        fxPrim->duo.phys.yVel += fxPrim->duo.phys.yAccl;
+        fxPrim->duo.phys.zVel += fxPrim->duo.phys.zAccl;
+
+        if ((flags & 0x1000000))
+        {
+            fxPrim->v0.x += fxPrim->duo.phys.xVel;
+            fxPrim->v1.x += fxPrim->duo.phys.xVel;
+
+            fxPrim->v0.y += fxPrim->duo.phys.yVel;
+            fxPrim->v1.y += fxPrim->duo.phys.yVel;
+
+            fxPrim->v0.z += fxPrim->duo.phys.zVel;
+            fxPrim->v1.z += fxPrim->duo.phys.zVel;
+        }
+        else
+        {
+            fxPrim->position.x += fxPrim->duo.phys.xVel;
+            fxPrim->position.y += fxPrim->duo.phys.yVel;
+            fxPrim->position.z += fxPrim->duo.phys.zVel;
+        }
+
+        if (((flags & 0x100)) && (fxPrim->position.z <= fxPrim->work0))
+        {
+            fxPrim->position.z = fxPrim->work0;
+
+            fxPrim->flags |= 0x2;
+        }
+    }
+
+    if ((!(flags & 0x8000000)) && (fxPrim->matrix != NULL) && (!(fxPrim->matrix->flags & 0x2)))
+    {
+        fxPrim->matrix->flags |= 0x2;
+
+        if ((flags & 0x80))
+        {
+            Rotation rot;
+
+            rot.x = ((char *)&fxPrim->work2)[1] * 4;
+            rot.y = ((char *)&fxPrim->work3)[0] * 4;
+            rot.z = ((char *)&fxPrim->work3)[1] * 4;
+
+            RotMatrixX(rot.x, &fxPrim->matrix->lwTransform);
+            RotMatrixY(rot.y, &fxPrim->matrix->lwTransform);
+            RotMatrixZ(rot.z, &fxPrim->matrix->lwTransform);
+        }
+    }
+}
 
 void FX_AttachedParticlePrimProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
 {
