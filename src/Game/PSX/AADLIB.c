@@ -695,7 +695,25 @@ AadTempo *aadGetTempoFromDynamicSequence(int bank, int sequenceNumber, AadTempo 
     return tempo;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadSetSlotTempo);
+void aadSetSlotTempo(int slotNumber, AadTempo *tempo)
+{
+    AadSequenceSlot *slot;
+    unsigned long tickTime;
+    // unsigned long tickTimeRemainder; // unused
+
+    slot = aadMem->sequenceSlots[slotNumber];
+
+    tickTime = ((tempo->quarterNoteTime / tempo->ppqn) << 16) + (((tempo->quarterNoteTime % tempo->ppqn) << 16) / tempo->ppqn);
+
+    slot->tempo.tickTimeFixed = tickTime;
+
+    slot->tempo.ticksPerUpdate = aadUpdateRate[aadMem->updateMode & 0x3] / tickTime;
+    slot->tempo.errorPerUpdate = aadUpdateRate[aadMem->updateMode & 0x3] % slot->tempo.tickTimeFixed;
+
+    slot->tempo.quarterNoteTime = tempo->quarterNoteTime;
+
+    slot->tempo.ppqn = tempo->ppqn;
+}
 
 void aadStartSlot(int slotNumber)
 {
