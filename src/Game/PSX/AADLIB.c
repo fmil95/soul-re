@@ -561,7 +561,42 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadOpenDynamicSoundBank);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadLoadDynamicSfx);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadFreeDynamicSfx);
+int aadFreeDynamicSfx(int handle)
+{
+    AadDynamicLoadRequest *loadReq;
+    int i;
+
+    for (i = aadMem->nextLoadReqOut; i != aadMem->nextLoadReqIn; i = (i + 1) & 0xF)
+    {
+        loadReq = &aadMem->loadRequestQueue[i];
+
+        if ((loadReq->type == 0) && (loadReq->handle == handle))
+        {
+            loadReq->type = 2;
+
+            return 0;
+        }
+    }
+
+    if (aadMem->numLoadReqsQueued >= 16)
+    {
+        return 0x100F;
+    }
+    else
+    {
+        loadReq = &aadMem->loadRequestQueue[(aadMem->nextLoadReqOut - 1) & 0xF];
+
+        aadMem->nextLoadReqOut = (aadMem->nextLoadReqOut - 1) & 0xF;
+
+        loadReq->type = 1;
+
+        loadReq->handle = handle;
+
+        aadMem->numLoadReqsQueued++;
+    }
+
+    return 0;
+}
 
 void aadRelocateMusicMemoryBegin()
 {
