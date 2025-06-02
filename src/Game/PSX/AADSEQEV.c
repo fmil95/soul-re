@@ -29,7 +29,16 @@ void midiChannelAftertouch()
 {
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", midiPitchWheelControl);
+void midiPitchWheelControl(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int channel;
+
+    channel = event->statusByte & 0xF;
+
+    slot->pitchWheel[channel] = event->dataByte[0] | (event->dataByte[1] << 7);
+
+    aadUpdateChannelPitchBend(slot, channel);
+}
 
 void midiMetaEvent()
 {
