@@ -183,7 +183,10 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdBranchIfVarBitsSet);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdBranchIfVarBitsClear);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSubstituteVariableParam1);
+void metaCmdSubstituteVariableParam1(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    slot->trackFlags[event->track] |= 0x1;
+}
 
 void metaCmdSubstituteVariableParam2(AadSeqEvent *event, AadSequenceSlot *slot)
 {
