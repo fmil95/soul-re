@@ -1,3 +1,4 @@
+#include "Game/PSX/AADLIB.h"
 #include "Game/PSX/AADSQCMD.h"
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", aadSubstituteVariables);
@@ -188,7 +189,19 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSubstituteVariableParam
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSubstituteVariableParam3);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdEndSequence);
+void metaCmdEndSequence(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    (void)event;
+
+    aadInitSequenceSlot(slot);
+
+    aadAllNotesOff(slot->thisSlotNumber);
+
+    if (aadMem->endSequenceCallback != NULL)
+    {
+        aadMem->endSequenceCallback(aadMem->endSequenceCallbackData, slot->thisSlotNumber, 0);
+    }
+}
 
 void metaCmdPlaySoundEffect()
 {
