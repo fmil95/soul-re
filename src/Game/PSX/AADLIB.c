@@ -781,7 +781,66 @@ int aadIsSfxLoaded(unsigned int toneID)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadInitSequenceSlot);
+void aadInitSequenceSlot(AadSequenceSlot *slot)
+{
+    AadSequenceHdr *seqHdr;
+    // unsigned long trackOffset; // unused
+    int i;
+    int bank;
+
+    bank = slot->sequenceAssignedDynamicBank;
+
+    slot->slotFlags &= 0x1;
+
+    slot->status = 0;
+
+    slot->selectedDynamicBank = bank;
+
+    seqHdr = (AadSequenceHdr *)aadMem->dynamicSequenceAddressTbl[bank][slot->sequenceNumberAssigned];
+
+    for (i = 0; i < 16; i++)
+    {
+        if (i < seqHdr->numTracks)
+        {
+            slot->sequencePosition[i] = (unsigned char *)seqHdr + ((int *)seqHdr)[i + 4];
+        }
+        else
+        {
+            slot->sequencePosition[i] = NULL;
+        }
+
+        slot->trackFlags[i] = 0;
+
+        slot->loopCurrentNestLevel[i] = 0;
+
+        slot->eventsInQueue[i] = 0;
+
+        slot->eventIn[i] = 0;
+        slot->eventOut[i] = 0;
+
+        slot->trackFlags[i] |= 0x20;
+    }
+
+    for (i = 0; i < 16; i++)
+    {
+        slot->currentDynamicBank[i] = slot->sequenceAssignedDynamicBank;
+        slot->currentProgram[i] = 255;
+
+        slot->volume[i] = 127;
+
+        slot->panPosition[i] = 63;
+
+        slot->pitchWheel[i] = 8192;
+    }
+
+    slot->selectedSlotPtr = slot;
+
+    slot->delayedMuteMode = 0;
+    slot->delayedMuteCmds = 0;
+    slot->delayedUnMuteCmds = 0;
+
+    slot->selectedSlotNum = slot->thisSlotNumber;
+}
 
 int aadWaitForSramTransferComplete()
 {
