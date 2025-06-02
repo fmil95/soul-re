@@ -746,7 +746,39 @@ unsigned long aadGetSramBlockAddr(int handle)
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadWaveFree);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadFreeSingleDynSfx);
+void aadFreeSingleDynSfx(int sfxID)
+{
+    int ti;
+    int wi;
+    AadLoadedSfxToneAttr *toneAttr;
+    AadLoadedSfxWaveAttr *waveAttr;
+
+    ti = aadMem->sfxToneMasterList[sfxID];
+
+    if (ti < 254)
+    {
+        toneAttr = &aadMem->sfxToneAttrTbl[ti];
+
+        if (--toneAttr->referenceCount == 0)
+        {
+            aadMem->sfxToneMasterList[sfxID] = 255;
+
+            wi = aadMem->sfxWaveMasterList[toneAttr->waveID];
+
+            if (wi < 254)
+            {
+                waveAttr = &aadMem->sfxWaveAttrTbl[wi];
+
+                if (--waveAttr->referenceCount == 0)
+                {
+                    aadMem->sfxWaveMasterList[toneAttr->waveID] = 255;
+
+                    aadWaveFree(waveAttr->sramHandle);
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", setSramFullAlarm);
 
