@@ -744,7 +744,61 @@ unsigned long aadGetSramBlockAddr(int handle)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadWaveFree);
+void aadWaveFree(int handle)
+{
+    AadNewSramBlockDesc *sramDesc;
+    AadNewSramBlockDesc *sramDescTbl;
+
+    if (handle < 128)
+    {
+        AadNewSramBlockDesc *next;
+        AadNewSramBlockDesc *prev;
+
+        sramDescTbl = &aadMem->sramDescriptorTbl[0];
+
+        sramDesc = &sramDescTbl[handle];
+
+        sramDesc->waveID = 0x8000;
+
+        if ((signed char)sramDesc->nextIndex >= 0)
+        {
+            next = &sramDescTbl[sramDesc->nextIndex];
+
+            if (!(next->waveID & 0x4000))
+            {
+                sramDesc->size += next->size;
+
+                next->waveID = 0;
+
+                sramDesc->nextIndex = next->nextIndex;
+
+                if (((signed char)sramDesc->nextIndex << 24) >= 0)
+                {
+                    sramDescTbl[sramDesc->nextIndex].prevIndex = handle;
+                }
+            }
+        }
+
+        if ((signed char)sramDesc->prevIndex >= 0)
+        {
+            prev = &sramDescTbl[sramDesc->prevIndex];
+
+            if (!(prev->waveID & 0x4000))
+            {
+                prev->size += sramDesc->size;
+
+                sramDesc->waveID = 0;
+
+                prev->nextIndex = sramDesc->nextIndex;
+
+                if (((signed char)prev->nextIndex << 24) >= 0)
+                {
+                    sramDescTbl[sramDesc->nextIndex].prevIndex = sramDesc->prevIndex;
+                }
+            }
+        }
+    }
+}
 
 void aadFreeSingleDynSfx(int sfxID)
 {
