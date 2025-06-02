@@ -1,11 +1,37 @@
 #include "Game/PSX/AADLIB.h"
 #include "Game/PSX/AADSEQEV.h"
+#include "Game/PSX/AADSQCMD.h"
+
+STATIC void (*midiEventFunction[8])();
 
 STATIC void (*midiControlFunction[16])();
 
+STATIC void (*midiMetaEventFunction[78])();
+
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", aadQueueNextEvent);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", aadExecuteEvent);
+void aadExecuteEvent(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int eventType;
+
+    if ((event->statusByte & 0x80))
+    {
+        eventType = (event->statusByte >> 4) & 0x7;
+
+        midiEventFunction[eventType](event, slot);
+    }
+    else
+    {
+        aadSubstituteVariables(event, slot);
+
+        eventType = event->statusByte & 0x7F;
+
+        if (event->statusByte < 78)
+        {
+            midiMetaEventFunction[eventType](event, slot);
+        }
+    }
+}
 
 void midiNoteOff()
 {

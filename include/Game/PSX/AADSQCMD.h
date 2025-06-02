@@ -3,4 +3,6 @@
 
 #include "common.h"
 
+void aadSubstituteVariables(AadSeqEvent *event, AadSequenceSlot *slot);
+
 #endif
