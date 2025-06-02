@@ -765,7 +765,21 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadCheckSramFragmented);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadProcessSramDefrag);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadIsSfxLoaded);
+int aadIsSfxLoaded(unsigned int toneID)
+{
+    toneID = aadMem->sfxToneMasterList[toneID];
+
+    if (toneID < 254)
+    {
+        return 1;
+    }
+    else if (toneID == 254)
+    {
+        return -1;
+    }
+
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadInitSequenceSlot);
 
