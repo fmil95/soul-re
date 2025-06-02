@@ -23,7 +23,14 @@ void midiPolyphonicAftertouch()
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", midiControlChange);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", midiProgramChange);
+void midiProgramChange(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int channel;
+
+    channel = event->statusByte & 0xF;
+
+    slot->currentProgram[channel] = event->dataByte[0];
+}
 
 void midiChannelAftertouch()
 {
