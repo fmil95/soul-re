@@ -1,6 +1,8 @@
 #include "Game/PSX/AADLIB.h"
 #include "Game/PSX/AADSEQEV.h"
 
+STATIC void (*midiControlFunction[16])();
+
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", aadQueueNextEvent);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", aadExecuteEvent);
@@ -21,7 +23,14 @@ void midiPolyphonicAftertouch()
 {
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", midiControlChange);
+void midiControlChange(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int controlNumber;
+
+    controlNumber = event->dataByte[0] & 0xF;
+
+    midiControlFunction[controlNumber](event, slot);
+}
 
 void midiProgramChange(AadSeqEvent *event, AadSequenceSlot *slot)
 {
