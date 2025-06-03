@@ -163,7 +163,10 @@ void metaCmdDefineLabel()
 {
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdGotoLabel);
+void metaCmdGotoLabel(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    aadGotoSequenceLabel(slot, event->track, (unsigned char)event->dataByte[0]);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSetSequencePosition);
 
