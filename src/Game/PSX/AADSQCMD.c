@@ -141,7 +141,17 @@ void metaCmdGetChannelBendRange()
 {
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdGetSlotVolume);
+void metaCmdGetSlotVolume(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int variableNum;
+
+    variableNum = (unsigned char)event->dataByte[0];
+
+    if (variableNum < 128)
+    {
+        aadMem->userVariables[variableNum] = slot->selectedSlotPtr->slotVolume;
+    }
+}
 
 void metaCmdGetSlotPan(AadSeqEvent *event, AadSequenceSlot *slot)
 {
