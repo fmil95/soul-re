@@ -145,7 +145,22 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdGetSlotVolume);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdGetSlotPan);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSetVariable);
+void metaCmdSetVariable(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int value;
+    int destVariable;
+
+    (void)slot;
+
+    value = (unsigned char)event->dataByte[0];
+
+    destVariable = (unsigned char)event->dataByte[1];
+
+    if (destVariable < 128)
+    {
+        aadMem->userVariables[destVariable] = value;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdCopyVariable);
 
