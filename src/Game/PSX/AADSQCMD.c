@@ -131,7 +131,20 @@ void metaCmdGetChannelTranspose()
 {
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdGetChannelProgram);
+void metaCmdGetChannelProgram(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int variableNum;
+    int channel;
+
+    variableNum = (unsigned char)event->dataByte[0];
+
+    channel = slot->selectedChannel;
+
+    if (variableNum < 128)
+    {
+        aadMem->userVariables[variableNum] = slot->selectedSlotPtr->currentProgram[channel];
+    }
+}
 
 void metaCmdGetChannelBasePriority()
 {
