@@ -195,7 +195,21 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdBranchIfVarLessOrEqual)
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdBranchIfVarGreaterOrEqual);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdBranchIfVarBitsSet);
+void metaCmdBranchIfVarBitsSet(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int variableNum;
+    int mask;
+    int labelNum;
+
+    variableNum = (unsigned char)event->dataByte[0];
+    mask = (unsigned char)event->dataByte[1];
+    labelNum = (unsigned char)event->dataByte[2];
+
+    if ((aadMem->userVariables[variableNum] & mask))
+    {
+        aadGotoSequenceLabel(slot, event->track, labelNum);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdBranchIfVarBitsClear);
 
