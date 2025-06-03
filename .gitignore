@@ -1,6 +1,7 @@
 SLUS_007.08
 KAIN2.ld
 asm/
+expected/
 build/
 .vscode/
 __pycache__/

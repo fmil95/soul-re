@@ -6,6 +6,7 @@ COMPARE      ?= 1
 NON_MATCHING ?= 0
 VERBOSE      ?= 0
 BUILD_DIR    ?= build
+EXPECTED_DIR ?= expected
 CHECK        ?= 1
 
 # Fail early if baserom does not exist
@@ -149,6 +150,10 @@ setup: distclean split
 
 split:
 	$(V)$(SPLAT)
+
+expected: all
+	@mkdir -p $(EXPECTED_DIR)
+	$(V)mv $(BUILD_DIR)/asm $(EXPECTED_DIR)/asm
 
 # Compile .c files
 $(BUILD_DIR)/%.c.o: %.c
