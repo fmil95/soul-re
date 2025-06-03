@@ -183,7 +183,23 @@ void metaCmdSetSequencePosition(AadSeqEvent *event, AadSequenceSlot *slot)
     aadGotoSequenceLabel(slot->selectedSlotPtr, event->track, (unsigned char)event->dataByte[0]);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdBranchIfVarEqual);
+void metaCmdBranchIfVarEqual(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int variableNum;
+    int value;
+    int labelNum;
+
+    variableNum = (unsigned char)event->dataByte[0];
+
+    value = (unsigned char)event->dataByte[1];
+
+    labelNum = (unsigned char)event->dataByte[2];
+
+    if (aadMem->userVariables[variableNum] == value)
+    {
+        aadGotoSequenceLabel(slot, event->track, labelNum);
+    }
+}
 
 void metaCmdBranchIfVarNotEqual(AadSeqEvent *event, AadSequenceSlot *slot)
 {
