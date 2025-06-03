@@ -248,7 +248,33 @@ void metaCmdClearVariableBits(AadSeqEvent *event, AadSequenceSlot *slot)
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", aadGotoSequencePosition);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", aadGotoSequenceLabel);
+void aadGotoSequenceLabel(AadSequenceSlot *slot, int track, int labelNumber)
+{
+    AadSequenceHdr *seqHdr;
+    unsigned long trackOffset;
+    int bank;
+
+    bank = slot->sequenceAssignedDynamicBank;
+
+    seqHdr = (AadSequenceHdr *)aadMem->dynamicSequenceAddressTbl[bank][slot->sequenceNumberAssigned];
+
+    trackOffset = ((unsigned long *)&seqHdr[1])[track];
+
+    slot->sequencePosition[track] = (unsigned char *)seqHdr + trackOffset + aadMem->dynamicSequenceLabelOffsetTbl[bank][labelNumber];
+
+    while (slot->eventsInQueue[track] != 0)
+    {
+        slot->eventsInQueue[track]--;
+        slot->eventOut[track]++;
+
+        if (slot->eventOut[track] == 4)
+        {
+            slot->eventOut[track] = 0;
+        }
+    }
+
+    slot->trackFlags[track] &= ~0x18;
+}
 
 void metaCmdLoopStart(AadSeqEvent *event, AadSequenceSlot *slot)
 {
