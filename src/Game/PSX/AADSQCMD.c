@@ -161,7 +161,26 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", aadGotoSequencePosition);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", aadGotoSequenceLabel);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdLoopStart);
+void metaCmdLoopStart(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int nestLevel;
+    int track;
+
+    track = event->track;
+
+    nestLevel = slot->loopCurrentNestLevel[track];
+
+    if (nestLevel < 4)
+    {
+        slot->loopSequencePosition[nestLevel][track] = slot->sequencePosition[track];
+
+        slot->loopCounter[nestLevel][track] = (unsigned char)event->dataByte[0];
+
+        slot->loopCurrentNestLevel[track]++;
+    }
+
+    slot->trackFlags[track] &= ~0x10;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdLoopEnd);
 
