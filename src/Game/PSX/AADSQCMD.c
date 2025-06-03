@@ -162,7 +162,21 @@ void metaCmdSetVariable(AadSeqEvent *event, AadSequenceSlot *slot)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdCopyVariable);
+void metaCmdCopyVariable(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int srcVariable;
+    int destVariable;
+
+    (void)slot;
+
+    srcVariable = (unsigned char)event->dataByte[0];
+    destVariable = (unsigned char)event->dataByte[1];
+
+    if ((srcVariable < 128) && (destVariable < 128))
+    {
+        aadMem->userVariables[destVariable] = aadMem->userVariables[srcVariable];
+    }
+}
 
 void metaCmdAddVariable(AadSeqEvent *event, AadSequenceSlot *slot)
 {
