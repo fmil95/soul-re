@@ -3,7 +3,17 @@
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", aadSubstituteVariables);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSelectChannel);
+void metaCmdSelectChannel(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int channelNumber;
+
+    channelNumber = (unsigned char)event->dataByte[0];
+
+    if (channelNumber < 16)
+    {
+        slot->selectedChannel = channelNumber;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSelectSlot);
 
