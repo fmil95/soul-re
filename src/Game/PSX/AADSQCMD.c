@@ -1,5 +1,6 @@
 #include "Game/PSX/AADLIB.h"
 #include "Game/PSX/AADSQCMD.h"
+#include "Game/PSX/AADSEQEV.h"
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", aadSubstituteVariables);
 
@@ -53,7 +54,16 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSetSlotVolume);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSetSlotPan);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSetChannelVolume);
+void metaCmdSetChannelVolume(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int volume;
+
+    volume = (unsigned char)event->dataByte[0];
+
+    slot->selectedSlotPtr->volume[slot->selectedChannel] = volume;
+
+    aadUpdateChannelVolPan(slot->selectedSlotPtr, slot->selectedChannel);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSetChannelPan);
 
