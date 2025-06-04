@@ -91,7 +91,14 @@ void metaCmdSlotPanFade()
 {
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSetChannelProgram);
+void metaCmdSetChannelProgram(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int program;
+
+    program = (unsigned char)event->dataByte[0];
+
+    slot->selectedSlotPtr->currentProgram[slot->selectedChannel] = program;
+}
 
 void metaCmdSetChannelBasePriority()
 {
