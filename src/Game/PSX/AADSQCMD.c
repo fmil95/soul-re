@@ -18,7 +18,20 @@ void metaCmdSelectChannel(AadSeqEvent *event, AadSequenceSlot *slot)
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSelectSlot);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdAssignSequence);
+void metaCmdAssignSequence(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int sequenceNumber;
+    int bank;
+
+    sequenceNumber = (unsigned char)event->dataByte[0];
+
+    bank = slot->selectedDynamicBank;
+
+    if ((aadMem->dynamicBankStatus[bank] == 2) && (sequenceNumber < aadGetNumDynamicSequences(bank)))
+    {
+        aadAssignDynamicSequence(bank, sequenceNumber, slot->selectedSlotNum);
+    }
+}
 
 void metaCmdUsePrimaryTempo()
 {
