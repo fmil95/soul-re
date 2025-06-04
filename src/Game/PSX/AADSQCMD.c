@@ -38,7 +38,12 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdStartSlot);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdStopSlot);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdPauseSlot);
+void metaCmdPauseSlot(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    (void)event;
+
+    aadPauseSlot(slot->selectedSlotNum);
+}
 
 void metaCmdResumeSlot(AadSeqEvent *event, AadSequenceSlot *slot)
 {
