@@ -97,7 +97,17 @@ void metaCmdSetChannelBasePriority()
 {
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSetChannelTranspose);
+void metaCmdSetChannelTranspose(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int channel;
+    int transpose;
+
+    channel = slot->selectedChannel;
+
+    transpose = (unsigned char)event->dataByte[0];
+
+    slot->selectedSlotPtr->transpose[channel] = transpose;
+}
 
 void metaCmdIgnoreChannelTranspose(AadSeqEvent *event, AadSequenceSlot *slot)
 {
