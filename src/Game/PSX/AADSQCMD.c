@@ -117,7 +117,26 @@ void metaCmdRespectChannelPitchMap()
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdGetSequenceAssigned);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdGetTempo);
+void metaCmdGetTempo(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int variableNum1;
+    int variableNum2;
+    int variableNum3;
+    unsigned long quarterNoteTime;
+
+    variableNum1 = (unsigned char)event->dataByte[0];
+    variableNum2 = (unsigned char)event->dataByte[1];
+    variableNum3 = (unsigned char)event->dataByte[2];
+
+    if ((variableNum1 < 128) && (variableNum2 < 128) && (variableNum3 < 128))
+    {
+        quarterNoteTime = slot->selectedSlotPtr->tempo.quarterNoteTime;
+
+        aadMem->userVariables[variableNum1] = quarterNoteTime;
+        aadMem->userVariables[variableNum2] = quarterNoteTime >> 8;
+        aadMem->userVariables[variableNum3] = quarterNoteTime >> 16;
+    }
+}
 
 void metaCmdGetSlotStatus(AadSeqEvent *event, AadSequenceSlot *slot)
 {
