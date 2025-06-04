@@ -28,7 +28,19 @@ void metaCmdUseSecondaryTempo()
 {
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSetTempo);
+void metaCmdSetTempo(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    AadTempo tempo;
+
+    tempo.quarterNoteTime = (unsigned char)event->dataByte[0] << 16;
+
+    tempo.quarterNoteTime |= (unsigned char)event->dataByte[1] << 8;
+    tempo.quarterNoteTime |= (unsigned char)event->dataByte[2];
+
+    tempo.ppqn = slot->selectedSlotPtr->tempo.ppqn;
+
+    aadSetSlotTempo(slot->selectedSlotNum, &tempo);
+}
 
 void metaCmdChangeTempo(AadSeqEvent *event, AadSequenceSlot *slot)
 {
