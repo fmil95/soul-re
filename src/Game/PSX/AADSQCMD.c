@@ -65,7 +65,16 @@ void metaCmdSetChannelVolume(AadSeqEvent *event, AadSequenceSlot *slot)
     aadUpdateChannelVolPan(slot->selectedSlotPtr, slot->selectedChannel);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSetChannelPan);
+void metaCmdSetChannelPan(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int pan;
+
+    pan = (unsigned char)event->dataByte[0];
+
+    slot->selectedSlotPtr->panPosition[slot->selectedChannel] = pan;
+
+    aadUpdateChannelVolPan(slot->selectedSlotPtr, slot->selectedChannel);
+}
 
 void metaCmdEnableSustainUpdate(AadSeqEvent *event, AadSequenceSlot *slot)
 {
