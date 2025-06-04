@@ -63,7 +63,12 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdDisableSustainUpdate);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdMuteChannel);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdUnMuteChannel);
+void metaCmdUnMuteChannel(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    (void)event;
+
+    aadUnMuteChannels(slot->selectedSlotPtr, 1 << slot->selectedChannel);
+}
 
 void metaCmdMuteChannelList(AadSeqEvent *event, AadSequenceSlot *slot)
 {
