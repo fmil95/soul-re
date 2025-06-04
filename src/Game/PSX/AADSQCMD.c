@@ -16,7 +16,25 @@ void metaCmdSelectChannel(AadSeqEvent *event, AadSequenceSlot *slot)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSelectSlot);
+void metaCmdSelectSlot(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int slotNumber;
+
+    slotNumber = (unsigned char)event->dataByte[0];
+
+    if (slotNumber < aadMem->numSlots)
+    {
+        slot->selectedSlotPtr = aadMem->sequenceSlots[slotNumber];
+
+        slot->selectedSlotNum = slotNumber;
+    }
+    else if (slotNumber == 127)
+    {
+        slot->selectedSlotPtr = slot;
+
+        slot->selectedSlotNum = slot->thisSlotNumber;
+    }
+}
 
 void metaCmdAssignSequence(AadSeqEvent *event, AadSequenceSlot *slot)
 {
