@@ -123,7 +123,20 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdGetSlotStatus);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdGetChannelMute);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdGetChannelVolume);
+void metaCmdGetChannelVolume(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int variableNum;
+    int channel;
+
+    variableNum = (unsigned char)event->dataByte[0];
+
+    channel = slot->selectedChannel;
+
+    if (variableNum < 128)
+    {
+        aadMem->userVariables[variableNum] = slot->selectedSlotPtr->volume[channel];
+    }
+}
 
 void metaCmdGetChannelPan(AadSeqEvent *event, AadSequenceSlot *slot)
 {
