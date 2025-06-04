@@ -101,7 +101,16 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSetChannelTranspose);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdIgnoreChannelTranspose);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdRespectChannelTranspose);
+void metaCmdRespectChannelTranspose(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int channel;
+
+    (void)event;
+
+    channel = slot->selectedChannel;
+
+    slot->selectedSlotPtr->ignoreTranspose &= ~(1 << channel);
+}
 
 void metaCmdSetChannelPitchMap()
 {
