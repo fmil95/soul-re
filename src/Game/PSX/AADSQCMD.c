@@ -30,7 +30,21 @@ void metaCmdUseSecondaryTempo()
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSetTempo);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdChangeTempo);
+void metaCmdChangeTempo(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    AadTempo tempo;
+    AadSequenceSlot *selectedSlot;
+
+    selectedSlot = slot->selectedSlotPtr;
+
+    tempo.quarterNoteTime = selectedSlot->tempo.quarterNoteTime * 100;
+
+    tempo.quarterNoteTime /= (unsigned char)event->dataByte[0];
+
+    tempo.ppqn = selectedSlot->tempo.ppqn;
+
+    aadSetSlotTempo(slot->selectedSlotNum, &tempo);
+}
 
 void metaCmdSetTempoFromSequence(AadSeqEvent *event, AadSequenceSlot *slot)
 {
@@ -38,9 +52,9 @@ void metaCmdSetTempoFromSequence(AadSeqEvent *event, AadSequenceSlot *slot)
     AadTempo tempo;
     int bank;
 
-    bank = slot->selectedDynamicBank;
-
     sequenceNumber = (unsigned char)event->dataByte[0];
+
+    bank = slot->selectedDynamicBank;
 
     if ((aadMem->dynamicBankStatus[bank] == 2) && (sequenceNumber < aadGetNumDynamicSequences(bank)))
     {
