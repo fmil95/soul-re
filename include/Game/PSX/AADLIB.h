@@ -68,5 +68,7 @@ int aadWaitForSramTransferComplete();
 int aadGetReverbDepth();
 void aadLoadDynamicSfxReturn2(void *loadedDataPtr, long loadedDataSize, short status, void *data1, void *data2);
 void aadWaveFree(int handle);
+void aadMuteChannels(AadSequenceSlot *slot, unsigned long channelList);
+void aadUnMuteChannels(AadSequenceSlot *slot, unsigned long channelList);
 
 #endif
