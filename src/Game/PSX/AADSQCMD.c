@@ -71,7 +71,16 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdUnMuteChannelList);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSetChannelMute);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdDelayMute);
+void metaCmdDelayMute(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    unsigned long channelMask;
+
+    (void)event;
+
+    channelMask = ((unsigned char)event->dataByte[1] << 8) | (unsigned char)event->dataByte[0];
+
+    slot->selectedSlotPtr->delayedMuteMode |= channelMask;
+}
 
 void metaCmdUpdateMute(AadSeqEvent *event, AadSequenceSlot *slot)
 {
