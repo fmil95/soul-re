@@ -57,7 +57,16 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSetChannelVolume);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSetChannelPan);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdEnableSustainUpdate);
+void metaCmdEnableSustainUpdate(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int channel;
+
+    (void)event;
+
+    channel = slot->selectedChannel;
+
+    slot->selectedSlotPtr->enableSustainUpdate |= 1 << channel;
+}
 
 void metaCmdDisableSustainUpdate(AadSeqEvent *event, AadSequenceSlot *slot)
 {
