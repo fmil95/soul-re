@@ -32,7 +32,23 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSetTempo);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdChangeTempo);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdSetTempoFromSequence);
+void metaCmdSetTempoFromSequence(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int sequenceNumber;
+    AadTempo tempo;
+    int bank;
+
+    bank = slot->selectedDynamicBank;
+
+    sequenceNumber = (unsigned char)event->dataByte[0];
+
+    if ((aadMem->dynamicBankStatus[bank] == 2) && (sequenceNumber < aadGetNumDynamicSequences(bank)))
+    {
+        aadGetTempoFromDynamicSequence(bank, sequenceNumber, &tempo);
+
+        aadSetSlotTempo(slot->selectedSlotNum, &tempo);
+    }
+}
 
 void metaCmdStartSlot(AadSeqEvent *event, AadSequenceSlot *slot)
 {

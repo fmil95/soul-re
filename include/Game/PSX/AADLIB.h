@@ -72,5 +72,6 @@ void aadMuteChannels(AadSequenceSlot *slot, unsigned long channelList);
 void aadUnMuteChannels(AadSequenceSlot *slot, unsigned long channelList);
 void aadResumeSlot(int slotNumber);
 void aadPauseSlot(int slotNumber);
+int aadGetNumDynamicSequences(int bank);
 
 #endif
