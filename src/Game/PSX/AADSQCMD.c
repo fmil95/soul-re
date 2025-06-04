@@ -346,7 +346,31 @@ void metaCmdLoopStart(AadSeqEvent *event, AadSequenceSlot *slot)
     slot->trackFlags[track] &= ~0x10;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", metaCmdLoopEnd);
+void metaCmdLoopEnd(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    int prevNestLevel;
+    int track;
+
+    track = event->track;
+
+    if (slot->loopCurrentNestLevel[track] != 0)
+    {
+        prevNestLevel = slot->loopCurrentNestLevel[track] - 1;
+
+        if (slot->loopCounter[prevNestLevel][track] == 0)
+        {
+            aadGotoSequencePosition(slot, track, slot->loopSequencePosition[prevNestLevel][track]);
+        }
+        else if (--slot->loopCounter[prevNestLevel][track] != 0)
+        {
+            aadGotoSequencePosition(slot, track, slot->loopSequencePosition[prevNestLevel][track]);
+        }
+        else
+        {
+            slot->loopCurrentNestLevel[track] = prevNestLevel;
+        }
+    }
+}
 
 void metaCmdLoopBreak()
 {
