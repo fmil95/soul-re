@@ -40,5 +40,6 @@ void LOAD_SetupFileToDoBufferedCDReading();
 void LOAD_InitCd();
 void LOAD_ChangeDirectory(char *name);
 int LOAD_IsXAInQueue();
+void LOAD_LoadTIM(long *addr, long x_pos, long y_pos, long clut_x, long clut_y);
 
 #endif

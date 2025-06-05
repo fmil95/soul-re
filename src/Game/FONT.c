@@ -1,5 +1,7 @@
 #include "common.h"
 #include "Game/FONT.h"
+#include "Game/MEMPACK.h"
+#include "Game/LOAD3D.h"
 
 unsigned char fontTransTable[128];
 
@@ -34,7 +36,20 @@ void FONT_MakeSpecialFogClut(int x, int y)
 
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_Init);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_ReloadFont);
+extern char D_800D0674[];
+void FONT_ReloadFont()
+{
+    unsigned long *timAddr;
+
+    timAddr = (unsigned long *)LOAD_ReadFile(D_800D0674, 5);
+    // timAddr = (unsigned long*)LOAD_ReadFile("\\kain2\\game\\font.tim", 5);
+
+    LOAD_LoadTIM((long *)timAddr, fontTracker.font_vramX, fontTracker.font_vramY, fontTracker.font_vramX, fontTracker.font_vramY + 126);
+
+    MEMPACK_Free((char *)timAddr);
+
+    FONT_MakeSpecialFogClut(fontTracker.font_vramX, fontTracker.font_vramY + 127);
+}
 
 void FONT_DrawChar(FontChar *fontChar)
 {
