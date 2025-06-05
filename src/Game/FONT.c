@@ -89,7 +89,27 @@ void FONT_AddCharToBuffer(char c, long x, long y)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_Print);
+void FONT_Print(const char *fmt, ...)
+{
+    char *hold;
+    va_list ap;
+
+    va_start(ap, fmt);
+
+    vsprintf(fp_str, fmt, ap);
+
+    for (hold = fp_str; *hold != '\0'; hold++)
+    {
+        if ((*hold >= 'A') && (*hold <= 'Z'))
+        {
+            *hold += 'a' - 'A';
+        }
+    }
+
+    FONT_VaReallyPrint(fp_str, ap);
+
+    va_end(ap);
+}
 
 void FONT_Print2(const char *fmt, ...)
 {
