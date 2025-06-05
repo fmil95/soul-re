@@ -808,8 +808,6 @@ int MON_ChooseCombatMove(Instance *instance, int reason)
     struct _Position temp;
     struct SVECTOR New;
     struct VECTOR OutTrans;
-    int temp2;   // not from decls.h
-    short temp3; // not from decls.h
 
     mv = (MonsterVars *)instance->extraData;
     enemy = mv->enemy;
@@ -817,77 +815,64 @@ int MON_ChooseCombatMove(Instance *instance, int reason)
 
     infront = (unsigned)enemy->relativePosition.y >> 0x1F;
 
-    if (mv->ally != NULL)
+    if ((mv->ally != NULL) && (mv->ally->distance < 0x2BC))
     {
-        if (mv->ally->distance < 0x2BC)
-        {
-            anim = MONSTER_ANIM_JUMPLEFT;
-            if (mv->ally->relativePosition.x > 0)
-            {
-                anim = MONSTER_ANIM_JUMPRIGHT;
-            }
-            goto block_21;
-        }
+        anim = (mv->ally->relativePosition.x > 0) ? MONSTER_ANIM_JUMPRIGHT : MONSTER_ANIM_JUMPLEFT;
     }
-
-    if (reason != 4)
+    else if (reason == 4)
+    {
+        goto label;
+    }
+    else
     {
         anim = MONSTER_ANIM_JUMPFORWARD;
         if (reason != 5)
         {
             if (abs(enemy->relativePosition.y) < subAttr->combatAttributes->preferredCombatRange)
             {
-                if (infront == 0)
-                {
-                    goto block_21;
-                }
-                else
+                if (infront != 0)
                 {
                 label:
                     anim = MONSTER_ANIM_JUMPBACK;
-                    goto block_21;
-                }
-            }
-            else if ((unsigned short)(MON_FacingOffset(instance, enemy->instance) + 0x2A9) < 0x553U)
-            {
-                temp2 = MON_ChooseLeftOrRight(instance, enemy);
-                anim = MONSTER_ANIM_JUMPLEFT;
-                if (temp2 >= 0)
-                {
-                    anim = MONSTER_ANIM_JUMPRIGHT;
-                    if (temp2 <= 0)
-                    {
-                        if (!(rand() & 3))
-                        {
-                            anim = MONSTER_ANIM_JUMPLEFT;
-                            if (rand() & 1)
-                            {
-                                anim = MONSTER_ANIM_JUMPRIGHT;
-                            }
-                        }
-                        else
-                        {
-                            anim = (signed char)mv->lastSideMove;
-                        }
-                    }
                 }
             }
             else
             {
-                anim = MONSTER_ANIM_HIT1;
-            }
-            if (anim != MONSTER_STATE_BIRTH)
-            {
-                data = anim;
+                zrot = MON_FacingOffset(instance, enemy->instance);
+                if (zrot > -682 && zrot < 682)
+                {
+                    data = MON_ChooseLeftOrRight(instance, enemy);
+
+                    if (data < 0)
+                    {
+                        anim = MONSTER_ANIM_JUMPLEFT;
+                    }
+                    else if (data > 0)
+                    {
+                        anim = MONSTER_ANIM_JUMPRIGHT;
+                    }
+                    else if (!(rand() & 3))
+                    {
+                        anim = rand() & 1 ? MONSTER_ANIM_JUMPRIGHT : MONSTER_ANIM_JUMPLEFT;
+                    }
+                    else
+                    {
+                        anim = (signed char)mv->lastSideMove;
+                    }
+                }
+                else
+                {
+                    anim = MONSTER_ANIM_HIT1;
+                }
+
+                if (anim != MONSTER_STATE_BIRTH)
+                {
+                    data = anim;
+                }
             }
         }
     }
-    else
-    {
-        goto label;
-    }
 
-block_21:
     if (anim != MONSTER_ANIM_HIT1)
     {
         zrot = instance->rotation.z;
@@ -946,19 +931,22 @@ block_21:
                 temp.z = instance->position.z + OutTrans.vz;
                 if (MATH3D_LengthXYZ(temp.x - instance->intro->position.x, temp.y - instance->intro->position.y, temp.z - instance->intro->position.z) > (mv->guardRange + 0x140))
                 {
-                    temp3 = (MATH3D_AngleFromPosToPos(&instance->position, &instance->intro->position) - instance->rotation.z) & 0xFFF;
-                    anim = MONSTER_ANIM_JUMPFORWARD;
-                    if (temp3 >= 0x400)
+                    zrot = (MATH3D_AngleFromPosToPos(&instance->position, &instance->intro->position) - instance->rotation.z) & 0xFFF;
+                    if (zrot < 0x400)
+                    {
+                        anim = MONSTER_ANIM_JUMPFORWARD;
+                    }
+                    else if (zrot < 0x800)
                     {
                         anim = MONSTER_ANIM_JUMPLEFT;
-                        if (temp3 >= 0x800)
-                        {
-                            anim = MONSTER_ANIM_JUMPRIGHT;
-                            if (temp3 < 0xC00)
-                            {
-                                anim = MONSTER_ANIM_JUMPBACK;
-                            }
-                        }
+                    }
+                    else if (zrot < 0xC00)
+                    {
+                        anim = MONSTER_ANIM_JUMPBACK;
+                    }
+                    else
+                    {
+                        anim = MONSTER_ANIM_JUMPRIGHT;
                     }
                     manim = &((MonsterAttributes *)instance->data)->animList[(signed char)subAttr->animList[anim]];
                 }
