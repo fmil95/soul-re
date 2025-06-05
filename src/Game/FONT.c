@@ -95,7 +95,31 @@ INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_Print2);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_GetStringWidth);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_Flush);
+void FONT_Flush()
+{
+    long i;
+    FontChar *fontChar;
+
+    fontTracker.font_xpos = 10;
+    fontTracker.font_ypos = 16;
+
+    if (fontTracker.font_buffIndex == 0)
+    {
+        return;
+    }
+
+    fontChar = fontTracker.font_buffer;
+
+    for (i = fontTracker.font_buffIndex; i != 0; i--, fontChar++)
+    {
+        if ((fontChar->c != ' ') && (fontChar->c != '@'))
+        {
+            FONT_DrawChar(fontChar);
+        }
+    }
+
+    fontTracker.font_buffIndex = 0;
+}
 
 void FONT_SetCursor(short x, short y)
 {
