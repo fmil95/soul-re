@@ -91,7 +91,18 @@ void FONT_AddCharToBuffer(char c, long x, long y)
 
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_Print);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_Print2);
+void FONT_Print2(const char *fmt, ...)
+{
+    va_list ap;
+
+    va_start(ap, fmt);
+
+    vsprintf(fp_str, fmt, ap);
+
+    FONT_VaReallyPrint(fp_str, ap);
+
+    va_end(ap);
+}
 
 int FONT_GetStringWidth(char *str)
 {
