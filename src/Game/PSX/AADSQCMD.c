@@ -2,7 +2,40 @@
 #include "Game/PSX/AADSQCMD.h"
 #include "Game/PSX/AADSEQEV.h"
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSQCMD", aadSubstituteVariables);
+void aadSubstituteVariables(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    unsigned char trackFlags;
+
+    slot = (AadSequenceSlot *)((uintptr_t)slot + event->track);
+
+    trackFlags = slot->trackFlags[0];
+
+    if (((trackFlags & 0x7)) && ((event->statusByte != 65) && (event->statusByte != 66) && (event->statusByte != 67)))
+    {
+        if ((trackFlags & 0x1))
+        {
+            trackFlags &= ~0x1;
+
+            event->dataByte[0] = aadMem->userVariables[(unsigned char)event->dataByte[0]];
+        }
+
+        if ((trackFlags & 0x2))
+        {
+            trackFlags &= ~0x2;
+
+            event->dataByte[1] = aadMem->userVariables[(unsigned char)event->dataByte[1]];
+        }
+
+        if ((trackFlags & 0x4))
+        {
+            trackFlags &= ~0x4;
+
+            event->dataByte[2] = aadMem->userVariables[(unsigned char)event->dataByte[2]];
+        }
+
+        slot->trackFlags[0] = trackFlags;
+    }
+}
 
 void metaCmdSelectChannel(AadSeqEvent *event, AadSequenceSlot *slot)
 {
