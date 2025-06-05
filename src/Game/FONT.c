@@ -93,7 +93,23 @@ INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_Print);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_Print2);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_GetStringWidth);
+int FONT_GetStringWidth(char *str)
+{
+    int w;
+    int len;
+    int i;
+
+    len = strlen(str);
+
+    w = 0;
+
+    for (i = 0; i < len; i++)
+    {
+        w += FONT_CharSpacing(str[i], 8);
+    }
+
+    return w;
+}
 
 void FONT_Flush()
 {

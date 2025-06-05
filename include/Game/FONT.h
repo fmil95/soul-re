@@ -14,6 +14,7 @@ void FONT_SetColorIndexCol(int color, int r, int g, int b);
 void FONT_Init();
 void FONT_DrawChar2D(unsigned char c, long x, long y);
 void FONT_ReloadFont();
+long FONT_CharSpacing(char c, long fontXSize);
 
 FontTracker fontTracker;
 
