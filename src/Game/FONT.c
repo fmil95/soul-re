@@ -2,12 +2,15 @@
 #include "Game/FONT.h"
 #include "Game/MEMPACK.h"
 #include "Game/LOAD3D.h"
+#include "Game/VRAM.h"
 
 unsigned char fontTransTable[128];
 
 static char fp_str[512];
 
 STATIC font_color_t the_font_color_table[5];
+
+BlockVramEntry *FONT_vramBlock;
 
 void FONT_MakeSpecialFogClut(int x, int y)
 {
@@ -34,9 +37,49 @@ void FONT_MakeSpecialFogClut(int x, int y)
     DrawSync(0);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_Init);
-
 extern char D_800D0674[];
+void FONT_Init()
+{
+    unsigned long *timAddr;
+    short x;
+    short y;
+
+    FONT_vramBlock = VRAM_CheckVramSlot(&x, &y, 16, 128, 3, -1);
+
+    if (FONT_vramBlock != NULL)
+    {
+        // timAddr = LOAD_ReadFile("\\kain2\\game\\font.tim", 5);
+        timAddr = (unsigned long *)LOAD_ReadFile(D_800D0674, 5);
+
+        LOAD_LoadTIM((long *)timAddr, x, y, x, y + 126);
+
+        MEMPACK_Free((char *)timAddr);
+
+        fontTracker.sprite_sort_push = 0;
+
+        fontTracker.font_tpage = getTPage(0, 0, x, y);
+        fontTracker.font_clut = getClut(x, y + 126);
+
+        fontTracker.font_vramX = x;
+        fontTracker.font_vramY = y;
+
+        fontTracker.font_vramU = (x & 0x3F) * 4;
+        fontTracker.font_vramV = y & 0xFF;
+
+        FONT_MakeSpecialFogClut(x, y + 127);
+    }
+
+    fontTracker.font_xpos = 10;
+    fontTracker.font_ypos = 16;
+
+    fontTracker.font_buffIndex = 0;
+
+    fontTracker.sprite_sort_push = 0;
+
+    fontTracker.color_global = 0;
+    fontTracker.color_local = 0;
+}
+
 void FONT_ReloadFont()
 {
     unsigned long *timAddr;
