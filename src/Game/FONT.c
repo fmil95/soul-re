@@ -136,15 +136,10 @@ void FONT_FontPrintCentered(char *text, long y)
     FONT_Print2(text);
 }
 
-// Matches 100% on decomp.me but differs on this project
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_SetColorIndex);
-#else
 void FONT_SetColorIndex(int color)
 {
-    fontTracker.color_local = color;
+    fontTracker.color_global = color;
 }
-#endif
 
 void FONT_SetColorIndexCol(int color, int r, int g, int b)
 {
