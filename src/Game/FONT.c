@@ -5,6 +5,8 @@ unsigned char fontTransTable[128];
 
 static char fp_str[512];
 
+STATIC font_color_t the_font_color_table[5];
+
 void FONT_MakeSpecialFogClut(int x, int y)
 {
 
@@ -112,4 +114,13 @@ void FONT_FontPrintCentered(char *text, long y)
 
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_SetColorIndex);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_SetColorIndexCol);
+void FONT_SetColorIndexCol(int color, int r, int g, int b)
+{
+    font_color_t *fcol;
+
+    fcol = &the_font_color_table[color];
+
+    fcol->r = r;
+    fcol->g = g;
+    fcol->b = b;
+}
