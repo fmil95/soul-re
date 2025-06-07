@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/STREAM.h"
 #include "Game/STRMLOAD.h"
 #include "Game/GAMELOOP.h"

@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/SPLINE.h"
 #include "Game/MATH3D.h"
 #include "Game/PSX/PSX_G2/QUATVM.h"

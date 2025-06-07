@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/SAVEINFO.h"
 #include "Game/MCARD/MEMCARD.h"
 #include "Game/MEMPACK.h"

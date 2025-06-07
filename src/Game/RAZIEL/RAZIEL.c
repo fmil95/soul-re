@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/FX.h"
 #include "Game/COLLIDE.h"
 #include "Game/GLYPH.h"

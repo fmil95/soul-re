@@ -1614,7 +1614,7 @@ void MON_Idle(Instance *instance)
 
         if (state != -1)
         {
-            MON_SwitchState(instance, (enum MonsterState)state);
+            MON_SwitchState(instance, state);
         }
     }
     else if ((mv->auxFlags & 0x10000000))
@@ -2732,7 +2732,7 @@ void MON_DefaultInit(Instance *instance)
         }
     }
 
-    MON_SwitchState(instance, (enum MonsterState)state);
+    MON_SwitchState(instance, state);
 }
 
 void MON_CleanUp(Instance *instance)

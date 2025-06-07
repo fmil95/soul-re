@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/SCRIPT2.h"
 #include "Game/GAMELOOP.h"
 

@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/STATE.h"
 #include "Game/G2/ANIMG2.h"
 #include "Game/G2/ANMCTRLR.h"

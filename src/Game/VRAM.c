@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/VRAM.h"
 #include "Game/MEMPACK.h"
 #include "Game/GAMELOOP.h"

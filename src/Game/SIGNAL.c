@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/SIGNAL.h"
 #include "Game/CAMERA.h"
 #include "Game/STREAM.h"
