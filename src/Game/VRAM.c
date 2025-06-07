@@ -424,7 +424,6 @@ int VRAM_InsertFreeVram(short x, short y, short w, short h, short flags)
     return 1;
 }
 
-// Further debugging symbols were provided by the remasters' PDB file for this function
 BlockVramEntry *VRAM_CheckVramSlot(short *x, short *y, short w, short h, short type, short startY)
 {
     struct _BlockVramEntry *vblock; // $s1

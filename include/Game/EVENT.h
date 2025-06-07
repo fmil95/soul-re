@@ -3,7 +3,6 @@
 
 #include "common.h"
 
-// Further debugging symbols were provided by the remasters' PDB file for the following structs
 typedef struct EventVMO
 {
     short id;

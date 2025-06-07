@@ -231,7 +231,6 @@ void G2Anim_SetController_Vector(G2Anim *anim, int segNumber, int type, G2SVecto
     controller->flags = (unsigned char)controller->flags;
 }
 
-// Further debugging symbols were provided by the remasters' PDB file for this function
 void G2Anim_SetInterpController_Vector(G2Anim *anim, int segNumber, int type, G2SVector3 *vector, short duration)
 {
     G2AnimController *controller;
