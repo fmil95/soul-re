@@ -989,7 +989,7 @@ void EVENT_AddObjectToStack(PCodeStack *stack, long item)
 
         switch ((short)(basicObject->id - 1))
         {
-        case 5:
+        case EVENT_ID_SIGNAL - 1:
             if (((EventSignalObject *)basicObject)->signal != NULL)
             {
                 stackEntry->id = 17;
@@ -1008,7 +1008,7 @@ void EVENT_AddObjectToStack(PCodeStack *stack, long item)
             }
 
             break;
-        case 3:
+        case EVENT_ID_TGROUP - 1:
             if (((EventTGroupObject *)basicObject)->bspTree != NULL)
             {
                 stackEntry->id = 23;
@@ -1029,7 +1029,7 @@ void EVENT_AddObjectToStack(PCodeStack *stack, long item)
             }
 
             break;
-        case 1:
+        case EVENT_ID_WILDCARD - 1:
             stackEntry->id = 18;
 
             stackEntry->data.listObject.eventInstance = (EventWildCardObject *)basicObject;
@@ -1038,10 +1038,10 @@ void EVENT_AddObjectToStack(PCodeStack *stack, long item)
 
             stackEntry->data.listObject.lineID = CurrentEventLine;
             break;
-        case 2:
+        case EVENT_ID_EVENT - 1:
             EVENT_WriteEventObject(stackEntry, ((EventEventObject *)basicObject)->unitID, ((EventEventObject *)basicObject)->event, ((EventEventObject *)basicObject)->eventNumber);
             break;
-        case 4:
+        case EVENT_ID_AREA - 1:
             stackEntry->id = 1;
 
             stackEntry->data.areaObject.streamUnit = (StreamUnit *)((EventAreaObject *)basicObject)->stream;
@@ -1050,7 +1050,7 @@ void EVENT_AddObjectToStack(PCodeStack *stack, long item)
 
             stackEntry->data.areaObject.unitID = ((EventAreaObject *)basicObject)->unitID;
             break;
-        case 0:
+        case EVENT_ID_INSTANCE - 1:
             if ((((EventInstanceObject *)basicObject)->flags & 0x1))
             {
                 stackEntry->id = 27;
@@ -1097,7 +1097,7 @@ void EVENT_AddObjectToStack(PCodeStack *stack, long item)
             }
 
             break;
-        case 6:
+        case EVENT_ID_VMO_OBJECT - 1:
             if (((EventVMO *)basicObject)->vmObjectPtr != NULL)
             {
                 stackEntry->id = 26;
@@ -5658,7 +5658,7 @@ void EVENT_UpdatePuzzlePointers(EventPointers *events, long offset)
             {
                 curEvent->instanceList[d2] = (EventBasicObject *)OFFSET_DATA(curEvent->instanceList[d2], offset);
 
-                if (curEvent->instanceList[d2]->id == 2)
+                if (curEvent->instanceList[d2]->id == EVENT_ID_WILDCARD)
                 {
                     ((EventWildCardObject *)curEvent->instanceList[d2])->objectName = (char *)OFFSET_DATA(((EventWildCardObject *)curEvent->instanceList[d2])->objectName, offset);
                 }
@@ -5875,7 +5875,7 @@ void EVENT_RemoveInstanceFromInstanceList(Instance *instance)
 
                     for (i2 = 0; i2 < puzzle->eventInstances[i]->numInstances; i2++)
                     {
-                        if ((basicEventObject[i2]->id == 1) && (((EventInstanceObject *)basicEventObject[i2])->instance == instance))
+                        if ((basicEventObject[i2]->id == EVENT_ID_INSTANCE) && (((EventInstanceObject *)basicEventObject[i2])->instance == instance))
                         {
                             ((EventInstanceObject *)basicEventObject[i2])->instance = NULL;
                             break;
@@ -5899,7 +5899,7 @@ void EVENT_UpdatePuzzleWithInstance(EventPointers *puzzle, Instance *instance)
 
         for (i2 = 0; i2 < puzzle->eventInstances[i]->numInstances; i2++)
         {
-            if ((basicEventObject[i2]->id == 1) && (instance->introUniqueID == ((EventInstanceObject *)basicEventObject[i2])->introUniqueID))
+            if ((basicEventObject[i2]->id == EVENT_ID_INSTANCE) && (instance->introUniqueID == ((EventInstanceObject *)basicEventObject[i2])->introUniqueID))
             {
                 ((EventInstanceObject *)basicEventObject[i2])->instance = instance;
                 break;
@@ -6000,7 +6000,7 @@ void EVENT_FixPuzzlesForStream(StreamUnit *stream)
 
             for (i2 = 0; i2 < puzzle->eventInstances[i]->numInstances; i2++)
             {
-                if (basicEventObject[i2]->id == 5)
+                if (basicEventObject[i2]->id == EVENT_ID_AREA)
                 {
                     StreamUnit *newStream;
 
@@ -6013,7 +6013,7 @@ void EVENT_FixPuzzlesForStream(StreamUnit *stream)
                         temp->stream = newStream;
                     }
                 }
-                else if (basicEventObject[i2]->id == 3)
+                else if (basicEventObject[i2]->id == EVENT_ID_EVENT)
                 {
                     StreamUnit *newStream;
                     EventEventObject *eventEventObject;
@@ -6041,7 +6041,7 @@ void EVENT_FixPuzzlesForStream(StreamUnit *stream)
                         }
                     }
                 }
-                else if (basicEventObject[i2]->id == 4)
+                else if (basicEventObject[i2]->id == EVENT_ID_TGROUP)
                 {
                     EventTGroupObject *tgroupEventObject;
                     StreamUnit *newStream;
@@ -6068,7 +6068,7 @@ void EVENT_FixPuzzlesForStream(StreamUnit *stream)
                         }
                     }
                 }
-                else if (basicEventObject[i2]->id == 6)
+                else if (basicEventObject[i2]->id == EVENT_ID_SIGNAL)
                 {
                     StreamUnit *newStream;
 
@@ -6081,7 +6081,7 @@ void EVENT_FixPuzzlesForStream(StreamUnit *stream)
                         temp2->signal = EVENT_ResolveObjectSignal(newStream, temp2->signalNumber);
                     }
                 }
-                else if (basicEventObject[i2]->id == 1)
+                else if (basicEventObject[i2]->id == EVENT_ID_INSTANCE)
                 {
                     void *pointer;
 
@@ -6112,7 +6112,7 @@ void EVENT_FixPuzzlesForStream(StreamUnit *stream)
                         }
                     }
                 }
-                else if (basicEventObject[i2]->id == 7)
+                else if (basicEventObject[i2]->id == EVENT_ID_VMO_OBJECT)
                 {
                     StreamUnit *newStream;
 
@@ -6159,7 +6159,7 @@ void EVENT_AddStreamToInstanceList(StreamUnit *stream)
 
                     for (i2 = 0; i2 < puzzle->eventInstances[i]->numInstances; i2++)
                     {
-                        if (basicEventObject[i2]->id == 5)
+                        if (basicEventObject[i2]->id == EVENT_ID_AREA)
                         {
                             temp = (EventAreaObject *)basicEventObject[i2];
 
@@ -6168,7 +6168,7 @@ void EVENT_AddStreamToInstanceList(StreamUnit *stream)
                                 temp->stream = stream;
                             }
                         }
-                        else if (basicEventObject[i2]->id == 3)
+                        else if (basicEventObject[i2]->id == EVENT_ID_EVENT)
                         {
                             eventEventObject = (EventEventObject *)basicEventObject[i2];
 
@@ -6191,7 +6191,7 @@ void EVENT_AddStreamToInstanceList(StreamUnit *stream)
                                 }
                             }
                         }
-                        else if (basicEventObject[i2]->id == 4)
+                        else if (basicEventObject[i2]->id == EVENT_ID_TGROUP)
                         {
                             tgroupEventObject = (EventTGroupObject *)basicEventObject[i2];
 
@@ -6213,7 +6213,7 @@ void EVENT_AddStreamToInstanceList(StreamUnit *stream)
                                 }
                             }
                         }
-                        else if (basicEventObject[i2]->id == 6)
+                        else if (basicEventObject[i2]->id == EVENT_ID_SIGNAL)
                         {
                             temp2 = (EventSignalObject *)basicEventObject[i2];
 
@@ -6222,7 +6222,7 @@ void EVENT_AddStreamToInstanceList(StreamUnit *stream)
                                 temp2->signal = EVENT_ResolveObjectSignal(stream, temp2->signalNumber);
                             }
                         }
-                        else if (basicEventObject[i2]->id == 1)
+                        else if (basicEventObject[i2]->id == EVENT_ID_INSTANCE)
                         {
                             void *pointer;
 
@@ -6246,7 +6246,7 @@ void EVENT_AddStreamToInstanceList(StreamUnit *stream)
                                 }
                             }
                         }
-                        else if (basicEventObject[i2]->id == 7)
+                        else if (basicEventObject[i2]->id == EVENT_ID_VMO_OBJECT)
                         {
                             temp4 = (EventVMO *)basicEventObject[i2];
 
@@ -6291,7 +6291,7 @@ void EVENT_RemoveStreamToInstanceList(StreamUnit *stream)
 
                     for (i2 = 0; i2 < puzzle->eventInstances[i]->numInstances; i2++)
                     {
-                        if (basicEventObject[i2]->id == 5)
+                        if (basicEventObject[i2]->id == EVENT_ID_AREA)
                         {
                             temp = (EventAreaObject *)basicEventObject[i2];
 
@@ -6300,7 +6300,7 @@ void EVENT_RemoveStreamToInstanceList(StreamUnit *stream)
                                 temp->stream = NULL;
                             }
                         }
-                        else if (basicEventObject[i2]->id == 3)
+                        else if (basicEventObject[i2]->id == EVENT_ID_EVENT)
                         {
                             temp2 = (EventEventObject *)basicEventObject[i2];
 
@@ -6309,7 +6309,7 @@ void EVENT_RemoveStreamToInstanceList(StreamUnit *stream)
                                 temp2->event = NULL;
                             }
                         }
-                        else if (basicEventObject[i2]->id == 4)
+                        else if (basicEventObject[i2]->id == EVENT_ID_TGROUP)
                         {
                             temp3 = (EventTGroupObject *)basicEventObject[i2];
 
@@ -6320,7 +6320,7 @@ void EVENT_RemoveStreamToInstanceList(StreamUnit *stream)
                                 temp3->stream = NULL;
                             }
                         }
-                        else if (basicEventObject[i2]->id == 6)
+                        else if (basicEventObject[i2]->id == EVENT_ID_SIGNAL)
                         {
                             temp4 = (EventSignalObject *)basicEventObject[i2];
 
@@ -6329,7 +6329,7 @@ void EVENT_RemoveStreamToInstanceList(StreamUnit *stream)
                                 temp4->signal = NULL;
                             }
                         }
-                        else if (basicEventObject[i2]->id == 1)
+                        else if (basicEventObject[i2]->id == EVENT_ID_INSTANCE)
                         {
                             temp5 = (EventInstanceObject *)basicEventObject[i2];
 
@@ -6383,7 +6383,7 @@ void EVENT_RelocateInstanceList(Level *oldLevel, Level *newLevel, long sizeOfLev
 
                     for (i2 = 0; i2 < puzzle->eventInstances[i]->numInstances; i2++)
                     {
-                        if (basicEventObject[i2]->id == 3)
+                        if (basicEventObject[i2]->id == EVENT_ID_EVENT)
                         {
                             temp = (EventEventObject *)basicEventObject[i2];
 
@@ -6392,7 +6392,7 @@ void EVENT_RelocateInstanceList(Level *oldLevel, Level *newLevel, long sizeOfLev
                                 temp->event = (Event *)OFFSET_DATA(temp->event, offset);
                             }
                         }
-                        else if (basicEventObject[i2]->id == 4)
+                        else if (basicEventObject[i2]->id == EVENT_ID_TGROUP)
                         {
                             temp2 = (EventTGroupObject *)basicEventObject[i2];
 
@@ -6401,7 +6401,7 @@ void EVENT_RelocateInstanceList(Level *oldLevel, Level *newLevel, long sizeOfLev
                                 temp2->bspTree = (BSPTree *)OFFSET_DATA(temp2->bspTree, offset);
                             }
                         }
-                        else if (basicEventObject[i2]->id == 6)
+                        else if (basicEventObject[i2]->id == EVENT_ID_SIGNAL)
                         {
                             temp3 = (EventSignalObject *)basicEventObject[i2];
 
@@ -6410,7 +6410,7 @@ void EVENT_RelocateInstanceList(Level *oldLevel, Level *newLevel, long sizeOfLev
                                 temp3->signal = (MultiSignal *)OFFSET_DATA(temp3->signal, offset);
                             }
                         }
-                        else if (basicEventObject[i2]->id == 1)
+                        else if (basicEventObject[i2]->id == EVENT_ID_INSTANCE)
                         {
                             temp4 = (EventInstanceObject *)basicEventObject[i2];
 
@@ -6419,7 +6419,7 @@ void EVENT_RelocateInstanceList(Level *oldLevel, Level *newLevel, long sizeOfLev
                                 temp4->data.sfxMarker = (SFXMkr *)OFFSET_DATA(temp4->data.sfxMarker, offset);
                             }
                         }
-                        else if (basicEventObject[i2]->id == 7)
+                        else if (basicEventObject[i2]->id == EVENT_ID_VMO_OBJECT)
                         {
                             temp5 = (EventVMO *)basicEventObject[i2];
 

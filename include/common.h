@@ -21,6 +21,7 @@ typedef unsigned char u_char;
 
 #include "include_asm.h"
 #include "Game/TYPES.h"
+#include "Game/EXTRA.h"
 #include "Libs/SDK.h"
 
 #define ARRAY_COUNT(arr) (sizeof(arr) / sizeof(arr[0]))
