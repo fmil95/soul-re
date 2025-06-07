@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/PSX/AADLIB.h"
 #include "Game/MEMPACK.h"
 #include "Game/LOAD3D.h"

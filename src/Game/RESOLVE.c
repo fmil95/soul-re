@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/RESOLVE.h"
 
 void RESOLVE_Pointers(RedirectList *redirectList, long *data, long *baseAddr)

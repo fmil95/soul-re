@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/CAMERA.h"
 #include "Game/LIGHT3D.h"
 #include "Game/INSTANCE.h"

@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/GLYPH.h"
 #include "Game/CAMERA.h"
 #include "Game/GAMELOOP.h"

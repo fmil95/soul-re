@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/MATH3D.h"
 #include "Game/G2/QUATG2.h"
 #include "Game/HASM.h"

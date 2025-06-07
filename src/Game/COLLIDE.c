@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/MATH3D.h"
 #include "Game/PIPE3D.h"
 #include "Game/COLLIDE.h"
@@ -2247,7 +2246,7 @@ long COLLIDE_SAndT(SCollideInfo *scollideInfo, Level *level)
                                         CSpad->hfaceInfo.normal = *(SVector *)&CSpad->normal;
 
                                         if (COLLIDE_SphereAndHFace(&CSpad->sphere, (Position *)&CSpad->oldPos, &CSpad->hfaceInfo,
-                                                                   (SVector *)&CSpad->collideInfo.point1, &CSpad->edge) != 0)
+                                            (SVector *)&CSpad->collideInfo.point1, &CSpad->edge) != 0)
                                         {
                                             CSpad->collideInfo.flags = 0;
 

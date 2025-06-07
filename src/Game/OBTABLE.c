@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/OBTABLE.h"
 #include "Game/GAMELOOP.h"
 #include "Game/SCRIPT.h"

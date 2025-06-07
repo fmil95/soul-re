@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/BSP.h"
 #include "Game/COLLIDE.h"
 #include "Game/GAMELOOP.h"

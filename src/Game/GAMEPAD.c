@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/GAMEPAD.h"
 #include "Game/GAMELOOP.h"
 #include "Game/FONT.h"

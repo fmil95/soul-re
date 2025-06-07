@@ -1,4 +1,4 @@
-#include "common.h"
+#include "Game/LIST.h"
 
 void LIST_InsertFunc(NodeType *list, NodeType *node)
 {

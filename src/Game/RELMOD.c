@@ -1,4 +1,4 @@
-#include "common.h"
+#include "Game/RELMOD.h"
 
 void RELMOD_InitModulePointers(intptr_t baseaddr, int *relocs)
 {

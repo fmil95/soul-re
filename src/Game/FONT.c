@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/FONT.h"
 #include "Game/MEMPACK.h"
 #include "Game/LOAD3D.h"

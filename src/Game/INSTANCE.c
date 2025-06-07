@@ -1,4 +1,3 @@
-#include "common.h"
 #include "Game/SPLINE.h"
 #include "Game/GAMELOOP.h"
 #include "Game/SAVEINFO.h"
