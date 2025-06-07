@@ -339,7 +339,7 @@ void MON_LandOnFeetEntry(Instance *instance)
 
     mv = (MonsterVars *)instance->extraData;
 
-    if ((signed char)mv->previousMainState == 0xB)
+    if ((signed char)mv->previousMainState == MONSTER_STATE_THROWN)
     {
         MON_PlayAnim(instance, MONSTER_ANIM_SPINLAND, 1);
 
@@ -387,7 +387,7 @@ void MON_LandOnFeet(Instance *instance)
     mv = instance->extraData;
     MON_DefaultQueueHandler(instance);
 
-    if ((instance->currentMainState == 0x10) && (mv->damageType == 0x20 || mv->damageType == 0x40))
+    if ((instance->currentMainState == MONSTER_STATE_GENERALDEATH) && (mv->damageType == 0x20 || mv->damageType == 0x40))
     {
         MON_BurnInAir(instance, MONSTER_STATE_LANDONFEET);
     }
