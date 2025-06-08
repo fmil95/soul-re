@@ -1286,47 +1286,47 @@ long EVENT_TransformTGroupAttribute(PCodeStack *stack, StackType *stackObject, l
 
         switch (item)
         {
-        case 5:
-        case 6:
-        case 7:
-        case 8:
-        case 9:
-        case 10:
-        case 11:
-        case 12:
-        case 13:
-        case 14:
-        case 15:
-        case 16:
-        case 17:
-        case 18:
-        case 19:
-        case 20:
-        case 21:
-        case 22:
-        case 23:
-        case 24:
-        case 25:
-        case 26:
-        case 27:
-        case 28:
-        case 29:
-        case 30:
-        case 31:
-        case 32:
-        case 33:
-        case 34:
-        case 35:
-        case 36:
-        case 37:
-        case 38:
-        case 39:
-        case 40:
-        case 41:
-        case 42:
-        case 43:
+        case ATTR_POSITION:
+        case ATTR_X:
+        case ATTR_Y:
+        case ATTR_Z:
+        case ATTR_ROTATION:
+        case ATTR_HIDE:
+        case ATTR_UNHIDE:
+        case ATTR_SPLINE:
+        case ATTR_START:
+        case ATTR_STOP:
+        case ATTR_KEYFRAME:
+        case ATTR_MODE:
+        case ATTR_DIRECTION:
+        case ATTR_WATERSTATUS:
+        case ATTR_MODE_STATUS:
+        case ATTR_SPECTRAL:
+        case ATTR_MATERIAL:
+        case ATTR_MAXKEYFRAMES:
+        case ATTR_SPHERE:
+        case ATTR_CYLINDER:
+        case ATTR_BOX:
+        case ATTR_CALL:
+        case ATTR_KEYPAD:
+        case ATTR_PLAYTO:
+        case ATTR_ANIMATE:
+        case ATTR_ANIMATION:
+        case ATTR_SETCLIP:
+        case ATTR_SETACTION:
+        case ATTR_ANITEXTURE:
+        case ATTR_FORWARD:
+        case ATTR_BACKWARD:
+        case ATTR_SWITCHON:
+        case ATTR_SWITCHOFF:
+        case ATTR_DISABLE:
+        case ATTR_ENABLE:
+        case ATTR_FRAME:
+        case ATTR_PLAY:
+        case ATTR_PLAYLOOP:
+        case ATTR_ON:
             break;
-        case 44:
+        case ATTR_MOVEZ:
             if (codeStream != NULL)
             {
                 MoveCodeStreamExtra = 2;
@@ -1338,7 +1338,7 @@ long EVENT_TransformTGroupAttribute(PCodeStack *stack, StackType *stackObject, l
 
             retValue = 1;
             break;
-        case 45:
+        case ATTR_MOVEZSNAP:
             if (codeStream != NULL)
             {
                 MoveCodeStreamExtra = 1;
@@ -1348,7 +1348,7 @@ long EVENT_TransformTGroupAttribute(PCodeStack *stack, StackType *stackObject, l
 
             retValue = 1;
             break;
-        case 46:
+        case ATTR_WATERMOVEZ:
             if (codeStream != NULL)
             {
                 MoveCodeStreamExtra = 2;
@@ -1360,7 +1360,7 @@ long EVENT_TransformTGroupAttribute(PCodeStack *stack, StackType *stackObject, l
 
             retValue = 1;
             break;
-        case 47:
+        case ATTR_WATERMOVEZSNAP:
             if (codeStream != NULL)
             {
                 MoveCodeStreamExtra = 1;
@@ -1389,12 +1389,12 @@ long EVENT_TransformConstrictAttribute(PCodeStack *stack, StackType *stackObject
 
     switch (item)
     {
-    case 58:
+    case ATTR_CLOCKWISE:
         EVENT_ChangeOperandToNumber(stackObject, instance->constrictAngle < -1, 0);
 
         retValue = 1;
         break;
-    case 59:
+    case ATTR_COUNTERCLOCKWISE:
         EVENT_ChangeOperandToNumber(stackObject, (instance->constrictAngle < 2) == 0, 0);
 
         retValue = 1;
@@ -1850,7 +1850,7 @@ long EVENT_TransformSoundObjectAttribute(PCodeStack *stack, SoundObject *soundOb
 
     switch (item)
     {
-    case 126:
+    case ATTR_SOUND:
     {
         int status;
 
@@ -1884,7 +1884,7 @@ long EVENT_TransformSoundObjectAttribute(PCodeStack *stack, SoundObject *soundOb
         retValue = 1;
         break;
     }
-    case 127:
+    case ATTR_SET_VOLUME:
         soundObject->attribute = item;
 
         if (codeStream != NULL)
@@ -1898,13 +1898,13 @@ long EVENT_TransformSoundObjectAttribute(PCodeStack *stack, SoundObject *soundOb
 
         retValue = 1;
         break;
-    case 13:
-    case 14:
+    case ATTR_START:
+    case ATTR_STOP:
         soundObject->attribute = item;
 
         retValue = 1;
         break;
-    case 128:
+    case ATTR_SET_PITCH:
         soundObject->attribute = item;
 
         if (codeStream != NULL)
@@ -1934,7 +1934,7 @@ long EVENT_GetGameValue(GameObject *gameObject)
     case -1:
         value = 1;
         break;
-    case 2:
+    case ATTR_TIMEOFDAY:
         value = GAMELOOP_GetTimeOfDay();
 
         switch (value)
@@ -1968,17 +1968,17 @@ long EVENT_TransformGameAttribute(PCodeStack *stack, StackType *stackObject, lon
 
     switch (item)
     {
-    case 1:
+    case ATTR_TIME:
         EVENT_ChangeOperandToNumber(stackObject, (long)((gameTrackerX.currentTime * 30) / 1000), 0);
 
         retValue = 1;
         break;
-    case 61:
+    case ATTR_MILTIME:
         EVENT_ChangeOperandToNumber(stackObject, gameTrackerX.timeOfDay, 0);
 
         retValue = 1;
         break;
-    case 27:
+    case ATTR_KEYPAD:
         value = gameTrackerX.controlCommand[0][0];
 
         if (((value & 0x80)) && ((value & 0x10)))
@@ -1990,17 +1990,17 @@ long EVENT_TransformGameAttribute(PCodeStack *stack, StackType *stackObject, lon
 
         retValue = 1;
         break;
-    case 157:
+    case ATTR_CURRENTHINT:
         EVENT_ChangeOperandToNumber(stackObject, HINT_GetCurrentHint(), 0);
 
         retValue = 1;
         break;
-    case 158:
+    case ATTR_GLYPH_MENU_OPEN:
         EVENT_ChangeOperandToNumber(stackObject, gameTrackerX.streamFlags & 0x100000, 0);
 
         retValue = 1;
         break;
-    case 20:
+    case ATTR_SPECTRAL:
         value = INSTANCE_Query(gameTrackerX.playerInstance, 11) >> 1;
 
         value &= 0x1;
@@ -2014,7 +2014,7 @@ long EVENT_TransformGameAttribute(PCodeStack *stack, StackType *stackObject, lon
 
         retValue = 1;
         break;
-    case 21:
+    case ATTR_MATERIAL:
         value = INSTANCE_Query(gameTrackerX.playerInstance, 11) & 0x1;
 
         if (STREAM_IsMorphInProgress() != 0)
@@ -2026,7 +2026,7 @@ long EVENT_TransformGameAttribute(PCodeStack *stack, StackType *stackObject, lon
 
         retValue = 1;
         break;
-    case 49:
+    case ATTR_TIMER:
     {
         EventTimer *timer;
         short time;
@@ -2063,7 +2063,7 @@ long EVENT_TransformGameAttribute(PCodeStack *stack, StackType *stackObject, lon
         retValue = 1;
         break;
     }
-    case 66:
+    case ATTR_CAMERA:
         stackObject->id = 25;
 
         stackObject->data.cameraObject.camera = &theCamera;
@@ -2072,14 +2072,14 @@ long EVENT_TransformGameAttribute(PCodeStack *stack, StackType *stackObject, lon
 
         retValue = 1;
         break;
-    case 145:
+    case ATTR_ENDGAMENOW:
         stack->topOfStack--;
 
         EVENT_AddShortPointerToStack(stack, &gEndGameNow);
 
         retValue = 1;
         break;
-    case 74:
+    case ATTR_SCREENWIPE:
         if (codeStream != NULL)
         {
             long wipeType;
@@ -2112,7 +2112,7 @@ long EVENT_TransformGameAttribute(PCodeStack *stack, StackType *stackObject, lon
 
         retValue = 1;
         break;
-    case 162:
+    case ATTR_PAD_SHOCK:
         if (codeStream != NULL)
         {
             long motor0Time;
@@ -2140,21 +2140,21 @@ long EVENT_TransformGameAttribute(PCodeStack *stack, StackType *stackObject, lon
 
         retValue = 1;
         break;
-    case 82:
+    case ATTR_STOPALLMONSTERCONTROL:
         INSTANCE_Broadcast(NULL, 42, 0x4000E, 1);
 
         stack->topOfStack--;
 
         retValue = 1;
         break;
-    case 81:
+    case ATTR_STARTALLMONSTERCONTROL:
         INSTANCE_Broadcast(NULL, 10, 0x4000E, 0);
 
         stack->topOfStack--;
 
         retValue = 1;
         break;
-    case 90:
+    case ATTR_RANDOM:
         if (codeStream != NULL)
         {
             short rand1;
@@ -2170,12 +2170,12 @@ long EVENT_TransformGameAttribute(PCodeStack *stack, StackType *stackObject, lon
 
         retValue = 1;
         break;
-    case 120:
+    case ATTR_VOICEISDONE:
         EVENT_ChangeOperandToNumber(stackObject, LOAD_IsXAInQueue() == 0, 0);
 
         retValue = 1;
         break;
-    case 134:
+    case ATTR_SKIP_PUPPET_SHOW:
     {
         int number;
 
@@ -2186,17 +2186,17 @@ long EVENT_TransformGameAttribute(PCodeStack *stack, StackType *stackObject, lon
         retValue = 1;
         break;
     }
-    case 154:
+    case ATTR_PLAYEREVENT:
         EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(gameTrackerX.playerInstance, 41), 3);
 
         retValue = 1;
         break;
-    case 155:
+    case ATTR_PLAYEREVENTHISTORY:
         EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(gameTrackerX.playerInstance, 42), 3);
 
         retValue = 1;
         break;
-    case 168:
+    case ATTR_WAITFORVOICEDONE:
         stack->topOfStack--;
 
         if (((gameTrackerX.debugFlags & 0x80000)) && (LOAD_IsXAInQueue() != 0))
@@ -2206,23 +2206,23 @@ long EVENT_TransformGameAttribute(PCodeStack *stack, StackType *stackObject, lon
 
         retValue = 1;
         break;
-    case 2:
-    case 88:
-    case 89:
-    case 108:
-    case 109:
-    case 110:
-    case 111:
-    case 118:
-    case 119:
-    case 135:
-    case 136:
-    case 137:
-    case 140:
-    case 142:
-    case 147:
-    case 150:
-    case 156:
+    case ATTR_TIMEOFDAY:
+    case ATTR_SNOW:
+    case ATTR_RAIN:
+    case ATTR_SETSLIDEANGLE:
+    case ATTR_RESETSLIDEANGLE:
+    case ATTR_GOTOUNDERWORLD:
+    case ATTR_ENABLEABILITY:
+    case ATTR_VOICEPLAY:
+    case ATTR_VOICEVOL:
+    case ATTR_SETMUSICMODIFIER:
+    case ATTR_RESETMUSICMODIFIER:
+    case ATTR_ABILITY:
+    case ATTR_GLIDESPEED:
+    case ATTR_SHOWHINT:
+    case ATTR_STOPHINT:
+    case ATTR_PLAYMOVIE:
+    case ATTR_KILLSPFCHINT:
         stackObject->data.gameObject.attribute = item;
 
         retValue = 1;
@@ -2252,7 +2252,7 @@ long EVENT_TransformAreaAttribute(PCodeStack *stack, StackType *stackObject, lon
     {
         switch (item)
         {
-        case 3:
+        case ATTR_VARIABLE:
             MoveCodeStreamExtra = 1;
 
             offset = *++codeStream;
@@ -2267,15 +2267,15 @@ long EVENT_TransformAreaAttribute(PCodeStack *stack, StackType *stackObject, lon
             }
 
             break;
-        case 65:
+        case ATTR_WATERLEVEL:
             stack->topOfStack--;
 
             EVENT_AddShortPointerToStack(stack, (short *)&streamUnit->level->waterZLevel);
 
             retValue = 1;
             break;
-        case 113:
-        case 112:
+        case ATTR_FOGNEAR:
+        case ATTR_FOGFAR:
             stackObject->data.areaObject.attribute = item;
 
             retValue = 1;
@@ -2298,7 +2298,7 @@ long EVENT_TransformEventAttribute(PCodeStack *stack, StackType *stackObject, lo
 
     switch (item)
     {
-    case 3:
+    case ATTR_VARIABLE:
         MoveCodeStreamExtra = 1;
 
         offset = *++codeStream;
@@ -2313,7 +2313,7 @@ long EVENT_TransformEventAttribute(PCodeStack *stack, StackType *stackObject, lo
         }
 
         break;
-    case 26:
+    case ATTR_CALL:
         if (event->processingPuppetShow == 0)
         {
             event->processingPuppetShow = 1;
@@ -2336,7 +2336,7 @@ long EVENT_TransformSavedEventAttribute(PCodeStack *stack, StackType *stackObjec
 
     switch (item)
     {
-    case 3:
+    case ATTR_VARIABLE:
         MoveCodeStreamExtra = 1;
 
         offset = *++codeStream;
@@ -2433,18 +2433,18 @@ long EVENT_TransformCameraObjectAttribute(PCodeStack *stack, StackType *stackObj
 
     switch (item)
     {
-    case 67:
-    case 68:
-    case 69:
-    case 70:
-    case 71:
-    case 72:
-    case 73:
+    case ATTR_SMOOTH:
+    case ATTR_SPLINE0:
+    case ATTR_SPLINE1:
+    case ATTR_TILT:
+    case ATTR_DISTANCE:
+    case ATTR_RESTOREMODE:
+    case ATTR_SETFOCUS:
         stackObject->data.cameraObject.attribute = item;
 
         retValue = 1;
         break;
-    case 93:
+    case ATTR_SHAKE:
     {
         short time;
 
@@ -2464,12 +2464,12 @@ long EVENT_TransformCameraObjectAttribute(PCodeStack *stack, StackType *stackObj
         retValue = 1;
         break;
     }
-    case 104:
+    case ATTR_ROLL:
         stackObject->data.cameraObject.attribute = item;
 
         retValue = 1;
         break;
-    case 105:
+    case ATTR_MOVETOROLL:
         if (codeStream != NULL)
         {
             MoveCodeStreamExtra = 1;
@@ -2481,13 +2481,13 @@ long EVENT_TransformCameraObjectAttribute(PCodeStack *stack, StackType *stackObj
 
         retValue = 1;
         break;
-    case 117:
+    case ATTR_CINEMATICDONE:
         EVENT_ChangeOperandToNumber(stackObject, camera->data.Cinematic.cinema_done != 0, 0);
 
         retValue = 1;
         break;
-    case 9:
-    case 16:
+    case ATTR_ROTATION:
+    case ATTR_MODE:
         stackObject->data.cameraObject.attribute = item;
 
         retValue = 1;
@@ -2510,7 +2510,7 @@ long EVENT_TransformSplineAttribute(PCodeStack *stack, StackType *stackObject, l
 
     switch (item)
     {
-    case 31:
+    case ATTR_SETCLIP:
         MoveCodeStreamExtra = 2;
 
         instance->clipBeg = *++codeStream;
@@ -2541,12 +2541,12 @@ long EVENT_TransformSplineAttribute(PCodeStack *stack, StackType *stackObject, l
 
         retValue = 1;
         break;
-    case 34:
+    case ATTR_FORWARD:
         stackObject->data.instanceSpline.splineFlags |= 0x4;
 
         retValue = 1;
         break;
-    case 35:
+    case ATTR_BACKWARD:
         stackObject->data.instanceSpline.splineFlags |= 0x8;
 
         retValue = 1;
@@ -2576,7 +2576,7 @@ long EVENT_TransformIntroAttribute(PCodeStack *stack, StackType *stackObject, lo
 
     switch (item)
     {
-    case 5:
+    case ATTR_POSITION:
         if (!(intro->flags & 0x4000))
         {
             EventAbortLine = 1;
@@ -2592,7 +2592,7 @@ long EVENT_TransformIntroAttribute(PCodeStack *stack, StackType *stackObject, lo
 
         retValue = 1;
         break;
-    case 9:
+    case ATTR_ROTATION:
     {
         Rotation3d vector;
 
@@ -2609,29 +2609,29 @@ long EVENT_TransformIntroAttribute(PCodeStack *stack, StackType *stackObject, lo
         retValue = 1;
         break;
     }
-    case 63:
+    case ATTR_INTRODUCED:
         EVENT_ChangeOperandToNumber(stackObject, 0, 0);
 
         retValue = 1;
         break;
-    case 4:
-    case 62:
-    case 138:
-    case 146:
-    case 160:
-    case 166:
+    case ATTR_DESTROY:
+    case ATTR_INTRO:
+    case ATTR_NOREGEN:
+    case ATTR_DESTROYED:
+    case ATTR_SLUAGH_SUCKABLE:
+    case ATTR_DEADORDESTROYED:
         stackObject->data.introObject.attribute = item;
 
         retValue = 1;
         break;
-    case 7:
-    case 10:
-    case 16:
-    case 32:
-    case 80:
-    case 112:
-    case 144:
-    case 165:
+    case ATTR_Y:
+    case ATTR_HIDE:
+    case ATTR_MODE:
+    case ATTR_SETACTION:
+    case ATTR_MOVETOROT:
+    case ATTR_FOGFAR:
+    case ATTR_SWITCHTURNINGOFF:
+    case ATTR_NOKEYPADINPUT:
         EventAbortLine = 1;
 
         retValue = 1;
