@@ -164,7 +164,7 @@ segments:
       - [0x0AA27C, asm, LIBS]
 
       - [0x0B8890, .data, Game/DEBUG]
-      - [0x0BA7C0, data, Game/FONT]
+      - [0x0BA7C0, .data, Game/FONT]
       - [0x0BA9F4, .data, Game/GAMELOOP]
       - [0x0BAA1C, .data, Game/GAMEPAD]
       - [0x0BAA28, data]
