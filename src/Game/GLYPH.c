@@ -850,7 +850,7 @@ void HEALTHU_Pickup(Instance *instance)
 
     HUD_Captured = 1;
 
-    HUD_State = 1;
+    HUD_State = HUD_STATE_PIE_MOVE_IN;
 }
 
 void HUD_Damp(short *val, short target, short *vel, short max)
@@ -867,7 +867,7 @@ void HUD_Init()
     HUD_Rot_vel = 0;
     HUD_Pos_vel = 0;
 
-    HUD_State = 0;
+    HUD_State = HUD_STATE_INIT;
 
     HUD_Wait = 0;
 
@@ -894,20 +894,20 @@ void HUD_Update()
 {
     short accl;
 
-    if ((gameTrackerX.gameMode == 6) && (HUD_State == 0))
+    if ((gameTrackerX.gameMode == 6) && (HUD_State == HUD_STATE_INIT))
     {
-        HUD_State = 10;
+        HUD_State = HUD_STATE_IN_POUSE_PIE_MOVE_IN;
     }
     else if (gameTrackerX.gameMode != 6)
     {
-        if ((HUD_State == 10) || (HUD_State == 11))
+        if ((HUD_State == HUD_STATE_IN_POUSE_PIE_MOVE_IN) || (HUD_State == HUD_STATE_IN_POUSE_SHOW_PIE))
         {
-            HUD_State = 12;
+            HUD_State = HUD_STATE_IN_POUSE_PIE_MOVE_OUT;
         }
     }
-    else if (HUD_State > 1)
+    else if (HUD_State > HUD_STATE_PIE_MOVE_IN)
     {
-        if (HUD_State < 7)
+        if (HUD_State <= HUD_STATE_PIE_MOVE_OUT)
         {
             return;
         }
@@ -922,7 +922,7 @@ void HUD_Update()
     switch (HUD_State)
     {
     default:
-    case 0:
+    case HUD_STATE_INIT:
     case 7:
     case 8:
     case 9:
@@ -938,36 +938,36 @@ void HUD_Update()
         }
 
         break;
-    case 3:
-    case 4:
-    case 11:
+    case HUD_STATE_WAIT_NEW_SLICE_GET_POSITION:
+    case HUD_STATE_WAIT_NEW_SLICE_GET_POSITION_IN_PIE:
+    case HUD_STATE_IN_POUSE_SHOW_PIE:
         break;
-    case 1:
-    case 10:
+    case HUD_STATE_PIE_MOVE_IN:
+    case HUD_STATE_IN_POUSE_PIE_MOVE_IN:
         HUD_Damp(&HUD_Position, 0, &HUD_Pos_vel, 96);
 
         if (HUD_Position >= 0)
         {
             HUD_Position = 0;
 
-            if (HUD_State != 10)
+            if (HUD_State != HUD_STATE_IN_POUSE_PIE_MOVE_IN)
             {
                 if (HUD_Count <= 0)
                 {
-                    HUD_State = 3;
+                    HUD_State = HUD_STATE_WAIT_NEW_SLICE_GET_POSITION;
                 }
                 else
                 {
-                    HUD_State = 2;
+                    HUD_State = HUD_STATE_PIE_ROTATING;
                 }
             }
             else
             {
-                HUD_State = 11;
+                HUD_State = HUD_STATE_IN_POUSE_SHOW_PIE;
             }
         }
 
-        if (HUD_State == 10)
+        if (HUD_State == HUD_STATE_IN_POUSE_PIE_MOVE_IN)
         {
             MANNA_Pickup_Time = 0;
 
@@ -975,19 +975,19 @@ void HUD_Update()
         }
 
         break;
-    case 2:
+    case HUD_STATE_PIE_ROTATING:
         HUD_Damp(&HUD_Rotation, 819, &HUD_Rot_vel, 80);
 
         if (HUD_Rotation >= 819)
         {
             HUD_Rotation = 819;
 
-            HUD_State = 3;
+            HUD_State = HUD_STATE_WAIT_NEW_SLICE_GET_POSITION;
         }
 
         break;
-    case 5:
-        HUD_State = 6;
+    case HUD_STATE_NEW_SLICE_ADDED:
+        HUD_State = HUD_STATE_PIE_MOVE_OUT;
 
         HUD_Wait = 10;
 
@@ -998,21 +998,19 @@ void HUD_Update()
         HUD_Count++;
         HUD_Count_Overall++;
         break;
-    case 6:
-    case 12:
+    case HUD_STATE_PIE_MOVE_OUT:
+    case HUD_STATE_IN_POUSE_PIE_MOVE_OUT:
         HUD_Damp(&HUD_Position, -1000, &HUD_Pos_vel, 96);
 
         if (HUD_Position < -999)
         {
-            HUD_State = 0;
+            HUD_State = HUD_STATE_INIT;
         }
 
         break;
     }
 }
 
-extern char D_800D1A94[];
-extern char D_800D1A98[];
 void HUD_Draw()
 {
     SVector Rotation;
@@ -1152,7 +1150,7 @@ void HUD_Draw()
             targetPos.x = -1536;
             targetPos.z = 2560;
 
-            if (HUD_State < 4)
+            if (HUD_State < HUD_STATE_WAIT_NEW_SLICE_GET_POSITION_IN_PIE)
             {
                 targetPos.y = 288;
             }
@@ -1165,13 +1163,13 @@ void HUD_Draw()
 
             if ((HUD_Cap_Vel.x == 0) && (HUD_Cap_Vel.y == 0) && (HUD_Cap_Vel.z == 0))
             {
-                if (HUD_State == 3)
+                if (HUD_State == HUD_STATE_WAIT_NEW_SLICE_GET_POSITION)
                 {
-                    HUD_State = 4;
+                    HUD_State = HUD_STATE_WAIT_NEW_SLICE_GET_POSITION_IN_PIE;
                 }
-                else if (HUD_State == 4)
+                else if (HUD_State == HUD_STATE_WAIT_NEW_SLICE_GET_POSITION_IN_PIE)
                 {
-                    HUD_State = 5;
+                    HUD_State = HUD_STATE_NEW_SLICE_ADDED;
                 }
             }
 
