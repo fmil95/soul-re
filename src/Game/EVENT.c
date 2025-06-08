@@ -1420,7 +1420,7 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
 
     switch (item)
     {
-    case 5:
+    case ATTR_POSITION:
     {
         evPositionData *position;
 
@@ -1444,7 +1444,7 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
         retValue = 1;
         break;
     }
-    case 9:
+    case ATTR_ROTATION:
     {
         evPositionData *rotation;
         Rotation3d vector;
@@ -1473,7 +1473,7 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
         retValue = 1;
         break;
     }
-    case 12:
+    case ATTR_SPLINE:
         stackObject->id = 15;
 
         stackObject->data.instanceSpline.instance = instance;
@@ -1486,7 +1486,7 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
 
         retValue = 1;
         break;
-    case 126:
+    case ATTR_SOUND:
     {
         int status;
 
@@ -1528,7 +1528,7 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
         retValue = 1;
         break;
     }
-    case 29:
+    case ATTR_ANIMATE:
         if (instance->object->animList != NULL)
         {
             retValue = 1;
@@ -1541,27 +1541,27 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
         }
 
         break;
-    case 19:
+    case ATTR_MODE_STATUS:
         EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 10), 3);
 
         retValue = 1;
         break;
-    case 159:
+    case ATTR_FULL_HEALTH:
         EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 43), 0);
 
         retValue = 1;
         break;
-    case 169:
+    case ATTR_RAZ_HEALTH:
         EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 31), 0);
 
         retValue = 1;
         break;
-    case 170:
+    case ATTR_RAZ_MANA:
         EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 32), 0);
 
         retValue = 1;
         break;
-    case 161:
+    case ATTR_HOLDING_ID:
     {
         Instance *tmpI;
         long value;
@@ -1592,18 +1592,18 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
         retValue = 1;
         break;
     }
-    case 139:
-    case 166:
+    case ATTR_DEAD:
+    case ATTR_DEADORDESTROYED:
         EVENT_ChangeOperandToNumber(stackObject, (INSTANCE_Query(instance, 0) >> 30) & 0x1, 0);
 
         retValue = 1;
         break;
-    case 167:
+    case ATTR_DYING:
         EVENT_ChangeOperandToNumber(stackObject, (INSTANCE_Query(instance, 0) >> 26) & 0x1, 0);
 
         retValue = 1;
         break;
-    case 160:
+    case ATTR_SLUAGH_SUCKABLE:
     {
         unsigned long temp; // not from decls.h
 
@@ -1614,22 +1614,22 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
         retValue = 1;
         break;
     }
-    case 18:
+    case ATTR_WATERSTATUS:
         EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 9), 1);
 
         retValue = 1;
         break;
-    case 56:
+    case ATTR_SPECIALINFO:
         EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 30), 0);
 
         retValue = 1;
         break;
-    case 63:
+    case ATTR_INTRODUCED:
         EVENT_ChangeOperandToNumber(stackObject, 1, 0);
 
         retValue = 1;
         break;
-    case 33:
+    case ATTR_ANITEXTURE:
         stackObject->id = 20;
 
         stackObject->data.instanceAniTexture.instance = instance;
@@ -1640,7 +1640,7 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
 
         stackObject->data.instanceAniTexture.attribute = -1;
         break;
-    case 43:
+    case ATTR_ON:
     {
         int temp; // not from decls.h
         StreamUnit *temp2; // not from decls.h
@@ -1666,22 +1666,22 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
         retValue = 1;
         break;
     }
-    case 146:
+    case ATTR_DESTROYED:
         EVENT_ChangeOperandToNumber(stackObject, 0, 0);
 
         retValue = 1;
         break;
-    case 151:
+    case ATTR_INUNIT:
         EVENT_ChangeOperandToNumber(stackObject, instance->currentStreamUnitID, 0);
 
         retValue = 1;
         break;
-    case 153:
+    case ATTR_ONGROUND:
         EVENT_ChangeOperandToNumber(stackObject, instance->tface != NULL, 0);
 
         retValue = 1;
         break;
-    case 57:
+    case ATTR_CONSTRICT:
         retValue = 1;
 
         stackObject->id = 24;
@@ -1690,7 +1690,7 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
 
         stackObject->data.instanceAnimate.attribute = -1;
         break;
-    case 60:
+    case ATTR_ATTACKED:
     {
         long value;
 
@@ -1708,7 +1708,7 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
         retValue = 1;
         break;
     }
-    case 121:
+    case ATTR_INTERACTED:
     {
         long value;
 
@@ -1726,7 +1726,7 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
         retValue = 1;
         break;
     }
-    case 122:
+    case ATTR_INTERACTEDAUX:
     {
         long value;
 
@@ -1744,7 +1744,7 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
         retValue = 1;
         break;
     }
-    case 106:
+    case ATTR_FORCED:
     {
         long value;
 
@@ -1762,7 +1762,7 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
         retValue = 1;
         break;
     }
-    case 125:
+    case ATTR_AMPLIFIEDFORCED:
     {
         long value;
 
@@ -1780,58 +1780,58 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
         retValue = 1;
         break;
     }
-    case 137:
+    case ATTR_ABILITY:
         EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 36), 3);
 
         retValue = 1;
         break;
-    case 4:
-    case 10:
-    case 11:
-    case 20:
-    case 21:
-    case 32:
-    case 36:
-    case 37:
-    case 38:
-    case 39:
-    case 51:
-    case 52:
-    case 53:
-    case 54:
-    case 55:
-    case 62:
-    case 64:
-    case 75:
-    case 76:
-    case 77:
-    case 78:
-    case 79:
-    case 80:
-    case 83:
-    case 84:
-    case 85:
-    case 91:
-    case 92:
-    case 94:
-    case 95:
-    case 103:
-    case 108:
-    case 109:
-    case 110:
-    case 111:
-    case 114:
-    case 116:
-    case 123:
-    case 124:
-    case 138:
-    case 140:
-    case 141:
-    case 143:
-    case 144:
-    case 163:
-    case 164:
-    case 165:
+    case ATTR_DESTROY:
+    case ATTR_HIDE:
+    case ATTR_UNHIDE:
+    case ATTR_SPECTRAL:
+    case ATTR_MATERIAL:
+    case ATTR_SETACTION:
+    case ATTR_SWITCHON:
+    case ATTR_SWITCHOFF:
+    case ATTR_DISABLE:
+    case ATTR_ENABLE:
+    case ATTR_SETPIECE:
+    case ATTR_NODRAW:
+    case ATTR_NOCOLLIDE:
+    case ATTR_PUSH:
+    case ATTR_STARTEFFECT:
+    case ATTR_INTRO:
+    case ATTR_BOOST:
+    case ATTR_MOVETOPOS:
+    case ATTR_SETPOSITION:
+    case ATTR_SETROTATION:
+    case ATTR_STOPCONTROL:
+    case ATTR_STARTCONTROL:
+    case ATTR_MOVETOROT:
+    case ATTR_LOOKAT:
+    case ATTR_STOPLOOKAT:
+    case ATTR_GRAVITY:
+    case ATTR_LIGHTGROUP:
+    case ATTR_SPECTRALLIGHTGROUP:
+    case ATTR_STARTBURN:
+    case ATTR_STOPBURN:
+    case ATTR_USEFLOORLIGHTING:
+    case ATTR_SETSLIDEANGLE:
+    case ATTR_RESETSLIDEANGLE:
+    case ATTR_GOTOUNDERWORLD:
+    case ATTR_ENABLEABILITY:
+    case ATTR_ANIMTOPOS:
+    case ATTR_DRAINENERGY:
+    case ATTR_ROTATETOWARD:
+    case ATTR_CHANGEMANA:
+    case ATTR_NOREGEN:
+    case ATTR_GLIDESPEED:
+    case ATTR_SOUNDALARM:
+    case ATTR_SWITCHTURNINGON:
+    case ATTR_SWITCHTURNINGOFF:
+    case ATTR_KAIN_ZAP:
+    case ATTR_KAIN_ZAPSTOP:
+    case ATTR_NOKEYPADINPUT:
         stackObject->data.instanceObject.attribute = item;
 
         retValue = 1;
@@ -2687,9 +2687,9 @@ long EVENT_DoVMObjectAction(EventVmObject *vmobject, StackType *operand2)
 
         switch (vmobject->attribute)
         {
-        case 14:
+        case ATTR_STOP:
             trueValue = trueValue == 0;
-        case 13:
+        case ATTR_START:
             if (trueValue != 0)
             {
                 vmobject->vmObjectPtr->flags &= ~0x2;
@@ -2701,7 +2701,7 @@ long EVENT_DoVMObjectAction(EventVmObject *vmobject, StackType *operand2)
 
             result = 1;
             break;
-        case 99:
+        case ATTR_TABLE:
             if (number != -1)
             {
                 if ((number >= 0) && (number < vmobject->vmObjectPtr->numVMOffsetTables))
@@ -2716,7 +2716,7 @@ long EVENT_DoVMObjectAction(EventVmObject *vmobject, StackType *operand2)
             }
 
             break;
-        case 100:
+        case ATTR_INDEX:
             if (number != -1)
             {
                 vmobject->vmObjectPtr->timer = number;
@@ -2752,9 +2752,9 @@ long EVENT_GetVMObjectValue(EventVmObject *vmobject)
     case -1:
         value = 1;
         break;
-    case 14:
+    case ATTR_STOP:
         trueValue = 0;
-    case 13:
+    case ATTR_START:
         value = trueValue;
 
         if ((vmobject->vmObjectPtr->flags & 0x2))
@@ -2763,10 +2763,10 @@ long EVENT_GetVMObjectValue(EventVmObject *vmobject)
         }
 
         break;
-    case 99:
+    case ATTR_TABLE:
         value = vmobject->vmObjectPtr->currentIdx;
         break;
-    case 100:
+    case ATTR_INDEX:
         value = vmobject->vmObjectPtr->timer % vmobject->vmObjectPtr->curVMOffsetTable->numVMOffsets;
         break;
     }
@@ -2790,7 +2790,7 @@ long EVENT_DoGameAction(GameObject *gameObject, StackType *operand2)
 
         switch (gameObject->attribute)
         {
-        case 88:
+        case ATTR_SNOW:
             if (error != 0)
             {
                 FX_Start_Snow(100);
@@ -2801,7 +2801,7 @@ long EVENT_DoGameAction(GameObject *gameObject, StackType *operand2)
             }
 
             break;
-        case 89:
+        case ATTR_RAIN:
             if (error != 0)
             {
                 FX_Start_Rain(100);
@@ -2812,7 +2812,7 @@ long EVENT_DoGameAction(GameObject *gameObject, StackType *operand2)
             }
 
             break;
-        case 118:
+        case ATTR_VOICEPLAY:
             if ((number >= 0) && ((gameTrackerX.debugFlags & 0x80000)))
             {
                 if (WaitingForVoiceNumber != number)
@@ -2841,23 +2841,23 @@ long EVENT_DoGameAction(GameObject *gameObject, StackType *operand2)
             }
 
             break;
-        case 119:
+        case ATTR_VOICEVOL:
             if ((number > 0) && (number < 128))
             {
                 SOUND_SetVoiceVolume(number);
             }
 
             break;
-        case 142:
+        case ATTR_SHOWHINT:
             HINT_StartHint(number);
             break;
-        case 156:
+        case ATTR_KILLSPFCHINT:
             HINT_KillSpecificHint(number);
             break;
-        case 147:
+        case ATTR_STOPHINT:
             HINT_StopHint();
             break;
-        case 2:
+        case ATTR_TIMEOFDAY:
             switch (number)
             {
             case 1:
@@ -2875,13 +2875,13 @@ long EVENT_DoGameAction(GameObject *gameObject, StackType *operand2)
             }
 
             break;
-        case 135:
+        case ATTR_SETMUSICMODIFIER:
             SOUND_SetMusicModifier(number);
             break;
-        case 136:
+        case ATTR_RESETMUSICMODIFIER:
             SOUND_ResetMusicModifier(number);
             break;
-        case 150:
+        case ATTR_PLAYMOVIE:
             if (MoviePlayed == 0)
             {
                 MovieToPlay = number;
@@ -2919,7 +2919,7 @@ long EVENT_DoSignalAction(SignalObject *signalObject, StackType *operand2)
     {
         EVENT_ParseOperand2(operand2, &error, &trueValue);
 
-        if ((signalObject->attribute == 26) && (trueValue != 0))
+        if ((signalObject->attribute == ATTR_CALL) && (trueValue != 0))
         {
             COLLIDE_HandleSignal(gameTrackerX.playerInstance, signalObject->msignal->signalList, signalObject->msignal->numSignals, 0);
         }
@@ -2941,12 +2941,12 @@ long EVENT_TransformSignalAttribute(PCodeStack *stack, StackType *stackObject, l
 
     switch (item)
     {
-    case 26:
+    case ATTR_CALL:
         stackObject->data.signalObject.attribute = item;
 
         retValue = 1;
         break;
-    case 50:
+    case ATTR_CROSSED:
         EVENT_ChangeOperandToNumber(stackObject, msignal->flags & 0x1, 0);
 
         retValue = 1;
@@ -2965,12 +2965,12 @@ long EVENT_TransformRotation3dAttribute(PCodeStack *stack, StackType *stackObjec
 
     switch (item)
     {
-    case 6:
-    case 7:
-    case 8:
-    case 96:
-    case 97:
-    case 98:
+    case ATTR_X:
+    case ATTR_Y:
+    case ATTR_Z:
+    case ATTR_SOFTX:
+    case ATTR_SOFTY:
+    case ATTR_SOFTZ:
         stackObject->data.rotation3d.attribute = item;
 
         retValue = 1;
@@ -2990,22 +2990,22 @@ long EVENT_TransformVector3dAttribute(PCodeStack *stack, StackType *stackObject,
 
     switch (item)
     {
-    case 6:
+    case ATTR_X:
         EVENT_ChangeOperandToNumber(stackObject, stackObject->data.vector3d.vx, 0);
 
         retValue = 1;
         break;
-    case 7:
+    case ATTR_Y:
         EVENT_ChangeOperandToNumber(stackObject, stackObject->data.vector3d.vy, 0);
 
         retValue = 1;
         break;
-    case 8:
+    case ATTR_Z:
         EVENT_ChangeOperandToNumber(stackObject, stackObject->data.vector3d.vz, 0);
 
         retValue = 1;
         break;
-    case 23:
+    case ATTR_SPHERE:
         stackObject->data.vector3d.errorx = *++codeStream;
         stackObject->data.vector3d.errory = -1;
         stackObject->data.vector3d.errorz = -1;
@@ -3014,7 +3014,7 @@ long EVENT_TransformVector3dAttribute(PCodeStack *stack, StackType *stackObject,
 
         retValue = 1;
         break;
-    case 24:
+    case ATTR_CYLINDER:
         MoveCodeStreamExtra = 2;
 
         stackObject->data.vector3d.errorx = *++codeStream;
@@ -3023,7 +3023,7 @@ long EVENT_TransformVector3dAttribute(PCodeStack *stack, StackType *stackObject,
 
         retValue = 1;
         break;
-    case 25:
+    case ATTR_BOX:
         MoveCodeStreamExtra = 3;
 
         stackObject->data.vector3d.errorx = *++codeStream;
@@ -3072,10 +3072,10 @@ long EVENT_DoInstanceAnimateTextureAction(InstanceAnimateTexture *instanceAniTex
 
         switch (instanceAniTexture->attribute)
         {
-        case 14:
+        case ATTR_STOP:
             trueValue ^= 1;
-        case 13:
-        case 41:
+        case ATTR_START:
+        case ATTR_PLAY:
             result = 1;
 
             if (trueValue != 0)
@@ -3088,8 +3088,8 @@ long EVENT_DoInstanceAnimateTextureAction(InstanceAnimateTexture *instanceAniTex
             }
 
             break;
-        case 15:
-        case 40:
+        case ATTR_KEYFRAME:
+        case ATTR_FRAME:
             if (error == 0)
             {
                 instanceAniTexture->instance->currentTextureAnimFrame = number;
