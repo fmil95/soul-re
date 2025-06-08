@@ -41,7 +41,7 @@ void metaCmdSelectChannel(AadSeqEvent *event, AadSequenceSlot *slot)
 {
     int channelNumber;
 
-    channelNumber = (unsigned char)event->dataByte[0];
+    channelNumber = event->dataByte[0];
 
     if (channelNumber < 16)
     {
@@ -53,7 +53,7 @@ void metaCmdSelectSlot(AadSeqEvent *event, AadSequenceSlot *slot)
 {
     int slotNumber;
 
-    slotNumber = (unsigned char)event->dataByte[0];
+    slotNumber = event->dataByte[0];
 
     if (slotNumber < aadMem->numSlots)
     {
@@ -74,7 +74,7 @@ void metaCmdAssignSequence(AadSeqEvent *event, AadSequenceSlot *slot)
     int sequenceNumber;
     int bank;
 
-    sequenceNumber = (unsigned char)event->dataByte[0];
+    sequenceNumber = event->dataByte[0];
 
     bank = slot->selectedDynamicBank;
 
@@ -96,10 +96,10 @@ void metaCmdSetTempo(AadSeqEvent *event, AadSequenceSlot *slot)
 {
     AadTempo tempo;
 
-    tempo.quarterNoteTime = (unsigned char)event->dataByte[0] << 16;
+    tempo.quarterNoteTime = event->dataByte[0] << 16;
 
-    tempo.quarterNoteTime |= (unsigned char)event->dataByte[1] << 8;
-    tempo.quarterNoteTime |= (unsigned char)event->dataByte[2];
+    tempo.quarterNoteTime |= event->dataByte[1] << 8;
+    tempo.quarterNoteTime |= event->dataByte[2];
 
     tempo.ppqn = slot->selectedSlotPtr->tempo.ppqn;
 
@@ -115,7 +115,7 @@ void metaCmdChangeTempo(AadSeqEvent *event, AadSequenceSlot *slot)
 
     tempo.quarterNoteTime = selectedSlot->tempo.quarterNoteTime * 100;
 
-    tempo.quarterNoteTime /= (unsigned char)event->dataByte[0];
+    tempo.quarterNoteTime /= event->dataByte[0];
 
     tempo.ppqn = selectedSlot->tempo.ppqn;
 
@@ -128,7 +128,7 @@ void metaCmdSetTempoFromSequence(AadSeqEvent *event, AadSequenceSlot *slot)
     AadTempo tempo;
     int bank;
 
-    sequenceNumber = (unsigned char)event->dataByte[0];
+    sequenceNumber = event->dataByte[0];
 
     bank = slot->selectedDynamicBank;
 
@@ -180,7 +180,7 @@ void metaCmdSetSlotVolume(AadSeqEvent *event, AadSequenceSlot *slot)
 {
     int volume;
 
-    volume = (unsigned char)event->dataByte[0];
+    volume = event->dataByte[0];
 
     slot->selectedSlotPtr->slotVolume = volume;
 
@@ -191,7 +191,7 @@ void metaCmdSetSlotPan(AadSeqEvent *event, AadSequenceSlot *slot)
 {
     int pan;
 
-    pan = (unsigned char)event->dataByte[0];
+    pan = event->dataByte[0];
 
     slot->selectedSlotPtr->slotPan = pan;
 
@@ -202,7 +202,7 @@ void metaCmdSetChannelVolume(AadSeqEvent *event, AadSequenceSlot *slot)
 {
     int volume;
 
-    volume = (unsigned char)event->dataByte[0];
+    volume = event->dataByte[0];
 
     slot->selectedSlotPtr->volume[slot->selectedChannel] = volume;
 
@@ -213,7 +213,7 @@ void metaCmdSetChannelPan(AadSeqEvent *event, AadSequenceSlot *slot)
 {
     int pan;
 
-    pan = (unsigned char)event->dataByte[0];
+    pan = event->dataByte[0];
 
     slot->selectedSlotPtr->panPosition[slot->selectedChannel] = pan;
 
@@ -258,19 +258,19 @@ void metaCmdUnMuteChannel(AadSeqEvent *event, AadSequenceSlot *slot)
 
 void metaCmdMuteChannelList(AadSeqEvent *event, AadSequenceSlot *slot)
 {
-    aadMuteChannels(slot->selectedSlotPtr, ((unsigned char)event->dataByte[1] << 8) | (unsigned char)event->dataByte[0]);
+    aadMuteChannels(slot->selectedSlotPtr, (event->dataByte[1] << 8) | event->dataByte[0]);
 }
 
 void metaCmdUnMuteChannelList(AadSeqEvent *event, AadSequenceSlot *slot)
 {
-    aadUnMuteChannels(slot->selectedSlotPtr, ((unsigned char)event->dataByte[1] << 8) | (unsigned char)event->dataByte[0]);
+    aadUnMuteChannels(slot->selectedSlotPtr, (event->dataByte[1] << 8) | event->dataByte[0]);
 }
 
 void metaCmdSetChannelMute(AadSeqEvent *event, AadSequenceSlot *slot)
 {
     unsigned long muteChannelMask;
 
-    muteChannelMask = ((unsigned char)event->dataByte[1] << 8) | (unsigned char)event->dataByte[0];
+    muteChannelMask = (event->dataByte[1] << 8) | event->dataByte[0];
 
     aadUnMuteChannels(slot->selectedSlotPtr, ~muteChannelMask);
     aadMuteChannels(slot->selectedSlotPtr, muteChannelMask);
@@ -280,7 +280,7 @@ void metaCmdDelayMute(AadSeqEvent *event, AadSequenceSlot *slot)
 {
     unsigned long channelMask;
 
-    channelMask = ((unsigned char)event->dataByte[1] << 8) | (unsigned char)event->dataByte[0];
+    channelMask = (event->dataByte[1] << 8) | event->dataByte[0];
 
     slot->selectedSlotPtr->delayedMuteMode |= channelMask;
 }
@@ -290,7 +290,7 @@ void metaCmdUpdateMute(AadSeqEvent *event, AadSequenceSlot *slot)
     unsigned long channelMask;
     unsigned long mask;
 
-    channelMask = ((unsigned char)event->dataByte[1] << 8) | (unsigned char)event->dataByte[0];
+    channelMask = (event->dataByte[1] << 8) | event->dataByte[0];
 
     slot->selectedSlotPtr->delayedMuteMode &= ~channelMask;
 
@@ -329,7 +329,7 @@ void metaCmdSetChannelProgram(AadSeqEvent *event, AadSequenceSlot *slot)
 {
     int program;
 
-    program = (unsigned char)event->dataByte[0];
+    program = event->dataByte[0];
 
     slot->selectedSlotPtr->currentProgram[slot->selectedChannel] = program;
 }
@@ -345,7 +345,7 @@ void metaCmdSetChannelTranspose(AadSeqEvent *event, AadSequenceSlot *slot)
 
     channel = slot->selectedChannel;
 
-    transpose = (unsigned char)event->dataByte[0];
+    transpose = event->dataByte[0];
 
     slot->selectedSlotPtr->transpose[channel] = transpose;
 }
@@ -388,7 +388,7 @@ void metaCmdGetSequenceAssigned(AadSeqEvent *event, AadSequenceSlot *slot)
 {
     int variableNum;
 
-    variableNum = (unsigned char)event->dataByte[0];
+    variableNum = event->dataByte[0];
 
     if (variableNum < 128)
     {
@@ -403,9 +403,9 @@ void metaCmdGetTempo(AadSeqEvent *event, AadSequenceSlot *slot)
     int variableNum3;
     unsigned long quarterNoteTime;
 
-    variableNum1 = (unsigned char)event->dataByte[0];
-    variableNum2 = (unsigned char)event->dataByte[1];
-    variableNum3 = (unsigned char)event->dataByte[2];
+    variableNum1 = event->dataByte[0];
+    variableNum2 = event->dataByte[1];
+    variableNum3 = event->dataByte[2];
 
     if ((variableNum1 < 128) && (variableNum2 < 128) && (variableNum3 < 128))
     {
@@ -421,7 +421,7 @@ void metaCmdGetSlotStatus(AadSeqEvent *event, AadSequenceSlot *slot)
 {
     int variableNum;
 
-    variableNum = (unsigned char)event->dataByte[0];
+    variableNum = event->dataByte[0];
 
     if (variableNum < 128)
     {
@@ -434,8 +434,8 @@ void metaCmdGetChannelMute(AadSeqEvent *event, AadSequenceSlot *slot)
     int variableNum1;
     int variableNum2;
 
-    variableNum1 = (unsigned char)event->dataByte[0];
-    variableNum2 = (unsigned char)event->dataByte[1];
+    variableNum1 = event->dataByte[0];
+    variableNum2 = event->dataByte[1];
 
     if ((variableNum1 < 128) && (variableNum2 < 128))
     {
@@ -449,7 +449,7 @@ void metaCmdGetChannelVolume(AadSeqEvent *event, AadSequenceSlot *slot)
     int variableNum;
     int channel;
 
-    variableNum = (unsigned char)event->dataByte[0];
+    variableNum = event->dataByte[0];
 
     channel = slot->selectedChannel;
 
@@ -464,7 +464,7 @@ void metaCmdGetChannelPan(AadSeqEvent *event, AadSequenceSlot *slot)
     int variableNum;
     int channel;
 
-    variableNum = (unsigned char)event->dataByte[0];
+    variableNum = event->dataByte[0];
 
     channel = slot->selectedChannel;
 
@@ -483,7 +483,7 @@ void metaCmdGetChannelProgram(AadSeqEvent *event, AadSequenceSlot *slot)
     int variableNum;
     int channel;
 
-    variableNum = (unsigned char)event->dataByte[0];
+    variableNum = event->dataByte[0];
 
     channel = slot->selectedChannel;
 
@@ -505,7 +505,7 @@ void metaCmdGetSlotVolume(AadSeqEvent *event, AadSequenceSlot *slot)
 {
     int variableNum;
 
-    variableNum = (unsigned char)event->dataByte[0];
+    variableNum = event->dataByte[0];
 
     if (variableNum < 128)
     {
@@ -517,7 +517,7 @@ void metaCmdGetSlotPan(AadSeqEvent *event, AadSequenceSlot *slot)
 {
     int variableNum;
 
-    variableNum = (unsigned char)event->dataByte[0];
+    variableNum = event->dataByte[0];
 
     if (variableNum < 128)
     {
@@ -532,9 +532,9 @@ void metaCmdSetVariable(AadSeqEvent *event, AadSequenceSlot *slot)
 
     (void)slot;
 
-    value = (unsigned char)event->dataByte[0];
+    value = event->dataByte[0];
 
-    destVariable = (unsigned char)event->dataByte[1];
+    destVariable = event->dataByte[1];
 
     if (destVariable < 128)
     {
@@ -549,8 +549,8 @@ void metaCmdCopyVariable(AadSeqEvent *event, AadSequenceSlot *slot)
 
     (void)slot;
 
-    srcVariable = (unsigned char)event->dataByte[0];
-    destVariable = (unsigned char)event->dataByte[1];
+    srcVariable = event->dataByte[0];
+    destVariable = event->dataByte[1];
 
     if ((srcVariable < 128) && (destVariable < 128))
     {
@@ -565,9 +565,9 @@ void metaCmdAddVariable(AadSeqEvent *event, AadSequenceSlot *slot)
 
     (void)slot;
 
-    value = (unsigned char)event->dataByte[0];
+    value = event->dataByte[0];
 
-    destVariable = (unsigned char)event->dataByte[1];
+    destVariable = event->dataByte[1];
 
     if (destVariable < 128)
     {
@@ -582,9 +582,9 @@ void metaCmdSubtractVariable(AadSeqEvent *event, AadSequenceSlot *slot)
 
     (void)slot;
 
-    value = (unsigned char)event->dataByte[0];
+    value = event->dataByte[0];
 
-    destVariable = (unsigned char)event->dataByte[1];
+    destVariable = event->dataByte[1];
 
     if (destVariable < 128)
     {
@@ -599,9 +599,9 @@ void metaCmdSetVariableBits(AadSeqEvent *event, AadSequenceSlot *slot)
 
     (void)slot;
 
-    value = (unsigned char)event->dataByte[0];
+    value = event->dataByte[0];
 
-    destVariable = (unsigned char)event->dataByte[1];
+    destVariable = event->dataByte[1];
 
     if (destVariable < 128)
     {
@@ -616,9 +616,9 @@ void metaCmdClearVariableBits(AadSeqEvent *event, AadSequenceSlot *slot)
 
     (void)slot;
 
-    value = (unsigned char)event->dataByte[0];
+    value = event->dataByte[0];
 
-    destVariable = (unsigned char)event->dataByte[1];
+    destVariable = event->dataByte[1];
 
     if (destVariable < 128)
     {
@@ -685,7 +685,7 @@ void metaCmdLoopStart(AadSeqEvent *event, AadSequenceSlot *slot)
     {
         slot->loopSequencePosition[nestLevel][track] = slot->sequencePosition[track];
 
-        slot->loopCounter[nestLevel][track] = (unsigned char)event->dataByte[0];
+        slot->loopCounter[nestLevel][track] = event->dataByte[0];
 
         slot->loopCurrentNestLevel[track]++;
     }
@@ -729,12 +729,12 @@ void metaCmdDefineLabel()
 
 void metaCmdGotoLabel(AadSeqEvent *event, AadSequenceSlot *slot)
 {
-    aadGotoSequenceLabel(slot, event->track, (unsigned char)event->dataByte[0]);
+    aadGotoSequenceLabel(slot, event->track, event->dataByte[0]);
 }
 
 void metaCmdSetSequencePosition(AadSeqEvent *event, AadSequenceSlot *slot)
 {
-    aadGotoSequenceLabel(slot->selectedSlotPtr, event->track, (unsigned char)event->dataByte[0]);
+    aadGotoSequenceLabel(slot->selectedSlotPtr, event->track, event->dataByte[0]);
 }
 
 void metaCmdBranchIfVarEqual(AadSeqEvent *event, AadSequenceSlot *slot)
@@ -743,11 +743,11 @@ void metaCmdBranchIfVarEqual(AadSeqEvent *event, AadSequenceSlot *slot)
     int value;
     int labelNum;
 
-    variableNum = (unsigned char)event->dataByte[0];
+    variableNum = event->dataByte[0];
 
-    value = (unsigned char)event->dataByte[1];
+    value = event->dataByte[1];
 
-    labelNum = (unsigned char)event->dataByte[2];
+    labelNum = event->dataByte[2];
 
     if (aadMem->userVariables[variableNum] == value)
     {
@@ -761,11 +761,11 @@ void metaCmdBranchIfVarNotEqual(AadSeqEvent *event, AadSequenceSlot *slot)
     int value;
     int labelNum;
 
-    variableNum = (unsigned char)event->dataByte[0];
+    variableNum = event->dataByte[0];
 
-    value = (unsigned char)event->dataByte[1];
+    value = event->dataByte[1];
 
-    labelNum = (unsigned char)event->dataByte[2];
+    labelNum = event->dataByte[2];
 
     if (aadMem->userVariables[variableNum] != value)
     {
@@ -779,11 +779,11 @@ void metaCmdBranchIfVarLess(AadSeqEvent *event, AadSequenceSlot *slot)
     int value;
     int labelNum;
 
-    variableNum = (unsigned char)event->dataByte[0];
+    variableNum = event->dataByte[0];
 
-    value = (unsigned char)event->dataByte[1];
+    value = event->dataByte[1];
 
-    labelNum = (unsigned char)event->dataByte[2];
+    labelNum = event->dataByte[2];
 
     if (aadMem->userVariables[variableNum] < value)
     {
@@ -797,11 +797,11 @@ void metaCmdBranchIfVarGreater(AadSeqEvent *event, AadSequenceSlot *slot)
     int value;
     int labelNum;
 
-    variableNum = (unsigned char)event->dataByte[0];
+    variableNum = event->dataByte[0];
 
-    value = (unsigned char)event->dataByte[1];
+    value = event->dataByte[1];
 
-    labelNum = (unsigned char)event->dataByte[2];
+    labelNum = event->dataByte[2];
 
     if (aadMem->userVariables[variableNum] > value)
     {
@@ -815,11 +815,11 @@ void metaCmdBranchIfVarLessOrEqual(AadSeqEvent *event, AadSequenceSlot *slot)
     int value;
     int labelNum;
 
-    variableNum = (unsigned char)event->dataByte[0];
+    variableNum = event->dataByte[0];
 
-    value = (unsigned char)event->dataByte[1];
+    value = event->dataByte[1];
 
-    labelNum = (unsigned char)event->dataByte[2];
+    labelNum = event->dataByte[2];
 
     if (aadMem->userVariables[variableNum] <= value)
     {
@@ -833,11 +833,11 @@ void metaCmdBranchIfVarGreaterOrEqual(AadSeqEvent *event, AadSequenceSlot *slot)
     int value;
     int labelNum;
 
-    variableNum = (unsigned char)event->dataByte[0];
+    variableNum = event->dataByte[0];
 
-    value = (unsigned char)event->dataByte[1];
+    value = event->dataByte[1];
 
-    labelNum = (unsigned char)event->dataByte[2];
+    labelNum = event->dataByte[2];
 
     if (aadMem->userVariables[variableNum] >= value)
     {
@@ -851,11 +851,11 @@ void metaCmdBranchIfVarBitsSet(AadSeqEvent *event, AadSequenceSlot *slot)
     int mask;
     int labelNum;
 
-    variableNum = (unsigned char)event->dataByte[0];
+    variableNum = event->dataByte[0];
 
-    mask = (unsigned char)event->dataByte[1];
+    mask = event->dataByte[1];
 
-    labelNum = (unsigned char)event->dataByte[2];
+    labelNum = event->dataByte[2];
 
     if ((aadMem->userVariables[variableNum] & mask))
     {
@@ -869,11 +869,11 @@ void metaCmdBranchIfVarBitsClear(AadSeqEvent *event, AadSequenceSlot *slot)
     int mask;
     int labelNum;
 
-    variableNum = (unsigned char)event->dataByte[0];
+    variableNum = event->dataByte[0];
 
-    mask = (unsigned char)event->dataByte[1];
+    mask = event->dataByte[1];
 
-    labelNum = (unsigned char)event->dataByte[2];
+    labelNum = event->dataByte[2];
 
     if (!(aadMem->userVariables[variableNum] & mask))
     {
