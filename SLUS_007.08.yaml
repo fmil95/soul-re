@@ -210,7 +210,7 @@ segments:
       - [0x0C186C, .sdata, Game/VM]
       - [0x0C1874, .sdata, Game/MEMPACK]
       - [0x0C1958, .sdata, Game/PSX/AADLIB]
-      - [0x0C1A1C, sdata, Game/PSX/AADSEQEV]
+      - [0x0C1A1C, .sdata, Game/PSX/AADSEQEV]
       - [0x0C1BBC, .sdata, Game/PSX/AADSFX] 
       - [0x0C1BE8, sdata] # Game/PSX/AADVOICE?
       - [0x0C1E94, .sdata, Game/STREAM]

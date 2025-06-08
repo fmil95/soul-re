@@ -2,11 +2,121 @@
 #include "Game/PSX/AADSEQEV.h"
 #include "Game/PSX/AADSQCMD.h"
 
-STATIC void (*midiEventFunction[8])();
+static char midiDataByteCount[8] = {2, 2, 2, 2, 1, 1, 2, 2};
 
-STATIC void (*midiControlFunction[16])();
+static void (*midiEventFunction[8])() =
+{
+    midiNoteOff,
+    midiNoteOn,
+    midiPolyphonicAftertouch,
+    midiControlChange,
+    midiProgramChange,
+    midiChannelAftertouch,
+    midiPitchWheelControl,
+    midiMetaEvent
+};
 
-STATIC void (*midiMetaEventFunction[78])();
+static void (*midiControlFunction[16])() =
+{
+    midiControlBankSelect,
+    midiControlDummy,
+    midiControlDummy,
+    midiControlDummy,
+    midiControlDummy,
+    midiControlDummy,
+    midiControlDummy,
+    midiControlVolume,
+    midiControlDummy,
+    midiControlDummy,
+    midiControlPan,
+    midiControlCallback,
+    midiControlDummy,
+    midiControlDummy,
+    midiControlDummy,
+    midiControlDummy
+};
+
+static void (*midiMetaEventFunction[78])() =
+{
+    metaCmdSelectChannel,
+    metaCmdSelectSlot,
+    metaCmdAssignSequence,
+    metaCmdUsePrimaryTempo,
+    metaCmdUseSecondaryTempo,
+    metaCmdSetTempo,
+    metaCmdSetTempoFromSequence,
+    metaCmdChangeTempo,
+    metaCmdStartSlot,
+    metaCmdStopSlot,
+    metaCmdPauseSlot,
+    metaCmdResumeSlot,
+    metaCmdSetSlotBendRange,
+    metaCmdSetChannelBendRange,
+    metaCmdSetSlotVolume,
+    metaCmdSetSlotPan,
+    metaCmdSetChannelVolume,
+    metaCmdSetChannelPan,
+    metaCmdMuteChannel,
+    metaCmdUnMuteChannel,
+    metaCmdMuteChannelList,
+    metaCmdUnMuteChannelList,
+    metaCmdChannelVolumeFade,
+    metaCmdChannelPanFade,
+    metaCmdSlotVolumeFade,
+    metaCmdSlotPanFade,
+    metaCmdSetChannelProgram,
+    metaCmdSetChannelBasePriority,
+    metaCmdSetChannelTranspose,
+    metaCmdIgnoreChannelTranspose,
+    metaCmdRespectChannelTranspose,
+    metaCmdSetChannelPitchMap,
+    metaCmdIgnoreChannelPitchMap,
+    metaCmdRespectChannelPitchMap,
+    metaCmdGetSequenceAssigned,
+    metaCmdGetTempo,
+    metaCmdGetSlotStatus,
+    metaCmdGetSlotVolume,
+    metaCmdGetSlotPan,
+    metaCmdGetChannelVolume,
+    metaCmdGetChannelPan,
+    metaCmdGetChannelMute,
+    metaCmdGetChannelBendRange,
+    metaCmdGetChannelTranspose,
+    metaCmdGetChannelProgram,
+    metaCmdGetChannelBasePriority,
+    metaCmdLoopStart,
+    metaCmdLoopEnd,
+    metaCmdLoopBreak,
+    metaCmdDefineLabel,
+    metaCmdGotoLabel,
+    metaCmdSetVariable,
+    metaCmdCopyVariable,
+    metaCmdAddVariable,
+    metaCmdSubtractVariable,
+    metaCmdSetVariableBits,
+    metaCmdClearVariableBits,
+    metaCmdBranchIfVarEqual,
+    metaCmdBranchIfVarNotEqual,
+    metaCmdBranchIfVarLess,
+    metaCmdBranchIfVarGreater,
+    metaCmdBranchIfVarLessOrEqual,
+    metaCmdBranchIfVarGreaterOrEqual,
+    metaCmdBranchIfVarBitsSet,
+    metaCmdBranchIfVarBitsClear,
+    metaCmdSubstituteVariableParam1,
+    metaCmdSubstituteVariableParam2,
+    metaCmdSubstituteVariableParam3,
+    metaCmdEndSequence,
+    metaCmdPlaySoundEffect,
+    metaCmdStopSoundEffect,
+    metaCmdSetSoundEffectVolumePan,
+    metaCmdSetSequencePosition,
+    metaCmdEnableSustainUpdate,
+    metaCmdDisableSustainUpdate,
+    metaCmdSetChannelMute,
+    metaCmdDelayMute,
+    metaCmdUpdateMute
+};
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", aadQueueNextEvent);
 
