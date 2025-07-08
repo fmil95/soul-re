@@ -847,7 +847,66 @@ void HackCallback()
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadLoadDynamicSfxReturn2);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadCheckSramFragmented);
+int aadCheckSramFragmented()
+{
+    AadNewSramBlockDesc *sramDescTbl;
+    AadNewSramBlockDesc *sramDesc;
+    long totalFree;
+    long smallestFree;
+    long numFreeBlocks;
+    int i;
+    int defragNeeded;
+
+    totalFree = 0;
+
+    smallestFree = 999999;
+
+    numFreeBlocks = 0;
+
+    sramDescTbl = aadMem->sramDescriptorTbl;
+
+    sramDesc = &sramDescTbl[aadMem->firstSramBlockDescIndex];
+
+    i = 128;
+
+    while (sramDesc != NULL)
+    {
+        if (!(sramDesc->waveID & 0x4000))
+        {
+            numFreeBlocks++;
+
+            totalFree += sramDesc->size;
+
+            if (sramDesc->size < smallestFree)
+            {
+                smallestFree = sramDesc->size;
+            }
+        }
+
+        if ((signed char)sramDesc->nextIndex >= 0)
+        {
+            sramDesc = &sramDescTbl[sramDesc->nextIndex];
+        }
+        else
+        {
+            sramDesc = NULL;
+        }
+
+        if (--i == 0)
+        {
+            break;
+        }
+    }
+
+    defragNeeded = 0;
+
+    if (numFreeBlocks >= 3)
+    {
+        defragNeeded = smallestFree < (totalFree >> 2);
+    }
+
+    return defragNeeded;
+}
 
 void aadProcessSramDefrag()
 {
