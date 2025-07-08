@@ -849,7 +849,199 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadLoadDynamicSfxReturn2);
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadCheckSramFragmented);
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadProcessSramDefrag);
+void aadProcessSramDefrag()
+{
+    AadSramDefragInfo *info;
+    AadNewSramBlockDesc *sramDescTbl;
+    AadNewSramBlockDesc *firstBlock;
+    AadNewSramBlockDesc *secondBlock;
+    int n;
+    int waveID;
+    int firstBlockIndex;
+    int secondBlockIndex;
+
+    info = &aadMem->sramDefragInfo;
+
+    firstBlockIndex = 1;
+
+    switch (aadMem->sramDefragInfo.status)
+    {
+    case 0:
+        break;
+    case 1:
+        firstBlockIndex = aadMem->firstSramBlockDescIndex;
+
+        sramDescTbl = aadMem->sramDescriptorTbl;
+
+        firstBlock = &sramDescTbl[firstBlockIndex];
+
+        n = 128;
+
+        if (firstBlock == NULL) goto label;
+        {
+            while (firstBlock != NULL)
+            {
+                if ((firstBlock->waveID & 0x4000))
+                {
+                    n--;
+
+                    firstBlockIndex = firstBlock->nextIndex;
+
+                    if ((n != 0) && (firstBlockIndex < 128))
+                    {
+                        firstBlock = &sramDescTbl[firstBlockIndex];
+                    }
+                    else
+                    {
+                        firstBlock = NULL;
+                    }
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            if (firstBlock == NULL) goto label;
+            {
+                if (firstBlock->nextIndex >= 128) goto label;
+                {
+                    secondBlockIndex = firstBlock->nextIndex;
+
+                    secondBlock = &sramDescTbl[secondBlockIndex];
+
+                    if (!(secondBlock->waveID & 0x4000)) goto label;
+                    {
+                        info->fragBuffer = aadMem->memoryMallocProc(4096, 48);
+
+                        if (info->fragBuffer == NULL) goto label;
+                        {
+                            waveID = secondBlock->waveID & 0x3FFF;
+
+                            info->masterListEntry = aadMem->sfxWaveMasterList[waveID];
+
+                            if (info->masterListEntry >= 254)
+                            {
+                                aadMem->memoryFreeProc(info->fragBuffer);
+                            label:
+                                info->status = 0;
+                            }
+                            else
+                            {
+                                aadMem->sfxWaveMasterList[waveID] = 255;
+
+                                info->waveID = waveID;
+
+                                info->destSramAddr = firstBlock->address << 3;
+                                info->srcSramAddr = secondBlock->address << 3;
+
+                                info->moveSize = secondBlock->size * 8;
+
+                                n = firstBlock->size;
+
+                                firstBlock->size = secondBlock->size;
+                                secondBlock->size = n;
+
+                                n = firstBlock->waveID;
+
+                                firstBlock->waveID = secondBlock->waveID;
+                                secondBlock->waveID = n;
+
+                                secondBlock->address = firstBlock->address + firstBlock->size;
+
+                                if ((signed char)secondBlock->nextIndex >= 0)
+                                {
+                                    AadNewSramBlockDesc *next;
+
+                                    next = &sramDescTbl[secondBlock->nextIndex];
+
+                                    if (!(next->waveID & 0x4000))
+                                    {
+                                        secondBlock->size += next->size;
+
+                                        next->waveID = 0;
+
+                                        secondBlock->nextIndex = next->nextIndex;
+
+                                        if (secondBlock->nextIndex < 128)
+                                        {
+                                            sramDescTbl[secondBlock->nextIndex].prevIndex = secondBlockIndex;
+                                        }
+                                    }
+                                }
+
+                                aadMem->sfxWaveAttrTbl[info->masterListEntry].sramHandle = firstBlockIndex;
+
+                                info->status = 2;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        break;
+    case 2:
+        if (SpuIsTransferCompleted(0) != 0)
+        {
+            if (info->moveSize <= 4096)
+            {
+                n = info->moveSize;
+            }
+            else
+            {
+                n = 4096;
+            }
+
+            SpuSetTransferStartAddr(info->srcSramAddr);
+
+            SpuRead(info->fragBuffer, n);
+
+            info->readSize = n;
+
+            info->status = 3;
+        }
+
+        break;
+    case 3:
+        if (SpuIsTransferCompleted(0) != 0)
+        {
+            SpuSetTransferStartAddr(info->destSramAddr);
+
+            n = info->readSize;
+
+            SpuWrite(info->fragBuffer, n);
+
+            info->srcSramAddr += n;
+
+            info->moveSize -= n;
+
+            info->destSramAddr += n;
+
+            if (info->moveSize != 0)
+            {
+                info->status = 2;
+            }
+            else
+            {
+                aadMem->memoryFreeProc(info->fragBuffer);
+
+                aadMem->sfxWaveMasterList[info->waveID] = info->masterListEntry;
+
+                if (aadCheckSramFragmented() != 0)
+                {
+                    info->status = 1;
+                }
+                else
+                {
+                    info->status = 0;
+                }
+            }
+        }
+
+        break;
+    }
+}
 
 int aadIsSfxLoaded(unsigned int toneID)
 {
