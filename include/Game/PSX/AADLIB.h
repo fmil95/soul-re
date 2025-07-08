@@ -74,5 +74,7 @@ void aadResumeSlot(int slotNumber);
 void aadPauseSlot(int slotNumber);
 int aadGetNumDynamicSequences(int bank);
 int aadCheckSramFragmented();
+void HackCallback();
+void aadLoadSingleDynSfx(AadDynamicSfxLoadInfo *info);
 
 #endif

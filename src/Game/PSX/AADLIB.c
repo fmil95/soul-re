@@ -845,7 +845,189 @@ void HackCallback()
     aadLoadDynamicSfxReturn2(smfDataPtr, smfBytesLeft, 0, smfInfo, NULL);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadLoadDynamicSfxReturn2);
+void aadLoadDynamicSfxReturn2(void *loadedDataPtr, long loadedDataSize, short status, void *data1, void *data2)
+{
+    unsigned char *dataPtr;
+    unsigned long dataOffset;
+    unsigned long bytesRemaining;
+    AadDynamicSfxLoadInfo *info;
+    unsigned long n;
+
+    (void)status;
+    (void)data2;
+
+    info = (AadDynamicSfxLoadInfo *)data1;
+
+    dataOffset = 0;
+
+    bytesRemaining = loadedDataSize;
+
+    dataPtr = (unsigned char *)loadedDataPtr;
+
+    while (bytesRemaining != 0)
+    {
+        switch (info->smfLoadingState)
+        {
+        case 0:
+            if (((AadDynSfxSnfFileHdr *)dataPtr)->snfID != aadCreateFourCharID('a', 'S', 'M', 'F'))
+            {
+                aadLoadDynamicSfxAbort(info, 4107);
+                return;
+            }
+            else if (((AadDynSfxSnfFileHdr *)dataPtr)->snfVersion != 256)
+            {
+                aadLoadDynamicSfxAbort(info, 4108);
+                return;
+            }
+            else
+            {
+                if ((((AadDynSfxSnfFileHdr *)dataPtr)->uniqueID != info->snfFile->uniqueID) || (((AadDynSfxSnfFileHdr *)dataPtr)->handle != info->snfFile->numSfxInFile))
+                {
+                    aadLoadDynamicSfxAbort(info, 4109);
+                    return;
+                }
+                else
+                {
+                    dataOffset += 16;
+
+                    bytesRemaining -= 16;
+
+                    info->numSfxToLoad = info->snfFile->numSfxInFile;
+
+                    info->smfLoadingState = 1;
+
+                    info->bytesToLoad = 24;
+                }
+            }
+
+            break;
+        case 1:
+            n = info->bytesToLoad;
+
+            if (bytesRemaining < n)
+            {
+                n = bytesRemaining;
+            }
+
+            memcpy((char *)info - (info->bytesToLoad - 148), &dataPtr[dataOffset], n);
+
+            dataOffset += n;
+
+            bytesRemaining -= n;
+
+            info->bytesToLoad -= n;
+
+            if (info->bytesToLoad == 0)
+            {
+                aadLoadSingleDynSfx(info);
+
+                info->bytesToLoad = info->attr.waveSize;
+            }
+
+            break;
+        case 2:
+            n = info->bytesToLoad;
+
+            if (bytesRemaining < n)
+            {
+                n = bytesRemaining;
+            }
+
+            dataOffset += n;
+
+            bytesRemaining -= n;
+
+            info->bytesToLoad -= n;
+
+            if (info->bytesToLoad == 0)
+            {
+                if (--info->numSfxToLoad != 0)
+                {
+                    info->smfLoadingState = 1;
+
+                    info->bytesToLoad = 24;
+                }
+                else
+                {
+                    aadLoadDynamicSfxDone(info);
+                    return;
+                }
+            }
+
+            break;
+        case 3:
+            n = info->bytesToLoad;
+
+            if (bytesRemaining < n)
+            {
+                n = bytesRemaining;
+            }
+
+            bytesRemaining -= n;
+
+            aadWaitForSramTransferComplete();
+
+            SpuSetTransferCallback(HackCallback);
+            SpuSetTransferStartAddr(info->waveTransferAddr);
+
+            SpuWrite(&dataPtr[dataOffset], n);
+
+            dataOffset += n;
+
+            info->waveTransferAddr += n;
+
+            info->bytesToLoad -= n;
+
+            if (info->bytesToLoad == 0)
+            {
+                info->totalSramUsed += info->attr.waveSize;
+
+                if (--info->numSfxToLoad == 0)
+                {
+                    SpuSetTransferCallback(NULL);
+
+                    aadLoadDynamicSfxDone(info);
+                    return;
+                }
+                else
+                {
+                    info->smfLoadingState = 1;
+
+                    info->bytesToLoad = 24;
+
+                    if (bytesRemaining == 0)
+                    {
+                        SpuSetTransferCallback(NULL);
+                    }
+                    else
+                    {
+                        smfDataPtr = &dataPtr[dataOffset];
+
+                        smfBytesLeft = bytesRemaining;
+
+                        smfInfo = info;
+                        return;
+                    }
+                }
+            }
+            else if (bytesRemaining != 0)
+            {
+                smfDataPtr = &dataPtr[dataOffset];
+
+                smfBytesLeft = bytesRemaining;
+
+                smfInfo = info;
+                return;
+            }
+            else
+            {
+                SpuSetTransferCallback(NULL);
+            }
+
+            break;
+        }
+    }
+}
 
 int aadCheckSramFragmented()
 {
