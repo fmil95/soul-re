@@ -83,6 +83,6 @@ In case of an error, you can use `make clean` to do this step once more from scr
  
 ## Contact
 
-The **PS1/PS2 Decompilation** Discord server has an exclusive channel for this decompilation titled **#soul-reaver**, which is the main medium of communication for anything in relation to it: https://discord.gg/VwCPdfbxgm
+The **PS1/PS2 Decompilation** Discord server has an exclusive channel for this decompilation titled **#soul-reaver**, which is the main medium of communication for anything in relation to it: [REDACTED].
 
 Alternatively, if you aren't able to join the server for some reason, you can write me an email to fmilesi_soft@hotmail.com with any query you might have. 
