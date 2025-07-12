@@ -2915,7 +2915,163 @@ void MON_MoveInstanceToImpalePoint(Instance *instance)
 
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONLIB", MON_ReachableIntro);
+int MON_ReachableIntro(Instance *instance, Position *pos, Position *introPos, Rotation *introRot, int checkOrientation)
+{
+    MonsterVars *mv;
+    int angle;
+    int angle2;
+    int angle3;
+    int flightAngle;
+    // int length; // unused        
+    int length2;
+    int newFVel;
+    int newZVel;
+    int zDiff;
+    int zAccl;
+    int tempFVel;
+    int maxForwardVel;
+    int res;
+    int temp, temp2, temp3; // not from decls.h
+
+    mv = (MonsterVars *)instance->extraData;
+
+    angle = 0;
+    angle2 = 0;
+
+    maxForwardVel = 0;
+
+    length2 = ((pos->x - introPos->x) * (pos->x - introPos->x)) + ((pos->y - introPos->y) * (pos->y - introPos->y)) + ((pos->z - introPos->z) * (pos->z - introPos->z));
+
+    res = 0;
+
+    if (length2 < (mv->subAttr->maxSpikeRange * mv->subAttr->maxSpikeRange))
+    {
+        if ((mv->subAttr->minSpikeRange * mv->subAttr->minSpikeRange) < length2)
+        {
+            angle = MATH3D_AngleFromPosToPos(pos, introPos);
+
+            if (checkOrientation != 0)
+            {
+                temp = (((instance->rotation.z + 2048) & 0xFFF) - angle) & 0xFFF;
+
+                temp2 = mv->subAttr->maxSpikeAngle;
+
+                if (temp <= 2048)
+                {
+                    if (temp < temp2)
+                    {
+                        goto label_1;
+                    }
+                }
+                else if (abs(temp - 4096) < temp2)
+                {
+                label_1:
+                    checkOrientation = 0;
+                }
+            }
+
+            if (checkOrientation == 0)
+            {
+                if (introRot != NULL)
+                {
+                    angle3 = (introRot->x + 1024) & 0xFFF;
+
+                    if (angle3 <= 2048)
+                    {
+                        angle3 = abs(angle3);
+                    }
+                    else
+                    {
+                        angle3 = abs(angle3 - 4096);
+                    }
+
+                    if (angle3 >= 128)
+                    {
+                        angle2 = (angle + 2048) & 0xFFF;
+
+                        temp = (introRot->z - angle2) & 0xFFF;
+
+                        temp3 = mv->subAttr->maxSpikeAngle;
+
+                        if (temp <= 2048)
+                        {
+                            if (temp < temp3)
+                            {
+                                goto label_2;
+                            }
+                        }
+                        else if (abs(temp - 4096) < temp3)
+                        {
+                        label_2:
+                            tempFVel = introRot->x & 0xFFF;
+
+                            if (tempFVel > 2048)
+                            {
+                                tempFVel -= 4096;
+                            }
+
+                            res = 1;
+
+                            if (tempFVel > 0)
+                            {
+                                maxForwardVel = mv->subAttr->maxSpikeHorzSpeed;
+                            }
+                            else
+                            {
+                                maxForwardVel = mv->subAttr->maxSpikeHorzSpeed - (((mv->subAttr->maxSpikeHorzSpeed - mv->subAttr->minSpikeHorzSpeed) * -tempFVel) / 896);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        res = 1;
+
+                        maxForwardVel = mv->subAttr->minSpikeHorzSpeed;
+                    }
+                }
+                else
+                {
+                    res = 1;
+
+                    maxForwardVel = mv->subAttr->minSpikeHorzSpeed;
+                }
+            }
+        }
+    }
+
+    if (res != 0)
+    {
+        newFVel = maxForwardVel;
+
+        zDiff = introPos->z - pos->z;
+
+        zAccl = instance->zAccl;
+
+        if ((zDiff != 0) && (abs((zAccl * length2) / (zDiff * 2)) < (newFVel * newFVel)))
+        {
+            newFVel = MATH3D_FastSqrt0(abs((zAccl * length2) / (zDiff * 2)));
+        }
+
+        flightAngle = MATH3D_FastSqrt0(length2);
+
+        newZVel = ((zDiff * newFVel) / flightAngle) - ((zAccl * flightAngle) / (newFVel * 2));
+
+        newFVel++;
+
+        if (abs(newZVel) < mv->subAttr->maxSpikeVertSpeed)
+        {
+            instance->rotation.z = angle2;
+
+            PhysicsSetVelFromZRot(instance, angle, newFVel);
+
+            instance->zVel = newZVel;
+
+            return 1;
+        }
+    }
+
+    return 0;
+}
 
 int MON_SetVelocityTowardsImpalingObject(Instance *instance, int checkOrientation)
 {
