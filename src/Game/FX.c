@@ -3031,7 +3031,16 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DoBlastRing);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawBlastring);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueFlash);
+void FX_ContinueFlash(FXFlash *flash, FXTracker *fxTracker)
+{
+
+    flash->currentTime += gameTrackerX.timeMult;
+
+    if ((flash->currentTime / 16) >= flash->timeFromColor)
+    {
+        FX_DeleteGeneralEffect((FXGeneralEffect *)flash);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawFlash);
 
