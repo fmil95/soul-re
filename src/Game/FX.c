@@ -2803,7 +2803,34 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DoInstancePowerRing);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdatePowerRing);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdateInstanceSplitRing);
+void FX_UpdateInstanceSplitRing(FXHalvePlane *ring, FXTracker *fxTracker)
+{
+
+    if (ring->lifeTime != 0)
+    {
+        if (ring->type == 0)
+        {
+            FX_UpdatePowerRing(ring);
+        }
+        else
+        {
+            ring->diffTime += gameTrackerX.lastLoopTime;
+            if (ring->diffTime >= ring->lifeTime)
+            {
+                ring->diffTime = ring->lifeTime;
+                ring->lifeTime = 0;
+            }
+        }
+        if (ring->lifeTime == 0)
+        {
+            FX_DeleteGeneralEffect((FXGeneralEffect *)ring);
+        }
+    }
+    else
+    {
+        FX_DeleteGeneralEffect((FXGeneralEffect *)ring);
+    }
+}
 
 void FX_UpdateGlowEffect(FXGlowEffect *effect, FXTracker *fxTracker)
 {
