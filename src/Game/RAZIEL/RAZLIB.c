@@ -1247,7 +1247,53 @@ Instance *RAZIEL_QueryEngagedInstance(int index)
     return NULL;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", razUpdateSoundRamp);
+int razUpdateSoundRamp(Instance *instance, SoundRamp *sound)
+{
+
+    int volume;
+    int time;
+    int startPitch;
+    int endPitch;
+    int startVolume;
+    int endVolume;
+
+    endVolume = volume = 0;
+
+    if (sound->soundHandle != 0)
+    {
+
+        time = sound->soundTotalTime;
+        endPitch = sound->soundTimer + gameTrackerX.timeMult;
+        sound->soundTimer = endPitch;
+
+        if (time < endPitch)
+        {
+            sound->soundTimer = time;
+        }
+
+        if (time != 0)
+        {
+            if (time >= sound->soundTimer)
+            {
+                startVolume = sound->soundStartVolume;
+                startPitch = sound->soundStartPitch;
+                endVolume = volume = startVolume + (((sound->soundEndVolume - startVolume) * sound->soundTimer) / time);
+
+                if (SOUND_Update3dSound(&instance->position, sound->soundHandle, startPitch + (((sound->soundEndPitch - startPitch) * sound->soundTimer) / time), volume, sound->soundDistance) == 0)
+                {
+                    SndEndLoop(sound->soundHandle);
+                    sound->soundHandle = 0;
+                    endVolume = volume;
+                }
+            }
+        }
+    }
+    else
+    {
+        endVolume = volume;
+    }
+    return endVolume;
+}
 
 void razSetupSoundRamp(Instance *instance, SoundRamp *sound, int sfx, int startPitch, int endPitch, int startVolume, int endVolume, int timer, int distance)
 {
