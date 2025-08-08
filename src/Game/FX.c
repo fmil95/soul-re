@@ -2432,7 +2432,38 @@ void FX_Blood2(SVector *location, SVector *input_vel, SVector *accel, int amount
     FX_Blood(location, input_vel, accel, amount, color, 4);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Blood_Impale);
+void FX_Blood_Impale(Instance *locinst, short locseg, Instance *instance, short segment)
+{
+
+    int i;
+    SVector location;
+    SVector accel;
+    SVector vel;
+    SVector input_vel;
+
+    input_vel.x = instance->matrix[segment].t[0] - instance->oldMatrix[segment].t[0];
+    input_vel.y = instance->matrix[segment].t[1] - instance->oldMatrix[segment].t[1];
+    input_vel.z = instance->matrix[segment].t[2] - instance->oldMatrix[segment].t[2];
+
+    location.x = locinst->matrix[locseg].t[0];
+    location.y = locinst->matrix[locseg].t[1];
+    location.z = locinst->matrix[locseg].t[2];
+
+    accel.x = 0;
+    accel.y = 0;
+    accel.z = -2;
+
+
+    for (i = 1; i < 0x40; i++)
+    {
+        vel.x = ((input_vel.x * i) / 64) + (rand() & 0xF) - 7;
+        vel.y = ((input_vel.y * i) / 64) + (rand() & 0xF) - 7;
+        vel.z = ((input_vel.z * i) / 64) + (rand() & 0xF) - 7;
+
+        FX_Dot(&location, &vel, &accel, 0, 0x1800FF, 0x10, 0x16, 1);
+    }
+
+}
 
 FXParticle *FX_BloodCone(Instance *instance, short startSegment, long time)
 {
