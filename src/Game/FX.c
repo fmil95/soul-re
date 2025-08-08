@@ -3090,7 +3090,10 @@ long FX_GetHealthColor(int currentHealth)
 }
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Start_Snow);
+void FX_Start_Snow(int percent)
+{
+    snow_amount = (percent * 0x300) / 100;
+}
 
 void FX_Start_Rain(int percent)
 {
