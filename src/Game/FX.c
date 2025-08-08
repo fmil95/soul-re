@@ -2960,7 +2960,11 @@ FXGlowEffect *FX_DoInstanceOneSegmentGlow(Instance *instance, long segment, long
     return glowEffect;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_SetGlowFades);
+void FX_SetGlowFades(FXGlowEffect *glowEffect, int fadein, int fadeout)
+{
+    glowEffect->fadein_time = fadein * 33;
+    glowEffect->fadeout_time = fadeout * 33;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DoInstanceTwoSegmentGlow);
 
