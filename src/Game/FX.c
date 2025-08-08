@@ -3092,7 +3092,14 @@ long FX_GetHealthColor(int currentHealth)
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Start_Snow);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Start_Rain);
+void FX_Start_Rain(int percent)
+{
+    rain_amount = (percent * 1024) / 100;
+    if (rain_amount == 0)
+    {
+        current_rain_fade = 0;
+    }
+}
 
 void FX_StartLightbeam(Instance *instance, int startSeg, int endSeg, int color_num)
 {
