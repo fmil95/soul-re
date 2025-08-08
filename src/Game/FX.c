@@ -2616,7 +2616,23 @@ int FX_GetMorphFadeVal()
     return fade;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ConvertCamPersToWorld);
+void FX_ConvertCamPersToWorld(SVECTOR *campos, SVECTOR *worldpos)
+{
+
+    SetRotMatrix(theCamera.core.cwTransform2);
+    SetTransMatrix(theCamera.core.cwTransform2);
+
+    campos->vx -= 256;
+    campos->vx = ((campos->vx * 320) / 512);
+    campos->vy -= 120;
+
+    campos->vx = ((campos->vx * campos->vz) / 320);
+    campos->vy = ((campos->vy * campos->vz) / 320);
+
+    gte_ldv0(campos);
+    gte_nrtv0tr();
+    gte_stsv(worldpos);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_GetRandomScreenPt);
 
