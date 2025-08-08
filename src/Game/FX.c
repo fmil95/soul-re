@@ -2803,7 +2803,18 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdraftPrimModify);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_MakeParticleTexFX);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_MakeHitFX);
+void FX_MakeHitFX(SVector *position)
+{
+    FX_PRIM *fxPrim;
+    fxPrim = FX_GetPrim(gFXT);
+
+    if (fxPrim != NULL)
+    {
+        FX_MakeParticleTexFX(fxPrim, position, 0, 0, 0, 0, 0, 0xFFFFFF, 0x60, 8);
+        FX_Sprite_Insert(&gFXT->usedPrimListSprite, fxPrim);
+        fxPrim->flags |= 0x8000;
+    }
+}
 
 void FX_ContinueLightning(FXLightning *zap, FXTracker *fxTracker)
 {
