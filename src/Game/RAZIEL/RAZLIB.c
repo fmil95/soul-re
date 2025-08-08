@@ -1288,10 +1288,7 @@ int razUpdateSoundRamp(Instance *instance, SoundRamp *sound)
             }
         }
     }
-    else
-    {
-        endVolume = volume;
-    }
+
     return endVolume;
 }
 

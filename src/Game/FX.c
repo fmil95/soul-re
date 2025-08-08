@@ -3096,7 +3096,67 @@ void FX_ContinueFlash(FXFlash *flash, FXTracker *fxTracker)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawFlash);
+void FX_DrawFlash(FXFlash *flash)
+{
+
+    unsigned long color;
+    unsigned long black;
+
+    int time;
+    int div;
+    int interp;
+    int transtype;
+
+    time = flash->currentTime / 16;
+    color = flash->color;
+    black = 0;
+    transtype = 1;
+
+    if (color & 0x01000000)
+    {
+        transtype = 2;
+    }
+
+    if (time < flash->timeToColor)
+    {
+
+        interp = (time * 4096) / flash->timeToColor;
+
+        if (interp > 4096)
+        {
+            interp = 4096;
+        }
+
+        div = interp;
+        LoadAverageCol((u_char *)&color, (u_char *)&black, div, 4096 - div, (u_char *)&color);
+
+    }
+    else if (flash->timeAtColor < time)
+    {
+
+        div = flash->timeFromColor - flash->timeAtColor;
+
+        if (div != 0)
+        {
+            interp = ((time - flash->timeAtColor) * 4096) / div;
+        }
+        else
+        {
+            interp = 4096;
+        }
+
+        if (interp > 4096)
+        {
+            interp = 4096;
+        }
+
+        div = 4096 - interp;
+        LoadAverageCol((u_char *)&color, (u_char *)&black, div, interp, (u_char *)&color);
+    }
+
+    FX_DrawScreenPoly(transtype, color, 5);
+}
+
 
 void FX_RelocateGeneric(Object *object, long offset)
 {
