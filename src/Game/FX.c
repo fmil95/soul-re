@@ -3067,7 +3067,21 @@ void FX_ContinueFlash(FXFlash *flash, FXTracker *fxTracker)
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawFlash);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_RelocateGeneric);
+void FX_RelocateGeneric(Object *object, long offset)
+{
+
+    GenericFXObject *GFXO;
+
+    GFXO = (GenericFXObject *)object->data;
+    GFXO->ParticleList = (GenericParticleParams *)OFFSET_DATA(GFXO->ParticleList, offset);
+    GFXO->RibbonList = (GenericRibbonParams *)OFFSET_DATA(GFXO->RibbonList, offset);
+    GFXO->GlowList = (GenericGlowParams *)OFFSET_DATA(GFXO->GlowList, offset);
+    GFXO->LightningList = (GenericLightningParams *)OFFSET_DATA(GFXO->LightningList, offset);
+    GFXO->BlastList = (GenericBlastringParams *)OFFSET_DATA(GFXO->BlastList, offset);
+    GFXO->FlashList = (GenericFlashParams *)OFFSET_DATA(GFXO->FlashList, offset);
+    GFXO->ColorList = (long *)OFFSET_DATA(GFXO->ColorList, offset);
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericParticle);
 
