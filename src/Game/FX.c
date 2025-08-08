@@ -2962,7 +2962,57 @@ void FX_GetPlaneEquation(SVector *normal, SVector *poPlane, PlaneConstants *plan
     plane->d = -(((plane->a * poPlane->x) + (plane->b * poPlane->y) + (plane->c * poPlane->z)) >> 12);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DoInstancePowerRing);
+void FX_DoInstancePowerRing(Instance *instance, long atuTime, long *color, long numColors, int follow_halveplane)
+{
+
+    SVector normal;
+    SVector point;
+    FXHalvePlane *ring;
+
+    ring = (FXHalvePlane *)MEMPACK_Malloc(sizeof(FXHalvePlane) + (numColors * 4), 13);
+
+    if (ring == NULL) { return; }
+
+    ring->effectType = 0x82;
+    ring->continue_process = &FX_UpdateInstanceSplitRing;
+    ring->diffTime = 0;
+    ring->instance = instance;
+    ring->type = follow_halveplane;
+    ring->colorArray = NULL;
+    ring->colorBlendLife = 0;
+    ring->numColors = numColors;
+    ring->lifeTime = (atuTime * 0x3E8) / 1200;
+
+    if (numColors < 2)
+    {
+        ring->currentColor = color != NULL ? color[0] : 0xFF8010;
+    }
+    else
+    {
+
+        int i;
+        ring->colorArray = (long *)(&ring[1]);
+
+        for (i = 0; i < numColors; i++)
+        {
+            ring->colorArray[i] = color[i];
+        }
+
+        ring->colorBlendLife = ring->lifeTime / (numColors - 1);
+        ring->currentColor = color[0];
+    }
+
+    normal.x = normal.y = 0;
+    normal.z = 0x1000;
+
+    point.x = instance->position.x;
+    point.y = instance->position.y;
+    point.z = instance->position.z;
+
+    FX_GetPlaneEquation(&normal, &point, &ring->ringPlane);
+    FX_InsertGeneralEffect(ring);
+
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdatePowerRing);
 
@@ -3306,7 +3356,7 @@ void FX_RelocateGeneric(Object *object, long offset)
     GFXO->BlastList = (GenericBlastringParams *)OFFSET_DATA(GFXO->BlastList, offset);
     GFXO->FlashList = (GenericFlashParams *)OFFSET_DATA(GFXO->FlashList, offset);
     GFXO->ColorList = (long *)OFFSET_DATA(GFXO->ColorList, offset);
-}
+    }
 
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericParticle);
