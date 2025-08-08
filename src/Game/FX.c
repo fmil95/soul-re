@@ -2801,7 +2801,29 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueParticle);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdraftPrimModify);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_MakeParticleTexFX);
+void FX_MakeParticleTexFX(FX_PRIM *fxPrim, SVector *position, Object *object, int modelnum, int texnum, SVector *vel, SVector *accl, long color, int size, int life)
+{
+
+    if (object == NULL)
+    {
+        object = objectAccess[0xA].object;
+    }
+
+    if (object != NULL && fxPrim != NULL)
+    {
+        FX_DFacadeParticleSetup(fxPrim, (SVECTOR *)position, size, size, color, (SVECTOR *)vel, (SVECTOR *)accl, gFXT, (short)life);
+        fxPrim->texture = FX_GetTextureObject(object, modelnum, texnum);
+        fxPrim->fadeValue[3] = 0;
+        fxPrim->fadeValue[2] = 0;
+        fxPrim->fadeValue[1] = 0;
+        fxPrim->fadeValue[0] = 0;
+        fxPrim->color = color | 0x2E000000;
+        fxPrim->startColor = color;
+        fxPrim->endColor = 0;
+        fxPrim->flags |= 0xC0001;
+        fxPrim->fadeStep = 0x1000 / life;
+    }
+}
 
 void FX_MakeHitFX(SVector *position)
 {
