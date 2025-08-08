@@ -2636,7 +2636,42 @@ void FX_ConvertCamPersToWorld(SVECTOR *campos, SVECTOR *worldpos)
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_GetRandomScreenPt);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ProcessSnow);
+void FX_ProcessSnow(FX_PRIM *fxPrim, FXTracker *fxTracker)
+{
+
+    SVECTOR position;
+
+    if (fxPrim->work0 == 0x270F)
+    {
+        if (gameTrackerX.gameData.asmData.MorphType == 1 ||
+            gameTrackerX.gameData.asmData.MorphTime != 0x3E8 ||
+            snow_amount == 0)
+        {
+            FX_Die(fxPrim, fxTracker);
+            return;
+        }
+
+        fxPrim->work0 = 0;
+        FX_GetRandomScreenPt(&position);
+        FX_ConvertCamPersToWorld(&position, (SVECTOR *)&fxPrim->position);
+
+    }
+
+    if (fxPrim->timeToLive > 0)
+    {
+        fxPrim->timeToLive--;
+    }
+
+    if (fxPrim->timeToLive == 0)
+    {
+        FX_Die(fxPrim, fxTracker);
+        return;
+    }
+
+    fxPrim->position.x += (windx * ((rand() & 2047) + 2048)) / 4096;
+    fxPrim->position.y += (windy * ((rand() & 2047) + 2048)) / 4096;
+    fxPrim->position.z += fxPrim->duo.flame.segment;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueSnow);
 
@@ -2901,6 +2936,8 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdatePowerRing);
 void FX_UpdateInstanceSplitRing(FXHalvePlane *ring, FXTracker *fxTracker)
 {
 
+    (void)fxTracker;
+
     if (ring->lifeTime != 0)
     {
         if (ring->type == 0)
@@ -3152,6 +3189,7 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawBlastring);
 void FX_ContinueFlash(FXFlash *flash, FXTracker *fxTracker)
 {
 
+    (void)fxTracker;
     flash->currentTime += gameTrackerX.timeMult;
 
     if ((flash->currentTime / 16) >= flash->timeFromColor)
