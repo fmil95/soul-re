@@ -2552,7 +2552,55 @@ FXParticle *FX_GetTorchParticle(Instance *instance, short startSegment, int tex,
     return currentParticle;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_TorchFlame);
+FXParticle *FX_TorchFlame(Instance *instance, short startSegment)
+{
+
+    Object *particle;
+    FXParticle *currentParticle;
+
+    particle = (Object *)objectAccess[0xA].object;
+
+    if (particle == NULL) { return NULL; }
+
+    currentParticle = FX_GetTorchParticle(instance, startSegment, 0, 0x10, -5);
+    if (currentParticle != NULL)
+    {
+        currentParticle->direction.x = 0x30;
+        currentParticle->direction.y = 0x20;
+        currentParticle->direction.z = 0x38;
+    }
+
+    currentParticle = FX_GetTorchParticle(instance, startSegment, 1, 8, -1);
+    if (currentParticle != NULL)
+    {
+        currentParticle->direction.x = 0x18;
+        currentParticle->direction.y = 0x10;
+        currentParticle->direction.z = 0x10;
+    }
+
+    currentParticle = FX_GetParticle(instance, startSegment);
+    if (currentParticle != NULL)
+    {
+        currentParticle->size = 0xA;
+        currentParticle->texture = FX_GetTextureObject(particle, 0, 1);
+        currentParticle->birthRadius = 0x14;
+        currentParticle->direction.x = 0x80;
+        currentParticle->direction.y = 0x80;
+        currentParticle->direction.z = 0x80;
+        currentParticle->startColor = 0x020093E4;
+        currentParticle->acceleration.x = 0;
+        currentParticle->acceleration.y = 0;
+        currentParticle->acceleration.z = 1;
+        currentParticle->numberBirthParticles = 1;
+        currentParticle->endColor = 0;
+        currentParticle->lifeTime = -1;
+        currentParticle->primLifeTime = 0xF;
+        currentParticle->flag_bits |= 1;
+        FX_InsertGeneralEffect(currentParticle);
+    }
+
+    return currentParticle;
+}
 
 int FX_GetMorphFadeVal()
 {
