@@ -2432,7 +2432,38 @@ void FX_Blood2(SVector *location, SVector *input_vel, SVector *accel, int amount
     FX_Blood(location, input_vel, accel, amount, color, 4);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Blood_Impale);
+void FX_Blood_Impale(Instance *locinst, short locseg, Instance *instance, short segment)
+{
+
+    int i;
+    SVector location;
+    SVector accel;
+    SVector vel;
+    SVector input_vel;
+
+    input_vel.x = instance->matrix[segment].t[0] - instance->oldMatrix[segment].t[0];
+    input_vel.y = instance->matrix[segment].t[1] - instance->oldMatrix[segment].t[1];
+    input_vel.z = instance->matrix[segment].t[2] - instance->oldMatrix[segment].t[2];
+
+    location.x = locinst->matrix[locseg].t[0];
+    location.y = locinst->matrix[locseg].t[1];
+    location.z = locinst->matrix[locseg].t[2];
+
+    accel.x = 0;
+    accel.y = 0;
+    accel.z = -2;
+
+
+    for (i = 1; i < 0x40; i++)
+    {
+        vel.x = ((input_vel.x * i) / 64) + (rand() & 0xF) - 7;
+        vel.y = ((input_vel.y * i) / 64) + (rand() & 0xF) - 7;
+        vel.z = ((input_vel.z * i) / 64) + (rand() & 0xF) - 7;
+
+        FX_Dot(&location, &vel, &accel, 0, 0x1800FF, 0x10, 0x16, 1);
+    }
+
+}
 
 FXParticle *FX_BloodCone(Instance *instance, short startSegment, long time)
 {
@@ -2521,7 +2552,55 @@ FXParticle *FX_GetTorchParticle(Instance *instance, short startSegment, int tex,
     return currentParticle;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_TorchFlame);
+FXParticle *FX_TorchFlame(Instance *instance, short startSegment)
+{
+
+    Object *particle;
+    FXParticle *currentParticle;
+
+    particle = (Object *)objectAccess[0xA].object;
+
+    if (particle == NULL) { return NULL; }
+
+    currentParticle = FX_GetTorchParticle(instance, startSegment, 0, 0x10, -5);
+    if (currentParticle != NULL)
+    {
+        currentParticle->direction.x = 0x30;
+        currentParticle->direction.y = 0x20;
+        currentParticle->direction.z = 0x38;
+    }
+
+    currentParticle = FX_GetTorchParticle(instance, startSegment, 1, 8, -1);
+    if (currentParticle != NULL)
+    {
+        currentParticle->direction.x = 0x18;
+        currentParticle->direction.y = 0x10;
+        currentParticle->direction.z = 0x10;
+    }
+
+    currentParticle = FX_GetParticle(instance, startSegment);
+    if (currentParticle != NULL)
+    {
+        currentParticle->size = 0xA;
+        currentParticle->texture = FX_GetTextureObject(particle, 0, 1);
+        currentParticle->birthRadius = 0x14;
+        currentParticle->direction.x = 0x80;
+        currentParticle->direction.y = 0x80;
+        currentParticle->direction.z = 0x80;
+        currentParticle->startColor = 0x020093E4;
+        currentParticle->acceleration.x = 0;
+        currentParticle->acceleration.y = 0;
+        currentParticle->acceleration.z = 1;
+        currentParticle->numberBirthParticles = 1;
+        currentParticle->endColor = 0;
+        currentParticle->lifeTime = -1;
+        currentParticle->primLifeTime = 0xF;
+        currentParticle->flag_bits |= 1;
+        FX_InsertGeneralEffect(currentParticle);
+    }
+
+    return currentParticle;
+}
 
 int FX_GetMorphFadeVal()
 {
@@ -2537,7 +2616,23 @@ int FX_GetMorphFadeVal()
     return fade;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ConvertCamPersToWorld);
+void FX_ConvertCamPersToWorld(SVECTOR *campos, SVECTOR *worldpos)
+{
+
+    SetRotMatrix(theCamera.core.cwTransform2);
+    SetTransMatrix(theCamera.core.cwTransform2);
+
+    campos->vx -= 256;
+    campos->vx = ((campos->vx * 320) / 512);
+    campos->vy -= 120;
+
+    campos->vx = ((campos->vx * campos->vz) / 320);
+    campos->vy = ((campos->vy * campos->vz) / 320);
+
+    gte_ldv0(campos);
+    gte_nrtv0tr();
+    gte_stsv(worldpos);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_GetRandomScreenPt);
 
@@ -2803,7 +2898,34 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DoInstancePowerRing);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdatePowerRing);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdateInstanceSplitRing);
+void FX_UpdateInstanceSplitRing(FXHalvePlane *ring, FXTracker *fxTracker)
+{
+
+    if (ring->lifeTime != 0)
+    {
+        if (ring->type == 0)
+        {
+            FX_UpdatePowerRing(ring);
+        }
+        else
+        {
+            ring->diffTime += gameTrackerX.lastLoopTime;
+            if (ring->diffTime >= ring->lifeTime)
+            {
+                ring->diffTime = ring->lifeTime;
+                ring->lifeTime = 0;
+            }
+        }
+        if (ring->lifeTime == 0)
+        {
+            FX_DeleteGeneralEffect((FXGeneralEffect *)ring);
+        }
+    }
+    else
+    {
+        FX_DeleteGeneralEffect((FXGeneralEffect *)ring);
+    }
+}
 
 void FX_UpdateGlowEffect(FXGlowEffect *effect, FXTracker *fxTracker)
 {
@@ -2933,9 +3055,32 @@ FXGlowEffect *FX_DoInstanceOneSegmentGlow(Instance *instance, long segment, long
     return glowEffect;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_SetGlowFades);
+void FX_SetGlowFades(FXGlowEffect *glowEffect, int fadein, int fadeout)
+{
+    glowEffect->fadein_time = fadein * 33;
+    glowEffect->fadeout_time = fadeout * 33;
+}
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DoInstanceTwoSegmentGlow);
+FXGlowEffect *FX_DoInstanceTwoSegmentGlow(Instance *instance, long segment, long segmentEnd, long *color, long numColors, long atuColorCycleRate, long height)
+{
+
+    int inc;
+    FXGlowEffect *glowEffect;
+
+    inc = segmentEnd - segment;
+
+    if (inc < 0)
+    {
+        segment = segmentEnd;
+        inc = -inc;
+    }
+
+    glowEffect = FX_DoInstanceOneSegmentGlow(instance, segment, color, numColors, atuColorCycleRate, height, height);
+    glowEffect->numSegments = 2;
+    glowEffect->SegmentInc = inc;
+
+    return glowEffect;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DoInstanceManySegmentGlow);
 
@@ -3004,11 +3149,94 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DoBlastRing);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawBlastring);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueFlash);
+void FX_ContinueFlash(FXFlash *flash, FXTracker *fxTracker)
+{
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawFlash);
+    flash->currentTime += gameTrackerX.timeMult;
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_RelocateGeneric);
+    if ((flash->currentTime / 16) >= flash->timeFromColor)
+    {
+        FX_DeleteGeneralEffect((FXGeneralEffect *)flash);
+    }
+}
+
+void FX_DrawFlash(FXFlash *flash)
+{
+
+    unsigned long color;
+    unsigned long black;
+
+    int time;
+    int div;
+    int interp;
+    int transtype;
+
+    time = flash->currentTime / 16;
+    color = flash->color;
+    black = 0;
+    transtype = 1;
+
+    if (color & 0x01000000)
+    {
+        transtype = 2;
+    }
+
+    if (time < flash->timeToColor)
+    {
+
+        interp = (time * 4096) / flash->timeToColor;
+
+        if (interp > 4096)
+        {
+            interp = 4096;
+        }
+
+        div = interp;
+        LoadAverageCol((u_char *)&color, (u_char *)&black, div, 4096 - div, (u_char *)&color);
+
+    }
+    else if (flash->timeAtColor < time)
+    {
+
+        div = flash->timeFromColor - flash->timeAtColor;
+
+        if (div != 0)
+        {
+            interp = ((time - flash->timeAtColor) * 4096) / div;
+        }
+        else
+        {
+            interp = 4096;
+        }
+
+        if (interp > 4096)
+        {
+            interp = 4096;
+        }
+
+        div = 4096 - interp;
+        LoadAverageCol((u_char *)&color, (u_char *)&black, div, interp, (u_char *)&color);
+    }
+
+    FX_DrawScreenPoly(transtype, color, 5);
+}
+
+
+void FX_RelocateGeneric(Object *object, long offset)
+{
+
+    GenericFXObject *GFXO;
+
+    GFXO = (GenericFXObject *)object->data;
+    GFXO->ParticleList = (GenericParticleParams *)OFFSET_DATA(GFXO->ParticleList, offset);
+    GFXO->RibbonList = (GenericRibbonParams *)OFFSET_DATA(GFXO->RibbonList, offset);
+    GFXO->GlowList = (GenericGlowParams *)OFFSET_DATA(GFXO->GlowList, offset);
+    GFXO->LightningList = (GenericLightningParams *)OFFSET_DATA(GFXO->LightningList, offset);
+    GFXO->BlastList = (GenericBlastringParams *)OFFSET_DATA(GFXO->BlastList, offset);
+    GFXO->FlashList = (GenericFlashParams *)OFFSET_DATA(GFXO->FlashList, offset);
+    GFXO->ColorList = (long *)OFFSET_DATA(GFXO->ColorList, offset);
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericParticle);
 
@@ -3054,9 +3282,19 @@ long FX_GetHealthColor(int currentHealth)
 }
 #endif
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Start_Snow);
+void FX_Start_Snow(int percent)
+{
+    snow_amount = (percent * 0x300) / 100;
+}
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Start_Rain);
+void FX_Start_Rain(int percent)
+{
+    rain_amount = (percent * 1024) / 100;
+    if (rain_amount == 0)
+    {
+        current_rain_fade = 0;
+    }
+}
 
 void FX_StartLightbeam(Instance *instance, int startSeg, int endSeg, int color_num)
 {

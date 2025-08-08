@@ -63,7 +63,6 @@ void FX_UpdateTexturePointers(FX_PRIM *fxPrim, Object *oldObject, long sizeOfObj
 void FX_MakeWarpArrow(int x, int y, int xsize, int ysize, int fade);
 void FX_MakeMannaIcon(int x, int y, int xsize, int ysize);
 void FX_DrawModel(Object *object, int model_num, SVector *rotation, SVector *position, SVector *offset, int transflag);
-FX_PRIM *FX_Dot(SVector *location, SVector *vel, SVector *accel, int scale_speed, long color, long size, int lifetime, int texture_num);
 void FX_Start_Snow(int percent);
 void FX_Start_Rain(int percent);
 void FX_FlamePrimProcess(FX_PRIM *fxPrim, FXTracker *fxTracker);
