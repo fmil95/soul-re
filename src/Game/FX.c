@@ -2360,7 +2360,51 @@ void FX_AttachedParticlePrimProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
     FX_StandardFXPrimProcess(fxPrim, fxTracker);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_FlamePrimProcess);
+void FX_FlamePrimProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
+{
+
+    Instance *instance;
+    MATRIX *swTransform;
+    MATRIX *swTransformOld;
+    SVector movement;
+    int total;
+
+    instance = (Instance *)fxPrim->matrix;
+
+    if (instance->matrix == NULL || instance->oldMatrix == NULL) { return; }
+
+    swTransform = &instance->matrix[fxPrim->work0];
+    swTransformOld = &instance->oldMatrix[fxPrim->work0];
+
+    movement.x = ((swTransform->t[0] - swTransformOld->t[0]) * 0x6E) / 128;
+    movement.y = ((swTransform->t[1] - swTransformOld->t[1]) * 0x6E) / 128;
+    movement.z = ((swTransform->t[2] - swTransformOld->t[2]) * 0x6E) / 128;
+
+    total = abs(movement.x) + abs(movement.y) + abs(movement.z);
+
+    if (total != 0)
+    {
+        fxPrim->position.x += movement.x;
+        fxPrim->position.y += movement.y;
+        fxPrim->position.z += movement.z;
+    }
+
+    if (total > 40)
+    {
+        fxPrim->duo.phys.zAccl = 0;
+        fxPrim->v0.y -= (total * 3) / 2;
+
+        if (fxPrim->v0.y >> 0x10)
+        {
+            fxPrim->v0.y = 0;
+        }
+    }
+    else
+    {
+        fxPrim->duo.phys.zAccl = 1;
+    }
+    FX_StandardFXPrimProcess(fxPrim, fxTracker);
+}
 
 void FX_DFacadeParticleSetup(FX_PRIM *fxPrim, SVECTOR *center, short halveWidth, short halveHeight, long color, SVECTOR *vel, SVECTOR *accl, FXTracker *fxTracker, int timeToLive)
 {
@@ -3404,7 +3448,7 @@ void FX_RelocateGeneric(Object *object, long offset)
     GFXO->BlastList = (GenericBlastringParams *)OFFSET_DATA(GFXO->BlastList, offset);
     GFXO->FlashList = (GenericFlashParams *)OFFSET_DATA(GFXO->FlashList, offset);
     GFXO->ColorList = (long *)OFFSET_DATA(GFXO->ColorList, offset);
-        }
+}
 
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericParticle);
