@@ -64,10 +64,6 @@ STATIC short wind_speed;
 
 STATIC FXRibbon *FX_ConstrictRibbon;
 
-STATIC Position FX_ConstrictPosition;
-
-STATIC Position *FX_ConstrictPositionPtr;
-
 STATIC short FX_ConstrictStage;
 
 STATIC Instance *FX_ConstrictInstance;
@@ -2119,7 +2115,59 @@ void FX_RibbonProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ConstrictProcess);
+void FX_ConstrictProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
+{
+    if (FX_ConstrictStage == 1)
+    {
+
+        gameTrackerX.streamFlags |= 4;
+        fxPrim->startColor = 0xFFFFFF;
+        fxPrim->timeToLive = 0x28;
+        fxPrim->fadeStep = 0x66;
+        fxPrim->fadeValue[2] = fxPrim->fadeValue[3] = 0;
+        fxPrim->fadeValue[0] = fxPrim->fadeValue[1] = 0;
+        fxPrim->work0 = fxPrim->work1 = 0x380;
+        fxPrim->work1 = 0;
+
+        if (fxPrim->work2 != 0)
+        {
+
+            fxPrim->fadeValue[0] = fxPrim->fadeValue[1] = 0x1000;
+            fxPrim->fadeValue[2] = fxPrim->fadeValue[3] = 0;
+            fxPrim->work2 = ratan2(fxPrim->v2.y - FX_ConstrictPosition.y, fxPrim->v2.x - FX_ConstrictPosition.x);
+            fxPrim->work3 = ratan2(fxPrim->v3.y - FX_ConstrictPosition.y, fxPrim->v3.x - FX_ConstrictPosition.x);
+            fxPrim->v0.z = (fxPrim->v2.z + ((fxPrim->v0.z - fxPrim->v2.z) /4));
+            fxPrim->v1.z = (fxPrim->v3.z + ((fxPrim->v1.z - fxPrim->v3.z) * 3));
+
+        }
+        else
+        {
+
+            fxPrim->fadeValue[0] = fxPrim->fadeValue[1] = 0;
+            fxPrim->fadeValue[2] = fxPrim->fadeValue[3] = 0x1000;
+            fxPrim->work2 = ratan2(fxPrim->v0.y - FX_ConstrictPosition.y, fxPrim->v0.x - FX_ConstrictPosition.x);
+            fxPrim->work3 = ratan2(fxPrim->v1.y - FX_ConstrictPosition.y, fxPrim->v1.x - FX_ConstrictPosition.x);
+            fxPrim->v2.z = (fxPrim->v0.z + ((fxPrim->v2.z - fxPrim->v0.z) / 4));
+            fxPrim->v3.z = (fxPrim->v1.z + ((fxPrim->v3.z - fxPrim->v1.z) * 3));
+
+        }
+
+        fxPrim->v3.x = fxPrim->v1.x = FX_ConstrictPosition.x;
+        fxPrim->v3.y = fxPrim->v1.y = FX_ConstrictPosition.y;
+
+    }
+    else if (fxPrim->work0 > 0 || fxPrim->work1 > 0)
+    {
+
+        fxPrim->work0 -= 0x28;
+        fxPrim->work2 -= 0x40;
+        fxPrim->v2.x = fxPrim->v0.x = FX_ConstrictPosition.x + ((fxPrim->work0 * rcos(fxPrim->work2)) >> 0xC);
+        fxPrim->v2.y = fxPrim->v0.y = FX_ConstrictPosition.y + ((fxPrim->work0 * rsin(fxPrim->work2)) >> 0xC);
+        gameTrackerX.streamFlags |= 4;
+
+    }
+    FX_RibbonProcess(fxPrim, fxTracker);
+}
 
 void FX_StartConstrict(Instance *instance, SVector *constrict_point, short startSegment, short endSegment)
 {
@@ -3356,7 +3404,7 @@ void FX_RelocateGeneric(Object *object, long offset)
     GFXO->BlastList = (GenericBlastringParams *)OFFSET_DATA(GFXO->BlastList, offset);
     GFXO->FlashList = (GenericFlashParams *)OFFSET_DATA(GFXO->FlashList, offset);
     GFXO->ColorList = (long *)OFFSET_DATA(GFXO->ColorList, offset);
-    }
+        }
 
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericParticle);
