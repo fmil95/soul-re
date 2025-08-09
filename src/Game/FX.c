@@ -64,10 +64,6 @@ STATIC short wind_speed;
 
 STATIC FXRibbon *FX_ConstrictRibbon;
 
-STATIC Position FX_ConstrictPosition;
-
-STATIC Position *FX_ConstrictPositionPtr;
-
 STATIC short FX_ConstrictStage;
 
 STATIC Instance *FX_ConstrictInstance;
@@ -2119,7 +2115,59 @@ void FX_RibbonProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ConstrictProcess);
+void FX_ConstrictProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
+{
+    if (FX_ConstrictStage == 1)
+    {
+
+        gameTrackerX.streamFlags |= 4;
+        fxPrim->startColor = 0xFFFFFF;
+        fxPrim->timeToLive = 0x28;
+        fxPrim->fadeStep = 0x66;
+        fxPrim->fadeValue[2] = fxPrim->fadeValue[3] = 0;
+        fxPrim->fadeValue[0] = fxPrim->fadeValue[1] = 0;
+        fxPrim->work0 = fxPrim->work1 = 0x380;
+        fxPrim->work1 = 0;
+
+        if (fxPrim->work2 != 0)
+        {
+
+            fxPrim->fadeValue[0] = fxPrim->fadeValue[1] = 0x1000;
+            fxPrim->fadeValue[2] = fxPrim->fadeValue[3] = 0;
+            fxPrim->work2 = ratan2(fxPrim->v2.y - FX_ConstrictPosition.y, fxPrim->v2.x - FX_ConstrictPosition.x);
+            fxPrim->work3 = ratan2(fxPrim->v3.y - FX_ConstrictPosition.y, fxPrim->v3.x - FX_ConstrictPosition.x);
+            fxPrim->v0.z = (fxPrim->v2.z + ((fxPrim->v0.z - fxPrim->v2.z) /4));
+            fxPrim->v1.z = (fxPrim->v3.z + ((fxPrim->v1.z - fxPrim->v3.z) * 3));
+
+        }
+        else
+        {
+
+            fxPrim->fadeValue[0] = fxPrim->fadeValue[1] = 0;
+            fxPrim->fadeValue[2] = fxPrim->fadeValue[3] = 0x1000;
+            fxPrim->work2 = ratan2(fxPrim->v0.y - FX_ConstrictPosition.y, fxPrim->v0.x - FX_ConstrictPosition.x);
+            fxPrim->work3 = ratan2(fxPrim->v1.y - FX_ConstrictPosition.y, fxPrim->v1.x - FX_ConstrictPosition.x);
+            fxPrim->v2.z = (fxPrim->v0.z + ((fxPrim->v2.z - fxPrim->v0.z) / 4));
+            fxPrim->v3.z = (fxPrim->v1.z + ((fxPrim->v3.z - fxPrim->v1.z) * 3));
+
+        }
+
+        fxPrim->v3.x = fxPrim->v1.x = FX_ConstrictPosition.x;
+        fxPrim->v3.y = fxPrim->v1.y = FX_ConstrictPosition.y;
+
+    }
+    else if (fxPrim->work0 > 0 || fxPrim->work1 > 0)
+    {
+
+        fxPrim->work0 -= 0x28;
+        fxPrim->work2 -= 0x40;
+        fxPrim->v2.x = fxPrim->v0.x = FX_ConstrictPosition.x + ((fxPrim->work0 * rcos(fxPrim->work2)) >> 0xC);
+        fxPrim->v2.y = fxPrim->v0.y = FX_ConstrictPosition.y + ((fxPrim->work0 * rsin(fxPrim->work2)) >> 0xC);
+        gameTrackerX.streamFlags |= 4;
+
+    }
+    FX_RibbonProcess(fxPrim, fxTracker);
+}
 
 void FX_StartConstrict(Instance *instance, SVector *constrict_point, short startSegment, short endSegment)
 {
@@ -2312,7 +2360,51 @@ void FX_AttachedParticlePrimProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
     FX_StandardFXPrimProcess(fxPrim, fxTracker);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_FlamePrimProcess);
+void FX_FlamePrimProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
+{
+
+    Instance *instance;
+    MATRIX *swTransform;
+    MATRIX *swTransformOld;
+    SVector movement;
+    int total;
+
+    instance = (Instance *)fxPrim->matrix;
+
+    if (instance->matrix == NULL || instance->oldMatrix == NULL) { return; }
+
+    swTransform = &instance->matrix[fxPrim->work0];
+    swTransformOld = &instance->oldMatrix[fxPrim->work0];
+
+    movement.x = ((swTransform->t[0] - swTransformOld->t[0]) * 0x6E) / 128;
+    movement.y = ((swTransform->t[1] - swTransformOld->t[1]) * 0x6E) / 128;
+    movement.z = ((swTransform->t[2] - swTransformOld->t[2]) * 0x6E) / 128;
+
+    total = abs(movement.x) + abs(movement.y) + abs(movement.z);
+
+    if (total != 0)
+    {
+        fxPrim->position.x += movement.x;
+        fxPrim->position.y += movement.y;
+        fxPrim->position.z += movement.z;
+    }
+
+    if (total > 40)
+    {
+        fxPrim->duo.phys.zAccl = 0;
+        fxPrim->v0.y -= (total * 3) / 2;
+
+        if (fxPrim->v0.y >> 0x10)
+        {
+            fxPrim->v0.y = 0;
+        }
+    }
+    else
+    {
+        fxPrim->duo.phys.zAccl = 1;
+    }
+    FX_StandardFXPrimProcess(fxPrim, fxTracker);
+}
 
 void FX_DFacadeParticleSetup(FX_PRIM *fxPrim, SVECTOR *center, short halveWidth, short halveHeight, long color, SVECTOR *vel, SVECTOR *accl, FXTracker *fxTracker, int timeToLive)
 {
@@ -2636,7 +2728,42 @@ void FX_ConvertCamPersToWorld(SVECTOR *campos, SVECTOR *worldpos)
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_GetRandomScreenPt);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ProcessSnow);
+void FX_ProcessSnow(FX_PRIM *fxPrim, FXTracker *fxTracker)
+{
+
+    SVECTOR position;
+
+    if (fxPrim->work0 == 0x270F)
+    {
+        if (gameTrackerX.gameData.asmData.MorphType == 1 ||
+            gameTrackerX.gameData.asmData.MorphTime != 0x3E8 ||
+            snow_amount == 0)
+        {
+            FX_Die(fxPrim, fxTracker);
+            return;
+        }
+
+        fxPrim->work0 = 0;
+        FX_GetRandomScreenPt(&position);
+        FX_ConvertCamPersToWorld(&position, (SVECTOR *)&fxPrim->position);
+
+    }
+
+    if (fxPrim->timeToLive > 0)
+    {
+        fxPrim->timeToLive--;
+    }
+
+    if (fxPrim->timeToLive == 0)
+    {
+        FX_Die(fxPrim, fxTracker);
+        return;
+    }
+
+    fxPrim->position.x += (windx * ((rand() & 2047) + 2048)) / 4096;
+    fxPrim->position.y += (windy * ((rand() & 2047) + 2048)) / 4096;
+    fxPrim->position.z += fxPrim->duo.flame.segment;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueSnow);
 
@@ -2766,9 +2893,42 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueParticle);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdraftPrimModify);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_MakeParticleTexFX);
+void FX_MakeParticleTexFX(FX_PRIM *fxPrim, SVector *position, Object *object, int modelnum, int texnum, SVector *vel, SVector *accl, long color, int size, int life)
+{
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_MakeHitFX);
+    if (object == NULL)
+    {
+        object = objectAccess[0xA].object;
+    }
+
+    if (object != NULL && fxPrim != NULL)
+    {
+        FX_DFacadeParticleSetup(fxPrim, (SVECTOR *)position, size, size, color, (SVECTOR *)vel, (SVECTOR *)accl, gFXT, (short)life);
+        fxPrim->texture = FX_GetTextureObject(object, modelnum, texnum);
+        fxPrim->fadeValue[3] = 0;
+        fxPrim->fadeValue[2] = 0;
+        fxPrim->fadeValue[1] = 0;
+        fxPrim->fadeValue[0] = 0;
+        fxPrim->color = color | 0x2E000000;
+        fxPrim->startColor = color;
+        fxPrim->endColor = 0;
+        fxPrim->flags |= 0xC0001;
+        fxPrim->fadeStep = 0x1000 / life;
+    }
+}
+
+void FX_MakeHitFX(SVector *position)
+{
+    FX_PRIM *fxPrim;
+    fxPrim = FX_GetPrim(gFXT);
+
+    if (fxPrim != NULL)
+    {
+        FX_MakeParticleTexFX(fxPrim, position, 0, 0, 0, 0, 0, 0xFFFFFF, 0x60, 8);
+        FX_Sprite_Insert(&gFXT->usedPrimListSprite, fxPrim);
+        fxPrim->flags |= 0x8000;
+    }
+}
 
 void FX_ContinueLightning(FXLightning *zap, FXTracker *fxTracker)
 {
@@ -2894,12 +3054,64 @@ void FX_GetPlaneEquation(SVector *normal, SVector *poPlane, PlaneConstants *plan
     plane->d = -(((plane->a * poPlane->x) + (plane->b * poPlane->y) + (plane->c * poPlane->z)) >> 12);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DoInstancePowerRing);
+void FX_DoInstancePowerRing(Instance *instance, long atuTime, long *color, long numColors, int follow_halveplane)
+{
+
+    SVector normal;
+    SVector point;
+    FXHalvePlane *ring;
+
+    ring = (FXHalvePlane *)MEMPACK_Malloc(sizeof(FXHalvePlane) + (numColors * 4), 13);
+
+    if (ring == NULL) { return; }
+
+    ring->effectType = 0x82;
+    ring->continue_process = &FX_UpdateInstanceSplitRing;
+    ring->diffTime = 0;
+    ring->instance = instance;
+    ring->type = follow_halveplane;
+    ring->colorArray = NULL;
+    ring->colorBlendLife = 0;
+    ring->numColors = numColors;
+    ring->lifeTime = (atuTime * 0x3E8) / 1200;
+
+    if (numColors < 2)
+    {
+        ring->currentColor = color != NULL ? color[0] : 0xFF8010;
+    }
+    else
+    {
+
+        int i;
+        ring->colorArray = (long *)(&ring[1]);
+
+        for (i = 0; i < numColors; i++)
+        {
+            ring->colorArray[i] = color[i];
+        }
+
+        ring->colorBlendLife = ring->lifeTime / (numColors - 1);
+        ring->currentColor = color[0];
+    }
+
+    normal.x = normal.y = 0;
+    normal.z = 0x1000;
+
+    point.x = instance->position.x;
+    point.y = instance->position.y;
+    point.z = instance->position.z;
+
+    FX_GetPlaneEquation(&normal, &point, &ring->ringPlane);
+    FX_InsertGeneralEffect(ring);
+
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdatePowerRing);
 
 void FX_UpdateInstanceSplitRing(FXHalvePlane *ring, FXTracker *fxTracker)
 {
+
+    (void)fxTracker;
 
     if (ring->lifeTime != 0)
     {
@@ -3152,6 +3364,7 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawBlastring);
 void FX_ContinueFlash(FXFlash *flash, FXTracker *fxTracker)
 {
 
+    (void)fxTracker;
     flash->currentTime += gameTrackerX.timeMult;
 
     if ((flash->currentTime / 16) >= flash->timeFromColor)
