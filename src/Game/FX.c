@@ -2211,7 +2211,21 @@ void FX_EndConstrict(int ConstrictEnemyFlag, Instance *instance)
     FX_ConstrictRibbon = NULL;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_SubDividePrim);
+void FX_SubDividePrim(FX_PRIM *fxPrim1, FX_PRIM *fxPrim2)
+{
+
+    SVECTOR mp0;
+    SVECTOR mp1;
+
+    LoadAverageShort12((SVECTOR *)&fxPrim1->v0, (SVECTOR *)&fxPrim2->v2, 0x800, 0x800, &mp0);
+    LoadAverageShort12((SVECTOR *)&fxPrim1->v1, (SVECTOR *)&fxPrim2->v3, 0x800, 0x800, &mp1);
+
+    fxPrim1->v2 = *(Position *)&mp0;
+    fxPrim1->v3 = *(Position *)&mp1;
+    fxPrim2->v0 = *(Position *)&mp0;
+    fxPrim2->v1 = *(Position *)&mp1;
+
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueRibbon);
 
