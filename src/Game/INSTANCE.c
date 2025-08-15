@@ -5,6 +5,7 @@
 #include "Game/MEMPACK.h"
 #include "Game/MATH3D.h"
 #include "Game/LIGHT3D.h"
+#include "Game/LOAD3D.h"
 #include "Game/PSX/SUPPORT.h"
 #include "Game/G2/ANIMG2.h"
 #include "Game/G2/INSTNCG2.h"
@@ -1691,7 +1692,183 @@ Instance *INSTANCE_Find(long introUniqueID)
     return instance;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/INSTANCE", INSTANCE_IntroduceSavedInstance);
+Instance *INSTANCE_IntroduceSavedInstance(SavedIntro *savedIntro, StreamUnit *streamUnit, int *deleted)
+{
+
+
+    Instance *instance;
+    Position *levelOffset;
+    Instance *attachInst;
+    Level *level;
+
+    instance = NULL;
+    attachInst = NULL;
+    level = streamUnit->level;
+    levelOffset = &level->terrain->BSPTreeArray[0].globalOffset;
+
+    if (INSTANCE_FindWithID(savedIntro->introUniqueID) == 0)
+    {
+
+        ObjectTracker *objectTracker;
+        char savedName[12];
+
+        memcpy(savedName, savedIntro->name, 8);
+        savedName[8] = '\0';
+        LOAD_SetSearchDirectory(savedIntro->birthUnitID);
+        objectTracker = STREAM_GetObjectTracker(savedName);
+        LOAD_SetSearchDirectory(0);
+
+        if (objectTracker != NULL)
+        {
+
+            Object *object;
+            object = objectTracker->object;
+
+            if (objectTracker->objectStatus == 2 && (savedIntro->attachedUniqueID == 0 || (attachInst = INSTANCE_Find(savedIntro->attachedUniqueID), attachInst != NULL)))
+            {
+                if (!(object->oflags2 & 0x10000000) || (OBTABLE_InitAnimPointers(objectTracker), !(object->oflags2 & 0x10000000)))
+                {
+
+                    instance = INSTANCE_NewInstance(gameTrackerX.instanceList);
+
+                    if (instance != NULL)
+                    {
+
+                        Level *birthLevel;
+                        Intro *intro;
+                        Intro *oldIntro;
+                        int i;
+                        int nosave;
+                        int remove;
+
+                        objectTracker->numInUse++;
+
+                        INSTANCE_DefaultInit(instance, object, 0);
+                        strcpy(instance->introName, savedName);
+
+                        instance->introUniqueID = savedIntro->introUniqueID;
+                        instance->currentStreamUnitID = savedIntro->streamUnitID;
+                        instance->birthStreamUnitID = savedIntro->birthUnitID;
+
+                        LIGHT_GetAmbient((ColorType *)&instance->light_color, instance);
+
+                        oldIntro = NULL;
+                        birthLevel = STREAM_GetLevelWithID(instance->birthStreamUnitID);
+
+                        if (birthLevel != NULL)
+                        {
+                            for (i = birthLevel->terrain->numIntros, intro = birthLevel->terrain->introList; i != 0; i--, intro++)
+                            {
+                                if (intro->UniqueID == instance->introUniqueID)
+                                {
+                                    oldIntro = intro;
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (oldIntro != NULL)
+                        {
+                            instance->intro = oldIntro;
+                            instance->introData = oldIntro->data;
+                        }
+                        else
+                        {
+                            instance->intro = NULL;
+                            instance->introData = NULL;
+                        }
+
+                        ADD_SVEC(Position, &instance->position, Position, &savedIntro->position, Position, levelOffset);
+
+                        instance->initialPos = instance->position;
+                        instance->oldPos = instance->position;
+
+                        instance->rotation.x = savedIntro->smallRotation.x;
+                        instance->rotation.y = savedIntro->smallRotation.y;
+                        instance->rotation.z = savedIntro->smallRotation.z;
+
+                        if (instance->object->oflags & 0x100)
+                        {
+                            INSTANCE_BuildStaticShadow(instance);
+                        }
+
+                        instance->scale.x = 0x1000;
+                        instance->scale.y = 0x1000;
+                        instance->scale.z = 0x1000;
+
+                        instance->lightGroup = savedIntro->lightGroup;
+                        instance->spectralLightGroup = savedIntro->specturalLightGroup;
+
+                        INSTANCE_InsertInstanceGroup(gameTrackerX.instanceList, instance);
+                        OBTABLE_GetInstanceCollideFunc(instance);
+                        OBTABLE_GetInstanceProcessFunc(instance);
+                        OBTABLE_GetInstanceQueryFunc(instance);
+                        OBTABLE_GetInstanceMessageFunc(instance);
+                        OBTABLE_GetInstanceAdditionalCollideFunc(instance);
+                        OBTABLE_InstanceInit(instance);
+
+                        nosave = instance->flags & 0x20;
+                        remove = instance->flags2 & 0x20000;
+
+                        instance->flags = savedIntro->flags;
+                        instance->flags2 = savedIntro->flags2 & ~1;
+
+                        if (attachInst != NULL)
+                        {
+                            INSTANCE_ForceActive(attachInst);
+                            attachInst->flags2 |= 0x80;
+                        }
+
+                        if (instance->flags & 0x40000)
+                        {
+                            instance->flags2 |= 0x20000000;
+                        }
+                        else
+                        {
+                            instance->flags2 &= ~0x20000000;
+                        }
+
+                        instance->flags &= ~0x40000;
+                        instance->flags &= ~0x2000000;
+                        instance->flags |= 0x100000;
+
+                        MORPH_SetupInstanceFlags(instance);
+
+                        if (instance->intro != NULL)
+                        {
+                            INSTANCE_ProcessIntro(instance);
+                        }
+
+                        if ((unsigned long)(savedIntro->shiftedSaveSize << 2) > sizeof(SavedIntro))
+                        {
+                            INSTANCE_Post(instance, 0x100007, SetControlSaveDataData((savedIntro->shiftedSaveSize << 2) - sizeof(SavedIntro), savedIntro + 1));
+                        }
+
+                        EVENT_AddInstanceToInstanceList(instance);
+                        INSTANCE_InitEffects(instance, object);
+
+                        if (nosave != 0)
+                        {
+                            instance->flags |= 0x20;
+                        }
+
+                        if (remove != 0)
+                        {
+                            instance->flags2 |= 0x20000;
+                            SAVE_DeleteInstance(instance);
+                            *deleted = 1;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                SAVE_BufferIntro((SavedBasic *)savedIntro);
+            }
+        }
+    }
+    return instance;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/INSTANCE", INSTANCE_IntroduceSavedInstanceWithIntro);
 
