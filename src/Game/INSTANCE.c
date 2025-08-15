@@ -1870,7 +1870,165 @@ Instance *INSTANCE_IntroduceSavedInstance(SavedIntro *savedIntro, StreamUnit *st
     return instance;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/INSTANCE", INSTANCE_IntroduceSavedInstanceWithIntro);
+Instance *INSTANCE_IntroduceSavedInstanceWithIntro(SavedIntroWithIntro *savedIntro, StreamUnit *streamUnit, int *deleted)
+{
+
+    Level *level;
+    Instance *instance;
+    Position *levelOffset;
+    Intro *intro;
+    Instance *attachInst;
+
+    instance = NULL;
+    attachInst = NULL;
+
+    level = streamUnit->level;
+    intro = &level->introList[savedIntro->introOffset];
+    levelOffset = &level->terrain->BSPTreeArray->globalOffset;
+
+    if (INSTANCE_FindWithID(intro->UniqueID) == 0)
+    {
+
+        ObjectTracker *objectTracker;
+
+        LOAD_SetSearchDirectory(streamUnit->StreamUnitID);
+        objectTracker = STREAM_GetObjectTracker(intro->name);
+        LOAD_SetSearchDirectory(0);
+
+        if (objectTracker != NULL)
+        {
+
+            Object *object;
+            object = objectTracker->object;
+
+            if (objectTracker->objectStatus == 2 && (savedIntro->attachedUniqueID == 0 || ((attachInst = INSTANCE_Find(savedIntro->attachedUniqueID), attachInst != NULL) && attachInst->matrix != NULL)))
+            {
+                if (!(object->oflags2 & 0x10000000) || (OBTABLE_InitAnimPointers(objectTracker), !(object->oflags2 & 0x10000000)))
+                {
+
+                    instance = INSTANCE_NewInstance(gameTrackerX.instanceList);
+
+                    if (instance != NULL)
+                    {
+
+                        int remove;
+                        int nosave;
+
+                        objectTracker->numInUse++;
+
+                        INSTANCE_DefaultInit(instance, object, 0);
+                        strcpy(instance->introName, intro->name);
+
+                        instance->introUniqueID = intro->UniqueID;
+                        instance->introNum = intro->intronum;
+                        instance->birthStreamUnitID = streamUnit->StreamUnitID;
+                        instance->currentStreamUnitID = streamUnit->StreamUnitID;
+                        instance->attachedID = savedIntro->attachedUniqueID;
+
+                        LIGHT_GetAmbient((ColorType *)&instance->light_color, instance);
+
+                        intro->instance = instance;
+                        STREAM_GetLevelWithID(instance->birthStreamUnitID);
+
+                        instance->intro = intro;
+                        instance->introData = intro->data;
+
+                        ADD_SVEC(Position, &instance->position, Position, &savedIntro->position, Position, levelOffset);
+                        instance->initialPos = instance->position;
+                        instance->oldPos = instance->position;
+
+                        instance->rotation.x = savedIntro->smallRotation.x;
+                        instance->rotation.y = savedIntro->smallRotation.y;
+                        instance->rotation.z = savedIntro->smallRotation.z;
+
+                        if (instance->object->oflags & 0x100)
+                        {
+                            INSTANCE_BuildStaticShadow(instance);
+                        }
+
+                        instance->scale.x = 0x1000;
+                        instance->scale.y = 0x1000;
+                        instance->scale.z = 0x1000;
+
+                        instance->lightGroup = savedIntro->lightGroup;
+                        instance->spectralLightGroup = savedIntro->specturalLightGroup;
+
+                        INSTANCE_InsertInstanceGroup(gameTrackerX.instanceList, instance);
+                        OBTABLE_GetInstanceCollideFunc(instance);
+                        OBTABLE_GetInstanceProcessFunc(instance);
+                        OBTABLE_GetInstanceQueryFunc(instance);
+                        OBTABLE_GetInstanceMessageFunc(instance);
+                        OBTABLE_GetInstanceAdditionalCollideFunc(instance);
+                        OBTABLE_InstanceInit(instance);
+
+                        nosave = instance->flags & 0x20;
+                        remove = instance->flags2 & 0x20000;
+
+                        instance->flags = savedIntro->flags;
+                        instance->flags2 = savedIntro->flags2;
+
+                        if (attachInst != NULL)
+                        {
+                            INSTANCE_ForceActive(attachInst);
+                            attachInst->flags2 |= 0x80;
+                        }
+
+                        instance->flags2 &= ~1;
+
+                        if (instance->flags & 0x40000)
+                        {
+                            instance->flags2 |= 0x20000000;
+                        }
+                        else
+                        {
+                            instance->flags2 &= ~0x20000000;
+                        }
+
+                        instance->flags &= ~0x40000;
+
+                        if (SCRIPT_GetMultiSpline(instance, 0, 0) == 0)
+                        {
+                            instance->flags &= ~0x2000000;
+                            instance->flags |= 0x100000;
+                        }
+
+                        MORPH_SetupInstanceFlags(instance);
+
+                        if (instance->intro != NULL)
+                        {
+                            INSTANCE_ProcessIntro(instance);
+                        }
+
+                        if ((unsigned long)(savedIntro->shiftedSaveSize << 2) > sizeof(SavedIntroWithIntro))
+                        {
+                            INSTANCE_Post(instance, 0x100007, SetControlSaveDataData((savedIntro->shiftedSaveSize << 2) - sizeof(SavedIntroWithIntro), savedIntro + 1));
+                        }
+
+                        EVENT_AddInstanceToInstanceList(instance);
+                        INSTANCE_InitEffects(instance, object);
+
+                        if (nosave != 0)
+                        {
+                            instance->flags |= 0x20;
+                        }
+
+                        if (remove != 0)
+                        {
+                            instance->flags2 |= 0x20000;
+                            SAVE_DeleteInstance(instance);
+                            *deleted = 1;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                SAVE_BufferIntro((SavedBasic *)savedIntro);
+            }
+        }
+    }
+    return instance;
+}
 
 void INSTANCE_SpatialRelationships(InstanceList *instanceList)
 {
