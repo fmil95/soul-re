@@ -1,16 +1,48 @@
 name: Update README Progress
 
 on:
-  schedule:
-    - cron: '0 0 0 * *'
   push:
     branches:
     - main
-  workflow_dispatch
+  workflow_dispatch:
 
 jobs:
   update_progress:
-  container: ghcr.io/fmil95/soul-re:latest
-  runs-on: ubuntu-latest
-  # - name: check_progress
-  #   runs-on: ubuntu-latest
+    name: Update Progress
+    if: github.repository == 'fmil95/soul-re'
+    container: ghcr.io/fmil95/soul-re:latest
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: true
+
+      - name: Copy Binary
+        run: |
+          cp -r /game/* .
+
+      - name: Setup
+        run: make setup
+
+      - name: Build
+        run: make
+
+      - name: Update Progress
+        run: |
+          python tools/scripts/progress.py --update-readme
+    
+          git config --global --add safe.directory $PWD
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if ! git diff --quiet || ! git diff --cached --quiet; then
+            echo "Working tree is dirty. Committing changes..."
+            git add .
+            git commit -m "Update README with progress"
+            git push
+          else
+            echo "No changes to commit."
+          fi

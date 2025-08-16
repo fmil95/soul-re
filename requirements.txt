@@ -7,3 +7,4 @@ levenshtein
 cxxfilt
 GitPython
 colour
+splat64[mips]>=0.34.0,<1.0.0
