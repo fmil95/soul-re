@@ -1,0 +1,16 @@
+name: Update README Progress
+
+on:
+  schedule:
+    - cron: '0 0 0 * *'
+  push:
+    branches:
+    - main
+  workflow_dispatch
+
+jobs:
+  update_progress:
+  container: ghcr.io/fmil95/soul-re:latest
+  runs-on: ubuntu-latest
+  # - name: check_progress
+  #   runs-on: ubuntu-latest
