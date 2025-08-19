@@ -22,14 +22,13 @@ jobs:
           lfs: true
 
       - name: Copy Binary
-        run: |
-          cp -r /game/* .
+        run: cp -r /game/* .
 
       - name: Setup
         run: make setup
 
       - name: Build
-        run: make
+        run: make -j12
 
       - name: Update Progress
         run: |
