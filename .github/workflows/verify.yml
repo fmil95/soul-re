@@ -1,0 +1,28 @@
+name: Verify
+
+on:
+  pull_request:
+    
+
+jobs:
+  check:
+    name: Check Match
+    if: github.repository == 'fmil95/soul-re'
+    container: ghcr.io/fmil95/soul-re:latest
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: true
+
+      - name: Copy Binary
+        run: cp -r /game/* .
+
+      - name: Setup
+        run: make setup
+
+      - name: Build
+        run: make -j12
