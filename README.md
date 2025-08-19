@@ -11,8 +11,8 @@ Once its fully overhauled, the source code could then be used for many different
 Next is a benchmark for the progress achieved so far on the decompilation of the main game executable (**SLUS_007.08**):
 
 ```
-2115 matched functions / 2274 total (93.01%)
-535132 matching bytes / 653008 total (81.95%)
+2137 matched functions / 2274 total (93.98%)
+543048 matching bytes / 653008 total (83.16%)
 ```
 
 Note that the status above is not reflective of the actual completion rate of the project however, as Soul Reaver like many other titles for the PlayStation (especially those near the end of the system's life cycle) distributes a good amount of game logic throughout _overlays_. For those not familiar with the concept, overlays are binaries which contain code that is loaded at specific instances during gameplay by the primary executable. This was designed such to taper the maximum amount of memory that the game consumes at once, which could never be too high due to hardware limitations.
