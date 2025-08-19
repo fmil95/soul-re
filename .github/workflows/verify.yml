@@ -1,4 +1,4 @@
-name: Check Match
+name: Verify
 
 on:
   pull_request:
