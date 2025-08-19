@@ -72,7 +72,7 @@ int COLLIDE_PointInTriangle(SVector *v0, SVector *v1, SVector *v2, SVector *poin
             tx = point->y;
             ty = point->z;
 
-            *(int *)&triangle->x0 = (unsigned short)v0->y | (v0->z << 16);
+            *(int *)&triangle->x0 = (unsigned short)v0->y | (v0->z << 6);
             *(int *)&triangle->x1 = (unsigned short)v1->y | (v1->z << 16);
             *(int *)&triangle->x2 = (unsigned short)v2->y | (v2->z << 16);
         }

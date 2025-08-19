@@ -7,7 +7,6 @@ on:
 jobs:
   check:
     name: Check Match
-    if: github.repository == 'fmil95/soul-re'
     container: ghcr.io/fmil95/soul-re:latest
     runs-on: ubuntu-latest
 
