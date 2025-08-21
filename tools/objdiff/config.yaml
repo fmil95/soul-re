@@ -1,0 +1,22 @@
+categories:
+  - id: sdk
+    name: Psy-Q SDK
+    paths:
+      - slus_006.64/psyq
+  - id: main
+    name: Main Executable
+    paths:
+      - slus_006.64
+  - id: field
+    name: Field Overlay
+    paths:
+      - field
+
+expected_paths:
+  asm: expected/asm
+  src: expected/src
+
+ignored_files:
+  - slus_006.64/header
+
+output: ./objdiff.json

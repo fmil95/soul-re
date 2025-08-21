@@ -4,8 +4,11 @@ BASEEXE      := SLUS_007.08
 TARGET       := KAIN2
 COMPARE      ?= 1
 NON_MATCHING ?= 0
+SKIP_ASM     ?= 0
 VERBOSE      ?= 0
 BUILD_DIR    ?= build
+TOOLS_DIR    := tools
+OBJDIFF_DIR  := $(TOOLS_DIR)/objdiff
 EXPECTED_DIR ?= expected
 CHECK        ?= 1
 
@@ -51,7 +54,6 @@ SPLAT_YAML := $(BASEEXE).yaml
 SPLAT      := splat split $(SPLAT_YAML)
 DIFF       := diff
 MASPSX     := $(PYTHON) tools/maspsx/maspsx.py --use-comm-section --aspsx-version=2.81 -G4096
-
 CROSS    := mips-linux-gnu-
 AS       := $(CROSS)as -EL
 LD       := $(CROSS)ld -EL
@@ -60,6 +62,7 @@ STRIP    := $(CROSS)strip
 CPP      := $(CROSS)cpp
 CC       := tools/gcc-2.8.1-psx/cc1
 CC_HOST  := gcc
+OBJDIFF  := $(OBJDIFF_DIR)/objdiff
 
 PRINT := printf '
  ENDCOLOR := \033[0m
@@ -87,6 +90,10 @@ CHECK_WARNINGS := -Wall -Wextra
 
 ifeq ($(NON_MATCHING),1)
 CPPFLAGS += -DNON_MATCHING
+endif
+
+ifeq ($(SKIP_ASM),1)
+CPPFLAGS := $(CPPFLAGS) -DSKIP_ASM
 endif
 
 ### Sources ###
@@ -152,6 +159,15 @@ setup: distclean split
 split:
 	$(V)$(SPLAT)
 
+reset: clean
+	$(V)rm -rf $(EXPECTED_DIR)
+
+regenerate: reset
+
+objdiff-config: regenerate
+	@$(MAKE) NON_MATCHING=1 SKIP_ASM=1 expected
+	@$(PYTHON) $(OBJDIFF_DIR)/objdiff_generate.py $(OBJDIFF_DIR)/config.yaml
+
 expected: all
 	@mkdir -p $(EXPECTED_DIR)
 	$(V)mv $(BUILD_DIR)/asm $(EXPECTED_DIR)/asm
@@ -183,11 +199,12 @@ $(BUILD_DIR)/$(LD_SCRIPT): $(LD_SCRIPT)
 #Temporary hack for noload segment wrong alignment
 	@sed -r -i 's/\.main_bss \(NOLOAD\) : SUBALIGN\(4\)/.main_bss main_SDATA_END (NOLOAD) : SUBALIGN(4)/g' $@
 
+ifeq ($(SKIP_ASM),1)
 # Link the .o files into the .elf
 $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) $(BUILD_DIR)/$(LD_SCRIPT)
 	@$(PRINT)$(GREEN)Linking elf file: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(LD) $(LDFLAGS) -o $@
-
+endif
 # Convert the .elf to the final exe
 $(EXE): $(BUILD_DIR)/$(TARGET).elf
 	@$(PRINT)$(GREEN)Creating EXE: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
