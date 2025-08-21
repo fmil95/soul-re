@@ -2,7 +2,7 @@ categories:
   - id: main
     name: Main Executable
     paths:
-      - slus_006.64
+      - Game
 
 expected_paths:
   asm: expected/asm

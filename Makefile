@@ -168,6 +168,12 @@ objdiff-config: regenerate
 	@$(MAKE) NON_MATCHING=1 SKIP_ASM=1 expected -j12
 	@$(PYTHON) $(OBJDIFF_DIR)/objdiff_generate.py $(OBJDIFF_DIR)/config.yaml
 
+report: objdiff-config
+	@$(OBJDIFF) report generate > $(BUILD_DIR)/progress.json
+
+progress:
+	$(MAKE) build NON_MATCHING=1 SKIP_ASM=1
+
 expected: all
 	@mkdir -p $(EXPECTED_DIR)
 	$(V)mv $(BUILD_DIR)/asm $(EXPECTED_DIR)/asm
