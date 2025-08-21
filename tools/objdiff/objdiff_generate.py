@@ -70,7 +70,7 @@ def _determine_categories(path: Path, config) -> tuple[UnitMetadata, str]:
     return (UnitMetadata(categories), str(modified_path))
 
 def _get_base_path(path: Path) -> Path:
-    name = "build/src/" + path.removesuffix(".s.o").removesuffix(".c.o")
+    name = "expected/src/" + path.removesuffix(".s.o").removesuffix(".c.o")
     c_path = name + ".c.o"
     hasm_path = name + ".hasm.s.o"
     if Path(c_path).exists(): return c_path
