@@ -165,12 +165,14 @@ reset: clean
 regenerate: reset
 
 objdiff-config: regenerate
-	@$(MAKE) NON_MATCHING=1 SKIP_ASM=1 expected
+	@$(MAKE) NON_MATCHING=1 SKIP_ASM=1 expected -j12
 	@$(PYTHON) $(OBJDIFF_DIR)/objdiff_generate.py $(OBJDIFF_DIR)/config.yaml
 
 expected: all
 	@mkdir -p $(EXPECTED_DIR)
 	$(V)mv $(BUILD_DIR)/asm $(EXPECTED_DIR)/asm
+	$(V)mv $(BUILD_DIR)/src $(EXPECTED_DIR)/src
+	$(V)find $(EXPECTED_DIR)/src -name '*.s.o' -delete
 
 # Compile .c files
 $(BUILD_DIR)/%.c.o: %.c
