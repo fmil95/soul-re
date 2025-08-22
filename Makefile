@@ -142,7 +142,12 @@ $(BUILD_DIR)/src/Game/MENU/MENUFACE.c.o: CFLAGS += -funsigned-char
 
 $(BUILD_DIR)/src/Game/RAZIEL/RAZIEL.c.o: CFLAGS += -funsigned-char
 
+ifeq ($(SKIP_ASM),1)
+all: $(OBJECTS)
+	@echo "SKIP_ASM=1: Skipping linking, only built objects."
+else
 all: $(EXE)
+endif
 
 -include $(DEPENDS)
 
@@ -178,7 +183,9 @@ expected: all
 	@mkdir -p $(EXPECTED_DIR)
 	$(V)mv $(BUILD_DIR)/asm $(EXPECTED_DIR)/asm
 	$(V)mv $(BUILD_DIR)/src $(EXPECTED_DIR)/src
-	$(V)find $(EXPECTED_DIR)/src -name '*.s.o' -delete
+	$(V)find $(EXPECTED_DIR)/src -name 'ENTRYPOINT.s.o' -delete
+	$(V)find $(EXPECTED_DIR)/src -name 'HASM_1.s.o' -delete
+	$(V)find $(EXPECTED_DIR)/src -name 'HASM_2.s.o' -delete
 
 # Compile .c files
 $(BUILD_DIR)/%.c.o: %.c
@@ -208,11 +215,20 @@ $(BUILD_DIR)/$(LD_SCRIPT): $(LD_SCRIPT)
 	@sed -r -i 's/\.main_bss \(NOLOAD\) : SUBALIGN\(4\)/.main_bss main_SDATA_END (NOLOAD) : SUBALIGN(4)/g' $@
 
 ifeq ($(SKIP_ASM),1)
+# Prevent building ELF if SKIP_ASM != 1
+$(BUILD_DIR)/$(TARGET).elf:
+	@echo "Skipping linking (SKIP_ASM != 1)"
+else
 # Link the .o files into the .elf
 $(BUILD_DIR)/$(TARGET).elf: $(OBJECTS) $(BUILD_DIR)/$(LD_SCRIPT)
 	@$(PRINT)$(GREEN)Linking elf file: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(LD) $(LDFLAGS) -o $@
 endif
+
+ifeq ($(SKIP_ASM),1)
+$(EXE):
+	@echo "Skipping EXE creation (SKIP_ASM=1)"
+else
 # Convert the .elf to the final exe
 $(EXE): $(BUILD_DIR)/$(TARGET).elf
 	@$(PRINT)$(GREEN)Creating EXE: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
@@ -220,6 +236,7 @@ $(EXE): $(BUILD_DIR)/$(TARGET).elf
 	$(V)$(OBJCOPY) -O binary --gap-fill 0x00 --pad-to 0x0C3000 $< $@
 ifeq ($(COMPARE),1)
 	@$(DIFF) $(BASEEXE) $(EXE) && printf "OK\n" || (echo 'The build succeeded, but did not match the base EXE. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+endif
 endif
 
 ### Make Settings ###
