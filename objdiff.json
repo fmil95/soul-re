@@ -23,6 +23,416 @@
       }
     },
     {
+      "name": "Game/BSP",
+      "base_path": "expected/src/Game/BSP.c.o",
+      "target_path": "expected/asm/Game/BSP.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/PHYSOBS",
+      "base_path": "expected/src/Game/PHYSOBS.c.o",
+      "target_path": "expected/asm/Game/PHYSOBS.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/FX",
+      "base_path": "expected/src/Game/FX.c.o",
+      "target_path": "expected/asm/Game/FX.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/RELMOD",
+      "base_path": "expected/src/Game/RELMOD.c.o",
+      "target_path": "expected/asm/Game/RELMOD.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/COLLIDE",
+      "base_path": "expected/src/Game/COLLIDE.c.o",
+      "target_path": "expected/asm/Game/COLLIDE.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/OBTABLE",
+      "base_path": "expected/src/Game/OBTABLE.c.o",
+      "target_path": "expected/asm/Game/OBTABLE.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/GAMEPAD",
+      "base_path": "expected/src/Game/GAMEPAD.c.o",
+      "target_path": "expected/asm/Game/GAMEPAD.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/UNDRWRLD",
+      "base_path": "expected/src/Game/UNDRWRLD.c.o",
+      "target_path": "expected/asm/Game/UNDRWRLD.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/LOAD3D",
+      "base_path": "expected/src/Game/LOAD3D.c.o",
+      "target_path": "expected/asm/Game/LOAD3D.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/STRMLOAD",
+      "base_path": "expected/src/Game/STRMLOAD.c.o",
+      "target_path": "expected/asm/Game/STRMLOAD.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/STREAM",
+      "base_path": "expected/src/Game/STREAM.c.o",
+      "target_path": "expected/asm/Game/STREAM.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/DRAW",
+      "base_path": "expected/src/Game/DRAW.c.o",
+      "target_path": "expected/asm/Game/DRAW.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/SCRIPT",
+      "base_path": "expected/src/Game/SCRIPT.c.o",
+      "target_path": "expected/asm/Game/SCRIPT.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/LIST",
+      "base_path": "expected/src/Game/LIST.c.o",
+      "target_path": "expected/asm/Game/LIST.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/SCRIPT2",
+      "base_path": "expected/src/Game/SCRIPT2.c.o",
+      "target_path": "expected/asm/Game/SCRIPT2.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/DEBUG",
+      "base_path": "expected/src/Game/DEBUG.c.o",
+      "target_path": "expected/asm/Game/DEBUG.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/FONT",
+      "base_path": "expected/src/Game/FONT.c.o",
+      "target_path": "expected/asm/Game/FONT.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/INSTANCE",
+      "base_path": "expected/src/Game/INSTANCE.c.o",
+      "target_path": "expected/asm/Game/INSTANCE.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/SIGNAL",
+      "base_path": "expected/src/Game/SIGNAL.c.o",
+      "target_path": "expected/asm/Game/SIGNAL.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/CAMERA",
+      "base_path": "expected/src/Game/CAMERA.c.o",
+      "target_path": "expected/asm/Game/CAMERA.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/LIGHT3D",
+      "base_path": "expected/src/Game/LIGHT3D.c.o",
+      "target_path": "expected/asm/Game/LIGHT3D.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/EVENT",
+      "base_path": "expected/src/Game/EVENT.c.o",
+      "target_path": "expected/asm/Game/EVENT.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/STATE",
+      "base_path": "expected/src/Game/STATE.c.o",
+      "target_path": "expected/asm/Game/STATE.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/VOICEXA",
+      "base_path": "expected/src/Game/VOICEXA.c.o",
+      "target_path": "expected/asm/Game/VOICEXA.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/PHYSICS",
+      "base_path": "expected/src/Game/PHYSICS.c.o",
+      "target_path": "expected/asm/Game/PHYSICS.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/PIPE3D",
+      "base_path": "expected/src/Game/PIPE3D.c.o",
+      "target_path": "expected/asm/Game/PIPE3D.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/SAVEINFO",
+      "base_path": "expected/src/Game/SAVEINFO.c.o",
+      "target_path": "expected/asm/Game/SAVEINFO.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/TIMER",
+      "base_path": "expected/src/Game/TIMER.c.o",
+      "target_path": "expected/asm/Game/TIMER.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/RAZCNTRL",
+      "base_path": "expected/src/Game/RAZCNTRL.c.o",
+      "target_path": "expected/asm/Game/RAZCNTRL.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/VM",
+      "base_path": "expected/src/Game/VM.c.o",
+      "target_path": "expected/asm/Game/VM.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/RESOLVE",
+      "base_path": "expected/src/Game/RESOLVE.c.o",
+      "target_path": "expected/asm/Game/RESOLVE.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/GLYPH",
+      "base_path": "expected/src/Game/GLYPH.c.o",
+      "target_path": "expected/asm/Game/GLYPH.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/SOUND",
+      "base_path": "expected/src/Game/SOUND.c.o",
+      "target_path": "expected/asm/Game/SOUND.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/SPLINE",
+      "base_path": "expected/src/Game/SPLINE.c.o",
+      "target_path": "expected/asm/Game/SPLINE.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/PLAYER",
+      "base_path": "expected/src/Game/PLAYER.c.o",
+      "target_path": "expected/asm/Game/PLAYER.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/VRAM",
+      "base_path": "expected/src/Game/VRAM.c.o",
+      "target_path": "expected/asm/Game/VRAM.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/GENERIC",
+      "base_path": "expected/src/Game/GENERIC.c.o",
+      "target_path": "expected/asm/Game/GENERIC.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/GAMELOOP",
+      "base_path": "expected/src/Game/GAMELOOP.c.o",
+      "target_path": "expected/asm/Game/GAMELOOP.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/REAVER",
+      "base_path": "expected/src/Game/REAVER.c.o",
+      "target_path": "expected/asm/Game/REAVER.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/MEMPACK",
+      "base_path": "expected/src/Game/MEMPACK.c.o",
+      "target_path": "expected/asm/Game/MEMPACK.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
+      "name": "Game/MATH3D",
+      "base_path": "expected/src/Game/MATH3D.c.o",
+      "target_path": "expected/asm/Game/MATH3D.s.o",
+      "metadata": {
+        "progress_categories": [
+          "main"
+        ]
+      }
+    },
+    {
       "name": "data/Game/VRAM.comm",
       "base_path": null,
       "target_path": "expected/asm/data/Game/VRAM.comm.s.o",

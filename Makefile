@@ -98,9 +98,16 @@ endif
 
 ### Sources ###
 
+ASM_SRCS := $(wildcard asm/Game/*.s)
+ASM_OBJS := $(ASM_SRCS:.s=.s.o)
+ASM_OBJS := $(ASM_OBJS:%=$(BUILD_DIR)/%)
+
 # Object files
 OBJECTS := $(shell grep -E 'BUILD_PATH.+\.o' $(LD_SCRIPT) -o)
 OBJECTS := $(OBJECTS:BUILD_PATH/%=$(BUILD_DIR)/%)
+ifeq ($(SKIP_ASM),1)
+OBJECTS += $(ASM_OBJS)
+endif
 DEPENDS := $(OBJECTS:=.d)
 
 ### Targets ###
