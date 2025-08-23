@@ -98,7 +98,7 @@ endif
 
 ### Sources ###
 
-ASM_SRCS := $(wildcard asm/Game/*.s)
+ASM_SRCS := $(shell find asm/Game -type f -name '*.s')
 ASM_OBJS := $(ASM_SRCS:.s=.s.o)
 ASM_OBJS := $(ASM_OBJS:%=$(BUILD_DIR)/%)
 
