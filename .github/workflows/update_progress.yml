@@ -22,12 +22,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          token: ${{ secrets.GHP }}
           submodules: recursive
           lfs: true
 
       - name: Copy Binary
-        run: |
-          cp -r /game/* .
+        run: cp -r /game/* .
 
       - name: Setup
         run: make setup
