@@ -84,15 +84,19 @@ def main():
     expected_objects = _collect_objects(Path(config["expected_paths"]["asm"]), config) + _collect_objects(Path(config["expected_paths"]["src"]), config)
     
     logging.info(f"Accounting for {len(expected_objects)} objects.")
-    units = []
+    units_dict = {}
     for file in expected_objects:
         processed_path = _determine_categories(file, config)
-        unit = Unit(
-            processed_path[1].removesuffix(".s.o").removesuffix(".c.o"),
-            _get_base_path(processed_path[1]),
-            str(file),
-            processed_path[0])
-        units.append(unit)
+        unit_name = processed_path[1].removesuffix(".s.o").removesuffix(".c.o")
+        base_path = _get_base_path(processed_path[1])
+        if unit_name not in units_dict:
+            units_dict[unit_name] = Unit(
+                unit_name,
+                base_path,
+                str(file),
+                processed_path[0]
+            )
+    units = list(units_dict.values())
     
     categories = []
     for category in config["categories"]:
