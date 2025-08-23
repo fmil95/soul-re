@@ -1,4 +1,4 @@
-name: Update README Progress
+name: Publish Progress Report
 
 on:
   push:
@@ -12,6 +12,11 @@ jobs:
     if: github.repository == 'fmil95/soul-re'
     container: ghcr.io/fmil95/soul-re:latest
     runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      matrix:
+        game_id: [ SLUS-00708 ]
 
     steps:
       - name: Checkout
@@ -27,22 +32,11 @@ jobs:
       - name: Setup
         run: make setup
 
-      - name: Build
-        run: make
+      - name: Create Progress Report
+        run: make report
 
-      - name: Update Progress
-        run: |
-          python tools/scripts/progress.py --update-readme
-    
-          git config --global --add safe.directory $PWD
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          if ! git diff --quiet || ! git diff --cached --quiet; then
-            echo "Working tree is dirty. Committing changes..."
-            git add .
-            git commit -m "Update README with progress"
-            git push
-          else
-            echo "No changes to commit."
-          fi
+      - name: Publish Progress Report
+        uses: actions/upload-artifact@v4
+        with:
+            name: ${{ matrix.game_id }}_report
+            path: ./build/progress.json
