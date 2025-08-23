@@ -4391,7 +4391,249 @@ void RazielPost(Instance *instance, unsigned long Message, uintptr_t Data)
     }
 }
 
+// Matches 100% on decomp.me but differs on this project
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", SetStates);
+#else
+int SetStates(Instance *instance, GameTracker *GT, long *controlCommand, int AnalogLength)
+{
+    int i;
+    int Event;
+    int Data1;
+    STATIC unsigned long LastTime;
+    Message *Ptr;
+
+    (void)AnalogLength;
+
+    Data1 = 0;
+
+    LastTime = (GetRCnt(0xF2000000) & 0xFFFF) | (gameTimer << 16);
+
+    PadData = controlCommand;
+
+    gameTracker = GT;
+
+    LoopCounter++;
+
+    for (i = 0; i < 3; i++)
+    {
+        while ((Ptr = DeMessageQueue(&Raziel.State.SectionList[i].Defer)) != NULL)
+        {
+            EnMessageQueue(&Raziel.State.SectionList[i].Event, Ptr);
+        }
+    }
+
+    if ((instance->offset.x != 0) || (instance->offset.y != 0) || (instance->offset.z != 0))
+    {
+        INSTANCE_Post(instance, 0x4000004, LoopCounter);
+
+        SetImpulsePhysics(instance, &Raziel);
+    }
+
+    if (Raziel.Senses.HitMonster != NULL)
+    {
+        INSTANCE_Post(instance, 0x2000002, SetMonsterHitData(Raziel.Senses.HitMonster, NULL, 4096, Raziel.attack->knockBackDistance, Raziel.attack->knockBackFrames));
+
+        DisableWristCollision(instance, 1);
+        DisableWristCollision(instance, 2);
+    }
+
+    if (!(gameTrackerX.playerInstance->flags & 0x100))
+    {
+        Event = 0;
+
+        if ((ControlFlag & 0x800000))
+        {
+            PadData = &Raziel.blankPad;
+
+            for (i = 0; i < 3; i++)
+            {
+                EnMessageQueueData(&Raziel.State.SectionList[i].Event, Event, Data1);
+            }
+        }
+        else
+        {
+            Message *message;
+
+            GetControllerMessages(controlCommand);
+
+            while ((message = DeMessageQueue(&Raziel.padCommands)) != NULL)
+            {
+                Event = message->ID;
+
+                if ((unsigned int)Event == 0x80000000)
+                {
+                    if (!(Raziel.Senses.EngagedMask & 0x681F))
+                    {
+                        if (((Raziel.Senses.EngagedMask & 0x20)) && (razGetHeldItem() == NULL))
+                        {
+                            Event = 0x2000000;
+                        }
+                    }
+                    else
+                    {
+                        Event = 0x2000000;
+                    }
+                }
+
+                if (Event != 0)
+                {
+                    for (i = 0; i < 3; i++)
+                    {
+                        EnMessageQueueData(&Raziel.State.SectionList[i].Event, Event, Data1);
+                    }
+                }
+            }
+
+            Data1 = ProcessMovement(instance, controlCommand, GT);
+
+            if (Data1 != 0)
+            {
+                if ((Data1 & 0x1000))
+                {
+                    Event = 0x1000001;
+                }
+                else
+                {
+                    Event = 0x10000000;
+                }
+            }
+            else
+            {
+                Event = 0;
+            }
+
+            for (i = 0; i < 3; i++)
+            {
+                EnMessageQueueData(&Raziel.State.SectionList[i].Event, Event, Data1);
+            }
+        }
+    }
+
+    razSetPlayerEvent();
+
+    G2EmulatePlayAnimation(&Raziel.State);
+
+    for (i = 0; i < 3; i++)
+    {
+        Raziel.State.SectionList[i].Process(&Raziel.State, i, 1);
+    }
+
+    if (gameTracker->cheatMode == 1)
+    {
+        PhysicsMode = 3;
+    }
+
+    ProcessPhysics(&Raziel, &Raziel.State, 0, PhysicsMode);
+
+    if ((*PadData & RazielCommands[7]))
+    {
+        Raziel.nothingCounter = 0;
+
+        if (((Raziel.Senses.EngagedMask & 0x40)) && (!(Raziel.Mode & 0x2000000)))
+        {
+            for (i = 0; i < 3; i++)
+            {
+                EnMessageQueueData(&Raziel.State.SectionList[i].Event, 0x1000001, 0);
+            }
+        }
+
+        ControlFlag |= 0x4;
+
+        if ((Raziel.Senses.EngagedMask & 0x40))
+        {
+            Raziel.Senses.CurrentAutoFace = Raziel.Senses.EngagedList[6].instance;
+        }
+        else
+        {
+            Raziel.Senses.CurrentAutoFace = NULL;
+        }
+    }
+    else
+    {
+        Raziel.nothingCounter++;
+
+        if (Raziel.nothingCounter < 6)
+        {
+            if (((Raziel.Senses.EngagedMask & 0x40)) && (!(Raziel.Mode & 0x2000000)))
+            {
+                for (i = 0; i < 3; i++)
+                {
+                    EnMessageQueueData(&Raziel.State.SectionList[i].Event, 0x1000001, 0);
+                }
+            }
+        }
+        else if (Raziel.nothingCounter == 6)
+        {
+            Raziel.Senses.LastAutoFace = NULL;
+            Raziel.Senses.CurrentAutoFace = NULL;
+        }
+
+        ControlFlag &= ~0x4;
+    }
+
+    AutoFaceAngle = -1;
+
+    Raziel.iVelocity.x = instance->position.x - instance->oldPos.x - instance->offset.x;
+    Raziel.iVelocity.y = instance->position.y - instance->oldPos.y - instance->offset.y;
+    Raziel.iVelocity.z = instance->position.z - instance->oldPos.z - instance->offset.z;
+
+    StateGovernState(&Raziel.State, 3);
+
+    if (((gameTrackerX.debugFlags2 & 0x800)) && (!(ControlFlag & 0x1000000)))
+    {
+        ProcessHealth(instance);
+    }
+
+    if ((ControlFlag & 0x20000))
+    {
+        if ((Raziel.Senses.EngagedMask & 0x400))
+        {
+            AlgorithmicNeck(instance, Raziel.Senses.EngagedList[10].instance);
+        }
+        else if ((Raziel.Senses.Flags & 0x10))
+        {
+            AlgorithmicNeck(instance, NULL);
+        }
+    }
+
+    if (((ControlFlag & 0x200000)) && (gameTrackerX.gameFramePassed != 0))
+    {
+        ProcessConstrict();
+    }
+
+    if (Raziel.effectsFlags != 0)
+    {
+        ProcessEffects(instance);
+    }
+
+    ProcessInteractiveMusic(instance);
+    ProcessSpecialAbilities(instance);
+
+    if (((Raziel.Senses.Flags & 0x40)) && (RAZIEL_OkToShift() != 0))
+    {
+        if (INSTANCE_Query(Raziel.Senses.Portal, 17) != 1)
+        {
+            FX_EndInstanceParticleEffects(Raziel.Senses.Portal);
+
+            INSTANCE_Post(Raziel.Senses.Portal, 0x8000008, SetAnimationInstanceSwitchData(Raziel.Senses.Portal, 1, 0, 0, 2));
+        }
+    }
+    else
+    {
+        if ((Raziel.Senses.Portal != NULL) && (INSTANCE_Query(Raziel.Senses.Portal, 17) != 0))
+        {
+            FX_EndInstanceParticleEffects(Raziel.Senses.Portal);
+
+            INSTANCE_Post(Raziel.Senses.Portal, 0x8000008, SetAnimationInstanceSwitchData(Raziel.Senses.Portal, 0, 0, 0, 2));
+        }
+
+        Raziel.Senses.Portal = NULL;
+    }
+
+    return 1;
+}
+#endif
 
 void ProcessConstrict()
 {
