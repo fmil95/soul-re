@@ -8,6 +8,8 @@ expected_paths:
   asm: expected/asm
   src: expected/src
 
-ignored_files: {}
+ignored_files:
+  - LIBS
+  - header
 
 output: ./objdiff.json

@@ -160,6 +160,7 @@ endif
 
 clean:
 	$(V)rm -rf $(BUILD_DIR)
+	$(V)rm -rf $(EXPECTED_DIR)
 
 distclean: clean
 	$(V)rm -f $(LD_SCRIPT)
@@ -190,9 +191,7 @@ expected: all
 	@mkdir -p $(EXPECTED_DIR)
 	$(V)mv $(BUILD_DIR)/asm $(EXPECTED_DIR)/asm
 	$(V)mv $(BUILD_DIR)/src $(EXPECTED_DIR)/src
-	$(V)find $(EXPECTED_DIR)/src -name 'ENTRYPOINT.s.o' -delete
-	$(V)find $(EXPECTED_DIR)/src -name 'HASM_1.s.o' -delete
-	$(V)find $(EXPECTED_DIR)/src -name 'HASM_2.s.o' -delete
+	$(V)find $(EXPECTED_DIR)/src -name '*.s.o' -delete
 
 # Compile .c files
 $(BUILD_DIR)/%.c.o: %.c
