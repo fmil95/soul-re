@@ -1,4 +1,4 @@
-# This script was borrowed from the Silent Hill Decompilation Project (silent-hill-decomp) 
+# Adapted from https://github.com/Vatuu/silent-hill-decomp/tree/master
 
 from pathlib import Path
 from argparse import ArgumentParser
@@ -69,6 +69,14 @@ def _determine_categories(path: Path, config) -> tuple[UnitMetadata, str]:
                 categories.append(category["id"])
     return (UnitMetadata(categories), str(modified_path))
 
+def _get_base_path(path: Path) -> Path:
+    name = "expected/src/" + path.removesuffix(".s.o").removesuffix(".c.o")
+    c_path = name + ".c.o"
+    hasm_path = name + ".hasm.s.o"
+    if Path(c_path).exists(): return c_path
+    if Path(hasm_path).exists(): return hasm_path
+    return None
+
 def main():
     logging.basicConfig(level = logging.INFO)
     config = _create_config()
@@ -79,10 +87,9 @@ def main():
     units = []
     for file in expected_objects:
         processed_path = _determine_categories(file, config)
-        base_path = "build/src/" + processed_path[1].removesuffix(".s.o").removesuffix(".c.o") + ".c.o"
         unit = Unit(
             processed_path[1].removesuffix(".s.o").removesuffix(".c.o"),
-            base_path if Path(base_path).exists() else None,
+            _get_base_path(processed_path[1]),
             str(file),
             processed_path[0])
         units.append(unit)

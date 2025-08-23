@@ -1,0 +1,15 @@
+categories:
+  - id: main
+    name: Main Executable
+    paths:
+      - Game
+
+expected_paths:
+  asm: expected/asm
+  src: expected/src
+
+ignored_files:
+  - LIBS
+  - header
+
+output: ./objdiff.json
