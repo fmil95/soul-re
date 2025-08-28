@@ -617,8 +617,6 @@ long LOAD_HashName(char *string)
 
     ext = 0;
 
-    ext = 0;
-
     endPos = 0;
 
     strl = strlen(string) - 1;

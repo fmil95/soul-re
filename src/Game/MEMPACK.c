@@ -219,7 +219,7 @@ void MEMPACK_Return(char *address, long takeBackSize)
 
     if (takeBackSize >= (long)sizeof(MemHeader))
     {
-        memAddress = (MemHeader *)(address - 8);
+        memAddress = (MemHeader *)(address - sizeof(MemHeader));
 
         memAddress->memSize -= takeBackSize;
 
@@ -247,7 +247,7 @@ void MEMPACK_Free(char *address)
     MemHeader *memAddress;
     MemHeader *secondAddress;
 
-    memAddress = (MemHeader *)(address - 8);
+    memAddress = (MemHeader *)(address - sizeof(MemHeader));
 
     memAddress->memStatus = 0;
     memAddress->memType = 0;
@@ -561,11 +561,11 @@ void MEMPACK_DoGarbageCollection()
 
                 if (addressMemType == 2)
                 {
-                    MEMPACK_RelocateAreaType((MemHeader *)(newAddress - 8), newAddress - oldAddress, (Level *)oldAddress);
+                    MEMPACK_RelocateAreaType((MemHeader *)(newAddress - sizeof(MemHeader)), newAddress - oldAddress, (Level *)oldAddress);
                 }
                 else if (addressMemType == 1)
                 {
-                    MEMPACK_RelocateObjectType((MemHeader *)(newAddress - 8), newAddress - oldAddress, (Object *)oldAddress);
+                    MEMPACK_RelocateObjectType((MemHeader *)(newAddress - sizeof(MemHeader)), newAddress - oldAddress, (Object *)oldAddress);
                 }
                 else if (addressMemType == 14)
                 {
@@ -573,7 +573,7 @@ void MEMPACK_DoGarbageCollection()
                 }
                 else if (addressMemType == 44)
                 {
-                    MEMPACK_RelocateCDMemory((MemHeader *)(newAddress - 8), newAddress - oldAddress, (BigFileDir *)oldAddress);
+                    MEMPACK_RelocateCDMemory((MemHeader *)(newAddress - sizeof(MemHeader)), newAddress - oldAddress, (BigFileDir *)oldAddress);
                 }
                 else if (addressMemType == 4)
                 {
@@ -584,7 +584,7 @@ void MEMPACK_DoGarbageCollection()
                     aadRelocateSfxMemory(oldAddress, newAddress - oldAddress);
                 }
 
-                MEMPACK_GarbageSplitMemoryNow(holdSize, (MemHeader *)(newAddress - 8), addressMemType, freeSize);
+                MEMPACK_GarbageSplitMemoryNow(holdSize, (MemHeader *)(newAddress - sizeof(MemHeader)), addressMemType, freeSize);
             }
         }
         else
