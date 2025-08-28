@@ -2981,7 +2981,87 @@ void StateHandlerHang(CharacterState *In, int CurrentSection, intptr_t Data)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", StateHandlerPushObject);
+void StateHandlerPushObject(CharacterState *In, int CurrentSection, intptr_t Data)
+{
+
+    Message *Ptr;
+
+    if (!(Raziel.Senses.EngagedMask & 3))
+    {
+        EnMessageQueueData(&In->SectionList[CurrentSection].Defer, 0x100000, 0);
+    }
+
+
+    while ((Ptr = PeekMessageQueue(&In->SectionList[CurrentSection].Event)) != NULL)
+    {
+        switch (Ptr->ID)
+        {
+        case 0x100001:
+            if (CurrentSection == 0)
+            {
+                Raziel.Mode = 0x400;
+                ControlFlag = 0x08001108;
+                PhysicsMode = 3;
+                SteerSwitchMode(In->CharacterInstance, 0);
+                razCenterWithBlock(In->CharacterInstance, Raziel.Senses.EngagedList->instance, -0x8D);
+            }
+            In->SectionList[CurrentSection].Data1 = 0;
+            razSetPlayerEventHistory(1);
+            break;
+        case 0x100000:
+            StateSwitchStateData(In, CurrentSection, &StateHandlerIdle, SetControlInitIdleData(0, 0, 6));
+            break;
+        case 0x08000000:
+        case 0x08000001:
+            if (!(*PadData & RazielCommands[2] && Raziel.Senses.EngagedMask & 2))
+            {
+                if (In->SectionList[CurrentSection].Data1 != 0)
+                {
+                    StateSwitchStateData(In, CurrentSection, &StateHandlerIdle, SetControlInitIdleData(0, 0, 3));
+                    ControlFlag |= 1;
+                    break;
+                }
+                if (CurrentSection == 2)
+                {
+                    G2EmulationSwitchAnimation(In, 2, 0, 0, 3, 2);
+                }
+                else
+                {
+                    G2EmulationSwitchAnimation(In, CurrentSection, 0x17, 0, 3, 1);
+                }
+                In->SectionList[CurrentSection].Data1 = 1;
+
+                if (CurrentSection == 0)
+                {
+                    Raziel.alarmTable = 400;
+                    In->CharacterInstance->anim.section[0].swAlarmTable = &Raziel.alarmTable;
+                }
+            }
+            else
+            {
+                StateSwitchStateData(In, CurrentSection, &StateHandlerDragObject, 0);
+            }
+            break;
+        case 0x08000004:
+        {
+            evMonsterHitData *data;
+            data = (evMonsterHitData *)SetObjectData(-Raziel.Senses.ForwardNormal.x, -Raziel.Senses.ForwardNormal.y, 6, 0, 0);
+            INSTANCE_Post(Raziel.Senses.EngagedList->instance, 0x800000, (intptr_t)data);
+            if (data->power == 0)
+            {
+                INSTANCE_Post(In->CharacterInstance, 0x100000, 0);
+            }
+            break;
+        }
+        case 0x80000008:
+            break;
+        default:
+            DefaultStateHandler(In, CurrentSection, Data);
+        }
+        DeMessageQueue(&In->SectionList[CurrentSection].Event);
+    }
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", StateHandlerBreakOff);
 
