@@ -582,7 +582,61 @@ int aadFreeDynamicSoundBank(int dynamicBankIndex)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadOpenDynamicSoundBank);
+int aadOpenDynamicSoundBank(unsigned char *soundBank, int dynamicBankIndex)
+{
+    AadSoundBankHdr *soundBankHdr;
+    AadProgramAtr *programAtr;
+    AadToneAtr *toneAtr;
+    unsigned long *waveAddr;
+    unsigned long *sequenceOffsetTbl;
+    unsigned long *sequenceLabelOffsetTbl;
+    unsigned char *sequenceBase;
+    int i;
+
+    if (dynamicBankIndex >= 2)
+    {
+        return 4101;
+    }
+
+    soundBankHdr = (AadSoundBankHdr *)soundBank;
+
+    if (soundBankHdr->bankID != aadCreateFourCharID('a', 'S', 'N', 'D'))
+    {
+        return 4097;
+    }
+
+    if (soundBankHdr->bankVersion != 262)
+    {
+        return 4098;
+    }
+
+    programAtr = (AadProgramAtr *)((char *)soundBankHdr + soundBankHdr->headerSize);
+    toneAtr = (AadToneAtr *)&programAtr[soundBankHdr->numPrograms];
+
+    waveAddr = (unsigned long *)&toneAtr[soundBankHdr->numTones];
+
+    sequenceOffsetTbl = &waveAddr[soundBankHdr->numWaves];
+    sequenceLabelOffsetTbl = &sequenceOffsetTbl[soundBankHdr->numSequences];
+
+    sequenceBase = (unsigned char *)&sequenceLabelOffsetTbl[soundBankHdr->numLabels];
+
+    aadMem->dynamicSoundBankHdr[dynamicBankIndex] = soundBankHdr;
+
+    aadMem->dynamicProgramAtr[dynamicBankIndex] = programAtr;
+    aadMem->dynamicToneAtr[dynamicBankIndex] = toneAtr;
+
+    aadMem->dynamicWaveAddr[dynamicBankIndex] = waveAddr;
+
+    aadMem->dynamicSequenceAddressTbl[dynamicBankIndex] = (unsigned char **)sequenceOffsetTbl;
+    aadMem->dynamicSequenceLabelOffsetTbl[dynamicBankIndex] = sequenceLabelOffsetTbl;
+
+    for (i = 0; i < soundBankHdr->numSequences; i++)
+    {
+        aadMem->dynamicSequenceAddressTbl[dynamicBankIndex][i] = &sequenceBase[sequenceOffsetTbl[i]];
+    }
+
+    return 0;
+}
 
 int aadLoadDynamicSfx(char *fileName, long directoryID, long flags)
 {
