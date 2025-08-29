@@ -3,6 +3,7 @@ categories:
     name: Main Executable
     paths:
       - Game
+      - data/Game
 
 expected_paths:
   asm: expected/asm
