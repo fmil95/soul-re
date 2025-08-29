@@ -1,6 +1,7 @@
 #include "Game/PSX/AADLIB.h"
 #include "Game/PSX/AADSEQEV.h"
 #include "Game/PSX/AADSFX.h"
+#include "Game/LOAD3D.h"
 
 static unsigned short aadHblanksPerUpdate[4] = {262, 131, 312, 156};
 
@@ -726,7 +727,63 @@ void aadLoadDynamicSfxDone(AadDynamicSfxLoadInfo *info)
     info->flags = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadLoadDynamicSfxReturn);
+void aadLoadDynamicSfxReturn(void *loadedDataPtr, void *data, void *data2)
+{
+    AadDynSfxSnfFileHdr *p;
+    AadDynamicSfxLoadInfo *info;
+
+    (void)data2;
+
+    info = (AadDynamicSfxLoadInfo *)data;
+
+    if ((info->snfFile == NULL) || (info->snfFile != loadedDataPtr))
+    {
+        aadLoadDynamicSfxAbort(info, 4110);
+    }
+    else if ((info->snfFile->snfID != aadCreateFourCharID('a', 'S', 'N', 'F')) || (info->snfFile->snfVersion != 256))
+    {
+        aadLoadDynamicSfxAbort(info, 4107);
+    }
+    else
+    {
+        info->snfFile->handle = info->fileHandle;
+
+        p = aadMem->firstDynSfxFile;
+
+        if (p != NULL)
+        {
+            for (; p->nextDynSfxFile != NULL; p = p->nextDynSfxFile);
+
+            p->nextDynSfxFile = info->snfFile;
+
+            info->snfFile->prevDynSfxFile = p;
+        }
+        else
+        {
+            aadMem->firstDynSfxFile = info->snfFile;
+
+            info->snfFile->prevDynSfxFile = NULL;
+        }
+
+        info->snfFile->nextDynSfxFile = NULL;
+
+        info->smfLoadingState = 0;
+
+        info->flags |= 0x2;
+
+        if (info->directoryID != 0)
+        {
+            LOAD_SetSearchDirectory(info->directoryID);
+        }
+
+        aadMem->nonBlockBufferedLoadProc(info->smfFileName, (void *)aadLoadDynamicSfxReturn2, info, NULL);
+
+        if (info->directoryID != 0)
+        {
+            LOAD_SetSearchDirectory(0);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadWaveMalloc);
 
