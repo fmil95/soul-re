@@ -57,10 +57,16 @@ def _collect_objects(path: Path, config) -> list[Path]:
     ]
 
 def _determine_categories(path: Path, config) -> tuple[UnitMetadata, str]:
-    if path.name.endswith(".s.o"):
-        modified_path = path.relative_to(config["expected_paths"]["asm"])
+    asm_path = Path(config["expected_paths"]["asm"]).resolve()
+    src_path = Path(config["expected_paths"]["src"]).resolve()
+    file_path = path.resolve()
+
+    if asm_path in file_path.parents:
+        modified_path = file_path.relative_to(asm_path)
+    elif src_path in file_path.parents:
+        modified_path = file_path.relative_to(src_path)
     else:
-        modified_path = path.relative_to(config["expected_paths"]["src"])
+        raise ValueError(f"File {file_path} is not in asm or src directories")
 
     categories = []
     for category in config["categories"]:

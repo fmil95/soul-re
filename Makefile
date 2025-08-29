@@ -191,7 +191,6 @@ expected: all
 	@mkdir -p $(EXPECTED_DIR)
 	$(V)mv $(BUILD_DIR)/asm $(EXPECTED_DIR)/asm
 	$(V)mv $(BUILD_DIR)/src $(EXPECTED_DIR)/src
-	$(V)find $(EXPECTED_DIR)/src -name '*.s.o' -delete
 
 # Compile .c files
 $(BUILD_DIR)/%.c.o: %.c
