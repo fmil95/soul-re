@@ -47,7 +47,7 @@ def _create_config():
         except yaml.YAMLError as exc:
             raise exc
 
-EXCLUDED_NAMES = {"data", "rodata", "sdata", "bss"}
+EXCLUDED_NAMES = {"data", "rodata", "sdata", "bss", "comm"}
 
 def _collect_objects(path: Path, config) -> list[Path]:
     ignored = config["ignored_files"]
