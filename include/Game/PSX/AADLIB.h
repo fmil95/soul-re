@@ -77,5 +77,8 @@ int aadCheckSramFragmented();
 void HackCallback();
 void aadLoadSingleDynSfx(AadDynamicSfxLoadInfo *info);
 unsigned long aadGetReverbSize();
+void aadLoadDynamicSfxReturn(void *loadedDataPtr, void *data, void *data2);
+void aadFreeSingleDynSfx(int sfxID);
+void aadProcessSramDefrag();
 
 #endif

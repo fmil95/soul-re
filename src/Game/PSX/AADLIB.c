@@ -2,6 +2,7 @@
 #include "Game/PSX/AADSEQEV.h"
 #include "Game/PSX/AADSFX.h"
 #include "Game/LOAD3D.h"
+#include "Game/SOUND.h"
 
 static unsigned short aadHblanksPerUpdate[4] = {262, 131, 312, 156};
 
@@ -27,6 +28,8 @@ static unsigned char *smfDataPtr;
 static unsigned long smfBytesLeft;
 
 static AadDynamicSfxLoadInfo *smfInfo;
+
+int gSramFullAlarm;
 
 unsigned long aadGetMemorySize(AadInitAttr *attributes)
 {
@@ -848,7 +851,164 @@ void aadPurgeLoadQueue()
     aadMem->numLoadReqsQueued = 0;
 }
 
+// Matches 100% on decomp.me but differs on this project
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadProcessLoadQueue);
+#else
+extern char D_800D1178[];
+extern char D_800D1184[];
+extern char D_800D11A0[];
+extern char D_800D11BC[];
+extern char D_800D11D8[];
+void aadProcessLoadQueue()
+{
+    AadDynamicSfxLoadInfo *info;
+    int i;
+    char *p;
+
+    info = &aadMem->dynamicSfxLoadInfo;
+
+    if (!(info->flags & 0x1))
+    {
+        for (i = 0; i < 2; i++)
+        {
+            if (aadMem->dynamicBankStatus[i] == 1)
+            {
+                return;
+            }
+        }
+
+        if ((aadMem->numLoadReqsQueued != 0) && (aadMem->sramDefragInfo.status == 0) && (gDefragRequest == 0))
+        {
+            AadDynamicLoadRequest *loadReq;
+
+            loadReq = &aadMem->loadRequestQueue[aadMem->nextLoadReqOut];
+
+            aadMem->nextLoadReqOut = (aadMem->nextLoadReqOut + 1) & 0xF;
+
+            aadMem->numLoadReqsQueued--;
+
+            switch (loadReq->type)
+            {
+            case 0:
+            {
+                char areaName[12];
+
+                strcpy(areaName, loadReq->fileName);
+
+                //p = (char*)strpbrk(areaName, "0123456789");
+                p = (char *)strpbrk(areaName, D_800D1178);
+
+                if (p != NULL)
+                {
+                    *p = 0;
+                }
+
+                if ((loadReq->flags & 0x1))
+                {
+                    //sprintf(info->snfFileName, "\\kain2\\area\\%s\\bin\\%s.snf", areaName, loadReq->fileName);
+                    sprintf(info->snfFileName, D_800D1184, areaName, loadReq->fileName);
+                    //sprintf(info->smfFileName, "\\kain2\\area\\%s\\bin\\%s.smf", areaName, loadReq->fileName);
+                    sprintf(info->smfFileName, D_800D11A0, areaName, loadReq->fileName);
+                }
+                else
+                {
+                    //sprintf(info->snfFileName, "\\kain2\\sfx\\object\\%s\\%s.snf", loadReq->fileName, loadReq->fileName);
+                    sprintf(info->snfFileName, D_800D11BC, loadReq->fileName, loadReq->fileName);
+                    //sprintf(info->smfFileName, "\\kain2\\sfx\\object\\%s\\%s.smf", loadReq->fileName, loadReq->fileName);
+                    sprintf(info->smfFileName, D_800D11D8, loadReq->fileName, loadReq->fileName);
+                }
+
+                gSramFullAlarm = 0;
+
+                info->fileHandle = loadReq->handle;
+
+                info->directoryID = loadReq->directoryID;
+
+                info->loadFlags = loadReq->flags;
+                info->flags = 1;
+
+                info->snfFile = NULL;
+
+                info->error = 0;
+
+                info->totalSramUsed = 0;
+
+                if (info->directoryID != 0)
+                {
+                    LOAD_SetSearchDirectory(info->directoryID);
+                }
+
+                aadMem->nonBlockLoadProc(info->snfFileName, aadLoadDynamicSfxReturn, info, 0, &info->snfFile, 47);
+
+                if (info->directoryID != 0)
+                {
+                    LOAD_SetSearchDirectory(0);
+                }
+
+                break;
+            }
+            case 1:
+            {
+                int i;
+                AadDynSfxSnfFileHdr *snfFile;
+                unsigned short *sfxIDListPtr;
+
+                for (snfFile = aadMem->firstDynSfxFile; snfFile != NULL; snfFile = snfFile->nextDynSfxFile)
+                {
+                    if (snfFile->handle == loadReq->handle)
+                    {
+                        sfxIDListPtr = (unsigned short *)&snfFile[1];
+
+                        for (i = 0; i < snfFile->numSfxInFile; i++)
+                        {
+                            aadFreeSingleDynSfx(sfxIDListPtr[i]);
+                        }
+
+                        if (snfFile->prevDynSfxFile != NULL)
+                        {
+                            snfFile->prevDynSfxFile->nextDynSfxFile = snfFile->nextDynSfxFile;
+                        }
+                        else
+                        {
+                            aadMem->firstDynSfxFile = snfFile->nextDynSfxFile;
+                        }
+
+                        if (snfFile->nextDynSfxFile != NULL)
+                        {
+                            snfFile->nextDynSfxFile->prevDynSfxFile = snfFile->prevDynSfxFile;
+                        }
+
+                        aadMem->memoryFreeProc(snfFile);
+
+                        gSramFullAlarm = 0;
+                        break;
+                    }
+                }
+
+                if (aadCheckSramFragmented() != 0)
+                {
+                    gDefragRequest = 1;
+                }
+
+                break;
+            }
+            case 2:
+                break;
+            }
+        }
+
+        if ((gDefragRequest != 0) && (SOUND_IsMusicLoading() == 0))
+        {
+            gDefragRequest = 0;
+
+            aadMem->sramDefragInfo.status = 1;
+        }
+
+        aadProcessSramDefrag();
+    }
+}
+#endif
 
 void aadLoadDynamicSfxAbort(AadDynamicSfxLoadInfo *info, int error)
 {

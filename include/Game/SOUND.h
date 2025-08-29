@@ -52,5 +52,6 @@ void SOUND_StartInstanceSound(SoundInstance *soundInst);
 void SOUND_StopInstanceSound(SoundInstance *soundInst);
 void SOUND_SetInstanceSoundVolume(SoundInstance *soundInst, long volumeChangeAmt, long time);
 void SOUND_SetInstanceSoundPitch(SoundInstance *soundInst, long pitchChangeAmt, long time);
+int SOUND_IsMusicLoading();
 
 #endif
