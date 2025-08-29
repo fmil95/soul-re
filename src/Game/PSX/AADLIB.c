@@ -520,7 +520,7 @@ int aadLoadDynamicSoundBank(char *sndFileName, char *smpFileName, int dynamicBan
 }
 
 int aadOpenDynamicSoundBank(unsigned char *soundBank, int dynamicBankIndex);
-void aadLoadDynamicSoundBankReturn2(void *loadedDataPtr, long loadedDataSize, short status, void *data1, void *data2);
+void aadLoadDynamicSoundBankReturn2(void *loadedDataPtr, long loadedDataSize, unsigned int status, void *data1, void *data2);
 void aadLoadDynamicSoundBankReturn(void *loadedDataPtr, void *data, void *data2)
 {
     int dynamicBankIndex;
@@ -554,7 +554,105 @@ void aadLoadDynamicSoundBankReturn(void *loadedDataPtr, void *data, void *data2)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadLoadDynamicSoundBankReturn2);
+// void aadLoadDynamicSoundBankReturn2(void *loadedDataPtr, long loadedDataSize, short status, void *data1, void *data2)
+void aadLoadDynamicSoundBankReturn2(void *loadedDataPtr, long loadedDataSize, unsigned int status, void *data1, void *data2)
+{
+    unsigned long *dataPtr;
+    AadDynamicBankLoadInfo *info;
+    int dynamicBankIndex;
+    int error;
+    short temp;         // not from decls.h
+    unsigned int temp2; // not from decls.h
+
+    (void)data2;
+
+    temp = status;
+
+    info = data1;
+
+    error = temp < 256;
+
+    dynamicBankIndex = info->dynamicBankIndex;
+
+    temp2 = status << 16;
+
+    if (error == 0)
+    {
+        if (!(info->flags & 0x2))
+        {
+            info->flags |= 0x2;
+
+            error = (temp2 >> 24) | 0x80;
+
+            aadMem->dynamicBankStatus[dynamicBankIndex] = error;
+
+            if (aadMem->dynamicSoundBankData[dynamicBankIndex] != NULL)
+            {
+                aadMem->memoryFreeProc(aadMem->dynamicSoundBankData[dynamicBankIndex]);
+
+                aadMem->dynamicSoundBankData[dynamicBankIndex] = NULL;
+            }
+
+            if (info->userCallbackProc != NULL)
+            {
+                info->userCallbackProc(dynamicBankIndex, temp);
+            }
+        }
+    }
+    else
+    {
+        dataPtr = loadedDataPtr;
+
+        if (!(info->flags & 0x1))
+        {
+            dataPtr++;
+
+            info->flags |= 0x1;
+
+            info->sramDataSize = *dataPtr++;
+
+            loadedDataSize -= 8;
+
+            switch (info->loadOption)
+            {
+            case 0:
+            default:
+                info->nextSramAddr = 302800;
+                break;
+            case 1:
+                info->nextSramAddr = (524288 - aadGetReverbSize()) - info->sramDataSize;
+                break;
+            }
+
+            aadMem->dynamicSoundBankSramData[dynamicBankIndex] = info->nextSramAddr;
+        }
+
+        aadWaitForSramTransferComplete();
+
+        SpuSetTransferStartAddr(info->nextSramAddr);
+
+        SpuWrite((unsigned char *)dataPtr, loadedDataSize);
+
+        info->nextSramAddr += loadedDataSize;
+
+        if (temp == 1)
+        {
+            int i;
+
+            for (i = 0; i < aadMem->dynamicSoundBankHdr[dynamicBankIndex]->numWaves; i++)
+            {
+                aadMem->dynamicWaveAddr[dynamicBankIndex][i] += aadMem->dynamicSoundBankSramData[dynamicBankIndex];
+            }
+
+            aadMem->dynamicBankStatus[dynamicBankIndex] = 2;
+
+            if (info->userCallbackProc != NULL)
+            {
+                info->userCallbackProc(dynamicBankIndex & 0xFFFF, 0);
+            }
+        }
+    }
+}
 
 int aadFreeDynamicSoundBank(int dynamicBankIndex)
 {

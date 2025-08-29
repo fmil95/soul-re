@@ -76,5 +76,6 @@ int aadGetNumDynamicSequences(int bank);
 int aadCheckSramFragmented();
 void HackCallback();
 void aadLoadSingleDynSfx(AadDynamicSfxLoadInfo *info);
+unsigned long aadGetReverbSize();
 
 #endif
