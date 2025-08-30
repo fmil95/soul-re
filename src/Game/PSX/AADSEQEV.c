@@ -1,6 +1,7 @@
 #include "Game/PSX/AADLIB.h"
 #include "Game/PSX/AADSEQEV.h"
 #include "Game/PSX/AADSQCMD.h"
+#include "Game/PSX/AADVOICE.h"
 
 static char midiDataByteCount[8] = {2, 2, 2, 2, 1, 1, 2, 2};
 
@@ -147,7 +148,104 @@ void midiNoteOff()
 {
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", midiNoteOn);
+void midiNoteOn(AadSeqEvent *event, AadSequenceSlot *slot)
+{
+    AadProgramAtr *progAtr;
+    AadToneAtr *toneAtrTbl;
+    AadSynthVoice *voice;
+    int channel;
+    int midiNote;
+    int transposedNote;
+    int t;
+    int dynBank;
+
+    channel = event->statusByte & 0xF;
+
+    if ((!((slot->channelMute >> channel) & 0x1)) && (slot->currentProgram[channel] != 255))
+    {
+        midiNote = event->dataByte[0];
+
+        if (event->dataByte[1] == 0)
+        {
+            for (t = 0; t < 24; t++)
+            {
+                voice = &aadMem->synthVoice[t];
+
+                if ((voice->voiceID == (slot->slotID | channel)) && (voice->note == midiNote) && ((aadMem->voiceStatus[t] != 0) && (aadMem->voiceStatus[t] != 2)))
+                {
+                    aadMem->voiceKeyOffRequest |= voice->voiceMask;
+                    aadMem->voiceKeyOnRequest &= ~voice->voiceMask;
+
+                    voice->voiceID = 255;
+                }
+            }
+        }
+        else
+        {
+            if (((slot->ignoreTranspose >> channel) & 0x1))
+            {
+                transposedNote = midiNote;
+            }
+            else
+            {
+                transposedNote = (midiNote + slot->transpose[channel]) & 0xFF;
+            }
+
+            dynBank = slot->currentDynamicBank[channel];
+
+            if (aadMem->dynamicBankStatus[dynBank] == 2)
+            {
+                progAtr = aadMem->dynamicProgramAtr[dynBank] + slot->currentProgram[channel];
+
+                toneAtrTbl = aadMem->dynamicToneAtr[dynBank];
+
+                for (t = progAtr->firstTone; t < (progAtr->firstTone + progAtr->numTones); t++)
+                {
+                    if ((midiNote >= (&toneAtrTbl[t])->minNote) && ((&toneAtrTbl[t])->maxNote >= midiNote))
+                    {
+                        voice = aadAllocateVoice((&toneAtrTbl[t])->priority);
+
+                        if (voice != NULL)
+                        {
+                            unsigned long waveStartAddr;
+
+                            waveStartAddr = aadMem->dynamicWaveAddr[dynBank][(&toneAtrTbl[t])->waveIndex];
+
+                            if (((&toneAtrTbl[t])->pitchBendMax != 0) && (slot->pitchWheel[channel] != 8192))
+                            {
+                                aadPlayTonePitchBend(&toneAtrTbl[t], waveStartAddr, progAtr, transposedNote, event->dataByte[1], slot->volume[channel], slot->panPosition[channel], slot->slotVolume, slot->masterVolPtr[0], voice, slot->pitchWheel[channel]);
+
+                                voice->handle = 0;
+                            }
+                            else
+                            {
+                                aadPlayTone(&toneAtrTbl[t], waveStartAddr, progAtr, transposedNote, event->dataByte[1], slot->volume[channel], slot->panPosition[channel], slot->slotVolume, slot->masterVolPtr[0], voice, 0);
+
+                                voice->handle = 0;
+                            }
+
+                            voice->voiceID = slot->slotID | channel;
+
+                            voice->priority = (&toneAtrTbl[t])->priority;
+
+                            voice->note = midiNote;
+
+                            voice->program = slot->currentProgram[channel];
+
+                            voice->volume = event->dataByte[1];
+                            voice->updateVol = slot->volume[channel];
+
+                            voice->pan = slot->panPosition[channel];
+
+                            voice->progAtr = progAtr;
+                            voice->toneAtr = &toneAtrTbl[t];
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", aadUpdateChannelVolPan);
 
