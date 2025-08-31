@@ -3309,7 +3309,16 @@ FXGlowEffect *FX_DoInstanceTwoSegmentGlow(Instance *instance, long segment, long
     return glowEffect;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DoInstanceManySegmentGlow);
+FXGlowEffect *FX_DoInstanceManySegmentGlow(Instance *instance, long segment, long numSegments, long *color, long numColors, long atuColorCycleRate, long height)
+{
+    FXGlowEffect *glowEffect;
+
+    glowEffect = FX_DoInstanceOneSegmentGlow(instance, segment, color, numColors, atuColorCycleRate, height, height);
+
+    glowEffect->numSegments = numSegments;
+
+    return glowEffect;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DoInstanceOneSegmentGlowWithTime);
 
