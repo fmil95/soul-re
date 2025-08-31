@@ -3593,7 +3593,48 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericRibbon);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericGlow);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_CreateLightning);
+FXLightning *FX_CreateLightning(Instance *instance, int lifeTime, int deg, int deg_inc, int width, int small_width, int segs, int sine_size, int variation, unsigned long color, unsigned long glow_color)
+{
+    FXLightning *zap;
+
+    zap = (FXLightning *)MEMPACK_Malloc(sizeof(FXLightning), 13);
+
+    if (zap != NULL)
+    {
+        zap->continue_process = FX_ContinueLightning;
+
+        zap->end_instance = zap->instance = instance;
+
+        zap->effectType = 135;
+        zap->type = 0;
+
+        zap->lifeTime = lifeTime;
+
+        zap->deg = deg;
+        zap->deg_inc = deg_inc;
+
+        zap->width = width;
+        zap->small_width = small_width;
+
+        zap->segs = segs;
+
+        zap->sine_size = sine_size;
+
+        zap->variation = variation;
+
+        zap->color = color;
+        zap->glow_color = glow_color;
+
+        zap->start_offset.z = zap->start_offset.y = zap->start_offset.x = 0;
+        zap->end_offset.z = zap->end_offset.y = zap->end_offset.x = 0;
+
+        zap->matrixSeg = -1;
+
+        FX_InsertGeneralEffect(zap);
+    }
+
+    return zap;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_SetLightingPos);
 
