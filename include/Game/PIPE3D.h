@@ -14,5 +14,7 @@ void PIPE3D_AnimateTerrainTextures(DrMoveAniTex *aniTextures, long req_frame, Pr
 void PIPE3D_InstanceListTransformAndDraw(StreamUnit *unit, GameTracker *gameTracker, unsigned long **ot, CameraCore *cameraCore);
 void PIPE3D_CalculateWCTransform(CameraCore *cameraCore);
 long PIPE3D_Segment2ScreenPt(Instance *instance, MATRIX *wcTransform, int segIndex, Position *pos);
+void PIPE3D_DoGlow(Instance *instance, MATRIX *wcTransform, VertexPool *vertexPool, PrimPool *primPool, unsigned long **ot, FXGlowEffect *glow);
+void PIPE3D_HalvePlaneGetRingPoints(Instance *instance, MATRIX *wcTransform, VertexPool *vertexPool, PrimPool *primPool, unsigned long **ot, FXHalvePlane *ring);
 
 #endif

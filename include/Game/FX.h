@@ -79,5 +79,10 @@ void FX_GetPlaneEquation(SVector *normal, SVector *poPlane, PlaneConstants *plan
 void FX_UpdateInstanceSplitRing(FXHalvePlane *ring, FXTracker *fxTracker);
 void FX_GetRandomScreenPt(SVECTOR *point);
 void FX_UpdatePowerRing(FXHalvePlane *ring);
+void FX_DrawBlastring(MATRIX *wcTransform, FXBlastringEffect *blast);
+void FX_LightHouse(MATRIX *wcTransform, unsigned long **ot, Instance *instance, int startSeg, int endSeg, int segs, long beam_color);
+void FX_DrawFField(MATRIX *wcTransform, FXForceFieldEffect *field);
+void FX_DrawLightning(FXLightning *zap, MATRIX *wcTransform, unsigned long **ot);
+void FX_DrawFlash(FXFlash *flash);
 
 #endif

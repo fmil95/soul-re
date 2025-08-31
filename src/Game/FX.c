@@ -11,6 +11,7 @@
 #include "Game/SOUND.h"
 #include "Game/CAMERA.h"
 #include "Game/COLLIDE.h"
+#include "Game/PIPE3D.h"
 
 STATIC FXGeneralEffect *FX_GeneralEffectTracker;
 
@@ -3367,7 +3368,65 @@ void FX_StopGlowEffect(FXGlowEffect *glowEffect, int fadeout_time)
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawLightning);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawAllGeneralEffects);
+void FX_DrawAllGeneralEffects(MATRIX *wcTransform, VertexPool *vertexPool, PrimPool *primPool, unsigned long **ot)
+{
+    Instance *instance;
+    FXGeneralEffect *currentEffect;
+
+    for (currentEffect = FX_GeneralEffectTracker; currentEffect != NULL; currentEffect = currentEffect->next)
+    {
+        if ((currentEffect->effectType & 0x80))
+        {
+            instance = currentEffect->instance;
+
+            if ((instance == NULL) || ((!(instance->flags & 0x800)) && (!(instance->flags2 & 0x4000000))))
+            {
+                if (currentEffect->effectType == 131)
+                {
+                    FXGlowEffect *currentGlow;
+
+                    currentGlow = (FXGlowEffect *)currentEffect;
+
+                    if (currentEffect->lifeTime > 0)
+                    {
+                        currentEffect->lifeTime -= gameTrackerX.lastLoopTime;
+
+                        if (currentEffect->lifeTime < 0)
+                        {
+                            currentEffect->lifeTime = 0;
+                        }
+                    }
+
+                    PIPE3D_DoGlow(instance, wcTransform, vertexPool, primPool, ot, currentGlow);
+                }
+                else if (currentEffect->effectType == 130)
+                {
+                    PIPE3D_HalvePlaneGetRingPoints(instance, wcTransform, vertexPool, primPool, ot, (FXHalvePlane *)currentEffect);
+                }
+                else if (currentEffect->effectType == 132)
+                {
+                    FX_DrawBlastring(wcTransform, (FXBlastringEffect *)currentEffect);
+                }
+                else if (currentEffect->effectType == 133)
+                {
+                    FX_LightHouse(wcTransform, ot, currentEffect->instance, ((FXLightBeam *)currentEffect)->startSeg, ((FXLightBeam *)currentEffect)->endSeg, 32, ((FXLightBeam *)currentEffect)->color);
+                }
+                else if (currentEffect->effectType == 134)
+                {
+                    FX_DrawFField(wcTransform, (FXForceFieldEffect *)currentEffect);
+                }
+                else if (currentEffect->effectType == 135)
+                {
+                    FX_DrawLightning((FXLightning *)currentEffect, wcTransform, ot);
+                }
+                else if (currentEffect->effectType == 136)
+                {
+                    FX_DrawFlash((FXFlash *)currentEffect);
+                }
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueBlastRing);
 
