@@ -3742,7 +3742,118 @@ void FX_GetLinePoint(int radius, int next_radius, int deg, int next_deg, int *pn
     *pnty = y1 + (((y2 - y1) * part) / 4096);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_CalcSpiral);
+void FX_CalcSpiral(int degchange)
+{
+    int radius;
+    int deg;
+    int n;
+    int pntx;
+    int pnty;
+    int px;
+    int py;
+    int mx;
+    int my;
+    int mod;
+    int next_deg;
+    int next_radius;
+    int minx;
+    int maxx;
+    int miny;
+    int maxy;
+
+    minx = 32767;
+    maxx = -32767;
+
+    miny = 32767;
+    maxy = -32767;
+
+    next_radius = radius = 8192;
+
+    next_deg = deg = 0;
+
+    FX_GetSpiralPoint(8192, 0, &pntx, &pnty);
+
+    Spiral_Array[64].vx = pntx;
+    Spiral_Array[64].vy = pnty;
+
+    for (n = 0; n < 64; n++)
+    {
+        if (Spiral_Number == 0)
+        {
+            mod = n % Spiral_Mod;
+
+            if (mod == 0)
+            {
+                deg = next_deg;
+
+                radius = next_radius;
+
+                next_radius += 1088 * Spiral_Mod;
+
+                next_deg += degchange * Spiral_Mod;
+            }
+
+            mod = (mod * 4096) / Spiral_Mod;
+
+            FX_GetLinePoint(radius, next_radius, deg, next_deg, &pntx, &pnty, mod);
+            FX_GetLinePoint(radius + 7168, next_radius + 7168, deg, next_deg, &px, &py, mod);
+            FX_GetLinePoint(radius - 7168, next_radius - 7168, deg, next_deg, &mx, &my, mod);
+        }
+        else
+        {
+            radius += 1088;
+
+            deg += degchange;
+
+            FX_GetSpiralPoint(radius, deg, &pntx, &pnty);
+            FX_GetSpiralPoint(radius + 7168, deg, &px, &py);
+            FX_GetSpiralPoint(radius - 7168, deg, &mx, &my);
+        }
+
+        Spiral_Array[n].vx = pntx;
+        Spiral_Array[n].vy = pnty;
+
+        if (n == 63)
+        {
+            px = pntx;
+            py = pnty;
+
+            mx = pntx;
+            my = pnty;
+        }
+
+        Spiral_OffsetP[n].vx = px;
+        Spiral_OffsetP[n].vy = py;
+
+        if (px < minx)
+        {
+            minx = px;
+        }
+
+        if (maxx < px)
+        {
+            maxx = px;
+        }
+
+        if (py < miny)
+        {
+            miny = py;
+        }
+
+        if (maxy < py)
+        {
+            maxy = py;
+        }
+
+        Spiral_OffsetM[n].vx = mx;
+        Spiral_OffsetM[n].vy = my;
+    }
+
+    Spiral_Glow_Size = ((320 * ((maxx - minx) / 2)) / 512) + 2;
+
+    Spiral_Glow_X = (minx + maxx) / 2;
+    Spiral_Glow_Y = (miny + maxy) / 2;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Spiral);
 
