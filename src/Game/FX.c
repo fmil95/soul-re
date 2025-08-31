@@ -3430,7 +3430,70 @@ void FX_DrawAllGeneralEffects(MATRIX *wcTransform, VertexPool *vertexPool, PrimP
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueBlastRing);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DoBlastRing);
+FXBlastringEffect *FX_DoBlastRing(Instance *instance, SVector *position, MATRIX *mat, int segment, int radius, int endRadius, int colorChangeRadius, int size1, int size2, int vel, int accl, int height1, int height2, int height3, long startColor, long endColor, int pred_offset, int lifeTime, int sortInWorld)
+{
+    FXBlastringEffect *blast;
+
+    blast = (FXBlastringEffect *)MEMPACK_Malloc(sizeof(FXBlastringEffect), 13);
+
+    if (blast != NULL)
+    {
+        blast->continue_process = FX_ContinueBlastRing;
+
+        blast->instance = instance;
+
+        blast->effectType = 132;
+
+        if (pred_offset != 0)
+        {
+            blast->type = 1;
+        }
+        else
+        {
+            blast->type = 0;
+        }
+
+        blast->predator_offset_orig = blast->predator_offset = pred_offset;
+
+        blast->lifeTime = lifeTime;
+
+        blast->position = *position;
+
+        if (mat != NULL)
+        {
+            blast->matrix = *mat;
+        }
+
+        blast->segment = segment;
+
+        blast->startRadius = blast->radius = radius * 4096;
+
+        blast->size1 = size1;
+        blast->size2 = size2;
+
+        blast->endRadius = endRadius * 4096;
+        blast->colorchange_radius = colorChangeRadius * 4096;
+
+        blast->vel = vel;
+
+        blast->accl = accl;
+
+        blast->height1 = height1;
+        blast->height2 = height2;
+        blast->height3 = height3;
+
+        blast->startColor = blast->color = startColor;
+        blast->endColor = endColor;
+
+        blast->sortInWorld = sortInWorld;
+
+        blast->stay_in_place = 0;
+
+        FX_InsertGeneralEffect(blast);
+    }
+
+    return blast;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawBlastring);
 

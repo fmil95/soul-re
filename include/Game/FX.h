@@ -84,5 +84,6 @@ void FX_LightHouse(MATRIX *wcTransform, unsigned long **ot, Instance *instance, 
 void FX_DrawFField(MATRIX *wcTransform, FXForceFieldEffect *field);
 void FX_DrawLightning(FXLightning *zap, MATRIX *wcTransform, unsigned long **ot);
 void FX_DrawFlash(FXFlash *flash);
+void FX_ContinueBlastRing(FXBlastringEffect *blast, FXTracker *fxTracker);
 
 #endif
