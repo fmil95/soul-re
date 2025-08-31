@@ -3642,7 +3642,51 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericLightning);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericBlastring);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericFlash);
+FXFlash *FX_StartGenericFlash(Instance *instance, int num)
+{
+    GenericFXObject *GFXO;
+    GenericFlashParams *GFP;
+    Object *particle;
+    FXFlash *flash;
+
+    particle = (Object *)objectAccess[10].object;
+
+    if (particle == NULL)
+    {
+        return NULL;
+    }
+
+    GFXO = (GenericFXObject *)particle->data;
+
+    GFP = &GFXO->FlashList[num];
+
+    flash = (FXFlash *)MEMPACK_Malloc(sizeof(FXFlash), 13);
+
+    if (flash != NULL)
+    {
+        flash->continue_process = FX_ContinueFlash;
+
+        flash->effectType = 136;
+
+        flash->instance = instance;
+
+        flash->type = 0;
+
+        flash->lifeTime = -1;
+
+        flash->color = GFP->color;
+
+        flash->currentTime = 0;
+
+        flash->timeToColor = GFP->timeToColor * 256;
+        flash->timeAtColor = flash->timeToColor + (GFP->timeAtColor * 256);
+        flash->timeFromColor = flash->timeAtColor + (GFP->timeFromColor * 256);
+
+        FX_InsertGeneralEffect(flash);
+    }
+
+    return flash;
+}
 
 // Matches 100% on decomp.me but differs on this project
 #ifndef NON_MATCHING
