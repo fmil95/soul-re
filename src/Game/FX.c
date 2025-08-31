@@ -3320,7 +3320,16 @@ FXGlowEffect *FX_DoInstanceManySegmentGlow(Instance *instance, long segment, lon
     return glowEffect;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DoInstanceOneSegmentGlowWithTime);
+FXGlowEffect *FX_DoInstanceOneSegmentGlowWithTime(Instance *instance, long segment, long *color, long numColors, long atuColorCycleRate, long width, long height, long ATULifeTime)
+{
+    FXGlowEffect *glowEffect;
+
+    glowEffect = FX_DoInstanceOneSegmentGlow(instance, segment, color, numColors, atuColorCycleRate, width, height);
+
+    glowEffect->lifeTime = ATULifeTime * 33;
+
+    return glowEffect;
+}
 
 void FX_StopAllGlowEffects(Instance *instance, int fadeout_time)
 {
