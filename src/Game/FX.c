@@ -1589,7 +1589,84 @@ void FX_WaterRingProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
     FX_StandardFXPrimProcess(fxPrim, fxTracker);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_WaterBubbleProcess);
+void FX_WaterBubbleProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
+{
+    FX_PRIM *temp;
+
+    if (fxPrim->duo.phys.zVel < fxPrim->work1)
+    {
+        fxPrim->duo.phys.zVel += fxPrim->duo.phys.zAccl;
+    }
+
+    if (fxPrim->work0 < fxPrim->duo.phys.xAccl)
+    {
+        fxPrim->position.x += fxPrim->duo.phys.xVel;
+        fxPrim->position.y += fxPrim->duo.phys.yVel;
+    }
+
+    fxPrim->position.z += fxPrim->duo.phys.zVel;
+
+    fxPrim->work0++;
+
+    fxPrim->v0.y = fxPrim->v2.y = fxPrim->work3 - (fxPrim->work0 * fxPrim->work2);
+
+    if (fxPrim->v0.y >= fxPrim->duo.phys.yAccl)
+    {
+        if (fxPrim->position.z > fxPrim->timeToLive)
+        {
+            Object *waterfx;
+            Model *wxring;
+
+            waterfx = objectAccess[3].object;
+
+            if (waterfx != NULL)
+            {
+                if (fxPrim->v1.y < fxPrim->v0.y)
+                {
+                    wxring = *waterfx->modelList;
+
+                    temp = FX_GetPrim(gFXT);
+
+                    if (temp != NULL)
+                    {
+                        temp->position = fxPrim->position;
+
+                        temp->v0.x = temp->v2.x = temp->position.x - 8;
+                        temp->v1.x = temp->v3.x = temp->position.x + 8;
+
+                        temp->v0.y = temp->v1.y = temp->position.y - 8;
+                        temp->v2.y = temp->v3.y = temp->position.y + 8;
+
+                        temp->v0.z = temp->v1.z = temp->v2.z = temp->v3.z = temp->position.z;
+
+                        temp->texture = (TextureMT3 *)wxring->faceList->color;
+
+                        temp->process = FX_WaterRingProcess;
+
+                        temp->timeToLive = 16;
+
+                        temp->flags |= 0x50009;
+
+                        temp->color = 0x2EFFFFFF;
+                        temp->startColor = 0xFFFFFF;
+                        temp->endColor = 0;
+
+                        temp->fadeValue[0] = 0;
+                        temp->fadeStep = 256;
+
+                        LIST_InsertFunc(&fxTracker->usedPrimList, (NodeType *)temp);
+                    }
+                }
+            }
+
+            FX_Die(fxPrim, fxTracker);
+        }
+    }
+    else
+    {
+        FX_Die(fxPrim, fxTracker);
+    }
+}
 
 void FX_Sprite_Insert(NodeType *list, FX_PRIM *fxPrim)
 {
