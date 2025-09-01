@@ -4159,7 +4159,92 @@ void fx_setTex(DVECTOR *x, unsigned char *uv, int tx, int offset)
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawRing2);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawFField);
+void FX_DrawFField(MATRIX *wcTransform, FXForceFieldEffect *field)
+{
+    Instance *instance;
+    MATRIX tmpmat;
+    SVector position;
+    int size;
+    short fade;
+    long color;
+    long black;
+    int temp, temp2; // not from decls.h
+
+    instance = field->instance;
+
+    position.x = instance->position.x + field->offset.x;
+    position.y = instance->position.y + field->offset.y;
+    position.z = instance->position.z + field->offset.z;
+
+    black = 0;
+
+    temp = rcos(field->deg) * field->size_change;
+
+    field->deg = (field->deg + field->deg_change) & 0xFFF;
+
+    size = field->size_diff + (temp >> 12);
+
+    if (field->start_fade != 0)
+    {
+        field->start_fade = fade = field->start_fade - 128;
+
+        if (fade < 0)
+        {
+            field->start_fade = 0;
+        }
+
+        temp2 = (unsigned short)field->start_fade * 65536;
+    }
+    else
+    {
+        if (field->end_fade != 0)
+        {
+            field->end_fade = fade = field->end_fade - 512;
+
+            if ((fade * 65536) <= 0)
+            {
+                FX_DeleteGeneralEffect((FXGeneralEffect *)field);
+                return;
+            }
+
+            fade = 4096 - fade;
+        }
+        else
+        {
+            fade = 0;
+        }
+
+        temp2 = fade * 65536;
+    }
+
+    fade = temp2 >> 16;
+
+    if (fade != 0)
+    {
+        LoadAverageCol((unsigned char *)&field->color, (unsigned char *)&black, 4096 - fade, fade, (unsigned char *)&color);
+    }
+    else
+    {
+        color = field->color;
+    }
+
+    color &= 0xFFFFFF;
+
+    MATH3D_SetUnityMatrix(&tmpmat);
+
+    RotMatrixZ(1024, &tmpmat);
+
+    if (field->type == 1)
+    {
+        PIPE3D_AspectAdjustMatrix(&tmpmat);
+    }
+    else
+    {
+        RotMatrixX(theCamera.core.rotation.x, &tmpmat);
+    }
+
+    FX_DrawRing(wcTransform, &position, &tmpmat, field->size - size, field->size, field->size - size, 0, 0, 0, color, 1);
+}
 
 FXForceFieldEffect *FX_StartFField(Instance *instance, int size, Position *offset, int size_diff, int size_change, int deg_change, long color)
 {

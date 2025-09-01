@@ -16,5 +16,6 @@ void PIPE3D_CalculateWCTransform(CameraCore *cameraCore);
 long PIPE3D_Segment2ScreenPt(Instance *instance, MATRIX *wcTransform, int segIndex, Position *pos);
 void PIPE3D_DoGlow(Instance *instance, MATRIX *wcTransform, VertexPool *vertexPool, PrimPool *primPool, unsigned long **ot, FXGlowEffect *glow);
 void PIPE3D_HalvePlaneGetRingPoints(Instance *instance, MATRIX *wcTransform, VertexPool *vertexPool, PrimPool *primPool, unsigned long **ot, FXHalvePlane *ring);
+void PIPE3D_AspectAdjustMatrix(MATRIX *matrix);
 
 #endif

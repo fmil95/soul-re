@@ -85,5 +85,6 @@ void FX_DrawFField(MATRIX *wcTransform, FXForceFieldEffect *field);
 void FX_DrawLightning(FXLightning *zap, MATRIX *wcTransform, unsigned long **ot);
 void FX_DrawFlash(FXFlash *flash);
 void FX_ContinueBlastRing(FXBlastringEffect *blast, FXTracker *fxTracker);
+void FX_DrawRing(MATRIX *wcTransform, SVector *position, MATRIX *matrix, int radius, int radius2, int radius3, int z1, int z2, int z3, long color, int sortInWorld);
 
 #endif
