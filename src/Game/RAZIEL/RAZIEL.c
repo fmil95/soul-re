@@ -3138,7 +3138,214 @@ void StateHandlerPickupObject(CharacterState *In, int CurrentSection, intptr_t D
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", StateHandlerAutoFace);
+void StateHandlerAutoFace(CharacterState *In, int CurrentSection, intptr_t Data)
+{
+    Message *Ptr;
+    int Frames;
+    int Anim;
+
+    Anim = G2EmulationQueryAnimation(In, CurrentSection);
+    Frames = 4;
+
+    if (CurrentSection == 2)
+    {
+        Frames = 6;
+    }
+
+    while ((Ptr = PeekMessageQueue(&In->SectionList[CurrentSection].Event)) != NULL)
+    {
+        switch (Ptr->ID)
+        {
+        case 0x100001:
+            ControlFlag = 0x1210B;
+            if (*PadData & RazielCommands[7])
+            {
+                Raziel.Mode |= 0x02000002;
+            }
+            else
+            {
+                Raziel.Mode |= 0x02000001;
+            }
+            PhysicsMode = 3;
+            if (CurrentSection == 0)
+            {
+                SteerSwitchMode(In->CharacterInstance, 5);
+            }
+            In->SectionList[CurrentSection].Data1 = 0;
+            if (razSwitchVAnimGroup(In->CharacterInstance, CurrentSection, 0x54, -1, -1) != 0)
+            {
+                G2EmulationSwitchAnimation(In, CurrentSection, 0x37, 0, 6, 2);
+            }
+            razSetPlayerEventHistory(0x20);
+            break;
+        case 0x100004:
+            if (CurrentSection == 0)
+            {
+                razResetPauseTranslation(In->CharacterInstance);
+            }
+            break;
+        case 0x8000003:
+            if (Anim == 0x37)
+            {
+                In->SectionList[CurrentSection].Data1 = 1;
+            }
+        case 0x80000001:
+            break;
+        case 0x4010080:
+            if (CurrentSection == 0)
+            {
+                if (Ptr->Data != 0)
+                {
+                    razResetPauseTranslation(In->CharacterInstance);
+                    break;
+                }
+                razSetPauseTranslation(In->CharacterInstance);
+            }
+            break;
+        case 0x1000001:
+            if (CurrentSection == 1 && In->CharacterInstance->LinkChild != 0)
+            {
+                Ptr->Data = 0;
+            }
+
+            switch (Ptr->Data)
+            {
+            case 0x10001001:
+                if (Anim != 0xC)
+                {
+                    G2EmulationSwitchAnimation(In, CurrentSection, 0xC, 0, Frames, 2);
+                    break;
+                }
+                if (PadData[1] & RazielCommands[3] && !(Raziel.Senses.Flags & 0x80))
+                {
+                    StateSwitchStateData(In, CurrentSection, StateHandlerAttack2, 5);
+                    if (CurrentSection == 2)
+                    {
+                        StateSwitchStateData(In, 1, StateHandlerAttack2, 5);
+                    }
+                }
+                break;
+            case 0x10001003:
+                if (Anim != 0xD && Anim != 0x5B)
+                {
+                    G2EmulationSwitchAnimation(In, CurrentSection, 0xD, 0, Frames, 2);
+                    break;
+                }
+                if (PadData[1] & RazielCommands[3])
+                {
+                    if (Anim != 0x5B)
+                    {
+                        SteerSwitchMode(In->CharacterInstance, 0xE);
+                        G2EmulationSwitchAnimation(In, CurrentSection, 0x5B, 0, 0, 1);
+                    }
+                }
+                break;
+            case 0x10001004:
+                if (Anim != 0xE && Anim != 0x5C)
+                {
+                    G2EmulationSwitchAnimation(In, CurrentSection, 0xE, 0, Frames, 2);
+                    break;
+                }
+                if (PadData[1] & RazielCommands[3])
+                {
+                    if (Anim != 0x5C)
+                    {
+                        SteerSwitchMode(In->CharacterInstance, 0xE);
+                        G2EmulationSwitchAnimation(In, CurrentSection, 0x5C, 0, 0, 1);
+                    }
+                }
+                break;
+            case 0x10001002:
+                if (Anim != 0xF && Anim != 0x5D)
+                {
+                    G2EmulationSwitchAnimation(In, CurrentSection, 0xF, 0, Frames, 2);
+                }
+                else if (PadData[1] & RazielCommands[3])
+                {
+                    if (Anim != 0x5D)
+                    {
+                        SteerSwitchMode(In->CharacterInstance, 0xE);
+                        G2EmulationSwitchAnimation(In, CurrentSection, 0x5D, 0, 0, 1);
+                    }
+                }
+            }
+
+            break;
+        case 0:
+            if (Anim != 0x5B && Anim != 0x5C && Anim != 0x5D)
+            {
+                if (Raziel.nothingCounter < 6)
+                {
+                    if (Anim != 0x37)
+                    {
+                        StateInitIdle(In, CurrentSection, SetControlInitIdleData(1, 0, 6));
+                    }
+                }
+                else
+                {
+                    StateSwitchStateData(In, CurrentSection, StateHandlerIdle, SetControlInitIdleData(0, 0, 3));
+                }
+            }
+            break;
+        case 0x20000004:
+            if (CurrentSection == 0)
+            {
+                Raziel.Senses.LastAutoFace = Raziel.Senses.EngagedList[6].instance;
+            }
+            break;
+        case 0x80000002:
+            if (Raziel.Senses.heldClass != 3)
+            {
+                Raziel.returnState = StateHandlerIdle;
+                StateSwitchStateData(In, CurrentSection, StateHandlerSoulSuck, 0);
+            }
+            break;
+        case 0x8000000:
+            if (CurrentSection == 0)
+            {
+                SteerSwitchMode(In->CharacterInstance, 5);
+            }
+            In->SectionList[CurrentSection].Data1 = 0;
+            G2EmulationSwitchAnimation(In, CurrentSection, 0x37, 0, 6, 2);
+            break;
+        case 0x100000:
+            StateSwitchStateData(In, CurrentSection, StateHandlerIdle, SetControlInitIdleData(0, 0, 3));
+            break;
+        case 0x10000000:
+            if (!(ControlFlag & 2))
+            {
+                if (CurrentSection == 0)
+                {
+                    StateSwitchStateData(In, CurrentSection, StateHandlerStartMove, 0);
+                    break;
+                }
+                EnMessageQueueData(&In->SectionList->Event, 0x100005, CurrentSection);
+            }
+            break;
+        case 0x2000000:
+            if (razPickupAndGrab(In, CurrentSection) != 0)
+            {
+                StateSwitchStateData(In, CurrentSection, StateHandlerAttack2, 0);
+            }
+            break;
+        case 0x80000000:
+            if (CurrentSection == 0 && !(Raziel.Senses.Flags & 0x80))
+            {
+                StateSwitchStateCharacterData(In, StateHandlerAttack2, 0);
+            }
+            break;
+        default:
+            DefaultStateHandler(In, CurrentSection, Data);
+            break;
+        }
+        DeMessageQueue(&In->SectionList[CurrentSection].Event);
+    }
+    if (Raziel.nothingCounter == 6 || !(Raziel.Senses.EngagedMask & 0x40))
+    {
+        EnMessageQueueData(&In->SectionList[CurrentSection].Event, 0x100000, 0);
+    }
+}
+
 
 void StateHandlerGlyphs(CharacterState *In, int CurrentSection, intptr_t Data)
 {
