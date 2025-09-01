@@ -96,6 +96,30 @@ On the root directory which is where the **requirements.txt** file is, run this 
 python3 -m pip install -r requirements.txt
 ```
 
+### DAT Utils
+
+Soul Reaver, like other Crystal Dynamics games for the PSX, stores its overlays in BIGFILE.DAT. There is a provided utility for unpacking, repacking, and comparing BIGFILEs to assist with the overlay work. To get started, place `BIGFILE.DAT` into the root of the project.
+
+To unpack the file:
+
+```bash
+python tools/cd-dat-utils/dat_utils.py -c dat-config.json unpack BIFILE.DAT <output_dir>
+```
+
+To repackage the file:
+
+```bash
+python tools/cd-dat-utils/dat_utils.py -c dat-config.json pack <input_dir> <output_file>
+```
+
+To compare between 2 BIGFILEs (packed or unpacked):
+
+```bash
+python tools/cd-dat-utils/dat_utils.py -c dat-config.json compare <input_a> <input_b>
+```
+
+The compare command will tell you how the BIGFILEs differ and in what way (encryption, hashes of file X in folder Y, etc.)
+
 ### Building the code
 
 Enter `make setup` on the terminal to extract the source assets from the ROM, then input `make -j12` to compile the binary. If the build process is succesfully performed a folder named `build` will appear, which is where you'll find the result: **KAIN2.EXE**.
