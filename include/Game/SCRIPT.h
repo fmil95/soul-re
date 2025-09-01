@@ -14,5 +14,7 @@ long SCRIPT_SplineProcess(Instance *instance, MultiSpline *multi, SplineDef *spl
 MultiSpline *SCRIPT_GetMultiSpline(Instance *instance, unsigned long *isParent, unsigned long *isClass);
 void SCRIPT_InstanceSplineInit(Instance *instance);
 long SCRIPT_InstanceSplineProcess(Instance *instance, SplineDef *splineDef, SplineDef *rsplineDef, SplineDef *ssplineDef, int direction);
+Spline *ScriptGetPosSpline(Instance *instance);
+RSpline *ScriptGetRotSpline(Instance *instance);
 
 #endif

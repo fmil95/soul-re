@@ -128,7 +128,58 @@ void SCRIPT_InstanceSplineInit(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/SCRIPT", SCRIPTCountFramesInSpline);
+short SCRIPTCountFramesInSpline(Instance *instance)
+{
+
+    SplineKey *key;
+    Spline *spline;
+    RSpline *rspline;
+    short kf;
+    short frames;
+
+    kf = 0;
+    frames = 0;
+
+    spline = ScriptGetPosSpline(instance);
+
+    if (spline != NULL)
+    {
+        for (key = spline->key; kf < spline->numkeys; kf++, key++)
+        {
+            frames += key->count;
+        }
+    }
+    else
+    {
+
+        SplineRotKey *rkey;
+
+        rspline = ScriptGetRotSpline(instance);
+        if (rspline != NULL)
+        {
+            for (rkey = rspline->key; kf < rspline->numkeys; kf++, rkey++)
+            {
+                frames += rkey->count;
+            }
+        }
+        else
+        {
+
+            MultiSpline *multi;
+            multi = SCRIPT_GetMultiSpline(instance, 0, 0);
+
+            if (multi != NULL)
+            {
+                spline = multi->scaling;
+                for (key = spline->key; kf < spline->numkeys; kf++, key++)
+                {
+                    frames += key->count;
+                }
+            }
+        }
+    }
+    return frames;
+}
 
 Spline *ScriptGetPosSpline(Instance *instance)
 {
