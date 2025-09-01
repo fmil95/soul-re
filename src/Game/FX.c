@@ -4310,7 +4310,83 @@ void FX_EndFField(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Draw_Glowing_Line);
+void FX_Draw_Glowing_Line(unsigned long **ot, long otz, DVECTOR *sxy0, DVECTOR *sxy1, DVECTOR *xy0, DVECTOR *xy1, long color, long color2)
+{
+    POLY_2G4T *poly;
+    PrimPool *primPool;
+    int negflag;
+
+    negflag = 0;
+
+    primPool = gameTrackerX.primPool;
+
+    if ((otz >= 1) && (otz < 3072))
+    {
+        poly = (POLY_2G4T *)primPool->nextPrim;
+
+        if ((primPool->nextPrim + 18) < primPool->lastPrim)
+        {
+            if ((color & 0x1000000))
+            {
+                color &= 0xFFFFFF;
+
+                negflag = 1;
+            }
+
+            color |= 0x3A000000;
+
+            *(unsigned int *)&poly->p1.r2 = color;
+            *(unsigned int *)&poly->p2.r0 = color;
+
+            *(unsigned int *)&poly->p1.r0 = 0x3A000000;
+            *(unsigned int *)&poly->p1.r1 = 0;
+
+            *(unsigned int *)&poly->p1.r3 = color2;
+            *(unsigned int *)&poly->p2.r1 = color2;
+
+            *(unsigned int *)&poly->p2.r2 = 0;
+            *(unsigned int *)&poly->p2.r3 = 0;
+
+            *(unsigned int *)&poly->p2.x0 = *(unsigned int *)&sxy0->vx;
+            *(unsigned int *)&poly->p1.x2 = *(unsigned int *)&poly->p2.x0;
+
+            *(unsigned short *)&poly->p1.x0 = sxy0->vx + xy0->vx;
+            *(unsigned short *)&poly->p1.y0 = sxy0->vy - xy0->vy;
+
+            *(unsigned short *)&poly->p2.x2 = sxy0->vx - xy0->vx;
+            *(unsigned short *)&poly->p2.y2 = sxy0->vy + xy0->vy;
+
+            *(unsigned int *)&poly->p2.x1 = *(unsigned int *)&sxy1->vx;
+            *(unsigned int *)&poly->p1.x3 = *(unsigned int *)&poly->p2.x1;
+
+            *(unsigned short *)&poly->p1.x1 = sxy1->vx + xy1->vx;
+            *(unsigned short *)&poly->p1.y1 = sxy1->vy - xy1->vy;
+
+            *(unsigned short *)&poly->p2.x3 = sxy1->vx - xy1->vx;
+            *(unsigned short *)&poly->p2.y3 = sxy1->vy + xy1->vy;
+
+            if (negflag != 0)
+            {
+                // setDrawTPage(poly, 1, 1, 64);
+
+                poly->drawTPage1 = _get_mode(1, 1, 64);
+            }
+            else
+            {
+                // setDrawTPage(poly, 1, 1, 32);
+
+                poly->drawTPage1 = _get_mode(1, 1, 32);
+            }
+
+            // addPrim(poly, ot[otz]);
+
+            *(int *)poly = getaddr(&ot[otz]) | 0x11000000;
+            *(int *)&ot[otz] = (intptr_t)poly & 0xFFFFFF;
+
+            primPool->nextPrim = (unsigned long *)(poly + 1);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Lightning);
 
