@@ -8,3 +8,6 @@ cxxfilt
 GitPython
 colour
 splat64[mips]>=0.34.3,<1.0.0
+
+# Submodules
+-r tools/cd-dat-utils/requirements.txt

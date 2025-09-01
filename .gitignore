@@ -10,3 +10,6 @@ nonmatchings/
 *.d
 diff.py
 objdiff.json
+*.DAT
+bigfile/
+.DS_Store
