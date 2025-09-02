@@ -2831,15 +2831,13 @@ void FX_ConvertCamPersToWorld(SVECTOR *campos, SVECTOR *worldpos)
 
 void FX_GetRandomScreenPt(SVECTOR *point)
 {
-    int temp, temp2; // not from decls.h
+    int temp; // not from decls.h
 
     temp = rand();
 
     point->vx = temp - ((temp / 512) * 512);
 
-    temp2 = rand();
-
-    point->vy = temp2 % 240;
+    point->vy = rand() % 240;
 
     point->vz = (rand() & 0xFFF) + 384;
 }
