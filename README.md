@@ -10,7 +10,7 @@ Once its fully overhauled, the source code could then be used for many different
 
 ## Progress
 
-| Name | Game ID | Progress |
+| Name | ID | Progress |
 |------|---------|----------|
 | Legacy of Kain: Soul Reaver | SLUS_007.08 | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&label=Functions&measure=matched_functions)|
 
