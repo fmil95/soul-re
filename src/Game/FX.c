@@ -2829,7 +2829,20 @@ void FX_ConvertCamPersToWorld(SVECTOR *campos, SVECTOR *worldpos)
     gte_stsv(worldpos);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_GetRandomScreenPt);
+void FX_GetRandomScreenPt(SVECTOR *point)
+{
+    int temp, temp2; // not from decls.h
+
+    temp = rand();
+
+    point->vx = temp - ((temp / 512) * 512);
+
+    temp2 = rand();
+
+    point->vy = temp2 % 240;
+
+    point->vz = (rand() & 0xFFF) + 384;
+}
 
 void FX_ProcessSnow(FX_PRIM *fxPrim, FXTracker *fxTracker)
 {
