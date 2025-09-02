@@ -4503,7 +4503,18 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawModel);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", fx_calc_points);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", fx_get_startz);
+long fx_get_startz(SVector *position)
+{
+    MATRIX tmpmat;
+
+    gte_ldv0(position);
+    gte_nrtv0tr();
+    gte_stlvnl(&tmpmat.t[0]);
+
+    SetTransMatrix(&tmpmat);
+
+    return tmpmat.t[2] / 4;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawRing);
 
