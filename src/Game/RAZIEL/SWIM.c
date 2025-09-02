@@ -39,7 +39,109 @@ INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", StateHandlerSwimCoil);
 
 INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", StateHandlerSwimTread);
 
-INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", StateHandlerSwimDiveIn);
+void StateHandlerSwimDiveIn(CharacterState *In, int CurrentSection, intptr_t Data)
+{
+
+    Message *Ptr;
+    evPhysicsSwimData *SwimData;
+
+    (void)Data;
+    SwimData = NULL;
+
+    while ((Ptr = PeekMessageQueue(&In->SectionList[CurrentSection].Event)) != NULL)
+    {
+        switch (Ptr->ID)
+        {
+        case 0x100001:
+            if (Raziel.Mode != 0x40000 && CurrentSection == 0)
+            {
+                CAMERA_ChangeToUnderWater(&theCamera, In->CharacterInstance);
+            }
+            if (CurrentSection == 0)
+            {
+                Raziel.Mode = 0x40000;
+                ControlFlag = 0x191;
+                PhysicsMode = 6;
+                SteerSwitchMode(In->CharacterInstance, 0x11);
+            }
+            break;
+        case 0x100004:
+            if (!(Raziel.Mode & 0x40000) && (CurrentSection == 0))
+            {
+                CAMERA_ChangeToOutOfWater(&theCamera, In->CharacterInstance);
+                Raziel.passedMask = 0;
+            }
+            break;
+        case 0x8000000:
+            if (*PadData & RazielCommands[3])
+            {
+                EnMessageQueueData(&In->SectionList[CurrentSection].Defer, 0x80000001, 0);
+            }
+            if (SwimData->rc & 0x40)
+            {
+                StateSwitchStateData(In, CurrentSection, &StateHandlerSwimTread, 0);
+            }
+            else
+            {
+                StateSwitchStateData(In, CurrentSection, &StateHandlerSwim, 0);
+                In->SectionList[CurrentSection].Data2 |= 2;
+            }
+            break;
+        case 0x4020000:
+            SwimData = (evPhysicsSwimData *)Ptr->Data;
+            if (SwimData->rc & 0x80)
+            {
+                StateSwitchStateData(In, CurrentSection, &StateHandlerIdle, SetControlInitIdleData(0, 0, 9));
+            }
+            break;
+        case 0x4010200:
+        case 0x80000004:
+        case 0x100000:
+            break;
+        case 0x100014:
+            StateSwitchStateData(In, CurrentSection, &StateHandlerIdle, SetControlInitIdleData(0, 0, 9));
+            if (CurrentSection == 0)
+            {
+                CAMERA_ChangeToOutOfWater(&theCamera, In->CharacterInstance);
+            }
+            break;
+        case 0x1000000: {
+            evMonsterHitData *data;
+
+            if (CurrentSection == 0)
+            {
+                data = (evMonsterHitData *)Ptr->Data;
+                if (gameTrackerX.debugFlags2 & 0x800)
+                {
+                    LoseHealth(data->power);
+                }
+            }
+            break;
+        }
+        }
+        DeMessageQueue(&In->SectionList[CurrentSection].Event);
+    }
+
+    if (CurrentSection == 0)
+    {
+        In->CharacterInstance->position.z -= 0x10;
+        if (Raziel.passedMask & 1)
+        {
+            if (Raziel.passedMask & 2 || PadData[0] & 1)
+            {
+                Raziel.extraRot.x += 0x30;
+            }
+            if (Raziel.extraRot.x >= 0x401)
+            {
+                PhysicsMode = 5;
+            }
+            if (Raziel.passedMask & 4)
+            {
+                razLaunchBubbles(3, 1, 0);
+            }
+        }
+    }
+}
 
 void StateHandlerSwim(CharacterState *In, int CurrentSection, intptr_t Data)
 {
