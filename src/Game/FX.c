@@ -4553,7 +4553,27 @@ void FX_Spiral_Init()
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawModel);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", fx_calc_points);
+void fx_calc_points(SVector *points, int degrees, int radius, int radius2, int radius3)
+{
+
+    int cosval;
+    int sinval;
+
+    cosval = rcos(degrees);
+    sinval = rsin(degrees);
+
+    points[0].x = (cosval * radius) >> 0xC;
+    points[1].x = (cosval * radius2) >> 0xC;
+    points[2].x = (cosval * radius3) >> 0xC;
+
+    points[0].y = (sinval * radius) >> 0xC;
+    points[1].y = (sinval * radius2) >> 0xC;
+    points[2].y = (sinval * radius3) >> 0xC;
+
+    gte_ldv3c(points);
+    gte_nrtpt();
+
+}
 
 long fx_get_startz(SVector *position)
 {
