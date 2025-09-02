@@ -2868,7 +2868,56 @@ void FX_ProcessSnow(FX_PRIM *fxPrim, FXTracker *fxTracker)
     fxPrim->position.z += fxPrim->duo.flame.segment;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueSnow);
+void FX_ContinueSnow(FXTracker *fxTracker)
+{
+    FX_PRIM *fxPrim;
+    SVECTOR position;
+    SVECTOR vel;
+    int temp; // not from decls.h
+
+    if (gameTrackerX.gameData.asmData.MorphTime != 1000)
+    {
+        if (gameTrackerX.gameData.asmData.MorphType != 0)
+        {
+            goto label;
+        }
+    }
+    else if (gameTrackerX.gameData.asmData.MorphType != 1)
+    {
+    label:
+        if ((rand() & 0x3FF) <= snow_amount)
+        {
+            fxPrim = FX_GetPrim(gFXT);
+
+            if (fxPrim != NULL)
+            {
+                SVECTOR campos;
+
+                vel.vx = 0;
+                vel.vy = 0;
+                vel.vz = -13 - (rand() & 3);
+
+                temp = rand();
+
+                campos.vx = temp - ((temp / 512) * 512);
+                campos.vy = 5;
+                campos.vz = (rand() & 0xFFF) + 384;
+
+                FX_ConvertCamPersToWorld(&campos, &position);
+
+                FX_DFacadeParticleSetup(fxPrim, &position, 1, 1, 0xFFFFFF, &vel, NULL, fxTracker, 150);
+
+                fxPrim->process = FX_ProcessSnow;
+
+                fxPrim->work0 = 0;
+
+                fxPrim->flags |= 0x800000;
+
+                FX_Sprite_Insert(&fxTracker->usedPrimListSprite, fxPrim);
+            }
+        }
+    }
+}
 
 void FX_UpdateWind(FXTracker *fxTracker)
 {
