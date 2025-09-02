@@ -12,6 +12,7 @@
 #include "Game/CAMERA.h"
 #include "Game/COLLIDE.h"
 #include "Game/PIPE3D.h"
+#include "Game/REAVER.h"
 
 STATIC FXGeneralEffect *FX_GeneralEffectTracker;
 
@@ -3681,8 +3682,178 @@ void FX_RelocateGeneric(Object *object, long offset)
     GFXO->ColorList = (long *)OFFSET_DATA(GFXO->ColorList, offset);
 }
 
+FXParticle *FX_StartGenericParticle(Instance *instance, int num, int segOverride, int lifeOverride, int InitFlag)
+{
+    FXParticle *currentParticle;
+    GenericFXObject *GFXO;
+    GenericParticleParams *GPP;
+    Object *texture_obj;
+    Object *particle;
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericParticle);
+    particle = objectAccess[10].object;
+
+    texture_obj = NULL;
+
+    if (particle == NULL)
+    {
+        return NULL;
+    }
+
+    GFXO = particle->data;
+
+    GPP = &GFXO->ParticleList[num];
+
+    if ((InitFlag != 0) && (GPP->StartOnInit == 0))
+    {
+        return NULL;
+    }
+
+    if (GPP->use_child != 0)
+    {
+        instance = instance->LinkChild;
+
+        if (instance == NULL)
+        {
+            return NULL;
+        }
+    }
+
+    if (GPP->texture != -1)
+    {
+        if (GPP->useInstanceModel != 0)
+        {
+            texture_obj = instance->object;
+        }
+        else
+        {
+            texture_obj = particle;
+        }
+
+        if (texture_obj == NULL)
+        {
+            return NULL;
+        }
+    }
+
+    currentParticle = FX_GetParticle(instance, 0);
+
+    if (currentParticle != NULL)
+    {
+        currentParticle->numberBirthParticles = GPP->numberBirthParticles;
+
+        currentParticle->size = GPP->size;
+
+        currentParticle->type = GPP->type;
+
+        currentParticle->birthRadius = GPP->birthRadius;
+
+        if (segOverride == 0)
+        {
+            currentParticle->startSegment = GPP->startSegment;
+        }
+        else
+        {
+            currentParticle->startSegment = segOverride;
+        }
+
+        currentParticle->endSegment = GPP->endSegment;
+
+        currentParticle->direction = GPP->direction;
+
+        currentParticle->acceleration.x = GPP->accx;
+        currentParticle->acceleration.y = GPP->accy;
+        currentParticle->acceleration.z = GPP->accz;
+
+        currentParticle->startColor = *(long *)&GPP->startColor_red & 0xFFFFFF;
+        currentParticle->endColor = *(long *)&GPP->endColor_red & 0xFFFFFF;
+
+        if (lifeOverride != 0)
+        {
+            currentParticle->lifeTime = lifeOverride;
+        }
+        else
+        {
+            currentParticle->lifeTime = GPP->lifeTime;
+        }
+
+        currentParticle->primLifeTime = GPP->primLifeTime;
+
+        currentParticle->startFadeValue = GPP->startFadeValue;
+        currentParticle->startScale = GPP->startScale;
+
+        currentParticle->scaleSpeed = GPP->scaleSpeed;
+
+        currentParticle->offset.x = GPP->offset.x;
+        currentParticle->offset.y = GPP->offset.y;
+        currentParticle->offset.z = GPP->offset.z;
+
+        currentParticle->z_undulate = GPP->z_undulation_mode;
+
+        if ((GPP->fadeStep == -1) && (GPP->primLifeTime != 0))
+        {
+            currentParticle->fadeStep = (4096 - currentParticle->startFadeValue) / GPP->primLifeTime;
+        }
+        else
+        {
+            currentParticle->fadeStep = GPP->fadeStep;
+        }
+
+        if (GPP->texture != -1)
+        {
+            TextureMT3 *texture;
+
+            texture = FX_GetTextureObject(texture_obj, GPP->model, GPP->texture);
+
+            currentParticle->texture = texture;
+
+            currentParticle->startColor |= texture->color & 0x3000000;
+        }
+
+        if (GPP->type == 1)
+        {
+            currentParticle->fxprim_process = FX_AttachedParticlePrimProcess;
+        }
+
+        if (GPP->spectral_colorize == 1)
+        {
+            currentParticle->flag_bits |= 0x1;
+        }
+
+        if (GPP->absolute_direction != 0)
+        {
+            currentParticle->flag_bits |= 0x2;
+        }
+
+        if (GPP->spectral_colorize == 2)
+        {
+            int tmp_blue;
+            CVECTOR *ptr;
+
+            if (SoulReaverFire() != 0)
+            {
+                ptr = (CVECTOR *)&currentParticle->startColor;
+
+                tmp_blue = ptr->b;
+
+                ptr->b = currentParticle->startColor;
+
+                ptr = (CVECTOR *)&currentParticle->endColor;
+
+                ((char *)&currentParticle->startColor)[0] = tmp_blue;
+
+                tmp_blue = ptr->b;
+
+                ptr->b = currentParticle->endColor;
+
+                ((char *)&currentParticle->endColor)[0] = tmp_blue;
+            }
+        }
+
+        FX_InsertGeneralEffect(currentParticle);
+    }
+
+    return currentParticle;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericRibbon);
 
