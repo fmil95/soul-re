@@ -119,7 +119,103 @@ static void (*midiMetaEventFunction[78])() =
     metaCmdUpdateMute
 };
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", aadQueueNextEvent);
+int aadQueueNextEvent(AadSequenceSlot *slot, int track)
+{
+    AadSeqEvent seqEvent;
+    unsigned char *seqData;
+    unsigned long deltaTime;
+    int c;
+    int n;
+    int i;
+
+    if ((slot->trackFlags[track] & 0x18))
+    {
+        return -1;
+    }
+
+    if ((slot->trackFlags[track] & 0x20))
+    {
+        slot->lastEventExecutedTime[track] = slot->tempo.currentTick;
+
+        slot->trackFlags[track] &= ~0x20;
+    }
+
+    seqData = slot->sequencePosition[track];
+
+    deltaTime = *seqData++;
+
+    if ((deltaTime & 0x80))
+    {
+        c = *seqData;
+
+        deltaTime &= 0x7F | (c & 0x7F);
+
+        do
+        {
+            c = *seqData++;
+
+            deltaTime = (deltaTime * 128) | (c & 0x7F);
+        } while ((c & 0x80));
+    }
+
+    seqEvent.track = track;
+
+    seqEvent.deltaTime = deltaTime;
+
+    c = *seqData;
+
+    if (c == 255)
+    {
+        seqData++;
+
+        seqEvent.statusByte = *seqData++;
+
+        n = *seqData++;
+
+        if (seqEvent.statusByte == 68)
+        {
+            slot->trackFlags[track] |= 0x8;
+        }
+        else if (seqEvent.statusByte == 46)
+        {
+            slot->trackFlags[track] |= 0x10;
+        }
+    }
+    else
+    {
+        if ((c & 0x80))
+        {
+            slot->runningStatus[track] = seqEvent.statusByte = *seqData++;
+        }
+        else
+        {
+            seqEvent.statusByte = slot->runningStatus[track];
+        }
+
+        n = midiDataByteCount[(seqEvent.statusByte >> 4) & 0x7];
+    }
+
+    i = 0;
+
+    while (--n != -1)
+    {
+        seqEvent.dataByte[i++] = *seqData++;
+    }
+
+    slot->sequencePosition[track] = seqData;
+
+    memcpy(&slot->eventQueue[slot->eventIn[track]][track], &seqEvent, sizeof(seqEvent));
+
+    slot->eventsInQueue[track]++;
+    slot->eventIn[track]++;
+
+    if (slot->eventIn[track] == 4)
+    {
+        slot->eventIn[track] = 0;
+    }
+
+    return 0;
+}
 
 void aadExecuteEvent(AadSeqEvent *event, AadSequenceSlot *slot)
 {
