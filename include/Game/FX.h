@@ -91,5 +91,7 @@ void FX_StartGenericRibbon(Instance *instance, int num, int segOverride, int end
 void FX_StartGenericGlow(Instance *instance, int num, int segOverride, int seg2Override, int InitFlag);
 FXLightning *FX_StartGenericLightning(Instance *instance, int num, int segOverride, int endSegOverride);
 FXBlastringEffect *FX_StartGenericBlastring(Instance *instance, int num, int segOverride, int matrixSegOverride);
+void FX_Build(Instance *instance, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)());
+void FX_DFacadeProcess(FX_PRIM *fxPrim, FXTracker *fxTracker);
 
 #endif

@@ -7,6 +7,10 @@
 #include "Game/HASM.h"
 #include "Game/INSTANCE.h"
 #include "Game/STREAM.h"
+#include "Game/SOUND.h"
+#include "Game/SIGNAL.h"
+#include "Game/FX.h"
+#include "Game/GENERIC.h"
 
 void SCRIPT_CombineEulerAngles(Rotation *combinedRotation, Rotation *inputRotation1, Rotation *inputRotation2)
 {
@@ -356,4 +360,94 @@ void SCRIPT_FadeOutProcess(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/SCRIPT", ScriptKillInstance);
+void ScriptKillInstance(Instance *instance, int effect)
+{
+    Object *object;
+
+    object = instance->object;
+
+    if ((object->oflags2 & 0x4))
+    {
+        SOUND_EndInstanceSounds(object->soundData, instance->soundInstanceTbl);
+    }
+
+    if (((object->oflags & 0x40000000)) && (instance->introData != NULL))
+    {
+        Signal *temp; // not from decls.h
+
+        temp = instance->introData;
+
+        if (temp->id != 0)
+        {
+            SIGNAL_HandleSignal(instance, (Signal *)(temp->id + 8), 0); // TODO: find the union from the Signal struct that would logically fit in here
+        }
+    }
+
+    if (effect == 1)
+    {
+        Object *object;
+
+        object = instance->object;
+
+        if ((object->oflags & 0x8000))
+        {
+            effect = 5;
+        }
+    }
+
+    switch (effect)
+    {
+    case 6:
+    {
+        SVECTOR v;
+
+        v.vy = v.vz = v.vx = -2;
+
+        FX_Build(instance, NULL, &v, NULL, gFXT, NULL, NULL);
+        break;
+    }
+    case 2:
+    case 5:
+    {
+        FXSplinter *splinterData;
+        int facadeFlg;
+        short shardFlags;
+
+        splinterData = NULL;
+
+        shardFlags = facadeFlg = 0;
+
+        if ((instance->processFunc == GenericProcess) || (instance->processFunc == NULL))
+        {
+            GenericTune *tune;
+
+            tune = object->data;
+
+            if (tune != NULL)
+            {
+                splinterData = tune->shatterData;
+
+                facadeFlg = tune->flags & 0x1;
+
+                if ((tune->flags & 0x2))
+                {
+                    shardFlags = 0x10;
+                }
+            }
+        }
+
+        _FX_BuildSplinters(instance, NULL, NULL, NULL, splinterData, gFXT, NULL, (facadeFlg != 0) ? FX_DFacadeProcess : 0, shardFlags);
+        break;
+    }
+    case 7:
+        instance->processFunc = SCRIPT_FadeOutProcess;
+        return;
+    case 0:
+    case 1:
+    case 3:
+    case 4:
+        break;
+    }
+
+    INSTANCE_PlainDeath(instance);
+}
