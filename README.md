@@ -1,6 +1,6 @@
 # Soul Reaverse
 
-<img src="https://i.imgur.com/RTQyAu8.png"/>
+![image](https://i.imgur.com/RTQyAu8.png)
 
 ## Description
 
@@ -8,12 +8,11 @@
 
 Once its fully overhauled, the source code could then be used for many different purposes, including but not limited to: porting the game to other platforms, improving its performance on console hardware, and developing tools for it such as a level editor.
 
-Next is a benchmark for the progress achieved so far on the decompilation of the main game executable (**SLUS_007.08**):
+## Progress
 
-```
-2137 matched functions / 2274 total (93.98%)
-543048 matching bytes / 653008 total (83.16%)
-```
+| Name | ID | Progress |
+|------|---------|----------|
+| Legacy of Kain: Soul Reaver | SLUS_007.08 | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&label=Functions&measure=matched_functions)|
 
 Note that the status above is not reflective of the actual completion rate of the project however, as Soul Reaver like many other titles for the PlayStation (especially those near the end of the system's life cycle) distributes a good amount of game logic throughout _overlays_. For those not familiar with the concept, overlays are binaries which contain code that is loaded at specific instances during gameplay by the primary executable. This was designed such to taper the maximum amount of memory that the game consumes at once, which could never be too high due to hardware limitations.
 
