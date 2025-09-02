@@ -4182,7 +4182,7 @@ void FX_StartInstanceEffect(Instance *instance, ObjectEffect *effect, int InitFl
 
                 if ((tune->flags & 0x2))
                 {
-                    shardFlags = 16;
+                    shardFlags = 0x10;
                 }
             }
 

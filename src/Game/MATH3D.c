@@ -3,7 +3,7 @@
 #include "Game/HASM.h"
 
 // TODO: according to the debugging symbols the actual definition is "short identityMatrix[3][3]", but it has been temporarily redefined as a char array for an easier match
-char identityMatrix[20] = {0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00}; /* unused */
+char identityMatrix[20] = {0, 16, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0}; /* unused */
 
 void MATH3D_Sort3VectorCoords(long *a, long *b, long *c)
 {
