@@ -520,6 +520,9 @@ typedef struct
 #define setPolyF4(p) setlen(p, 5), setcode(p, 0x28)
 #define setPolyG4(p) setlen(p, 8), setcode(p, 0x38)
 
+  // custom macro
+#define setAbr(p, abr) (p)->dr_tpage |= abr << 5
+
 typedef void (*CdlCB)(u_char, u_char *);
 
 /*

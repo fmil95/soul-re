@@ -151,7 +151,33 @@ void DRAW_FlatQuad(CVECTOR *color, short x0, short y0, short x1, short y1, short
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_TranslucentQuad);
+void DRAW_TranslucentQuad(short x0, short y0, short x1, short y1, short x2, short y2, short x3, short y3, short r, short g, short b, short abr, PrimPool *primPool, unsigned long **ot)
+{
+    unsigned long *prim;
+
+    prim = primPool->nextPrim;
+
+    if (prim < (primPool->lastPrim - 12))
+    {
+        // setDrawTPage((POLY_F4_SEMITRANS*)prim, 0, 1, 8);
+        ((POLY_F4_SEMITRANS *)prim)->dr_tpage = _get_mode(0, 1, 8);
+
+        setAbr((POLY_F4_SEMITRANS *)prim, abr);
+
+        ((POLY_F4_SEMITRANS *)prim)->code = 0x2a;
+
+        setRGB0((POLY_F4_SEMITRANS *)prim, r, g, b);
+        setXY4((POLY_F4_SEMITRANS *)prim, x0, y0, x1, y1, x2, y2, x3, y3);
+
+        // addPrim(ot, prim);
+        *(int *)prim = getaddr(ot) | 0x6000000;
+        *(int *)ot = (intptr_t)prim & 0xFFFFFF;
+
+        primPool->nextPrim += sizeof(POLY_F4_SEMITRANS) / sizeof(unsigned long);
+
+        primPool->numPrims++;
+    }
+}
 
 void DRAW_DrawButton(ButtonTexture *button, short x, short y, unsigned long **ot)
 {
