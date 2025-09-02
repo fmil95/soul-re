@@ -2886,16 +2886,8 @@ void FX_ContinueSnow(FXTracker *fxTracker)
     SVECTOR vel;
     int temp; // not from decls.h
 
-    if (gameTrackerX.gameData.asmData.MorphTime != 1000)
+    if (((gameTrackerX.gameData.asmData.MorphTime != 1000) && (gameTrackerX.gameData.asmData.MorphType != 0)) || ((gameTrackerX.gameData.asmData.MorphTime == 1000) && (gameTrackerX.gameData.asmData.MorphType != 1)))
     {
-        if (gameTrackerX.gameData.asmData.MorphType != 0)
-        {
-            goto label;
-        }
-    }
-    else if (gameTrackerX.gameData.asmData.MorphType != 1)
-    {
-    label:
         if ((rand() & 0x3FF) <= snow_amount)
         {
             fxPrim = FX_GetPrim(gFXT);
