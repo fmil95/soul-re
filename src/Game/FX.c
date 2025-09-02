@@ -13,6 +13,9 @@
 #include "Game/COLLIDE.h"
 #include "Game/PIPE3D.h"
 #include "Game/REAVER.h"
+#include "Game/GAMEPAD.h"
+#include "Game/GLYPH.h"
+#include "Game/PHYSOBS.h"
 
 STATIC FXGeneralEffect *FX_GeneralEffectTracker;
 
@@ -69,6 +72,13 @@ STATIC FXRibbon *FX_ConstrictRibbon;
 STATIC short FX_ConstrictStage;
 
 STATIC Instance *FX_ConstrictInstance;
+
+long FX_ColorArray[6];
+
+static inline long FX_GetColor(ObjectEffect *effect, int i)
+{
+    return FX_ColorArray[effect->modifierList[i]];
+}
 
 void FX_Init(struct _FXTracker *fxTracker)
 {
@@ -4035,7 +4045,192 @@ void FX_StartLightbeam(Instance *instance, int startSeg, int endSeg, int color_n
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartInstanceEffect);
+void FX_StartInstanceEffect(Instance *instance, ObjectEffect *effect, int InitFlag)
+{
+    long color;
+    int temp, temp2, temp3; // not from decls.h
+
+    color = 0x4080;
+
+    switch (effect->effectNumber)
+    {
+    case 0:
+        break;
+    case 1:
+        FX_TorchFlame(instance, effect->modifierList[0]);
+        break;
+    case 2:
+        if ((effect->modifierList[1] == 1) || (effect->modifierList[1] == 2) || (effect->modifierList[1] == 3) || (effect->modifierList[1] == 4) || (effect->modifierList[1] == 5))
+        {
+            color = FX_GetColor(effect, 1);
+        }
+
+        FX_DoInstanceOneSegmentGlow(instance, effect->modifierList[0], &color, 1, 1024, 50, 100);
+        break;
+    case 3:
+    {
+        long numberOfSegments;
+
+        numberOfSegments = effect->modifierList[1];
+
+        if (numberOfSegments <= 0)
+        {
+            numberOfSegments = 1;
+        }
+
+        if ((effect->modifierList[2] == 1) || (effect->modifierList[2] == 2) || (effect->modifierList[2] == 3) || (effect->modifierList[2] == 4) || (effect->modifierList[2] == 5))
+        {
+            color = FX_GetColor(effect, 2);
+        }
+
+        FX_DoInstanceManySegmentGlow(instance, effect->modifierList[0], numberOfSegments, &color, 1, 1024, 65);
+        break;
+    }
+    case 5:
+        FX_StartGenericParticle(instance, effect->modifierList[0], effect->modifierList[1], effect->modifierList[2], InitFlag);
+        break;
+    case 6:
+        FX_StartGenericRibbon(instance, effect->modifierList[0], effect->modifierList[1], effect->modifierList[2], InitFlag);
+        break;
+    case 7:
+        FX_StartGenericGlow(instance, effect->modifierList[0], effect->modifierList[1], effect->modifierList[2], InitFlag);
+        break;
+    case 8:
+        GlyphTrigger();
+        break;
+    case 10:
+        FX_Start_Snow(effect->modifierList[0]);
+        break;
+    case 11:
+        FX_Start_Rain(effect->modifierList[0]);
+        break;
+    case 12:
+    {
+        FXParticle *currentParticle;
+        evObjectDraftData *draft;
+
+        draft = (evObjectDraftData *)INSTANCE_Query(instance, 22);
+
+        if (draft != NULL)
+        {
+            currentParticle = FX_StartGenericParticle(instance, effect->modifierList[0], effect->modifierList[1], effect->modifierList[2], InitFlag);
+
+            if (currentParticle != NULL)
+            {
+                currentParticle->direction.x = draft->radius;
+                currentParticle->direction.y = draft->radiusCoef;
+                currentParticle->direction.z = draft->height;
+
+                currentParticle->primLifeTime = draft->maxVelocity / 8;
+
+                currentParticle->birthRadius = 0;
+
+                currentParticle->fxprim_modify_process = FX_UpdraftPrimModify;
+            }
+        }
+
+        break;
+    }
+    case 13:
+        FX_StartLightbeam(instance, effect->modifierList[0], effect->modifierList[1], effect->modifierList[2]);
+        break;
+    case 14:
+        FX_StartGenericLightning(instance, effect->modifierList[0], effect->modifierList[1], effect->modifierList[2]);
+        break;
+    case 15:
+        if (InitFlag == 0)
+        {
+            FX_StartGenericBlastring(instance, effect->modifierList[0], effect->modifierList[1], effect->modifierList[2]);
+        }
+
+        break;
+    case 16:
+        if (InitFlag == 0)
+        {
+            FX_StartGenericFlash(instance, effect->modifierList[0]);
+        }
+
+        break;
+    case 17:
+    {
+        FXSplinter *splinterData;
+        GenericTune *tune;
+        short shardFlags;
+
+        splinterData = NULL;
+
+        if (InitFlag == 0)
+        {
+            shardFlags = 0;
+
+            tune = instance->object->data;
+
+            if ((instance->object->oflags2 & 0x40000))
+            {
+                PhysObSplinter *splintDef;
+
+                splintDef = PhysObGetSplinter(instance);
+
+                if (splintDef != NULL)
+                {
+                    splinterData = splintDef->splinterData;
+                }
+            }
+            else if (tune != NULL)
+            {
+                splinterData = tune->shatterData;
+
+                if ((tune->flags & 0x2))
+                {
+                    shardFlags = 16;
+                }
+            }
+
+            _FX_BuildSplinters(instance, NULL, NULL, NULL, splinterData, gFXT, NULL, NULL, shardFlags);
+        }
+
+        break;
+    }
+    case 18:
+        FX_StartGenericBlastring(instance, effect->modifierList[0], effect->modifierList[1], effect->modifierList[2]);
+        break;
+    case 19:
+        GAMEPAD_Shock0(effect->modifierList[0], effect->modifierList[1] * 4096);
+        break;
+    case 20:
+    {
+        int shock;
+        int amt;
+
+        shock = effect->modifierList[0];
+
+        amt = effect->modifierList[1] * 4096;
+
+        GAMEPAD_Shock1(shock, amt);
+        break;
+    }
+    case 21:
+        temp = MATH3D_DistanceBetweenPositions(&instance->position, &theCamera.core.position);
+
+        temp2 = effect->modifierList[0];
+
+        temp3 = ((8000 - temp) * temp2) / 8000;
+
+        if (temp3 > 0)
+        {
+            temp3 += 50;
+
+            if (effect->modifierList[0] < temp3)
+            {
+                temp3 = effect->modifierList[0];
+            }
+
+            GAMEPAD_Shock1(temp3, effect->modifierList[1] * 4096);
+        }
+
+        break;
+    }
+}
 
 void FX_EndInstanceEffects(Instance *instance)
 {

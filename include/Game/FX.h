@@ -86,5 +86,10 @@ void FX_DrawLightning(FXLightning *zap, MATRIX *wcTransform, unsigned long **ot)
 void FX_DrawFlash(FXFlash *flash);
 void FX_ContinueBlastRing(FXBlastringEffect *blast, FXTracker *fxTracker);
 void FX_DrawRing(MATRIX *wcTransform, SVector *position, MATRIX *matrix, int radius, int radius2, int radius3, int z1, int z2, int z3, long color, int sortInWorld);
+void FX_UpdraftPrimModify(FX_PRIM *fxPrim, Instance *instance, FXParticle *particle, FXTracker *fxTracker);
+void FX_StartGenericRibbon(Instance *instance, int num, int segOverride, int endOverride, int InitFlag);
+void FX_StartGenericGlow(Instance *instance, int num, int segOverride, int seg2Override, int InitFlag);
+FXLightning *FX_StartGenericLightning(Instance *instance, int num, int segOverride, int endSegOverride);
+FXBlastringEffect *FX_StartGenericBlastring(Instance *instance, int num, int segOverride, int matrixSegOverride);
 
 #endif
