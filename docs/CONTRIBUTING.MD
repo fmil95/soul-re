@@ -1,7 +1,5 @@
 # Contributing
 
----
-
 ## Decompiling
 
 ### Picking a Function to Decompile
@@ -40,8 +38,6 @@ void SAVE_SaveEverythingInMemory()
 ```
 
 This provides a huge amount of context for decompiling, do not deviate from the variables used in here unless you cannot get a function match otherwise.
-
----
 
 ## Styling Guides
 
@@ -83,8 +79,6 @@ Sometimes seemingly uneccesary operations are included in the code solely becaus
 ```c
 do {} while (0); // garbage code for reordering
 ```
-
----
 
 ## Contributing a Matched Function
 
