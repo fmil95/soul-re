@@ -717,7 +717,8 @@ void razCenterWithBlock(Instance *inst, Instance *target, int dist)
 
     ApplyMatrixSV(&mat, &d, &dd);
 
-    do {} while (0);
+    do {} while (0); // garbage code for reordering
+    
     d.vx = inst->position.x - target->position.x;
     d.vy = inst->position.y - target->position.y;
 
