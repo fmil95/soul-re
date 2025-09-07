@@ -3601,7 +3601,77 @@ void FX_DrawAllGeneralEffects(MATRIX *wcTransform, VertexPool *vertexPool, PrimP
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueBlastRing);
+void FX_ContinueBlastRing(FXBlastringEffect *blast, FXTracker *fxTracker)
+{
+    int fade;
+    int tm;
+
+    (void)fxTracker;
+
+    tm = gameTrackerX.timeMult / 16;
+
+    blast->radius += (blast->vel * tm) / 256;
+
+    blast->vel += blast->accl * FX_Frames;
+
+    if (blast->colorchange_radius < blast->radius)
+    {
+        int rad;
+        int crad;
+        int endrad;
+
+        rad = blast->radius / 4096;
+        crad = blast->colorchange_radius / 4096;
+        endrad = blast->endRadius / 4096;
+
+        if (blast->vel < 0)
+        {
+            fade = ((rad - crad) * 4096) / ((blast->startRadius / 4096) - crad);
+        }
+        else
+        {
+            fade = ((rad - crad) * 4096) / (endrad - crad);
+        }
+
+        if (fade >= 4096)
+        {
+            blast->color = 0;
+        }
+        else
+        {
+            LoadAverageCol((unsigned char *)&blast->endColor, (unsigned char *)&blast->startColor, fade, 4096 - fade, (unsigned char *)&blast->color);
+        }
+    }
+
+    if (gameTrackerX.gameData.asmData.MorphTime != 1000)
+    {
+        unsigned long *colorPtr;
+        unsigned long black;
+        int fade;
+
+        black = 0;
+
+        fade = INSTANCE_GetFadeValue(blast->instance);
+
+        if (blast->radius > blast->colorchange_radius)
+        {
+            colorPtr = (unsigned long *)&blast->color;
+        }
+        else
+        {
+            colorPtr = (unsigned long *)&blast->startColor;
+        }
+
+        LoadAverageCol((unsigned char *)colorPtr, (unsigned char *)&black, 4096 - fade, fade, (unsigned char *)&blast->color);
+    }
+
+    blast->color &= 0xFFFFFF;
+
+    if (((blast->lifeTime != -99) && (((blast->vel > 0) && (blast->radius > blast->endRadius)) || ((blast->vel < 0) && (blast->radius < blast->endRadius)))) || ((blast->lifeTime >= 0) && (--blast->lifeTime <= 0)))
+    {
+        FX_DeleteGeneralEffect((FXGeneralEffect *)blast);
+    }
+}
 
 FXBlastringEffect *FX_DoBlastRing(Instance *instance, SVector *position, MATRIX *mat, int segment, int radius, int endRadius, int colorChangeRadius, int size1, int size2, int vel, int accl, int height1, int height2, int height3, long startColor, long endColor, int pred_offset, int lifeTime, int sortInWorld)
 {
