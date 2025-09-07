@@ -290,6 +290,13 @@
         : : "r"(r0) \
     )
 
+#define gte_ldsxy3( r0, r1, r2 ) __asm__ ( \
+	"mtc2	%0, $12;"		\
+	"mtc2	%2, $14;"		\
+	"mtc2	%1, $13;"		\
+	:						\
+	: "r"( r0 ), "r"( r1 ), "r"( r2 ))
+
 #define gte_nrtpt() __asm__( \
     "nop;"                   \
     "nop;"                   \
