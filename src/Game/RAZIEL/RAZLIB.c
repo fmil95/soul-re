@@ -691,7 +691,59 @@ void razGetRotFromNormal(SVector *normal, Rotation *rot)
     MATH3D_RotationFromPosToPos(&a, &b, rot);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", razCenterWithBlock);
+void razCenterWithBlock(Instance *inst, Instance *target, int dist)
+{
+
+    SVECTOR d;
+    SVECTOR dd;
+    Rotation rot;
+    MATRIX mat;
+    G2SVector3 v;
+
+    int temp_s4; // not from decls.h
+    int v0;      // not from decls.h
+
+    razGetForwardNormal(inst, target);
+    razGetRotFromNormal(&Raziel.Senses.ForwardNormal, &rot);
+
+    v0 = abs(Raziel.Senses.ForwardNormal.z);
+    temp_s4 = v0 >= 0x3E9;
+
+    MATH3D_SetUnityMatrix(&mat);
+    RotMatrixZ(rot.z, &mat);
+
+    d.vx = d.vz = 0;
+    d.vy = 320 - dist;
+
+    ApplyMatrixSV(&mat, &d, &dd);
+
+    do {} while (0);
+    d.vx = inst->position.x - target->position.x;
+    d.vy = inst->position.y - target->position.y;
+
+    if (abs(d.vx) < abs(d.vy))
+    {
+        d.vx /= 2;
+        if (temp_s4) { d.vy = dd.vy; }
+    }
+    else
+    {
+        d.vy /= 2;
+        if (temp_s4) { d.vx = dd.vx; }
+    }
+
+    v.x = dd.vx + (inst->position.x - d.vx);
+    v.y = dd.vy + (inst->position.y - d.vy);
+    v.z = inst->position.z;
+
+    if (!G2Anim_IsControllerActive(&inst->anim, 0, 0x20))
+    {
+        G2Anim_EnableController(&inst->anim, 0, 0x20);
+    }
+
+    G2EmulationSetInterpController_Vector(inst, 0, 0x20, &v, 6, 0);
+    inst->rotation.z = rot.z;
+}
 
 void razSetPauseTranslation(Instance *instance)
 {
