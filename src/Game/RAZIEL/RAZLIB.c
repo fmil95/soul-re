@@ -92,7 +92,61 @@ void razAlignYRotInterp(Instance *source, Position *dest, unsigned char segNumbe
     source->rotation.z = MATH3D_AngleFromPosToPos(&source->position, dest);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", razConstrictAngle);
+int razConstrictAngle(Instance *instance)
+{
+
+    int i;
+    int j;
+    int k;
+    int Total;
+    int rc;
+    int outer;
+    SVector point;
+
+    Total = 0;
+    rc = 0;
+    point.x = instance->position.x;
+    point.y = instance->position.y;
+
+    for (i = Raziel.constrictIndex, j = 0; j < 0x20; i++, j++)
+    {
+
+        if (i >= 0x20)
+        {
+            i = 0;
+        }
+
+        k = i + 1;
+
+        if (k >= 0x20)
+        {
+            k = 0;
+        }
+
+        gte_ldsxy3(*(long *)&Raziel.constrictCenter.x, *(long *)&Raziel.constrictData[i].x, *(long *)&Raziel.constrictData[k].x);
+        gte_nclip();
+        gte_stopz(&outer);
+
+        if (outer > 0)
+        {
+            Total++;
+        }
+        else
+        {
+            Total--;
+        }
+
+        rc += COLLIDE_PointInTriangle2DPub(&Raziel.constrictCenter.x, &Raziel.constrictData[i].x, &Raziel.constrictData[k].x, &point.x);
+
+    }
+
+    if (rc == 0)
+    {
+        return 0;
+    }
+
+    return Total;
+}
 
 void razRotateUpperBody(Instance *instance, evActionLookAroundData *data)
 {
