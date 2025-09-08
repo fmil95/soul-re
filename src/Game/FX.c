@@ -4029,7 +4029,85 @@ void FX_StartGenericRibbon(Instance *instance, int num, int segOverride, int end
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericGlow);
+void FX_StartGenericGlow(Instance *instance, int num, int segOverride, int seg2Override, int InitFlag)
+{
+    Object *particle;
+    GenericFXObject *GFXO;
+    GenericGlowParams *GGP;
+    FXGlowEffect *glowEffect;
+    long *color;
+
+    particle = objectAccess[10].object;
+
+    if (particle != NULL)
+    {
+        GFXO = particle->data;
+
+        GGP = &GFXO->GlowList[num];
+
+        if (((InitFlag == 0) || (GGP->StartOnInit != 0)) && ((GGP->use_child == 0) || (instance = instance->LinkChild, (instance != NULL))))
+        {
+            color = &GFXO->ColorList[GGP->color_num];
+
+            if (GGP->numSegments < 2)
+            {
+                int seg;
+
+                seg = segOverride;
+
+                if (segOverride == 0)
+                {
+                    seg = GGP->segment;
+                }
+
+                glowEffect = FX_DoInstanceOneSegmentGlow(instance, seg, color, GGP->numColors, GGP->atuColorCycleRate, GGP->width, GGP->height);
+            }
+            else if (GGP->numSegments == 2)
+            {
+                int seg;
+                int segEnd;
+
+                if ((segOverride != 0) || (seg2Override != 0))
+                {
+                    seg = segOverride;
+                    segEnd = seg2Override;
+                }
+                else
+                {
+                    seg = GGP->segment;
+                    segEnd = GGP->segmentEnd;
+                }
+
+                glowEffect = FX_DoInstanceTwoSegmentGlow(instance, seg, segEnd, color, GGP->numColors, GGP->atuColorCycleRate, GGP->width);
+            }
+            else
+            {
+                int seg;
+                int numSeg;
+
+                if ((segOverride != 0) || (seg2Override != 0))
+                {
+                    seg = segOverride;
+                    numSeg = seg2Override;
+                }
+                else
+                {
+                    seg = GGP->segment;
+                    numSeg = GGP->numSegments;
+                }
+
+                glowEffect = FX_DoInstanceManySegmentGlow(instance, seg, numSeg, color, GGP->numColors, GGP->atuColorCycleRate, GGP->width);
+            }
+
+            if ((glowEffect != NULL) && (GGP->lifetime > 0))
+            {
+                glowEffect->lifeTime = GGP->lifetime * 33;
+
+                FX_SetGlowFades(glowEffect, GGP->fadein_time, GGP->fadeout_time);
+            }
+        }
+    }
+}
 
 FXLightning *FX_CreateLightning(Instance *instance, int lifeTime, int deg, int deg_inc, int width, int small_width, int segs, int sine_size, int variation, unsigned long color, unsigned long glow_color)
 {
