@@ -282,7 +282,57 @@ void FX_StandardProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
     FX_StandardFXPrimProcess(fxPrim, fxTracker);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ShatterProcess);
+void FX_ShatterProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
+{
+    MATRIX matrix;
+    Rotation rotation = {0};
+    Rotation rot_temp;
+    short temp; // not from decls.h
+
+    if (fxPrim->timeToLive > 0)
+    {
+        fxPrim->timeToLive--;
+    }
+
+    if (fxPrim->timeToLive == 0)
+    {
+        FX_Die(fxPrim, fxTracker);
+    }
+    else if (!(fxPrim->flags & 0x2))
+    {
+        temp = gameTrackerX.timeMult;
+
+        fxPrim->duo.phys.xVel += (temp * fxPrim->duo.phys.xAccl) >> 12;
+        fxPrim->duo.phys.yVel += (temp * fxPrim->duo.phys.yAccl) >> 12;
+        fxPrim->duo.phys.zVel += (temp * fxPrim->duo.phys.zAccl) >> 12;
+
+        fxPrim->position.x += (temp * fxPrim->duo.phys.xVel) >> 12;
+        fxPrim->position.y += (temp * fxPrim->duo.phys.yVel) >> 12;
+        fxPrim->position.z += (temp * fxPrim->duo.phys.zVel) >> 12;
+
+        if (fxPrim->position.z < fxPrim->work0)
+        {
+            fxPrim->timeToLive = 6;
+
+            fxPrim->flags |= 0x2;
+
+            fxPrim->position.z = fxPrim->work0;
+        }
+
+        rotation.x = fxPrim->work3;
+
+        if (rotation.x != 0)
+        {
+            rot_temp.x = ((rotation.x * fxPrim->matrix->lwTransform.m[0][0]) >> 12) + ((rotation.y * fxPrim->matrix->lwTransform.m[0][1]) >> 12) + ((rotation.z * fxPrim->matrix->lwTransform.m[0][2]) >> 12);
+            rot_temp.y = ((rotation.x * fxPrim->matrix->lwTransform.m[1][0]) >> 12) + ((rotation.y * fxPrim->matrix->lwTransform.m[1][1]) >> 12) + ((rotation.z * fxPrim->matrix->lwTransform.m[1][2]) >> 12);
+            rot_temp.z = ((rotation.x * fxPrim->matrix->lwTransform.m[2][0]) >> 12) + ((rotation.y * fxPrim->matrix->lwTransform.m[2][1]) >> 12) + ((rotation.z * fxPrim->matrix->lwTransform.m[2][2]) >> 12);
+
+            RotMatrix((SVECTOR *)&rot_temp, &matrix);
+
+            MulMatrix2(&matrix, &fxPrim->matrix->lwTransform);
+        }
+    }
+}
 
 void FX_DFacadeProcess(struct _FX_PRIM *fxPrim, struct _FXTracker *fxTracker)
 {
