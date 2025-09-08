@@ -4002,7 +4002,32 @@ FXParticle *FX_StartGenericParticle(Instance *instance, int num, int segOverride
     return currentParticle;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericRibbon);
+void FX_StartGenericRibbon(Instance *instance, int num, int segOverride, int endOverride, int InitFlag)
+{
+    Object *particle;
+    GenericFXObject *GFXO;
+    GenericRibbonParams *GRP;
+
+    (void)segOverride;
+    (void)endOverride;
+
+    particle = objectAccess[10].object;
+
+    if (particle != NULL)
+    {
+        GFXO = particle->data;
+
+        GRP = &GFXO->RibbonList[num];
+
+        if ((GRP->use_child == 0) || (instance = instance->LinkChild, (instance != NULL)))
+        {
+            if ((InitFlag == 0) || (GRP->StartOnInit != 0))
+            {
+                FX_StartRibbon(instance, GRP->startSegment, GRP->endSegment, GRP->type, GRP->ribbonLifeTime, GRP->faceLifeTime, GRP->startFadeValue, GRP->startColor, GRP->endColor);
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericGlow);
 
