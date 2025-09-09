@@ -1788,7 +1788,33 @@ void FX_MakeWaterBubble(struct _SVector *position, struct _SVector *vel, struct 
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawScreenPoly);
+void FX_DrawScreenPoly(int transtype, unsigned long color, int zdepth)
+{
+    unsigned long **drawot;
+    POLY_TF4 *poly;
+
+    drawot = gameTrackerX.drawOT;
+
+    poly = (POLY_TF4 *)gameTrackerX.primPool->nextPrim;
+
+    if ((unsigned long *)(poly + 1) < gameTrackerX.primPool->lastPrim)
+    {
+        setXY4(&poly->p1, 0, 0, 512, 0, 0, 240, 512, 240);
+
+        *(unsigned int *)&poly->p1.r0 = color;
+
+        poly->drawTPage = (transtype << 5) | _get_mode(1, 1, 0);
+
+        poly->p1.code = 0x2A;
+
+        // addPrim(drawot[zdepth], poly);
+
+        *(int *)poly = getaddr(&drawot[zdepth]) | 0x6000000;
+        *(int *)&drawot[zdepth] = (intptr_t)poly & 0xFFFFFF;
+
+        gameTrackerX.primPool->nextPrim = (unsigned long *)(poly + 1);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_SetupPolyGT4);
 
