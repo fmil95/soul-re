@@ -1816,7 +1816,57 @@ void FX_DrawScreenPoly(int transtype, unsigned long color, int zdepth)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_SetupPolyGT4);
+POLY_GT4 *FX_SetupPolyGT4(int x1, int y1, int x2, int y2, int otz, TextureMT3 *texture, long color0, long color1, long color2, long color3)
+{
+    POLY_GT4 *poly;
+    unsigned long **drawot;
+
+    poly = (POLY_GT4 *)gameTrackerX.primPool->nextPrim;
+
+    drawot = gameTrackerX.drawOT;
+
+    if ((unsigned long *)(poly + 1) >= gameTrackerX.primPool->lastPrim)
+    {
+        return NULL;
+    }
+
+    *(unsigned short *)&poly->u0 = *(unsigned short *)&texture->u2;
+    *(unsigned short *)&poly->u1 = *(unsigned short *)&texture->u1;
+    *(unsigned short *)&poly->u2 = *(unsigned short *)&texture->u0;
+
+    poly->x0 = poly->x2 = x1;
+    poly->x3 = poly->x1 = x2;
+
+    poly->y0 = poly->y1 = y1;
+    poly->y3 = poly->y2 = y2;
+
+    *(int *)&poly->r0 = color0 | 0x3C000000;
+    *(int *)&poly->r1 = color1;
+    *(int *)&poly->r2 = color2;
+
+    poly->u3 = poly->u1;
+    poly->v3 = poly->v2;
+
+    *(int *)&poly->r3 = color3;
+
+    poly->tpage = texture->tpage;
+
+    poly->clut = texture->clut;
+
+    if (otz <= 0)
+    {
+        otz = 1;
+    }
+
+    // addPrim(drawot[otz], poly);
+
+    *(int *)poly = getaddr(&drawot[otz]) | 0xC000000;
+    *(int *)&drawot[otz] = (intptr_t)poly & 0xFFFFFF;
+
+    gameTrackerX.primPool->nextPrim = (unsigned long *)(poly + 1);
+
+    return poly;
+}
 
 void FX_MakeWarpArrow(int x, int y, int xsize, int ysize, int fade)
 {
