@@ -18,83 +18,6 @@ Note that the status above is not reflective of the actual completion rate of th
 
 A complete list of overlays will be published on this repository soon.
 
-## Installation
-
-**Notice:** If not using Docker, the process outlined below for setting up Soul Reaverse locally on your machine will only work on Linux, because much of the required software isn't compatible with Windows. The only way to install the development environment on that operating system is through the _Windows Subsystem for Linux (WSL)_, which if you don't have it already enabled you should look for some guide on the net on how to use it.
-
-### Developing with Docker
-
-Docker can be used to work on this project independent of your operating system. To do so, first make sure you have Docker installed.
-To build the Docker image for the first time, just run:
-
-```bash
-./build_image.sh
-```
-
-commands can be passed to the container using `docker_run.sh`. Ex:
-
-```bash
-./docker_run.sh make setup
-```
-
-### Fetching the ROM
-
-The commercial releases of Soul Reaver don't have debugging symbols, except for the German release. However, the .SYM file that is available on that version's CD-ROM is from an earlier build of the game, which would render reverse-engineering it confusing as the symbols would be mapped to different addresses in memory and have breaking changes in regards to the actual compiled data on the binary. Instead, you must download the **1999-07-14 build** which can be found on Internet Archive, and glean the SLUS_007.08 file from there.
-
-### Installing the IDE and Plugins
-
-The preferred _Integrated Development Environment (IDE)_ for this project is **Visual Studio Code 1.99.3 or higher**, which can be freely obtained on its official website.
-
-After installing Visual Studio Code, it is very much recommended that you add the following Extensions to it:
-
-- C/C++ Extension Pack
-- CMake Tools
-- Makefile Tools
-- Python
-- WSL (not necessary if you are on Linux)
-
-### Installing the required packages
-
-You'll need to have the following packets installed on your system:
-
-- git
-- build-essential
-- binutils-mips-linux-gnu
-- cpp-mips-linux-gnu
-- python3
-- bchunk
-- p7zip-full
-- p7zip-rar
-
-You might already have some of these but if you don't have any of them or are missing a select few, you can grab them all with the following two Bash commands:
-
-```bash
-sudo apt update
-sudo apt install git build-essential binutils-mips-linux-gnu cpp-mips-linux-gnu python3 bchunk p7zip-full p7zip-rar
-```
-
-### Cloning the repository
-
-In order to clone this repository locally on your desktop, you can enter the next Bash command in the directory where you want to put up the decompile:
-
-```bash
-git clone --recursive https://github.com/fmil95/soul-re.git
-```
-
-If you want to do the cloning by some other means, don't forget to do it recursively or else the submodules in the **tools** folder of the project won't be copied correctly.
-
-### Placing the ROM
-
-Now that you have set up the repository, place the SLUS_007.08 file that you obtained earlier from the prototype's disc in the root folder.
-
-### Installing the Python 3 prerequisites
-
-On the root directory which is where the **requirements.txt** file is, run this command on your terminal to install the Python 3 essentials for the project:
-
-```bash
-python3 -m pip install -r requirements.txt
-```
-
 ### DAT Utils
 
 Soul Reaver, like other Crystal Dynamics games for the PSX, stores its overlays in BIGFILE.DAT. There is a provided utility for unpacking, repacking, and comparing BIGFILEs to assist with the overlay work. To get started, place `BIGFILE.DAT` into the root of the project.
@@ -119,13 +42,15 @@ python tools/cd-dat-utils/dat_utils.py -c dat-config.json compare <input_a> <inp
 
 The compare command will tell you how the BIGFILEs differ and in what way (encryption, hashes of file X in folder Y, etc.)
 
-### Building the code
+### Setting Up
 
-Enter `make setup` on the terminal to extract the source assets from the ROM, then input `make -j12` to compile the binary. If the build process is succesfully performed a folder named `build` will appear, which is where you'll find the result: **KAIN2.EXE**.
+For first time setup, check out the [installation guide](docs/INSTALL.MD).
 
-In case of an error, you can use `make clean` to do this step once more from scratch.
+### Contributing
 
-## Contact
+Thinking about contributing to the project? Check out the [contribution guide](docs/CONTRIBUTING.MD) to get started!
+
+### Contact
 
 The **PS1/PS2 Decompilation** Discord server has an exclusive channel for this decompilation titled **#soul-reaver**, which is the main medium of communication for anything in relation to it: [REDACTED].
 
