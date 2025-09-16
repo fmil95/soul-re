@@ -3864,7 +3864,54 @@ FXBlastringEffect *FX_DoBlastRing(Instance *instance, SVector *position, MATRIX 
     return blast;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawBlastring);
+void FX_DrawBlastring(MATRIX *wcTransform, FXBlastringEffect *blast)
+{
+    int radius;
+    SVector position;
+    MATRIX mat;
+
+    radius = blast->radius / 4096;
+
+    if (blast->segment >= 0)
+    {
+        MATRIX *swtransform;
+
+        if (blast->instance->matrix == NULL)
+        {
+            return;
+        }
+
+        swtransform = &blast->instance->matrix[blast->segment];
+
+        CompMatrix(wcTransform, swtransform, &mat);
+
+        if (blast->stay_in_place == 0)
+        {
+            position.x = swtransform->t[0];
+            position.y = swtransform->t[1];
+            position.z = swtransform->t[2];
+        }
+        else
+        {
+            position = blast->position;
+        }
+    }
+    else
+    {
+        CompMatrix(wcTransform, &blast->matrix, &mat);
+
+        position = blast->position;
+    }
+
+    if (blast->type == 0)
+    {
+        FX_DrawRing(wcTransform, &position, &mat, radius, radius + blast->size1, radius + blast->size2, blast->height1, blast->height2, blast->height3, blast->color, blast->sortInWorld);
+    }
+    else if (blast->type == 1)
+    {
+        FX_DrawRing2(wcTransform, &position, &mat, radius, radius + blast->size1, radius + blast->size2, blast->height1, blast->height2, blast->height3, blast->predator_offset, blast->sortInWorld);
+    }
+}
 
 void FX_ContinueFlash(FXFlash *flash, FXTracker *fxTracker)
 {
@@ -4325,7 +4372,7 @@ FXFlash *FX_StartGenericFlash(Instance *instance, int num)
         flash->timeFromColor = flash->timeAtColor + (GFP->timeFromColor * 256);
 
         FX_InsertGeneralEffect(flash);
-    }
+}
 
     return flash;
 }
