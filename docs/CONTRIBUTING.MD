@@ -118,4 +118,4 @@ For function contributions, each commit should contain one function match and wh
 
 Now it's time to PR. In the PR description, include links to the scratches for the matched functions:
 
-![image](./images/PR-example.png)
+![image](/docs/images/PR-example.png)
