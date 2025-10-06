@@ -245,7 +245,64 @@ void DRAW_DrawButton(ButtonTexture *button, short x, short y, unsigned long **ot
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_LoadButton);
+void DRAW_LoadButton(long *addr, ButtonTexture *button)
+{
+    RECT vramRect;
+    long *paletteAddr;
+    short paletteW;
+    short paletteH;
+
+    addr = &addr[2];
+
+    paletteAddr = NULL;
+
+    paletteH = paletteW = 0;
+
+    button->xshift = 0;
+
+    // TODO: find the struct that addr gets parsed to
+    if (((long *)addr)[-1] == 8)
+    {
+        button->xshift = 2;
+
+        paletteW = 16;
+        paletteH = 1;
+
+        paletteAddr = &addr[3];
+        addr = &addr[11];
+    }
+
+    button->textureW = ((unsigned short *)addr)[4];
+    button->textureH = ((unsigned short *)addr)[5];
+
+    vramRect.w = (paletteW < button->textureW) ? button->textureW : paletteW;
+    vramRect.h = button->textureH + paletteH;
+
+    button->vramBlock = VRAM_CheckVramSlot(&vramRect.x, &vramRect.y, vramRect.w, vramRect.h, 4, 0);
+
+    button->tpage = getTPage(2 - button->xshift, 0, vramRect.x, vramRect.y);
+
+    button->vramBlock->udata.button = button;
+
+    vramRect.w = button->textureW;
+    vramRect.h = button->textureH;
+
+    LoadImage(&vramRect, (unsigned long *)&addr[3]);
+
+    if (paletteAddr != NULL)
+    {
+        vramRect.y += button->textureH;
+
+        vramRect.w = paletteW;
+        vramRect.h = paletteH;
+
+        LoadImage(&vramRect, (unsigned long *)paletteAddr);
+
+        button->clut = getClut(vramRect.x, vramRect.y);
+    }
+
+    DrawSync(0);
+}
 
 void DRAW_FreeButton(ButtonTexture *button)
 {

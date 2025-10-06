@@ -3063,7 +3063,134 @@ void StateHandlerPushObject(CharacterState *In, int CurrentSection, intptr_t Dat
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", StateHandlerBreakOff);
+void StateHandlerBreakOff(CharacterState *In, int CurrentSection, intptr_t Data)
+{
+
+    Message *Ptr;
+
+    while ((Ptr = PeekMessageQueue(&In->SectionList[CurrentSection].Event)) != NULL)
+    {
+
+        switch (Ptr->ID)
+        {
+
+        case 0x100001:
+            if (CurrentSection == 0)
+            {
+
+                PhysObInteractProperties *interactProp;
+                Instance *Inst;
+                int anim;
+
+                if (Raziel.Senses.EngagedMask & 0x10)
+                {
+                    Inst = Raziel.Senses.EngagedList[4].instance;
+                }
+                else
+                {
+                    Inst = Raziel.Senses.EngagedList[13].instance;
+                }
+
+                interactProp = (PhysObInteractProperties *)INSTANCE_Query(Inst, 0x15);
+
+                if (Raziel.Senses.EngagedMask & 0x10)
+                {
+                    anim = interactProp->razielAnim;
+                }
+                else
+                {
+                    anim = interactProp->razielAuxAnim;
+                }
+
+                In->SectionList[CurrentSection].Data2 = (intptr_t)Inst;
+
+                if (anim == 0xFF)
+                {
+                    SetTimer(interactProp->frame + 1);
+                }
+                else
+                {
+                    G2EmulationInstanceToInstanceSwitchAnimationCharacter(In->CharacterInstance, Inst, anim, 0, 0, 1);
+                    if (interactProp->frame != 0xFF)
+                    {
+                        G2AnimSection *temp; // not from decls.h
+
+                        Raziel.alarmTable = interactProp->frame * 0x64;
+                        temp = &In->CharacterInstance->anim.section[CurrentSection];
+                        temp->swAlarmTable = &Raziel.alarmTable;
+                    }
+                }
+                ControlFlag = 0x08041108;
+                PhysicsMode = 3;
+                switch (interactProp->mode)
+                {
+                case 0:
+                    razAlignYRotMoveInterp(In->CharacterInstance, Inst, interactProp->distance, 0, 3, 0);
+                    break;
+                case 1:
+                    razAlignYMoveRot(Inst, -interactProp->distance, &In->CharacterInstance->position, &In->CharacterInstance->rotation, 0);
+                    break;
+                case 3:
+                    razAlignYRotMoveInterp(In->CharacterInstance, Inst, interactProp->distance, 0, interactProp->mode, 0x800);
+                    break;
+                case 4:
+                    razAlignYMoveRot(Inst, -interactProp->distance, &In->CharacterInstance->position, &In->CharacterInstance->rotation, 0x800);
+                    break;
+                }
+            }
+            break;
+        case 0x08000004:
+            goto label;
+        case 0x100015:
+            if (CurrentSection == 0)
+            {
+
+                PhysObInteractProperties *interactProp;
+                int action;
+                int condition;
+                Instance *Inst;
+
+                StateSwitchStateCharacterData(In, &StateHandlerIdle, SetControlInitIdleData(0, 0, 3));
+
+            label:
+                interactProp = (PhysObInteractProperties *)INSTANCE_Query((Instance *)(intptr_t)In->SectionList[CurrentSection].Data2, 0x15);
+
+                if (Raziel.Senses.EngagedMask & 0x10)
+                {
+                    action = interactProp->action;
+                    condition = interactProp->conditions;
+                }
+                else
+                {
+                    action = interactProp->auxAction;
+                    condition = interactProp->auxConditions;
+                }
+
+                if (condition & 0x1FE)
+                {
+                    Inst = Raziel.soulReaver;
+                    razReaverImbue(action);
+                }
+                else
+                {
+                    Inst = In->CharacterInstance;
+                }
+                INSTANCE_Post((Instance *)(intptr_t)In->SectionList[CurrentSection].Data2, 0x800023, SetObjectBreakOffData(Inst, 0x31, 0, 0, 0, 0, (int)(short)action));
+            }
+            break;
+        case 0x08000000:
+        case 0x08000001:
+            StateSwitchStateData(In, CurrentSection, &StateHandlerIdle, SetControlInitIdleData(0, 0, 3));
+            break;
+        case 0x100004:
+        case 0x80000000:
+            break;
+        default:
+            DefaultStateHandler(In, CurrentSection, Data);
+        }
+        DeMessageQueue(&In->SectionList[CurrentSection].Event);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", StateHandlerPullSwitch);
 

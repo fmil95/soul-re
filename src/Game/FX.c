@@ -282,7 +282,57 @@ void FX_StandardProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
     FX_StandardFXPrimProcess(fxPrim, fxTracker);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ShatterProcess);
+void FX_ShatterProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
+{
+    MATRIX matrix;
+    Rotation rotation = {0};
+    Rotation rot_temp;
+    short temp; // not from decls.h
+
+    if (fxPrim->timeToLive > 0)
+    {
+        fxPrim->timeToLive--;
+    }
+
+    if (fxPrim->timeToLive == 0)
+    {
+        FX_Die(fxPrim, fxTracker);
+    }
+    else if (!(fxPrim->flags & 0x2))
+    {
+        temp = gameTrackerX.timeMult;
+
+        fxPrim->duo.phys.xVel += (temp * fxPrim->duo.phys.xAccl) >> 12;
+        fxPrim->duo.phys.yVel += (temp * fxPrim->duo.phys.yAccl) >> 12;
+        fxPrim->duo.phys.zVel += (temp * fxPrim->duo.phys.zAccl) >> 12;
+
+        fxPrim->position.x += (temp * fxPrim->duo.phys.xVel) >> 12;
+        fxPrim->position.y += (temp * fxPrim->duo.phys.yVel) >> 12;
+        fxPrim->position.z += (temp * fxPrim->duo.phys.zVel) >> 12;
+
+        if (fxPrim->position.z < fxPrim->work0)
+        {
+            fxPrim->timeToLive = 6;
+
+            fxPrim->flags |= 0x2;
+
+            fxPrim->position.z = fxPrim->work0;
+        }
+
+        rotation.x = fxPrim->work3;
+
+        if (rotation.x != 0)
+        {
+            rot_temp.x = ((rotation.x * fxPrim->matrix->lwTransform.m[0][0]) >> 12) + ((rotation.y * fxPrim->matrix->lwTransform.m[0][1]) >> 12) + ((rotation.z * fxPrim->matrix->lwTransform.m[0][2]) >> 12);
+            rot_temp.y = ((rotation.x * fxPrim->matrix->lwTransform.m[1][0]) >> 12) + ((rotation.y * fxPrim->matrix->lwTransform.m[1][1]) >> 12) + ((rotation.z * fxPrim->matrix->lwTransform.m[1][2]) >> 12);
+            rot_temp.z = ((rotation.x * fxPrim->matrix->lwTransform.m[2][0]) >> 12) + ((rotation.y * fxPrim->matrix->lwTransform.m[2][1]) >> 12) + ((rotation.z * fxPrim->matrix->lwTransform.m[2][2]) >> 12);
+
+            RotMatrix((SVECTOR *)&rot_temp, &matrix);
+
+            MulMatrix2(&matrix, &fxPrim->matrix->lwTransform);
+        }
+    }
+}
 
 void FX_DFacadeProcess(struct _FX_PRIM *fxPrim, struct _FXTracker *fxTracker)
 {
@@ -1738,9 +1788,85 @@ void FX_MakeWaterBubble(struct _SVector *position, struct _SVector *vel, struct 
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawScreenPoly);
+void FX_DrawScreenPoly(int transtype, unsigned long color, int zdepth)
+{
+    unsigned long **drawot;
+    POLY_TF4 *poly;
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_SetupPolyGT4);
+    drawot = gameTrackerX.drawOT;
+
+    poly = (POLY_TF4 *)gameTrackerX.primPool->nextPrim;
+
+    if ((unsigned long *)(poly + 1) < gameTrackerX.primPool->lastPrim)
+    {
+        setXY4(&poly->p1, 0, 0, 512, 0, 0, 240, 512, 240);
+
+        *(unsigned int *)&poly->p1.r0 = color;
+
+        poly->drawTPage = (transtype << 5) | _get_mode(1, 1, 0);
+
+        poly->p1.code = 0x2A;
+
+        // addPrim(drawot[zdepth], poly);
+
+        *(int *)poly = getaddr(&drawot[zdepth]) | 0x6000000;
+        *(int *)&drawot[zdepth] = (intptr_t)poly & 0xFFFFFF;
+
+        gameTrackerX.primPool->nextPrim = (unsigned long *)(poly + 1);
+    }
+}
+
+POLY_GT4 *FX_SetupPolyGT4(int x1, int y1, int x2, int y2, int otz, TextureMT3 *texture, long color0, long color1, long color2, long color3)
+{
+    POLY_GT4 *poly;
+    unsigned long **drawot;
+
+    poly = (POLY_GT4 *)gameTrackerX.primPool->nextPrim;
+
+    drawot = gameTrackerX.drawOT;
+
+    if ((unsigned long *)(poly + 1) >= gameTrackerX.primPool->lastPrim)
+    {
+        return NULL;
+    }
+
+    *(unsigned short *)&poly->u0 = *(unsigned short *)&texture->u2;
+    *(unsigned short *)&poly->u1 = *(unsigned short *)&texture->u1;
+    *(unsigned short *)&poly->u2 = *(unsigned short *)&texture->u0;
+
+    poly->x0 = poly->x2 = x1;
+    poly->x3 = poly->x1 = x2;
+
+    poly->y0 = poly->y1 = y1;
+    poly->y3 = poly->y2 = y2;
+
+    *(int *)&poly->r0 = color0 | 0x3C000000;
+    *(int *)&poly->r1 = color1;
+    *(int *)&poly->r2 = color2;
+
+    poly->u3 = poly->u1;
+    poly->v3 = poly->v2;
+
+    *(int *)&poly->r3 = color3;
+
+    poly->tpage = texture->tpage;
+
+    poly->clut = texture->clut;
+
+    if (otz <= 0)
+    {
+        otz = 1;
+    }
+
+    // addPrim(drawot[otz], poly);
+
+    *(int *)poly = getaddr(&drawot[otz]) | 0xC000000;
+    *(int *)&drawot[otz] = (intptr_t)poly & 0xFFFFFF;
+
+    gameTrackerX.primPool->nextPrim = (unsigned long *)(poly + 1);
+
+    return poly;
+}
 
 void FX_MakeWarpArrow(int x, int y, int xsize, int ysize, int fade)
 {
@@ -3601,7 +3727,77 @@ void FX_DrawAllGeneralEffects(MATRIX *wcTransform, VertexPool *vertexPool, PrimP
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueBlastRing);
+void FX_ContinueBlastRing(FXBlastringEffect *blast, FXTracker *fxTracker)
+{
+    int fade;
+    int tm;
+
+    (void)fxTracker;
+
+    tm = gameTrackerX.timeMult / 16;
+
+    blast->radius += (blast->vel * tm) / 256;
+
+    blast->vel += blast->accl * FX_Frames;
+
+    if (blast->colorchange_radius < blast->radius)
+    {
+        int rad;
+        int crad;
+        int endrad;
+
+        rad = blast->radius / 4096;
+        crad = blast->colorchange_radius / 4096;
+        endrad = blast->endRadius / 4096;
+
+        if (blast->vel < 0)
+        {
+            fade = ((rad - crad) * 4096) / ((blast->startRadius / 4096) - crad);
+        }
+        else
+        {
+            fade = ((rad - crad) * 4096) / (endrad - crad);
+        }
+
+        if (fade >= 4096)
+        {
+            blast->color = 0;
+        }
+        else
+        {
+            LoadAverageCol((unsigned char *)&blast->endColor, (unsigned char *)&blast->startColor, fade, 4096 - fade, (unsigned char *)&blast->color);
+        }
+    }
+
+    if (gameTrackerX.gameData.asmData.MorphTime != 1000)
+    {
+        unsigned long *colorPtr;
+        unsigned long black;
+        int fade;
+
+        black = 0;
+
+        fade = INSTANCE_GetFadeValue(blast->instance);
+
+        if (blast->radius > blast->colorchange_radius)
+        {
+            colorPtr = (unsigned long *)&blast->color;
+        }
+        else
+        {
+            colorPtr = (unsigned long *)&blast->startColor;
+        }
+
+        LoadAverageCol((unsigned char *)colorPtr, (unsigned char *)&black, 4096 - fade, fade, (unsigned char *)&blast->color);
+    }
+
+    blast->color &= 0xFFFFFF;
+
+    if (((blast->lifeTime != -99) && (((blast->vel > 0) && (blast->radius > blast->endRadius)) || ((blast->vel < 0) && (blast->radius < blast->endRadius)))) || ((blast->lifeTime >= 0) && (--blast->lifeTime <= 0)))
+    {
+        FX_DeleteGeneralEffect((FXGeneralEffect *)blast);
+    }
+}
 
 FXBlastringEffect *FX_DoBlastRing(Instance *instance, SVector *position, MATRIX *mat, int segment, int radius, int endRadius, int colorChangeRadius, int size1, int size2, int vel, int accl, int height1, int height2, int height3, long startColor, long endColor, int pred_offset, int lifeTime, int sortInWorld)
 {
@@ -3668,7 +3864,54 @@ FXBlastringEffect *FX_DoBlastRing(Instance *instance, SVector *position, MATRIX 
     return blast;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawBlastring);
+void FX_DrawBlastring(MATRIX *wcTransform, FXBlastringEffect *blast)
+{
+    int radius;
+    SVector position;
+    MATRIX mat;
+
+    radius = blast->radius / 4096;
+
+    if (blast->segment >= 0)
+    {
+        MATRIX *swtransform;
+
+        if (blast->instance->matrix == NULL)
+        {
+            return;
+        }
+
+        swtransform = &blast->instance->matrix[blast->segment];
+
+        CompMatrix(wcTransform, swtransform, &mat);
+
+        if (blast->stay_in_place == 0)
+        {
+            position.x = swtransform->t[0];
+            position.y = swtransform->t[1];
+            position.z = swtransform->t[2];
+        }
+        else
+        {
+            position = blast->position;
+        }
+    }
+    else
+    {
+        CompMatrix(wcTransform, &blast->matrix, &mat);
+
+        position = blast->position;
+    }
+
+    if (blast->type == 0)
+    {
+        FX_DrawRing(wcTransform, &position, &mat, radius, radius + blast->size1, radius + blast->size2, blast->height1, blast->height2, blast->height3, blast->color, blast->sortInWorld);
+    }
+    else if (blast->type == 1)
+    {
+        FX_DrawRing2(wcTransform, &position, &mat, radius, radius + blast->size1, radius + blast->size2, blast->height1, blast->height2, blast->height3, blast->predator_offset, blast->sortInWorld);
+    }
+}
 
 void FX_ContinueFlash(FXFlash *flash, FXTracker *fxTracker)
 {
@@ -3932,9 +4175,112 @@ FXParticle *FX_StartGenericParticle(Instance *instance, int num, int segOverride
     return currentParticle;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericRibbon);
+void FX_StartGenericRibbon(Instance *instance, int num, int segOverride, int endOverride, int InitFlag)
+{
+    Object *particle;
+    GenericFXObject *GFXO;
+    GenericRibbonParams *GRP;
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericGlow);
+    (void)segOverride;
+    (void)endOverride;
+
+    particle = objectAccess[10].object;
+
+    if (particle != NULL)
+    {
+        GFXO = particle->data;
+
+        GRP = &GFXO->RibbonList[num];
+
+        if ((GRP->use_child == 0) || (instance = instance->LinkChild, (instance != NULL)))
+        {
+            if ((InitFlag == 0) || (GRP->StartOnInit != 0))
+            {
+                FX_StartRibbon(instance, GRP->startSegment, GRP->endSegment, GRP->type, GRP->ribbonLifeTime, GRP->faceLifeTime, GRP->startFadeValue, GRP->startColor, GRP->endColor);
+            }
+        }
+    }
+}
+
+void FX_StartGenericGlow(Instance *instance, int num, int segOverride, int seg2Override, int InitFlag)
+{
+    Object *particle;
+    GenericFXObject *GFXO;
+    GenericGlowParams *GGP;
+    FXGlowEffect *glowEffect;
+    long *color;
+
+    particle = objectAccess[10].object;
+
+    if (particle != NULL)
+    {
+        GFXO = particle->data;
+
+        GGP = &GFXO->GlowList[num];
+
+        if (((InitFlag == 0) || (GGP->StartOnInit != 0)) && ((GGP->use_child == 0) || (instance = instance->LinkChild, (instance != NULL))))
+        {
+            color = &GFXO->ColorList[GGP->color_num];
+
+            if (GGP->numSegments < 2)
+            {
+                int seg;
+
+                seg = segOverride;
+
+                if (segOverride == 0)
+                {
+                    seg = GGP->segment;
+                }
+
+                glowEffect = FX_DoInstanceOneSegmentGlow(instance, seg, color, GGP->numColors, GGP->atuColorCycleRate, GGP->width, GGP->height);
+            }
+            else if (GGP->numSegments == 2)
+            {
+                int seg;
+                int segEnd;
+
+                if ((segOverride != 0) || (seg2Override != 0))
+                {
+                    seg = segOverride;
+                    segEnd = seg2Override;
+                }
+                else
+                {
+                    seg = GGP->segment;
+                    segEnd = GGP->segmentEnd;
+                }
+
+                glowEffect = FX_DoInstanceTwoSegmentGlow(instance, seg, segEnd, color, GGP->numColors, GGP->atuColorCycleRate, GGP->width);
+            }
+            else
+            {
+                int seg;
+                int numSeg;
+
+                if ((segOverride != 0) || (seg2Override != 0))
+                {
+                    seg = segOverride;
+                    numSeg = seg2Override;
+                }
+                else
+                {
+                    seg = GGP->segment;
+                    numSeg = GGP->numSegments;
+                }
+
+                glowEffect = FX_DoInstanceManySegmentGlow(instance, seg, numSeg, color, GGP->numColors, GGP->atuColorCycleRate, GGP->width);
+            }
+
+            if ((glowEffect != NULL) && (GGP->lifetime > 0))
+            {
+                glowEffect->lifeTime = GGP->lifetime * 33;
+
+                FX_SetGlowFades(glowEffect, GGP->fadein_time, GGP->fadeout_time);
+            }
+        }
+    }
+}
 
 FXLightning *FX_CreateLightning(Instance *instance, int lifeTime, int deg, int deg_inc, int width, int small_width, int segs, int sine_size, int variation, unsigned long color, unsigned long glow_color)
 {
@@ -4026,7 +4372,7 @@ FXFlash *FX_StartGenericFlash(Instance *instance, int num)
         flash->timeFromColor = flash->timeAtColor + (GFP->timeFromColor * 256);
 
         FX_InsertGeneralEffect(flash);
-    }
+}
 
     return flash;
 }
