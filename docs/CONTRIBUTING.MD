@@ -10,7 +10,7 @@ To decompile, it's recommended to use [decomp.me](https://decomp.me), where ther
 
 ### Function Signatures and Local Variables
 
-Next, look up your function in [decls.h](decls.h). This will give you the function signature, all local variables declared in it, their registers, and any inner scopes.
+When unpacking your backup of the game, you'll notice a `.SYM` file. This is the file containing the debug information for the game. This can be used with [PSX_MND_SYM](https://github.com/Gillou68310/psx_mnd_sym/tree/kain2) to generate a `decls.h`. This header file contains the function signatures, all local variables declared in them, their registers, and any inner scopes.
 
 Ex:
 
@@ -41,9 +41,9 @@ This provides a huge amount of context for decompiling, do not deviate from the 
 
 ## Styling Guides
 
-### Curly Braces on Their Own Lines
+### Indentation Style
 
-Statements or scopes that cannot be fit in one line should have their curly braces on their own lines.
+This project uses Allman-style formatting. Statements or scopes that cannot be fit in one line should have their curly braces on their own lines.
 
 ```c
 // Like this
