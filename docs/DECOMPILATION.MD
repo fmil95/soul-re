@@ -61,7 +61,7 @@ the result of some compiler optimization.
 
 ### Array Accesses
 
-These are the most common by far. To fully understand why this pattern manifests, it's helpful to understand the way that array element are ordered in memory.
+These are the most common by far. To fully understand why this pattern manifests, it's helpful to understand the way that array elements are ordered in memory.
 
 Under the hood, array elements are stored contiguously in memory. So the address for an array element is:
 
@@ -98,10 +98,6 @@ This looks like an array access. If we look in [TYPES.h](/include/Game/TYPES.h),
 So we can now rewrite this as:
 
 ```c
-G2Matrix segMatrix;
-G2Anim *anim;
-G2AnimController *controller;
-
 segMatrix = anim->segMatrices[controller->segNumber];
 ```
 
@@ -126,9 +122,6 @@ if (a < 0)
 Then it can usually be rewritten as:
 
 ```c
-int a;
-int b;
-
 a = abs(b);
 ```
 
@@ -138,7 +131,42 @@ There are a few different ways that loops can be decompiled.
 
 First, the `for` loop.
 
-### Bit Clearing
+### Clearing Bitflags
+
+When looking at bitwise operations on flags, you may see a flag AND-ed with some very high value:
+
+```c
+camera->flags &= 0xF7FF;
+```
+
+Although this code works, that is likely _not_ what the developer actually wrote, and doesn't accurately reflect what is really going on here. Let's look at the binary representation of this value:
+
+```c
+   F    7    F    F
+1111 0111 1111 1111
+```
+
+We can see that every bit is set except one. What's actually happening here is a single bit is being cleared. When clearing bitflags, it's very uncommon for the actual inverse value to be written in code, instead being represented as the bitwise negation `~` of the bit in question:
+
+```c
+   0    8    0    0
+0000 1000 0000 0000
+```
+
+So the actual code should look something like this:
+
+```c
+camera->flags &= ~0x800;
+```
+
+Although the 2 code snippets above do the exact same thing, semantically the second one makes much more sense. This is especially evident when flags have explicit names or definitions:
+
+```c
+#define MY_FLAG 0x80       // Binary 1000 0000
+
+camera->flags |= MY_FLAG;  // Setting the flag
+camera->flags &= ~MY_FLAG; // Clearing the flag
+```
 
 ### Fixed-point Arithmetic
 
