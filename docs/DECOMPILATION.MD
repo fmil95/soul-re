@@ -55,9 +55,7 @@ If you see patterns like this appear in the outline of a function, chances are t
 
 ## Compiler Patterns
 
-As you go through and decompile code, you'll often begin to see that there are
-common patterns that emerge during the initial decompile. These are usually
-the result of some compiler optimization.
+As you go through and decompile code, you'll begin to see that there are common patterns that emerge during the initial decompile.
 
 ### Array Accesses
 
@@ -65,8 +63,8 @@ These are the most common by far. To fully understand why this pattern manifests
 
 Under the hood, array elements are stored contiguously in memory. So the address for an array element is:
 
-```c
-Array Address + (Index * Element Size)
+```latex
+ElementAddress = ArrayAddress + (Index * ElementSize)
 ```
 
 So if we had an array of integers `myArray`, a given element `i` is located at:
@@ -178,6 +176,10 @@ camera->flags &= ~MY_FLAG; // Clearing the flag
 
 ### The Permuter
 
-The permuter is a tool that will, as the name implies, create thousands of
-small permutations of your current source code with the goal of achieving a better match.
-This is immensely helpful if you have a function mostly matched, but are stuck with some odd instruction ordering or register usage.
+The permuter is a tool that will continuously create small permutations of your current source code with the goal of achieving a better match. This is immensely helpful if you have a function mostly matched, but are stuck on some odd instruction ordering or register usage.
+
+Using the permuter is simple, just copy the link to your decomp scratch and run the following terminal command:
+
+```bash
+python tools/scripts/permuter.py <LINK TO YOUR SCRATCH>
+```
