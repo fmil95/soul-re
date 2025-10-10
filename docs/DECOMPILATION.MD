@@ -77,9 +77,9 @@ Even though this code will work, the C devs gave us a much more convenient way t
 myArray[i];
 ```
 
-There's tons of array accesses throughout the project. But when you start decompiling, the initial decompile will usually spit out the verbose format because it isn't always sure about what is and isn't an array access or some other pointer manipulation.
+When you start decompiling, the initial decompile will usually spit out the verbose format because it isn't always sure about what is and isn't an array access or some other pointer manipulation.
 
-So something like:
+So we will usually end up with something like:
 
 ```c
 G2Matrix segMatrix;
@@ -401,7 +401,7 @@ int CanBePickedUp(struct _Instance *instance, struct _Instance *Force, int LinkN
 Let's walk through the first variable: `pcollideInfo`. It's annotated as 80 bytes from the top of the stack. So we know where it is relative to the top of the stack, and we know how big the stack is, so let's do a little math:
 
 - The stack is 0x60 bytes
-- `pCollideInfo` is 80 bytes from the top of the stack.
+- `pcollideInfo` is 80 bytes from the top of the stack.
 - First, let's convert that to hexidecimal: 80 -> 0x50
 - 0x60 - 0x50 = **0x10**
 
