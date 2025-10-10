@@ -325,9 +325,71 @@ camera->flags |= MY_FLAG;  // Setting the flag
 camera->flags &= ~MY_FLAG; // Clearing the flag
 ```
 
-### Fixed-point Arithmetic
+### Fixed-Point Arithmetic
 
-TODO
+During decompilation, you may encounter a series of seemingly random additions and shifts. Below is an example of a real piece of code from the project. For the sake of this example, variable names and types have been resolved:
+
+```c
+int GlyphTime(int time) {
+
+  time *= time;
+
+  if (time < 0)
+  {
+      time += 0xFFF;
+  }
+
+  return time >> 0xC;
+}
+```
+
+What's going on here is [fixed-point arithmetic](https://en.wikipedia.org/wiki/Fixed-point_arithmetic), as the PSX doesn't have an **FPU** (**F**loating **P**oint **U**nit) which is necessary to support [floating-point arithmetic](https://en.wikipedia.org/wiki/Floating-point_arithmetic). This is the same reason that 3D titles on the console exhibit vertex snapping (or the endearing "visual jitter" that PSX games had).
+
+The pattern in the above snippet starts after multiplying `time` by itself. Let's break down what's going on here:
+
+1. Check if `time` is less than 0 and, if it is, add 0xFFF (or 4095) to it.
+
+2. Shift `time` right by 0xC (12) bits. This has the same effect of dividing by 2^12 (4096).
+
+What this boils down to is a simple division operation, but it's expanded as this due to the lack of floating-point support. The pattern can be generalized as follows:
+
+- For the operation $x / y$ where $y = 2^n$
+
+- If $x < 0$, increase it by $y-1$
+
+- Now, right shift $x$ by $n$ bits
+
+So why the addition of $y-1$? Well, let's walk through what happens when we don't. If we were calculating $-7 / 4$, that would simplify to $-7 >> 2$.
+
+Since $-7$ is negative, it is represented with [2's complement](https://en.wikipedia.org/wiki/Two%27s_complement):
+
+```c
+11111001
+```
+
+Now let's perform the right shift of 2 bits:
+
+```c
+11111110
+```
+
+Oh no! We've ended up with $-2$! This is a **_big_** problem. In floating-point arithmetic, we'd get the correct answer: $-1.75$, but since the PSX can't support the floating point we _should_ have ended up with $-1$.
+
+So when $x$ is negative, fixed-point arithmetic rounds **_away_** from 0 and **_towards_** negative infinity. Now let's try this again, this time with the negative check and addition:
+
+$-7$ is less than 0, so let's add $y-1$ which is $3$. $-7 + 3 = -4$. Now let's do the division: $-4 / 4 = -1$ which is the right answer!
+
+Adding $y-1$ when $x$ is negative compensates for the rounding issue, and makes negative divsion round towards 0!
+
+Knowing this, we can rewrite the code above as follows:
+
+```c
+int GlyphTime(int time)
+{
+  time *= time;
+  return time / 4096;
+}
+```
 
 ### Load Optimization
 
