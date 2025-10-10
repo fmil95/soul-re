@@ -327,7 +327,11 @@ camera->flags &= ~MY_FLAG; // Clearing the flag
 
 ### Fixed-point Arithmetic
 
+TODO
+
 ### Load Optimization
+
+TODO
 
 ## Misc
 
