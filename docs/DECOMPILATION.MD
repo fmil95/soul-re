@@ -123,13 +123,174 @@ a = abs(b);
 
 ### Loops
 
-There are a few different ways that loops can be decompiled.
+Being able to recognize and correct poorly decompiled loops is necessary. Even though the incorrect versions _functionally_ do the same thing, the different variations can impact what instructions are emitted, the order of emission, and the registers that are used.
 
-First, the `for` loop.
+#### While Loops
+
+Although while loops _can_ show up properly in the initial decompilation, there are times where they don't. In these instances, there are 2 main ways a while loop can manifest.
+
+First, using labels and gotos:
+
+```c
+int a;
+
+myLoop:
+if (a > 0)
+{
+  // some code
+  goto myLoop;
+}
+```
+
+Second, using if statements and a do while loop:
+
+```c
+int a;
+
+if (a > 0)
+{
+  do
+  {
+    // some code
+  } while (a > 0);
+}
+```
+
+Note that this one looks very similar to how a for loop can manifest.
+
+Both of these can be rewritten into a while loop:
+
+```c
+int a;
+
+while (a > 0)
+{
+  // some code
+}
+```
+
+Let's look at a real instance of this, below is a snippet of real code from this project. For the sake of this example, variable names and types have already been resolved.
+
+When beginning this decompile, we are met with this piece of code:
+
+```c
+void FX_WaterBubbleProcess(FX_PRIM *fxPrim, FXTracker *fxTracker);
+
+FX_PRIM* fxPrim;
+FXTracker* fxTracker;
+SVector *offset;
+
+if (fxPrim != NULL)
+{
+  do
+  {
+    FX_UpdatePos(fxPrim, offset, 1);
+
+    if (fxPrim->process == &FX_WaterBubbleProcess)
+    {
+      fxPrim->timeToLive += offset->z;
+    }
+
+    fxPrim = (FX_PRIM *)fxPrim->next;
+
+  } while (fxPrim != NULL);
+}
+```
+
+By recognizing the pattern in the snippet above, we can rewrite that code as a while loop:
+
+```c
+void FX_WaterBubbleProcess(FX_PRIM *fxPrim, FXTracker *fxTracker);
+
+FX_PRIM* fxPrim;
+FXTracker* fxTracker;
+SVector *offset;
+
+while (fxPrim != NULL)
+{
+  FX_UpdatePos(fxPrim, offset, 1);
+
+  if (fxPrim->process == &FX_WaterBubbleProcess)
+  {
+    fxPrim->timeToLive += offset->z;
+  }
+
+  fxPrim = (FX_PRIM *)fxPrim->node.next;
+}
+```
+
+#### For Loops
+
+It's exceedingly rare for a for loop to be properly decompiled in the initial decompilation. Instead, they will almost always show up in the following form:
+
+```c
+int i;
+
+i = 0;
+
+if (i < 5)
+{
+  do
+  {
+    // some code
+    i++; // Modifying the variable in the loop condition
+  } while (i < 5);
+}
+```
+
+You'll notice that this is quite similar to one of the while loop patterns. The biggest difference here is the variable that the loop condition hinges on (`i` in the above example) is _directly_ modified within the loop. Usually incremented or decremented.
+
+The pattern can be rewritten as follows:
+
+```c
+int i;
+
+for (i = 0; i < 5; i++)
+{
+  // some code
+}
+```
+
+Alright, let's look at a real example. For the sake of this example, all veriable names and types have been resolved.
+
+When beginning this decompile, we are met with this piece of code:
+
+```c
+void FX_StartInstanceEffect(Instance *instance, ObjectEffect *effect, int InitFlag);
+
+int i;
+Instance* instance;
+Object* object;
+
+i = 0;
+if (i > 0)
+{
+  do
+  {
+    FX_StartInstanceEffect(instance, &object->effectList[i], 1);
+    i++;
+  } while (i < object->numberOfEffects);
+}
+```
+
+By recognizing the pattern in the above snippet as a for loop, we can rewrite it as follow:
+
+```c
+void FX_StartInstanceEffect(Instance *instance, ObjectEffect *effect, int InitFlag);
+
+int i;
+Instance* instance;
+Object* object;
+
+for (i = 0; i < object->numberOfEffects; i++)
+{
+  FX_StartInstanceEffect(instance, &object->effectList[i], 1);
+}
+```
 
 ### Clearing Bitflags
 
-When looking at bitwise operations on flags, you may see a flag AND-ed with some very high value:
+When looking at bitwise operations, you may see a flag AND-ed with some very high value:
 
 ```c
 camera->flags &= 0xF7FF;
@@ -158,7 +319,7 @@ camera->flags &= ~0x800;
 Although the 2 code snippets above do the exact same thing, semantically the second one makes much more sense. This is especially evident when flags have explicit names or definitions:
 
 ```c
-#define MY_FLAG 0x80       // Binary 1000 0000
+#define MY_FLAG 0x80
 
 camera->flags |= MY_FLAG;  // Setting the flag
 camera->flags &= ~MY_FLAG; // Clearing the flag
@@ -194,7 +355,8 @@ This gives us a vital piece of information: The stack is 0x60 bytes in size.
 Now let's take a look at the initial decompile:
 
 ```c
-s32 CanBePickedUp(void* arg0, void* arg1, s32 arg2) {
+s32 CanBePickedUp(void* arg0, void* arg1, s32 arg2)
+{
   short sp10;
   short* sp24;
   short* sp28;
@@ -244,7 +406,8 @@ Wait a second, we have a variable `sp10`! We now know that `sp10` is a `PCollide
 Let's do the same for the other 2 stack variables, we end up with:
 
 ```c
-s32 CanBePickedUp(Instance *instance, Instance *Force, int LinkNode) {
+s32 CanBePickedUp(Instance *instance, Instance *Force, int LinkNode)
+{
   PCollideInfo pcollideInfo; // sp10
   short* sp24;
   short* sp28;
@@ -283,7 +446,8 @@ Look at that! A `Position` is made of 3 shorts (which are 2 bytes in size). So `
 After doing this to the rest of the stack variables, we are now left with:
 
 ```c
-s32 CanBePickedUp(Instance *instance, Instance *Force, int LinkNode) {
+s32 CanBePickedUp(Instance *instance, Instance *Force, int LinkNode)
+{
   PCollideInfo pcollideInfo;
   Position newPos;
   Position oldPod;
