@@ -391,10 +391,6 @@ int GlyphTime(int time)
 }
 ```
 
-### Load Optimization
-
-TODO
-
 ## Misc
 
 ### Resolving Stack Variables
