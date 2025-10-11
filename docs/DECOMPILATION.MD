@@ -330,7 +330,8 @@ camera->flags &= ~MY_FLAG; // Clearing the flag
 During decompilation, you may encounter a series of seemingly random additions and shifts. Below is an example of a real piece of code from the project. For the sake of this example, variable names and types have been resolved:
 
 ```c
-int GlyphTime(int time) {
+int GlyphTime(int time)
+{
 
   time *= time;
 
