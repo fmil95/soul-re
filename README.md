@@ -50,6 +50,10 @@ For first time setup, check out the [installation guide](docs/INSTALL.MD).
 
 Thinking about contributing to the project? Check out the [contribution guide](docs/CONTRIBUTING.MD) to get started!
 
+### Reference
+
+New to the PSX, decompilation as a whole, or just stuck on a function? Check out the [decompilation reference](/docs/DECOMPILATION.MD) which has several common code patterns broken down and documented.
+
 ### Contact
 
 The **PS1/PS2 Decompilation** Discord server has an exclusive channel for this decompilation titled **#soul-reaver**, which is the main medium of communication for anything in relation to it: [REDACTED].
