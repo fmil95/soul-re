@@ -118,6 +118,9 @@ if (a < 0)
 Then it can usually be rewritten as:
 
 ```c
+int a;
+int b;
+
 a = abs(b);
 ```
 
@@ -155,8 +158,6 @@ if (a > 0)
   } while (a > 0);
 }
 ```
-
-Note that this one looks very similar to how a for loop can manifest.
 
 Both of these can be rewritten into a while loop:
 
