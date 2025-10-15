@@ -82,6 +82,6 @@ That will split the executable into individual assembly files. As a final test, 
 make
 ```
 
-To make builds faster, you can allocate multiple threads to the build process with the `-j` flag followed by the number of threads you wish to allocate. 12 threads (`make -j12`) is plenty fast, but feel free to expirment to see what works for you.
+To make builds faster, you can allocate multiple threads to the build process with the `-j` flag followed by the number of threads you wish to allocate. 12 threads (`make -j12`) is plenty fast, but feel free to experiment to see what works for you.
 
 If the build runs successfully, then setup is complete!
