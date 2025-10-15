@@ -25,7 +25,7 @@ M2C_ERROR(/* unknown instruction: mtc2 $t6, $11 */);
 M2C_ERROR(/* unknown instruction: gpl 0x1 */);
 ```
 
-If you're decompiling a function and encounter these, then what you've found is a [**GTE**](https://psx-spx.consoledev.net/geometrytransformationenginegte/) (**G**eometry **T**ransformation **E**ngine) macro. These macros can be found in [SDK.h](/include/Libs/SDK.h) and are always prefixed with `gte_`. The GTE is a specialized coprocessor that is designed to quickly perform complex mathematical operations, which are usually graphics related tasks such as lighting calculations or 3D transformations. If you encounter a GTE macro that isn't present in the repo, you can find the correct macro from the [gte_macro collection](https://github.com/Decompollaborate/rabbitizer/blob/fb4ab5e24994a5987c5789983789d8d3dfc7a40f/docs/r3000gte/gte_macros.h).
+If you're decompiling a function and encounter these, then what you've found is a [**GTE**](https://psx-spx.consoledev.net/geometrytransformationenginegte/) (**G**eometry **T**ransformation **E**ngine) macro. These GTE macros are a subset of the larger PsyQ toolkit, a popular SDK used to develop games for PSX. In this project, GTE macros are kept in [SDK.h](/include/Libs/SDK.h) and are always prefixed with `gte_`. The GTE is a specialized coprocessor that is designed to quickly perform complex mathematical operations, which are usually graphics related tasks such as lighting calculations or 3D transformations. If you encounter a GTE macro that isn't present in the repo, you can find the correct macro from the [gte_macro collection](https://github.com/Decompollaborate/rabbitizer/blob/1.x/docs/r3000gte/gte_macros.h). For more information on PsyQ, you can check out an archive of the [official documentation](https://psx.arthus.net/sdk/Psy-Q/DOCS/), and for concise code examples using the PsyQ toolchain and GTE macros, check out [nolibgs_hello_worlds](https://github.com/ABelliqueux/nolibgs_hello_worlds).
 
 ### Other Macros
 
@@ -252,7 +252,7 @@ for (i = 0; i < 5; i++)
 }
 ```
 
-Alright, let's look at a real example. For the sake of this example, all veriable names and types have been resolved.
+Alright, let's look at a real example. For the sake of this example, all variable names and types have been resolved.
 
 When beginning this decompile, we are met with this piece of code:
 
@@ -419,7 +419,7 @@ This gives us a vital piece of information: The stack is 0x60 bytes in size.
 Now let's take a look at the initial decompile:
 
 ```c
-s32 CanBePickedUp(void* arg0, void* arg1, s32 arg2)
+int CanBePickedUp(void* arg0, void* arg1, int arg2)
 {
   short sp10;
   short* sp24;
@@ -470,7 +470,7 @@ Wait a second, we have a variable `sp10`! We now know that `sp10` is a `PCollide
 Let's do the same for the other 2 stack variables, we end up with:
 
 ```c
-s32 CanBePickedUp(Instance *instance, Instance *Force, int LinkNode)
+int CanBePickedUp(Instance *instance, Instance *Force, int LinkNode)
 {
   PCollideInfo pcollideInfo; // sp10
   short* sp24;
@@ -510,7 +510,7 @@ Look at that! A `Position` is made of 3 shorts (which are 2 bytes in size). So `
 After doing this to the rest of the stack variables, we are now left with:
 
 ```c
-s32 CanBePickedUp(Instance *instance, Instance *Force, int LinkNode)
+int CanBePickedUp(Instance *instance, Instance *Force, int LinkNode)
 {
   PCollideInfo pcollideInfo;
   Position newPos;
@@ -521,6 +521,12 @@ s32 CanBePickedUp(Instance *instance, Instance *Force, int LinkNode)
 ```
 
 Which exactly matches the outline derived from the debug symbols! Resolving stack variables and references to their fields is a great way to immediately get a _lot_ of context with only a little bit of math.
+
+### Pure Assembly Functions
+
+There are some assembly functions in the project with the suffix `_S`, such as `DRAW_AnimatedModel_S`. These are unique in that the functions are _hand-written_ assembly. These are largely low-level console-specific functions and rewriting them in C is a massive undertaking.
+
+The main effort of this project is to reverse engineer the functions that were _compiled_ from C and, as such, these can be left alone.
 
 ### The Permuter
 
