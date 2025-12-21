@@ -16,5 +16,6 @@ unsigned long SplineGetQuatData(Spline *spline, SplineDef *def, void *p);
 unsigned long SplineGetOffsetPrev(Spline *spline, SplineDef *def, long fracOffset);
 SVector *SplineGetNextPoint(Spline *spline, SplineDef *def);
 SVector *SplineGetPreviousPoint(Spline *spline, SplineDef *def);
+short SplineSetDef2FrameNumber(Spline *spline, SplineDef *def, unsigned short frame_number);
 
 #endif

@@ -323,7 +323,108 @@ SplineDef *SCRIPT_GetScaleSplineDef(Instance *instance, MultiSpline *multi, unsi
 
 INCLUDE_ASM("asm/nonmatchings/Game/SCRIPT", SCRIPT_RelativisticSpline);
 
-INCLUDE_ASM("asm/nonmatchings/Game/SCRIPT", SCRIPT_InstanceSplineSet);
+void SCRIPT_InstanceSplineSet(Instance *instance, short frameNum, SplineDef *splineDef, SplineDef *rsplineDef, SplineDef *ssplineDef)
+{
+    Spline *spline;         
+    RSpline *rspline;       
+    Spline *sspline;       
+    MultiSpline *multi;      
+    unsigned long isClass;   
+    unsigned long isParent;   
+    SVector point;           
+
+    multi = SCRIPT_GetMultiSpline(instance, &isParent, &isClass);
+    
+    if (multi != NULL)
+    {
+        if (frameNum == -1) 
+        {
+            frameNum = SCRIPTCountFramesInSpline(instance);
+        }
+        
+        if (((isParent != 0) || (isClass != 0)) || ((splineDef == NULL) && (rsplineDef == NULL) && (ssplineDef == NULL))) 
+        {
+            splineDef = SCRIPT_GetPosSplineDef(instance, multi, isParent, isClass);
+            rsplineDef = SCRIPT_GetRotSplineDef(instance, multi, isParent, isClass);
+            ssplineDef = SCRIPT_GetScaleSplineDef(instance, multi, isParent, isClass);
+        }
+        
+        spline = multi->positional;
+        rspline = multi->rotational;
+        sspline = multi->scaling;
+        
+        if ((splineDef != NULL) && (spline != NULL))
+        {
+            SplineSetDef2FrameNumber(spline, splineDef, frameNum);
+            
+            SplineGetData(spline, splineDef, &point);
+            
+            if (isClass != 0) 
+            {
+                SCRIPT_RelativisticSpline(instance, &point);
+            } 
+            else 
+            {
+                instance->position.x = point.x;
+                instance->position.y = point.y;
+                instance->position.z = point.z;
+            }
+        }
+        
+        if ((rsplineDef != NULL) && (rspline != NULL))
+        {
+            SplineSetDef2FrameNumber((Spline*)rspline, rsplineDef, frameNum);
+            
+            if ((instance->flags & 0x1)) 
+            {
+                G2Quat q; 
+                
+                if (SplineGetQuatData((Spline*)rspline, rsplineDef, &q) != 0) 
+                {
+                    MATRIX introTransform;   
+                    
+                    G2Quat_ToMatrix_S(&q, (G2Matrix*)&multi->curRotMatrix);
+                    
+                    if (instance->intro != NULL)
+                    {
+                        RotMatrix((SVECTOR*)&instance->intro->rotation, &introTransform);
+                        MulMatrix0(&multi->curRotMatrix, &introTransform, &multi->curRotMatrix);
+                    }
+                }
+            } 
+            else 
+            {
+                Rotation rot;             
+                
+                if (SplineGetData((Spline*)rspline, rsplineDef, &rot) != 0) 
+                {
+                    Rotation combinedRotation; 
+                    
+                    instance->rotation.x = rot.x;
+                    instance->rotation.y = rot.y;
+                    instance->rotation.z = rot.z;
+                    
+                    SCRIPT_CombineEulerAngles(&combinedRotation, &instance->rotation, &instance->intro->rotation);
+    
+                    COPY_SVEC(Rotation, &instance->rotation, Rotation, &combinedRotation); 
+                }
+            }
+        }
+        
+        if ((ssplineDef != NULL) && (sspline != NULL)) 
+        {
+            SVector scale;            
+            
+            SplineSetDef2FrameNumber(sspline, ssplineDef, frameNum);
+            
+            SplineGetData(sspline, ssplineDef, &scale);
+            
+            instance->scale.x = scale.x;
+            instance->scale.y = scale.z;
+            instance->scale.z = scale.y;
+        }
+    }
+}
 
 long SCRIPT_SplineProcess(Instance *instance, MultiSpline *multi, SplineDef *splineDef, SplineDef *rsplineDef, SplineDef *ssplineDef, int direction, int isClass)
 {
@@ -335,7 +436,6 @@ long SCRIPT_SplineProcess(Instance *instance, MultiSpline *multi, SplineDef *spl
     Rotation rot;
     long timeOff; 
     SVector temp; // not from decls.h
-    Intro *temp2; // not from decls.h
 
     timeOff = gameTrackerX.timeMult;
     
@@ -403,11 +503,9 @@ long SCRIPT_SplineProcess(Instance *instance, MultiSpline *multi, SplineDef *spl
                     
                     G2Quat_ToMatrix_S(&q, (G2Matrix*)&multi->curRotMatrix);
                     
-                    temp2 = instance->intro;
-                    
-                    if (temp2 != NULL)
+                    if (instance->intro != NULL)
                     {
-                        RotMatrix((SVECTOR *)&temp2->rotation, &introTransform);
+                        RotMatrix((SVECTOR*)&instance->intro->rotation, &introTransform);
                         MulMatrix0(&multi->curRotMatrix, &introTransform, &multi->curRotMatrix);
                     }
                 } 
