@@ -325,7 +325,154 @@ INCLUDE_ASM("asm/nonmatchings/Game/SCRIPT", SCRIPT_RelativisticSpline);
 
 INCLUDE_ASM("asm/nonmatchings/Game/SCRIPT", SCRIPT_InstanceSplineSet);
 
-INCLUDE_ASM("asm/nonmatchings/Game/SCRIPT", SCRIPT_SplineProcess);
+long SCRIPT_SplineProcess(Instance *instance, MultiSpline *multi, SplineDef *splineDef, SplineDef *rsplineDef, SplineDef *ssplineDef, int direction, int isClass)
+{
+    long retVal; 
+    Spline *spline; 
+    RSpline *rspline;
+    Spline *sspline; 
+    SVector *point; 
+    Rotation rot;
+    long timeOff; 
+    SVector temp; // not from decls.h
+    Intro *temp2; // not from decls.h
+
+    timeOff = gameTrackerX.timeMult;
+    
+    retVal = -1;
+    
+    spline = multi->positional;
+    sspline = multi->scaling;
+    rspline = multi->rotational;
+    
+    point = NULL;
+    
+    if (sspline != NULL) 
+    {
+        //SVector pt; // unused
+        
+        if (direction > 0)
+        {
+            point = SplineGetNextPoint(sspline, ssplineDef);
+        } 
+        else if (direction < 0) 
+        {
+            point = SplineGetPreviousPoint(sspline, ssplineDef);
+        }
+        else if (SplineGetData(sspline, ssplineDef, &temp) != 0) 
+        {
+            point = &temp;
+        }
+        
+        if (point != NULL) 
+        {
+            retVal = 0;
+            
+            instance->scale.x = point->x;
+            instance->scale.y = point->z;
+            instance->scale.z = point->y;
+        } 
+        else
+        {
+            retVal = 1;
+        }
+    }
+    
+    if (rspline != NULL) 
+    {
+        retVal = 0;
+        
+        if (direction > 0) 
+        {
+            retVal = SplineGetOffsetNext((Spline*)rspline, rsplineDef, timeOff) == 0;
+        } 
+        else if ((direction < 0) && (SplineGetOffsetPrev((Spline*)rspline, rsplineDef, timeOff) == 0)) 
+        {
+            retVal = 1;
+        }
+        
+        if (retVal == 0) 
+        {
+            G2Quat q; 
+            
+            if ((instance->flags & 0x1)) 
+            {
+                if (SplineGetQuatData((Spline*)rspline, rsplineDef, &q) != 0) 
+                {
+                    MATRIX introTransform;
+                    
+                    G2Quat_ToMatrix_S(&q, (G2Matrix*)&multi->curRotMatrix);
+                    
+                    temp2 = instance->intro;
+                    
+                    if (temp2 != NULL)
+                    {
+                        RotMatrix((SVECTOR *)&temp2->rotation, &introTransform);
+                        MulMatrix0(&multi->curRotMatrix, &introTransform, &multi->curRotMatrix);
+                    }
+                } 
+                else 
+                {
+                    retVal = 1;
+                }
+            } 
+            else if (SplineGetData((Spline*)rspline, rsplineDef, &rot) != 0)
+            {
+                Rotation combinedRotation; 
+                
+                instance->rotation.x = rot.x;
+                instance->rotation.y = rot.y;
+                instance->rotation.z = rot.z;
+                
+                SCRIPT_CombineEulerAngles(&combinedRotation, &instance->rotation, &instance->intro->rotation);
+                
+                COPY_SVEC(Rotation, &instance->rotation, Rotation, &combinedRotation);
+            } 
+            else 
+            {
+                retVal = 1;
+            }
+        }
+    }
+    
+    if (spline != NULL) 
+    {
+        SVector pt; 
+        
+        if (direction > 0)
+        {
+            point = SplineGetOffsetNextPoint(spline, splineDef, timeOff);
+        }
+        else if (direction < 0) 
+        {
+            point = SplineGetOffsetPreviousPoint(spline, splineDef, timeOff);
+        } 
+        else if (SplineGetData(spline, splineDef, &pt) != 0) 
+        {
+            point = &pt;
+        }
+        
+        retVal = 1;
+        
+        if (point != NULL) 
+        {
+            retVal = 0;
+            
+            if (isClass != 0) 
+            {
+                SCRIPT_RelativisticSpline(instance, point);
+            } 
+            else 
+            {   
+                instance->position.x = point->x;
+                instance->position.y = point->y;
+                instance->position.z = point->z;
+            }
+        }
+    }
+    
+    return retVal;
+}
 
 long SCRIPT_InstanceSplineProcess(Instance *instance, SplineDef *splineDef, SplineDef *rsplineDef, SplineDef *ssplineDef, int direction)
 {

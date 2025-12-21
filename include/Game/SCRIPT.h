@@ -16,5 +16,6 @@ void SCRIPT_InstanceSplineInit(Instance *instance);
 long SCRIPT_InstanceSplineProcess(Instance *instance, SplineDef *splineDef, SplineDef *rsplineDef, SplineDef *ssplineDef, int direction);
 Spline *ScriptGetPosSpline(Instance *instance);
 RSpline *ScriptGetRotSpline(Instance *instance);
+void SCRIPT_RelativisticSpline(Instance *instance, SVector *point);
 
 #endif
