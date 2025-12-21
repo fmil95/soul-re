@@ -35,6 +35,13 @@ options:
   migrate_rodata_to_functions: True
   hasm_in_src_path: True
   make_full_disasm_for_code: True
+  generate_asm_macros_files: False
+  asm_data_macro: "glabel"
+  asm_data_end_label: ""
+  asm_end_label: ""
+  asm_function_alt_macro: glabel
+  asm_jtbl_label_macro: glabel
+  asm_nonmatching_label_macro: ""
 
 segments:
   - name: header
