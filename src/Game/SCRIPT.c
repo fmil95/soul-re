@@ -321,7 +321,39 @@ SplineDef *SCRIPT_GetScaleSplineDef(Instance *instance, MultiSpline *multi, unsi
     return &multi->curScaling;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/SCRIPT", SCRIPT_RelativisticSpline);
+void SCRIPT_RelativisticSpline(Instance *instance, SVector *point)
+{
+    SVector pt;       
+
+    if ((instance->intro != NULL) && ((instance->intro->rotation.x != 0) || (instance->intro->rotation.y != 0) || (instance->intro->rotation.z != 0))) 
+    {
+        MATRIX segMatrix; 
+        Position newPt;  
+        Position localPt; 
+        
+        COPY_SVEC(SVector, &pt, SVector, point);
+        
+        localPt.x = pt.x;
+        localPt.y = pt.y;
+        localPt.z = pt.z;
+        
+        RotMatrix((SVECTOR*)&instance->intro->rotation, &segMatrix);
+       
+        segMatrix.t[2] = 0;
+        segMatrix.t[1] = 0;
+        segMatrix.t[0] = 0;
+       
+        newPt.x = ((localPt.x * segMatrix.m[0][0]) >> 12) + ((localPt.y * segMatrix.m[0][1]) >> 12) + ((localPt.z * segMatrix.m[0][2]) >> 12);
+        newPt.y = ((localPt.x * segMatrix.m[1][0]) >> 12) + ((localPt.y * segMatrix.m[1][1]) >> 12) + ((localPt.z * segMatrix.m[1][2]) >> 12);
+        newPt.z = ((localPt.x * segMatrix.m[2][0]) >> 12) + ((localPt.y * segMatrix.m[2][1]) >> 12) + ((localPt.z * segMatrix.m[2][2]) >> 12);
+       
+        ADD_SVEC(Position, &instance->position, Position, &newPt, Position, &instance->initialPos);
+    }
+    else 
+    {
+        ADD_SVEC(Position, &instance->position, Position, &instance->initialPos, SVector, point);
+    }
+}
 
 void SCRIPT_InstanceSplineSet(Instance *instance, short frameNum, SplineDef *splineDef, SplineDef *rsplineDef, SplineDef *ssplineDef)
 {
