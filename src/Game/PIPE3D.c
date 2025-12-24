@@ -11,6 +11,8 @@
 #include "Game/DRAW.h"
 #include "Game/G2/QUATG2.h"
 
+int D_800D0D10 = 0x34FFFFFF;
+
 void PIPE3D_AspectAdjustMatrix(MATRIX *matrix)
 {
     int temp, temp2, temp3; // not from decls.h
@@ -193,7 +195,99 @@ void PIPE3D_NormalizeMatrix(MATRIX *target, MATRIX *source)
     ScaleMatrix(target, &scalevec);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PIPE3D", PIPE3D_TransformVerticesToWorld);
+void PIPE3D_TransformVerticesToWorld(Instance *instance, SVector *poolVertex, long *vtxSegment, Vector *Average)
+{
+    MATRIX *segMatrix;                                                  
+    Model *model = instance->object->modelList[instance->currentModel]; 
+    MVertex *vertexList = model->vertexList;                            
+    long i;                                                             
+    Segment *segment = model->segmentList;                            
+    SVector *orgPoolVertex;                                             
+    SVector minV = { 32767, 32767, 32767, 0 };                             
+    SVector maxV = { 32769, 32769, 32769, 0 };                             
+    
+    Average->x = 0;
+    Average->y = 0;
+    Average->z = 0;
+
+    orgPoolVertex = poolVertex;
+
+    for (i = 0; i < model->numSegments; i++) 
+    {
+        if (segment->lastVertex != -1)
+        {
+            MVertex *firstVertex; 
+            MVertex *lastVertex;  
+            MVertex *modelVertex; 
+            
+            firstVertex = &vertexList[segment->firstVertex];
+            lastVertex = &vertexList[segment->lastVertex];
+
+            segMatrix = &instance->matrix[i];
+            
+            SetRotMatrix(segMatrix);
+            SetTransMatrix(segMatrix);
+
+            for (modelVertex = firstVertex; modelVertex <= lastVertex; poolVertex++)
+            {
+                gte_ldv0(modelVertex);
+                gte_nrtv0tr();
+                
+                *vtxSegment++ = i;
+                
+                modelVertex++;
+                
+                gte_stsv(poolVertex);
+
+                if (maxV.x < poolVertex->x)
+                {
+                    maxV.x = poolVertex->x;
+                }
+                        
+                if (minV.x > poolVertex->x) 
+                {
+                    minV.x = poolVertex->x;
+                }
+                
+                if (maxV.y < poolVertex->y) 
+                {
+                    maxV.y = poolVertex->y;
+                }
+
+                if (minV.y > poolVertex->y) 
+                {
+                    minV.y = poolVertex->y;
+                }
+                
+                if (maxV.z < poolVertex->z) 
+                {
+                    maxV.z = poolVertex->z;
+                }
+
+                if (minV.z > poolVertex->z) 
+                {
+                    minV.z = poolVertex->z;
+                }
+            }
+        }
+
+        segment++;
+    }
+
+    if (model->numVertices != 0)
+    {
+        Average->x = (maxV.x + minV.x) >> 1;
+        Average->y = (maxV.y + minV.y) >> 1;
+        Average->z = (maxV.z + minV.z) >> 1;
+
+        for (poolVertex = orgPoolVertex, i = 0; i < model->numVertices; poolVertex++, i++) 
+        {
+            poolVertex->x -= Average->x;
+            poolVertex->y -= Average->y;
+            poolVertex->z -= Average->z;
+        }
+    }
+}
 
 void PIPE3D_InstanceTransformAndDraw(Instance *instance, CameraCore *cameraCore, VertexPool *vertexPool, PrimPool *primPool, unsigned long **ot, Mirror *mirror)
 {

@@ -205,7 +205,7 @@ segments:
       - [0x0C1124, sdata, Game/LOAD3D]
       - [0x0C119C, sdata, Game/PSX/MAIN]
       - [0x0C14FC, .sdata, Game/MATH3D]
-      - [0x0C1510, sdata, Game/PIPE3D]
+      - [0x0C1510, .sdata, Game/PIPE3D]
       - [0x0C1524, sdata] # Unused
       - [0x0C1560, .sdata, Game/TIMER]
       - [0x0C1564, sdata] # Unused
