@@ -878,7 +878,131 @@ void PIPE3D_HalvePlaneGetRingPoints(Instance *instance, MATRIX *wcTransform, Ver
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PIPE3D", PIPE3D_DoGlow);
+void PIPE3D_DoGlow(Instance *instance, MATRIX *wcTransform, VertexPool *vertexPool, PrimPool *primPool, unsigned long **ot, FXGlowEffect *glow) 
+{
+    long currentColorID;  
+    long previousColorID; 
+    long value;           
+    long fade;            
+    long fadeflag;    
+    
+    (void)wcTransform;
+    (void)vertexPool;
+    
+    fade = 0;
+
+    if ((instance->flags & 0x200)) 
+    {
+        previousColorID = glow->numColors;
+        
+        glow->diffTime = (glow->diffTime + gameTrackerX.lastLoopTime) % 32000;
+        
+        if (previousColorID >= 2) 
+        {
+            glow->diffTime = glow->diffTime % (glow->colorBlendCycle * previousColorID);
+            
+            currentColorID = (glow->diffTime / glow->colorBlendCycle) % previousColorID;
+            
+            if (currentColorID == 0) 
+            {
+                previousColorID--;
+            } 
+            else 
+            {
+                previousColorID = currentColorID - 1;
+            }
+
+            value = ((glow->diffTime % (glow->colorBlendCycle + 1)) * 4096) / glow->colorBlendCycle;
+            
+            if (value >= 4096) 
+            {
+                value = 0;
+            }
+            
+            gte_lddp(4096 - value);
+            gte_ldcv(&glow->colorArray[previousColorID]);
+            gte_ngpf(1);
+
+            gte_lddp(value);
+            gte_ldcv(&glow->colorArray[currentColorID]);
+            gte_ngpl(1);
+            
+            gte_stcv(&glow->currentColor);
+            
+            glow->currentColor &= 0xFFFFFF;
+            glow->currentColor |= glow->colorArray[previousColorID] & 0xFF000000;
+        }
+        
+        if ((instance->matrix != NULL) && (instance->oldMatrix != NULL)) 
+        {
+            long color; 
+            
+            fadeflag = 0;
+            
+            if ((instance->fadeValue != 0) || (gameTrackerX.gameData.asmData.MorphTime != 1000)) 
+            {
+                fadeflag = 1;
+                
+                if (gameTrackerX.gameData.asmData.MorphTime != 1000) 
+                {
+                    fade = 4096 - INSTANCE_GetFadeValue(instance);
+                }
+                else 
+                {
+                    fade = 4096 - instance->fadeValue;
+                }
+            } 
+            else if (glow->lifeTime >= 0)
+            {
+                if (glow->diffTime < (unsigned)glow->fadein_time) 
+                {
+                    fadeflag = 1;
+
+                    fade = (glow->diffTime * 4096) / glow->fadein_time; 
+                } 
+                else if (glow->lifeTime < glow->fadeout_time) 
+                {
+                    fadeflag = 1;
+                    
+                    fade = (glow->lifeTime * 4096) / glow->fadeout_time; 
+                }
+            }
+
+            if (fadeflag != 0) 
+            {
+                gte_lddp(fade);
+                gte_ldcv(&glow->currentColor);
+                gte_ngpf(1);
+                gte_stcv(&color);
+             
+                color &= 0xFFFFFF;
+                
+                if ((glow->currentColor & 0x1000000))
+                {
+                    color |= 0x1000000;
+                }
+            } 
+            else 
+            {
+                color = glow->currentColor;
+            }
+            
+            if (glow->numSegments == 1) 
+            {
+                primPool->nextPrim = DRAW_DrawGlowPoint(instance, glow->segment, primPool, ot, color, glow->width, glow->height);
+            }
+            else 
+            {
+                long i; 
+                
+                for (i = glow->segment; i < ((glow->segment + glow->numSegments) - 1); i++) 
+                {
+                    primPool->nextPrim = DRAW_DrawGlowPoints2(instance, i, i + glow->SegmentInc, primPool, ot, color, glow->height);
+                }
+            }
+        }
+    }
+}
 
 long PIPE3D_Segment2ScreenPt(Instance *instance, MATRIX *wcTransform, int segIndex, Position *pos)
 {
