@@ -24,8 +24,8 @@ jobs:
           submodules: recursive
           lfs: true
 
-      - name: Copy Binary
-        run: cp -r /game/* .
+      - name: Copy Game Binary
+        run: cp /game/SLUS_007.08 SLUS_007.08
 
       - name: Setup
         run: make setup

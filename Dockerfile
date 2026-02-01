@@ -20,6 +20,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         && echo "USERNAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME \
         && chmod 0440 /etc/sudoers.d/$USERNAME
 
+RUN mkdir -p /game
+
+COPY SLUS_007.08 /game/SLUS_007.08
+
 RUN mkdir -p /tmp/tools/cd-dat-utils
 COPY requirements.txt /tmp/requirements.txt
 COPY tools/cd-dat-utils/requirements.txt /tmp/tools/cd-dat-utils/requirements.txt
