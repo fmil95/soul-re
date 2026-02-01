@@ -5,6 +5,7 @@ ARG GID=1000
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git \
+        git-lfs \
         build-essential \
         binutils-mips-linux-gnu \
         cpp-mips-linux-gnu \
