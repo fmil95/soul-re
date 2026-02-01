@@ -197,7 +197,7 @@ segments:
       - [0x0C0C08, .sdata, Game/SIGNAL]
       - [0x0C0D6C, .sdata, Game/COLLIDE]
       - [0x0C0DDC, .sdata, Game/HASM_1]
-      - [0x0C0E38, sdata, Game/FONT]
+      - [0x0C0E38, .sdata, Game/FONT]
       - [0x0C0F0C, .sdata, Game/GAMELOOP]
       - [0x0C0FC0, .sdata, Game/GAMEPAD]
       - [0x0C1010, .sdata, Game/INSTANCE]
