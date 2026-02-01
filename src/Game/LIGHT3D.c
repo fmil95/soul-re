@@ -14,13 +14,13 @@ static int D_800D0908[2] = {0x10001000, 4096};
 
 static int D_800D0910[5] = {2048, 2048, 2048, 0, 0};
 
-long (*light_sourceAndVertexFunc)();
+static long (*light_sourceAndVertexFunc)();
 
-void *light_light;
+static void *light_light;
 
-Terrain *light_terrain;
+static Terrain *light_terrain;
 
-LightInfo *light_lightInfo;
+static LightInfo *light_lightInfo;
 
 static inline int LIGHT3D_FixedDivision(long a, long b)
 {
