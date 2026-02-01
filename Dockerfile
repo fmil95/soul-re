@@ -18,8 +18,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         && echo "USERNAME ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/$USERNAME \
         && chmod 0440 /etc/sudoers.d/$USERNAME
 
+RUN mkdir -p /tmp/tools/cd-dat-utils
 COPY requirements.txt /tmp/requirements.txt
-RUN pip install --no-cache-dir -r /tmp/requirements.txt && rm /tmp/requirements.txt
+COPY tools/cd-dat-utils/requirements.txt /tmp/tools/cd-dat-utils/requirements.txt
+
+RUN pip install --no-cache-dir -r /tmp/requirements.txt \
+    && rm -rf /tmp
 
 USER $USERNAME
 WORKDIR /app
