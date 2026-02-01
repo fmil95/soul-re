@@ -23,21 +23,21 @@ long collide_ignoreAttr = 0;
 
 long collide_acceptAttr = 0;
 
-long collide_t0;
+static SVector *collide_point0;
 
-long collide_t1;
+static SVector *collide_point1;
 
-SVector *collide_point0;
+static long collide_t0;
 
-SVector *collide_point1;
+static long collide_t1;
 
-SVector *collide_normal0;
+static SVector collide_localPoint;
 
-SVector *collide_normal1;
+static MATRIX *collide_lwTransform;
 
-SVector collide_localPoint;
+static SVector *collide_normal0;
 
-MATRIX *collide_lwTransform;
+static SVector *collide_normal1;
 
 int COLLIDE_PointInTriangle(SVector *v0, SVector *v1, SVector *v2, SVector *point, SVector *normal)
 {
