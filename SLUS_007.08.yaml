@@ -232,7 +232,7 @@ segments:
       - [0x0C2278, .sdata, Game/PHYSICS]
       - [0x0C2288, .sdata, Game/GLYPH]
       - [0x0C229C, .sdata, Game/MONSTER/HUMAN]
-      - [0x0C22E8, sdata, Game/MONSTER/MONSENSE]
+      - [0x0C22E8, .sdata, Game/MONSTER/MONSENSE]
       - [0x0C2330, .sdata, Game/MONSTER/MONSTER]
       - [0x0C2348, .sdata, Game/MONSTER/MONTABLE]
       - [0x0C2368, .sdata, Game/MONSTER/SLUAGH]

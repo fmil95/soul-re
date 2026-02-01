@@ -7,11 +7,11 @@
 #include "Game/GAMELOOP.h"
 #include "Game/INSTANCE.h"
 
-STATIC int gNumMonsters;
+static int gNumMonsters = 0;
 
-STATIC int gNumSpectralMonsters;
+static int gNumSpectralMonsters = 0;
 
-STATIC int gNumMaterialMonsters;
+static int gNumMaterialMonsters = 0;
 
 static MonsterVars *monsterSenseArray[40];
 
@@ -19,9 +19,9 @@ static char monsterSensed[40];
 
 static int lastSenseFrame;
 
-STATIC RadarInfo radarDir[8];
+static RadarInfo radarDir[8] = { { 0, 0, 64256 }, { 512, 905, 64631 }, { 1024, 1280, 0 }, { 1536, 905, 905 }, { 2048, 0, 1280 }, { 2560, 64631, 905 }, { 3072, 64256, 0 }, { 3584, 64631, 64631 } };
 
-STATIC unsigned char radarDirIndex[8];
+static unsigned char radarDirIndex[8] = { 0, 4, 6, 2, 7, 3, 5, 1 };
 
 MonsterIR *MONSENSE_FindIR(MonsterVars *mv, Instance *instance)
 {
@@ -872,11 +872,10 @@ int MONSENSE_GetDistanceInDirection(Instance *instance, short angle)
     return mv->radarDistance[bit / 512];
 }
 
-extern int D_800D1B2C;
 void MONSENSE_DoSenses(Instance *instance)
 {
     MonsterVars *mv;
-    // static int doneThisFrame;
+    static int doneThisFrame = 0;
 
     mv = (MonsterVars *)instance->extraData;
 
@@ -891,19 +890,16 @@ void MONSENSE_DoSenses(Instance *instance)
             lastSenseFrame = gameTrackerX.frameCount - 1;
         }
 
-        // doneThisFrame = 0;
-        D_800D1B2C = 0;
+        doneThisFrame = 0;
     }
 
-    // if ((doneThisFrame == 0) && (monsterSensed[mv->senseIndex] == 0))
-    if ((D_800D1B2C == 0) && (monsterSensed[(int)mv->senseIndex] == 0))
+    if ((doneThisFrame == 0) && (monsterSensed[(int)mv->senseIndex] == 0))
     {
         lastSenseFrame = gameTrackerX.frameCount;
 
         monsterSensed[(int)mv->senseIndex] = 1;
 
-        // doneThisFrame = 1;
-        D_800D1B2C = 1;
+        doneThisFrame = 1;
 
         mv->alertCount = 1;
 
