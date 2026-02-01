@@ -25,5 +25,4 @@ COPY tools/cd-dat-utils/requirements.txt /tmp/tools/cd-dat-utils/requirements.tx
 RUN pip install --no-cache-dir -r /tmp/requirements.txt \
     && rm -rf /tmp
 
-USER $USERNAME
 WORKDIR /app
