@@ -27,10 +27,6 @@
 
 static burntTuneType burntTest = {300, 2};
 
-static int D_800D1B38[2] = {0, 65534}; // for use on MON_DamageEffect
-
-static int D_800D1B40[2] = {0, 1}; // for use on MON_DamageEffect
-
 static unsigned char pupateObjects[/*4*/] = { 15, 17, 16, 18 }; 
 
 void MON_DoCombatTimers(Instance *instance)
@@ -2753,7 +2749,140 @@ void MONSTER_VertexBurnt(Instance *instance, burntTuneType *burntTune)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_DamageEffect);
+void MON_DamageEffect(Instance* instance, evFXHitData* data)
+{
+    SVector accel = {.x = 0, .y = 0, .z = -2}; 
+    MonsterVars *mv;               
+    
+    mv = (MonsterVars*)instance->extraData;
+    
+    if (data == NULL) 
+    {
+        MonsterAttributes *ma;
+        
+        ma = (MonsterAttributes*)instance->data;
+        
+        if ((mv->mvFlags & 0x10000200) == 0x10000000) 
+        {
+            MATRIX *mat = &instance->matrix[rand() % instance->object->modelList[instance->currentModel]->numSegments];                
+            SVector location;            
+            SVector vel;                 
+            SVector accel = {.x = 0, .y = 0, .z = 1}; 
+                
+            vel.x = 4 - (rand() & 0x7);
+            vel.y = 4 - (rand() & 0x7);
+            vel.z = 0;
+            
+            location.x = mat->t[0];
+            location.y = mat->t[1];
+            location.z = mat->t[2];
+            
+            FX_Dot(&location, &vel, &accel, 0, 0xFF2828, 24, 16, 2);
+        }
+        
+        if ((mv->mvFlags & 0x800010) == 0x800010) 
+        {
+            MATRIX *mat = &instance->matrix[ma->damageFXSegment];         
+            SVector location;    
+            SVector vel = { 0 }; 
+            
+            location.x = mat->t[0];
+            location.y = mat->t[1];
+            location.z = mat->t[2];
+            
+            FX_Blood(&location, &vel, &accel, 4, 0x1800D0, 8);
+        }
+        
+        if ((mv->mvFlags & 0x400000)) 
+        {
+            Object *flame;        
+            
+            flame = objectAccess[10].object;
+            
+            if (flame != NULL) 
+            {
+                Model *model;         
+                
+                model = flame->modelList[0];
+                
+                FX_MakeSpark(instance, model, ma->leftShoulderSegment);
+                FX_MakeSpark(instance, model, ma->rightShoulderSegment);
+                FX_MakeSpark(instance, model, ma->waistSegment);
+                FX_MakeSpark(instance, model, ma->leftKneeSegment);
+                FX_MakeSpark(instance, model, ma->rightKneeSegment);
+            }
+            
+            MONSTER_VertexBurnt(instance, &burntTest);
+        }
+        
+        if ((mv->causeOfDeath == 3) && ((ma->whatAmI & 0x2)) && (MON_GetTime(instance) < mv->effectTimer))
+        {
+            MATRIX *mat;        
+            SVector location;   
+            SVector vel;         
+            SVector accel;       
+            int n;               
+            int cnt;            
+            
+            MONSTER_VertexBurnt(instance, &burntTest);
+            
+            vel.y = 0;
+            vel.x = 0;
+            vel.z = 12;
+            
+            accel.y = 0;
+            accel.x = 0;
+            accel.z = 0;
+            
+            cnt = instance->object->modelList[instance->currentModel]->numSegments;
+            
+            for (n = 1; n < cnt; n++) 
+            {
+                mat = &instance->matrix[n];
+                
+                location.x = mat->t[0] + (rand() & 0x3);
+                location.y = mat->t[1] + (rand() & 0x3);
+                location.z = mat->t[2] + (rand() & 0x3);
+                
+                if (!(rand() & 0x1F)) 
+                {
+                    FX_Dot(&location, &vel, &accel, -256, 0x808080, 80, 32, 0);
+                }
+                else 
+                {
+                    FX_Dot(&location, &vel, &accel, -256, 0x808080, 80, 2, 0);
+                }
+            }
+        }
+    } 
+    else
+    {
+        if (data->type == 0x20) 
+        {
+            if (data->amount != 0)
+            {
+                MONSTER_StartVertexBurnt(instance, data, &burntTest);
+            } 
+            else 
+            {
+                MONSTER_StartVertexBurnt(instance, &instance->position, &burntTest);
+            }
+        }
+        else if (data->type == 0x10)
+        {
+            MONSTER_StartVertexBurnt(instance, &instance->position, &burntTest);
+        } 
+        else 
+        {
+            mv->mainColorVertex = MONSTER_StartVertexBlood(instance, &data->location, MONSTER_CalcDamageIntensity(mv->hitPoints, mv->maxHitPoints));
+        }
+        
+        if (data->amount != 0) 
+        {
+            FX_Blood(&data->location, &data->velocity, &accel, data->amount, 0x1800D0, 8);
+        }
+    } 
+}
 
 void MON_DefaultInit(Instance *instance)
 {
