@@ -8,6 +8,7 @@
 #include "Game/TIMER.h"
 #include "Game/VOICEXA.h"
 #include "Game/PSX/SUPPORT.h"
+#include "Game/PSX/MAIN.h"
 
 STATIC LoadStatus loadStatus;
 

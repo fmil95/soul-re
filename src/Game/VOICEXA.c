@@ -1,6 +1,7 @@
 #include "Game/VOICEXA.h"
 #include "Game/GAMELOOP.h"
 #include "Game/PSX/AADLIB.h"
+#include "Game/PSX/MAIN.h"
 
 typedef void (*voiceCmd)(XAVoiceTracker *vt, short voiceIndex);
 

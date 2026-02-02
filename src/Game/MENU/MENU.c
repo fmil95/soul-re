@@ -2,6 +2,7 @@
 #include "Game/MENU/MENUUTIL.h"
 #include "Game/MENU/MENUDEFS.h"
 #include "Game/GAMELOOP.h"
+#include "Game/PSX/MAIN.h"
 
 static int dy[16] = {40, 30, 20, 15, 10, 8, 6, 5, 4, 3, 2, 2, 1, 1, 1, 0};
 

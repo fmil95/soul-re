@@ -534,6 +534,9 @@ typedef struct
     (p)->x2 = (_x0), (p)->y2 = (_y0) + (_h), \
     (p)->x3 = (_x0) + (_w), (p)->y3 = (_y0) + (_h)
 
+#define setWH(p, _w, _h) \
+    (p)->w = _w, (p)->h = _h
+
 #define setPolyF4(p) setlen(p, 5), setcode(p, 0x28)
 #define setPolyG4(p) setlen(p, 8), setcode(p, 0x38)
 

@@ -27,6 +27,7 @@
 #include "Game/EVENT.h"
 #include "Game/RAZIEL/RAZLIB.h"
 #include "Game/HASM.h"
+#include "Game/PSX/MAIN.h"
 
 /*.sbss*/
 STATIC Player Raziel;

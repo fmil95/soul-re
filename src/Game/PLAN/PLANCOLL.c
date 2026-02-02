@@ -4,6 +4,7 @@
 #include "Game/MEMPACK.h"
 #include "Game/STREAM.h"
 #include "Game/COLLIDE.h"
+#include "Game/PSX/MAIN.h"
 
 static FindTerrainHit directionList[6] = {
     {

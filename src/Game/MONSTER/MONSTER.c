@@ -23,6 +23,7 @@
 #include "Game/G2/ANMG2ILF.h"
 #include "Game/MONSTER/HUMAN.h"
 #include "Game/OBTABLE.h"
+#include "Game/PSX/MAIN.h"
 
 static burntTuneType burntTest = {300, 2};
 

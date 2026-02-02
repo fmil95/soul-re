@@ -1,6 +1,7 @@
 #include "Game/VM.h"
 #include "Game/MEMPACK.h"
 #include "Game/GAMELOOP.h"
+#include "Game/PSX/MAIN.h"
 
 static long vmRealClock = 0;
 

@@ -23,6 +23,7 @@
 #include "Game/G2/ANMG2ILF.h"
 #include "Game/FONT.h"
 #include "Game/SIGNAL.h"
+#include "Game/PSX/MAIN.h"
 
 void INSTANCE_Deactivate(Instance *instance)
 {

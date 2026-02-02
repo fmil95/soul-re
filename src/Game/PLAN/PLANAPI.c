@@ -8,6 +8,7 @@
 #include "Game/MATH3D.h"
 #include "Game/PLAN/PLANCOLL.h"
 #include "Game/HASM.h"
+#include "Game/PSX/MAIN.h"
 
 static PoolManagementData poolManagementDataStorage;
 

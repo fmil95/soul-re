@@ -17,6 +17,7 @@
 #include "Game/INSTANCE.h"
 #include "Game/G2/ANIMG2.h"
 #include "Game/G2/ANMG2ILF.h"
+#include "Game/PSX/MAIN.h"
 
 void MonsterProcess(Instance *instance, GameTracker *gameTracker)
 {

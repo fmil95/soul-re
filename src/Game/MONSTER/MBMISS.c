@@ -8,6 +8,7 @@
 #include "Game/MATH3D.h"
 #include "Game/INSTANCE.h"
 #include "Game/COLLIDE.h"
+#include "Game/PSX/MAIN.h"
 
 void WCBEGG_Message(Instance *instance, unsigned long message, unsigned long data)
 {

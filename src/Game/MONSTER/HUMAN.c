@@ -13,6 +13,7 @@
 #include "Game/INSTANCE.h"
 #include "Game/STATE.h"
 #include "Game/SOUND.h"
+#include "Game/PSX/MAIN.h"
 
 MonsterStateChoice HUMAN_StateChoiceTable[] = {
     {9, {HUMAN_StunnedEntry, HUMAN_Stunned}},

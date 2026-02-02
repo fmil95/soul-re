@@ -10,6 +10,7 @@
 #include "Game/STREAM.h"
 #include "Game/LOAD3D.h"
 #include "Game/PSX/SUPPORT.h"
+#include "Game/PSX/MAIN.h"
 
 /*.sdata*/
 int gSramFullAlarm = 0;

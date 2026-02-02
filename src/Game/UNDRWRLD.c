@@ -11,6 +11,7 @@
 #include "Game/INSTANCE.h"
 #include "Game/SIGNAL.h"
 #include "Game/STREAM.h"
+#include "Game/PSX/MAIN.h"
 
 static UW_ScreenXY *ScreenMorphArray = NULL;
 

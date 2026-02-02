@@ -3,6 +3,7 @@
 #include "Game/FONT.h"
 #include "Game/MENU/MENU.h"
 #include "Game/LOCAL/LOCALSTR.h"
+#include "Game/PSX/MAIN.h"
 
 //.sdata
 static short align_flag = 0;

@@ -9,6 +9,7 @@
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSTER.h"
+#include "Game/PSX/MAIN.h"
 
 MonsterStateChoice SLUAGH_StateChoiceTable[] = {
     {6, {SLUAGH_AttackEntry, SLUAGH_Attack}},

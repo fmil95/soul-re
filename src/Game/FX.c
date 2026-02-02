@@ -16,6 +16,7 @@
 #include "Game/GAMEPAD.h"
 #include "Game/GLYPH.h"
 #include "Game/PHYSOBS.h"
+#include "Game/PSX/MAIN.h"
 
 STATIC FXGeneralEffect *FX_GeneralEffectTracker;
 

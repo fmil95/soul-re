@@ -3,6 +3,7 @@
 #include "Game/GAMELOOP.h"
 #include "Game/MATH3D.h"
 #include "Game/PLAN/PLANCOLL.h"
+#include "Game/PSX/MAIN.h"
 
 void ENMYPLAN_InitEnemyPlanPool(void *enemyPlanPool)
 {

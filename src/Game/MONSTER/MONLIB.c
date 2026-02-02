@@ -24,6 +24,7 @@
 #include "Game/SAVEINFO.h"
 #include "Game/G2/ANMG2ILF.h"
 #include "Game/G2/ANMCTRLR.h"
+#include "Game/PSX/MAIN.h"
 
 void MON_TurnOffWeaponSpheres(Instance *instance)
 {

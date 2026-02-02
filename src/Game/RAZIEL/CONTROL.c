@@ -3,6 +3,7 @@
 #include "Game/PHYSICS.h"
 #include "Game/GAMELOOP.h"
 #include "Game/INSTANCE.h"
+#include "Game/PSX/MAIN.h"
 
 static Force *ExternalForces;
 static char _unused[8];

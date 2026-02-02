@@ -4,6 +4,7 @@
 #include "Game/DRAW.h"
 #include "Game/STREAM.h"
 #include "Game/COLLIDE.h"
+#include "Game/PSX/MAIN.h"
 
 static LightGroup default_lightgroup = {
     {{{63461, 64216, 3274}, {3363, 64057, 1809}, {2579, 2683, 1709}}, {0, 0, 0}},

@@ -11,6 +11,7 @@
 #include "Game/INSTANCE.h"
 #include "Game/OBTABLE.h"
 #include "Game/FONT.h"
+#include "Game/PSX/MAIN.h"
 
 static short MANNA_Position;
 

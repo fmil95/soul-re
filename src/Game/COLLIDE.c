@@ -9,6 +9,7 @@
 #include "Game/INSTANCE.h"
 #include "Game/SIGNAL.h"
 #include "Game/EVENT.h"
+#include "Game/PSX/MAIN.h"
 
 long dyna_clddyna[8] = {
     0x0C, 0x0D, 0x0E, 0x0F, 0x1C, 0x1D, 0x1E, 0x1F};

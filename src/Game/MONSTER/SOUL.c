@@ -17,6 +17,7 @@
 #include "Game/STREAM.h"
 #include "Game/G2/ANMG2ILF.h"
 #include "Game/MONSTER/SLUAGH.h"
+#include "Game/PSX/MAIN.h"
 
 MonsterFunctionTable SOUL_FunctionTable = {
     SOUL_Init,

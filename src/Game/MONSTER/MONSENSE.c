@@ -6,6 +6,7 @@
 #include "Game/PHYSICS.h"
 #include "Game/GAMELOOP.h"
 #include "Game/INSTANCE.h"
+#include "Game/PSX/MAIN.h"
 
 static int gNumMonsters = 0;
 

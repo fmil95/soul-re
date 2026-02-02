@@ -11,6 +11,7 @@
 #include "Game/SIGNAL.h"
 #include "Game/FX.h"
 #include "Game/GENERIC.h"
+#include "Game/PSX/MAIN.h"
 
 void SCRIPT_CombineEulerAngles(Rotation *combinedRotation, Rotation *inputRotation1, Rotation *inputRotation2)
 {

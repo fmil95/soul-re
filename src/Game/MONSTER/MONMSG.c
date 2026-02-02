@@ -8,6 +8,7 @@
 #include "Game/MONSTER/MONTABLE.h"
 #include "Game/MONSTER/MONSENSE.h"
 #include "Game/MATH3D.h"
+#include "Game/PSX/MAIN.h"
 
 int MON_GroundMoveQueueHandler(Instance *instance)
 {

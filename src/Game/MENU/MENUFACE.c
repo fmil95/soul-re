@@ -3,6 +3,7 @@
 #include "Game/MEMPACK.h"
 #include "Game/DRAW.h"
 #include "Game/GAMELOOP.h"
+#include "Game/PSX/MAIN.h"
 
 static menuface_t MenuFaces[8] = {
     {236, 49,  48, 48, 2, -1, 0, 0, 0},

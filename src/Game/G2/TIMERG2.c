@@ -1,6 +1,7 @@
 #include "Game/G2/TIMERG2.h"
 #include "Game/GAMELOOP.h"
 #include "Game/G2/ANMCTRLR.h"
+#include "Game/PSX/MAIN.h"
 
 short G2Timer_GetFrameTime()
 {

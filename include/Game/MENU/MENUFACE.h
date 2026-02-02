@@ -6,5 +6,6 @@
 void MENUFACE_ChangeStateRandomly(int index);
 void menuface_terminate();
 void MENUFACE_RefreshFaces();
+void menuface_initialize();
 
 #endif

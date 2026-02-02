@@ -10,6 +10,7 @@
 #include "Game/MEMPACK.h"
 #include "Game/HASM.h"
 #include "Game/INSTANCE.h"
+#include "Game/PSX/MAIN.h"
 #include "Game/RAZIEL/RAZIEL.h"
 
 long camera_modeToIndex[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0};

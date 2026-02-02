@@ -9,6 +9,7 @@
 #include "Game/FX.h"
 #include "Game/INSTANCE.h"
 #include "Game/STREAM.h"
+#include "Game/PSX/MAIN.h"
 
 static short FireReaverFlag;
 

@@ -5,6 +5,7 @@
 #include "Game/MEMPACK.h"
 #include "Game/STREAM.h"
 #include "Game/MONSTER/MONAPI.h"
+#include "Game/PSX/MAIN.h"
 
 ObjectFunc objectFunc[8924 + 8];
 

@@ -19,6 +19,7 @@
 #include "Game/HASM.h"
 #include "Game/G2/ANMCTRLR.h"
 #include "Game/G2/ANMG2ILF.h"
+#include "Game/PSX/MAIN.h"
 
 void PHYSOB_PlayDropSound(Instance *instance)
 {

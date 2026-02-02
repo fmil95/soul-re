@@ -10,6 +10,7 @@
 #include "Game/INSTANCE.h"
 #include "Game/DRAW.h"
 #include "Game/G2/QUATG2.h"
+#include "Game/PSX/MAIN.h"
 
 int D_800D0D10 = 0x34FFFFFF;
 

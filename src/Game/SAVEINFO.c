@@ -11,6 +11,7 @@
 #include "Game/INSTANCE.h"
 #include "Game/EVENT.h"
 #include "Game/MATH3D.h"
+#include "Game/PSX/MAIN.h"
 
 GlobalSaveTracker *GlobalSave = NULL;
 

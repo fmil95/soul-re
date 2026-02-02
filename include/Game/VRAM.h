@@ -18,6 +18,7 @@ void VRAM_DeleteFreeBlock(BlockVramEntry *block);
 void VRAM_UpdateMorphPalettes();
 void VRAM_DisableTerrainArea();
 void VRAM_InitVramBlockCache();
+void VRAM_EnableTerrainArea();
 
 extern long VRAM_NeedToUpdateMorph;
 

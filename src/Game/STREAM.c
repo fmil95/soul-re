@@ -30,6 +30,7 @@
 #include "Game/DRAW.h"
 #include "Game/LIST.h"
 #include "Game/HASM.h"
+#include "Game/PSX/MAIN.h"
 
 short M_TrackClutUpdate;
 

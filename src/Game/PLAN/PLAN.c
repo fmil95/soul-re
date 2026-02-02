@@ -7,6 +7,7 @@
 #include "Game/COLLIDE.h"
 #include "Game/GAMELOOP.h"
 #include "Game/MEMPACK.h"
+#include "Game/PSX/MAIN.h"
 
 long PLAN_CalcMinDistFromExistingNodes(Position *pos, PlanningNode *planningPool, int distanceType)
 {

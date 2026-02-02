@@ -7,6 +7,7 @@
 #include "Game/DEBUG.h"
 #include "Game/SIGNAL.h"
 #include "Game/EVENT.h"
+#include "Game/PSX/MAIN.h"
 
 static NewMemTracker newMemTracker;
 

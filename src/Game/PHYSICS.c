@@ -11,6 +11,7 @@
 #include "Game/INSTANCE.h"
 #include "Game/FX.h"
 #include "Game/G2/QUATG2.h"
+#include "Game/PSX/MAIN.h"
 
 static inline int PHYSICS_FixedMultiplication(short a, short b, long c)
 {

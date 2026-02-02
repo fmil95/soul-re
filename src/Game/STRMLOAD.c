@@ -8,6 +8,7 @@
 #include "Game/VOICEXA.h"
 #include "Game/GAMELOOP.h"
 #include "Game/VRAM.h"
+#include "Game/PSX/MAIN.h"
 
 static LoadQueueEntry LoadQueue[40];
 

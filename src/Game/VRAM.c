@@ -3,6 +3,7 @@
 #include "Game/GAMELOOP.h"
 #include "Game/FONT.h"
 #include "Game/HASM.h"
+#include "Game/PSX/MAIN.h"
 
 BlockVramEntry *usedVramBlocks;
 
