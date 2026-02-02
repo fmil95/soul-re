@@ -22,6 +22,7 @@
 #include "Game/G2/ANMCTRLR.h"
 #include "Game/G2/ANMG2ILF.h"
 #include "Game/MONSTER/HUMAN.h"
+#include "Game/OBTABLE.h"
 
 static burntTuneType burntTest = {300, 2};
 
@@ -29,7 +30,7 @@ static int D_800D1B38[2] = {0, 65534}; // for use on MON_DamageEffect
 
 static int D_800D1B40[2] = {0, 1}; // for use on MON_DamageEffect
 
-static unsigned char D_800CC4D0[] = {15, 17, 16, 18}; // pupateObjects
+static unsigned char pupateObjects[/*4*/] = { 15, 17, 16, 18 }; 
 
 void MON_DoCombatTimers(Instance *instance)
 {
@@ -2301,7 +2302,125 @@ void MON_PupateEntry(Instance *instance)
     mv->effectTimer = MON_GetTime(instance) + 2000 + ((rand() & 0xFFF));
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Pupate);
+void MON_Pupate(Instance *instance)
+{
+    MonsterVars *mv; // not from decls.h
+    MonsterAttributes *ma;                 
+    Object *cocoonOb;                     
+    Instance *cocoon;                      
+    Instance *closest;                     
+    long closestDist;                      
+    int burst;                             
+    int time; // not from decls.h
+    int temp; // not from decls.h
+    
+    mv = (MonsterVars*)instance->extraData;
+    
+    if ((instance->flags & 0x800)) 
+    {
+        cocoonOb = NULL;
+        
+        closest = NULL;
+        
+        closestDist = 99999;
+        
+        ma = (MonsterAttributes*)instance->data;
+        
+        burst = 0;
+        
+        MON_PupateQueueHandler(instance);
+        
+        if ((signed char)ma->pupateObject != -1) 
+        {
+            cocoonOb = objectAccess[pupateObjects[(signed char)ma->pupateObject]].object;
+            
+            for (cocoon = gameTrackerX.instanceList->first; cocoon != NULL; cocoon = cocoon->next)
+            {
+                if ((cocoon->object == cocoonOb) && (!(cocoon->flags & 0x20)) && (MATH3D_LengthXYZ(cocoon->position.x - instance->intro->position.x, cocoon->position.y - instance->intro->position.y, cocoon->position.z - instance->intro->position.z) < mv->wanderRange)) 
+                {
+                    long dist;                             
+                    
+                    dist = MATH3D_LengthXYZ(cocoon->position.x - gameTrackerX.playerInstance->position.x, cocoon->position.y - gameTrackerX.playerInstance->position.y, cocoon->position.z - gameTrackerX.playerInstance->position.z);
+                   
+                    if (dist < closestDist)
+                    {
+                        closestDist = dist;
+                        
+                        closest = cocoon;
+                    }
+                    
+                    if ((mv->effectTimer < MON_GetTime(instance)) && (!(rand() & 0xF))) 
+                    {
+                        INSTANCE_Post(cocoon, 0x8000008, SetAnimationInstanceSwitchData(cocoon, 0, 0, 0, 1));
+                       
+                        time = MON_GetTime(instance);
+                        
+                        temp = (rand() & 0xFFF) + 2000;
+                       
+                        mv->effectTimer = time + temp;
+                    }
+                }
+            } 
+            
+            if (closest != NULL)
+            {
+                instance->position = closest->position;
+                
+                if ((mv->enemy != NULL) && (mv->enemy->instance == gameTrackerX.playerInstance)) 
+                {
+                    mv->enemy->distance = closestDist;
+                }
+            }
+        }
+        
+        if (instance->currentMainState != MONSTER_STATE_PUPATE) 
+        {
+            burst = 1;
+        } 
+        else if ((closest != NULL) || (cocoonOb == NULL)) 
+        {
+            if (MON_ShouldIAmbushEnemy(instance) != 0) 
+            {
+                MON_PlayAnim(instance, MONSTER_ANIM_PUPATE, 1);
+                
+                burst = 1;
+            }
+        } 
+        else 
+        {
+            mv->regenTime = 0;
+            
+            MON_KillMonster(instance);
+        }
+        
+        if (burst != 0) 
+        {
+            instance->flags &= ~0x800;
+            instance->flags2 &= ~0x20000000;
+            
+            mv->mvFlags &= ~0x80;
+            
+            if (closest != NULL) 
+            {
+                INSTANCE_Post(closest, 0x40002, 5);
+            }
+        }
+    } 
+    else
+    {
+        MON_DefaultQueueHandler(instance);
+        
+        if (mv->enemy != NULL) 
+        {
+            MON_TurnToPosition(instance, &mv->enemy->instance->position, mv->subAttr->speedPivotTurn);
+        }
+        
+        if ((instance->flags2 & 0x10)) 
+        {
+            MON_ChangeBehavior(instance, mv->triggeredBehavior);
+        }
+    }
+}
 
 void MON_EmbraceEntry(Instance *instance)
 {
