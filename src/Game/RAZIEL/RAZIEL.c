@@ -3193,7 +3193,256 @@ void StateHandlerBreakOff(CharacterState *In, int CurrentSection, intptr_t Data)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", StateHandlerPullSwitch);
+void StateHandlerPullSwitch(CharacterState *In, int CurrentSection, intptr_t Data) 
+{
+    Message *Ptr;                              
+    int switchDone;                            
+    int hitPosted;                            
+    short offset; // not from decls.h
+
+    switchDone = 0;
+    
+    hitPosted = 0;
+    
+    G2EmulationQueryAnimation(In, CurrentSection);
+    
+    while ((Ptr = PeekMessageQueue(&In->SectionList[CurrentSection].Event)) != NULL) 
+    {
+        switch (Ptr->ID)
+        {                          
+        case 0x100001:
+        {
+            PhysObSwitchProperties *switchData;         
+                
+            if (CurrentSection == 0) 
+            {
+                int switchStatus;                        
+                int switchSuccess;                       
+                Instance *inst;                           
+                PhysObSwitchProperties *switchProperties;  
+                int extraZ;                                
+                
+                ControlFlag = 0x9041108;
+                
+                PhysicsMode = 3;
+                
+                SteerSwitchMode(In->CharacterInstance, 0);
+                
+                switchSuccess = 1;
+                
+                if ((Raziel.Senses.EngagedMask & 0x8))
+                {
+                    extraZ = 0;
+                    
+                    inst = Raziel.Senses.EngagedList[3].instance;
+                    
+                    switchProperties = (PhysObSwitchProperties*)INSTANCE_Query(inst, 23);
+                    switchStatus = INSTANCE_Query(inst, 5);
+                    switchData = (PhysObSwitchProperties*)INSTANCE_Query(inst, 28);
+                    
+                    if (INSTANCE_Query(inst, 4) == 9) 
+                    {
+                        offset = MON_FacingOffset(In->CharacterInstance, inst) & 0xFFF;
+                        
+                        if (offset > 2048)
+                        {
+                            offset |= 0xF000;
+                        }
+                        
+                        if (((offset + 1024) < 0) || ((offset + 1024) > 2048)) 
+                        { 
+                            switchStatus |= 0x1;
+                            
+                            extraZ = 2048;
+                        } 
+                        else 
+                        {
+                            switchStatus &= ~0x1;
+                        }
+                        
+                        INSTANCE_Post(inst, 0x80002A, switchStatus);
+                    }
+                    
+                    if (!(switchStatus & 0x1)) 
+                    {
+                        if ((switchStatus & 0x2)) 
+                        {
+                            if (switchProperties->razielOnAnim == 0xFF)
+                            {
+                                switchSuccess = 0;
+                            }
+                            else 
+                            {
+                                G2EmulationInstanceToInstanceSwitchAnimationCharacter(In->CharacterInstance, Raziel.Senses.EngagedList[3].instance, switchProperties->razielOnAnim, 0, 0, 1);
+                            }
+                        }
+                        else if (switchProperties->razielFailedOnAnim == 0xFF)
+                        {
+                            switchSuccess = 0;
+                        }
+                        else 
+                        {
+                            G2EmulationInstanceToInstanceSwitchAnimationCharacter(In->CharacterInstance, Raziel.Senses.EngagedList[3].instance, switchProperties->razielFailedOnAnim, 0, 0, 1);
+                        }
+                    }
+                    else if ((switchStatus & 0x2)) 
+                    {
+                        if (switchProperties->razielOffAnim == 0xFF) 
+                        {
+                            switchSuccess = 0;
+                        }
+                        else 
+                        {
+                            G2EmulationInstanceToInstanceSwitchAnimationCharacter(In->CharacterInstance, Raziel.Senses.EngagedList[3].instance, switchProperties->razielOffAnim, 0, 0, 1);
+                        }
+                    }
+                    else if (switchProperties->razielEnableAnim == 0xFF) 
+                    {
+                        switchSuccess = 0;
+                    }
+                    else 
+                    {
+                        G2EmulationInstanceToInstanceSwitchAnimationCharacter(In->CharacterInstance, Raziel.Senses.EngagedList[3].instance, switchProperties->razielEnableAnim, 0, 0, 1);
+                    }
+                    
+                    if (switchSuccess == 0)
+                    {
+                        INSTANCE_Post(In->CharacterInstance, 0x100000, switchStatus);
+                    } 
+                    else 
+                    {
+                        razAlignYMoveRot(Raziel.Senses.EngagedList[3].instance, switchData->Distance, &In->CharacterInstance->position, &In->CharacterInstance->rotation, (short)extraZ);
+                        
+                        INSTANCE_Post(Raziel.Senses.EngagedList[3].instance, 0x800020, 0);
+                        
+                        if (INSTANCE_Query(inst, 4) == 9)
+                        {
+                            razSetPlayerEventHistory(0x8);
+                        } 
+                        else 
+                        {
+                            razSetPlayerEventHistory(0x4);
+                        }
+                    }
+                }
+            }
+            
+            break;
+        }
+        case 0x100000:
+        {
+            int switchStatus;                       
+            Instance *inst;                          
+            PhysObSwitchProperties *switchProperties; 
+            int switchClass;                            
+            
+            inst = Raziel.Senses.EngagedList[3].instance;
+            
+            switchClass = INSTANCE_Query(inst, 4);
+            switchProperties = (PhysObSwitchProperties*)INSTANCE_Query(Raziel.Senses.EngagedList[3].instance, 23);
+            switchStatus = INSTANCE_Query(inst, 5);
+            
+            if (switchClass == 6) 
+            {
+                switchDone = 1;
+                
+                if ((!(*PadData & RazielCommands[2])) || (Ptr->Data != 0)) 
+                {
+                    StateSwitchStateData(In, CurrentSection, StateHandlerIdle, SetControlInitIdleData(0, 0, 3));
+                    
+                    ControlFlag |= 0x1;
+                    
+                    if (CurrentSection == 0) 
+                    {
+                        INSTANCE_Post(Raziel.Senses.EngagedList[3].instance, 0x800020, 0);
+                    }
+                }
+                else 
+                {
+                    EnMessageQueueData(&In->SectionList[CurrentSection].Defer, 0x100000, 0);
+                }
+            } 
+            else if (switchClass == 9) 
+            {
+                if ((switchStatus & 0x1)) 
+                {
+                    SetTimer(switchProperties->onWalkTimer + 6);
+                } 
+                else 
+                {
+                    SetTimer(switchProperties->offWalkTimer + 6);
+                }
+                
+                G2EmulationSwitchAnimation(In, CurrentSection, 123, 0, 6, 2);
+                
+                if (CurrentSection == 0) 
+                {
+                    INSTANCE_Post(Raziel.Senses.EngagedList[3].instance, 0x80002D, 0x14);
+                }
+            }
+            else 
+            {
+                StateSwitchStateData(In, CurrentSection, StateHandlerIdle, SetControlInitIdleData(0, 0, 3));
+                
+                ControlFlag |= 0x1;
+            }
+            
+            break;
+        }
+        case 0x100015:
+            StateSwitchStateData(In, CurrentSection, StateHandlerIdle, SetControlInitIdleData(0, 0, 3));
+            break;
+        case 0x8000000:
+            if (CurrentSection == 2) 
+            {
+                G2EmulationSwitchAnimation(In, 2, 0, 0, 3, CurrentSection);
+            } 
+            else
+            {
+                EnMessageQueueData(&In->SectionList[CurrentSection].Defer, 0x100000, 0);
+            }
+            
+            break;
+        case 0x1000000:
+        {
+            evMonsterHitData *data; 
+                
+            data = (evMonsterHitData*)Ptr->Data;
+            
+            if (switchDone != 0) 
+            {
+                EnMessageQueueData(&In->SectionList[CurrentSection].Event, 0x100000, 0x1);
+            }
+            
+            if (hitPosted == 0) 
+            {
+                hitPosted = 1;
+                
+                EnMessageQueueData(&In->SectionList[CurrentSection].Defer, 0x1000000, SetMonsterHitData(data->sender, data->lastHit, data->power, data->knockBackDistance, data->knockBackDuration));
+            }
+            
+            break;
+        }
+            
+        case 0x1000001:
+        case 0x80000000:
+        case 0x80000008:
+        case 0x80000010:
+        case 0x80000020:
+            break;
+        default:
+            DefaultStateHandler(In, CurrentSection, Data);
+            break;
+        }
+        
+        DeMessageQueue(&In->SectionList[CurrentSection].Event);
+    }
+    
+    if (CurrentSection == 0) 
+    {
+        razApplyMotion(In, 0);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", StateHandlerDragObject);
 
