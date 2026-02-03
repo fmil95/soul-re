@@ -1,5 +1,6 @@
 #include "Game/RAZIEL/ATTACK.h"
 #include "Game/G2/ANMCTRLR.h"
+#include "Game/PHYSOBS.h"
 
 int StateHandlerDecodeHold(int *Message, int *Data)
 {
@@ -941,7 +942,96 @@ void StateHandlerStumble(CharacterState *In, int CurrentSection, intptr_t Data)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", StateHandlerHitReaction);
+void StateHandlerHitReaction(CharacterState *In, int CurrentSection, intptr_t Data)
+{
+    Message *Ptr;         
+    
+    while ((Ptr = PeekMessageQueue(&In->SectionList[CurrentSection].Event)) != NULL)
+    {
+        switch (Ptr->ID)
+        {
+        case 0x100001:
+        {
+            evMonsterHitData *data; 
+                
+            data = (evMonsterHitData*)Ptr->Data;
+            
+            if (CurrentSection == 0)
+            {
+                Instance *weapon;      
+                
+                Raziel.attackedBy = data->sender;
+                
+                weapon = razGetHeldWeapon();
+                
+                if (weapon != NULL) 
+                {
+                    TurnOffCollisionPhysOb(weapon, 7);
+                }
+                
+                if ((gameTrackerX.debugFlags2 & 0x800))
+                {
+                    LoseHealth(data->power);
+                }
+                
+                PhysicsMode = 0;
+                
+                ControlFlag |= 0x1008;
+                ControlFlag &= ~0x8000000;
+                
+                Raziel.Mode |= 0x208000;
+                
+                ResetPhysics(In->CharacterInstance, -16);
+                
+                SteerSwitchMode(In->CharacterInstance, 10);
+            }
+            
+            if (data->power > 4096) 
+            {
+                G2EmulationSwitchAnimation(In, CurrentSection, 56, 0, 2, 1);
+            } 
+            else
+            {
+                G2EmulationSwitchAnimation(In, CurrentSection, 125, 0, 2, 1);
+            }
+            
+            break;
+        }
+        case 0x8000000:
+        case 0x8000001:
+            if (CurrentSection == 0)
+            {
+                if ((ControlFlag & 0x100000)) 
+                {
+                    StateSwitchStateCharacterData(In, StateHandlerGlyphs, 0);
+                    break;
+                }
+                
+                if ((Raziel.Mode & 0x40000)) 
+                {
+                    StateSwitchStateCharacterData(In, StateHandlerSwim, 0);
+                } 
+                else 
+                {
+                    StateSwitchStateCharacterData(In, StateHandlerIdle, SetControlInitIdleData(0, 0, 3));
+                }
+            } 
+            
+            break;
+        case 0x1000000:
+        case 0x4020000:
+        case 0x80000000:
+        case 0x80000001:
+        case 0x80000020:
+            break;
+        default:
+            DefaultStateHandler(In, CurrentSection, Data);
+            break;
+        }
+        
+        DeMessageQueue(&In->SectionList[CurrentSection].Event);
+    }
+}
 
 void StateHandlerThrow2(CharacterState *In, int CurrentSection, intptr_t Data)
 {
