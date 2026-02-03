@@ -3444,7 +3444,250 @@ void StateHandlerPullSwitch(CharacterState *In, int CurrentSection, intptr_t Dat
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", StateHandlerDragObject);
+void StateHandlerDragObject(CharacterState *In, int CurrentSection, intptr_t Data) 
+{
+    Message *Ptr;              
+    Instance *instance;            
+    int anim;                    
+    int hitPosted;                
+    
+    hitPosted = 0;
+    
+    if ((Raziel.Senses.EngagedMask & 0x2)) 
+    {
+        instance = Raziel.Senses.EngagedList[1].instance;
+        
+        if (instance->introUniqueID == In->CharacterInstance->attachedID) 
+        {
+            In->CharacterInstance->attachedID = 0;
+        }
+    } 
+    else 
+    {
+        instance = NULL;
+        
+        EnMessageQueueData(&In->SectionList[CurrentSection].Defer, 0x100000, 0);
+    }
+    
+    while ((Ptr = PeekMessageQueue(&In->SectionList[CurrentSection].Event)) != NULL)
+    {
+        anim = G2EmulationQueryAnimation(In, CurrentSection);
+        
+        switch (Ptr->ID) 
+        {        
+        case 0x100001:
+            if (CurrentSection == 0) 
+            {
+                Raziel.Mode = 0x400;
+                
+                ControlFlag = 0x9001508;
+                
+                PhysicsMode = 3;
+                
+                SteerSwitchMode(In->CharacterInstance, 0);
+            }
+            
+            G2EmulationSwitchAnimation(In, CurrentSection, 20, 0, 3, 1);
+            break;
+        case 0x10000000: 
+            if (CurrentSection == 0) 
+            {
+                gameTrackerX.raziel_collide_override = 1;
+                
+                if (((anim == 0) || (anim == 22)) && (instance != NULL)) 
+                {
+                    evPhysicsSlideData *slideData;
+                    
+                    switch (Ptr->Data) 
+                    {           
+                    case 0x10000001:                
+                    {
+                        evObjectData *data;            
+                            
+                        gameTrackerX.raziel_collide_override = 0;
+                           
+                        data = (evObjectData*)SetObjectData(-Raziel.Senses.ForwardNormal.x, -Raziel.Senses.ForwardNormal.y, 5, 0, 0);
+                        
+                        do { } while (0); // garbage code for reordering
+                        
+                        INSTANCE_Post(instance, 0x800000, (intptr_t)data);
+                        
+                        if ((data->rc & 0x4))
+                        {
+                            G2EmulationSwitchAnimation(In, 2, 0, 0, 3, 2);
+                            G2EmulationSwitchAnimation(In, 0, 46, 0, 0, 1);
+                            G2EmulationSwitchAnimation(In, 1, 46, 0, 0, 1);
+                        } 
+                        else if ((data->rc & 0x2)) 
+                        {
+                            G2EmulationSwitchAnimationCharacter(In, 23, 0, 3, 1);
+                            
+                            data = (evObjectData*)SetObjectData(-Raziel.Senses.ForwardNormal.x, -Raziel.Senses.ForwardNormal.y, 6, 0, 0);
+                            
+                            INSTANCE_Post(instance, 0x800000, (intptr_t)data);
+                        }
+                        
+                        break;
+                    }
+                    case 0x10000003:               
+                        if ((PHYSOB_CheckSlideNormal(In->CharacterInstance, Raziel.Senses.ForwardNormal.x, Raziel.Senses.ForwardNormal.y, &slideData) & 0x4002) == 0x4000)
+                        {
+                            evObjectData *data; // not from decls.h
+                            
+                            data = (evObjectData*)SetObjectData(Raziel.Senses.ForwardNormal.x, Raziel.Senses.ForwardNormal.y, 4, 0, 0);
+                            
+                            do { } while (0); // garbage code for reordering
+                            
+                            INSTANCE_Post(instance, 0x800000, (intptr_t)data);
+                            
+                            if ((data->rc & 0x4))
+                            {
+                                G2EmulationSwitchAnimation(In, 2, 0, 0, 3, 2);
+                                G2EmulationSwitchAnimation(In, 0, 31, 0, 0, 1);
+                                G2EmulationSwitchAnimation(In, 1, 31, 0, 0, 1);
+                            }
+                        }
+                        
+                        break;
+                    case 0x10000002:                
+                        if ((PHYSOB_CheckSlideNormal(In->CharacterInstance, -Raziel.Senses.ForwardNormal.y, Raziel.Senses.ForwardNormal.x, &slideData) & 0x4002) == 0x4000)
+                        {
+                            evObjectData *data; // not from decls.h
+                            
+                            data = (evObjectData*)SetObjectData(-Raziel.Senses.ForwardNormal.y, Raziel.Senses.ForwardNormal.x, 2, 0, 0);
+                            
+                            do { } while (0); // garbage code for reordering
+                            
+                            INSTANCE_Post(instance, 0x800000, (intptr_t)data);
+                            
+                            if ((data->rc & 0x4))
+                            {
+                                G2EmulationSwitchAnimationCharacter(In, 30, 0, 0, 1);
+                                
+                                ControlFlag &= ~0x8;
+                            }
+                        }
+                        
+                        break;
+                    case 0x10000004:              
+                        if ((PHYSOB_CheckSlideNormal(In->CharacterInstance, Raziel.Senses.ForwardNormal.y, -Raziel.Senses.ForwardNormal.x, &slideData) & 0x4002) == 0x4000)
+                        {
+                            evObjectData *data; // not from decls.h
+                            
+                            data = (evObjectData*)SetObjectData(Raziel.Senses.ForwardNormal.y, -Raziel.Senses.ForwardNormal.x, 3, 0, 0);
+                        
+                            do { } while (0); // garbage code for reordering
+                         
+                            INSTANCE_Post(instance, 0x800000, (intptr_t)data);
+                         
+                            if ((data->rc & 0x4)) 
+                            {
+                                G2EmulationSwitchAnimationCharacter(In, 45, 0, 0, 1);
+                                
+                                ControlFlag &= ~0x8;
+                            }
+                        }
+                        
+                        break;
+                    }
+                }
+                
+                gameTrackerX.raziel_collide_override = 0;
+            }
+            
+            break;
+        case 0x8000001:
+            if ((anim != 0) && (anim != 22) && (anim != 20)) 
+            {
+                break;
+            } 
+            else
+            {
+                if (!(*PadData & RazielCommands[2])) 
+                {
+                    EnMessageQueueData(&In->SectionList[CurrentSection].Event, 0x100000, 0);
+                }
+            }
+            
+            break;
+        case 0x8000000:
+            if (anim == 23) 
+            {
+                StateSwitchStateData(In, CurrentSection, StateHandlerIdle, SetControlInitIdleData(0, 0, 3));
+            }
+            
+            if (instance != NULL) 
+            {
+                if (CurrentSection == 0) 
+                {
+                    INSTANCE_Post(instance, 0x800004, 0);
+                    
+                    ControlFlag |= 0x8;
+                    
+                    if ((anim != 0) && (anim != 22) && (anim != 20))
+                    {
+                        razCenterWithBlock(In->CharacterInstance, instance, -141);
+                    }
+                }
+                
+                if (CurrentSection == 2) 
+                {
+                    G2EmulationSwitchAnimation(In, CurrentSection, 0, 0, 3, 2);
+                }
+                else 
+                {
+                    G2EmulationSwitchAnimation(In, CurrentSection, 22, 0, 2, 2); 
+                }
+                
+                if (!(*PadData & RazielCommands[2])) 
+                {
+                    EnMessageQueueData(&In->SectionList[CurrentSection].Event, 0x100000, 0);
+                }
+            }
+            else
+            {
+                StateSwitchStateData(In, CurrentSection, StateHandlerIdle, SetControlInitIdleData(0, 0, 3));
+            }
+            
+            break;
+        case 0x100000:
+            StateSwitchStateData(In, CurrentSection, StateHandlerIdle, SetControlInitIdleData(0, 0, 3));
+            break;
+        case 0x1000000:
+            if (CurrentSection == 0) 
+            {
+                if (anim == 22) 
+                {
+                    StateSwitchStateCharacterData(In, StateHandlerHitReaction, Ptr->Data);
+                }
+                else if (hitPosted == 0) 
+                {
+                    evMonsterHitData *data;      
+                    
+                    data = (evMonsterHitData*)Ptr->Data;
+                    
+                    hitPosted = 1;
+                    
+                    EnMessageQueueData(&In->SectionList[CurrentSection].Defer, 0x1000000, SetMonsterHitData(data->sender, data->lastHit, data->power, data->knockBackDistance, data->knockBackDuration));
+                }
+            }
+            
+            break;
+        case 0x20000000:
+        case 0x80000000:
+        case 0x80000001:
+        case 0x80000008:
+        case 0x80000010:
+        case 0x80000020:
+            break;
+        default:
+            DefaultStateHandler(In, CurrentSection, Data);
+            break;
+        }
+        
+        DeMessageQueue(&In->SectionList[CurrentSection].Event);
+    }
+}
 
 void StateHandlerPickupObject(CharacterState *In, int CurrentSection, intptr_t Data)
 {
