@@ -2861,16 +2861,16 @@ void MON_DamageEffect(Instance* instance, evFXHitData* data)
         {
             if (data->amount != 0)
             {
-                MONSTER_StartVertexBurnt(instance, data, &burntTest);
+                MONSTER_StartVertexBurnt(instance, (SVector*)data, &burntTest);
             } 
             else 
             {
-                MONSTER_StartVertexBurnt(instance, &instance->position, &burntTest);
+                MONSTER_StartVertexBurnt(instance, (SVector*)&instance->position, &burntTest);
             }
         }
         else if (data->type == 0x10)
         {
-            MONSTER_StartVertexBurnt(instance, &instance->position, &burntTest);
+            MONSTER_StartVertexBurnt(instance, (SVector*)&instance->position, &burntTest);
         } 
         else 
         {

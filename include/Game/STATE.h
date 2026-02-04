@@ -72,5 +72,6 @@ void StateSwitchStateDataDefault(CharacterState *In, int CurrentSection, void (*
 intptr_t SetControlInitHangData(Instance *instance, long frame, long frames);
 intptr_t SetPhysicsDropOffData(int xOffset, int yOffset, int DropOffset, int slipSlope, int UpperOffset);
 intptr_t SetPhysicsWallCrawlData(int Segment, int Length, int ForwardOffset, int NormalDistance);
+intptr_t SetMonsterThrownData(Instance *Sender, Rotation *Direction, int Power);
 
 #endif
