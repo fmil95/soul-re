@@ -35,7 +35,238 @@ void StateHandlerInitSwim(CharacterState *In, int CurrentSection, intptr_t Data)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", StateHandlerSwimCoil);
+void StateHandlerSwimCoil(CharacterState *In, int CurrentSection, intptr_t Data)
+{
+    Message *Ptr;                
+    evPhysicsSwimData *SwimData; 
+    int rc;                      
+    int release;                 
+      
+    ControlFlag &= ~0x400;
+    
+    rc = In->SectionList[CurrentSection].Data1;
+    
+    release = 1;
+    
+    if (CurrentSection == 0) 
+    {
+        if (Raziel.timeAccumulator != 0) 
+        {
+            razLaunchBubbles(3, 3, 1);
+        }
+        
+        if ((Raziel.passedMask & 0x2)) 
+        {
+            razLaunchBubbles(3, 6, 1);
+        }
+        
+        if ((In->CharacterInstance->waterFace != NULL) && ((In->CharacterInstance->splitPoint.z < In->CharacterInstance->matrix[8].t[2]) || (In->CharacterInstance->splitPoint.z < In->CharacterInstance->matrix[12].t[2])))
+        {
+            PhysicsMode = 6; 
+        }
+    } 
+    
+    while ((Ptr = PeekMessageQueue(&In->SectionList[CurrentSection].Event)) != NULL)
+    {
+        switch (Ptr->ID) 
+        {   
+        case 0x100001:
+            if ((Raziel.Mode != 0x40000) && (CurrentSection == 0)) 
+            {
+                CAMERA_ChangeToUnderWater(&theCamera, In->CharacterInstance);
+            } 
+            
+            if (CurrentSection == 0) 
+            {
+                Raziel.Mode = 0x40000;
+                
+                ControlFlag = 0x111;
+                
+                razSetSwimVelocity(In->CharacterInstance, PlayerData->SwimPhysicsCoilVelocity, PlayerData->SwimPhysicsCoilDecelerationIn);
+                
+                SetTimer(5);
+            }
+            
+            PhysicsMode = 5;
+            
+            G2EmulationSwitchAnimation(In, CurrentSection, 65, 0, 9, 2);
+            
+            In->SectionList[CurrentSection].Data1 = 0;
+            
+            Raziel.passedMask = 0;
+            break;
+        case 0x100004:
+            if ((!(Raziel.Mode & 0x40000)) && (CurrentSection == 0))
+            {
+                CAMERA_ChangeToOutOfWater(&theCamera, In->CharacterInstance);
+            } 
+            
+            break;
+        case 0x100011:
+            if (Ptr->Data == PlayerData->SwimPhysicsCoilVelocity) 
+            {
+                razSetSwimVelocity(In->CharacterInstance, 0, PlayerData->SwimPhysicsCoilDecelerationOut);
+            }
+            
+            if (Ptr->Data == PlayerData->SwimPhysicsShotVelocity) 
+            {
+                razSetSwimVelocity(In->CharacterInstance, 0, PlayerData->SwimPhysicsShotAccelerationOut);
+            }
+            
+            break;
+        case 0x20000008:
+            if (G2EmulationQueryAnimation(In, CurrentSection) != 67) 
+            {
+                if (G2EmulationQueryFrame(In, CurrentSection) >= 2) 
+                {
+                    EnMessageQueueData(&In->SectionList[CurrentSection].Defer, 0x100000, 0);
+                }
+                else if (release != 0)
+                {
+                    EnMessageQueueData(&In->SectionList[CurrentSection].Defer, 0x20000008, 0);
+                }
+            }
+            
+            release = 0;
+            break;
+        case 0x8000003:
+            if ((*PadData & RazielCommands[3]))
+            {
+                EnMessageQueueData(&In->SectionList[CurrentSection].Defer, 0x80000001, 0);
+            }
+            
+            break;
+        case 0x8000000:
+            if (G2EmulationQueryAnimation(In, CurrentSection) == 67)
+            {
+                EnMessageQueueData(&In->SectionList[CurrentSection].Defer, 0x100000, 0);
+            }
+            
+            break;
+        case 0x80000001:
+            if (G2EmulationQueryAnimation(In, CurrentSection) != 67) 
+            {
+                G2EmulationSwitchAnimation(In, CurrentSection, 67, 0, 3, 1);
+                
+                if (CurrentSection == 0) 
+                {
+                    Raziel.alarmTable = 300;
+                    
+                    In->CharacterInstance->anim.section->swAlarmTable = &Raziel.alarmTable;
+                }
+            }
+            
+            break;
+        case 0x8000004:
+            razSetSwimVelocity(In->CharacterInstance, PlayerData->SwimPhysicsShotVelocity, PlayerData->SwimPhysicsShotAccelerationIn);
+            break;
+        case 0x100000:
+            if ((rc & 0x40)) 
+            {
+                StateSwitchStateData(In, CurrentSection, StateHandlerSwimTread, 0);
+            } 
+            else 
+            {
+                if (CurrentSection == 2) 
+                {
+                    G2EmulationSwitchAnimation(In, 2, 61, 0, 3, 2);
+                } 
+                else 
+                {
+                    G2EmulationSwitchAnimation(In, CurrentSection, 63, 0, 16, 2);
+                }
+                
+                StateSwitchStateData(In, CurrentSection, StateHandlerSwim, 0);
+                
+                In->SectionList[CurrentSection].Data2 |= 0x2;
+            }
+            
+            if (CurrentSection == 0) 
+            {
+                razSetSwimVelocity(In->CharacterInstance, 0, PlayerData->SwimPhysicsShotAccelerationOut);
+            }
+            
+            break;
+        case 0x4020000:
+            SwimData = (evPhysicsSwimData*)Ptr->Data;
+            
+            In->SectionList[CurrentSection].Data1 = SwimData->rc;
+            
+            if ((Raziel.CurrentPlane == 1) && (!(Raziel.Abilities & 0x10))) 
+            {
+                Raziel.HitPoints = 100000;
+            }
+            else if ((SwimData->rc & 0x220))
+            {
+                if (CurrentSection == 0) 
+                {
+                    Raziel.Mode = 0x10;
+                    
+                    SetPhysics(In->CharacterInstance, -16, 0, 21, 195);
+                    
+                    SteerSwitchMode(In->CharacterInstance, 4);
+                    
+                    Raziel.steeringLockRotation = In->CharacterInstance->rotation.z;
+                    
+                    Raziel.LastBearing = In->CharacterInstance->rotation.z;
+                    
+                    SetExternalForce(ExternalForces, 0, 0, -16, 1, 4096);
+                    
+                    PhysicsMode = 0;
+                }
+                
+                G2EmulationSwitchAnimation(In, CurrentSection, 35, 0, 0, 1);
+                
+                StateSwitchStateData(In, CurrentSection, StateHandlerJump, 0);
+            }
+            
+            break;
+        case 0x1000000:
+            if (CurrentSection == 0) 
+            {
+                evMonsterHitData *data;     
+
+                data = (evMonsterHitData*)Ptr->Data;
+                
+                if ((gameTrackerX.debugFlags2 & 0x800)) 
+                {
+                    LoseHealth(data->power);
+                }
+            }
+            
+            break;
+        case 0x100014:
+            StateSwitchStateData(In, CurrentSection, StateHandlerIdle, SetControlInitIdleData(0, 0, 9));
+            
+            if (CurrentSection == 0) 
+            {
+                CAMERA_ChangeToOutOfWater(&theCamera, In->CharacterInstance);
+            }
+            
+            break;
+        case 0x100009:
+        case 0x1000001:
+        case 0x4000001:
+        case 0x4000004:
+        case 0x4010200:
+        case 0x20000001:
+        case 0x80000000:
+        case 0x80000008:
+        case 0x80000010:
+            break;
+        default:
+            DefaultStateHandler(In, CurrentSection, Data);
+            break;
+        }
+        
+        DeMessageQueue(&In->SectionList[CurrentSection].Event);
+    }
+    
+    if ((release != 0) && (!(*PadData & RazielCommands[6]))) 
+    {
+        EnMessageQueueData(&In->SectionList[CurrentSection].Defer, 0x20000008, 0);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", StateHandlerSwimTread);
 
