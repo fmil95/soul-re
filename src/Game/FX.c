@@ -3666,7 +3666,71 @@ void FX_StopGlowEffect(FXGlowEffect *glowEffect, int fadeout_time)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawLightning);
+void FX_DrawLightning(FXLightning *zap, MATRIX *wcTransform, unsigned long **ot) 
+{
+    SVector start;       
+    SVector end;         
+    SVector offset;      
+    MATRIX *swtransform; 
+    MATRIX mat;          
+    
+    if ((zap->type == 2) || (zap->matrixSeg != -1)) 
+    {
+        start.x = zap->start_offset.x;
+        start.y = zap->start_offset.y;
+        start.z = zap->start_offset.z;
+    } 
+    else if (zap->instance->matrix != NULL) 
+    {
+        swtransform = &zap->instance->matrix[zap->startSeg];
+        
+        ApplyMatrixSV(swtransform, (SVECTOR*)&zap->start_offset, (SVECTOR*)&offset);
+        
+        start.x = swtransform->t[0] + offset.x;
+        start.y = swtransform->t[1] + offset.y;
+        start.z = swtransform->t[2] + offset.z;
+    }
+    else 
+    {
+        start.x = zap->instance->position.x;
+        start.y = zap->instance->position.y;
+        start.z = zap->instance->position.z;
+    }
+    
+    if (((zap->type == 1) || (zap->type == 2)) || (zap->matrixSeg != -1)) 
+    {
+        end.x = zap->end_offset.x;
+        end.y = zap->end_offset.y;
+        end.z = zap->end_offset.z;
+    } 
+    else if (zap->end_instance->matrix != NULL)
+    {
+        swtransform = &zap->end_instance->matrix[zap->endSeg];
+        
+        ApplyMatrixSV(swtransform, (SVECTOR*)&zap->end_offset, (SVECTOR*)&offset);
+        
+        end.x = swtransform->t[0] + offset.x;
+        end.y = swtransform->t[1] + offset.y;
+        end.z = swtransform->t[2] + offset.z;
+    }
+    else 
+    { 
+        end.x = zap->instance->position.x;
+        end.y = zap->instance->position.y;
+        end.z = zap->instance->position.z;
+    }
+    
+    swtransform = NULL;
+    
+    if ((zap->matrixSeg != -1) && (zap->instance->matrix != NULL)) 
+    {
+        CompMatrix(wcTransform, &zap->instance->matrix[zap->matrixSeg], &mat);
+        
+        swtransform = &mat;
+    }
+    
+    FX_Lightning(wcTransform, ot, swtransform, zap->deg, &start, &end, zap->width, zap->small_width, zap->segs, zap->sine_size, zap->variation, zap->color, zap->glow_color);
+}
 
 void FX_DrawAllGeneralEffects(MATRIX *wcTransform, VertexPool *vertexPool, PrimPool *primPool, unsigned long **ot)
 {
