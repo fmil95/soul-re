@@ -4436,7 +4436,93 @@ void FX_SetLightingPos(FXLightning *zap, Instance *startInstance, int startSeg, 
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericLightning);
+FXLightning* FX_StartGenericLightning(Instance *instance, int num, int segOverride, int endSegOverride)
+{
+    FXLightning *zap;            
+    GenericFXObject *GFXO;       
+    GenericLightningParams *GLP; 
+    Object *particle;                                           
+    
+    particle = (Object*)objectAccess[10].object;
+    
+    if (particle == NULL) 
+    {
+        return NULL; 
+    }
+    
+    GFXO = (GenericFXObject*)particle->data;
+    
+    GLP = &GFXO->LightningList[num];
+    
+    if (GLP->lifeTime == 0) 
+    {
+        return NULL;
+    }
+
+    if (GLP->use_child != 0)
+    {
+        if (instance->LinkChild != NULL)
+        {
+            instance = instance->LinkChild;
+        }
+        else 
+        {
+            return NULL;
+        }
+    }
+
+    zap = FX_CreateLightning(instance, GLP->lifeTime, GLP->deg, GLP->deg_inc, GLP->width, GLP->small_width, GLP->segs, GLP->sine_size, GLP->variation, GLP->color, GLP->glow_color);
+   
+    if (zap != NULL) 
+    {
+        int startSeg;                
+        int endSeg; 
+        
+        if (segOverride == 0) 
+        {
+            startSeg = GLP->startSeg;
+        }
+        else 
+        {
+            startSeg = segOverride;
+        }
+        
+        if (endSegOverride == 0) 
+        {
+            endSeg = GLP->endSeg;
+        }
+        else
+        {
+            endSeg = endSegOverride;
+        }
+        
+        FX_SetLightingPos(zap, instance, startSeg, &GLP->start_offset, instance, endSeg, &GLP->end_offset, GLP->matrixSeg);
+        
+        if ((GLP->type == 1) && (SoulReaverFire() != 0)) 
+        {
+            int tmp_blue;                
+            CVECTOR *ptr;  
+            
+            ptr = (CVECTOR*)&zap->color;
+
+            tmp_blue = ptr->b;
+
+            ptr->b = zap->color;
+
+            ptr = (CVECTOR*)&zap->glow_color;
+
+            ((char*)&zap->color)[0] = tmp_blue;
+
+            tmp_blue = ptr->b;
+
+            ptr->b = zap->glow_color;
+
+            ((char*)&zap->glow_color)[0] = tmp_blue;
+        }
+    } 
+        
+    return zap;
+}
 
 FXBlastringEffect *FX_StartGenericBlastring(Instance *instance, int num, int segOverride, int matrixSegOverride)
 {
@@ -4461,7 +4547,7 @@ FXBlastringEffect *FX_StartGenericBlastring(Instance *instance, int num, int seg
     
     GBP = &GFXO->BlastList[num];
 
-    if ((signed char)GBP->use_child != 0)
+    if (GBP->use_child != 0)
     {
         if (instance->LinkChild != NULL)
         {
@@ -4475,7 +4561,7 @@ FXBlastringEffect *FX_StartGenericBlastring(Instance *instance, int num, int seg
     
     if (segOverride == 0)
     {
-        segment = (signed char)GBP->segment;
+        segment = GBP->segment;
     }
     else 
     {
@@ -4512,7 +4598,7 @@ FXBlastringEffect *FX_StartGenericBlastring(Instance *instance, int num, int seg
     position.y += GBP->offset.y;
     position.z += GBP->offset.z;
     
-    blast = FX_DoBlastRing(instance, &position, &mat, matrix_segment, GBP->radius, GBP->endRadius, GBP->colorchange_radius, GBP->size1, GBP->size2, GBP->vel << 0xC, GBP->accl, GBP->height1, GBP->height2, GBP->height3, GBP->startColor, GBP->endColor, (signed char)GBP->predator_offset, GBP->lifeTime, (signed char)GBP->sortInWorld);
+    blast = FX_DoBlastRing(instance, &position, &mat, matrix_segment, GBP->radius, GBP->endRadius, GBP->colorchange_radius, GBP->size1, GBP->size2, GBP->vel << 12, GBP->accl, GBP->height1, GBP->height2, GBP->height3, GBP->startColor, GBP->endColor, GBP->predator_offset, GBP->lifeTime, GBP->sortInWorld);
     
     blast->stay_in_place = GBP->stay_in_place;
         
