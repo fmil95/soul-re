@@ -4438,7 +4438,86 @@ void FX_SetLightingPos(FXLightning *zap, Instance *startInstance, int startSeg, 
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericLightning);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericBlastring);
+FXBlastringEffect *FX_StartGenericBlastring(Instance *instance, int num, int segOverride, int matrixSegOverride)
+{
+    FXBlastringEffect *blast;   
+    GenericFXObject *GFXO;       
+    GenericBlastringParams *GBP; 
+    Object *particle;            
+    SVector position;            
+    int segment;                
+    int matrix_segment;          
+    MATRIX mat;                  
+    MATRIX *swTransform;         
+    
+    particle = objectAccess[10].object;
+    
+    if (particle == NULL)
+    {
+        return NULL;
+    }
+    
+    GFXO = (GenericFXObject*)particle->data;
+    
+    GBP = &GFXO->BlastList[num];
+
+    if ((signed char)GBP->use_child != 0)
+    {
+        if (instance->LinkChild != NULL)
+        {
+            instance = instance->LinkChild;
+        }
+        else 
+        {
+            return NULL;
+        }
+    }
+    
+    if (segOverride == 0)
+    {
+        segment = (signed char)GBP->segment;
+    }
+    else 
+    {
+        segment = segOverride;
+    }
+    
+    if (matrixSegOverride == 0) 
+    {
+        matrix_segment = GBP->matrixSeg;
+    }
+    else 
+    {
+        matrix_segment = matrixSegOverride;
+    }
+
+    MATH3D_SetUnityMatrix(&mat);
+    
+    if (instance->matrix != NULL) 
+    {
+        swTransform = &instance->matrix[segment];
+        
+        position.x = swTransform->t[0];
+        position.y = swTransform->t[1];
+        position.z = swTransform->t[2];
+    }
+    else 
+    {
+        position.x = instance->position.x;
+        position.y = instance->position.y;
+        position.z = instance->position.z;
+    }
+    
+    position.x += GBP->offset.x;
+    position.y += GBP->offset.y;
+    position.z += GBP->offset.z;
+    
+    blast = FX_DoBlastRing(instance, &position, &mat, matrix_segment, GBP->radius, GBP->endRadius, GBP->colorchange_radius, GBP->size1, GBP->size2, GBP->vel << 0xC, GBP->accl, GBP->height1, GBP->height2, GBP->height3, GBP->startColor, GBP->endColor, (signed char)GBP->predator_offset, GBP->lifeTime, (signed char)GBP->sortInWorld);
+    
+    blast->stay_in_place = GBP->stay_in_place;
+        
+    return blast;
+}
 
 FXFlash *FX_StartGenericFlash(Instance *instance, int num)
 {
