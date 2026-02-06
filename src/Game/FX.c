@@ -4326,7 +4326,51 @@ FXLightning *FX_CreateLightning(Instance *instance, int lifeTime, int deg, int d
     return zap;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_SetLightingPos);
+void FX_SetLightingPos(FXLightning *zap, Instance *startInstance, int startSeg, Position *startOffset, Instance *endInstance, int endSeg, Position *endOffset, int matrixSeg) 
+{
+    if (zap != NULL) 
+    {
+        if (startInstance != NULL) 
+        {
+            if (endInstance != NULL) 
+            {
+                zap->type = 0;
+                
+                zap->instance = startInstance;
+                zap->end_instance = endInstance;
+            } 
+            else 
+            {
+                zap->type = 1;
+                
+                zap->instance = startInstance;
+            }
+            
+            if ((startInstance == NULL) && (endInstance == NULL)) 
+            {
+                zap->type = 2;
+            }
+        } 
+        else if (endInstance == NULL) 
+        {
+            zap->type = 2;
+        }
+        
+        if (startOffset != NULL) 
+        {
+            memcpy(&zap->start_offset, startOffset, 6);
+        }
+        
+        if (endOffset != NULL) 
+        {
+            memcpy(&zap->end_offset, endOffset, 6);
+        }
+        
+        zap->startSeg = startSeg;
+        zap->endSeg = endSeg;
+        zap->matrixSeg = matrixSeg;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_StartGenericLightning);
 
