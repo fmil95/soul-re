@@ -11,10 +11,6 @@ static LightGroup default_lightgroup = {
     {{{2056, 2056, 2056}, {2056, 2056, 2056}, {2056, 2056, 2056}}, {0, 0, 0}}
 };
 
-static int D_800D0908[2] = {0x10001000, 4096};
-
-static int D_800D0910[5] = {2048, 2048, 2048, 0, 0};
-
 static long (*light_sourceAndVertexFunc)();
 
 static void *light_light;
@@ -250,6 +246,8 @@ void LIGHT_GetLightMatrix(struct _Instance *instance, struct Level *level, struc
     }
 }
 
+short D_800D0908[3] = { 4096, 4096, 4096 }; // tempRGB
+
 // Matches 100% on decomp.me but differs on this project
 #ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/LIGHT3D", LIGHT_PresetInstanceLight);
@@ -347,6 +345,10 @@ void LIGHT_SetAmbientInstance(Instance *instance, Level *level)
     (void)level;
     SetBackColor(((ColorType *)&instance->light_color)->r, ((ColorType *)&instance->light_color)->g, ((ColorType *)&instance->light_color)->b);
 }
+
+int D_800D0910[3] = { 2048, 2048, 2048 }; // half
+
+int D_800D0920[2] = { 0, 0 };
 
 // Matches 100% on decomp.me but differs on this project
 #ifndef NON_MATCHING
