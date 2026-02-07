@@ -339,21 +339,13 @@ void LIGHT_SetAmbientInstance(Instance *instance, Level *level)
     SetBackColor(((ColorType *)&instance->light_color)->r, ((ColorType *)&instance->light_color)->g, ((ColorType *)&instance->light_color)->b);
 }
 
-int D_800D0910[3] = { 2048, 2048, 2048 }; // half
-
-int D_800D0920[2] = { 0, 0 };
-
-// Matches 100% on decomp.me but differs on this project
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/LIGHT3D", LIGHT_SetMatrixForLightGroupInstance);
-#else
 void LIGHT_SetMatrixForLightGroupInstance(Instance *instance, Level *level)
 {
     MATRIX *lgt;
     MATRIX lgt_cat;
     MATRIX lm;
     MATRIX cm;
-    VECTOR half = {2048, 2048, 2048};
+    VECTOR half = { 2048, 2048, 2048, 0 };
     LightList *lightList;
     int lightGrp;
     typedef struct
@@ -470,7 +462,8 @@ void LIGHT_SetMatrixForLightGroupInstance(Instance *instance, Level *level)
         }
     }
 }
-#endif
+
+int D_800D091C = 0;
 
 void LIGHT_DrawShadow(MATRIX *wcTransform, struct _Instance *instance, struct _PrimPool *primPool, unsigned long **ot)
 {
