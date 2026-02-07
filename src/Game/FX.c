@@ -18,15 +18,62 @@
 #include "Game/PHYSOBS.h"
 #include "Game/PSX/MAIN.h"
 
-STATIC FXGeneralEffect *FX_GeneralEffectTracker;
+static FXGeneralEffect *FX_GeneralEffectTracker = NULL;
 
-STATIC short Spiral_Number;
+static FXRibbon *FX_ConstrictRibbon = NULL;
 
-STATIC short Spiral_Degrees;
+static short FX_ConstrictStage = 0;
 
-STATIC long Spiral_Current;
+static Instance *FX_ConstrictInstance = NULL;
 
-STATIC long Spiral_Max;
+static short snow_amount = 0;
+
+static short rain_amount = 0;
+
+static short current_rain_fade = 0;
+
+static Instance *FX_reaver_instance = NULL;
+
+/* sv_vels */
+static SVector D_800D1018[4] = 
+{
+    {  15,   0, 100, 6 },
+    { -15,   0, 100, 6 },
+    {   0,  15, 100, 6 },
+    {   0, -15, 100, 6 },
+};
+
+/* ??? */
+static short D_800D1038[2] = { 25637, 0 };
+
+static short windx = 0;
+
+static short windy = 0;
+
+static short wind_deg = 1024;
+
+static short wind_speed = 20;
+
+static long FX_ColorArray[6] = 
+{
+    0x1010C8,
+    0x10C810,
+    0xC81010,
+    0x1800A0,
+    0x93E4,
+    0xA01010,
+};
+
+static short Spiral_Number = 0xFFFF;
+
+static short Spiral_Degrees = 128;
+
+static long Spiral_Current = 0;
+
+static long Spiral_Max = 100000;
+
+/* cnt */
+static int D_800D1068 = 0;
 
 STATIC FX_PRIM *FX_LastUsedPrim;
 
@@ -44,37 +91,13 @@ STATIC int Spiral_Glow_Size;
 
 STATIC int Spiral_Mod;
 
-STATIC Instance *FX_reaver_instance;
-
 STATIC Position FX_ConstrictPosition;
 
 STATIC Position *FX_ConstrictPositionPtr;
 
-STATIC short snow_amount;
-
-STATIC short rain_amount;
-
-STATIC short current_rain_fade;
-
 STATIC short FX_Frames;
 
 STATIC short FX_TimeCount;
-
-STATIC short windx;
-
-STATIC short windy;
-
-STATIC short wind_deg;
-
-STATIC short wind_speed;
-
-STATIC FXRibbon *FX_ConstrictRibbon;
-
-STATIC short FX_ConstrictStage;
-
-STATIC Instance *FX_ConstrictInstance;
-
-long FX_ColorArray[6];
 
 static inline long FX_GetColor(ObjectEffect *effect, int i)
 {

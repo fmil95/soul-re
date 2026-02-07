@@ -214,7 +214,7 @@ segments:
       - [0x0C1714, .sdata, Game/GENERIC]
       - [0x0C1720, .sdata, Game/SOUND]
       - [0x0C17D4, .sdata, Game/SPLINE]
-      - [0x0C17FC, sdata, Game/FX]
+      - [0x0C17FC, .sdata, Game/FX]
       - [0x0C186C, .sdata, Game/VM]
       - [0x0C1874, .sdata, Game/MEMPACK]
       - [0x0C1958, .sdata, Game/PSX/AADLIB]
