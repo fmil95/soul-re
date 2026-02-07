@@ -4959,7 +4959,38 @@ void FX_EndInstanceParticleEffects(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_GetSpiralPoint);
+void FX_GetSpiralPoint(int radius, int deg, int *x, int *y)
+{
+	int prevx; 
+	int prevy; 
+
+	prevx = (-radius * rcos(deg)) >> 12;
+	prevx = (prevx / 240) * 512;
+
+	if (prevx < 0)
+	{
+		prevx -= 2048;
+	}
+	else
+	{
+		prevx += 2048;
+	}
+
+	*x = (prevx >> 12) + 438;
+
+	prevy = (radius * rsin(deg)) >> 12;
+
+	if (prevy < 0)
+	{
+		prevy -= 2048;
+	}
+	else
+	{
+		prevy += 2048;
+	}
+
+	*y = (prevy >> 12) + 201;
+}
 
 void FX_GetLinePoint(int radius, int next_radius, int deg, int next_deg, int *pntx, int *pnty, int part)
 {
