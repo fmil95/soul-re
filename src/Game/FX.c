@@ -5119,8 +5119,10 @@ void FX_CalcSpiral(int degchange)
     Spiral_Glow_Y = (miny + maxy) / 2;
 }
 
+// Matches 100% on decomp.me but differs on this project
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Spiral);
-/* TODO: Needs sdata migration
+#else
 void FX_Spiral(PrimPool *primPool, unsigned long **ot)
 {
     POLY_2G4 *poly; 
@@ -5128,12 +5130,12 @@ void FX_Spiral(PrimPool *primPool, unsigned long **ot)
     long offp; 
     long offm; 
     int n; 
-    DR_TPAGE *drtpage; 
+    //DR_TPAGE *drtpage; // unused
     int health; 
     int health_mod; 
     long no_color; 
     long color; 
-    static short cnt = 0; 
+    STATIC short cnt = 0; 
     int current_cnt; 
     int max64; 
     long SPIRAL_COLOR; 
@@ -5274,7 +5276,7 @@ void FX_Spiral(PrimPool *primPool, unsigned long **ot)
 
 		// setDrawTPage(poly, 1, 1, 32);
         
-        ((u_long*)poly)[1] = _get_mode(1, 1, 32);
+        ((unsigned long*)poly)[1] = _get_mode(1, 1, 32);
 
         // addPrim(poly, ot[1]);
 
@@ -5285,7 +5287,7 @@ void FX_Spiral(PrimPool *primPool, unsigned long **ot)
 
 		if ((Spiral_Number != 0) || (Spiral_Current == Spiral_Max))
 		{
-            static short deg; 
+            STATIC short deg; 
             Vector f1; 
             
 			f1.x = Spiral_Glow_X;
@@ -5296,7 +5298,8 @@ void FX_Spiral(PrimPool *primPool, unsigned long **ot)
 			DRAW_CreateAGlowingCircle(&f1, 320, gameTrackerX.primPool, ot, 5, 32768, Spiral_Glow_Size, Spiral_Glow_Size, deg);
 		}
 	}
-}*/
+}
+#endif
 
 void FX_Health_Spiral(int number, int current_health, int max_health)
 {
