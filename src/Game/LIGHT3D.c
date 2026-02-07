@@ -246,12 +246,6 @@ void LIGHT_GetLightMatrix(struct _Instance *instance, struct Level *level, struc
     }
 }
 
-short D_800D0908[3] = { 4096, 4096, 4096 }; // tempRGB
-
-// Matches 100% on decomp.me but differs on this project
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/LIGHT3D", LIGHT_PresetInstanceLight);
-#else
 void LIGHT_PresetInstanceLight(Instance *instance, short attenuate, MATRIX *lm)
 {
     MATRIX cm;
@@ -261,7 +255,7 @@ void LIGHT_PresetInstanceLight(Instance *instance, short attenuate, MATRIX *lm)
     int j;
     Level *level;
     CDLight *extraLight = (CDLight *)instance->extraLight;
-    short tempRGB[3] = {16, 16, 16};
+    short tempRGB[3] = { 4096, 4096, 4096 };
     short *todRGB;
 
     level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
@@ -318,7 +312,6 @@ void LIGHT_PresetInstanceLight(Instance *instance, short attenuate, MATRIX *lm)
 
     SetColorMatrix(&cm);
 }
-#endif
 
 void LIGHT_GetAmbient(struct _ColorType *color, struct _Instance *instance)
 {
