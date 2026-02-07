@@ -855,11 +855,6 @@ void aadPurgeLoadQueue()
 #ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadProcessLoadQueue);
 #else
-extern char D_800D1178[];
-extern char D_800D1184[];
-extern char D_800D11A0[];
-extern char D_800D11BC[];
-extern char D_800D11D8[];
 void aadProcessLoadQueue()
 {
     AadDynamicSfxLoadInfo *info;
@@ -896,8 +891,7 @@ void aadProcessLoadQueue()
 
                 strcpy(areaName, loadReq->fileName);
 
-                //p = (char*)strpbrk(areaName, "0123456789");
-                p = (char *)strpbrk(areaName, D_800D1178);
+                p = (char*)strpbrk(areaName, "0123456789");
 
                 if (p != NULL)
                 {
@@ -906,17 +900,13 @@ void aadProcessLoadQueue()
 
                 if ((loadReq->flags & 0x1))
                 {
-                    //sprintf(info->snfFileName, "\\kain2\\area\\%s\\bin\\%s.snf", areaName, loadReq->fileName);
-                    sprintf(info->snfFileName, D_800D1184, areaName, loadReq->fileName);
-                    //sprintf(info->smfFileName, "\\kain2\\area\\%s\\bin\\%s.smf", areaName, loadReq->fileName);
-                    sprintf(info->smfFileName, D_800D11A0, areaName, loadReq->fileName);
+                    sprintf(info->snfFileName, "\\kain2\\area\\%s\\bin\\%s.snf", areaName, loadReq->fileName);
+                    sprintf(info->smfFileName, "\\kain2\\area\\%s\\bin\\%s.smf", areaName, loadReq->fileName);
                 }
                 else
                 {
-                    //sprintf(info->snfFileName, "\\kain2\\sfx\\object\\%s\\%s.snf", loadReq->fileName, loadReq->fileName);
-                    sprintf(info->snfFileName, D_800D11BC, loadReq->fileName, loadReq->fileName);
-                    //sprintf(info->smfFileName, "\\kain2\\sfx\\object\\%s\\%s.smf", loadReq->fileName, loadReq->fileName);
-                    sprintf(info->smfFileName, D_800D11D8, loadReq->fileName, loadReq->fileName);
+                    sprintf(info->snfFileName, "\\kain2\\sfx\\object\\%s\\%s.snf", loadReq->fileName, loadReq->fileName);
+                    sprintf(info->smfFileName, "\\kain2\\sfx\\object\\%s\\%s.smf", loadReq->fileName, loadReq->fileName);
                 }
 
                 gSramFullAlarm = 0;
