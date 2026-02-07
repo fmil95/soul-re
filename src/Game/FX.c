@@ -5120,6 +5120,183 @@ void FX_CalcSpiral(int degchange)
 }
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Spiral);
+/* TODO: Needs sdata migration
+void FX_Spiral(PrimPool *primPool, unsigned long **ot)
+{
+    POLY_2G4 *poly; 
+    long prev; 
+    long offp; 
+    long offm; 
+    int n; 
+    DR_TPAGE *drtpage; 
+    int health; 
+    int health_mod; 
+    long no_color; 
+    long color; 
+    static short cnt = 0; 
+    int current_cnt; 
+    int max64; 
+    long SPIRAL_COLOR; 
+    long SPIRAL_COLOR2; 
+    long SPIRAL_COLOR3; 
+    long SPIRAL_COLOR_END; 
+    long SPIRAL_NOCOLOR; 
+
+	if (((gameTrackerX.gameData.asmData.MorphTime != 1000) && (gameTrackerX.gameData.asmData.MorphType == 0)) && (Spiral_Number != 0))
+	{
+        FX_Health_Spiral(1, Spiral_Current, Spiral_Max);
+	}
+
+	SPIRAL_COLOR = 0x3AFCFFD3;
+	SPIRAL_COLOR2 = 0x3ADCE0BA;
+	SPIRAL_COLOR3 = 0x3ABBC09D;
+
+	SPIRAL_COLOR_END = 0x3A483017;
+
+	SPIRAL_NOCOLOR = 0x3A002A15;
+
+	if (Spiral_Number == 0)
+	{
+		if (Spiral_Current == Spiral_Max)
+		{
+			if (++cnt > 80)
+			{
+				cnt = 0;
+			}
+		}
+		else
+		{
+			SPIRAL_COLOR = 0x3A00FF00;
+			SPIRAL_COLOR2 = 0x3A00E000;
+			SPIRAL_COLOR3 = 0x3A00BF00;
+            
+			SPIRAL_COLOR_END = 0x3A004500;
+		}
+
+		SPIRAL_NOCOLOR = 0x3A00150B;
+	}
+    else if (++cnt > 80)
+	{
+		cnt = 0;
+	}
+
+	max64 = Spiral_Max / 64;
+
+	health = Spiral_Current / max64;
+
+	prev = *(unsigned long*)&Spiral_Array[64];
+
+	offm = *(unsigned long*)&Spiral_Array[64];
+	offp = *(unsigned long*)&Spiral_Array[64];
+
+	poly = (POLY_2G4*)primPool->nextPrim;
+
+	health_mod = ((Spiral_Current - (health * max64)) * 4096) / max64;
+
+	if ((unsigned long*)(poly + 65) < primPool->lastPrim)
+	{
+		color = SPIRAL_NOCOLOR;
+		no_color = SPIRAL_NOCOLOR;
+        
+		current_cnt = cnt;
+
+		for (n = 0; n < 64; n++, poly++)
+		{
+			*(unsigned long*)&poly->p1.r2 = color;
+			*(unsigned long*)&poly->p2.r0 = color;
+
+			if (health < n)
+			{
+				color = no_color;
+			}
+			else
+			{
+                int tmp; 
+                
+				tmp = ((n + current_cnt) & 0xF) / 4;
+
+				switch (tmp)
+				{
+                default:
+                case 0:
+                    color = SPIRAL_COLOR;
+                    break;
+                case 1:
+                    color = SPIRAL_COLOR2;
+                    break;
+                case 2:
+                    color = SPIRAL_COLOR3;
+                    break;
+                case 3:
+                    color = SPIRAL_COLOR2;
+                    break;
+				}
+			}
+            
+            if (n == health)
+            {
+                LoadAverageCol((unsigned char*)&color, (unsigned char*)&no_color, health_mod, 4096 - health_mod, (unsigned char*)&color);
+
+                color &= 0xFFFFFF;
+                color |= SPIRAL_COLOR & 0xFF000000;
+            }
+
+			*(unsigned long*)&poly->p1.r0 = SPIRAL_COLOR_END;
+			*(unsigned long*)&poly->p1.r1 = SPIRAL_COLOR_END;
+			*(unsigned long*)&poly->p1.r3 = color;
+            
+			*(unsigned long*)&poly->p2.r2 = SPIRAL_COLOR_END;
+			*(unsigned long*)&poly->p2.r3 = SPIRAL_COLOR_END;
+			*(unsigned long*)&poly->p2.r1 = color;
+            
+			*(unsigned long*)&poly->p2.x0 = prev;
+			*(unsigned long*)&poly->p1.x2 = prev;
+
+			*(unsigned long*)&poly->p1.x0 = offp;
+			*(unsigned long*)&poly->p2.x2 = offm;
+
+			prev = *(unsigned long*)&Spiral_Array[n];
+
+			offp = *(unsigned long*)&Spiral_OffsetP[n];
+			offm = *(unsigned long*)&Spiral_OffsetM[n];
+
+			*(unsigned long*)&poly->p2.x1 = prev;
+			*(unsigned long*)&poly->p1.x3 = prev;
+
+			*(unsigned long*)&poly->p1.x1 = offp;
+			*(unsigned long*)&poly->p2.x3 = offm;
+
+			// addPrim(poly, ot[1]);
+
+            *(int*)poly = getaddr(&ot[1]) | 0x10000000;
+            *(int*)&ot[1] = (intptr_t)poly & 0xFFFFFF; 
+		}
+
+		// setDrawTPage(poly, 1, 1, 32);
+        
+        ((u_long*)poly)[1] = _get_mode(1, 1, 32);
+
+        // addPrim(poly, ot[1]);
+
+        *(int*)poly = getaddr(&ot[1]) | 0x1000000;
+        *(int*)&ot[1] = (intptr_t)poly & 0xFFFFFF;
+
+		primPool->nextPrim = (unsigned long*)((char*)poly + 8);
+
+		if ((Spiral_Number != 0) || (Spiral_Current == Spiral_Max))
+		{
+            static short deg; 
+            Vector f1; 
+            
+			f1.x = Spiral_Glow_X;
+			f1.y = Spiral_Glow_Y;
+
+			deg = (deg - 32) & 0xFFF;
+
+			DRAW_CreateAGlowingCircle(&f1, 320, gameTrackerX.primPool, ot, 5, 32768, Spiral_Glow_Size, Spiral_Glow_Size, deg);
+		}
+	}
+}*/
 
 void FX_Health_Spiral(int number, int current_health, int max_health)
 {
