@@ -2603,7 +2603,100 @@ short CAMERA_update_z_damped(Camera *camera, short current, short target)
     return current_tmp;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/CAMERA", CAMERA_CombatCamDist);
+void CAMERA_CombatCamDist(Camera *camera)
+{
+    DVECTOR xy;         
+    DVECTOR xy2;        
+    SVector position;   
+    long z;             
+    Instance *instance; 
+    short angle; // not from decls.h
+
+    instance = (Instance*)INSTANCE_Query(camera->focusInstance, 34);
+    
+    if (instance == NULL) 
+    {
+        combat_cam_weight = 4096;
+        combat_cam_distance = camera->targetFocusDistance;
+        return;
+    }
+    
+    SetRotMatrix(camera->core.wcTransform);
+    SetTransMatrix(camera->core.wcTransform);
+    
+    position.x = camera->focusInstance->position.x;
+    position.y = camera->focusInstance->position.y;
+    position.z = camera->focusInstance->position.z;
+    
+    gte_ldv0(&position);
+    gte_nrtps();
+    gte_stsxy(&xy.vx);
+    gte_stsz(&z);
+    
+    if (xy.vx < 256)
+    {
+        combat_cam_distance = -(((xy.vx - 256) * z) / 128);
+    }
+    else
+    {
+        combat_cam_distance = ((xy.vx - 256) * z) / 128;
+    }
+    
+    if (combat_cam_distance > 3000) 
+    {
+        combat_cam_distance = 3000;
+    }
+    
+    if (combat_cam_distance < camera->targetFocusDistance)
+    {
+        combat_cam_distance = camera->targetFocusDistance;
+    }
+    
+    if (xy.vy > 240)
+    {
+        combat_cam_weight += 48;
+        
+        if (combat_cam_weight > 4096) 
+        {
+            combat_cam_weight = 4096;
+        }
+    }
+    else if (xy.vy < 210) 
+    {
+        combat_cam_weight -= 48;
+        
+        if (combat_cam_weight < 2048) 
+        {
+            combat_cam_weight = 2048;
+        }
+    }
+    
+    position.x = instance->position.x;
+    position.y = instance->position.y;
+    position.z = instance->position.z;
+    
+    gte_ldv0(&position);
+    gte_nrtps(); 
+    gte_stsxy(&xy2.vx);
+    
+    if (ratan2(xy2.vy - xy.vy, xy2.vx - xy.vx) >= 0) 
+    {
+        angle = ratan2(xy2.vy - xy.vy, xy2.vx - xy.vx);
+    } 
+    else 
+    {
+        angle = -ratan2(xy2.vy - xy.vy, xy2.vx - xy.vx);
+    }
+    
+    combat_cam_angle = angle;
+    
+    if (angle > 1024) 
+    {
+        combat_cam_angle = 2048 - angle;
+    }
+    
+    combat_cam_angle = -170 - (combat_cam_angle / 8);
+}
 
 void CAMERA_GenericCameraProcess(Camera *camera)
 {
