@@ -14,8 +14,6 @@ STATIC LoadStatus loadStatus;
 
 long crap1;
 
-char HashExtensions[7][4];
-
 void LOAD_InitCd()
 {
     CdInit();
@@ -101,11 +99,12 @@ void LOAD_CdDataReady()
     }
 }
 
+static char D_800D0924[] = "something %x\n";
+
 // Matches 100% on decomp.me but differs on this project
 #ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_CdReadReady);
 #else
-extern char D_800D0924[];
 void LOAD_CdReadReady(unsigned char intr, unsigned char *result)
 {
     STATIC int crap;
@@ -293,13 +292,11 @@ void LOAD_SetupFileToDoBufferedCDReading()
     loadStatus.cdWaitTime = TIMER_GetTimeMS();
 }
 
-extern char D_800D0934[];
 void LOAD_ProcessReadQueue()
 {
     if (gameTrackerX.debugFlags < 0)
     {
-        // FONT_Print("CD St %d LS %d sk %d tm %d rd %d cs %d\n", loadStatus.currentQueueFile.readStatus, loadStatus.state, loadStatus.seekTime, loadStatus.sectorTime, loadStatus.currentQueueFile.readCurSize, loadStatus.currentSector);
-        FONT_Print(D_800D0934, loadStatus.currentQueueFile.readStatus, loadStatus.state, loadStatus.seekTime, loadStatus.sectorTime, loadStatus.currentQueueFile.readCurSize, loadStatus.currentSector);
+        FONT_Print("CD St %d LS %d sk %d tm %d rd %d cs %d\n", loadStatus.currentQueueFile.readStatus, loadStatus.state, loadStatus.seekTime, loadStatus.sectorTime, loadStatus.currentQueueFile.readCurSize, loadStatus.currentSector);
     }
 
     switch (loadStatus.currentQueueFile.readStatus)
@@ -514,7 +511,6 @@ void LOAD_InitCdLoader(char *bigFileName, char *voiceFileName)
     }
 }
 
-extern char D_800D095C[];
 int LOAD_SetupFileInfo(NonBlockLoadEntry *loadEntry)
 {
     BigFileEntry *fileInfo;
@@ -525,8 +521,7 @@ int LOAD_SetupFileInfo(NonBlockLoadEntry *loadEntry)
     {
         if (loadEntry->dirHash == loadStatus.bigFile.currentDirID)
         {
-            // DEBUG_FatalError("CD ERROR: File %s does not exist\n", loadEntry->fileName);
-            DEBUG_FatalError(D_800D095C, loadEntry->fileName);
+            DEBUG_FatalError("CD ERROR: File %s does not exist\n", loadEntry->fileName);
         }
 
         return 0;
@@ -595,6 +590,8 @@ void LOAD_CD_ReadPartOfFile(NonBlockLoadEntry *loadEntry)
         loadStatus.changeDir = 1;
     }
 }
+
+static char HashExtensions[7][4] = { "drm", "crm", "tim", "smp", "snd", "smf", "snf" };
 
 long LOAD_HashName(char *string)
 {
