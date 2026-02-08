@@ -16,11 +16,9 @@ void FONT_DrawChar2D(unsigned char c, long x, long y);
 void FONT_ReloadFont();
 long FONT_CharSpacing(char c, long fontXSize);
 void FONT_VaReallyPrint(char *fmt, void *ap);
-
-FontTracker fontTracker;
-
-unsigned short SpecialFogClut;
-
 void FONT_Flush();
+
+extern unsigned short SpecialFogClut;
+/* extern */ FontTracker fontTracker;
 
 #endif

@@ -20,18 +20,7 @@ void VRAM_DisableTerrainArea();
 void VRAM_InitVramBlockCache();
 void VRAM_EnableTerrainArea();
 
-extern BlockVramEntry vramBlockList[90];
-
 extern short M_TrackClutUpdate;
-
-extern long numOfBlocksUsed;
-
-extern BlockVramEntry TerrainVramBlock;
-
-extern BlockVramEntry *usedVramBlocks;
-
-extern BlockVramEntry *openVramBlocks;
-
 extern long VRAM_NeedToUpdateMorph;
 
 #endif

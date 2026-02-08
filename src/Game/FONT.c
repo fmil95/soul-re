@@ -181,6 +181,10 @@ static font_color_t the_font_color_table[5] = { { 0x00, 0x00, 0x00 }, { 0x40, 0x
 
 BlockVramEntry *FONT_vramBlock;
 
+unsigned short SpecialFogClut;
+
+FontTracker fontTracker;
+
 void FONT_MakeSpecialFogClut(int x, int y)
 {
 
