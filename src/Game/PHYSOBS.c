@@ -488,7 +488,137 @@ int SwitchPhysOb(Instance *instance)
     return 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PHYSOBS", InteractPhysOb);
+int InteractPhysOb(Instance *instance, Instance *Force, int LinkNode, int Action)
+{
+    PhysObData *Data;                       
+    PhysObInteractProperties *interactProp; 
+    
+    interactProp = (PhysObInteractProperties*)instance->data;
+    
+    if (CheckPhysObFamily(instance, 3) == 0) 
+    {
+        return 1;
+    } 
+    else
+    {
+        BreakOffData *BreakOff; 
+        
+        BreakOff = (BreakOffData*)(instance->extraData + 4);
+        
+        Data = (PhysObData*)instance->extraData; 
+        
+        if (interactProp->frame != 0xFF) 
+        {
+            switch (Action) 
+            {                         
+            case 1:
+            {
+                Instance *lightInst; 
+
+                Data->Mode |= 0x1080;
+                Data->Mode &= ~0x1;
+                
+                if ((Data->Mode & 0x10000)) 
+                {
+                    lightInst = Force->LinkChild;
+                    
+                    PHYSOB_StartLighting(lightInst, PhysObGetLight(lightInst));
+                }
+                
+                BreakOff->NewType = interactProp->newType;
+                BreakOff->NewClass = interactProp->newClass;
+                
+                INSTANCE_LinkToParent(instance, Force, LinkNode);
+                break;
+            }
+            case 2:
+            {
+                Instance *lightInst; 
+                    
+                lightInst = Force->LinkChild;
+                
+                if (CheckPhysOb(lightInst) != 0) 
+                {
+                    PHYSOB_StartBurning(lightInst, PhysObGetLight(lightInst));
+                }
+                
+                break;
+            }
+            case 9:
+                INSTANCE_Post(instance, 0x40002, 5);
+                break;
+            }
+            
+            if (Action == interactProp->action) 
+            {
+                instance->flags |= 0x8;
+            }
+            
+            if (Action == interactProp->auxAction)
+            {
+                instance->flags |= 0x10;
+            }
+        }
+        
+        if ((interactProp->endAnim != 0xFF) && ((interactProp->Properties.Type & 0x8000))) 
+        {
+            G2EmulationInstanceSetAnimation(instance, 0, interactProp->endAnim, 0, 0);
+            
+            switch ((interactProp->startAnimMode & 0x30)) 
+            {                   
+            case 0:                                 
+                G2EmulationInstanceSetMode(instance, 0, 2);
+                break;
+            case 0x10:                                
+                G2EmulationInstanceSetMode(instance, 0, 1);
+                break;
+            case 0x20:                                
+                G2EmulationInstanceSetMode(instance, 0, 0);
+                break;
+            }
+        }
+        
+        if (instance->object->modelList != NULL) 
+        {
+            if ((interactProp->startAnimMode & 0x80))
+            {
+                int s; 
+                
+                for (s = 0; s < instance->object->modelList[0]->numSegments; s++) 
+                {
+                    COLLIDE_SegmentCollisionOff(instance, s);
+                } 
+            } 
+            else 
+            {
+                int s; 
+                
+                for (s = 0; s < instance->object->modelList[0]->numSegments; s++) 
+                {
+                    COLLIDE_SegmentCollisionOn(instance, s);
+                }
+            }
+        } 
+
+        Data->Force = NULL;
+        
+        Data->Step = 0;
+        Data->Steps = 0;
+        
+        BreakOff->NewType = interactProp->newType;
+        BreakOff->NewClass = interactProp->newClass;
+        
+        instance->xVel = 0;
+        instance->yVel = 0;
+        instance->zVel = 0;
+        
+        instance->xAccl = 0;
+        instance->yAccl = 0;
+        instance->zAccl = 0;
+        
+        return 0;
+    }
+}
 
 void ResetOrientation(Instance *instance)
 {
