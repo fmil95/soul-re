@@ -32,8 +32,6 @@
 #include "Game/HASM.h"
 #include "Game/PSX/MAIN.h"
 
-short M_TrackClutUpdate;
-
 WarpGateLoadInformation WarpGateLoadInfo;
 
 long CurrentWarpNumber = 0;

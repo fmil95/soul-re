@@ -5,15 +5,19 @@
 #include "Game/HASM.h"
 #include "Game/PSX/MAIN.h"
 
+BlockVramEntry vramBlockList[90];
+
+short M_TrackClutUpdate;
+
+long numOfBlocksUsed;
+
+BlockVramEntry TerrainVramBlock;
+
 BlockVramEntry *usedVramBlocks;
 
 BlockVramEntry *openVramBlocks;
 
-BlockVramEntry vramBlockList[90];
-
-long numOfBlocksUsed;
-
-/* Unused */ long VRAM_NeedToUpdateMorph = 0;
+long VRAM_NeedToUpdateMorph = 0;
 
 static inline long VRAM_GetDispPage()
 {
