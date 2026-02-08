@@ -6539,10 +6539,6 @@ void EVENT_ExecuteActionCommand(StackType *operand1, StackType *operand2, PCodeS
     }
 }*/
 
-// Matches 100% on decomp.me but differs on this project
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_GetScalerValueFromOperand);
-#else
 long EVENT_GetScalerValueFromOperand(StackType *operand, long *error, short *flags)
 {
     long value;
@@ -6626,7 +6622,6 @@ long EVENT_GetScalerValueFromOperand(StackType *operand, long *error, short *fla
 
     return value;
 }
-#endif
 
 long EVENT_TransformOperand(StackType *stackObject, PCodeStack *stack, long item, short *codeStream)
 {

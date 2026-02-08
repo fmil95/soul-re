@@ -5613,13 +5613,13 @@ typedef struct StackType
         struct
         {
             // offset: 0x0000
-            char *pointer;
+            short *pointer;
         } ShortPointer;
         // offset: 0x0000 (4 bytes)
         struct
         {
             // offset: 0x0000
-            char *pointer;
+            long *pointer;
         } LongPointer;
         // offset: 0x0000 (12 bytes)
         AreaObject areaObject;
