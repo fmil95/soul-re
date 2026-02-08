@@ -261,13 +261,10 @@ void ProcessArgs(char *baseAreaName, GameTracker *gameTracker)
     }
 }
 
-int D_800D0BF4[2] = { 0x00000200, 0x02000200 };
-
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", InitDisplay);
-/*void InitDisplay()
+void InitDisplay()
 {
     int i;
-    RECT r = { 0x0200, 0x0000, 0x0200, 0x0200 };
+    RECT r = { 512, 0, 512, 512 };
 
     ResetGraph(3);
 
@@ -289,7 +286,7 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", InitDisplay);
 
     for (i = 0; i < 2; i++)
     {
-        clearRect[i].tag.bytes[3] = 3;
+        clearRect[i].tag.rgba.a = 3; 
 
         clearRect[i].code = 2;
 
@@ -305,7 +302,7 @@ INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", InitDisplay);
     ClearOTagR((unsigned long*)gameTrackerX.dispOT, 3072);
 
     ClearImage(&r, 0, 255, 0);
-}*/
+}
 
 void StartTimer()
 {

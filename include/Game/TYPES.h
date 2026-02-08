@@ -6905,10 +6905,16 @@ typedef struct DISPENV
 } DISPENV;
 
 // size: 0x10
-typedef struct BLK_FILL
+typedef struct BLK_FILL // this struct was modified from the original
 {
     // offset: 0x0000
-    unsigned long tag;
+    union 
+    {
+        // offset: 0x0000
+        long color;
+        // offset: 0x0000 (4 bytes)
+        RGBAColor rgba;
+    } tag; // modified field, assumed to contain union _77fake
     // offset: 0x0004
     unsigned char r0;
     // offset: 0x0005
