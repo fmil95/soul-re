@@ -3149,7 +3149,118 @@ void FX_ProcessRain(FX_PRIM *fxPrim, FXTracker *fxTracker)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueRain);
+void FX_ContinueRain(FXTracker *fxTracker)
+{
+    FX_PRIM *fxPrim;  
+    SVECTOR campos;   
+    int n;            
+    int rain_pct;     
+    long waterZLevel; 
+    int slack;        
+    int fade;         
+    
+    if (*(int*)&gameTrackerX.gameData.asmData.MorphTime != 66536) 
+    {
+        rain_pct = rain_amount;
+            
+        if (gameTrackerX.gameData.asmData.MorphTime != 1000) 
+        {
+            fade = 4096 - FX_GetMorphFadeVal();
+            fade = (fade * current_rain_fade) / 4096;
+        } 
+        else 
+        {
+            if (current_rain_fade < 4096) 
+            {
+                current_rain_fade += gameTrackerX.timeMult / 128;
+                
+                if (current_rain_fade > 4096) 
+                {
+                    current_rain_fade = 4096;
+                }
+            }
+            
+            fade = current_rain_fade;
+        }
+        
+        rain_pct = (rain_pct * fade) / 4096;
+        
+        waterZLevel = STREAM_GetLevelWithID(gameTrackerX.playerInstance->currentStreamUnitID)->waterZLevel;
+       
+        slack = theCamera.core.rotation.x;
+        
+        slack &= 0xFFF;
+        
+        if (slack > 3072) 
+        {
+            slack = ((4096 - slack) * 3) / 2;
+        } 
+        else 
+        {
+            slack = 0;
+        }
+        
+        for (n = 0; n < 3; n++)
+        {
+            if (rain_pct >= (rand() & 0x3FF))
+            {
+                SVector worldpos; 
+                int zvel;         
+                
+                campos.vx = (rand() % (slack + 512)) - (slack / 2);
+                campos.vy = 5;
+                campos.vz = rand() & 0x7FF;
+                
+                FX_ConvertCamPersToWorld(&campos, (SVECTOR*)&worldpos);
+                
+                zvel = (-14 - (rand() & 0x3)) * 8;
+                
+                if ((worldpos.z + zvel) < waterZLevel)
+                {
+                    FX_GetRandomScreenPt(&campos);
+                    
+                    campos.vz += waterZLevel - worldpos.z;
+                    
+                    FX_ConvertCamPersToWorld(&campos, (SVECTOR*)&worldpos);
+                }
+                
+                if ((worldpos.z + zvel) >= waterZLevel) 
+                {
+                    fxPrim = FX_GetPrim(gFXT);
+                    
+                    if (fxPrim != NULL)
+                    {
+                        fxPrim->v0.x = worldpos.x;
+                        fxPrim->v0.y = worldpos.y; 
+                        fxPrim->v0.z = worldpos.z;
+                        
+                        fxPrim->duo.phys.xVel = (windx * ((rand() & 0x3FF) + 3072)) / 4096;
+                        fxPrim->duo.phys.yVel = (windy * ((rand() & 0x3FF) + 3072)) / 4096;
+                        fxPrim->duo.phys.zVel = zvel;
+                        
+                        fxPrim->timeToLive = 20;
+                        
+                        fxPrim->flags = 0x1090000;
+                        
+                        fxPrim->color = 0x52404040;
+                        
+                        fxPrim->process = FX_ProcessRain;
+                        
+                        fxPrim->work0 = waterZLevel;
+                        
+                        fxPrim->endColor = 0;
+                        
+                        fxPrim->v1.x = fxPrim->v0.x + fxPrim->duo.phys.xVel;
+                        fxPrim->v1.y = fxPrim->v0.y + fxPrim->duo.phys.yVel;
+                        fxPrim->v1.z = fxPrim->v0.z + fxPrim->duo.phys.zVel;
+                        
+                        LIST_InsertFunc(&fxTracker->usedPrimList, (NodeType*)fxPrim);
+                    }
+                }
+            }
+        } 
+    }
+}
 
 void FX_MakeSpark(Instance *instance, Model *model, int segment)
 {
