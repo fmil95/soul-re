@@ -1152,7 +1152,7 @@ void EVENT_AddShortPointerToStack(PCodeStack *stack, short *pointer)
 
         stackEntry->id = 10;
 
-        stackEntry->data.ShortPointer.pointer = (char *)pointer;
+        stackEntry->data.ShortPointer.pointer = pointer;
 
         stack->topOfStack++;
     }
@@ -6452,8 +6452,6 @@ void EVENT_PrintVars()
 {
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/EVENT", EVENT_ExecuteActionCommand);
-/* TODO: Gives "small-data section too large" issue when compiling
 void EVENT_ExecuteActionCommand(StackType *operand1, StackType *operand2, PCodeStack *stack, short *codeStream)
 {
     long error;
@@ -6537,7 +6535,7 @@ void EVENT_ExecuteActionCommand(StackType *operand1, StackType *operand2, PCodeS
         EVENT_DoSubListAction(&operand1->data.subListObject, operand2, stack, codeStream);
         break;
     }
-}*/
+}
 
 long EVENT_GetScalerValueFromOperand(StackType *operand, long *error, short *flags)
 {
