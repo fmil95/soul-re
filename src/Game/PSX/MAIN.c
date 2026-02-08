@@ -24,13 +24,7 @@
 #include "Game/LOCAL/LOCALSTR.h"
 #include "Game/PSX/AADSFX.h"
 
-short mainMenuFading;
-
 MainTracker mainTrackerX;
-
-int nosound;
-
-int nomusic;
 
 int devstation;
 
@@ -38,21 +32,51 @@ static int mainMenuSfx;
 
 short mainMenuTimeOut;
 
-long DoMainMenu;
-
 DebugMenuLine mainMenu[8924 + 8];
-
-long mainMenuMode;
-
-intptr_t *mainMenuScreen;
 
 unsigned long __timerEvent;
 
 long gTimerEnabled;
 
-char mainOptionsInit;
+static char D_800D099C[] = "CD ERROR: file %s not in bigfile\n"; /* unused */
 
-InterfaceItem InterfaceItems[6];
+static char D_800D09C0[] = "CD ERROR: file %x not in bigfile\n"; /* unused */
+
+int _ramsize = 0x200000; /* unused */
+
+int _stacksize = 0x4000; /* unused */
+
+char mainOptionsInit = 0;
+
+short gEndGameNow = 0;
+
+int pcverify = 0; /* unused */
+
+int nosound = 0;
+
+int nomusic = 0;
+
+InterfaceItem InterfaceItems[6] = 
+{ 
+    { "\\PUBLOGO.STR;1",                         0,     0, 0,  1 },
+	{ "\\CRYLOGO.STR;1",                         0,     0, 0,  5 },
+	{ "\\KAININT.STR;1",                         0,     0, 0, -1 },
+	{ "\\VERSE.STR;1",                           0,     0, 0,  4 },
+	{ "\\CREDITS.STR;1",                         0,     0, 0, -1 },
+    { "\\kain2\\game\\psx\\mainmenu\\legal.tim", 165, 165, 1, -1 }, 
+};
+
+long DoMainMenu = 0;
+
+long mainMenuMode = 0;
+
+intptr_t *mainMenuScreen = NULL;
+
+intptr_t *controlsScreen = NULL; /* unused */
+
+short mainMenuFadeInTime = 0; /* unused */
+
+short mainMenuFading = 0;
 
 void ClearDisplay(void)
 {
@@ -166,86 +190,63 @@ void ExtractLevelNum(char *levelNum, char *levelName)
     *levelNum = '\0';
 }
 
-extern char D_800D0B60[];
-extern char D_800D0B7C[];
-extern char D_800D0B84[];
-extern char D_800D0B90[];
-extern char D_800D0B9C[];
-extern char D_800D0BA8[];
-extern char D_800D0BB4[];
-extern char D_800D0BC0[];
-extern char D_800D0BC8[];
-extern char D_800D0BD4[];
-extern char D_800D0BE0[];
-extern char D_800D0BEC[];
 void ProcessArgs(char *baseAreaName, GameTracker *gameTracker)
 {
     char levelNum[32];
     char worldName[32];
     intptr_t *argData;
 
-    // argData = (intptr_t*)LOAD_ReadFile("\\kain2\\game\\psx\\kain2.arg", 10);
-    argData = (intptr_t *)LOAD_ReadFile(D_800D0B60, 10);
+    argData = (intptr_t*)LOAD_ReadFile("\\kain2\\game\\psx\\kain2.arg", 10);
 
     if (argData != NULL)
     {
         ExtractWorldName(worldName, (char *)argData);
         ExtractLevelNum(levelNum, (char *)argData);
 
-        // sprintf(baseAreaName, "%s%s", worldName, levelNum);
-        sprintf(baseAreaName, D_800D0B7C, worldName, levelNum);
+        sprintf(baseAreaName, "%s%s", worldName, levelNum);
 
-        // if (FindTextInLine("-NOSOUND", (char*)argData) != 0) 
-        if (FindTextInLine(D_800D0B84, (char *)argData) != 0)
+        if (FindTextInLine("-NOSOUND", (char*)argData) != 0) 
         {
             nosound = 1;
             nomusic = 1;
         }
 
-        // if (FindTextInLine("-NOMUSIC", (char*)argData) != 0) 
-        if (FindTextInLine(D_800D0B90, (char *)argData) != 0)
+        if (FindTextInLine("-NOMUSIC", (char*)argData) != 0) 
         {
             nomusic = 1;
         }
 
-        // if (FindTextInLine("-TIMEOUT", (char*)argData) != 0)
-        if (FindTextInLine(D_800D0B9C, (char *)argData) != 0)
+        if (FindTextInLine("-TIMEOUT", (char*)argData) != 0)
         {
             gameTracker->debugFlags |= 0x20000;
         }
 
-        // if (FindTextInLine("-MAINMENU", (char*)argData) != 0) 
-        if (FindTextInLine(D_800D0BA8, (char *)argData) != 0)
+        if (FindTextInLine("-MAINMENU", (char*)argData) != 0) 
         {
             DoMainMenu = 1;
         }
 
-        // if (FindTextInLine("-INSPECTRAL", (char*)argData) != 0) 
-        if (FindTextInLine(D_800D0BB4, (char *)argData) != 0)
+        if (FindTextInLine("-INSPECTRAL", (char*)argData) != 0) 
         {
             gameTrackerX.gameData.asmData.MorphType = 1;
         }
 
-        // if (FindTextInLine("-VOICE", (char*)argData) != 0)
-        if (FindTextInLine(D_800D0BC0, (char *)argData) != 0)
+        if (FindTextInLine("-VOICE", (char*)argData) != 0)
         {
             gameTracker->debugFlags |= 0x80000;
         }
 
-        // if (FindTextInLine("-DEBUG_CD", (char*)argData) != 0) 
-        if (FindTextInLine(D_800D0BC8, (char *)argData) != 0)
+        if (FindTextInLine("-DEBUG_CD", (char*)argData) != 0) 
         {
             gameTracker->debugFlags |= 0x80000000;
         }
 
-        // if (FindTextInLine("-LOADGAME", (char*)argData) != 0)
-        if (FindTextInLine(D_800D0BD4, (char *)argData) != 0)
+        if (FindTextInLine("-LOADGAME", (char*)argData) != 0)
         {
             gameTrackerX.streamFlags |= 0x200000;
         }
 
-        // if (FindTextInLine("-ALLWARP", (char*)argData) != 0) 
-        if (FindTextInLine(D_800D0BE0, (char *)argData) != 0)
+        if (FindTextInLine("-ALLWARP", (char*)argData) != 0) 
         {
             gameTrackerX.streamFlags |= 0x400000;
         }
@@ -256,19 +257,17 @@ void ProcessArgs(char *baseAreaName, GameTracker *gameTracker)
     }
     else
     {
-        // memcpy(baseAreaName, "under1", sizeof("under1"));
-        memcpy(baseAreaName, D_800D0BEC, 7);
+        memcpy(baseAreaName, "under1", sizeof("under1"));
     }
 }
 
+int D_800D0BF4[2] = { 0x00000200, 0x02000200 };
+
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", InitDisplay);
-/* TODO: requires migration of .sdata
-void InitDisplay()
+/*void InitDisplay()
 {
     int i;
-    RECT r;
-
-    memcpy(&r, D_800D0BF4, sizeof(r));
+    RECT r = { 0x0200, 0x0000, 0x0200, 0x0200 };
 
     ResetGraph(3);
 
@@ -425,8 +424,6 @@ void CheckForDevStation()
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MAIN_ShowLoadingScreen);
-/* TODO: requires migration of .sdata
 void MAIN_ShowLoadingScreen()
 {
     long *loadingScreen;
@@ -452,7 +449,7 @@ void MAIN_ShowLoadingScreen()
     }
     else
     {
-        loadingScreen = LOAD_ReadFile("\\kain2\\game\\psx\\loading.tim", 11);
+        loadingScreen = LOAD_ReadFile("\\kain2\\game\\psx\\loading.tim\0\\kain2\\game\\psx\\warning.tim", 11);
     }
 
     if (loadingScreen != NULL)
@@ -461,7 +458,7 @@ void MAIN_ShowLoadingScreen()
 
         MEMPACK_Free((char*)loadingScreen);
     }
-}*/
+}
 
 long *MAIN_LoadTim(char *name)
 {
@@ -539,8 +536,6 @@ void MAIN_ResetGame()
     RAZIEL_StartNewGame();
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/MAIN", MAIN_MainMenuInit);
-/* TODO: requires migration of .sdata
 void MAIN_MainMenuInit()
 {
     char sfxFileName[64];
@@ -567,7 +562,7 @@ void MAIN_MainMenuInit()
         }
     }
 
-    mainMenuScreen = (intptr_t*)MAIN_LoadTim("\\kain2\\game\\psx\\frontend\\title1.tim");
+    mainMenuScreen = (intptr_t*)MAIN_LoadTim("\\kain2\\game\\psx\\frontend\\title1.tim\0\\kain2\\game\\psx\\mainmenu\\features.tim");
 
     VRAM_EnableTerrainArea();
 
@@ -578,7 +573,7 @@ void MAIN_MainMenuInit()
     gameTrackerX.gameMode = 4;
 
     menu_set(gameTrackerX.menu, menudefs_main_menu);
-}*/
+}
 
 void MAIN_FreeMainMenuStuff(void)
 {
@@ -657,9 +652,6 @@ long MAIN_DoMainMenu(GameTracker *gameTracker, MainTracker *mainTracker, long me
     return 0;
 }
 
-extern char D_800D0CDC[];
-extern char D_800D0CEC[];
-extern char D_800D0CF0[];
 int MainG2(void *appData)
 {
     MainTracker *mainTracker;
@@ -682,8 +674,7 @@ int MainG2(void *appData)
 
         StartTimer();
 
-        // STREAM_InitLoader("\\BIGFILE.DAT;1", "");
-        STREAM_InitLoader(D_800D0CDC, D_800D0CEC);
+        STREAM_InitLoader("\\BIGFILE.DAT;1", "");
 
         localstr_set_language(language_default);
 
@@ -744,8 +735,7 @@ int MainG2(void *appData)
 
                 break;
             case 4:
-                // LOAD_ChangeDirectory("Menustuff");
-                LOAD_ChangeDirectory(D_800D0CF0);
+                LOAD_ChangeDirectory("Menustuff");
 
                 while ((unsigned long)mainTracker->movieNum < 6)
                 {
@@ -807,8 +797,7 @@ int MainG2(void *appData)
 
                 MAIN_ResetGame();
 
-                // LOAD_ChangeDirectory("Menustuff");
-                LOAD_ChangeDirectory(D_800D0CF0);
+                LOAD_ChangeDirectory("Menustuff");
 
                 MAIN_MainMenuInit();
                 MAIN_InitVolume();
