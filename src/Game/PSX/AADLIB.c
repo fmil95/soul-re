@@ -4,6 +4,8 @@
 #include "Game/LOAD3D.h"
 #include "Game/SOUND.h"
 
+unsigned long aadGp __attribute__((section(".data"))) = 0;
+
 static unsigned short aadHblanksPerUpdate[4] = {262, 131, 312, 156};
 
 static unsigned long aadUpdateRate[4] = {0x411AAAAB, 0x208D5555, 0x4E200000, 0x27100000};
