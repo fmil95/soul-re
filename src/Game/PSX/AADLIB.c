@@ -39,8 +39,6 @@ unsigned long aadGetMemorySize(AadInitAttr *attributes)
     return (1488 * attributes->numSlots) + 7304;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadInit);
-/* TODO: need to import aadGp into the project
 int aadInit(AadInitAttr *attributes, unsigned char *memoryPtr)
 {
     AadSequenceSlot* slot;
@@ -162,7 +160,7 @@ int aadInit(AadInitAttr *attributes, unsigned char *memoryPtr)
     }
 
     return 0;
-}*/
+}
 
 void aadInstallUpdateFunc(long (*updateFuncPtr)(), int hblanksPerUpdate)
 {

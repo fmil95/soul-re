@@ -81,5 +81,8 @@ void aadLoadDynamicSfxReturn(void *loadedDataPtr, void *data, void *data2);
 void aadFreeSingleDynSfx(int sfxID);
 void aadProcessSramDefrag();
 void aadSlotUpdate();
+long aadSlotUpdateWrapper();
+void aadInstallUpdateFunc(long (*updateFuncPtr)(), int hblanksPerUpdate);
+void aadPurgeLoadQueue();
 
 #endif

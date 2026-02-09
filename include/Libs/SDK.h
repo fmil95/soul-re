@@ -704,6 +704,7 @@ long SpuIsTransferCompleted(long flag);
 unsigned long SpuSetTransferStartAddr(unsigned long addr);
 unsigned long SpuRead(unsigned char *addr, unsigned long size);
 unsigned long SpuWrite(unsigned char *addr, unsigned long size);
+void SpuInit (void);
 
 extern int StCdIntrFlag;
 
