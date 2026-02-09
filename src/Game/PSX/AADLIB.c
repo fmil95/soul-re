@@ -1,6 +1,7 @@
 #include "Game/PSX/AADLIB.h"
 #include "Game/PSX/AADSEQEV.h"
 #include "Game/PSX/AADSFX.h"
+#include "Game/HASM.h"
 #include "Game/LOAD3D.h"
 #include "Game/SOUND.h"
 
@@ -251,8 +252,6 @@ void aadShutdown()
     aadMem = NULL;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadSlotUpdateWrapper);
-/* TODO: need to import aadGp into the project
 long aadSlotUpdateWrapper()
 {
     unsigned long curGp;
@@ -266,7 +265,7 @@ long aadSlotUpdateWrapper()
     SetGp(curGp);
 
     return 0;
-}*/
+}
 
 void aadSlotUpdate()
 {
