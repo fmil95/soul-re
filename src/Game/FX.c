@@ -4787,7 +4787,7 @@ FXFlash *FX_StartGenericFlash(Instance *instance, int num)
 
 long FX_GetHealthColor(int currentHealth)
 {
-    static long HealthColors[] = { 0x7F, 0x407F, 0x7F7F, 0x7F00, 0x404000, 0x7F0000 };
+    static long HealthColors[/*6*/] = { 0x7F, 0x407F, 0x7F7F, 0x7F00, 0x404000, 0x7F0000 };
     long color;
 
     if (currentHealth <= 0)
@@ -5526,7 +5526,108 @@ void FX_Spiral_Init()
     FX_CalcSpiral(128);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawModel);
+void FX_DrawModel(Object *object, int model_num, SVector *rotation, SVector *position, SVector *offset, int transflag)
+{
+	Model *model;          
+    MFace *mface;          
+    MVertex *vertexList;   
+    TextureMT3 *texture;    
+    MATRIX matrix;         
+    int i;                  
+    POLY_GT3 *poly;         
+    unsigned long **drawot; 
+    SVector output;         
+    long color;            
+
+	drawot = gameTrackerX.drawOT;
+	
+	poly = (POLY_GT3*)gameTrackerX.primPool->nextPrim;
+
+	PushMatrix();
+
+	MATH3D_SetUnityMatrix(&matrix);
+
+	RotMatrixX(rotation->x, &matrix);
+	RotMatrixY(rotation->y, &matrix);
+	RotMatrixZ(rotation->z, &matrix);
+
+	PIPE3D_AspectAdjustMatrix(&matrix);
+
+	ApplyMatrixSV(&matrix, (SVECTOR*)offset, (SVECTOR*)&output);
+
+	matrix.t[0] = position->x + output.x;
+	matrix.t[1] = position->y + output.y;
+	matrix.t[2] = position->z + output.z;
+
+	SetRotMatrix(&matrix);
+	SetTransMatrix(&matrix);
+
+	color = 0x34808080;
+
+	if (transflag != 0)
+	{
+		color = 0x36909090;
+	}
+
+	if (object != NULL)
+	{
+		model = object->modelList[model_num];
+		
+		mface = model->faceList;
+		
+		vertexList = model->vertexList;
+        
+        i = model->numFaces;
+        
+        while (--i != -1)
+        {
+            if ((char*)(poly + 1) >= (char*)gameTrackerX.primPool->lastPrim)
+            {
+                gameTrackerX.primPool->nextPrim = (unsigned long*)poly;
+                
+                PopMatrix();
+                return;
+            }
+            else
+            {
+                long clip;             
+                
+                texture = (TextureMT3*)mface->color;
+
+                gte_ldv3(&vertexList[mface->face.v0], &vertexList[mface->face.v1], &vertexList[mface->face.v2]);
+                gte_nrtpt();
+
+                *(unsigned int*)&poly->u0 = *(unsigned int*)&texture->u0;
+                *(unsigned int*)&poly->u1 = *(unsigned int*)&texture->u1;
+                *(unsigned int*)&poly->u2 = *(unsigned int*)&texture->u2;
+
+                gte_nclip();
+
+                *(unsigned int*)&poly->r2 = color;
+                *(unsigned int*)&poly->r1 = color;
+                *(unsigned int*)&poly->r0 = color;
+
+                gte_stopz(&clip);
+
+                if (clip < 0)
+                {
+                    gte_stsxy3(&poly->x0, &poly->x1, &poly->x2);
+
+                    *(int*)poly = getaddr(&drawot[1]) | 0x9000000;
+                    *(int*)&drawot[1] = (intptr_t)poly & 0xFFFFFF;
+                    
+                    poly++;
+                }
+            }
+
+            mface++;
+        }
+	} 
+
+    gameTrackerX.primPool->nextPrim = (unsigned long*)poly; 
+    
+	PopMatrix();
+}
 
 void fx_calc_points(SVector *points, int degrees, int radius, int radius2, int radius3)
 {
