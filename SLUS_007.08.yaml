@@ -176,6 +176,7 @@ segments:
       - [0x0BA9F4, .data, Game/GAMELOOP]
       - [0x0BAA1C, .data, Game/GAMEPAD]
       - [0x0BAA28, data]
+      - [0x0BAC3C, .data, Game/FX]
       - [0x0BAC54, .data, Game/VM]
       - [0x0BCBF4, .data, Game/PSX/AADLIB]
       - [0x0BCBF8, .data, Game/STREAM]
