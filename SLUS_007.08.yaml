@@ -40,7 +40,7 @@ options:
   asm_data_end_label: ""
   asm_end_label: ""
   asm_function_alt_macro: glabel
-  asm_jtbl_label_macro: glabel
+  asm_jtbl_label_macro: jlabel
   asm_nonmatching_label_macro: ""
 
 segments:
