@@ -5,8 +5,8 @@
     \label:
 .endm
 
-.macro jlabel label
-    .global \label
+.macro jlabel label, visibility=local
+    .\visibility \label
     \label:
 .endm
 
