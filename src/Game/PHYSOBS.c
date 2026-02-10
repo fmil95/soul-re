@@ -322,7 +322,170 @@ void SetThrowDirection(Instance *instance, Instance *parent, evObjectThrowData *
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PHYSOBS", ThrowPhysOb);
+void ThrowPhysOb(Instance *instance, evObjectThrowData *throwData)
+{
+    PhysObData *Data;        
+    int collFlg;             
+    int endAnimFlg;           
+    
+    endAnimFlg = 0;
+    
+    if (instance->LinkParent != NULL) 
+    {
+        Instance *parent;          
+        PhysObProperties *Prop;   
+        
+        parent = instance->LinkParent;
+        
+        Prop = (PhysObProperties*)instance->data;
+        
+        Data = (PhysObData*)instance->extraData;
+        
+        instance->flags2 |= 0x4000;
+        
+        Data->Force = NULL;
+        
+        Data->physObTimer = 614400;
+        
+        if (throwData == NULL) 
+        {
+            throwData = (evObjectThrowData*)SetObjectThrowData(NULL, NULL, 0, 0, 384, 0, 64, -1024);
+        }
+        
+        INSTANCE_UnlinkFromParent(instance);
+        
+        SetThrowDirection(instance, parent, throwData, Data);
+        
+        instance->zAccl = throwData->gravity;
+        
+        switch (throwData->spinType) 
+        {                          
+        case 0:
+            Data->xRotVel = 0;
+            Data->yRotVel = 0;
+            Data->zRotVel = 0;
+            
+            Data->throwFlags &= ~0x1;
+            break;
+        case 1:
+            Data->throwFlags |= 0x1;
+            break;
+        case 2:
+        {
+            SVector *sv;              
+                
+            sv = &throwData->angularVel;
+            
+            Data->xRotVel = sv->x;
+            Data->yRotVel = sv->y;
+            Data->zRotVel = sv->z; 
+            
+            Data->throwFlags &= ~0x1;
+            break;
+        }
+        }
+        
+        Data->Mode = (Data->Mode | 0x1010) & ~0x81;
+        
+        Data->initialXRot = throwData->initialXRot;
+        
+        Data->throwingInstance = parent;
+        
+        if (Prop->family == 7) 
+        {
+            PhysObProjData *ProjData; 
+            
+            ProjData = ((PhysObProjectileProperties*)Prop)->data + ((PhysObProjData*)instance->extraData)->flags;
+            
+            if (ProjData->loopAnim != -1) 
+            {
+                G2EmulationInstanceSetAnimation(instance, 0, ProjData->loopAnim, 0, 0);
+                G2EmulationInstanceSetMode(instance, 0, 2);
+            }
+            
+            if (ProjData->endAnim != -1)
+            {
+                endAnimFlg = 1;
+            }
+            
+            if (instance->currentModel == 0) 
+            {
+                FX_EndFField(instance);
+                
+                FX_StartGenericParticle(instance, 0, 0, 0, 0);
+            }
+            
+            ExecuteThrow(instance);
+        }
+        
+        collFlg = PHYSOB_CheckThrownLineCollision(instance, parent);
+        
+        instance->flags2 |= 0x80;
+        
+        if (collFlg != 0) 
+        {
+            instance->xVel = 0;
+            instance->yVel = 0;
+            instance->zVel = 0;
+            
+            instance->zAccl = 0;
+            
+            if ((CheckPhysObAbility(instance, 0x200) != 0) && (collFlg == 1)) 
+            {
+                PCollideInfo pcollideInfo; 
+                Position newPos;           
+                Position oldPos;           
+                MATRIX *mat;               
+                
+                Data->Mode |= 0x1000;
+                
+                instance->flags2 &= ~0x80;
+                
+                Data->Mode &= ~0x10;
+                
+                mat = &instance->matrix[2];
+                
+                oldPos.x = mat->t[0];
+                oldPos.y = mat->t[1];
+                oldPos.z = mat->t[2];
+                
+                newPos.x = parent->position.x;
+                newPos.y = parent->position.y;
+                newPos.z = oldPos.z;
+                
+                pcollideInfo.newPoint = (SVECTOR*)&newPos;
+                pcollideInfo.oldPoint = (SVECTOR*)&oldPos;
+                
+                PHYSICS_CheckLineInWorld(instance, &pcollideInfo);
+                
+                if (pcollideInfo.type == 3) 
+                {
+                    SUB_SVEC(Position, &oldPos, Position, &newPos, Position, &oldPos);
+                    ADD_SVEC(Position, &instance->position, Position, &instance->position, Position, &oldPos);
+                }
+            } 
+            else if (endAnimFlg != 0) 
+            {
+                Data->Mode = (Data->Mode | 0x1000) & ~0x10;
+                
+            }
+            else 
+            {
+                Data->Mode &= ~0x1000;
+            }
+        }
+        
+        if ((Data->Mode & 0x10))
+        {
+            if (collFlg == 0)
+            {
+                PhysicsMove(instance, &instance->position, gameTrackerX.timeMult);
+            }
+            
+            TurnOnCollisionPhysOb(instance, 4);
+        }
+    }
+}
 
 int PushPhysOb(Instance *instance, short x, short y, short PathNumber, Instance *Force)
 {

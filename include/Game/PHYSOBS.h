@@ -53,5 +53,6 @@ int PHYSOB_CheckDropOnSlope(Instance *instance, int x, int y, evPhysicsSlideData
 int PHYSOBS_CheckObjectAxisAlignment(MATRIX *m0, MATRIX *m1, SVector *axis);
 PhysObSplinter *PhysObGetSplinter(Instance *instance);
 int PHYSOB_CheckSlideNormal(Instance *instance, int x, int y, evPhysicsSlideData **data);
+int PHYSOB_CheckThrownLineCollision(Instance *instance, Instance *parent);
 
 #endif

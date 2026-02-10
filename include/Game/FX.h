@@ -95,5 +95,7 @@ void FX_Build(Instance *instance, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, 
 void FX_DFacadeProcess(FX_PRIM *fxPrim, FXTracker *fxTracker);
 void FX_DrawRing2(MATRIX *wcTransform, SVector *position, MATRIX *matrix, int radius, int radius2, int radius3, int z1, int z2, int z3, long offset, int sortInWorld);
 void FX_MakeSpark(Instance *instance, Model *model, int segment);
+void FX_EndFField(Instance *instance);
+FXParticle *FX_StartGenericParticle(Instance *instance, int num, int segOverride, int lifeOverride, int InitFlag);
 
 #endif
