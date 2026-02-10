@@ -55,5 +55,10 @@ void StateHandlerBreakOff(CharacterState *In, int CurrentSection, intptr_t Data)
 int CheckHolding(Instance *instance);
 void EnableWristCollision(Instance *instance, int Side);
 void StateHandlerHang(CharacterState *In, int CurrentSection, intptr_t Data);
+void RazielInit(Instance *instance, GameTracker *gameTracker);
+void RazielProcess(Instance *playerInstance, GameTracker *gameTracker);
+unsigned long RazielQuery(Instance *instance, unsigned long Query);
+void RazielPost(Instance *instance, unsigned long Message, uintptr_t Data);
+void RazielAdditionalCollide(Instance *instance, GameTracker *gameTracker);
 
 #endif

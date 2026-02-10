@@ -19,6 +19,10 @@ void HUD_Draw();
 void GlyphProcess(Instance *instance, GameTracker *gameTracker);
 int GlyphIsGlyphOpen(Instance *instance);
 void GlyphTrigger();
+void GlyphInit(Instance *instance, GameTracker *gameTracker);
+void GlyphCollide();
+unsigned long GlyphQuery(Instance *instance, unsigned long query);
+void GlyphPost(Instance *instance, unsigned long message, unsigned long messageData);
 
 extern int hud_warp_arrow_flash;
 

@@ -97,5 +97,6 @@ void FX_DrawRing2(MATRIX *wcTransform, SVector *position, MATRIX *matrix, int ra
 void FX_MakeSpark(Instance *instance, Model *model, int segment);
 void FX_EndFField(Instance *instance);
 FXParticle *FX_StartGenericParticle(Instance *instance, int num, int segOverride, int lifeOverride, int InitFlag);
+void FX_RelocateGeneric(Object *object, long offset);
 
 #endif

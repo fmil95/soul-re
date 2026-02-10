@@ -54,5 +54,8 @@ int PHYSOBS_CheckObjectAxisAlignment(MATRIX *m0, MATRIX *m1, SVector *axis);
 PhysObSplinter *PhysObGetSplinter(Instance *instance);
 int PHYSOB_CheckSlideNormal(Instance *instance, int x, int y, evPhysicsSlideData **data);
 int PHYSOB_CheckThrownLineCollision(Instance *instance, Instance *parent);
+void InitPhysicalObject(Instance *instance, GameTracker *gameTracker);
+unsigned long PhysicalObjectQuery(Instance *instance, unsigned long Query);
+void PhysicalRelocateTune(Object *object, long offset);
 
 #endif

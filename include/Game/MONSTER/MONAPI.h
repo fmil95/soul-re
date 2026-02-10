@@ -29,5 +29,10 @@ void MonsterMessage(Instance *instance, unsigned long message, unsigned long dat
 void MONAPI_CheckGenerator(Instance *instance);
 void MonsterTranslateAnim(Object *object);
 void MONAPI_ProcessGenerator();
+void MonsterInit(Instance *instance, GameTracker *gameTracker);
+void MonsterCollide(Instance *instance, GameTracker *gameTracker);
+void MonsterAdditionalCollide(Instance *instance, GameTracker *gameTracker);
+void MonsterRelocateTune(Object *object, long offset);
+void MonsterRelocateInstanceObject(Instance *instance, long offset);
 
 #endif
