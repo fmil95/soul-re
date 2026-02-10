@@ -4785,15 +4785,9 @@ FXFlash *FX_StartGenericFlash(Instance *instance, int num)
     return flash;
 }
 
-long D_800CA43C[5] __attribute__((section(".data"))) = { 0x7F, 0x407F, 0x7F7F, 0x7F00, 0x404000 };
-long D_800CA450 __attribute__((section(".data"))) = 0x7F0000;
-// Matches 100% on decomp.me but differs on this project
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_GetHealthColor);
-#else
 long FX_GetHealthColor(int currentHealth)
 {
-    STATIC long HealthColors[8924 + 6];
+    static long HealthColors[] = { 0x7F, 0x407F, 0x7F7F, 0x7F00, 0x404000, 0x7F0000 };
     long color;
 
     if (currentHealth <= 0)
@@ -4813,7 +4807,6 @@ long FX_GetHealthColor(int currentHealth)
 
     return color;
 }
-#endif
 
 void FX_Start_Snow(int percent)
 {
