@@ -5,5 +5,6 @@
 
 void StateHandlerWallIdle(CharacterState *In, int CurrentSection, intptr_t Data);
 void StateHandlerWallGrab(CharacterState *In, int CurrentSection, intptr_t Data);
+void StateHandlerWallDismount(CharacterState *In, int CurrentSection, intptr_t Data);
 
 #endif
