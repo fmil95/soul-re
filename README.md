@@ -10,13 +10,26 @@ Once its fully overhauled, the source code could then be used for many different
 
 ## Progress
 
-| Name | ID | Progress |
+| Name | Purpose | Status |
 |------|---------|----------|
-| Legacy of Kain: Soul Reaver | SLUS_007.08 | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&label=Functions&measure=matched_functions)|
+| SLUS_007.08 | Gex 2 engine + game code | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&label=Functions&measure=matched_functions)|
+| cinemax.drm | Video Player overlay | N/A |
+| mcardx.drm | Memory Card overlay | N/A |
+| ronin.drm | Dumahim overlay | N/A |
+| hunter.drm | Human Hunter overlay | N/A |
+| skinner.drm | Melchiahim overlay | N/A |
+| wallcr.drm | Zephonim overlay | N/A |
+| morlock.drm | Turelim overlay | N/A |
+| aluka.drm | Rahabim overlay | N/A |
+| skinbos.drm | Melchiah overlay | N/A |
+| kain.drm | Kain overlay | N/A |
+| walboss.drm | Zephon overlay A | N/A |
+| walbosb.drm | Zephon overlay B | N/A |
+| walbosc.drm | Zephon overlay C | N/A |
+| alukabss.drm | Rahab overlay | N/A |
+| roninbss.drm | Dumah overlay | N/A |
 
-Note that the status above is not reflective of the actual completion rate of the project however, as Soul Reaver like many other titles for the PlayStation (especially those near the end of the system's life cycle) distributes a good amount of game logic throughout _overlays_. For those not familiar with the concept, overlays are binaries which contain code that is loaded at specific instances during gameplay by the primary executable. This was designed such to taper the maximum amount of memory that the game consumes at once, which could never be too high due to hardware limitations.
-
-A complete list of overlays will be published on this repository soon.
+In case you wonder what an overlay is: Soul Reaver like many other titles for the PlayStation (especially those near the end of the system's life cycle) distributes a good amount of game logic throughout _overlays_. For those not familiar with the concept, overlays are binaries which contain code that is loaded at specific instances during gameplay by the primary executable. This was designed such to taper the maximum amount of memory that the game consumes at once, which could never be too high due to hardware limitations. While overlays are fairly common, Crystal Dynamics designed some noteworthy tech to link DRM files dynamically on runtime, which means that the game's overlays never load at the same address during execution and thus, why none of them have been decompiled yet, since they require their own decompilation workflow different from the PS-EXE.
 
 ### DAT Utils
 
