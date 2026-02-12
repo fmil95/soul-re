@@ -774,7 +774,339 @@ void razResetPauseTranslation(Instance *instance)
     ControlFlag &= ~0x20000000;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", razSelectMotionAnim);
+void razSelectMotionAnim(CharacterState *In, int CurrentSection, int Frames, int *Anim)
+{
+	G2SVector3 Vec; 
+    int switchType; 
+    int frame; 
+	int adjustment; 
+	G2AnimSection *animSectionA; 
+    G2AnimSection *animSectionB; 
+    G2AnimKeylist *keylist; 
+    int keylistID; 
+
+	switchType = 0;
+
+	frame = 0;
+
+	if (Raziel.Magnitude > 3768)
+	{
+		if (Raziel.nothingCounter == 0)
+		{
+			ControlFlag &= ~0x2000;
+		}
+
+		if ((ControlFlag & 0x20000000))
+		{
+			razResetPauseTranslation(In->CharacterInstance);
+		}
+
+		if (*Anim == 60)
+		{
+			if ((Raziel.passedMask & 0xF))
+			{
+				switchType = 3;
+			}
+
+			if ((Raziel.passedMask & 0x8))
+			{
+				frame = 5;
+			}
+
+			if ((Raziel.passedMask & 0x1))
+			{
+				frame = 23;
+			}
+
+			if ((Raziel.passedMask & 0x2))
+			{
+				frame = 17;
+			}
+
+			if ((Raziel.passedMask & 0x4))
+			{
+				frame = 11;
+			}
+		}
+		else if (*Anim == 64)
+		{
+			if ((Raziel.passedMask & 0xF0))
+			{
+				switchType = 3;
+			}
+
+			if ((Raziel.passedMask & 0x80))
+			{
+				frame = 5;
+			}
+
+			if ((Raziel.passedMask & 0x10))
+			{
+				frame = 23;
+			}
+
+			if ((Raziel.passedMask & 0x20))
+			{
+				frame = 17;
+			}
+
+			if ((Raziel.passedMask & 0x40))
+			{
+				frame = 11;
+			}
+		}
+		else if (*Anim != 68)
+		{
+			switchType = 3;
+		}
+	}
+    else if (((Raziel.Magnitude - 2784) >= 0) && ((Raziel.Magnitude - 2784) <= 984))
+	{
+        ControlFlag &= ~0x2000;
+
+        if ((ControlFlag & 0x20000000))
+        {
+            razResetPauseTranslation(In->CharacterInstance);
+        }
+
+        if (*Anim == 60)
+        {
+            if ((Raziel.passedMask & 0xF))
+            {
+                switchType = 2;
+            }
+
+            if ((Raziel.passedMask & 0x8))
+            {
+                frame = 7;
+            }
+
+            if ((Raziel.passedMask & 0x1))
+            {
+                frame = 13;
+            }
+
+            if ((Raziel.passedMask & 0x2))
+            {
+                frame = 20;
+            }
+
+            if ((Raziel.passedMask & 0x4))
+            {
+                frame = 25;
+            }
+        }
+        else if (*Anim == 68)
+        {
+            if ((Raziel.passedMask & 0xF00))
+            {
+                switchType = 2;
+            }
+
+            if ((Raziel.passedMask & 0x800))
+            {
+                frame = 7;
+            }
+
+            if ((Raziel.passedMask & 0x100))
+            {
+                frame = 13;
+            }
+
+            if ((Raziel.passedMask & 0x200))
+            {
+                frame = 20;
+            }
+
+            if ((Raziel.passedMask & 0x400))
+            {
+                frame = 25;
+            }
+        }
+        else if (*Anim != 64)
+        {
+            switchType = 2;
+        }
+	}
+    else if (Raziel.Magnitude < 2784)
+    {
+        ControlFlag |= 0x2000;
+
+        if (*Anim == 64)
+        {
+            if ((Raziel.passedMask & 0xF0))
+            {
+                switchType = 1;
+            }
+
+            if ((Raziel.passedMask & 0x80))
+            {
+                frame = 12;
+            }
+
+            if ((Raziel.passedMask & 0x10))
+            {
+                frame = 20;
+            }
+
+            if ((Raziel.passedMask & 0x20))
+            {
+                frame = 32;
+            }
+
+            if ((Raziel.passedMask & 0x40))
+            {
+                frame = 0;
+            }
+        }
+        else if (*Anim == 68)
+        {
+            if ((Raziel.passedMask & 0xF00))
+            {
+                switchType = 1;
+            }
+
+            if ((Raziel.passedMask & 0x800))
+            {
+                frame = 12;
+            }
+
+            if ((Raziel.passedMask & 0x100))
+            {
+                frame = 20;
+            }
+
+            if ((Raziel.passedMask & 0x200))
+            {
+                frame = 32;
+            }
+
+            if ((Raziel.passedMask & 0x400))
+            {
+                frame = 0;
+            }
+        }
+        else if (*Anim != 60)
+        {
+            switchType = 1;
+        }
+    }
+
+	switch (switchType)
+	{
+	case 1:
+		if (CurrentSection == 2)
+		{
+			Raziel.passedMask = 0;
+		}
+
+		if (razSwitchVAnimGroup(In->CharacterInstance, CurrentSection, 60, frame, Frames) != 0)
+		{
+			G2EmulationSwitchAnimation(In, CurrentSection, 123, frame, Frames, 2);
+		}
+
+		Raziel.movementMinRate = 4096;
+		Raziel.movementMaxRate = 7168;
+
+		Raziel.movementMinAnalog = 2300;
+		Raziel.movementMaxAnalog = 2783;
+
+		*Anim = 60;
+		break;
+	case 2:
+		if (CurrentSection == 2)
+		{
+			Raziel.passedMask = 0;
+		}
+
+		if (razSwitchVAnimGroup(In->CharacterInstance, CurrentSection, 64, frame, Frames) != 0)
+		{
+			G2EmulationSwitchAnimation(In, CurrentSection, 124, frame, Frames, 2);
+		}
+
+		Raziel.movementMinRate = 3276;
+		Raziel.movementMaxRate = 6144;
+
+		Raziel.movementMinAnalog = 2783;
+		Raziel.movementMaxAnalog = 3768;
+
+		*Anim = 64;
+		break;
+	case 3:
+		if (CurrentSection == 2)
+		{
+			Raziel.passedMask = 0;
+		}
+
+		if (razSwitchVAnimGroup(In->CharacterInstance, CurrentSection, 68, frame, Frames) != 0)
+		{
+			G2EmulationSwitchAnimation(In, CurrentSection, 2, frame, Frames, 2);
+		}
+
+		Raziel.movementMinRate = 3547;
+		Raziel.movementMaxRate = 4096;
+        
+		Raziel.movementMinAnalog = 3768;
+		Raziel.movementMaxAnalog = 4096;
+
+		*Anim = 68;
+		break;
+	}
+
+	if ((CurrentSection == 0) && (!(ControlFlag & 0x20000000)))
+	{
+        Vec.z = 0;
+        Vec.x = 0;
+
+        switch (*Anim)
+        {
+        case 64:
+            Vec.y = -35;
+            break;
+        case 60:
+            Vec.y = -16;
+            break;
+        case 68:
+            Vec.y = -60;
+            break;
+        }
+
+        adjustment = razAdjustSpeed(In->CharacterInstance, 1);
+
+        Vec.y = (((Vec.y * G2Timer_GetFrameTime()) * adjustment) >> 12) / 100;
+
+        if (G2Anim_IsControllerActive(&In->CharacterInstance->anim, 0, 34) == G2FALSE)
+        {
+            G2Anim_EnableController(&In->CharacterInstance->anim, 0, 34);
+        }
+
+        G2Anim_SetController_Vector(&In->CharacterInstance->anim, 0, 34, &Vec);
+	}
+
+	if (CurrentSection != 0)
+	{
+		Frames = 6;
+
+		if (In->SectionList->Process == StateHandlerMove)
+		{
+			animSectionA = In->CharacterInstance->anim.section;
+			animSectionB = &In->CharacterInstance->anim.section[CurrentSection];
+
+			if (((G2AnimSection_IsInInterpolation(animSectionA) == G2FALSE) && (G2AnimSection_IsInInterpolation(animSectionB) == G2FALSE)) && (G2AnimSection_GetKeyframeNumber(animSectionA) != G2AnimSection_GetKeyframeNumber(animSectionB)))
+			{
+                keylist = animSectionA->keylist;
+                keylistID = animSectionA->keylistID;
+
+                frame = (G2AnimSection_GetKeyframeNumber(animSectionA) + Frames) % G2AnimKeylist_GetKeyframeCount(keylist);
+
+                if (razSwitchVAnimGroup(In->CharacterInstance, CurrentSection, *Anim, frame, Frames) != 0)
+                {
+                    G2AnimSection_InterpToKeylistFrame(animSectionB, keylist, keylistID, frame, 600);
+                }
+			}
+		}
+	}
+}
 
 int razApplyMotion(CharacterState *In, int CurrentSection)
 {
