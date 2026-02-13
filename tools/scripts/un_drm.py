@@ -184,6 +184,8 @@ def get_yaml_string(name: str, eof: int, sha_hash: str) -> str:
     out.append(f"    - symbol_addrs.{name}.txt")
     out.append(f"  reloc_addrs_path:")
     out.append(f"    - reloc_addrs.{name}.txt")
+    out.append(f"  undefined_funcs_auto_path: undefined_funcs_auto.{name}.txt")
+    out.append(f"  undefined_syms_auto_path: undefined_syms_auto.{name}.txt")
     out.append(f"  extensions_path: tools/splat_ext")
     out.append(f"  string_encoding: ASCII")
     out.append(f"  rodata_string_guesser_level: 2")

@@ -17,6 +17,8 @@ options:
     - symbol_addrs.hunter.txt
   reloc_addrs_path:
     - reloc_addrs.hunter.txt
+  undefined_funcs_auto_path: undefined_funcs_auto.hunter.txt
+  undefined_syms_auto_path: undefined_syms_auto.hunter.txt
   extensions_path: tools/splat_ext
   string_encoding: ASCII
   rodata_string_guesser_level: 2
