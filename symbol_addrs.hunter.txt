@@ -1,0 +1,7 @@
+FX_MakeHitFlame                                       = 0x88000020; // type:func
+HUNTER_InitFlamethrow                                 = 0x8800016C; // type:func
+HUNTER_Flamethrow                                     = 0x880001AC; // type:func
+HUNTER_Init                                           = 0x880005C4; // type:func
+HUNTER_CleanUp                                        = 0x8800066C; // type:func
+HUNTER_ProjectileEntry                                = 0x880006BC; // type:func
+HUNTER_Projectile                                     = 0x8800070C; // type:func
