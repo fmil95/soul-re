@@ -1,0 +1,2 @@
+gFXT = 0x800D2FDC;
+gameTrackerX = 0x800D3360;
