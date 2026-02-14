@@ -19,6 +19,13 @@ HUNTER_BASEBIN := hunter.bin
 HUNTER_ELF     := $(BUILD_DIR)/hunter.elf
 HUNTER_BIN     := $(BUILD_DIR)/hunter.bin
 
+SKINNER_YAML    := skinner.yaml
+SKINNER_LD      := skinner.ld
+SKINNER_LD_PP   := $(BUILD_DIR)/skinner.ld
+SKINNER_BASEBIN := skinner.bin
+SKINNER_ELF     := $(BUILD_DIR)/skinner.elf
+SKINNER_BIN     := $(BUILD_DIR)/skinner.bin
+
 # Fail early if baserom does not exist
 ifeq ($(wildcard $(BASEEXE)),)
 $(error Baserom `$(BASEEXE)' not found.)
@@ -60,6 +67,7 @@ PYTHON        := python3
 EXE_YAML      := $(BASEEXE).yaml
 SPLAT         := splat split $(EXE_YAML)
 SPLAT_HUNTER  := splat split $(HUNTER_YAML)
+SPLAT_SKINNER := splat split $(SKINNER_YAML)
 DIFF          := diff
 MASPSX        := $(PYTHON) tools/maspsx/maspsx.py --use-comm-section --aspsx-version=2.81 -G4096
 CROSS         := mips-linux-gnu-
@@ -123,6 +131,11 @@ HUNTER_OBJECTS := \
   $(BUILD_DIR)/asm/Overlays/hunter/hunter.s.o \
   $(BUILD_DIR)/asm/data/Overlays/hunter/hunter.data.s.o
 
+SKINNER_OBJECTS := \
+  $(BUILD_DIR)/src/Overlays/skinner/skinner.c.o \
+  $(BUILD_DIR)/asm/Overlays/skinner/skinner.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/skinner/skinner.data.s.o
+
 ### Targets ###
 
 $(BUILD_DIR)/src/Game/CINEMA/CINEPSX.c.o: CFLAGS += -G0
@@ -185,6 +198,7 @@ setup: distclean split
 split:
 	$(V)$(SPLAT)
 	$(V)$(SPLAT_HUNTER)
+	$(V)$(SPLAT_SKINNER)
 
 reset: clean
 	$(V)rm -rf $(EXPECTED_DIR)
@@ -207,7 +221,7 @@ expected: all
 	$(V)mv $(BUILD_DIR)/src $(EXPECTED_DIR)/src
 	$(V)find $(EXPECTED_DIR)/src -name '*.s.o' -delete
 
-overlays: $(HUNTER_BIN)
+overlays: $(HUNTER_BIN) $(SKINNER_BIN)
 
 # Compile .c files
 $(BUILD_DIR)/%.c.o: %.c
@@ -281,6 +295,28 @@ $(HUNTER_BIN): $(HUNTER_ELF)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
 	@$(DIFF) $(HUNTER_BASEBIN) $(HUNTER_BIN) && printf "hunter.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+endif
+
+$(SKINNER_LD_PP): $(SKINNER_LD)
+	@$(PRINT)$(GREEN)Preprocessing skinner overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
+	@mkdir -p $(BUILD_DIR)
+	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
+
+$(SKINNER_ELF): $(SKINNER_OBJECTS) $(SKINNER_LD_PP)
+	$(V)$(LD) \
+		--no-check-sections \
+		-nostdlib \
+		-T undefined_syms_auto.skinner.txt \
+		-T undefined_funcs_auto.skinner.txt \
+		-T $(SKINNER_LD_PP) \
+		-Map $(BUILD_DIR)/skinner.map \
+		-o $@
+
+$(SKINNER_BIN): $(SKINNER_ELF)
+	@$(PRINT)$(GREEN)Creating skinner.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
+	$(V)$(OBJCOPY) -O binary $< $@
+ifeq ($(COMPARE),1)
+	@$(DIFF) $(SKINNER_BASEBIN) $(SKINNER_BIN) && printf "skinner.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 ### Make Settings ###

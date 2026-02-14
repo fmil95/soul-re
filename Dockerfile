@@ -24,6 +24,7 @@ RUN mkdir -p /game
 
 COPY SLUS_007.08 /game/SLUS_007.08
 COPY hunter.bin /game/hunter.bin
+COPY skinner.bin /game/skinner.bin
 
 RUN mkdir -p /tmp/tools/cd-dat-utils
 COPY requirements.txt /tmp/requirements.txt

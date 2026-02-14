@@ -30,6 +30,9 @@ jobs:
       - name: Copy Overlay (hunter.bin)
         run: cp /game/hunter.bin hunter.bin
 
+      - name: Copy Overlay (skinner.bin)
+        run: cp /game/skinner.bin skinner.bin
+
       - name: Setup
         run: make setup
 

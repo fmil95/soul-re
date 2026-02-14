@@ -15,9 +15,8 @@ Once its fully overhauled, the source code could then be used for many different
 | SLUS_007.08 | Gex 2 engine + game code | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=main&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=main&label=Functions&measure=matched_functions) |
 | cinemax.drm | Video Player overlay | N/A |
 | mcardx.drm | Memory Card overlay | N/A |
-| ronin.drm | Dumahim overlay | N/A |
 | hunter.drm | Human Hunter overlay | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=hunter&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=hunter&label=Functions&measure=matched_functions) |
-| skinner.drm | Melchiahim overlay | N/A |
+| skinner.drm | Melchiahim overlay | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=skinner&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=skinner&label=Functions&measure=matched_functions) |
 | wallcr.drm | Zephonim overlay | N/A |
 | morlock.drm | Turelim overlay | N/A |
 | aluka.drm | Rahabim overlay | N/A |

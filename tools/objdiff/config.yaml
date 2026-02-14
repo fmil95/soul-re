@@ -7,6 +7,10 @@ categories:
     name: Human Hunter
     paths:
       - Overlays/hunter
+  - id: skinner
+    name: Melchiahim
+    paths:
+      - Overlays/skinner
 
 expected_paths:
   asm: expected/asm

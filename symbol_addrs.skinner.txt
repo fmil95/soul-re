@@ -1,0 +1,16 @@
+MON_GetRandomGroundPoint                              = 0x88000020; // type:func
+MONSENSE_DetectPlayer                                 = 0x8800023C; // type:func
+FX_StartInstanceBurrow                                = 0x88000268; // type:func
+FX_StopInstanceBurrow                                 = 0x8800039C; // type:func
+SKINNER_BurrowInEntry                                 = 0x880003A4; // type:func
+SKINNER_BurrowIn                                      = 0x8800048C; // type:func
+SKINNER_GetBurrowDest                                 = 0x88000500; // type:func
+SKINNER_CalcBurrowingMove                             = 0x88000618; // type:func
+SKINNER_PupateEntry                                   = 0x880006EC; // type:func
+SKINNER_Pupate                                        = 0x88000738; // type:func
+SKINNER_PursueEntry                                   = 0x88000784; // type:func
+SKINNER_Pursue                                        = 0x880007A4; // type:func
+SKINNER_HideEntry                                     = 0x8800092C; // type:func
+SKINNER_Hide                                          = 0x88000974; // type:func
+SKINNER_SurpriseAttackEntry                           = 0x88000A80; // type:func
+SKINNER_SurpriseAttack                                = 0x88000B14; // type:func
