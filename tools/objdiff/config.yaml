@@ -3,6 +3,10 @@ categories:
     name: Main Executable
     paths:
       - Game
+  - id: hunter
+    name: Human Hunter
+    paths:
+      - overlay/hunter
 
 expected_paths:
   asm: expected/asm
