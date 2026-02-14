@@ -163,10 +163,10 @@ $(BUILD_DIR)/src/Game/MENU/MENUFACE.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/RAZIEL/RAZIEL.c.o: CFLAGS += -funsigned-char
 
 ifeq ($(SKIP_ASM),1)
-all: $(OBJECTS)
+all: $(OBJECTS) overlays
 	@echo "SKIP_ASM=1: Skipping linking, only built objects."
 else
-all: $(EXE)
+all: $(EXE) overlays
 endif
 
 -include $(DEPENDS)
@@ -257,7 +257,7 @@ $(EXE): $(BUILD_DIR)/$(TARGET).elf
 	$(V)$(OBJCOPY) $< $@ -O binary
 	$(V)$(OBJCOPY) -O binary --gap-fill 0x00 --pad-to 0x0C3000 $< $@
 ifeq ($(COMPARE),1)
-	@$(DIFF) $(BASEEXE) $(EXE) && printf "OK\n" || (echo 'The build succeeded, but did not match the base EXE. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+	@$(DIFF) $(BASEEXE) $(EXE) && printf "EXE: OK\n" || (echo 'The build succeeded, but did not match the base EXE. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 endif
 
@@ -280,7 +280,7 @@ $(HUNTER_BIN): $(HUNTER_ELF)
 	@$(PRINT)$(GREEN)Creating hunter.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
-	@$(DIFF) $(HUNTER_BASEBIN) $(HUNTER_BIN) && printf "OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+	@$(DIFF) $(HUNTER_BASEBIN) $(HUNTER_BIN) && printf "hunter.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 ### Make Settings ###
