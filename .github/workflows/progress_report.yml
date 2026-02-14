@@ -26,6 +26,7 @@ jobs:
 
       - name: Copy Game Binary
         run: cp /game/SLUS_007.08 SLUS_007.08
+        
       - name: Copy Overlay (hunter.bin)
         run: cp /game/hunter.bin hunter.bin
 
