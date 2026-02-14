@@ -48,7 +48,7 @@ segments:
     # bss_size: 0x#### # Fill me!
     bss_contains_common: True
     subsegments:
-      - [0x000000, rodata, overlay/hunter/asm]
-      - [0x000020, asm, overlay/hunter/asm]
-      - [0x0009BC, data, overlay/hunter/asm]
+      - [0x000000, .rodata, overlay/hunter/hunter]
+      - [0x000020, _c, overlay/hunter/hunter]
+      - [0x0009BC, data, overlay/hunter/hunter]
   - [0x000A04]
