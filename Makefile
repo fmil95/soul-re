@@ -1,16 +1,23 @@
 ### Build Options ###
 
-BASEEXE      := SLUS_007.08
-TARGET       := KAIN2
-COMPARE      ?= 1
-NON_MATCHING ?= 0
-SKIP_ASM     ?= 0
-VERBOSE      ?= 0
-BUILD_DIR    ?= build
-TOOLS_DIR    := tools
-OBJDIFF_DIR  := $(TOOLS_DIR)/objdiff
-EXPECTED_DIR ?= expected
-CHECK        ?= 1
+BASEEXE        := SLUS_007.08
+TARGET         := KAIN2
+COMPARE        ?= 1
+NON_MATCHING   ?= 0
+SKIP_ASM       ?= 0
+VERBOSE        ?= 0
+BUILD_DIR      ?= build
+TOOLS_DIR      := tools
+OBJDIFF_DIR    := $(TOOLS_DIR)/objdiff
+EXPECTED_DIR   ?= expected
+CHECK          ?= 1
+
+HUNTER_YAML    := hunter.yaml
+HUNTER_LD      := hunter.ld
+HUNTER_LD_PP   := $(BUILD_DIR)/hunter.ld
+HUNTER_BASEBIN := hunter.bin
+HUNTER_ELF     := $(BUILD_DIR)/hunter.elf
+HUNTER_BIN     := $(BUILD_DIR)/hunter.bin
 
 # Fail early if baserom does not exist
 ifeq ($(wildcard $(BASEEXE)),)
@@ -49,20 +56,21 @@ LD_MAP       := $(BUILD_DIR)/$(TARGET).map
 
 ### Tools ###
 
-PYTHON     := python3
-SPLAT_YAML := $(BASEEXE).yaml
-SPLAT      := splat split $(SPLAT_YAML)
-DIFF       := diff
-MASPSX     := $(PYTHON) tools/maspsx/maspsx.py --use-comm-section --aspsx-version=2.81 -G4096
-CROSS    := mips-linux-gnu-
-AS       := $(CROSS)as -EL
-LD       := $(CROSS)ld -EL
-OBJCOPY  := $(CROSS)objcopy
-STRIP    := $(CROSS)strip
-CPP      := $(CROSS)cpp
-CC       := tools/gcc-2.8.1-psx/cc1
-CC_HOST  := gcc
-OBJDIFF  := $(OBJDIFF_DIR)/objdiff
+PYTHON        := python3
+EXE_YAML      := $(BASEEXE).yaml
+SPLAT         := splat split $(EXE_YAML)
+SPLAT_HUNTER  := splat split $(HUNTER_YAML)
+DIFF          := diff
+MASPSX        := $(PYTHON) tools/maspsx/maspsx.py --use-comm-section --aspsx-version=2.81 -G4096
+CROSS         := mips-linux-gnu-
+AS            := $(CROSS)as -EL
+LD            := $(CROSS)ld -EL
+OBJCOPY       := $(CROSS)objcopy
+STRIP         := $(CROSS)strip
+CPP           := $(CROSS)cpp
+CC            := tools/gcc-2.8.1-psx/cc1
+CC_HOST       := gcc
+OBJDIFF       := $(OBJDIFF_DIR)/objdiff
 
 PRINT := printf '
  ENDCOLOR := \033[0m
@@ -109,6 +117,11 @@ ifeq ($(SKIP_ASM),1)
 OBJECTS += $(ASM_OBJS)
 endif
 DEPENDS := $(OBJECTS:=.d)
+
+HUNTER_OBJECTS := \
+  $(BUILD_DIR)/asm/overlay/hunter/asm.s.o \
+  $(BUILD_DIR)/asm/data/overlay/hunter/asm.rodata.s.o \
+  $(BUILD_DIR)/asm/data/overlay/hunter/asm.data.s.o
 
 ### Targets ###
 
@@ -171,6 +184,7 @@ setup: distclean split
 
 split:
 	$(V)$(SPLAT)
+	$(V)$(SPLAT_HUNTER)
 
 reset: clean
 	$(V)rm -rf $(EXPECTED_DIR)
@@ -192,6 +206,8 @@ expected: all
 	$(V)mv $(BUILD_DIR)/asm $(EXPECTED_DIR)/asm
 	$(V)mv $(BUILD_DIR)/src $(EXPECTED_DIR)/src
 	$(V)find $(EXPECTED_DIR)/src -name '*.s.o' -delete
+
+overlays: $(HUNTER_BIN)
 
 # Compile .c files
 $(BUILD_DIR)/%.c.o: %.c
@@ -245,9 +261,31 @@ ifeq ($(COMPARE),1)
 endif
 endif
 
+$(HUNTER_LD_PP): $(HUNTER_LD)
+	@$(PRINT)$(GREEN)Preprocessing hunter overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
+	@mkdir -p $(BUILD_DIR)
+	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
+
+$(HUNTER_ELF): $(HUNTER_OBJECTS) $(HUNTER_LD_PP)
+	$(V)$(LD) \
+		--no-check-sections \
+		-nostdlib \
+		-T undefined_syms_auto.hunter.txt \
+		-T undefined_funcs_auto.hunter.txt \
+		-T $(HUNTER_LD_PP) \
+		-Map $(BUILD_DIR)/hunter.map \
+		-o $@
+
+$(HUNTER_BIN): $(HUNTER_ELF)
+	@$(PRINT)$(GREEN)Creating hunter.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
+	$(V)$(OBJCOPY) -O binary $< $@
+ifeq ($(COMPARE),1)
+	@$(DIFF) $(HUNTER_BASEBIN) $(HUNTER_BIN) && printf "OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+endif
+
 ### Make Settings ###
 
-.PHONY: all clean distclean setup split
+.PHONY: all clean distclean overlays setup split
 
 # Remove built-in implicit rules to improve performance
 MAKEFLAGS += --no-builtin-rules
