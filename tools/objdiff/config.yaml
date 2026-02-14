@@ -6,7 +6,7 @@ categories:
   - id: hunter
     name: Human Hunter
     paths:
-      - overlay/hunter
+      - Overlays/hunter
 
 expected_paths:
   asm: expected/asm

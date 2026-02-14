@@ -119,9 +119,9 @@ endif
 DEPENDS := $(OBJECTS:=.d)
 
 HUNTER_OBJECTS := \
-  $(BUILD_DIR)/src/overlay/hunter/hunter.c.o \
-  $(BUILD_DIR)/asm/overlay/hunter/hunter.s.o \
-  $(BUILD_DIR)/asm/data/overlay/hunter/hunter.data.s.o
+  $(BUILD_DIR)/src/Overlays/hunter/hunter.c.o \
+  $(BUILD_DIR)/asm/Overlays/hunter/hunter.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/hunter/hunter.data.s.o
 
 ### Targets ###
 
