@@ -23,7 +23,6 @@ Once its fully overhauled, the source code could then be used for many different
 | kain.drm | Kain overlay | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=kain&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=kain&label=Functions&measure=matched_functions) |
 | walboss.drm | Zephon overlay A | N/A |
 | walbosb.drm | Zephon overlay B | N/A |
-| walbosc.drm | Zephon overlay C | N/A |
 | alukabss.drm | Rahab overlay | N/A |
 | roninbss.drm | Dumah overlay | N/A |
 
