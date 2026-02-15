@@ -28,6 +28,7 @@ COPY skinner.bin /game/skinner.bin
 COPY wallcr.bin /game/wallcr.bin
 COPY aluka.bin /game/aluka.bin
 COPY skinbos.bin /game/skinbos.bin
+COPY kain.bin /game/kain.bin
 
 RUN mkdir -p /tmp/tools/cd-dat-utils
 COPY requirements.txt /tmp/requirements.txt

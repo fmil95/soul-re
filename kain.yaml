@@ -1,0 +1,54 @@
+name: kain (Overlay)
+sha1: 30a86e03be3b14ee77ccd5969e1884b92182fff4
+options:
+  basename: KAIN2_KAIN
+  target_path: kain.bin
+  base_path: .
+  platform: psx
+  compiler: gcc
+  build_path: BUILD_PATH
+  ld_script_path: kain.ld
+  find_file_boundaries: False
+  use_legacy_include_asm: False
+  gp_value: 0x800D7598
+  section_order: [".rodata", ".text", ".data", ".bss"]
+  symbol_addrs_path:
+    - symbol_addrs.txt
+    - symbol_addrs.kain.txt
+  reloc_addrs_path:
+    - reloc_addrs.kain.txt
+  undefined_funcs_auto_path: undefined_funcs_auto.kain.txt
+  undefined_syms_auto_path: undefined_syms_auto.kain.txt
+  extensions_path: tools/splat_ext
+  string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_encoding: ASCII
+  data_string_guesser_level: 2
+  subalign: 4
+  migrate_rodata_to_functions: True
+  hasm_in_src_path: True
+  make_full_disasm_for_code: True
+  generate_asm_macros_files: False
+  asm_data_macro: "glabel"
+  asm_data_end_label: ""
+  asm_end_label: ""
+  asm_function_alt_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_nonmatching_label_macro: ""
+  ld_bss_is_noload: False
+  global_vram_start: 0x80010000
+  global_vram_end: 0x800E0000
+
+segments:
+  - name: main
+    type: code
+    start: 0x00
+    vram: 0x88000000
+    align: 4
+    # bss_size: 0x#### # Fill me!
+    bss_contains_common: True
+    subsegments:
+      - [0x000000, .rodata, Overlays/kain/kain]
+      - [0x000080, _c, Overlays/kain/kain]
+      - [0x0028DC, data, Overlays/kain/kain]
+  - [0x00293C]

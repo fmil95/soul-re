@@ -23,6 +23,10 @@ categories:
     name: Melchiah Overlay
     paths:
       - Overlays/skinbos
+  - id: kain
+    name: Kain Overlay
+    paths:
+      - Overlays/kain
 
 expected_paths:
   asm: expected/asm

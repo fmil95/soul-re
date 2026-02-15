@@ -47,6 +47,13 @@ SKINBOS_BASEBIN := skinbos.bin
 SKINBOS_ELF     := $(BUILD_DIR)/skinbos.elf
 SKINBOS_BIN     := $(BUILD_DIR)/skinbos.bin
 
+KAIN_YAML    := kain.yaml
+KAIN_LD      := kain.ld
+KAIN_LD_PP   := $(BUILD_DIR)/kain.ld
+KAIN_BASEBIN := kain.bin
+KAIN_ELF     := $(BUILD_DIR)/kain.elf
+KAIN_BIN     := $(BUILD_DIR)/kain.bin
+
 # Fail early if baserom does not exist
 ifeq ($(wildcard $(BASEEXE)),)
 $(error Baserom `$(BASEEXE)' not found.)
@@ -92,6 +99,7 @@ SPLAT_SKINNER := splat split $(SKINNER_YAML)
 SPLAT_WALLCR  := splat split $(WALLCR_YAML)
 SPLAT_ALUKA   := splat split $(ALUKA_YAML)
 SPLAT_SKINBOS := splat split $(SKINBOS_YAML)
+SPLAT_KAIN    := splat split $(KAIN_YAML)
 DIFF          := diff
 MASPSX        := $(PYTHON) tools/maspsx/maspsx.py --use-comm-section --aspsx-version=2.81 -G4096
 CROSS         := mips-linux-gnu-
@@ -175,6 +183,11 @@ SKINBOS_OBJECTS := \
   $(BUILD_DIR)/asm/Overlays/skinbos/skinbos.s.o \
   $(BUILD_DIR)/asm/data/Overlays/skinbos/skinbos.data.s.o
 
+KAIN_OBJECTS := \
+  $(BUILD_DIR)/src/Overlays/kain/kain.c.o \
+  $(BUILD_DIR)/asm/Overlays/kain/kain.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/kain/kain.data.s.o
+
 ### Targets ###
 
 $(BUILD_DIR)/src/Game/CINEMA/CINEPSX.c.o: CFLAGS += -G0
@@ -241,6 +254,7 @@ split:
 	$(V)$(SPLAT_WALLCR)
 	$(V)$(SPLAT_ALUKA)
 	$(V)$(SPLAT_SKINBOS)
+	$(V)$(SPLAT_KAIN)
 
 reset: clean
 	$(V)rm -rf $(EXPECTED_DIR)
@@ -263,7 +277,7 @@ expected: all
 	$(V)mv $(BUILD_DIR)/src $(EXPECTED_DIR)/src
 	$(V)find $(EXPECTED_DIR)/src -name '*.s.o' -delete
 
-overlays: $(HUNTER_BIN) $(SKINNER_BIN) $(WALLCR_BIN) $(ALUKA_BIN) $(SKINBOS_BIN)
+overlays: $(HUNTER_BIN) $(SKINNER_BIN) $(WALLCR_BIN) $(ALUKA_BIN) $(SKINBOS_BIN) $(KAIN_BIN)
 
 # Compile .c files
 $(BUILD_DIR)/%.c.o: %.c
@@ -425,6 +439,28 @@ $(SKINBOS_BIN): $(SKINBOS_ELF)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
 	@$(DIFF) $(SKINBOS_BASEBIN) $(SKINBOS_BIN) && printf "skinbos.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+endif
+
+$(KAIN_LD_PP): $(KAIN_LD)
+	@$(PRINT)$(GREEN)Preprocessing kain overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
+	@mkdir -p $(BUILD_DIR)
+	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
+
+$(KAIN_ELF): $(KAIN_OBJECTS) $(KAIN_LD_PP)
+	$(V)$(LD) \
+		--no-check-sections \
+		-nostdlib \
+		-T undefined_syms_auto.kain.txt \
+		-T undefined_funcs_auto.kain.txt \
+		-T $(KAIN_LD_PP) \
+		-Map $(BUILD_DIR)/kain.map \
+		-o $@
+
+$(KAIN_BIN): $(KAIN_ELF)
+	@$(PRINT)$(GREEN)Creating kain.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
+	$(V)$(OBJCOPY) -O binary $< $@
+ifeq ($(COMPARE),1)
+	@$(DIFF) $(KAIN_BASEBIN) $(KAIN_BIN) && printf "kain.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 ### Make Settings ###

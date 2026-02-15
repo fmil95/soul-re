@@ -42,6 +42,9 @@ jobs:
       - name: Copy Overlay (skinbos.bin)
         run: cp /game/skinbos.bin skinbos.bin
 
+      - name: Copy Overlay (kain.bin)
+        run: cp /game/kain.bin kain.bin
+
       - name: Setup
         run: make setup
 
