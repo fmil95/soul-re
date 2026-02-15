@@ -19,7 +19,7 @@ Once its fully overhauled, the source code could then be used for many different
 | skinner.drm | Melchiahim overlay | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=skinner&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=skinner&label=Functions&measure=matched_functions) |
 | wallcr.drm | Zephonim overlay | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=wallcr&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=wallcr&label=Functions&measure=matched_functions) |
 | aluka.drm | Rahabim overlay | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=aluka&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=aluka&label=Functions&measure=matched_functions) |
-| skinbos.drm | Melchiah overlay | N/A |
+| skinbos.drm | Melchiah overlay | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=skinbos&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=skinbos&label=Functions&measure=matched_functions) |
 | kain.drm | Kain overlay | N/A |
 | walboss.drm | Zephon overlay A | N/A |
 | walbosb.drm | Zephon overlay B | N/A |

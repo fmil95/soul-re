@@ -19,6 +19,10 @@ categories:
     name: Rahabim Overlay
     paths:
       - Overlays/aluka
+  - id: skinbos
+    name: Melchiah Overlay
+    paths:
+      - Overlays/skinbos
 
 expected_paths:
   asm: expected/asm

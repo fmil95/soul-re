@@ -40,6 +40,13 @@ ALUKA_BASEBIN   := aluka.bin
 ALUKA_ELF       := $(BUILD_DIR)/aluka.elf
 ALUKA_BIN       := $(BUILD_DIR)/aluka.bin
 
+SKINBOS_YAML    := skinbos.yaml
+SKINBOS_LD      := skinbos.ld
+SKINBOS_LD_PP   := $(BUILD_DIR)/skinbos.ld
+SKINBOS_BASEBIN := skinbos.bin
+SKINBOS_ELF     := $(BUILD_DIR)/skinbos.elf
+SKINBOS_BIN     := $(BUILD_DIR)/skinbos.bin
+
 # Fail early if baserom does not exist
 ifeq ($(wildcard $(BASEEXE)),)
 $(error Baserom `$(BASEEXE)' not found.)
@@ -84,6 +91,7 @@ SPLAT_HUNTER  := splat split $(HUNTER_YAML)
 SPLAT_SKINNER := splat split $(SKINNER_YAML)
 SPLAT_WALLCR  := splat split $(WALLCR_YAML)
 SPLAT_ALUKA   := splat split $(ALUKA_YAML)
+SPLAT_SKINBOS := splat split $(SKINBOS_YAML)
 DIFF          := diff
 MASPSX        := $(PYTHON) tools/maspsx/maspsx.py --use-comm-section --aspsx-version=2.81 -G4096
 CROSS         := mips-linux-gnu-
@@ -162,6 +170,11 @@ ALUKA_OBJECTS := \
   $(BUILD_DIR)/asm/Overlays/aluka/aluka.s.o \
   $(BUILD_DIR)/asm/data/Overlays/aluka/aluka.data.s.o
 
+SKINBOS_OBJECTS := \
+  $(BUILD_DIR)/src/Overlays/skinbos/skinbos.c.o \
+  $(BUILD_DIR)/asm/Overlays/skinbos/skinbos.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/skinbos/skinbos.data.s.o
+
 ### Targets ###
 
 $(BUILD_DIR)/src/Game/CINEMA/CINEPSX.c.o: CFLAGS += -G0
@@ -227,6 +240,7 @@ split:
 	$(V)$(SPLAT_SKINNER)
 	$(V)$(SPLAT_WALLCR)
 	$(V)$(SPLAT_ALUKA)
+	$(V)$(SPLAT_SKINBOS)
 
 reset: clean
 	$(V)rm -rf $(EXPECTED_DIR)
@@ -249,7 +263,7 @@ expected: all
 	$(V)mv $(BUILD_DIR)/src $(EXPECTED_DIR)/src
 	$(V)find $(EXPECTED_DIR)/src -name '*.s.o' -delete
 
-overlays: $(HUNTER_BIN) $(SKINNER_BIN) $(WALLCR_BIN) $(ALUKA_BIN)
+overlays: $(HUNTER_BIN) $(SKINNER_BIN) $(WALLCR_BIN) $(ALUKA_BIN) $(SKINBOS_BIN)
 
 # Compile .c files
 $(BUILD_DIR)/%.c.o: %.c
@@ -389,6 +403,28 @@ $(ALUKA_BIN): $(ALUKA_ELF)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
 	@$(DIFF) $(ALUKA_BASEBIN) $(ALUKA_BIN) && printf "aluka.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+endif
+
+$(SKINBOS_LD_PP): $(SKINBOS_LD)
+	@$(PRINT)$(GREEN)Preprocessing skinbos overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
+	@mkdir -p $(BUILD_DIR)
+	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
+
+$(SKINBOS_ELF): $(SKINBOS_OBJECTS) $(SKINBOS_LD_PP)
+	$(V)$(LD) \
+		--no-check-sections \
+		-nostdlib \
+		-T undefined_syms_auto.skinbos.txt \
+		-T undefined_funcs_auto.skinbos.txt \
+		-T $(SKINBOS_LD_PP) \
+		-Map $(BUILD_DIR)/skinbos.map \
+		-o $@
+
+$(SKINBOS_BIN): $(SKINBOS_ELF)
+	@$(PRINT)$(GREEN)Creating skinbos.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
+	$(V)$(OBJCOPY) -O binary $< $@
+ifeq ($(COMPARE),1)
+	@$(DIFF) $(SKINBOS_BASEBIN) $(SKINBOS_BIN) && printf "skinbos.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 ### Make Settings ###

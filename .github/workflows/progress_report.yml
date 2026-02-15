@@ -39,6 +39,9 @@ jobs:
       - name: Copy Overlay (aluka.bin)
         run: cp /game/aluka.bin aluka.bin
 
+      - name: Copy Overlay (skinbos.bin)
+        run: cp /game/skinbos.bin skinbos.bin
+
       - name: Setup
         run: make setup
 
