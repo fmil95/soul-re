@@ -36,6 +36,9 @@ jobs:
       - name: Copy Overlay (wallcr.bin)
         run: cp /game/wallcr.bin wallcr.bin
 
+      - name: Copy Overlay (aluka.bin)
+        run: cp /game/aluka.bin aluka.bin
+
       - name: Setup
         run: make setup
 

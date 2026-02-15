@@ -4,17 +4,21 @@ categories:
     paths:
       - Game
   - id: hunter
-    name: Human Hunter
+    name: Human Hunter Overlay
     paths:
       - Overlays/hunter
   - id: skinner
-    name: Melchiahim
+    name: Melchiahim Overlay
     paths:
       - Overlays/skinner
   - id: wallcr
-    name: Zephonim
+    name: Zephonim Overlay
     paths:
       - Overlays/wallcr
+  - id: aluka
+    name: Rahabim Overlay
+    paths:
+      - Overlays/aluka
 
 expected_paths:
   asm: expected/asm

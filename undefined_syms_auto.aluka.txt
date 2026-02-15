@@ -1,0 +1,2 @@
+monVersion = 0x800D1EA4;
+gameTrackerX = 0x800D3360;
