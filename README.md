@@ -17,7 +17,7 @@ Once its fully overhauled, the source code could then be used for many different
 | mcardx.drm | Memory Card overlay | N/A |
 | hunter.drm | Human Hunter overlay | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=hunter&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=hunter&label=Functions&measure=matched_functions) |
 | skinner.drm | Melchiahim overlay | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=skinner&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=skinner&label=Functions&measure=matched_functions) |
-| wallcr.drm | Zephonim overlay | N/A |
+| wallcr.drm | Zephonim overlay | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=wallcr&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=wallcr&label=Functions&measure=matched_functions) |
 | aluka.drm | Rahabim overlay | N/A |
 | skinbos.drm | Melchiah overlay | N/A |
 | kain.drm | Kain overlay | N/A |

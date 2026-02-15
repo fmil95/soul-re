@@ -32,6 +32,9 @@ jobs:
 
       - name: Copy Overlay (skinner.bin)
         run: cp /game/skinner.bin skinner.bin
+      
+      - name: Copy Overlay (wallcr.bin)
+        run: cp /game/wallcr.bin wallcr.bin
 
       - name: Setup
         run: make setup

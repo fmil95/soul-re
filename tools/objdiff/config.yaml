@@ -11,6 +11,10 @@ categories:
     name: Melchiahim
     paths:
       - Overlays/skinner
+  - id: wallcr
+    name: Zephonim
+    paths:
+      - Overlays/wallcr
 
 expected_paths:
   asm: expected/asm

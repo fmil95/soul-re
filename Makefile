@@ -26,6 +26,13 @@ SKINNER_BASEBIN := skinner.bin
 SKINNER_ELF     := $(BUILD_DIR)/skinner.elf
 SKINNER_BIN     := $(BUILD_DIR)/skinner.bin
 
+WALLCR_YAML     := wallcr.yaml
+WALLCR_LD       := wallcr.ld
+WALLCR_LD_PP    := $(BUILD_DIR)/wallcr.ld
+WALLCR_BASEBIN  := wallcr.bin
+WALLCR_ELF      := $(BUILD_DIR)/wallcr.elf
+WALLCR_BIN      := $(BUILD_DIR)/wallcr.bin
+
 # Fail early if baserom does not exist
 ifeq ($(wildcard $(BASEEXE)),)
 $(error Baserom `$(BASEEXE)' not found.)
@@ -68,6 +75,7 @@ EXE_YAML      := $(BASEEXE).yaml
 SPLAT         := splat split $(EXE_YAML)
 SPLAT_HUNTER  := splat split $(HUNTER_YAML)
 SPLAT_SKINNER := splat split $(SKINNER_YAML)
+SPLAT_WALLCR  := splat split $(WALLCR_YAML)
 DIFF          := diff
 MASPSX        := $(PYTHON) tools/maspsx/maspsx.py --use-comm-section --aspsx-version=2.81 -G4096
 CROSS         := mips-linux-gnu-
@@ -136,6 +144,11 @@ SKINNER_OBJECTS := \
   $(BUILD_DIR)/asm/Overlays/skinner/skinner.s.o \
   $(BUILD_DIR)/asm/data/Overlays/skinner/skinner.data.s.o
 
+WALLCR_OBJECTS := \
+  $(BUILD_DIR)/src/Overlays/wallcr/wallcr.c.o \
+  $(BUILD_DIR)/asm/Overlays/wallcr/wallcr.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/wallcr/wallcr.data.s.o
+
 ### Targets ###
 
 $(BUILD_DIR)/src/Game/CINEMA/CINEPSX.c.o: CFLAGS += -G0
@@ -199,6 +212,7 @@ split:
 	$(V)$(SPLAT)
 	$(V)$(SPLAT_HUNTER)
 	$(V)$(SPLAT_SKINNER)
+	$(V)$(SPLAT_WALLCR)
 
 reset: clean
 	$(V)rm -rf $(EXPECTED_DIR)
@@ -221,7 +235,7 @@ expected: all
 	$(V)mv $(BUILD_DIR)/src $(EXPECTED_DIR)/src
 	$(V)find $(EXPECTED_DIR)/src -name '*.s.o' -delete
 
-overlays: $(HUNTER_BIN) $(SKINNER_BIN)
+overlays: $(HUNTER_BIN) $(SKINNER_BIN) $(WALLCR_BIN)
 
 # Compile .c files
 $(BUILD_DIR)/%.c.o: %.c
@@ -317,6 +331,28 @@ $(SKINNER_BIN): $(SKINNER_ELF)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
 	@$(DIFF) $(SKINNER_BASEBIN) $(SKINNER_BIN) && printf "skinner.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+endif
+
+$(WALLCR_LD_PP): $(WALLCR_LD)
+	@$(PRINT)$(GREEN)Preprocessing wallcr overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
+	@mkdir -p $(BUILD_DIR)
+	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
+
+$(WALLCR_ELF): $(WALLCR_OBJECTS) $(WALLCR_LD_PP)
+	$(V)$(LD) \
+		--no-check-sections \
+		-nostdlib \
+		-T undefined_syms_auto.wallcr.txt \
+		-T undefined_funcs_auto.wallcr.txt \
+		-T $(WALLCR_LD_PP) \
+		-Map $(BUILD_DIR)/wallcr.map \
+		-o $@
+
+$(WALLCR_BIN): $(WALLCR_ELF)
+	@$(PRINT)$(GREEN)Creating wallcr.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
+	$(V)$(OBJCOPY) -O binary $< $@
+ifeq ($(COMPARE),1)
+	@$(DIFF) $(WALLCR_BASEBIN) $(WALLCR_BIN) && printf "wallcr.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 ### Make Settings ###
