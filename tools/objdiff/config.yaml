@@ -7,6 +7,10 @@ categories:
     name: Video Player Overlay
     paths:
       - Overlays/cinemax
+  - id: mcardx
+    name: Memory Card Overlay
+    paths:
+      - Overlays/mcardx
   - id: hunter
     name: Human Hunter Overlay
     paths:
