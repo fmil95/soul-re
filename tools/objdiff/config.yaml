@@ -3,6 +3,10 @@ categories:
     name: Main Executable
     paths:
       - Game
+  - id: cinemax
+    name: Video Player Overlay
+    paths:
+      - Overlays/cinemax
   - id: hunter
     name: Human Hunter Overlay
     paths:

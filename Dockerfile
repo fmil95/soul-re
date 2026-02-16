@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN mkdir -p /game
 
 COPY SLUS_007.08 /game/SLUS_007.08
+COPY cinemax.bin /game/cinemax.bin
 COPY hunter.bin /game/hunter.bin
 COPY skinner.bin /game/skinner.bin
 COPY wallcr.bin /game/wallcr.bin

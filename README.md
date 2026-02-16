@@ -13,7 +13,7 @@ Once its fully overhauled, the source code could then be used for many different
 | Name | Purpose | Status |
 |------|---------|----------|
 | SLUS_007.08 | Gex 2 engine + game code | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=main&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=main&label=Functions&measure=matched_functions) |
-| cinemax.drm | Video Player overlay | N/A |
+| cinemax.drm | Video Player overlay | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=cinemax&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=cinemax&label=Functions&measure=matched_functions) |
 | mcardx.drm | Memory Card overlay | N/A |
 | hunter.drm | Human Hunter overlay | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=hunter&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=hunter&label=Functions&measure=matched_functions) |
 | skinner.drm | Melchiahim overlay | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=skinner&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=skinner&label=Functions&measure=matched_functions) |

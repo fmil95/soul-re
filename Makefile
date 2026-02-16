@@ -12,6 +12,13 @@ OBJDIFF_DIR      := $(TOOLS_DIR)/objdiff
 EXPECTED_DIR     ?= expected
 CHECK            ?= 1
 
+CINEMAX_YAML    := cinemax.yaml
+CINEMAX_LD      := cinemax.ld
+CINEMAX_LD_PP   := $(BUILD_DIR)/cinemax.ld
+CINEMAX_BASEBIN := cinemax.bin
+CINEMAX_ELF     := $(BUILD_DIR)/cinemax.elf
+CINEMAX_BIN     := $(BUILD_DIR)/cinemax.bin
+
 HUNTER_YAML      := hunter.yaml
 HUNTER_LD        := hunter.ld
 HUNTER_LD_PP     := $(BUILD_DIR)/hunter.ld
@@ -122,6 +129,7 @@ LD_MAP       := $(BUILD_DIR)/$(TARGET).map
 PYTHON         := python3
 EXE_YAML       := $(BASEEXE).yaml
 SPLAT          := splat split $(EXE_YAML)
+SPLAT_CINEMAX  := splat split $(CINEMAX_YAML)
 SPLAT_HUNTER   := splat split $(HUNTER_YAML)
 SPLAT_SKINNER  := splat split $(SKINNER_YAML)
 SPLAT_WALLCR   := splat split $(WALLCR_YAML)
@@ -189,6 +197,12 @@ ifeq ($(SKIP_ASM),1)
 OBJECTS += $(ASM_OBJS)
 endif
 DEPENDS := $(OBJECTS:=.d)
+
+CINEMAX_OBJECTS := \
+  $(BUILD_DIR)/src/Overlays/cinemax/cinemax.c.o \
+  $(BUILD_DIR)/asm/Overlays/cinemax/cinemax.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/cinemax/cinemax.data.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/cinemax/cinemax.bss.s.o
 
 HUNTER_OBJECTS := \
   $(BUILD_DIR)/src/Overlays/hunter/hunter.c.o \
@@ -301,6 +315,7 @@ setup: distclean split
 
 split:
 	$(V)$(SPLAT)
+	$(V)$(SPLAT_CINEMAX)
 	$(V)$(SPLAT_HUNTER)
 	$(V)$(SPLAT_SKINNER)
 	$(V)$(SPLAT_WALLCR)
@@ -333,7 +348,7 @@ expected: all
 	$(V)mv $(BUILD_DIR)/src $(EXPECTED_DIR)/src
 	$(V)find $(EXPECTED_DIR)/src -name '*.s.o' -delete
 
-overlays: $(HUNTER_BIN) $(SKINNER_BIN) $(WALLCR_BIN) $(ALUKA_BIN) $(SKINBOS_BIN) $(KAIN_BIN) $(WALBOSS_BIN) $(WALBOSB_BIN) $(ALUKABSS_BIN) $(RONINBSS_BIN)
+overlays: $(CINEMAX_BIN) $(HUNTER_BIN) $(SKINNER_BIN) $(WALLCR_BIN) $(ALUKA_BIN) $(SKINBOS_BIN) $(KAIN_BIN) $(WALBOSS_BIN) $(WALBOSB_BIN) $(ALUKABSS_BIN) $(RONINBSS_BIN)
 
 # Compile .c files
 $(BUILD_DIR)/%.c.o: %.c
@@ -385,6 +400,28 @@ $(EXE): $(BUILD_DIR)/$(TARGET).elf
 ifeq ($(COMPARE),1)
 	@$(DIFF) $(BASEEXE) $(EXE) && printf "EXE: OK\n" || (echo 'The build succeeded, but did not match the base EXE. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
+endif
+
+$(CINEMAX_LD_PP): $(CINEMAX_LD)
+	@$(PRINT)$(GREEN)Preprocessing cinemax overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
+	@mkdir -p $(BUILD_DIR)
+	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
+
+$(CINEMAX_ELF): $(CINEMAX_OBJECTS) $(CINEMAX_LD_PP)
+	$(V)$(LD) \
+		--no-check-sections \
+		-nostdlib \
+		-T undefined_syms_auto.cinemax.txt \
+		-T undefined_funcs_auto.cinemax.txt \
+		-T $(CINEMAX_LD_PP) \
+		-Map $(BUILD_DIR)/cinemax.map \
+		-o $@
+
+$(CINEMAX_BIN): $(CINEMAX_ELF)
+	@$(PRINT)$(GREEN)Creating cinemax.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
+	$(V)$(OBJCOPY) -O binary $< $@
+ifeq ($(COMPARE),1)
+	@$(DIFF) $(CINEMAX_BASEBIN) $(CINEMAX_BIN) && printf "cinemax.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 $(HUNTER_LD_PP): $(HUNTER_LD)
