@@ -39,6 +39,10 @@ categories:
     name: Rahab Overlay
     paths:
       - Overlays/alukabss
+  - id: roninbss
+    name: Dumah Overlay
+    paths:
+      - Overlays/roninbss
 
 expected_paths:
   asm: expected/asm

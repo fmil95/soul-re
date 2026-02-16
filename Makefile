@@ -75,6 +75,13 @@ ALUKABSS_BASEBIN := alukabss.bin
 ALUKABSS_ELF     := $(BUILD_DIR)/alukabss.elf
 ALUKABSS_BIN     := $(BUILD_DIR)/alukabss.bin
 
+RONINBSS_YAML    := roninbss.yaml
+RONINBSS_LD      := roninbss.ld
+RONINBSS_LD_PP   := $(BUILD_DIR)/roninbss.ld
+RONINBSS_BASEBIN := roninbss.bin
+RONINBSS_ELF     := $(BUILD_DIR)/roninbss.elf
+RONINBSS_BIN     := $(BUILD_DIR)/roninbss.bin
+
 # Fail early if baserom does not exist
 ifeq ($(wildcard $(BASEEXE)),)
 $(error Baserom `$(BASEEXE)' not found.)
@@ -124,6 +131,7 @@ SPLAT_KAIN     := splat split $(KAIN_YAML)
 SPLAT_WALBOSS  := splat split $(WALBOSS_YAML)
 SPLAT_WALBOSB  := splat split $(WALBOSB_YAML)
 SPLAT_ALUKABSS := splat split $(ALUKABSS_YAML)
+SPLAT_RONINBSS := splat split $(RONINBSS_YAML)
 DIFF           := diff
 MASPSX         := $(PYTHON) tools/maspsx/maspsx.py --use-comm-section --aspsx-version=2.81 -G4096
 CROSS          := mips-linux-gnu-
@@ -227,6 +235,11 @@ ALUKABSS_OBJECTS := \
   $(BUILD_DIR)/asm/Overlays/alukabss/alukabss.s.o \
   $(BUILD_DIR)/asm/data/Overlays/alukabss/alukabss.data.s.o
 
+RONINBSS_OBJECTS := \
+  $(BUILD_DIR)/src/Overlays/roninbss/roninbss.c.o \
+  $(BUILD_DIR)/asm/Overlays/roninbss/roninbss.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/roninbss/roninbss.data.s.o
+
 ### Targets ###
 
 $(BUILD_DIR)/src/Game/CINEMA/CINEPSX.c.o: CFLAGS += -G0
@@ -297,6 +310,7 @@ split:
 	$(V)$(SPLAT_WALBOSS)
 	$(V)$(SPLAT_WALBOSB)
 	$(V)$(SPLAT_ALUKABSS)
+	$(V)$(SPLAT_RONINBSS)
 
 reset: clean
 	$(V)rm -rf $(EXPECTED_DIR)
@@ -319,7 +333,7 @@ expected: all
 	$(V)mv $(BUILD_DIR)/src $(EXPECTED_DIR)/src
 	$(V)find $(EXPECTED_DIR)/src -name '*.s.o' -delete
 
-overlays: $(HUNTER_BIN) $(SKINNER_BIN) $(WALLCR_BIN) $(ALUKA_BIN) $(SKINBOS_BIN) $(KAIN_BIN) $(WALBOSS_BIN) $(WALBOSB_BIN) $(ALUKABSS_BIN)
+overlays: $(HUNTER_BIN) $(SKINNER_BIN) $(WALLCR_BIN) $(ALUKA_BIN) $(SKINBOS_BIN) $(KAIN_BIN) $(WALBOSS_BIN) $(WALBOSB_BIN) $(ALUKABSS_BIN) $(RONINBSS_BIN)
 
 # Compile .c files
 $(BUILD_DIR)/%.c.o: %.c
@@ -569,6 +583,28 @@ $(ALUKABSS_BIN): $(ALUKABSS_ELF)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
 	@$(DIFF) $(ALUKABSS_BASEBIN) $(ALUKABSS_BIN) && printf "alukabss.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+endif
+
+$(RONINBSS_LD_PP): $(RONINBSS_LD)
+	@$(PRINT)$(GREEN)Preprocessing roninbss overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
+	@mkdir -p $(BUILD_DIR)
+	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
+
+$(RONINBSS_ELF): $(RONINBSS_OBJECTS) $(RONINBSS_LD_PP)
+	$(V)$(LD) \
+		--no-check-sections \
+		-nostdlib \
+		-T undefined_syms_auto.roninbss.txt \
+		-T undefined_funcs_auto.roninbss.txt \
+		-T $(RONINBSS_LD_PP) \
+		-Map $(BUILD_DIR)/roninbss.map \
+		-o $@
+
+$(RONINBSS_BIN): $(RONINBSS_ELF)
+	@$(PRINT)$(GREEN)Creating alukabss.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
+	$(V)$(OBJCOPY) -O binary $< $@
+ifeq ($(COMPARE),1)
+	@$(DIFF) $(RONINBSS_BASEBIN) $(RONINBSS_BIN) && printf "roninbss.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 ### Make Settings ###

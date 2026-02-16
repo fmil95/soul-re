@@ -54,6 +54,9 @@ jobs:
       - name: Copy Overlay (alukabss.bin)
         run: cp /game/alukabss.bin alukabss.bin
 
+      - name: Copy Overlay (roninbss.bin)
+        run: cp /game/roninbss.bin roninbss.bin
+
       - name: Setup
         run: make setup
 

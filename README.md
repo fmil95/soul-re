@@ -24,7 +24,7 @@ Once its fully overhauled, the source code could then be used for many different
 | walboss.drm | Zephon overlay A | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=walboss&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=walboss&label=Functions&measure=matched_functions) |
 | walbosb.drm | Zephon overlay B | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=walbosb&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=walbosb&label=Functions&measure=matched_functions) |
 | alukabss.drm | Rahab overlay | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=alukabss&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=alukabss&label=Functions&measure=matched_functions) |
-| roninbss.drm | Dumah overlay | N/A |
+| roninbss.drm | Dumah overlay | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=roninbss&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=roninbss&label=Functions&measure=matched_functions) |
 
 In case you wonder what an overlay is: Soul Reaver like many other titles for the PlayStation (especially those near the end of the system's life cycle) distributes a good amount of game logic throughout _overlays_. For those not familiar with the concept, overlays are binaries which contain code that is loaded at specific instances during gameplay by the primary executable. This was designed such to taper the maximum amount of memory that the game consumes at once, which could never be too high due to hardware limitations. 
 

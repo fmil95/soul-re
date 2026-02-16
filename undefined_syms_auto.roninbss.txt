@@ -1,0 +1,4 @@
+objectAccess = 0x800CA23C;
+monVersion = 0x800D1EA4;
+theCamera = 0x800D2228;
+gameTrackerX = 0x800D3360;

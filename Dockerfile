@@ -32,6 +32,7 @@ COPY kain.bin /game/kain.bin
 COPY walboss.bin /game/walboss.bin
 COPY walbosb.bin /game/walbosb.bin
 COPY alukabss.bin /game/alukabss.bin
+COPY roninbss.bin /game/roninbss.bin
 
 RUN mkdir -p /tmp/tools/cd-dat-utils
 COPY requirements.txt /tmp/requirements.txt
