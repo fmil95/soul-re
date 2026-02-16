@@ -92,43 +92,81 @@ INCLUDE_RODATA("asm/nonmatchings/Overlays/walboss/walboss", func_88000060);
 #else 
 
 void WALBOSS_SetSegmentYaw(void) { };   
+
 void WALBOSS_InterpSegmentYaw(void) { };
+
 void WALBOSS_TurnToPosition(void) { };  
-void WALBOSS_ChooseAttack(void) { };    
-void WALBOSS_ShouldIAttack(void) { };   
+
+void WALBOSS_ChooseAttack(void) { };   
+
+void WALBOSS_ShouldIAttack(void) { };  
+
 void WALBOSS_MessageToLegs(void) { };   
-void WALBOSS_LivingLegs(void) { };      
-void WALBOSS_FindEgg(void) { };         
-void WALBOSS_CreateEgg(void) { };       
-void WALBOSS_EjectEgg(void) { };        
-void WALBOSS_BirthEggEntry(void) { };   
-void WALBOSS_BirthEgg(void) { };        
+
+void WALBOSS_LivingLegs(void) { };   
+
+void WALBOSS_FindEgg(void) { };   
+
+void WALBOSS_CreateEgg(void) { };  
+
+void WALBOSS_EjectEgg(void) { }; 
+
+void WALBOSS_BirthEggEntry(void) { };  
+
+void WALBOSS_BirthEgg(void) { };    
+
 void WALBOSS_CorrectLookAT(void) { };   
-void WALBOSS_LegHurtEntry(void) { };    
-void WALBOSS_LegHurt(void) { };         
-void WALBOSS_HitByEggEntry(void) { };   
-void WALBOSS_HitByEgg(void) { };        
-void WALBOSS_HandleThorn(void) { };     
-void WALBOSS_Collide(void) { };         
-void WALBOSS_Message(void) { };         
-void WALBOSS_Query(void) { };           
-void WALBOSS_Init(void) { };            
-void WALBOSS_CleanUp(void) { };         
-void WALBOSS_DamageEffect(void) { };    
-void WALBOSS_HandleFade(void) { };      
-void WALBOSS_IdleEntry(void) { };       
-void WALBOSS_Idle(void) { };            
-void WALBOSS_NoticeEntry(void) { };     
-void WALBOSS_Notice(void) { };          
-void WALBOSS_CombatEntry(void) { };     
-void WALBOSS_Combat(void) { };          
-void WALBOSS_AttackEntry(void) { };     
-void WALBOSS_Attack(void) { };          
-void WALBOSS_HitEntry(void) { };        
-void WALBOSS_Hit(void) { };             
+
+void WALBOSS_LegHurtEntry(void) { };   
+
+void WALBOSS_LegHurt(void) { };     
+
+void WALBOSS_HitByEggEntry(void) { };  
+
+void WALBOSS_HitByEgg(void) { };    
+
+void WALBOSS_HandleThorn(void) { };  
+
+void WALBOSS_Collide(void) { };   
+
+void WALBOSS_Message(void) { };   
+
+void WALBOSS_Query(void) { };   
+
+void WALBOSS_Init(void) { };     
+
+void WALBOSS_CleanUp(void) { };  
+
+void WALBOSS_DamageEffect(void) { };  
+
+void WALBOSS_HandleFade(void) { };    
+
+void WALBOSS_IdleEntry(void) { };     
+
+void WALBOSS_Idle(void) { };           
+
+void WALBOSS_NoticeEntry(void) { };    
+
+void WALBOSS_Notice(void) { };     
+
+void WALBOSS_CombatEntry(void) { };   
+
+void WALBOSS_Combat(void) { };     
+
+void WALBOSS_AttackEntry(void) { }; 
+
+void WALBOSS_Attack(void) { };  
+
+void WALBOSS_HitEntry(void) { };     
+
+void WALBOSS_Hit(void) { };         
+
 void WALBOSS_DoNothingEntry(void) { };  
-void WALBOSS_DoNothing(void) { };       
-void WALBOSS_DeadEntry(void) { };       
+
+void WALBOSS_DoNothing(void) { };     
+
+void WALBOSS_DeadEntry(void) { };  
+
 void WALBOSS_Dead(void) { };        
 
 #endif

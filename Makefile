@@ -61,6 +61,13 @@ WALBOSS_BASEBIN := walboss.bin
 WALBOSS_ELF     := $(BUILD_DIR)/walboss.elf
 WALBOSS_BIN     := $(BUILD_DIR)/walboss.bin
 
+WALBOSB_YAML    := walbosb.yaml
+WALBOSB_LD      := walbosb.ld
+WALBOSB_LD_PP   := $(BUILD_DIR)/walbosb.ld
+WALBOSB_BASEBIN := walbosb.bin
+WALBOSB_ELF     := $(BUILD_DIR)/walbosb.elf
+WALBOSB_BIN     := $(BUILD_DIR)/walbosb.bin
+
 # Fail early if baserom does not exist
 ifeq ($(wildcard $(BASEEXE)),)
 $(error Baserom `$(BASEEXE)' not found.)
@@ -108,6 +115,7 @@ SPLAT_ALUKA   := splat split $(ALUKA_YAML)
 SPLAT_SKINBOS := splat split $(SKINBOS_YAML)
 SPLAT_KAIN    := splat split $(KAIN_YAML)
 SPLAT_WALBOSS := splat split $(WALBOSS_YAML)
+SPLAT_WALBOSB := splat split $(WALBOSB_YAML)
 DIFF          := diff
 MASPSX        := $(PYTHON) tools/maspsx/maspsx.py --use-comm-section --aspsx-version=2.81 -G4096
 CROSS         := mips-linux-gnu-
@@ -201,6 +209,11 @@ WALBOSS_OBJECTS := \
   $(BUILD_DIR)/asm/Overlays/walboss/walboss.s.o \
   $(BUILD_DIR)/asm/data/Overlays/walboss/walboss.data.s.o
 
+WALBOSB_OBJECTS := \
+  $(BUILD_DIR)/src/Overlays/walbosb/walbosb.c.o \
+  $(BUILD_DIR)/asm/Overlays/walbosb/walbosb.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/walbosb/walbosb.data.s.o
+
 ### Targets ###
 
 $(BUILD_DIR)/src/Game/CINEMA/CINEPSX.c.o: CFLAGS += -G0
@@ -269,6 +282,7 @@ split:
 	$(V)$(SPLAT_SKINBOS)
 	$(V)$(SPLAT_KAIN)
 	$(V)$(SPLAT_WALBOSS)
+	$(V)$(SPLAT_WALBOSB)
 
 reset: clean
 	$(V)rm -rf $(EXPECTED_DIR)
@@ -291,7 +305,7 @@ expected: all
 	$(V)mv $(BUILD_DIR)/src $(EXPECTED_DIR)/src
 	$(V)find $(EXPECTED_DIR)/src -name '*.s.o' -delete
 
-overlays: $(HUNTER_BIN) $(SKINNER_BIN) $(WALLCR_BIN) $(ALUKA_BIN) $(SKINBOS_BIN) $(KAIN_BIN) $(WALBOSS_BIN)
+overlays: $(HUNTER_BIN) $(SKINNER_BIN) $(WALLCR_BIN) $(ALUKA_BIN) $(SKINBOS_BIN) $(KAIN_BIN) $(WALBOSS_BIN) $(WALBOSB_BIN)
 
 # Compile .c files
 $(BUILD_DIR)/%.c.o: %.c
@@ -497,6 +511,28 @@ $(WALBOSS_BIN): $(WALBOSS_ELF)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
 	@$(DIFF) $(WALBOSS_BASEBIN) $(WALBOSS_BIN) && printf "walboss.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+endif
+
+$(WALBOSB_LD_PP): $(WALBOSB_LD)
+	@$(PRINT)$(GREEN)Preprocessing walbosb overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
+	@mkdir -p $(BUILD_DIR)
+	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
+
+$(WALBOSB_ELF): $(WALBOSB_OBJECTS) $(WALBOSB_LD_PP)
+	$(V)$(LD) \
+		--no-check-sections \
+		-nostdlib \
+		-T undefined_syms_auto.walbosb.txt \
+		-T undefined_funcs_auto.walbosb.txt \
+		-T $(WALBOSB_LD_PP) \
+		-Map $(BUILD_DIR)/walbosb.map \
+		-o $@
+
+$(WALBOSB_BIN): $(WALBOSB_ELF)
+	@$(PRINT)$(GREEN)Creating walbosb.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
+	$(V)$(OBJCOPY) -O binary $< $@
+ifeq ($(COMPARE),1)
+	@$(DIFF) $(WALBOSB_BASEBIN) $(WALBOSB_BIN) && printf "walbosb.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 ### Make Settings ###

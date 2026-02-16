@@ -22,7 +22,7 @@ Once its fully overhauled, the source code could then be used for many different
 | skinbos.drm | Melchiah overlay | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=skinbos&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=skinbos&label=Functions&measure=matched_functions) |
 | kain.drm | Kain overlay | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=kain&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=kain&label=Functions&measure=matched_functions) |
 | walboss.drm | Zephon overlay A | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=walboss&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=walboss&label=Functions&measure=matched_functions) |
-| walbosb.drm | Zephon overlay B | N/A |
+| walbosb.drm | Zephon overlay B | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=walbosb&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=walbosb&label=Functions&measure=matched_functions) |
 | alukabss.drm | Rahab overlay | N/A |
 | roninbss.drm | Dumah overlay | N/A |
 
