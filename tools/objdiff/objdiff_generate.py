@@ -47,13 +47,20 @@ def _create_config():
         except yaml.YAMLError as exc:
             raise exc
 
-EXCLUDED_NAMES = {"data", "rodata", "sdata", "bss", "comm"}
+EXCLUDED_SUFFIXES = (
+    ".data.s.o",
+    ".rodata.s.o",
+    ".sdata.s.o",
+    ".bss.s.o",
+    ".comm.s.o",
+)
 
 def _collect_objects(path: Path, config) -> list[Path]:
     ignored = config["ignored_files"]
     return [
-        path for path in path.rglob("*.o")
-        if not any(name in path.name for name in EXCLUDED_NAMES ) and not any(file in str(path) for file in ignored)
+        p for p in path.rglob("*.o")
+        if not p.name.endswith(EXCLUDED_SUFFIXES)
+        and not any(ignored_file in str(p) for ignored_file in ignored)
     ]
 
 def _determine_categories(path: Path, config) -> tuple[UnitMetadata, str]:
