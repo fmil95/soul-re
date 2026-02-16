@@ -1,0 +1,54 @@
+name: walboss (Overlay)
+sha1: 324b147490051d8fd5d9939b5e61de31aa4b4f4f
+options:
+  basename: KAIN2_WALBOSS
+  target_path: walboss.bin
+  base_path: .
+  platform: psx
+  compiler: gcc
+  build_path: BUILD_PATH
+  ld_script_path: walboss.ld
+  find_file_boundaries: False
+  use_legacy_include_asm: False
+  gp_value: 0x800D7598
+  section_order: [".rodata", ".text", ".data", ".bss"]
+  symbol_addrs_path:
+    - symbol_addrs.txt
+    - symbol_addrs.walboss.txt
+  reloc_addrs_path:
+    - reloc_addrs.walboss.txt
+  undefined_funcs_auto_path: undefined_funcs_auto.walboss.txt
+  undefined_syms_auto_path: undefined_syms_auto.walboss.txt
+  extensions_path: tools/splat_ext
+  string_encoding: ASCII
+  rodata_string_guesser_level: 2
+  data_string_encoding: ASCII
+  data_string_guesser_level: 2
+  subalign: 4
+  migrate_rodata_to_functions: True
+  hasm_in_src_path: True
+  make_full_disasm_for_code: True
+  generate_asm_macros_files: False
+  asm_data_macro: "glabel"
+  asm_data_end_label: ""
+  asm_end_label: ""
+  asm_function_alt_macro: glabel
+  asm_jtbl_label_macro: jlabel
+  asm_nonmatching_label_macro: ""
+  ld_bss_is_noload: False
+  global_vram_start: 0x80010000
+  global_vram_end: 0x800E0000
+
+segments:
+  - name: main
+    type: code
+    start: 0x00
+    vram: 0x88000000
+    align: 4
+    # bss_size: 0x#### # Fill me!
+    bss_contains_common: True
+    subsegments:
+      - [0x000000, .rodata, Overlays/walboss/walboss]
+      - [0x000194, _c, Overlays/walboss/walboss]
+      - [0x002280, data, Overlays/walboss/walboss]
+  - [0x002310]

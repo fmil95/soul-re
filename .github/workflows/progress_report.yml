@@ -45,6 +45,9 @@ jobs:
       - name: Copy Overlay (kain.bin)
         run: cp /game/kain.bin kain.bin
 
+      - name: Copy Overlay (walboss.bin)
+        run: cp /game/walboss.bin walboss.bin
+
       - name: Setup
         run: make setup
 

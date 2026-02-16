@@ -47,12 +47,19 @@ SKINBOS_BASEBIN := skinbos.bin
 SKINBOS_ELF     := $(BUILD_DIR)/skinbos.elf
 SKINBOS_BIN     := $(BUILD_DIR)/skinbos.bin
 
-KAIN_YAML    := kain.yaml
-KAIN_LD      := kain.ld
-KAIN_LD_PP   := $(BUILD_DIR)/kain.ld
-KAIN_BASEBIN := kain.bin
-KAIN_ELF     := $(BUILD_DIR)/kain.elf
-KAIN_BIN     := $(BUILD_DIR)/kain.bin
+KAIN_YAML       := kain.yaml
+KAIN_LD         := kain.ld
+KAIN_LD_PP      := $(BUILD_DIR)/kain.ld
+KAIN_BASEBIN    := kain.bin
+KAIN_ELF        := $(BUILD_DIR)/kain.elf
+KAIN_BIN        := $(BUILD_DIR)/kain.bin
+
+WALBOSS_YAML    := walboss.yaml
+WALBOSS_LD      := walboss.ld
+WALBOSS_LD_PP   := $(BUILD_DIR)/walboss.ld
+WALBOSS_BASEBIN := walboss.bin
+WALBOSS_ELF     := $(BUILD_DIR)/walboss.elf
+WALBOSS_BIN     := $(BUILD_DIR)/walboss.bin
 
 # Fail early if baserom does not exist
 ifeq ($(wildcard $(BASEEXE)),)
@@ -100,6 +107,7 @@ SPLAT_WALLCR  := splat split $(WALLCR_YAML)
 SPLAT_ALUKA   := splat split $(ALUKA_YAML)
 SPLAT_SKINBOS := splat split $(SKINBOS_YAML)
 SPLAT_KAIN    := splat split $(KAIN_YAML)
+SPLAT_WALBOSS := splat split $(WALBOSS_YAML)
 DIFF          := diff
 MASPSX        := $(PYTHON) tools/maspsx/maspsx.py --use-comm-section --aspsx-version=2.81 -G4096
 CROSS         := mips-linux-gnu-
@@ -188,6 +196,11 @@ KAIN_OBJECTS := \
   $(BUILD_DIR)/asm/Overlays/kain/kain.s.o \
   $(BUILD_DIR)/asm/data/Overlays/kain/kain.data.s.o
 
+WALBOSS_OBJECTS := \
+  $(BUILD_DIR)/src/Overlays/walboss/walboss.c.o \
+  $(BUILD_DIR)/asm/Overlays/walboss/walboss.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/walboss/walboss.data.s.o
+
 ### Targets ###
 
 $(BUILD_DIR)/src/Game/CINEMA/CINEPSX.c.o: CFLAGS += -G0
@@ -255,6 +268,7 @@ split:
 	$(V)$(SPLAT_ALUKA)
 	$(V)$(SPLAT_SKINBOS)
 	$(V)$(SPLAT_KAIN)
+	$(V)$(SPLAT_WALBOSS)
 
 reset: clean
 	$(V)rm -rf $(EXPECTED_DIR)
@@ -277,7 +291,7 @@ expected: all
 	$(V)mv $(BUILD_DIR)/src $(EXPECTED_DIR)/src
 	$(V)find $(EXPECTED_DIR)/src -name '*.s.o' -delete
 
-overlays: $(HUNTER_BIN) $(SKINNER_BIN) $(WALLCR_BIN) $(ALUKA_BIN) $(SKINBOS_BIN) $(KAIN_BIN)
+overlays: $(HUNTER_BIN) $(SKINNER_BIN) $(WALLCR_BIN) $(ALUKA_BIN) $(SKINBOS_BIN) $(KAIN_BIN) $(WALBOSS_BIN)
 
 # Compile .c files
 $(BUILD_DIR)/%.c.o: %.c
@@ -461,6 +475,28 @@ $(KAIN_BIN): $(KAIN_ELF)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
 	@$(DIFF) $(KAIN_BASEBIN) $(KAIN_BIN) && printf "kain.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+endif
+
+$(WALBOSS_LD_PP): $(WALBOSS_LD)
+	@$(PRINT)$(GREEN)Preprocessing walboss overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
+	@mkdir -p $(BUILD_DIR)
+	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
+
+$(WALBOSS_ELF): $(WALBOSS_OBJECTS) $(WALBOSS_LD_PP)
+	$(V)$(LD) \
+		--no-check-sections \
+		-nostdlib \
+		-T undefined_syms_auto.walboss.txt \
+		-T undefined_funcs_auto.walboss.txt \
+		-T $(WALBOSS_LD_PP) \
+		-Map $(BUILD_DIR)/walboss.map \
+		-o $@
+
+$(WALBOSS_BIN): $(WALBOSS_ELF)
+	@$(PRINT)$(GREEN)Creating walboss.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
+	$(V)$(OBJCOPY) -O binary $< $@
+ifeq ($(COMPARE),1)
+	@$(DIFF) $(WALBOSS_BASEBIN) $(WALBOSS_BIN) && printf "walboss.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 ### Make Settings ###

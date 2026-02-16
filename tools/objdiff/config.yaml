@@ -27,6 +27,10 @@ categories:
     name: Kain Overlay
     paths:
       - Overlays/kain
+  - id: walboss
+    name: Zephon Overlay
+    paths:
+      - Overlays/walboss
 
 expected_paths:
   asm: expected/asm
