@@ -10,6 +10,15 @@ Once its fully overhauled, the source code could then be used for many different
 
 ## Progress
 
+[![Build Status]][actions] [![Code Progress]][progress] [![Data Progress]][progress] 
+
+[Build Status]: https://github.com/fmil95/soul-re/actions/workflows/progress_report.yml/badge.svg
+[actions]: https://github.com/fmil95/soul-re/actions/workflows/progress_report.yml
+
+[Code Progress]: https://decomp.dev/fmil95/soul-re.svg?mode=shield&label=Code&measure=matched_code_percent
+[Data Progress]: https://decomp.dev/fmil95/soul-re.svg?mode=shield&label=Functions&measure=matched_functions
+[progress]: https://decomp.dev/fmil95/soul-re
+
 | Name | Purpose | Status |
 |------|---------|----------|
 | SLUS_007.08 | Gex 2 engine + game code | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=main&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=main&label=Functions&measure=matched_functions) |
