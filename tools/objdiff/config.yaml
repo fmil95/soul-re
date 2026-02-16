@@ -35,6 +35,10 @@ categories:
     name: Zephon Overlay B
     paths:
       - Overlays/walbosb
+  - id: alukabss
+    name: Rahab Overlay
+    paths:
+      - Overlays/alukabss
 
 expected_paths:
   asm: expected/asm

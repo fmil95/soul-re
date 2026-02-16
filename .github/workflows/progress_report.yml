@@ -51,6 +51,9 @@ jobs:
       - name: Copy Overlay (walbosb.bin)
         run: cp /game/walbosb.bin walbosb.bin
 
+      - name: Copy Overlay (alukabss.bin)
+        run: cp /game/alukabss.bin alukabss.bin
+
       - name: Setup
         run: make setup
 

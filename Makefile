@@ -1,72 +1,79 @@
 ### Build Options ###
 
-BASEEXE        := SLUS_007.08
-TARGET         := KAIN2
-COMPARE        ?= 1
-NON_MATCHING   ?= 0
-SKIP_ASM       ?= 0
-VERBOSE        ?= 0
-BUILD_DIR      ?= build
-TOOLS_DIR      := tools
-OBJDIFF_DIR    := $(TOOLS_DIR)/objdiff
-EXPECTED_DIR   ?= expected
-CHECK          ?= 1
+BASEEXE          := SLUS_007.08
+TARGET           := KAIN2
+COMPARE          ?= 1
+NON_MATCHING     ?= 0
+SKIP_ASM         ?= 0
+VERBOSE          ?= 0
+BUILD_DIR        ?= build
+TOOLS_DIR        := tools
+OBJDIFF_DIR      := $(TOOLS_DIR)/objdiff
+EXPECTED_DIR     ?= expected
+CHECK            ?= 1
 
-HUNTER_YAML    := hunter.yaml
-HUNTER_LD      := hunter.ld
-HUNTER_LD_PP   := $(BUILD_DIR)/hunter.ld
-HUNTER_BASEBIN := hunter.bin
-HUNTER_ELF     := $(BUILD_DIR)/hunter.elf
-HUNTER_BIN     := $(BUILD_DIR)/hunter.bin
+HUNTER_YAML      := hunter.yaml
+HUNTER_LD        := hunter.ld
+HUNTER_LD_PP     := $(BUILD_DIR)/hunter.ld
+HUNTER_BASEBIN   := hunter.bin
+HUNTER_ELF       := $(BUILD_DIR)/hunter.elf
+HUNTER_BIN       := $(BUILD_DIR)/hunter.bin
 
-SKINNER_YAML    := skinner.yaml
-SKINNER_LD      := skinner.ld
-SKINNER_LD_PP   := $(BUILD_DIR)/skinner.ld
-SKINNER_BASEBIN := skinner.bin
-SKINNER_ELF     := $(BUILD_DIR)/skinner.elf
-SKINNER_BIN     := $(BUILD_DIR)/skinner.bin
+SKINNER_YAML     := skinner.yaml
+SKINNER_LD       := skinner.ld
+SKINNER_LD_PP    := $(BUILD_DIR)/skinner.ld
+SKINNER_BASEBIN  := skinner.bin
+SKINNER_ELF      := $(BUILD_DIR)/skinner.elf
+SKINNER_BIN      := $(BUILD_DIR)/skinner.bin
 
-WALLCR_YAML     := wallcr.yaml
-WALLCR_LD       := wallcr.ld
-WALLCR_LD_PP    := $(BUILD_DIR)/wallcr.ld
-WALLCR_BASEBIN  := wallcr.bin
-WALLCR_ELF      := $(BUILD_DIR)/wallcr.elf
-WALLCR_BIN      := $(BUILD_DIR)/wallcr.bin
+WALLCR_YAML      := wallcr.yaml
+WALLCR_LD        := wallcr.ld
+WALLCR_LD_PP     := $(BUILD_DIR)/wallcr.ld
+WALLCR_BASEBIN   := wallcr.bin
+WALLCR_ELF       := $(BUILD_DIR)/wallcr.elf
+WALLCR_BIN       := $(BUILD_DIR)/wallcr.bin
 
-ALUKA_YAML      := aluka.yaml
-ALUKA_LD        := aluka.ld
-ALUKA_LD_PP     := $(BUILD_DIR)/aluka.ld
-ALUKA_BASEBIN   := aluka.bin
-ALUKA_ELF       := $(BUILD_DIR)/aluka.elf
-ALUKA_BIN       := $(BUILD_DIR)/aluka.bin
+ALUKA_YAML       := aluka.yaml
+ALUKA_LD         := aluka.ld
+ALUKA_LD_PP      := $(BUILD_DIR)/aluka.ld
+ALUKA_BASEBIN    := aluka.bin
+ALUKA_ELF        := $(BUILD_DIR)/aluka.elf
+ALUKA_BIN        := $(BUILD_DIR)/aluka.bin
 
-SKINBOS_YAML    := skinbos.yaml
-SKINBOS_LD      := skinbos.ld
-SKINBOS_LD_PP   := $(BUILD_DIR)/skinbos.ld
-SKINBOS_BASEBIN := skinbos.bin
-SKINBOS_ELF     := $(BUILD_DIR)/skinbos.elf
-SKINBOS_BIN     := $(BUILD_DIR)/skinbos.bin
+SKINBOS_YAML     := skinbos.yaml
+SKINBOS_LD       := skinbos.ld
+SKINBOS_LD_PP    := $(BUILD_DIR)/skinbos.ld
+SKINBOS_BASEBIN  := skinbos.bin
+SKINBOS_ELF      := $(BUILD_DIR)/skinbos.elf
+SKINBOS_BIN      := $(BUILD_DIR)/skinbos.bin
 
-KAIN_YAML       := kain.yaml
-KAIN_LD         := kain.ld
-KAIN_LD_PP      := $(BUILD_DIR)/kain.ld
-KAIN_BASEBIN    := kain.bin
-KAIN_ELF        := $(BUILD_DIR)/kain.elf
-KAIN_BIN        := $(BUILD_DIR)/kain.bin
+KAIN_YAML        := kain.yaml
+KAIN_LD          := kain.ld
+KAIN_LD_PP       := $(BUILD_DIR)/kain.ld
+KAIN_BASEBIN     := kain.bin
+KAIN_ELF         := $(BUILD_DIR)/kain.elf
+KAIN_BIN         := $(BUILD_DIR)/kain.bin
 
-WALBOSS_YAML    := walboss.yaml
-WALBOSS_LD      := walboss.ld
-WALBOSS_LD_PP   := $(BUILD_DIR)/walboss.ld
-WALBOSS_BASEBIN := walboss.bin
-WALBOSS_ELF     := $(BUILD_DIR)/walboss.elf
-WALBOSS_BIN     := $(BUILD_DIR)/walboss.bin
+WALBOSS_YAML     := walboss.yaml
+WALBOSS_LD       := walboss.ld
+WALBOSS_LD_PP    := $(BUILD_DIR)/walboss.ld
+WALBOSS_BASEBIN  := walboss.bin
+WALBOSS_ELF      := $(BUILD_DIR)/walboss.elf
+WALBOSS_BIN      := $(BUILD_DIR)/walboss.bin
 
-WALBOSB_YAML    := walbosb.yaml
-WALBOSB_LD      := walbosb.ld
-WALBOSB_LD_PP   := $(BUILD_DIR)/walbosb.ld
-WALBOSB_BASEBIN := walbosb.bin
-WALBOSB_ELF     := $(BUILD_DIR)/walbosb.elf
-WALBOSB_BIN     := $(BUILD_DIR)/walbosb.bin
+WALBOSB_YAML     := walbosb.yaml
+WALBOSB_LD       := walbosb.ld
+WALBOSB_LD_PP    := $(BUILD_DIR)/walbosb.ld
+WALBOSB_BASEBIN  := walbosb.bin
+WALBOSB_ELF      := $(BUILD_DIR)/walbosb.elf
+WALBOSB_BIN      := $(BUILD_DIR)/walbosb.bin
+
+ALUKABSS_YAML    := alukabss.yaml
+ALUKABSS_LD      := alukabss.ld
+ALUKABSS_LD_PP   := $(BUILD_DIR)/alukabss.ld
+ALUKABSS_BASEBIN := alukabss.bin
+ALUKABSS_ELF     := $(BUILD_DIR)/alukabss.elf
+ALUKABSS_BIN     := $(BUILD_DIR)/alukabss.bin
 
 # Fail early if baserom does not exist
 ifeq ($(wildcard $(BASEEXE)),)
@@ -105,28 +112,29 @@ LD_MAP       := $(BUILD_DIR)/$(TARGET).map
 
 ### Tools ###
 
-PYTHON        := python3
-EXE_YAML      := $(BASEEXE).yaml
-SPLAT         := splat split $(EXE_YAML)
-SPLAT_HUNTER  := splat split $(HUNTER_YAML)
-SPLAT_SKINNER := splat split $(SKINNER_YAML)
-SPLAT_WALLCR  := splat split $(WALLCR_YAML)
-SPLAT_ALUKA   := splat split $(ALUKA_YAML)
-SPLAT_SKINBOS := splat split $(SKINBOS_YAML)
-SPLAT_KAIN    := splat split $(KAIN_YAML)
-SPLAT_WALBOSS := splat split $(WALBOSS_YAML)
-SPLAT_WALBOSB := splat split $(WALBOSB_YAML)
-DIFF          := diff
-MASPSX        := $(PYTHON) tools/maspsx/maspsx.py --use-comm-section --aspsx-version=2.81 -G4096
-CROSS         := mips-linux-gnu-
-AS            := $(CROSS)as -EL
-LD            := $(CROSS)ld -EL
-OBJCOPY       := $(CROSS)objcopy
-STRIP         := $(CROSS)strip
-CPP           := $(CROSS)cpp
-CC            := tools/gcc-2.8.1-psx/cc1
-CC_HOST       := gcc
-OBJDIFF       := $(OBJDIFF_DIR)/objdiff
+PYTHON         := python3
+EXE_YAML       := $(BASEEXE).yaml
+SPLAT          := splat split $(EXE_YAML)
+SPLAT_HUNTER   := splat split $(HUNTER_YAML)
+SPLAT_SKINNER  := splat split $(SKINNER_YAML)
+SPLAT_WALLCR   := splat split $(WALLCR_YAML)
+SPLAT_ALUKA    := splat split $(ALUKA_YAML)
+SPLAT_SKINBOS  := splat split $(SKINBOS_YAML)
+SPLAT_KAIN     := splat split $(KAIN_YAML)
+SPLAT_WALBOSS  := splat split $(WALBOSS_YAML)
+SPLAT_WALBOSB  := splat split $(WALBOSB_YAML)
+SPLAT_ALUKABSS := splat split $(ALUKABSS_YAML)
+DIFF           := diff
+MASPSX         := $(PYTHON) tools/maspsx/maspsx.py --use-comm-section --aspsx-version=2.81 -G4096
+CROSS          := mips-linux-gnu-
+AS             := $(CROSS)as -EL
+LD             := $(CROSS)ld -EL
+OBJCOPY        := $(CROSS)objcopy
+STRIP          := $(CROSS)strip
+CPP            := $(CROSS)cpp
+CC             := tools/gcc-2.8.1-psx/cc1
+CC_HOST        := gcc
+OBJDIFF        := $(OBJDIFF_DIR)/objdiff
 
 PRINT := printf '
  ENDCOLOR := \033[0m
@@ -214,6 +222,11 @@ WALBOSB_OBJECTS := \
   $(BUILD_DIR)/asm/Overlays/walbosb/walbosb.s.o \
   $(BUILD_DIR)/asm/data/Overlays/walbosb/walbosb.data.s.o
 
+ALUKABSS_OBJECTS := \
+  $(BUILD_DIR)/src/Overlays/alukabss/alukabss.c.o \
+  $(BUILD_DIR)/asm/Overlays/alukabss/alukabss.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/alukabss/alukabss.data.s.o
+
 ### Targets ###
 
 $(BUILD_DIR)/src/Game/CINEMA/CINEPSX.c.o: CFLAGS += -G0
@@ -283,6 +296,7 @@ split:
 	$(V)$(SPLAT_KAIN)
 	$(V)$(SPLAT_WALBOSS)
 	$(V)$(SPLAT_WALBOSB)
+	$(V)$(SPLAT_ALUKABSS)
 
 reset: clean
 	$(V)rm -rf $(EXPECTED_DIR)
@@ -305,7 +319,7 @@ expected: all
 	$(V)mv $(BUILD_DIR)/src $(EXPECTED_DIR)/src
 	$(V)find $(EXPECTED_DIR)/src -name '*.s.o' -delete
 
-overlays: $(HUNTER_BIN) $(SKINNER_BIN) $(WALLCR_BIN) $(ALUKA_BIN) $(SKINBOS_BIN) $(KAIN_BIN) $(WALBOSS_BIN) $(WALBOSB_BIN)
+overlays: $(HUNTER_BIN) $(SKINNER_BIN) $(WALLCR_BIN) $(ALUKA_BIN) $(SKINBOS_BIN) $(KAIN_BIN) $(WALBOSS_BIN) $(WALBOSB_BIN) $(ALUKABSS_BIN)
 
 # Compile .c files
 $(BUILD_DIR)/%.c.o: %.c
@@ -533,6 +547,28 @@ $(WALBOSB_BIN): $(WALBOSB_ELF)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
 	@$(DIFF) $(WALBOSB_BASEBIN) $(WALBOSB_BIN) && printf "walbosb.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+endif
+
+$(ALUKABSS_LD_PP): $(ALUKABSS_LD)
+	@$(PRINT)$(GREEN)Preprocessing alukabss overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
+	@mkdir -p $(BUILD_DIR)
+	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
+
+$(ALUKABSS_ELF): $(ALUKABSS_OBJECTS) $(ALUKABSS_LD_PP)
+	$(V)$(LD) \
+		--no-check-sections \
+		-nostdlib \
+		-T undefined_syms_auto.alukabss.txt \
+		-T undefined_funcs_auto.alukabss.txt \
+		-T $(ALUKABSS_LD_PP) \
+		-Map $(BUILD_DIR)/alukabss.map \
+		-o $@
+
+$(ALUKABSS_BIN): $(ALUKABSS_ELF)
+	@$(PRINT)$(GREEN)Creating alukabss.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
+	$(V)$(OBJCOPY) -O binary $< $@
+ifeq ($(COMPARE),1)
+	@$(DIFF) $(ALUKABSS_BASEBIN) $(ALUKABSS_BIN) && printf "alukabss.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 ### Make Settings ###
