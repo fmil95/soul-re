@@ -215,7 +215,8 @@ CINEMAX_OBJECTS := \
 MCARDX_OBJECTS := \
   $(BUILD_DIR)/src/Overlays/mcardx/mcardx.c.o \
   $(BUILD_DIR)/asm/Overlays/mcardx/mcardx.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/mcardx/mcardx.data.s.o 
+  $(BUILD_DIR)/asm/data/Overlays/mcardx/mcardx.data.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/mcardx/mcardx.bss.s.o
 
 HUNTER_OBJECTS := \
   $(BUILD_DIR)/src/Overlays/hunter/hunter.c.o \
