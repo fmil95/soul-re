@@ -31,7 +31,44 @@ void ALUKA_SetPitch(Instance *instance, int pitch)
     attributes->swimfast_pitch = pitch;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_EnableControllers);
+void ALUKA_EnableControllers(Instance *instance)
+{
+    G2SVector3 translate;
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (ALUKA_ControllersEnabled(instance))
+    {
+        return;
+    }
+
+    G2Anim_EnableController(&instance->anim, 1, 0x26);
+    G2Anim_EnableController(&instance->anim, 1, 0xE);
+    G2Anim_EnableController(&instance->anim, 0x13, 0xE);
+    G2Anim_EnableController(&instance->anim, 0x1A, 0xE);
+    G2Anim_EnableController(&instance->anim, 0x20, 0xE);
+    G2Anim_EnableController(&instance->anim, 5, 0xE);
+    G2Anim_EnableController(&instance->anim, 0xC, 0xE);
+    G2Anim_EnableController(&instance->anim, 4, 0xE);
+    G2Anim_EnableController(&instance->anim, 0xB, 0xE);
+
+    translate.y = 0;
+    translate.x = 0;
+
+    if (mv->age != 0)
+    {
+        translate.z = -0x1C2;
+        instance->position.z -= translate.z;
+    }
+    else
+    {
+        translate.z = -0x190;
+        instance->position.z -= translate.z;
+    }
+
+    G2Anim_SetController_Vector(&instance->anim, 1, 0x26, &translate);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_DisableControllers);
 
@@ -218,7 +255,44 @@ void ALUKA_SetPitch(Instance *instance, int pitch)
     attributes->swimfast_pitch = pitch;
 }
 
-void ALUKA_EnableControllers(void) {};
+void ALUKA_EnableControllers(Instance *instance)
+{
+    G2SVector3 translate;
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (ALUKA_ControllersEnabled(instance))
+    {
+        return;
+    }
+
+    G2Anim_EnableController(&instance->anim, 1, 0x26);
+    G2Anim_EnableController(&instance->anim, 1, 0xE);
+    G2Anim_EnableController(&instance->anim, 0x13, 0xE);
+    G2Anim_EnableController(&instance->anim, 0x1A, 0xE);
+    G2Anim_EnableController(&instance->anim, 0x20, 0xE);
+    G2Anim_EnableController(&instance->anim, 5, 0xE);
+    G2Anim_EnableController(&instance->anim, 0xC, 0xE);
+    G2Anim_EnableController(&instance->anim, 4, 0xE);
+    G2Anim_EnableController(&instance->anim, 0xB, 0xE);
+
+    translate.y = 0;
+    translate.x = 0;
+
+    if (mv->age != 0)
+    {
+        translate.z = -0x1C2;
+        instance->position.z -= translate.z;
+    }
+    else
+    {
+        translate.z = -0x190;
+        instance->position.z -= translate.z;
+    }
+
+    G2Anim_SetController_Vector(&instance->anim, 1, 0x26, &translate);
+}
 
 void ALUKA_DisableControllers(Instance *instance) {};
 
