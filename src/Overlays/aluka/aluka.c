@@ -12,7 +12,24 @@ G2Bool ALUKA_ControllersEnabled(Instance *instance)
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SetPitch);
+void ALUKA_SetPitch(Instance *instance, int pitch)
+{
+    G2SVector3 extraRot;
+    AlukaAttributes *attributes; // not from debug symbols
+
+    attributes = (AlukaAttributes *)((MonsterVars *)instance->extraData)->extraVars;
+
+    if (!ALUKA_ControllersEnabled(instance))
+    {
+        return;
+    }
+
+    extraRot.x = pitch;
+    extraRot.z = 0;
+    extraRot.y = 0;
+    G2Anim_SetController_Vector(&instance->anim, 1, 0xE, &extraRot);
+    attributes->swimfast_pitch = pitch;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_EnableControllers);
 
@@ -182,7 +199,24 @@ G2Bool ALUKA_ControllersEnabled(Instance *instance)
     return G2Anim_IsControllerActive(&instance->anim, 1, 0x26) != 0;
 }
 
-void ALUKA_SetPitch(void) {};
+void ALUKA_SetPitch(Instance *instance, int pitch)
+{
+    G2SVector3 extraRot;
+    AlukaAttributes *attributes; // not from debug symbols
+
+    attributes = (AlukaAttributes *)((MonsterVars *)instance->extraData)->extraVars;
+
+    if (!ALUKA_ControllersEnabled(instance))
+    {
+        return;
+    }
+
+    extraRot.x = pitch;
+    extraRot.z = 0;
+    extraRot.y = 0;
+    G2Anim_SetController_Vector(&instance->anim, 1, 0xE, &extraRot);
+    attributes->swimfast_pitch = pitch;
+}
 
 void ALUKA_EnableControllers(void) {};
 
