@@ -51,4 +51,5 @@ segments:
       - [0x000000, .rodata, Overlays/wallcr/wallcr]
       - [0x000054, _c, Overlays/wallcr/wallcr]
       - [0x002D14, data, Overlays/wallcr/wallcr]
+      - [0x002DB4, bss, Overlays/wallcr/wallcr]
   - [0x002DBC]

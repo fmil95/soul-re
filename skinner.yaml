@@ -51,4 +51,5 @@ segments:
       - [0x000000, .rodata, Overlays/skinner/skinner]
       - [0x000020, _c, Overlays/skinner/skinner]
       - [0x000B90, data, Overlays/skinner/skinner]
+      - [0x000BC4, bss, Overlays/skinner/skinner]
   - [0x000BCC]

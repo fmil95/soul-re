@@ -51,4 +51,5 @@ segments:
       - [0x000000, .rodata, Overlays/aluka/aluka]
       - [0x000034, _c, Overlays/aluka/aluka]
       - [0x004598, data, Overlays/aluka/aluka]
+      - [0x004644, bss, Overlays/aluka/aluka]
   - [0x00464C]

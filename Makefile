@@ -220,22 +220,26 @@ MCARDX_OBJECTS := \
 HUNTER_OBJECTS := \
   $(BUILD_DIR)/src/Overlays/hunter/hunter.c.o \
   $(BUILD_DIR)/asm/Overlays/hunter/hunter.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/hunter/hunter.data.s.o
+  $(BUILD_DIR)/asm/data/Overlays/hunter/hunter.data.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/hunter/hunter.bss.s.o
 
 SKINNER_OBJECTS := \
   $(BUILD_DIR)/src/Overlays/skinner/skinner.c.o \
   $(BUILD_DIR)/asm/Overlays/skinner/skinner.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/skinner/skinner.data.s.o
+  $(BUILD_DIR)/asm/data/Overlays/skinner/skinner.data.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/skinner/skinner.bss.s.o
 
 WALLCR_OBJECTS := \
   $(BUILD_DIR)/src/Overlays/wallcr/wallcr.c.o \
   $(BUILD_DIR)/asm/Overlays/wallcr/wallcr.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/wallcr/wallcr.data.s.o
+  $(BUILD_DIR)/asm/data/Overlays/wallcr/wallcr.data.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/wallcr/wallcr.bss.s.o
 
 ALUKA_OBJECTS := \
   $(BUILD_DIR)/src/Overlays/aluka/aluka.c.o \
   $(BUILD_DIR)/asm/Overlays/aluka/aluka.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/aluka/aluka.data.s.o
+  $(BUILD_DIR)/asm/data/Overlays/aluka/aluka.data.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/aluka/aluka.bss.s.o
 
 SKINBOS_OBJECTS := \
   $(BUILD_DIR)/src/Overlays/skinbos/skinbos.c.o \
