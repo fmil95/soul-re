@@ -51,4 +51,5 @@ segments:
       - [0x000000, .rodata, Overlays/skinbos/skinbos]
       - [0x00009C, _c, Overlays/skinbos/skinbos]
       - [0x002D88, data, Overlays/skinbos/skinbos]
+      - [0x002E18, bss, Overlays/skinbos/skinbos]
   - [0x002E20]

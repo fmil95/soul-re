@@ -244,22 +244,26 @@ ALUKA_OBJECTS := \
 SKINBOS_OBJECTS := \
   $(BUILD_DIR)/src/Overlays/skinbos/skinbos.c.o \
   $(BUILD_DIR)/asm/Overlays/skinbos/skinbos.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/skinbos/skinbos.data.s.o
+  $(BUILD_DIR)/asm/data/Overlays/skinbos/skinbos.data.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/skinbos/skinbos.bss.s.o
 
 KAIN_OBJECTS := \
   $(BUILD_DIR)/src/Overlays/kain/kain.c.o \
   $(BUILD_DIR)/asm/Overlays/kain/kain.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/kain/kain.data.s.o
+  $(BUILD_DIR)/asm/data/Overlays/kain/kain.data.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/kain/kain.bss.s.o
 
 WALBOSS_OBJECTS := \
   $(BUILD_DIR)/src/Overlays/walboss/walboss.c.o \
   $(BUILD_DIR)/asm/Overlays/walboss/walboss.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/walboss/walboss.data.s.o
+  $(BUILD_DIR)/asm/data/Overlays/walboss/walboss.data.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/walboss/walboss.bss.s.o
 
 WALBOSB_OBJECTS := \
   $(BUILD_DIR)/src/Overlays/walbosb/walbosb.c.o \
   $(BUILD_DIR)/asm/Overlays/walbosb/walbosb.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/walbosb/walbosb.data.s.o
+  $(BUILD_DIR)/asm/data/Overlays/walbosb/walbosb.data.s.o \
+  $(BUILD_DIR)/asm/data/Overlays/walbosb/walbosb.bss.s.o
 
 ALUKABSS_OBJECTS := \
   $(BUILD_DIR)/src/Overlays/alukabss/alukabss.c.o \

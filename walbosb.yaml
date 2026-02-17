@@ -51,4 +51,5 @@ segments:
       - [0x000000, .rodata, Overlays/walbosb/walbosb]
       - [0x000794, _c, Overlays/walbosb/walbosb]
       - [0x001D10, data, Overlays/walbosb/walbosb]
+      - [0x001DA4, bss, Overlays/walbosb/walbosb]
   - [0x001DAC]
