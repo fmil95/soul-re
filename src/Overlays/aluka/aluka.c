@@ -70,7 +70,36 @@ void ALUKA_EnableControllers(Instance *instance)
     G2Anim_SetController_Vector(&instance->anim, 1, 0x26, &translate);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_DisableControllers);
+void ALUKA_DisableControllers(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (!ALUKA_ControllersEnabled(instance))
+    {
+        return;
+    }
+
+    G2Anim_DisableController(&instance->anim, 1, 0x26);
+    G2Anim_DisableController(&instance->anim, 1, 0xE);
+    G2Anim_DisableController(&instance->anim, 0x13, 0xE);
+    G2Anim_DisableController(&instance->anim, 0x1A, 0xE);
+    G2Anim_DisableController(&instance->anim, 0x20, 0xE);
+    G2Anim_DisableController(&instance->anim, 5, 0xE);
+    G2Anim_DisableController(&instance->anim, 0xC, 0xE);
+    G2Anim_DisableController(&instance->anim, 4, 0xE);
+    G2Anim_DisableController(&instance->anim, 0xB, 0xE);
+
+    if (mv->age != 0)
+    {
+        instance->position.z = instance->position.z - 0x1C2;
+    }
+    else
+    {
+        instance->position.z = instance->position.z - 0x190;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SetSwimBodyTwist);
 
@@ -294,7 +323,36 @@ void ALUKA_EnableControllers(Instance *instance)
     G2Anim_SetController_Vector(&instance->anim, 1, 0x26, &translate);
 }
 
-void ALUKA_DisableControllers(Instance *instance) {};
+void ALUKA_DisableControllers(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (!ALUKA_ControllersEnabled(instance))
+    {
+        return;
+    }
+
+    G2Anim_DisableController(&instance->anim, 1, 0x26);
+    G2Anim_DisableController(&instance->anim, 1, 0xE);
+    G2Anim_DisableController(&instance->anim, 0x13, 0xE);
+    G2Anim_DisableController(&instance->anim, 0x1A, 0xE);
+    G2Anim_DisableController(&instance->anim, 0x20, 0xE);
+    G2Anim_DisableController(&instance->anim, 5, 0xE);
+    G2Anim_DisableController(&instance->anim, 0xC, 0xE);
+    G2Anim_DisableController(&instance->anim, 4, 0xE);
+    G2Anim_DisableController(&instance->anim, 0xB, 0xE);
+
+    if (mv->age != 0)
+    {
+        instance->position.z = instance->position.z - 0x1C2;
+    }
+    else
+    {
+        instance->position.z = instance->position.z - 0x190;
+    }
+}
 
 void ALUKA_SetSwimBodyTwist(void) {};
 
