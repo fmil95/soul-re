@@ -10,24 +10,10 @@ Once `SLUS_007.08` has been extracted, place it at the root of the project.
 
 ### Fetching the Overlays
 
-In order to obtain the overlay binaries, it is necessary to decompress the BIGFILE.DAT file from the game disk first with [cd-dat-utils](https://github.com/StableCrimson/cd-dat-utils/). Once finished, grab the following files from their respective subfolders on the kain2/object path:
+In order to obtain the overlay binaries, it is necessary to decompress the BIGFILE.DAT file from the game disk first with [cd-dat-utils](https://github.com/StableCrimson/cd-dat-utils/). Once finished, grab the following files from their respective subfolders on the kain2/object path of the extracted big file: `cinemax.drm`, `mcardx.drm`, `hunter.drm`, `skinner.drm`, `wallcr.drm`, `aluka.drm`, `skinbos.drm`, `kain.drm`, `walboss.drm`, `walbosb.drm`, `alukabss.drm` and `roninbss.drm`. Place them alongside the EXE and run the following string of commands to extract the code modules out of the DRM files:
 
-- cinemax.drm
-- mcardx.drm
-- hunter.drm
-- skinner.drm
-- wallcr.drm
-- aluka.drm
-- skinbos.drm
-- kain.drm
-- walboss.drm
-- walbosb.drm
-- alukabss.drm
-- roninbss.drm
-
-Place them alongside the EXE and run the following string of commands to extract the code modules out of the DRM files:
-
-```python tools/scripts/un_drm.py --input cinemax.drm --output .
+```
+python tools/scripts/un_drm.py --input cinemax.drm --output .
 python tools/scripts/un_drm.py --input mcardx.drm --output .
 python tools/scripts/un_drm.py --input hunter.drm --output .
 python tools/scripts/un_drm.py --input skinner.drm --output .
