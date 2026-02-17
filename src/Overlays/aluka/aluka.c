@@ -64,7 +64,27 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_GetCircleDestination)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SwimPlanMovement);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ResetSwim);
+void ALUKA_ResetSwim(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (ALUKA_ControllersEnabled(instance) == G2FALSE)
+    {
+        return;
+    }
+
+    mv->auxFlags &= ~0x20000000;
+    ALUKA_DisableControllers(instance);
+    MON_PlayCombatIdle(instance, 2);
+    mv->mvFlags &= ~0x800;
+    instance->zVel = 0;
+    instance->maxXVel = 0x190;
+    instance->maxYVel = 0x190;
+    instance->maxZVel = 0x190;
+
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ShouldJumpIn);
 
@@ -166,7 +186,7 @@ void ALUKA_SetPitch(void) {};
 
 void ALUKA_EnableControllers(void) {};
 
-void ALUKA_DisableControllers(void) {};
+void ALUKA_DisableControllers(Instance *instance) {};
 
 void ALUKA_SetSwimBodyTwist(void) {};
 
@@ -214,7 +234,27 @@ void ALUKA_GetCircleDestination(void) {};
 
 void ALUKA_SwimPlanMovement(void) {};
 
-void ALUKA_ResetSwim(Instance *instance) {};
+void ALUKA_ResetSwim(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (ALUKA_ControllersEnabled(instance) == G2FALSE)
+    {
+        return;
+    }
+
+    mv->auxFlags &= ~0x20000000;
+    ALUKA_DisableControllers(instance);
+    MON_PlayCombatIdle(instance, 2);
+    mv->mvFlags &= ~0x800;
+    instance->zVel = 0;
+    instance->maxXVel = 0x190;
+    instance->maxYVel = 0x190;
+    instance->maxZVel = 0x190;
+
+}
 
 void ALUKA_ShouldJumpIn(void) {};
 
