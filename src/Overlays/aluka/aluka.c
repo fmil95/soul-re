@@ -101,7 +101,48 @@ void ALUKA_DisableControllers(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SetSwimBodyTwist);
+void ALUKA_SetSwimBodyTwist(Instance *instance, int pitch, int yaw)
+{
+
+    G2SVector3 extraRot;
+
+    if (!ALUKA_ControllersEnabled(instance))
+    {
+        return;
+    }
+
+    extraRot.z = 0;
+    extraRot.x = 0;
+    extraRot.y = -pitch & 0xFFF;
+
+    G2Anim_SetController_Vector(&instance->anim, 5, 0xE, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 0xC, 0xE, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 4, 0xE, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 0xB, 0xE, &extraRot);
+
+    extraRot.y = pitch & 0xFFF;
+    extraRot.x = yaw & 0xFFF;
+
+    G2Anim_SetController_Vector(&instance->anim, 0x13, 0xE, &extraRot);
+
+    extraRot.x = -yaw & 0xFFF;
+
+    if (pitch > 0)
+    {
+        extraRot.y = -(pitch * 2) & 0xFFF;
+        G2Anim_SetController_Vector(&instance->anim, 0x1A, 0xE, &extraRot);
+        extraRot.y = -pitch & 0xFFF;
+        G2Anim_SetController_Vector(&instance->anim, 0x20, 0xE, &extraRot);
+    }
+    else
+    {
+        extraRot.y = -pitch & 0xFFF;
+        G2Anim_SetController_Vector(&instance->anim, 0x1A, 0xE, &extraRot);
+        extraRot.y = -(pitch * 2) & 0xFFF;
+        G2Anim_SetController_Vector(&instance->anim, 0x20, 0xE, &extraRot);
+    }
+
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_NotDaylight);
 
@@ -354,7 +395,48 @@ void ALUKA_DisableControllers(Instance *instance)
     }
 }
 
-void ALUKA_SetSwimBodyTwist(void) {};
+void ALUKA_SetSwimBodyTwist(Instance *instance, int pitch, int yaw)
+{
+
+    G2SVector3 extraRot;
+
+    if (!ALUKA_ControllersEnabled(instance))
+    {
+        return;
+    }
+
+    extraRot.z = 0;
+    extraRot.x = 0;
+    extraRot.y = -pitch & 0xFFF;
+
+    G2Anim_SetController_Vector(&instance->anim, 5, 0xE, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 0xC, 0xE, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 4, 0xE, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 0xB, 0xE, &extraRot);
+
+    extraRot.y = pitch & 0xFFF;
+    extraRot.x = yaw & 0xFFF;
+
+    G2Anim_SetController_Vector(&instance->anim, 0x13, 0xE, &extraRot);
+
+    extraRot.x = -yaw & 0xFFF;
+
+    if (pitch > 0)
+    {
+        extraRot.y = -(pitch * 2) & 0xFFF;
+        G2Anim_SetController_Vector(&instance->anim, 0x1A, 0xE, &extraRot);
+        extraRot.y = -pitch & 0xFFF;
+        G2Anim_SetController_Vector(&instance->anim, 0x20, 0xE, &extraRot);
+    }
+    else
+    {
+        extraRot.y = -pitch & 0xFFF;
+        G2Anim_SetController_Vector(&instance->anim, 0x1A, 0xE, &extraRot);
+        extraRot.y = -(pitch * 2) & 0xFFF;
+        G2Anim_SetController_Vector(&instance->anim, 0x20, 0xE, &extraRot);
+    }
+
+}
 
 void ALUKA_NotDaylight(void) {};
 
