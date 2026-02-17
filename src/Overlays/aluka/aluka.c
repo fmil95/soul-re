@@ -1,5 +1,7 @@
 #include "common.h"
 #include "Game/G2/ANMCTRLR.h"
+#include "Game/MONSTER/MONLIB.h"
+#include "Game/MONSTER/MONSTER.h"
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -132,7 +134,18 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Surprised);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_NoticeEntry);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Notice);
+void ALUKA_Notice(Instance *instance)
+{
+    if (!(((MonsterVars *)instance->extraData)->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Notice(instance);
+    }
+    else
+    {
+        MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_EmbraceEntry);
 
@@ -201,7 +214,7 @@ void ALUKA_GetCircleDestination(void) {};
 
 void ALUKA_SwimPlanMovement(void) {};
 
-void ALUKA_ResetSwim(void) {};
+void ALUKA_ResetSwim(Instance *instance) {};
 
 void ALUKA_ShouldJumpIn(void) {};
 
@@ -269,7 +282,18 @@ void ALUKA_Surprised(void) {};
 
 void ALUKA_NoticeEntry(void) {};
 
-void ALUKA_Notice(void) {};
+void ALUKA_Notice(Instance *instance)
+{
+    if (!(((MonsterVars *)instance->extraData)->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Notice(instance);
+    }
+    else
+    {
+        MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+    }
+}
 
 void ALUKA_EmbraceEntry(void) {};
 
