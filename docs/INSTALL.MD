@@ -38,7 +38,8 @@ python tools/scripts/un_drm.py --input kain.drm --output .
 python tools/scripts/un_drm.py --input walboss.drm --output .
 python tools/scripts/un_drm.py --input walbosb.drm --output .
 python tools/scripts/un_drm.py --input alukabss.drm --output .
-python tools/scripts/un_drm.py --input roninbss.drm --output .```
+python tools/scripts/un_drm.py --input roninbss.drm --output .
+```
 
 ### IDE and Plugins
 
