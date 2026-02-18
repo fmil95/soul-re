@@ -201,7 +201,17 @@ void ALUKA_ApplyForwardAccel(Instance *instance, int forward_accel, int time)
     mv->speed = ALUKA_ApplyIncr(mv->speed, 0, attrs->circle_dist, forward_accel, time);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ApplyAngularAccel);
+void ALUKA_ApplyAngularAccel(Instance *instance, int yaw_accel, int pitch_accel, int time)
+{
+    MonsterVars *mv; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    attrs = (AlukaAttributes *)mv->extraVars;
+
+    attrs->swimfast_speed = ALUKA_ApplyIncr(attrs->swimfast_speed, -attrs->pitch_offset_speed, attrs->pitch_offset_speed, yaw_accel, time);
+    attrs->swimattack_speed = ALUKA_ApplyIncr(attrs->swimattack_speed, -attrs->yaw_accel, attrs->yaw_accel, pitch_accel, time);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ApplyRots);
 
@@ -533,7 +543,17 @@ void ALUKA_ApplyForwardAccel(Instance *instance, int forward_accel, int time)
     mv->speed = ALUKA_ApplyIncr(mv->speed, 0, attrs->circle_dist, forward_accel, time);
 }
 
-void ALUKA_ApplyAngularAccel(void) {};
+void ALUKA_ApplyAngularAccel(Instance *instance, int yaw_accel, int pitch_accel, int time)
+{
+    MonsterVars *mv; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    attrs = (AlukaAttributes *)mv->extraVars;
+
+    attrs->swimfast_speed = ALUKA_ApplyIncr(attrs->swimfast_speed, -attrs->pitch_offset_speed, attrs->pitch_offset_speed, yaw_accel, time);
+    attrs->swimattack_speed = ALUKA_ApplyIncr(attrs->swimattack_speed, -attrs->yaw_accel, attrs->yaw_accel, pitch_accel, time);
+}
 
 void ALUKA_ApplyRots(void) {};
 
