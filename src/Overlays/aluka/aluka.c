@@ -171,7 +171,24 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SimpleLineCheck);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_TerrainInPath);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ApplyIncr);
+int ALUKA_ApplyIncr(int start, int min, int max, int delta, int time)
+{
+    int result; // not from debug symbols
+
+    result = start + ((delta * time) / 4096);
+
+    if (result < min && delta < 0)
+    {
+        result = min;
+    }
+    else if (result > max && delta > 0)
+    {
+        result = max;
+    }
+
+    return result;
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ApplyForwardAccel);
 
@@ -477,7 +494,24 @@ void ALUKA_SimpleLineCheck(void) {};
 
 void ALUKA_TerrainInPath(void) {};
 
-void ALUKA_ApplyIncr(void) {};
+int ALUKA_ApplyIncr(int start, int min, int max, int delta, int time)
+{
+    int result; // not from debug symbols
+
+    result = start + ((delta * time) / 4096);
+
+    if (result < min && delta < 0)
+    {
+        result = min;
+    }
+    else if (result > max && delta > 0)
+    {
+        result = max;
+    }
+
+    return result;
+}
+
 
 void ALUKA_ApplyForwardAccel(void) {};
 
