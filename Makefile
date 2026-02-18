@@ -464,7 +464,7 @@ $(CINEMAX_BIN): $(CINEMAX_ELF)
 	@$(PRINT)$(GREEN)Creating cinemax.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
-	@$(DIFF) $(CINEMAX_BASEBIN) $(CINEMAX_BIN) && printf "cinemax.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+	@$(DIFF) $(CINEMAX_BASEBIN) $(CINEMAX_BIN) && printf "cinemax.bin: OK\n" || (echo 'The build succeeded, but did not match the base cinemax BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 $(MCARDX_LD_PP): $(MCARDX_LD)
@@ -486,7 +486,7 @@ $(MCARDX_BIN): $(MCARDX_ELF)
 	@$(PRINT)$(GREEN)Creating mcardx.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
-	@$(DIFF) $(MCARDX_BASEBIN) $(MCARDX_BIN) && printf "mcardx.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+	@$(DIFF) $(MCARDX_BASEBIN) $(MCARDX_BIN) && printf "mcardx.bin: OK\n" || (echo 'The build succeeded, but did not match the base mcardx BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 $(HUNTER_LD_PP): $(HUNTER_LD)
@@ -508,7 +508,7 @@ $(HUNTER_BIN): $(HUNTER_ELF)
 	@$(PRINT)$(GREEN)Creating hunter.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
-	@$(DIFF) $(HUNTER_BASEBIN) $(HUNTER_BIN) && printf "hunter.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+	@$(DIFF) $(HUNTER_BASEBIN) $(HUNTER_BIN) && printf "hunter.bin: OK\n" || (echo 'The build succeeded, but did not match the base hunter BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 $(SKINNER_LD_PP): $(SKINNER_LD)
@@ -530,7 +530,7 @@ $(SKINNER_BIN): $(SKINNER_ELF)
 	@$(PRINT)$(GREEN)Creating skinner.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
-	@$(DIFF) $(SKINNER_BASEBIN) $(SKINNER_BIN) && printf "skinner.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+	@$(DIFF) $(SKINNER_BASEBIN) $(SKINNER_BIN) && printf "skinner.bin: OK\n" || (echo 'The build succeeded, but did not match the base skinner BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 $(WALLCR_LD_PP): $(WALLCR_LD)
@@ -552,7 +552,7 @@ $(WALLCR_BIN): $(WALLCR_ELF)
 	@$(PRINT)$(GREEN)Creating wallcr.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
-	@$(DIFF) $(WALLCR_BASEBIN) $(WALLCR_BIN) && printf "wallcr.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+	@$(DIFF) $(WALLCR_BASEBIN) $(WALLCR_BIN) && printf "wallcr.bin: OK\n" || (echo 'The build succeeded, but did not match the base wallcr BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 $(ALUKA_LD_PP): $(ALUKA_LD)
@@ -574,7 +574,7 @@ $(ALUKA_BIN): $(ALUKA_ELF)
 	@$(PRINT)$(GREEN)Creating aluka.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
-	@$(DIFF) $(ALUKA_BASEBIN) $(ALUKA_BIN) && printf "aluka.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+	@$(DIFF) $(ALUKA_BASEBIN) $(ALUKA_BIN) && printf "aluka.bin: OK\n" || (echo 'The build succeeded, but did not match the base aluka BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 $(SKINBOS_LD_PP): $(SKINBOS_LD)
@@ -596,7 +596,7 @@ $(SKINBOS_BIN): $(SKINBOS_ELF)
 	@$(PRINT)$(GREEN)Creating skinbos.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
-	@$(DIFF) $(SKINBOS_BASEBIN) $(SKINBOS_BIN) && printf "skinbos.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+	@$(DIFF) $(SKINBOS_BASEBIN) $(SKINBOS_BIN) && printf "skinbos.bin: OK\n" || (echo 'The build succeeded, but did not match the base skinbos BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 $(KAIN_LD_PP): $(KAIN_LD)
@@ -618,7 +618,7 @@ $(KAIN_BIN): $(KAIN_ELF)
 	@$(PRINT)$(GREEN)Creating kain.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
-	@$(DIFF) $(KAIN_BASEBIN) $(KAIN_BIN) && printf "kain.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+	@$(DIFF) $(KAIN_BASEBIN) $(KAIN_BIN) && printf "kain.bin: OK\n" || (echo 'The build succeeded, but did not match the base kain BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 $(WALBOSS_LD_PP): $(WALBOSS_LD)
@@ -640,7 +640,7 @@ $(WALBOSS_BIN): $(WALBOSS_ELF)
 	@$(PRINT)$(GREEN)Creating walboss.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
-	@$(DIFF) $(WALBOSS_BASEBIN) $(WALBOSS_BIN) && printf "walboss.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+	@$(DIFF) $(WALBOSS_BASEBIN) $(WALBOSS_BIN) && printf "walboss.bin: OK\n" || (echo 'The build succeeded, but did not match the base walboss BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 $(WALBOSB_LD_PP): $(WALBOSB_LD)
@@ -662,7 +662,7 @@ $(WALBOSB_BIN): $(WALBOSB_ELF)
 	@$(PRINT)$(GREEN)Creating walbosb.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
-	@$(DIFF) $(WALBOSB_BASEBIN) $(WALBOSB_BIN) && printf "walbosb.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+	@$(DIFF) $(WALBOSB_BASEBIN) $(WALBOSB_BIN) && printf "walbosb.bin: OK\n" || (echo 'The build succeeded, but did not match the base walbosb BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 $(ALUKABSS_LD_PP): $(ALUKABSS_LD)
@@ -684,7 +684,7 @@ $(ALUKABSS_BIN): $(ALUKABSS_ELF)
 	@$(PRINT)$(GREEN)Creating alukabss.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
-	@$(DIFF) $(ALUKABSS_BASEBIN) $(ALUKABSS_BIN) && printf "alukabss.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+	@$(DIFF) $(ALUKABSS_BASEBIN) $(ALUKABSS_BIN) && printf "alukabss.bin: OK\n" || (echo 'The build succeeded, but did not match the base alukabss BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 $(RONINBSS_LD_PP): $(RONINBSS_LD)
@@ -703,10 +703,10 @@ $(RONINBSS_ELF): $(RONINBSS_OBJECTS) $(RONINBSS_LD_PP)
 		-o $@
 
 $(RONINBSS_BIN): $(RONINBSS_ELF)
-	@$(PRINT)$(GREEN)Creating alukabss.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
+	@$(PRINT)$(GREEN)Creating roninbss.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
-	@$(DIFF) $(RONINBSS_BASEBIN) $(RONINBSS_BIN) && printf "roninbss.bin: OK\n" || (echo 'The build succeeded, but did not match the base BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+	@$(DIFF) $(RONINBSS_BASEBIN) $(RONINBSS_BIN) && printf "roninbss.bin: OK\n" || (echo 'The build succeeded, but did not match the base roninbss BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 
 ### Make Settings ###
