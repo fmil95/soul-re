@@ -1,4 +1,5 @@
 #include "common.h"
+#include "Game/MATH3D.h"
 #include "Game/G2/ANMCTRLR.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONSTER.h"
@@ -148,7 +149,19 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_NotDaylight);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_CapDepth);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_AngleTooWide);
+int ALUKA_AngleTooWide(Position *first, Position *second, int cosmult, int cosshift)
+{
+
+    long lenFirst; // not from debug symbols
+    long lenSecond; // not from debug symbols
+    long dot; // not from debug symbols
+
+    lenFirst = MATH3D_LengthXYZ(first->x, first->y, first->z);
+    lenSecond = MATH3D_LengthXYZ(second->x, second->y, second->z);
+    dot = (first->x * second->x) + (first->y * second->y) + (first->z * second->z);
+
+    return ((lenFirst * lenSecond * cosmult) >> cosshift) >= dot;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_VectorFromPitchYaw);
 
@@ -442,7 +455,19 @@ void ALUKA_NotDaylight(void) {};
 
 void ALUKA_CapDepth(void) {};
 
-void ALUKA_AngleTooWide(void) {};
+int ALUKA_AngleTooWide(Position *first, Position *second, int cosmult, int cosshift)
+{
+
+    long lenFirst; // not from debug symbols
+    long lenSecond; // not from debug symbols
+    long dot; // not from debug symbols
+
+    lenFirst = MATH3D_LengthXYZ(first->x, first->y, first->z);
+    lenSecond = MATH3D_LengthXYZ(second->x, second->y, second->z);
+    dot = (first->x * second->x) + (first->y * second->y) + (first->z * second->z);
+
+    return ((lenFirst * lenSecond * cosmult) >> cosshift) >= dot;
+}
 
 void ALUKA_VectorFromPitchYaw(void) {};
 
