@@ -51,5 +51,5 @@ segments:
       - [0x000000, .rodata, Overlays/mcardx/mcardx]
       - [0x0003B4, _c, Overlays/mcardx/mcardx]
       - [0x00570C, data, Overlays/mcardx/mcardx]
-      - [0x005958, bss, Overlays/mcardx/mcardx]
+      - [0x005958, bss, Overlays/mcardx/mcardx] # a bit unsure it actually starts here, needs decompilation of the module
   - [0x005D58]

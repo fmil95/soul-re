@@ -1,4 +1,4 @@
-#include "common.h"
+#include "Overlays/skinner/skinner.h"
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM

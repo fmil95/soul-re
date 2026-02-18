@@ -1,4 +1,4 @@
-#include "common.h"
+#include "Overlays/hunter/hunter.h"
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
