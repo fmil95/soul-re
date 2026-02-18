@@ -206,75 +206,89 @@ OBJECTS += $(ASM_OBJS)
 endif
 DEPENDS := $(OBJECTS:=.d)
 
-CINEMAX_OBJECTS := \
-  $(BUILD_DIR)/src/Overlays/cinemax/cinemax.c.o \
-  $(BUILD_DIR)/asm/Overlays/cinemax/cinemax.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/cinemax/cinemax.data.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/cinemax/cinemax.bss.s.o
+CINEMAX_C_SRCS := $(wildcard src/Overlays/cinemax/*.c)
+CINEMAX_S_SRCS := $(wildcard asm/Overlays/cinemax/*.s)
+CINEMAX_DATA_SRCS := $(wildcard asm/data/Overlays/cinemax/*.s)
+CINEMAX_OBJECTS := $(CINEMAX_C_SRCS:%=$(BUILD_DIR)/%.o) \
+                   $(CINEMAX_S_SRCS:%=$(BUILD_DIR)/%.o) \
+                   $(CINEMAX_DATA_SRCS:%=$(BUILD_DIR)/%.o)
 
-MCARDX_OBJECTS := \
-  $(BUILD_DIR)/src/Overlays/mcardx/mcardx.c.o \
-  $(BUILD_DIR)/asm/Overlays/mcardx/mcardx.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/mcardx/mcardx.data.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/mcardx/mcardx.bss.s.o
+MCARDX_C_SRCS     := $(wildcard src/Overlays/mcardx/*.c)
+MCARDX_S_SRCS     := $(wildcard asm/Overlays/mcardx/*.s)
+MCARDX_DATA_SRCS  := $(wildcard asm/data/Overlays/mcardx/*.s)
+MCARDX_OBJECTS    := $(MCARDX_C_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(MCARDX_S_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(MCARDX_DATA_SRCS:%=$(BUILD_DIR)/%.o)
 
-HUNTER_OBJECTS := \
-  $(BUILD_DIR)/src/Overlays/hunter/hunter.c.o \
-  $(BUILD_DIR)/asm/Overlays/hunter/hunter.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/hunter/hunter.data.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/hunter/hunter.bss.s.o
+HUNTER_C_SRCS     := $(wildcard src/Overlays/hunter/*.c)
+HUNTER_S_SRCS     := $(wildcard asm/Overlays/hunter/*.s)
+HUNTER_DATA_SRCS  := $(wildcard asm/data/Overlays/hunter/*.s)
+HUNTER_OBJECTS    := $(HUNTER_C_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(HUNTER_S_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(HUNTER_DATA_SRCS:%=$(BUILD_DIR)/%.o)
 
-SKINNER_OBJECTS := \
-  $(BUILD_DIR)/src/Overlays/skinner/skinner.c.o \
-  $(BUILD_DIR)/asm/Overlays/skinner/skinner.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/skinner/skinner.data.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/skinner/skinner.bss.s.o
+SKINNER_C_SRCS    := $(wildcard src/Overlays/skinner/*.c)
+SKINNER_S_SRCS    := $(wildcard asm/Overlays/skinner/*.s)
+SKINNER_DATA_SRCS := $(wildcard asm/data/Overlays/skinner/*.s)
+SKINNER_OBJECTS   := $(SKINNER_C_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(SKINNER_S_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(SKINNER_DATA_SRCS:%=$(BUILD_DIR)/%.o)
 
-WALLCR_OBJECTS := \
-  $(BUILD_DIR)/src/Overlays/wallcr/wallcr.c.o \
-  $(BUILD_DIR)/asm/Overlays/wallcr/wallcr.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/wallcr/wallcr.data.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/wallcr/wallcr.bss.s.o
+WALLCR_C_SRCS     := $(wildcard src/Overlays/wallcr/*.c)
+WALLCR_S_SRCS     := $(wildcard asm/Overlays/wallcr/*.s)
+WALLCR_DATA_SRCS  := $(wildcard asm/data/Overlays/wallcr/*.s)
+WALLCR_OBJECTS    := $(WALLCR_C_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(WALLCR_S_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(WALLCR_DATA_SRCS:%=$(BUILD_DIR)/%.o)
 
-ALUKA_OBJECTS := \
-  $(BUILD_DIR)/src/Overlays/aluka/aluka.c.o \
-  $(BUILD_DIR)/asm/Overlays/aluka/aluka.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/aluka/aluka.data.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/aluka/aluka.bss.s.o
+ALUKA_C_SRCS      := $(wildcard src/Overlays/aluka/*.c)
+ALUKA_S_SRCS      := $(wildcard asm/Overlays/aluka/*.s)
+ALUKA_DATA_SRCS   := $(wildcard asm/data/Overlays/aluka/*.s)
+ALUKA_OBJECTS     := $(ALUKA_C_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(ALUKA_S_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(ALUKA_DATA_SRCS:%=$(BUILD_DIR)/%.o)
 
-SKINBOS_OBJECTS := \
-  $(BUILD_DIR)/src/Overlays/skinbos/skinbos.c.o \
-  $(BUILD_DIR)/asm/Overlays/skinbos/skinbos.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/skinbos/skinbos.data.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/skinbos/skinbos.bss.s.o
+SKINBOS_C_SRCS    := $(wildcard src/Overlays/skinbos/*.c)
+SKINBOS_S_SRCS    := $(wildcard asm/Overlays/skinbos/*.s)
+SKINBOS_DATA_SRCS := $(wildcard asm/data/Overlays/skinbos/*.s)
+SKINBOS_OBJECTS   := $(SKINBOS_C_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(SKINBOS_S_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(SKINBOS_DATA_SRCS:%=$(BUILD_DIR)/%.o)
 
-KAIN_OBJECTS := \
-  $(BUILD_DIR)/src/Overlays/kain/kain.c.o \
-  $(BUILD_DIR)/asm/Overlays/kain/kain.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/kain/kain.data.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/kain/kain.bss.s.o
+KAIN_C_SRCS       := $(wildcard src/Overlays/kain/*.c)
+KAIN_S_SRCS       := $(wildcard asm/Overlays/kain/*.s)
+KAIN_DATA_SRCS    := $(wildcard asm/data/Overlays/kain/*.s)
+KAIN_OBJECTS      := $(KAIN_C_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(KAIN_S_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(KAIN_DATA_SRCS:%=$(BUILD_DIR)/%.o)
 
-WALBOSS_OBJECTS := \
-  $(BUILD_DIR)/src/Overlays/walboss/walboss.c.o \
-  $(BUILD_DIR)/asm/Overlays/walboss/walboss.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/walboss/walboss.data.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/walboss/walboss.bss.s.o
+WALBOSS_C_SRCS    := $(wildcard src/Overlays/walboss/*.c)
+WALBOSS_S_SRCS    := $(wildcard asm/Overlays/walboss/*.s)
+WALBOSS_DATA_SRCS := $(wildcard asm/data/Overlays/walboss/*.s)
+WALBOSS_OBJECTS   := $(WALBOSS_C_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(WALBOSS_S_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(WALBOSS_DATA_SRCS:%=$(BUILD_DIR)/%.o)
 
-WALBOSB_OBJECTS := \
-  $(BUILD_DIR)/src/Overlays/walbosb/walbosb.c.o \
-  $(BUILD_DIR)/asm/Overlays/walbosb/walbosb.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/walbosb/walbosb.data.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/walbosb/walbosb.bss.s.o
+WALBOSB_C_SRCS    := $(wildcard src/Overlays/walbosb/*.c)
+WALBOSB_S_SRCS    := $(wildcard asm/Overlays/walbosb/*.s)
+WALBOSB_DATA_SRCS := $(wildcard asm/data/Overlays/walbosb/*.s)
+WALBOSB_OBJECTS   := $(WALBOSB_C_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(WALBOSB_S_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(WALBOSB_DATA_SRCS:%=$(BUILD_DIR)/%.o)
 
-ALUKABSS_OBJECTS := \
-  $(BUILD_DIR)/src/Overlays/alukabss/alukabss.c.o \
-  $(BUILD_DIR)/asm/Overlays/alukabss/alukabss.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/alukabss/alukabss.data.s.o
+ALUKABSS_C_SRCS   := $(wildcard src/Overlays/alukabss/*.c)
+ALUKABSS_S_SRCS   := $(wildcard asm/Overlays/alukabss/*.s)
+ALUKABSS_DATA_SRCS:= $(wildcard asm/data/Overlays/alukabss/*.s)
+ALUKABSS_OBJECTS  := $(ALUKABSS_C_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(ALUKABSS_S_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(ALUKABSS_DATA_SRCS:%=$(BUILD_DIR)/%.o)
 
-RONINBSS_OBJECTS := \
-  $(BUILD_DIR)/src/Overlays/roninbss/roninbss.c.o \
-  $(BUILD_DIR)/asm/Overlays/roninbss/roninbss.s.o \
-  $(BUILD_DIR)/asm/data/Overlays/roninbss/roninbss.data.s.o
+RONINBSS_C_SRCS   := $(wildcard src/Overlays/roninbss/*.c)
+RONINBSS_S_SRCS   := $(wildcard asm/Overlays/roninbss/*.s)
+RONINBSS_DATA_SRCS:= $(wildcard asm/data/Overlays/roninbss/*.s)
+RONINBSS_OBJECTS  := $(RONINBSS_C_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(RONINBSS_S_SRCS:%=$(BUILD_DIR)/%.o) \
+                     $(RONINBSS_DATA_SRCS:%=$(BUILD_DIR)/%.o)
 
 ### Targets ###
 
