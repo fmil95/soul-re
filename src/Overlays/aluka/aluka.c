@@ -190,7 +190,16 @@ int ALUKA_ApplyIncr(int start, int min, int max, int delta, int time)
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ApplyForwardAccel);
+void ALUKA_ApplyForwardAccel(Instance *instance, int forward_accel, int time)
+{
+    MonsterVars *mv; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    attrs = (AlukaAttributes *)mv->extraVars;
+
+    mv->speed = ALUKA_ApplyIncr(mv->speed, 0, attrs->circle_dist, forward_accel, time);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ApplyAngularAccel);
 
@@ -513,7 +522,16 @@ int ALUKA_ApplyIncr(int start, int min, int max, int delta, int time)
 }
 
 
-void ALUKA_ApplyForwardAccel(void) {};
+void ALUKA_ApplyForwardAccel(Instance *instance, int forward_accel, int time)
+{
+    MonsterVars *mv; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    attrs = (AlukaAttributes *)mv->extraVars;
+
+    mv->speed = ALUKA_ApplyIncr(mv->speed, 0, attrs->circle_dist, forward_accel, time);
+}
 
 void ALUKA_ApplyAngularAccel(void) {};
 
