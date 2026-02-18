@@ -335,6 +335,8 @@ else
 all: $(EXE) overlays
 endif
 
+exe: $(EXE)
+
 -include $(DEPENDS)
 
 clean:
@@ -347,6 +349,8 @@ distclean: clean
 	$(V)rm -rf *_auto.txt
 
 setup: distclean split
+
+setupexe: distclean splitexe
 
 split:
 	$(V)$(SPLAT)
@@ -362,6 +366,9 @@ split:
 	$(V)$(SPLAT_WALBOSB)
 	$(V)$(SPLAT_ALUKABSS)
 	$(V)$(SPLAT_RONINBSS)
+
+splitexe:
+	$(V)$(SPLAT)
 
 reset: clean
 	$(V)rm -rf $(EXPECTED_DIR)
