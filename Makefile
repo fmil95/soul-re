@@ -1,6 +1,7 @@
 ### Build Options ###
 
 BASEEXE          := SLUS_007.08
+OVERLAYS         := cinemax mcardx hunter skinner wallcr aluka skinbos kain walboss walbosb alukabss roninbss
 TARGET           := KAIN2
 COMPARE          ?= 1
 NON_MATCHING     ?= 0
@@ -11,90 +12,6 @@ TOOLS_DIR        := tools
 OBJDIFF_DIR      := $(TOOLS_DIR)/objdiff
 EXPECTED_DIR     ?= expected
 CHECK            ?= 1
-
-CINEMAX_YAML     := cinemax.yaml
-CINEMAX_LD       := cinemax.ld
-CINEMAX_LD_PP    := $(BUILD_DIR)/cinemax.ld
-CINEMAX_BASEBIN  := cinemax.bin
-CINEMAX_ELF      := $(BUILD_DIR)/cinemax.elf
-CINEMAX_BIN      := $(BUILD_DIR)/cinemax.bin
-
-MCARDX_YAML      := mcardx.yaml
-MCARDX_LD        := mcardx.ld
-MCARDX_LD_PP     := $(BUILD_DIR)/mcardx.ld
-MCARDX_BASEBIN   := mcardx.bin
-MCARDX_ELF       := $(BUILD_DIR)/mcardx.elf
-MCARDX_BIN       := $(BUILD_DIR)/mcardx.bin
-
-HUNTER_YAML      := hunter.yaml
-HUNTER_LD        := hunter.ld
-HUNTER_LD_PP     := $(BUILD_DIR)/hunter.ld
-HUNTER_BASEBIN   := hunter.bin
-HUNTER_ELF       := $(BUILD_DIR)/hunter.elf
-HUNTER_BIN       := $(BUILD_DIR)/hunter.bin
-
-SKINNER_YAML     := skinner.yaml
-SKINNER_LD       := skinner.ld
-SKINNER_LD_PP    := $(BUILD_DIR)/skinner.ld
-SKINNER_BASEBIN  := skinner.bin
-SKINNER_ELF      := $(BUILD_DIR)/skinner.elf
-SKINNER_BIN      := $(BUILD_DIR)/skinner.bin
-
-WALLCR_YAML      := wallcr.yaml
-WALLCR_LD        := wallcr.ld
-WALLCR_LD_PP     := $(BUILD_DIR)/wallcr.ld
-WALLCR_BASEBIN   := wallcr.bin
-WALLCR_ELF       := $(BUILD_DIR)/wallcr.elf
-WALLCR_BIN       := $(BUILD_DIR)/wallcr.bin
-
-ALUKA_YAML       := aluka.yaml
-ALUKA_LD         := aluka.ld
-ALUKA_LD_PP      := $(BUILD_DIR)/aluka.ld
-ALUKA_BASEBIN    := aluka.bin
-ALUKA_ELF        := $(BUILD_DIR)/aluka.elf
-ALUKA_BIN        := $(BUILD_DIR)/aluka.bin
-
-SKINBOS_YAML     := skinbos.yaml
-SKINBOS_LD       := skinbos.ld
-SKINBOS_LD_PP    := $(BUILD_DIR)/skinbos.ld
-SKINBOS_BASEBIN  := skinbos.bin
-SKINBOS_ELF      := $(BUILD_DIR)/skinbos.elf
-SKINBOS_BIN      := $(BUILD_DIR)/skinbos.bin
-
-KAIN_YAML        := kain.yaml
-KAIN_LD          := kain.ld
-KAIN_LD_PP       := $(BUILD_DIR)/kain.ld
-KAIN_BASEBIN     := kain.bin
-KAIN_ELF         := $(BUILD_DIR)/kain.elf
-KAIN_BIN         := $(BUILD_DIR)/kain.bin
-
-WALBOSS_YAML     := walboss.yaml
-WALBOSS_LD       := walboss.ld
-WALBOSS_LD_PP    := $(BUILD_DIR)/walboss.ld
-WALBOSS_BASEBIN  := walboss.bin
-WALBOSS_ELF      := $(BUILD_DIR)/walboss.elf
-WALBOSS_BIN      := $(BUILD_DIR)/walboss.bin
-
-WALBOSB_YAML     := walbosb.yaml
-WALBOSB_LD       := walbosb.ld
-WALBOSB_LD_PP    := $(BUILD_DIR)/walbosb.ld
-WALBOSB_BASEBIN  := walbosb.bin
-WALBOSB_ELF      := $(BUILD_DIR)/walbosb.elf
-WALBOSB_BIN      := $(BUILD_DIR)/walbosb.bin
-
-ALUKABSS_YAML    := alukabss.yaml
-ALUKABSS_LD      := alukabss.ld
-ALUKABSS_LD_PP   := $(BUILD_DIR)/alukabss.ld
-ALUKABSS_BASEBIN := alukabss.bin
-ALUKABSS_ELF     := $(BUILD_DIR)/alukabss.elf
-ALUKABSS_BIN     := $(BUILD_DIR)/alukabss.bin
-
-RONINBSS_YAML    := roninbss.yaml
-RONINBSS_LD      := roninbss.ld
-RONINBSS_LD_PP   := $(BUILD_DIR)/roninbss.ld
-RONINBSS_BASEBIN := roninbss.bin
-RONINBSS_ELF     := $(BUILD_DIR)/roninbss.elf
-RONINBSS_BIN     := $(BUILD_DIR)/roninbss.bin
 
 # Fail early if baserom does not exist
 ifeq ($(wildcard $(BASEEXE)),)
@@ -136,18 +53,6 @@ LD_MAP       := $(BUILD_DIR)/$(TARGET).map
 PYTHON         := python3
 EXE_YAML       := $(BASEEXE).yaml
 SPLAT          := splat split $(EXE_YAML)
-SPLAT_CINEMAX  := splat split $(CINEMAX_YAML)
-SPLAT_MCARDX   := splat split $(MCARDX_YAML)
-SPLAT_HUNTER   := splat split $(HUNTER_YAML)
-SPLAT_SKINNER  := splat split $(SKINNER_YAML)
-SPLAT_WALLCR   := splat split $(WALLCR_YAML)
-SPLAT_ALUKA    := splat split $(ALUKA_YAML)
-SPLAT_SKINBOS  := splat split $(SKINBOS_YAML)
-SPLAT_KAIN     := splat split $(KAIN_YAML)
-SPLAT_WALBOSS  := splat split $(WALBOSS_YAML)
-SPLAT_WALBOSB  := splat split $(WALBOSB_YAML)
-SPLAT_ALUKABSS := splat split $(ALUKABSS_YAML)
-SPLAT_RONINBSS := splat split $(RONINBSS_YAML)
 DIFF           := diff
 MASPSX         := $(PYTHON) tools/maspsx/maspsx.py --use-comm-section --aspsx-version=2.81 -G4096
 CROSS          := mips-linux-gnu-
@@ -206,89 +111,19 @@ OBJECTS += $(ASM_OBJS)
 endif
 DEPENDS := $(OBJECTS:=.d)
 
-CINEMAX_C_SRCS := $(wildcard src/Overlays/cinemax/*.c)
-CINEMAX_S_SRCS := $(wildcard asm/Overlays/cinemax/*.s)
-CINEMAX_DATA_SRCS := $(wildcard asm/data/Overlays/cinemax/*.s)
-CINEMAX_OBJECTS := $(CINEMAX_C_SRCS:%=$(BUILD_DIR)/%.o) \
-                   $(CINEMAX_S_SRCS:%=$(BUILD_DIR)/%.o) \
-                   $(CINEMAX_DATA_SRCS:%=$(BUILD_DIR)/%.o)
+OVERLAY_BINS := $(patsubst %,$(BUILD_DIR)/%.bin,$(OVERLAYS))
 
-MCARDX_C_SRCS     := $(wildcard src/Overlays/mcardx/*.c)
-MCARDX_S_SRCS     := $(wildcard asm/Overlays/mcardx/*.s)
-MCARDX_DATA_SRCS  := $(wildcard asm/data/Overlays/mcardx/*.s)
-MCARDX_OBJECTS    := $(MCARDX_C_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(MCARDX_S_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(MCARDX_DATA_SRCS:%=$(BUILD_DIR)/%.o)
+define get_overlay_objs
+    $(patsubst %,$(BUILD_DIR)/%.o,$(wildcard src/Overlays/$(1)/*.c)) \
+    $(patsubst %,$(BUILD_DIR)/%.o,$(wildcard asm/Overlays/$(1)/*.s)) \
+    $(patsubst %,$(BUILD_DIR)/%.o,$(wildcard asm/data/Overlays/$(1)/*.s))
+endef
 
-HUNTER_C_SRCS     := $(wildcard src/Overlays/hunter/*.c)
-HUNTER_S_SRCS     := $(wildcard asm/Overlays/hunter/*.s)
-HUNTER_DATA_SRCS  := $(wildcard asm/data/Overlays/hunter/*.s)
-HUNTER_OBJECTS    := $(HUNTER_C_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(HUNTER_S_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(HUNTER_DATA_SRCS:%=$(BUILD_DIR)/%.o)
-
-SKINNER_C_SRCS    := $(wildcard src/Overlays/skinner/*.c)
-SKINNER_S_SRCS    := $(wildcard asm/Overlays/skinner/*.s)
-SKINNER_DATA_SRCS := $(wildcard asm/data/Overlays/skinner/*.s)
-SKINNER_OBJECTS   := $(SKINNER_C_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(SKINNER_S_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(SKINNER_DATA_SRCS:%=$(BUILD_DIR)/%.o)
-
-WALLCR_C_SRCS     := $(wildcard src/Overlays/wallcr/*.c)
-WALLCR_S_SRCS     := $(wildcard asm/Overlays/wallcr/*.s)
-WALLCR_DATA_SRCS  := $(wildcard asm/data/Overlays/wallcr/*.s)
-WALLCR_OBJECTS    := $(WALLCR_C_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(WALLCR_S_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(WALLCR_DATA_SRCS:%=$(BUILD_DIR)/%.o)
-
-ALUKA_C_SRCS      := $(wildcard src/Overlays/aluka/*.c)
-ALUKA_S_SRCS      := $(wildcard asm/Overlays/aluka/*.s)
-ALUKA_DATA_SRCS   := $(wildcard asm/data/Overlays/aluka/*.s)
-ALUKA_OBJECTS     := $(ALUKA_C_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(ALUKA_S_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(ALUKA_DATA_SRCS:%=$(BUILD_DIR)/%.o)
-
-SKINBOS_C_SRCS    := $(wildcard src/Overlays/skinbos/*.c)
-SKINBOS_S_SRCS    := $(wildcard asm/Overlays/skinbos/*.s)
-SKINBOS_DATA_SRCS := $(wildcard asm/data/Overlays/skinbos/*.s)
-SKINBOS_OBJECTS   := $(SKINBOS_C_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(SKINBOS_S_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(SKINBOS_DATA_SRCS:%=$(BUILD_DIR)/%.o)
-
-KAIN_C_SRCS       := $(wildcard src/Overlays/kain/*.c)
-KAIN_S_SRCS       := $(wildcard asm/Overlays/kain/*.s)
-KAIN_DATA_SRCS    := $(wildcard asm/data/Overlays/kain/*.s)
-KAIN_OBJECTS      := $(KAIN_C_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(KAIN_S_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(KAIN_DATA_SRCS:%=$(BUILD_DIR)/%.o)
-
-WALBOSS_C_SRCS    := $(wildcard src/Overlays/walboss/*.c)
-WALBOSS_S_SRCS    := $(wildcard asm/Overlays/walboss/*.s)
-WALBOSS_DATA_SRCS := $(wildcard asm/data/Overlays/walboss/*.s)
-WALBOSS_OBJECTS   := $(WALBOSS_C_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(WALBOSS_S_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(WALBOSS_DATA_SRCS:%=$(BUILD_DIR)/%.o)
-
-WALBOSB_C_SRCS    := $(wildcard src/Overlays/walbosb/*.c)
-WALBOSB_S_SRCS    := $(wildcard asm/Overlays/walbosb/*.s)
-WALBOSB_DATA_SRCS := $(wildcard asm/data/Overlays/walbosb/*.s)
-WALBOSB_OBJECTS   := $(WALBOSB_C_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(WALBOSB_S_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(WALBOSB_DATA_SRCS:%=$(BUILD_DIR)/%.o)
-
-ALUKABSS_C_SRCS   := $(wildcard src/Overlays/alukabss/*.c)
-ALUKABSS_S_SRCS   := $(wildcard asm/Overlays/alukabss/*.s)
-ALUKABSS_DATA_SRCS:= $(wildcard asm/data/Overlays/alukabss/*.s)
-ALUKABSS_OBJECTS  := $(ALUKABSS_C_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(ALUKABSS_S_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(ALUKABSS_DATA_SRCS:%=$(BUILD_DIR)/%.o)
-
-RONINBSS_C_SRCS   := $(wildcard src/Overlays/roninbss/*.c)
-RONINBSS_S_SRCS   := $(wildcard asm/Overlays/roninbss/*.s)
-RONINBSS_DATA_SRCS:= $(wildcard asm/data/Overlays/roninbss/*.s)
-RONINBSS_OBJECTS  := $(RONINBSS_C_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(RONINBSS_S_SRCS:%=$(BUILD_DIR)/%.o) \
-                     $(RONINBSS_DATA_SRCS:%=$(BUILD_DIR)/%.o)
+$(foreach ov,$(OVERLAYS), \
+    $(eval SPLAT_$(ov) := splat split $(ov).yaml) \
+    $(eval $(ov)_OBJS  := $(call get_overlay_objs,$(ov))) \
+    $(eval $(BUILD_DIR)/$(ov).elf: O_FILES := $($(ov)_OBJS)) \
+)
 
 ### Targets ###
 
@@ -368,18 +203,7 @@ setupexe: distclean splitexe
 
 split:
 	$(V)$(SPLAT)
-	$(V)$(SPLAT_CINEMAX)
-	$(V)$(SPLAT_MCARDX)
-	$(V)$(SPLAT_HUNTER)
-	$(V)$(SPLAT_SKINNER)
-	$(V)$(SPLAT_WALLCR)
-	$(V)$(SPLAT_ALUKA)
-	$(V)$(SPLAT_SKINBOS)
-	$(V)$(SPLAT_KAIN)
-	$(V)$(SPLAT_WALBOSS)
-	$(V)$(SPLAT_WALBOSB)
-	$(V)$(SPLAT_ALUKABSS)
-	$(V)$(SPLAT_RONINBSS)
+	$(V)$(foreach ov,$(OVERLAYS),splat split $(ov).yaml;)
 
 splitexe:
 	$(V)$(SPLAT)
@@ -405,7 +229,7 @@ expected: all
 	$(V)mv $(BUILD_DIR)/src $(EXPECTED_DIR)/src
 	$(V)find $(EXPECTED_DIR)/src -name '*.s.o' -delete
 
-overlays: $(CINEMAX_BIN) $(MCARDX_BIN) $(HUNTER_BIN) $(SKINNER_BIN) $(WALLCR_BIN) $(ALUKA_BIN) $(SKINBOS_BIN) $(KAIN_BIN) $(WALBOSS_BIN) $(WALBOSB_BIN) $(ALUKABSS_BIN) $(RONINBSS_BIN)
+overlays: $(OVERLAY_BINS)
 
 # Compile .c files
 $(BUILD_DIR)/%.c.o: %.c
@@ -459,269 +283,27 @@ ifeq ($(COMPARE),1)
 endif
 endif
 
-$(CINEMAX_LD_PP): $(CINEMAX_LD)
-	@$(PRINT)$(GREEN)Preprocessing cinemax overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
+$(BUILD_DIR)/%.ld: %.ld
+	@$(PRINT)$(GREEN)Preprocessing overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
 	@mkdir -p $(BUILD_DIR)
 	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
 
-$(CINEMAX_ELF): $(CINEMAX_OBJECTS) $(CINEMAX_LD_PP)
-	$(V)$(LD) \
-		--no-check-sections \
-		-nostdlib \
-		-T undefined_syms_auto.cinemax.txt \
-		-T undefined_funcs_auto.cinemax.txt \
-		-T $(CINEMAX_LD_PP) \
-		-Map $(BUILD_DIR)/cinemax.map \
-		-o $@
+.SECONDEXPANSION:
+$(BUILD_DIR)/%.elf: $$(O_FILES) $(BUILD_DIR)/%.ld
+	@$(PRINT)$(GREEN)Linking Overlay ELF: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
+	$(V)$(LD) --no-check-sections -nostdlib \
+		-T undefined_syms_auto.$*.txt \
+		-T undefined_funcs_auto.$*.txt \
+		-T $(BUILD_DIR)/$*.ld -Map $(BUILD_DIR)/$*.map -o $@
 
-$(CINEMAX_BIN): $(CINEMAX_ELF)
-	@$(PRINT)$(GREEN)Creating cinemax.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
+$(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf
+	@$(PRINT)$(GREEN)Creating BIN: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
-	@$(DIFF) $(CINEMAX_BASEBIN) $(CINEMAX_BIN) && printf "cinemax.bin: OK\n" || (echo 'The build succeeded, but did not match the base cinemax BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+	@$(DIFF) $*.bin $@ && printf "$*.bin: OK\n" || (echo 'Match failed for $*.bin' && false)
 endif
 
-$(MCARDX_LD_PP): $(MCARDX_LD)
-	@$(PRINT)$(GREEN)Preprocessing mcardx overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
-	@mkdir -p $(BUILD_DIR)
-	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
-
-$(MCARDX_ELF): $(MCARDX_OBJECTS) $(MCARDX_LD_PP)
-	$(V)$(LD) \
-		--no-check-sections \
-		-nostdlib \
-		-T undefined_syms_auto.mcardx.txt \
-		-T undefined_funcs_auto.mcardx.txt \
-		-T $(MCARDX_LD_PP) \
-		-Map $(BUILD_DIR)/mcardx.map \
-		-o $@
-
-$(MCARDX_BIN): $(MCARDX_ELF)
-	@$(PRINT)$(GREEN)Creating mcardx.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
-	$(V)$(OBJCOPY) -O binary $< $@
-ifeq ($(COMPARE),1)
-	@$(DIFF) $(MCARDX_BASEBIN) $(MCARDX_BIN) && printf "mcardx.bin: OK\n" || (echo 'The build succeeded, but did not match the base mcardx BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
-endif
-
-$(HUNTER_LD_PP): $(HUNTER_LD)
-	@$(PRINT)$(GREEN)Preprocessing hunter overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
-	@mkdir -p $(BUILD_DIR)
-	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
-
-$(HUNTER_ELF): $(HUNTER_OBJECTS) $(HUNTER_LD_PP)
-	$(V)$(LD) \
-		--no-check-sections \
-		-nostdlib \
-		-T undefined_syms_auto.hunter.txt \
-		-T undefined_funcs_auto.hunter.txt \
-		-T $(HUNTER_LD_PP) \
-		-Map $(BUILD_DIR)/hunter.map \
-		-o $@
-
-$(HUNTER_BIN): $(HUNTER_ELF)
-	@$(PRINT)$(GREEN)Creating hunter.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
-	$(V)$(OBJCOPY) -O binary $< $@
-ifeq ($(COMPARE),1)
-	@$(DIFF) $(HUNTER_BASEBIN) $(HUNTER_BIN) && printf "hunter.bin: OK\n" || (echo 'The build succeeded, but did not match the base hunter BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
-endif
-
-$(SKINNER_LD_PP): $(SKINNER_LD)
-	@$(PRINT)$(GREEN)Preprocessing skinner overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
-	@mkdir -p $(BUILD_DIR)
-	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
-
-$(SKINNER_ELF): $(SKINNER_OBJECTS) $(SKINNER_LD_PP)
-	$(V)$(LD) \
-		--no-check-sections \
-		-nostdlib \
-		-T undefined_syms_auto.skinner.txt \
-		-T undefined_funcs_auto.skinner.txt \
-		-T $(SKINNER_LD_PP) \
-		-Map $(BUILD_DIR)/skinner.map \
-		-o $@
-
-$(SKINNER_BIN): $(SKINNER_ELF)
-	@$(PRINT)$(GREEN)Creating skinner.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
-	$(V)$(OBJCOPY) -O binary $< $@
-ifeq ($(COMPARE),1)
-	@$(DIFF) $(SKINNER_BASEBIN) $(SKINNER_BIN) && printf "skinner.bin: OK\n" || (echo 'The build succeeded, but did not match the base skinner BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
-endif
-
-$(WALLCR_LD_PP): $(WALLCR_LD)
-	@$(PRINT)$(GREEN)Preprocessing wallcr overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
-	@mkdir -p $(BUILD_DIR)
-	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
-
-$(WALLCR_ELF): $(WALLCR_OBJECTS) $(WALLCR_LD_PP)
-	$(V)$(LD) \
-		--no-check-sections \
-		-nostdlib \
-		-T undefined_syms_auto.wallcr.txt \
-		-T undefined_funcs_auto.wallcr.txt \
-		-T $(WALLCR_LD_PP) \
-		-Map $(BUILD_DIR)/wallcr.map \
-		-o $@
-
-$(WALLCR_BIN): $(WALLCR_ELF)
-	@$(PRINT)$(GREEN)Creating wallcr.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
-	$(V)$(OBJCOPY) -O binary $< $@
-ifeq ($(COMPARE),1)
-	@$(DIFF) $(WALLCR_BASEBIN) $(WALLCR_BIN) && printf "wallcr.bin: OK\n" || (echo 'The build succeeded, but did not match the base wallcr BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
-endif
-
-$(ALUKA_LD_PP): $(ALUKA_LD)
-	@$(PRINT)$(GREEN)Preprocessing aluka overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
-	@mkdir -p $(BUILD_DIR)
-	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
-
-$(ALUKA_ELF): $(ALUKA_OBJECTS) $(ALUKA_LD_PP)
-	$(V)$(LD) \
-		--no-check-sections \
-		-nostdlib \
-		-T undefined_syms_auto.aluka.txt \
-		-T undefined_funcs_auto.aluka.txt \
-		-T $(ALUKA_LD_PP) \
-		-Map $(BUILD_DIR)/aluka.map \
-		-o $@
-
-$(ALUKA_BIN): $(ALUKA_ELF)
-	@$(PRINT)$(GREEN)Creating aluka.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
-	$(V)$(OBJCOPY) -O binary $< $@
-ifeq ($(COMPARE),1)
-	@$(DIFF) $(ALUKA_BASEBIN) $(ALUKA_BIN) && printf "aluka.bin: OK\n" || (echo 'The build succeeded, but did not match the base aluka BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
-endif
-
-$(SKINBOS_LD_PP): $(SKINBOS_LD)
-	@$(PRINT)$(GREEN)Preprocessing skinbos overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
-	@mkdir -p $(BUILD_DIR)
-	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
-
-$(SKINBOS_ELF): $(SKINBOS_OBJECTS) $(SKINBOS_LD_PP)
-	$(V)$(LD) \
-		--no-check-sections \
-		-nostdlib \
-		-T undefined_syms_auto.skinbos.txt \
-		-T undefined_funcs_auto.skinbos.txt \
-		-T $(SKINBOS_LD_PP) \
-		-Map $(BUILD_DIR)/skinbos.map \
-		-o $@
-
-$(SKINBOS_BIN): $(SKINBOS_ELF)
-	@$(PRINT)$(GREEN)Creating skinbos.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
-	$(V)$(OBJCOPY) -O binary $< $@
-ifeq ($(COMPARE),1)
-	@$(DIFF) $(SKINBOS_BASEBIN) $(SKINBOS_BIN) && printf "skinbos.bin: OK\n" || (echo 'The build succeeded, but did not match the base skinbos BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
-endif
-
-$(KAIN_LD_PP): $(KAIN_LD)
-	@$(PRINT)$(GREEN)Preprocessing kain overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
-	@mkdir -p $(BUILD_DIR)
-	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
-
-$(KAIN_ELF): $(KAIN_OBJECTS) $(KAIN_LD_PP)
-	$(V)$(LD) \
-		--no-check-sections \
-		-nostdlib \
-		-T undefined_syms_auto.kain.txt \
-		-T undefined_funcs_auto.kain.txt \
-		-T $(KAIN_LD_PP) \
-		-Map $(BUILD_DIR)/kain.map \
-		-o $@
-
-$(KAIN_BIN): $(KAIN_ELF)
-	@$(PRINT)$(GREEN)Creating kain.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
-	$(V)$(OBJCOPY) -O binary $< $@
-ifeq ($(COMPARE),1)
-	@$(DIFF) $(KAIN_BASEBIN) $(KAIN_BIN) && printf "kain.bin: OK\n" || (echo 'The build succeeded, but did not match the base kain BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
-endif
-
-$(WALBOSS_LD_PP): $(WALBOSS_LD)
-	@$(PRINT)$(GREEN)Preprocessing walboss overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
-	@mkdir -p $(BUILD_DIR)
-	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
-
-$(WALBOSS_ELF): $(WALBOSS_OBJECTS) $(WALBOSS_LD_PP)
-	$(V)$(LD) \
-		--no-check-sections \
-		-nostdlib \
-		-T undefined_syms_auto.walboss.txt \
-		-T undefined_funcs_auto.walboss.txt \
-		-T $(WALBOSS_LD_PP) \
-		-Map $(BUILD_DIR)/walboss.map \
-		-o $@
-
-$(WALBOSS_BIN): $(WALBOSS_ELF)
-	@$(PRINT)$(GREEN)Creating walboss.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
-	$(V)$(OBJCOPY) -O binary $< $@
-ifeq ($(COMPARE),1)
-	@$(DIFF) $(WALBOSS_BASEBIN) $(WALBOSS_BIN) && printf "walboss.bin: OK\n" || (echo 'The build succeeded, but did not match the base walboss BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
-endif
-
-$(WALBOSB_LD_PP): $(WALBOSB_LD)
-	@$(PRINT)$(GREEN)Preprocessing walbosb overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
-	@mkdir -p $(BUILD_DIR)
-	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
-
-$(WALBOSB_ELF): $(WALBOSB_OBJECTS) $(WALBOSB_LD_PP)
-	$(V)$(LD) \
-		--no-check-sections \
-		-nostdlib \
-		-T undefined_syms_auto.walbosb.txt \
-		-T undefined_funcs_auto.walbosb.txt \
-		-T $(WALBOSB_LD_PP) \
-		-Map $(BUILD_DIR)/walbosb.map \
-		-o $@
-
-$(WALBOSB_BIN): $(WALBOSB_ELF)
-	@$(PRINT)$(GREEN)Creating walbosb.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
-	$(V)$(OBJCOPY) -O binary $< $@
-ifeq ($(COMPARE),1)
-	@$(DIFF) $(WALBOSB_BASEBIN) $(WALBOSB_BIN) && printf "walbosb.bin: OK\n" || (echo 'The build succeeded, but did not match the base walbosb BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
-endif
-
-$(ALUKABSS_LD_PP): $(ALUKABSS_LD)
-	@$(PRINT)$(GREEN)Preprocessing alukabss overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
-	@mkdir -p $(BUILD_DIR)
-	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
-
-$(ALUKABSS_ELF): $(ALUKABSS_OBJECTS) $(ALUKABSS_LD_PP)
-	$(V)$(LD) \
-		--no-check-sections \
-		-nostdlib \
-		-T undefined_syms_auto.alukabss.txt \
-		-T undefined_funcs_auto.alukabss.txt \
-		-T $(ALUKABSS_LD_PP) \
-		-Map $(BUILD_DIR)/alukabss.map \
-		-o $@
-
-$(ALUKABSS_BIN): $(ALUKABSS_ELF)
-	@$(PRINT)$(GREEN)Creating alukabss.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
-	$(V)$(OBJCOPY) -O binary $< $@
-ifeq ($(COMPARE),1)
-	@$(DIFF) $(ALUKABSS_BASEBIN) $(ALUKABSS_BIN) && printf "alukabss.bin: OK\n" || (echo 'The build succeeded, but did not match the base alukabss BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
-endif
-
-$(RONINBSS_LD_PP): $(RONINBSS_LD)
-	@$(PRINT)$(GREEN)Preprocessing roninbss overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
-	@mkdir -p $(BUILD_DIR)
-	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
-
-$(RONINBSS_ELF): $(RONINBSS_OBJECTS) $(RONINBSS_LD_PP)
-	$(V)$(LD) \
-		--no-check-sections \
-		-nostdlib \
-		-T undefined_syms_auto.roninbss.txt \
-		-T undefined_funcs_auto.roninbss.txt \
-		-T $(RONINBSS_LD_PP) \
-		-Map $(BUILD_DIR)/roninbss.map \
-		-o $@
-
-$(RONINBSS_BIN): $(RONINBSS_ELF)
-	@$(PRINT)$(GREEN)Creating roninbss.bin: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
-	$(V)$(OBJCOPY) -O binary $< $@
-ifeq ($(COMPARE),1)
-	@$(DIFF) $(RONINBSS_BASEBIN) $(RONINBSS_BIN) && printf "roninbss.bin: OK\n" || (echo 'The build succeeded, but did not match the base roninbss BIN. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
-endif
+.SECONDARY:
 
 ### Make Settings ###
 
