@@ -1,4 +1,5 @@
 #include "common.h"
+#include "Game/COLLIDE.h"
 #include "Game/MATH3D.h"
 #include "Game/G2/ANMCTRLR.h"
 #include "Game/MONSTER/MONLIB.h"
@@ -205,7 +206,43 @@ void ALUKA_FacingVector(Instance *instance, Position *vector, int dist)
     ALUKA_VectorFromPitchYaw(vector, (attrs->swimfast_pitch - attrs->min_swim_depth) & 0xFFF, instance->rotation.z, dist);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SimpleLineCheck);
+int ALUKA_SimpleLineCheck(Position *hit, Level *level, Position *start, Position *end)
+{
+
+    PCollideInfo info;
+    SVECTOR oldPt;
+    SVECTOR newPt;
+
+    oldPt.vx = start->x;
+    oldPt.vy = start->y;
+    oldPt.vz = start->z;
+
+    newPt.vx = end->x;
+    newPt.vy = end->y;
+    newPt.vz = end->z;
+
+    info.oldPoint = &oldPt;
+    info.newPoint = &newPt;
+
+    info.collideType = 3;
+    info.instance = NULL;
+    info.inst = NULL;
+
+    COLLIDE_PointAndWorld(&info, level);
+
+    if (info.type != 0)
+    {
+        if (hit != NULL)
+        {
+            hit->x = newPt.vx;
+            hit->y = newPt.vy;
+            hit->z = newPt.vz;
+        }
+        return 1;
+    }
+    return 0;
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_TerrainInPath);
 
@@ -583,7 +620,43 @@ void ALUKA_FacingVector(Instance *instance, Position *vector, int dist)
     ALUKA_VectorFromPitchYaw(vector, (attrs->swimfast_pitch - attrs->min_swim_depth) & 0xFFF, instance->rotation.z, dist);
 }
 
-void ALUKA_SimpleLineCheck(void) {};
+int ALUKA_SimpleLineCheck(Position *hit, Level *level, Position *start, Position *end)
+{
+
+    PCollideInfo info;
+    SVECTOR oldPt;
+    SVECTOR newPt;
+
+    oldPt.vx = start->x;
+    oldPt.vy = start->y;
+    oldPt.vz = start->z;
+
+    newPt.vx = end->x;
+    newPt.vy = end->y;
+    newPt.vz = end->z;
+
+    info.oldPoint = &oldPt;
+    info.newPoint = &newPt;
+
+    info.collideType = 3;
+    info.instance = NULL;
+    info.inst = NULL;
+
+    COLLIDE_PointAndWorld(&info, level);
+
+    if (info.type != 0)
+    {
+        if (hit != NULL)
+        {
+            hit->x = newPt.vx;
+            hit->y = newPt.vy;
+            hit->z = newPt.vz;
+        }
+        return 1;
+    }
+    return 0;
+}
+
 
 void ALUKA_TerrainInPath(void) {};
 
