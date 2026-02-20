@@ -45,7 +45,7 @@ segments:
     start: 0x00
     vram: 0x88000000
     align: 4
-    # bss_size: 0x#### # Fill me!
+    bss_size: 0x0
     bss_contains_common: True
     subsegments:
       - [0x000000, .rodata, Overlays/roninbss/roninbss]

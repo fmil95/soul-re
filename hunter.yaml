@@ -45,10 +45,11 @@ segments:
     start: 0x00
     vram: 0x88000000
     align: 4
-    # bss_size: 0x#### # Fill me!
+    bss_size: 0x8
     bss_contains_common: True
     subsegments:
       - [0x000000, .rodata, Overlays/hunter/hunter]
       - [0x000020, _c, Overlays/hunter/hunter]
       - [0x0009BC, data, Overlays/hunter/hunter]
+      - [0x0009FC, bss, Overlays/hunter/hunter]
   - [0x000A04]

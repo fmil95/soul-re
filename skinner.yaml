@@ -45,10 +45,11 @@ segments:
     start: 0x00
     vram: 0x88000000
     align: 4
-    # bss_size: 0x#### # Fill me!
+    bss_size: 0x8
     bss_contains_common: True
     subsegments:
       - [0x000000, .rodata, Overlays/skinner/skinner]
       - [0x000020, _c, Overlays/skinner/skinner]
       - [0x000B90, data, Overlays/skinner/skinner]
+      - [0x000BC4, bss, Overlays/skinner/skinner]
   - [0x000BCC]

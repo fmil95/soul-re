@@ -3,6 +3,8 @@
 #include "Game/G2/ANMCTRLR.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONSTER.h"
+#include "Overlays/aluka/aluka.h"
+
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM

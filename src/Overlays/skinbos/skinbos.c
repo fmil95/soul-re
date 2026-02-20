@@ -1,4 +1,4 @@
-#include "common.h"
+#include "Overlays/skinbos/skinbos.h"
 
 /* double-check that SKINBOS_CheckInsideMasher and SKINBOS_ShouldEscapeJail aren't swapped */
 

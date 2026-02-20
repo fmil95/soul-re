@@ -1,4 +1,4 @@
-#include "common.h"
+#include "Overlays/wallcr/wallcr.h"
 
 /* double-check that WALLCR_ShouldJumpOff and WALLCR_ShouldJumpOn aren't swapped */
 

@@ -45,10 +45,11 @@ segments:
     start: 0x00
     vram: 0x88000000
     align: 4
-    # bss_size: 0x#### # Fill me!
+    bss_size: 0x8
     bss_contains_common: True
     subsegments:
       - [0x000000, .rodata, Overlays/wallcr/wallcr]
       - [0x000054, _c, Overlays/wallcr/wallcr]
       - [0x002D14, data, Overlays/wallcr/wallcr]
+      - [0x002DB4, bss, Overlays/wallcr/wallcr]
   - [0x002DBC]
