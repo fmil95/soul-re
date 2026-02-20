@@ -163,7 +163,34 @@ int ALUKA_AngleTooWide(Position *first, Position *second, int cosmult, int cossh
     return ((lenFirst * lenSecond * cosmult) >> cosshift) >= dot;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_VectorFromPitchYaw);
+void ALUKA_VectorFromPitchYaw(Position *vector, int pitch, int yaw, int dist)
+{
+
+    MATRIX mat;
+    SVECTOR oldVector;
+    SVECTOR newVector;
+
+    oldVector.vx = 0;
+    oldVector.vy = -dist;
+    oldVector.vz = 0;
+
+    mat.m[0][0] = 0x1000;
+    mat.m[0][1] = 0;
+    mat.m[0][2] = 0;
+    mat.m[1][0] = 0;
+    mat.m[1][1] = 0x1000;
+    mat.m[1][2] = 0;
+    mat.m[2][0] = 0;
+    mat.m[2][1] = 0;
+    mat.m[2][2] = 0x1000;
+
+    RotMatrixX(pitch, &mat);
+    RotMatrixZ(yaw, &mat);
+    ApplyMatrixSV(&mat, &oldVector, &newVector);
+
+    COPY_SVEC(Position, (Position *)vector, Position, (Position *)&newVector);
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_FacingVector);
 
@@ -505,7 +532,34 @@ int ALUKA_AngleTooWide(Position *first, Position *second, int cosmult, int cossh
     return ((lenFirst * lenSecond * cosmult) >> cosshift) >= dot;
 }
 
-void ALUKA_VectorFromPitchYaw(void) {};
+void ALUKA_VectorFromPitchYaw(Position *vector, int pitch, int yaw, int dist)
+{
+
+    MATRIX mat;
+    SVECTOR oldVector;
+    SVECTOR newVector;
+
+    oldVector.vx = 0;
+    oldVector.vy = -dist;
+    oldVector.vz = 0;
+
+    mat.m[0][0] = 0x1000;
+    mat.m[0][1] = 0;
+    mat.m[0][2] = 0;
+    mat.m[1][0] = 0;
+    mat.m[1][1] = 0x1000;
+    mat.m[1][2] = 0;
+    mat.m[2][0] = 0;
+    mat.m[2][1] = 0;
+    mat.m[2][2] = 0x1000;
+
+    RotMatrixX(pitch, &mat);
+    RotMatrixZ(yaw, &mat);
+    ApplyMatrixSV(&mat, &oldVector, &newVector);
+
+    COPY_SVEC(Position, (Position *)vector, Position, (Position *)&newVector);
+}
+
 
 void ALUKA_FacingVector(void) {};
 
