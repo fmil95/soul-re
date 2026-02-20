@@ -1,41 +1,322 @@
+#include "common.h"
+#include "Game/COLLIDE.h"
+#include "Game/MATH3D.h"
+#include "Game/G2/ANMCTRLR.h"
+#include "Game/MONSTER/MONLIB.h"
+#include "Game/MONSTER/MONSTER.h"
+#include "Game/STREAM.h"
 #include "Overlays/aluka/aluka.h"
+
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ControllersEnabled);
+G2Bool ALUKA_ControllersEnabled(Instance *instance)
+{
+    return G2Anim_IsControllerActive(&instance->anim, 1, 0x26) != 0;
+}
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SetPitch);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_EnableControllers);
+void ALUKA_SetPitch(Instance *instance, int pitch)
+{
+    G2SVector3 extraRot;
+    AlukaAttributes *attributes; // not from debug symbols
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_DisableControllers);
+    attributes = (AlukaAttributes *)((MonsterVars *)instance->extraData)->extraVars;
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SetSwimBodyTwist);
+    if (!ALUKA_ControllersEnabled(instance))
+    {
+        return;
+    }
+
+    extraRot.x = pitch;
+    extraRot.z = 0;
+    extraRot.y = 0;
+    G2Anim_SetController_Vector(&instance->anim, 1, 0xE, &extraRot);
+    attributes->swimfast_pitch = pitch;
+}
+
+void ALUKA_EnableControllers(Instance *instance)
+{
+    G2SVector3 translate;
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (ALUKA_ControllersEnabled(instance))
+    {
+        return;
+    }
+
+    G2Anim_EnableController(&instance->anim, 1, 0x26);
+    G2Anim_EnableController(&instance->anim, 1, 0xE);
+    G2Anim_EnableController(&instance->anim, 0x13, 0xE);
+    G2Anim_EnableController(&instance->anim, 0x1A, 0xE);
+    G2Anim_EnableController(&instance->anim, 0x20, 0xE);
+    G2Anim_EnableController(&instance->anim, 5, 0xE);
+    G2Anim_EnableController(&instance->anim, 0xC, 0xE);
+    G2Anim_EnableController(&instance->anim, 4, 0xE);
+    G2Anim_EnableController(&instance->anim, 0xB, 0xE);
+
+    translate.y = 0;
+    translate.x = 0;
+
+    if (mv->age != 0)
+    {
+        translate.z = -0x1C2;
+        instance->position.z -= translate.z;
+    }
+    else
+    {
+        translate.z = -0x190;
+        instance->position.z -= translate.z;
+    }
+
+    G2Anim_SetController_Vector(&instance->anim, 1, 0x26, &translate);
+}
+
+void ALUKA_DisableControllers(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (!ALUKA_ControllersEnabled(instance))
+    {
+        return;
+    }
+
+    G2Anim_DisableController(&instance->anim, 1, 0x26);
+    G2Anim_DisableController(&instance->anim, 1, 0xE);
+    G2Anim_DisableController(&instance->anim, 0x13, 0xE);
+    G2Anim_DisableController(&instance->anim, 0x1A, 0xE);
+    G2Anim_DisableController(&instance->anim, 0x20, 0xE);
+    G2Anim_DisableController(&instance->anim, 5, 0xE);
+    G2Anim_DisableController(&instance->anim, 0xC, 0xE);
+    G2Anim_DisableController(&instance->anim, 4, 0xE);
+    G2Anim_DisableController(&instance->anim, 0xB, 0xE);
+
+    if (mv->age != 0)
+    {
+        instance->position.z = instance->position.z - 0x1C2;
+    }
+    else
+    {
+        instance->position.z = instance->position.z - 0x190;
+    }
+}
+
+void ALUKA_SetSwimBodyTwist(Instance *instance, int pitch, int yaw)
+{
+
+    G2SVector3 extraRot;
+
+    if (!ALUKA_ControllersEnabled(instance))
+    {
+        return;
+    }
+
+    extraRot.z = 0;
+    extraRot.x = 0;
+    extraRot.y = -pitch & 0xFFF;
+
+    G2Anim_SetController_Vector(&instance->anim, 5, 0xE, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 0xC, 0xE, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 4, 0xE, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 0xB, 0xE, &extraRot);
+
+    extraRot.y = pitch & 0xFFF;
+    extraRot.x = yaw & 0xFFF;
+
+    G2Anim_SetController_Vector(&instance->anim, 0x13, 0xE, &extraRot);
+
+    extraRot.x = -yaw & 0xFFF;
+
+    if (pitch > 0)
+    {
+        extraRot.y = -(pitch * 2) & 0xFFF;
+        G2Anim_SetController_Vector(&instance->anim, 0x1A, 0xE, &extraRot);
+        extraRot.y = -pitch & 0xFFF;
+        G2Anim_SetController_Vector(&instance->anim, 0x20, 0xE, &extraRot);
+    }
+    else
+    {
+        extraRot.y = -pitch & 0xFFF;
+        G2Anim_SetController_Vector(&instance->anim, 0x1A, 0xE, &extraRot);
+        extraRot.y = -(pitch * 2) & 0xFFF;
+        G2Anim_SetController_Vector(&instance->anim, 0x20, 0xE, &extraRot);
+    }
+
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_NotDaylight);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_CapDepth);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_AngleTooWide);
+int ALUKA_AngleTooWide(Position *first, Position *second, int cosmult, int cosshift)
+{
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_VectorFromPitchYaw);
+    long lenFirst; // not from debug symbols
+    long lenSecond; // not from debug symbols
+    long dot; // not from debug symbols
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_FacingVector);
+    lenFirst = MATH3D_LengthXYZ(first->x, first->y, first->z);
+    lenSecond = MATH3D_LengthXYZ(second->x, second->y, second->z);
+    dot = (first->x * second->x) + (first->y * second->y) + (first->z * second->z);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SimpleLineCheck);
+    return ((lenFirst * lenSecond * cosmult) >> cosshift) >= dot;
+}
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_TerrainInPath);
+void ALUKA_VectorFromPitchYaw(Position *vector, int pitch, int yaw, int dist)
+{
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ApplyIncr);
+    MATRIX mat;
+    SVECTOR oldVector;
+    SVECTOR newVector;
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ApplyForwardAccel);
+    oldVector.vx = 0;
+    oldVector.vy = -dist;
+    oldVector.vz = 0;
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ApplyAngularAccel);
+    mat.m[0][0] = 0x1000;
+    mat.m[0][1] = 0;
+    mat.m[0][2] = 0;
+    mat.m[1][0] = 0;
+    mat.m[1][1] = 0x1000;
+    mat.m[1][2] = 0;
+    mat.m[2][0] = 0;
+    mat.m[2][1] = 0;
+    mat.m[2][2] = 0x1000;
+
+    RotMatrixX(pitch, &mat);
+    RotMatrixZ(yaw, &mat);
+    ApplyMatrixSV(&mat, &oldVector, &newVector);
+
+    COPY_SVEC(Position, (Position *)vector, Position, (Position *)&newVector);
+}
+
+
+void ALUKA_FacingVector(Instance *instance, Position *vector, int dist)
+{
+    MonsterVars *mv; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    attrs = (AlukaAttributes *)mv->extraVars;
+
+    ALUKA_VectorFromPitchYaw(vector, (attrs->swimfast_pitch - attrs->min_swim_depth) & 0xFFF, instance->rotation.z, dist);
+}
+
+int ALUKA_SimpleLineCheck(Position *hit, Level *level, Position *start, Position *end)
+{
+
+    PCollideInfo info;
+    SVECTOR oldPt;
+    SVECTOR newPt;
+
+    oldPt.vx = start->x;
+    oldPt.vy = start->y;
+    oldPt.vz = start->z;
+
+    newPt.vx = end->x;
+    newPt.vy = end->y;
+    newPt.vz = end->z;
+
+    info.oldPoint = &oldPt;
+    info.newPoint = &newPt;
+
+    info.collideType = 3;
+    info.instance = NULL;
+    info.inst = NULL;
+
+    COLLIDE_PointAndWorld(&info, level);
+
+    if (info.type != 0)
+    {
+        if (hit != NULL)
+        {
+            hit->x = newPt.vx;
+            hit->y = newPt.vy;
+            hit->z = newPt.vz;
+        }
+        return 1;
+    }
+    return 0;
+}
+
+
+int ALUKA_TerrainInPath(Instance *instance)
+{
+    Position vector; // not from debug symbols
+    Level *level; // not from debug symbols
+
+    level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
+
+    ALUKA_FacingVector(instance, &vector, 0x190);
+    ADD_SVEC(Position, &vector, Position, &vector, Position, &instance->position);
+
+    return ALUKA_SimpleLineCheck(0, level, &instance->position, &vector);
+}
+
+int ALUKA_ApplyIncr(int start, int min, int max, int delta, int time)
+{
+    int result; // not from debug symbols
+
+    result = start + ((delta * time) / 4096);
+
+    if (result < min && delta < 0)
+    {
+        result = min;
+    }
+    else if (result > max && delta > 0)
+    {
+        result = max;
+    }
+
+    return result;
+}
+
+
+void ALUKA_ApplyForwardAccel(Instance *instance, int forward_accel, int time)
+{
+    MonsterVars *mv; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    attrs = (AlukaAttributes *)mv->extraVars;
+
+    mv->speed = ALUKA_ApplyIncr(mv->speed, 0, attrs->circle_dist, forward_accel, time);
+}
+
+void ALUKA_ApplyAngularAccel(Instance *instance, int yaw_accel, int pitch_accel, int time)
+{
+    MonsterVars *mv; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    attrs = (AlukaAttributes *)mv->extraVars;
+
+    attrs->swimfast_speed = ALUKA_ApplyIncr(attrs->swimfast_speed, -attrs->pitch_offset_speed, attrs->pitch_offset_speed, yaw_accel, time);
+    attrs->swimattack_speed = ALUKA_ApplyIncr(attrs->swimattack_speed, -attrs->yaw_accel, attrs->yaw_accel, pitch_accel, time);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ApplyRots);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_MoveForward);
+void ALUKA_MoveForward(Instance *instance, int time, int depth)
+{
+    Position vector; // not from debug symbols
+    int dist; // not from debug symbols
+
+    dist = ((MonsterVars *)instance->extraData)->speed * time;
+    ALUKA_FacingVector(instance, &vector, dist / 4096);
+
+    ADD_SVEC(Position, &instance->position, Position, &instance->position, Position, &vector);
+
+    if (depth < instance->position.z)
+    {
+        instance->position.z = depth;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_FixPitch);
 
@@ -57,7 +338,27 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_GetCircleDestination)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SwimPlanMovement);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ResetSwim);
+void ALUKA_ResetSwim(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (ALUKA_ControllersEnabled(instance) == G2FALSE)
+    {
+        return;
+    }
+
+    mv->auxFlags &= ~0x20000000;
+    ALUKA_DisableControllers(instance);
+    MON_PlayCombatIdle(instance, 2);
+    mv->mvFlags &= ~0x800;
+    instance->zVel = 0;
+    instance->maxXVel = 0x190;
+    instance->maxYVel = 0x190;
+    instance->maxZVel = 0x190;
+
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ShouldJumpIn);
 
@@ -127,7 +428,18 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Surprised);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_NoticeEntry);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Notice);
+void ALUKA_Notice(Instance *instance)
+{
+    if (!(((MonsterVars *)instance->extraData)->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Notice(instance);
+    }
+    else
+    {
+        MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_EmbraceEntry);
 
@@ -139,136 +451,439 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_GeneralDeath);
 
 #else
 
-void ALUKA_ControllersEnabled(void) { };   
-     
-void ALUKA_SetPitch(void) { };          
+G2Bool ALUKA_ControllersEnabled(Instance *instance)
+{
+    return G2Anim_IsControllerActive(&instance->anim, 1, 0x26) != 0;
+}
 
-void ALUKA_EnableControllers(void) { };  
+void ALUKA_SetPitch(Instance *instance, int pitch)
+{
+    G2SVector3 extraRot;
+    AlukaAttributes *attributes; // not from debug symbols
 
-void ALUKA_DisableControllers(void) { };   
+    attributes = (AlukaAttributes *)((MonsterVars *)instance->extraData)->extraVars;
 
-void ALUKA_SetSwimBodyTwist(void) { };  
+    if (!ALUKA_ControllersEnabled(instance))
+    {
+        return;
+    }
 
-void ALUKA_NotDaylight(void) { };    
+    extraRot.x = pitch;
+    extraRot.z = 0;
+    extraRot.y = 0;
+    G2Anim_SetController_Vector(&instance->anim, 1, 0xE, &extraRot);
+    attributes->swimfast_pitch = pitch;
+}
 
-void ALUKA_CapDepth(void) { };        
-               
-void ALUKA_AngleTooWide(void) { };     
+void ALUKA_EnableControllers(Instance *instance)
+{
+    G2SVector3 translate;
+    MonsterVars *mv; // not from debug symbols
 
-void ALUKA_VectorFromPitchYaw(void) { };  
+    mv = (MonsterVars *)instance->extraData;
 
-void ALUKA_FacingVector(void) { };     
+    if (ALUKA_ControllersEnabled(instance))
+    {
+        return;
+    }
 
-void ALUKA_SimpleLineCheck(void) { };  
+    G2Anim_EnableController(&instance->anim, 1, 0x26);
+    G2Anim_EnableController(&instance->anim, 1, 0xE);
+    G2Anim_EnableController(&instance->anim, 0x13, 0xE);
+    G2Anim_EnableController(&instance->anim, 0x1A, 0xE);
+    G2Anim_EnableController(&instance->anim, 0x20, 0xE);
+    G2Anim_EnableController(&instance->anim, 5, 0xE);
+    G2Anim_EnableController(&instance->anim, 0xC, 0xE);
+    G2Anim_EnableController(&instance->anim, 4, 0xE);
+    G2Anim_EnableController(&instance->anim, 0xB, 0xE);
 
-void ALUKA_TerrainInPath(void) { };   
+    translate.y = 0;
+    translate.x = 0;
 
-void ALUKA_ApplyIncr(void) { };       
+    if (mv->age != 0)
+    {
+        translate.z = -0x1C2;
+        instance->position.z -= translate.z;
+    }
+    else
+    {
+        translate.z = -0x190;
+        instance->position.z -= translate.z;
+    }
 
-void ALUKA_ApplyForwardAccel(void) { };  
+    G2Anim_SetController_Vector(&instance->anim, 1, 0x26, &translate);
+}
 
-void ALUKA_ApplyAngularAccel(void) { };    
+void ALUKA_DisableControllers(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
 
-void ALUKA_ApplyRots(void) { };     
+    mv = (MonsterVars *)instance->extraData;
 
-void ALUKA_MoveForward(void) { };        
+    if (!ALUKA_ControllersEnabled(instance))
+    {
+        return;
+    }
 
-void ALUKA_FixPitch(void) { };          
+    G2Anim_DisableController(&instance->anim, 1, 0x26);
+    G2Anim_DisableController(&instance->anim, 1, 0xE);
+    G2Anim_DisableController(&instance->anim, 0x13, 0xE);
+    G2Anim_DisableController(&instance->anim, 0x1A, 0xE);
+    G2Anim_DisableController(&instance->anim, 0x20, 0xE);
+    G2Anim_DisableController(&instance->anim, 5, 0xE);
+    G2Anim_DisableController(&instance->anim, 0xC, 0xE);
+    G2Anim_DisableController(&instance->anim, 4, 0xE);
+    G2Anim_DisableController(&instance->anim, 0xB, 0xE);
 
-void ALUKA_ProportionalLimitsAndAccels(void) { };    
+    if (mv->age != 0)
+    {
+        instance->position.z = instance->position.z - 0x1C2;
+    }
+    else
+    {
+        instance->position.z = instance->position.z - 0x190;
+    }
+}
 
-void ALUKA_FacePoint(void) { };           
+void ALUKA_SetSwimBodyTwist(Instance *instance, int pitch, int yaw)
+{
 
-void ALUKA_SetupSwimAnimWOTread(void) { };    
+    G2SVector3 extraRot;
 
-void ALUKA_SetupSwimAnimWTread(void) { };      
+    if (!ALUKA_ControllersEnabled(instance))
+    {
+        return;
+    }
 
-void ALUKA_SwimToDestination(void) { };  
+    extraRot.z = 0;
+    extraRot.x = 0;
+    extraRot.y = -pitch & 0xFFF;
 
-void ALUKA_GetRandomDestination(void) { };    
+    G2Anim_SetController_Vector(&instance->anim, 5, 0xE, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 0xC, 0xE, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 4, 0xE, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 0xB, 0xE, &extraRot);
 
-void ALUKA_NearAluka(void) { };             
+    extraRot.y = pitch & 0xFFF;
+    extraRot.x = yaw & 0xFFF;
 
-void ALUKA_GetCircleDestination(void) { };    
+    G2Anim_SetController_Vector(&instance->anim, 0x13, 0xE, &extraRot);
 
-void ALUKA_SwimPlanMovement(void) { };      
+    extraRot.x = -yaw & 0xFFF;
 
-void ALUKA_ResetSwim(void) { };   
+    if (pitch > 0)
+    {
+        extraRot.y = -(pitch * 2) & 0xFFF;
+        G2Anim_SetController_Vector(&instance->anim, 0x1A, 0xE, &extraRot);
+        extraRot.y = -pitch & 0xFFF;
+        G2Anim_SetController_Vector(&instance->anim, 0x20, 0xE, &extraRot);
+    }
+    else
+    {
+        extraRot.y = -pitch & 0xFFF;
+        G2Anim_SetController_Vector(&instance->anim, 0x1A, 0xE, &extraRot);
+        extraRot.y = -(pitch * 2) & 0xFFF;
+        G2Anim_SetController_Vector(&instance->anim, 0x20, 0xE, &extraRot);
+    }
 
-void ALUKA_ShouldJumpIn(void) { };   
+}
 
-void ALUKA_ShouldJumpOut(void) { };   
+void ALUKA_NotDaylight(void) {};
 
-void ALUKA_JumpToEntry(void) { };    
+void ALUKA_CapDepth(void) {};
 
-void ALUKA_SetJumpVels(void) { };  
+int ALUKA_AngleTooWide(Position *first, Position *second, int cosmult, int cosshift)
+{
 
-void ALUKA_SetHitGround(void) { };     
+    long lenFirst; // not from debug symbols
+    long lenSecond; // not from debug symbols
+    long dot; // not from debug symbols
 
-void ALUKA_JumpTo(void) { };      
+    lenFirst = MATH3D_LengthXYZ(first->x, first->y, first->z);
+    lenSecond = MATH3D_LengthXYZ(second->x, second->y, second->z);
+    dot = (first->x * second->x) + (first->y * second->y) + (first->z * second->z);
 
-void ALUKA_ChooseAttack(void) { };      
+    return ((lenFirst * lenSecond * cosmult) >> cosshift) >= dot;
+}
 
-void ALUKA_Init(void) { };         
+void ALUKA_VectorFromPitchYaw(Position *vector, int pitch, int yaw, int dist)
+{
 
-void ALUKA_CleanUp(void) { };     
+    MATRIX mat;
+    SVECTOR oldVector;
+    SVECTOR newVector;
 
-void ALUKA_Message(void) { };    
+    oldVector.vx = 0;
+    oldVector.vy = -dist;
+    oldVector.vz = 0;
 
-void ALUKA_PursueEntry(void) { };  
+    mat.m[0][0] = 0x1000;
+    mat.m[0][1] = 0;
+    mat.m[0][2] = 0;
+    mat.m[1][0] = 0;
+    mat.m[1][1] = 0x1000;
+    mat.m[1][2] = 0;
+    mat.m[2][0] = 0;
+    mat.m[2][1] = 0;
+    mat.m[2][2] = 0x1000;
 
-void ALUKA_Pursue(void) { };     
+    RotMatrixX(pitch, &mat);
+    RotMatrixZ(yaw, &mat);
+    ApplyMatrixSV(&mat, &oldVector, &newVector);
 
-void ALUKA_AttackEntry(void) { };     
+    COPY_SVEC(Position, (Position *)vector, Position, (Position *)&newVector);
+}
 
-void ALUKA_Attack(void) { };  
 
-void ALUKA_FleeEntry(void) { };   
+void ALUKA_FacingVector(Instance *instance, Position *vector, int dist)
+{
+    MonsterVars *mv; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
 
-void ALUKA_Flee(void) { };         
+    mv = (MonsterVars *)instance->extraData;
+    attrs = (AlukaAttributes *)mv->extraVars;
 
-void ALUKA_WanderEntry(void) { };   
+    ALUKA_VectorFromPitchYaw(vector, (attrs->swimfast_pitch - attrs->min_swim_depth) & 0xFFF, instance->rotation.z, dist);
+}
 
-void ALUKA_Wander(void) { };       
+int ALUKA_SimpleLineCheck(Position *hit, Level *level, Position *start, Position *end)
+{
 
-void ALUKA_IdleEntry(void) { };     
+    PCollideInfo info;
+    SVECTOR oldPt;
+    SVECTOR newPt;
 
-void ALUKA_Idle(void) { };           
+    oldPt.vx = start->x;
+    oldPt.vy = start->y;
+    oldPt.vz = start->z;
 
-void ALUKA_LandInWaterEntry(void) { };   
+    newPt.vx = end->x;
+    newPt.vy = end->y;
+    newPt.vz = end->z;
 
-void ALUKA_LandInWater(void) { };    
+    info.oldPoint = &oldPt;
+    info.newPoint = &newPt;
 
-void ALUKA_HitEntry(void) { };   
+    info.collideType = 3;
+    info.instance = NULL;
+    info.inst = NULL;
 
-void ALUKA_Hit(void) { };          
+    COLLIDE_PointAndWorld(&info, level);
 
-void ALUKA_StunnedEntry(void) { };    
+    if (info.type != 0)
+    {
+        if (hit != NULL)
+        {
+            hit->x = newPt.vx;
+            hit->y = newPt.vy;
+            hit->z = newPt.vz;
+        }
+        return 1;
+    }
+    return 0;
+}
 
-void ALUKA_Stunned(void) { };           
 
-void ALUKA_ProjectileEntry(void) { };      
+int ALUKA_TerrainInPath(Instance *instance)
+{
+    Position vector; // not from debug symbols
+    Level *level; // not from debug symbols
 
-void ALUKA_Projectile(void) { };           
+    level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
 
-void ALUKA_SurpriseAttackEntry(void) { };      
+    ALUKA_FacingVector(instance, &vector, 0x190);
+    ADD_SVEC(Position, &vector, Position, &vector, Position, &instance->position);
 
-void ALUKA_SurpriseAttack(void) { };  
+    return ALUKA_SimpleLineCheck(0, level, &instance->position, &vector);
+}
 
-void ALUKA_SurprisedEntry(void) { };  
+int ALUKA_ApplyIncr(int start, int min, int max, int delta, int time)
+{
+    int result; // not from debug symbols
 
-void ALUKA_Surprised(void) { };      
+    result = start + ((delta * time) / 4096);
 
-void ALUKA_NoticeEntry(void) { };    
+    if (result < min && delta < 0)
+    {
+        result = min;
+    }
+    else if (result > max && delta > 0)
+    {
+        result = max;
+    }
 
-void ALUKA_Notice(void) { };          
+    return result;
+}
 
-void ALUKA_EmbraceEntry(void) { };     
 
-void ALUKA_Embrace(void) { };         
+void ALUKA_ApplyForwardAccel(Instance *instance, int forward_accel, int time)
+{
+    MonsterVars *mv; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
 
-void ALUKA_GeneralDeathEntry(void) { };          
+    mv = (MonsterVars *)instance->extraData;
+    attrs = (AlukaAttributes *)mv->extraVars;
 
-void ALUKA_GeneralDeath(void) { };                   
+    mv->speed = ALUKA_ApplyIncr(mv->speed, 0, attrs->circle_dist, forward_accel, time);
+}
+
+void ALUKA_ApplyAngularAccel(Instance *instance, int yaw_accel, int pitch_accel, int time)
+{
+    MonsterVars *mv; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    attrs = (AlukaAttributes *)mv->extraVars;
+
+    attrs->swimfast_speed = ALUKA_ApplyIncr(attrs->swimfast_speed, -attrs->pitch_offset_speed, attrs->pitch_offset_speed, yaw_accel, time);
+    attrs->swimattack_speed = ALUKA_ApplyIncr(attrs->swimattack_speed, -attrs->yaw_accel, attrs->yaw_accel, pitch_accel, time);
+}
+
+void ALUKA_ApplyRots(void) {};
+
+void ALUKA_MoveForward(Instance *instance, int time, int depth)
+{
+    Position vector; // not from debug symbols
+    int dist; // not from debug symbols
+
+    dist = ((MonsterVars *)instance->extraData)->speed * time;
+    ALUKA_FacingVector(instance, &vector, dist / 4096);
+
+    ADD_SVEC(Position, &instance->position, Position, &instance->position, Position, &vector);
+
+    if (depth < instance->position.z)
+    {
+        instance->position.z = depth;
+    }
+}
+
+void ALUKA_FixPitch(void) {};
+
+void ALUKA_ProportionalLimitsAndAccels(void) {};
+
+void ALUKA_FacePoint(void) {};
+
+void ALUKA_SetupSwimAnimWOTread(void) {};
+
+void ALUKA_SetupSwimAnimWTread(void) {};
+
+void ALUKA_SwimToDestination(void) {};
+
+void ALUKA_GetRandomDestination(void) {};
+
+void ALUKA_NearAluka(void) {};
+
+void ALUKA_GetCircleDestination(void) {};
+
+void ALUKA_SwimPlanMovement(void) {};
+
+void ALUKA_ResetSwim(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (ALUKA_ControllersEnabled(instance) == G2FALSE)
+    {
+        return;
+    }
+
+    mv->auxFlags &= ~0x20000000;
+    ALUKA_DisableControllers(instance);
+    MON_PlayCombatIdle(instance, 2);
+    mv->mvFlags &= ~0x800;
+    instance->zVel = 0;
+    instance->maxXVel = 0x190;
+    instance->maxYVel = 0x190;
+    instance->maxZVel = 0x190;
+
+}
+
+void ALUKA_ShouldJumpIn(void) {};
+
+void ALUKA_ShouldJumpOut(void) {};
+
+void ALUKA_JumpToEntry(void) {};
+
+void ALUKA_SetJumpVels(void) {};
+
+void ALUKA_SetHitGround(void) {};
+
+void ALUKA_JumpTo(void) {};
+
+void ALUKA_ChooseAttack(void) {};
+
+void ALUKA_Init(void) {};
+
+void ALUKA_CleanUp(void) {};
+
+void ALUKA_Message(void) {};
+
+void ALUKA_PursueEntry(void) {};
+
+void ALUKA_Pursue(void) {};
+
+void ALUKA_AttackEntry(void) {};
+
+void ALUKA_Attack(void) {};
+
+void ALUKA_FleeEntry(void) {};
+
+void ALUKA_Flee(void) {};
+
+void ALUKA_WanderEntry(void) {};
+
+void ALUKA_Wander(void) {};
+
+void ALUKA_IdleEntry(void) {};
+
+void ALUKA_Idle(void) {};
+
+void ALUKA_LandInWaterEntry(void) {};
+
+void ALUKA_LandInWater(void) {};
+
+void ALUKA_HitEntry(void) {};
+
+void ALUKA_Hit(void) {};
+
+void ALUKA_StunnedEntry(void) {};
+
+void ALUKA_Stunned(void) {};
+
+void ALUKA_ProjectileEntry(void) {};
+
+void ALUKA_Projectile(void) {};
+
+void ALUKA_SurpriseAttackEntry(void) {};
+
+void ALUKA_SurpriseAttack(void) {};
+
+void ALUKA_SurprisedEntry(void) {};
+
+void ALUKA_Surprised(void) {};
+
+void ALUKA_NoticeEntry(void) {};
+
+void ALUKA_Notice(Instance *instance)
+{
+    if (!(((MonsterVars *)instance->extraData)->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Notice(instance);
+    }
+    else
+    {
+        MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+    }
+}
+
+void ALUKA_EmbraceEntry(void) {};
+
+void ALUKA_Embrace(void) {};
+
+void ALUKA_GeneralDeathEntry(void) {};
+
+void ALUKA_GeneralDeath(void) {};
 
 #endif

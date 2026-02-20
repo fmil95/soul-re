@@ -6908,7 +6908,7 @@ typedef struct DISPENV
 typedef struct BLK_FILL // this struct was modified from the original
 {
     // offset: 0x0000
-    union 
+    union
     {
         // offset: 0x0000
         long color;
