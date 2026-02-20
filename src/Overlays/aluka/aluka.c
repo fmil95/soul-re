@@ -194,7 +194,16 @@ void ALUKA_VectorFromPitchYaw(Position *vector, int pitch, int yaw, int dist)
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_FacingVector);
+void ALUKA_FacingVector(Instance *instance, Position *vector, int dist)
+{
+    MonsterVars *mv; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    attrs = (AlukaAttributes *)mv->extraVars;
+
+    ALUKA_VectorFromPitchYaw(vector, (attrs->swimfast_pitch - attrs->min_swim_depth) & 0xFFF, instance->rotation.z, dist);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SimpleLineCheck);
 
@@ -563,7 +572,16 @@ void ALUKA_VectorFromPitchYaw(Position *vector, int pitch, int yaw, int dist)
 }
 
 
-void ALUKA_FacingVector(void) {};
+void ALUKA_FacingVector(Instance *instance, Position *vector, int dist)
+{
+    MonsterVars *mv; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    attrs = (AlukaAttributes *)mv->extraVars;
+
+    ALUKA_VectorFromPitchYaw(vector, (attrs->swimfast_pitch - attrs->min_swim_depth) & 0xFFF, instance->rotation.z, dist);
+}
 
 void ALUKA_SimpleLineCheck(void) {};
 
