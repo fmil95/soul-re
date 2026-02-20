@@ -302,7 +302,21 @@ void ALUKA_ApplyAngularAccel(Instance *instance, int yaw_accel, int pitch_accel,
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ApplyRots);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_MoveForward);
+void ALUKA_MoveForward(Instance *instance, int time, int depth)
+{
+    Position vector; // not from debug symbols
+    int dist; // not from debug symbols
+
+    dist = ((MonsterVars *)instance->extraData)->speed * time;
+    ALUKA_FacingVector(instance, &vector, dist / 4096);
+
+    ADD_SVEC(Position, &instance->position, Position, &instance->position, Position, &vector);
+
+    if (depth < instance->position.z)
+    {
+        instance->position.z = depth;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_FixPitch);
 
@@ -727,7 +741,21 @@ void ALUKA_ApplyAngularAccel(Instance *instance, int yaw_accel, int pitch_accel,
 
 void ALUKA_ApplyRots(void) {};
 
-void ALUKA_MoveForward(void) {};
+void ALUKA_MoveForward(Instance *instance, int time, int depth)
+{
+    Position vector; // not from debug symbols
+    int dist; // not from debug symbols
+
+    dist = ((MonsterVars *)instance->extraData)->speed * time;
+    ALUKA_FacingVector(instance, &vector, dist / 4096);
+
+    ADD_SVEC(Position, &instance->position, Position, &instance->position, Position, &vector);
+
+    if (depth < instance->position.z)
+    {
+        instance->position.z = depth;
+    }
+}
 
 void ALUKA_FixPitch(void) {};
 
