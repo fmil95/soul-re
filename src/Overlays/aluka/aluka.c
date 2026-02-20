@@ -4,6 +4,7 @@
 #include "Game/G2/ANMCTRLR.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONSTER.h"
+#include "Game/STREAM.h"
 #include "Overlays/aluka/aluka.h"
 
 
@@ -244,7 +245,18 @@ int ALUKA_SimpleLineCheck(Position *hit, Level *level, Position *start, Position
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_TerrainInPath);
+int ALUKA_TerrainInPath(Instance *instance)
+{
+    Position vector; // not from debug symbols
+    Level *level; // not from debug symbols
+
+    level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
+
+    ALUKA_FacingVector(instance, &vector, 0x190);
+    ADD_SVEC(Position, &vector, Position, &vector, Position, &instance->position);
+
+    return ALUKA_SimpleLineCheck(0, level, &instance->position, &vector);
+}
 
 int ALUKA_ApplyIncr(int start, int min, int max, int delta, int time)
 {
@@ -658,7 +670,18 @@ int ALUKA_SimpleLineCheck(Position *hit, Level *level, Position *start, Position
 }
 
 
-void ALUKA_TerrainInPath(void) {};
+int ALUKA_TerrainInPath(Instance *instance)
+{
+    Position vector; // not from debug symbols
+    Level *level; // not from debug symbols
+
+    level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
+
+    ALUKA_FacingVector(instance, &vector, 0x190);
+    ADD_SVEC(Position, &vector, Position, &vector, Position, &instance->position);
+
+    return ALUKA_SimpleLineCheck(0, level, &instance->position, &vector);
+}
 
 int ALUKA_ApplyIncr(int start, int min, int max, int delta, int time)
 {
