@@ -3,6 +3,26 @@
 
 #include "common.h"
 
+enum AlukaAnim
+{
+    ALUKA_ANIM_NO_ANIM = -1,
+    ALUKA_ANIM_SWIMIDLE = 0,
+    ALUKA_ANIM_SWIMSLOW = 1,
+    ALUKA_ANIM_SWIMFAST = 2,
+    ALUKA_ANIM_SWIMATTACK = 3,
+    ALUKA_ANIM_JUMPOUT = 4,
+    ALUKA_ANIM_STARTSWIM = 5,
+    ALUKA_ANIM_JUMPIN = 6,
+    ALUKA_ANIM_SWIMSTUN = 7,
+    ALUKA_ANIM_SWIMRECOVER = 8,
+    ALUKA_ANIM_SWIMSPIT = 9,
+    ALUKA_ANIM_TREAD = 10,
+    ALUKA_ANIM_SWIMHIT = 11,
+    ALUKA_ANIM_SWIMSOULSUCK = 12,
+    ALUKA_ANIM_SWIMAGONY = 13,
+    ALUKA_ANIM_SWIMDEATH = 14
+};
+
 // size: 0x38
 typedef struct _AlukaAttributes {
     // offset: 0x0000
@@ -67,6 +87,7 @@ typedef struct _AlukaAttributes {
     short swim_smell_distance;
 } AlukaAttributes;
 
+// size: 0x26
 typedef struct _AlukaVars {
     // offset 0x0000
     int special_time;
