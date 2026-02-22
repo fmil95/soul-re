@@ -67,4 +67,39 @@ typedef struct _AlukaAttributes {
     short swim_smell_distance;
 } AlukaAttributes;
 
+typedef struct _AlukaVars {
+    // offset 0x0000
+    int special_time;
+    // offset 0x0004
+    short yaw_speed;
+    // offset 0x0006
+    short pitch_speed;
+    // offset 0x0008
+    short pitch_offset;
+    // offset 0x000A
+    short pitch_offset_speed;
+    // offset 0x000C
+    short forward_speed_limit;
+    // offset 0x000E
+    short yaw_speed_limit;
+    // offset 0x0010
+    short pitch_speed_limit;
+    // offset 0x0012
+    short yaw_accel;
+    // offset 0x0014
+    short pitch_accel;
+    // offset 0x0016
+    short use_yaw_speed_limit;
+    // offset 0x0018
+    short use_pitch_speed_limit;
+    // offset 0x001A
+    short use_yaw_accel;
+    // offset 0x001C
+    short use_pitch_accel;
+    // offset 0x001E
+    short swim_anim;
+    // offset 0x0020
+    Position target;
+} AlukaVars;
+
 #endif
