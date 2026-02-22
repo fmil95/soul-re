@@ -407,7 +407,47 @@ void ALUKA_SetupSwimAnimWOTread(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SetupSwimAnimWTread);
+void ALUKA_SetupSwimAnimWTread(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    if (vars->swim_anim == ALUKA_ANIM_SWIMATTACK || vars->swim_anim == ALUKA_ANIM_SWIMSPIT)
+    {
+        return;
+    }
+
+    if (mv->speed < attrs->swimslow_speed)
+    {
+        if (vars->swim_anim != ALUKA_ANIM_TREAD)
+        {
+            MON_PlayAnimFromList(instance, ma->auxAnimList, 0xA, 2);
+            vars->swim_anim = ALUKA_ANIM_TREAD;
+            if (vars->pitch_offset > 0)
+            {
+                vars->pitch_offset_speed = -attrs->pitch_offset_speed;
+            }
+            else
+            {
+                vars->pitch_offset_speed = 0;
+            }
+        }
+    }
+    else
+    {
+        ALUKA_SetupSwimAnimWOTread(instance);
+    }
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SwimToDestination);
 
@@ -926,7 +966,47 @@ void ALUKA_SetupSwimAnimWOTread(Instance *instance)
     }
 }
 
-void ALUKA_SetupSwimAnimWTread(void) {};
+void ALUKA_SetupSwimAnimWTread(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    if (vars->swim_anim == ALUKA_ANIM_SWIMATTACK || vars->swim_anim == ALUKA_ANIM_SWIMSPIT)
+    {
+        return;
+    }
+
+    if (mv->speed < attrs->swimslow_speed)
+    {
+        if (vars->swim_anim != ALUKA_ANIM_TREAD)
+        {
+            MON_PlayAnimFromList(instance, ma->auxAnimList, 0xA, 2);
+            vars->swim_anim = ALUKA_ANIM_TREAD;
+            if (vars->pitch_offset > 0)
+            {
+                vars->pitch_offset_speed = -attrs->pitch_offset_speed;
+            }
+            else
+            {
+                vars->pitch_offset_speed = 0;
+            }
+        }
+    }
+    else
+    {
+        ALUKA_SetupSwimAnimWOTread(instance);
+    }
+}
+
 
 void ALUKA_SwimToDestination(void) {};
 
