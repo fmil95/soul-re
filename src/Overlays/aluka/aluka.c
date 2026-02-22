@@ -548,7 +548,29 @@ void ALUKA_Init(Instance *instance)
     DEBUG_DoAreaProtection();
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_CleanUp);
+void ALUKA_CleanUp(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    G2Anim_DetachControllerFromSeg(&instance->anim, 1, 0xE);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 1, 0x26);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 0x13, 0xE);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 0x1A, 0xE);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 0x20, 0xE);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 5, 0xE);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 0xC, 0xE);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 4, 0xE);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 0xB, 0xE);
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv != NULL && mv->extraVars != NULL)
+    {
+        MEMPACK_Free(mv->extraVars);
+    }
+
+    MON_CleanUp(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Message);
 
@@ -1157,7 +1179,29 @@ void ALUKA_Init(Instance *instance)
     DEBUG_DoAreaProtection();
 }
 
-void ALUKA_CleanUp(void) {};
+void ALUKA_CleanUp(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    G2Anim_DetachControllerFromSeg(&instance->anim, 1, 0xE);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 1, 0x26);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 0x13, 0xE);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 0x1A, 0xE);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 0x20, 0xE);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 5, 0xE);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 0xC, 0xE);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 4, 0xE);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 0xB, 0xE);
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv != NULL && mv->extraVars != NULL)
+    {
+        MEMPACK_Free(mv->extraVars);
+    }
+
+    MON_CleanUp(instance);
+}
 
 void ALUKA_Message(void) {};
 
