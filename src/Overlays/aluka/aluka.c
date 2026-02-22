@@ -352,7 +352,60 @@ int ALUKA_FacePoint(Instance *instance, Position *point, int rate)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SetupSwimAnimWOTread);
+void ALUKA_SetupSwimAnimWOTread(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *alukaAttrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    vars = (AlukaVars *)mv->extraVars;
+    alukaAttrs = (AlukaAttributes *)ma->tunData;
+
+    if (vars->swim_anim == ALUKA_ANIM_SWIMATTACK || vars->swim_anim == ALUKA_ANIM_SWIMSPIT)
+    {
+        return;
+    }
+
+    if (mv->speed < alukaAttrs->swimfast_speed)
+    {
+        if (vars->swim_anim != ALUKA_ANIM_SWIMSLOW)
+        {
+            MON_PlayAnimFromList(instance, ma->auxAnimList, 1, 2);
+            vars->swim_anim = ALUKA_ANIM_SWIMSLOW;
+
+            if (vars->pitch_offset < 0x400)
+            {
+                vars->pitch_offset_speed = alukaAttrs->pitch_offset_speed;
+            }
+            else
+            {
+                vars->pitch_offset_speed = 0;
+            }
+        }
+        return;
+    }
+
+    if (vars->swim_anim != ALUKA_ANIM_SWIMFAST)
+    {
+
+        MON_PlayAnimFromList(instance, ma->auxAnimList, 2, 2);
+        vars->swim_anim = ALUKA_ANIM_SWIMFAST;
+
+        if (vars->pitch_offset < 0x400)
+        {
+            vars->pitch_offset_speed = alukaAttrs->pitch_offset_speed;
+        }
+        else
+        {
+            vars->pitch_offset_speed = 0;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SetupSwimAnimWTread);
 
@@ -818,7 +871,60 @@ int ALUKA_FacePoint(Instance *instance, Position *point, int rate)
     return 0;
 }
 
-void ALUKA_SetupSwimAnimWOTread(void) {};
+void ALUKA_SetupSwimAnimWOTread(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *alukaAttrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    vars = (AlukaVars *)mv->extraVars;
+    alukaAttrs = (AlukaAttributes *)ma->tunData;
+
+    if (vars->swim_anim == ALUKA_ANIM_SWIMATTACK || vars->swim_anim == ALUKA_ANIM_SWIMSPIT)
+    {
+        return;
+    }
+
+    if (mv->speed < alukaAttrs->swimfast_speed)
+    {
+        if (vars->swim_anim != ALUKA_ANIM_SWIMSLOW)
+        {
+            MON_PlayAnimFromList(instance, ma->auxAnimList, 1, 2);
+            vars->swim_anim = ALUKA_ANIM_SWIMSLOW;
+
+            if (vars->pitch_offset < 0x400)
+            {
+                vars->pitch_offset_speed = alukaAttrs->pitch_offset_speed;
+            }
+            else
+            {
+                vars->pitch_offset_speed = 0;
+            }
+        }
+        return;
+    }
+
+    if (vars->swim_anim != ALUKA_ANIM_SWIMFAST)
+    {
+
+        MON_PlayAnimFromList(instance, ma->auxAnimList, 2, 2);
+        vars->swim_anim = ALUKA_ANIM_SWIMFAST;
+
+        if (vars->pitch_offset < 0x400)
+        {
+            vars->pitch_offset_speed = alukaAttrs->pitch_offset_speed;
+        }
+        else
+        {
+            vars->pitch_offset_speed = 0;
+        }
+    }
+}
 
 void ALUKA_SetupSwimAnimWTread(void) {};
 
