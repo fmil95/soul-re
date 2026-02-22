@@ -1,5 +1,6 @@
 #include "common.h"
 #include "Game/COLLIDE.h"
+#include "Game/GAMELOOP.h"
 #include "Game/MATH3D.h"
 #include "Game/G2/ANMCTRLR.h"
 #include "Game/MONSTER/MONLIB.h"
@@ -322,7 +323,34 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_FixPitch);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ProportionalLimitsAndAccels);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_FacePoint);
+int ALUKA_FacePoint(Instance *instance, Position *point, int rate)
+{
+    int newPitch;
+
+    int targetYaw; // not from debug symbols
+    int targetPitch; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    attrs = (AlukaAttributes *)mv->extraVars;
+
+    targetYaw = MATH3D_AngleFromPosToPos(&instance->position, point);
+    targetPitch = (MATH3D_ElevationFromPosToPos(&instance->position, point) + attrs->min_swim_depth) & 0xFFF;
+
+    AngleMoveToward(&instance->rotation.z, targetYaw, (rate * gameTrackerX.timeMult) / 4096);
+
+    newPitch = attrs->swimfast_pitch;
+    AngleMoveToward((short *)&newPitch, targetPitch, (rate * gameTrackerX.timeMult) / 4096);
+    ALUKA_SetPitch(instance, newPitch);
+
+    if (instance->rotation.z == targetYaw && attrs->swimfast_pitch == targetPitch)
+    {
+        return 1;
+    }
+
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SetupSwimAnimWOTread);
 
@@ -761,7 +789,34 @@ void ALUKA_FixPitch(void) {};
 
 void ALUKA_ProportionalLimitsAndAccels(void) {};
 
-void ALUKA_FacePoint(void) {};
+int ALUKA_FacePoint(Instance *instance, Position *point, int rate)
+{
+    int newPitch;
+
+    int targetYaw; // not from debug symbols
+    int targetPitch; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    attrs = (AlukaAttributes *)mv->extraVars;
+
+    targetYaw = MATH3D_AngleFromPosToPos(&instance->position, point);
+    targetPitch = (MATH3D_ElevationFromPosToPos(&instance->position, point) + attrs->min_swim_depth) & 0xFFF;
+
+    AngleMoveToward(&instance->rotation.z, targetYaw, (rate * gameTrackerX.timeMult) / 4096);
+
+    newPitch = attrs->swimfast_pitch;
+    AngleMoveToward((short *)&newPitch, targetPitch, (rate * gameTrackerX.timeMult) / 4096);
+    ALUKA_SetPitch(instance, newPitch);
+
+    if (instance->rotation.z == targetYaw && attrs->swimfast_pitch == targetPitch)
+    {
+        return 1;
+    }
+
+    return 0;
+}
 
 void ALUKA_SetupSwimAnimWOTread(void) {};
 
