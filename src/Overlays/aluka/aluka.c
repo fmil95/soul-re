@@ -2,6 +2,7 @@
 #include "Game/COLLIDE.h"
 #include "Game/DEBUG.h"
 #include "Game/GAMELOOP.h"
+#include "Game/INSTANCE.h"
 #include "Game/MATH3D.h"
 #include "Game/MEMPACK.h"
 #include "Game/G2/ANMCTRLR.h"
@@ -455,7 +456,33 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SwimToDestination);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_GetRandomDestination);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_NearAluka);
+int ALUKA_NearAluka(Instance *instance)
+{
+
+    int dist; // not from debug symbols
+    int oldDist; // not from debug symbols
+    Instance *inst; // not from debug symbols
+
+    for (inst = gameTrackerX.instanceList->first; inst != NULL; inst = inst->next)
+    {
+
+        if (inst == instance || INSTANCE_Query(inst, 1) != 0x82)
+        {
+            continue;
+        }
+
+        dist = MATH3D_LengthXYZ(instance->position.x - inst->position.x, instance->position.y - inst->position.y, instance->position.z - inst->position.z);
+        oldDist = MATH3D_LengthXYZ(instance->oldPos.x - inst->oldPos.x, instance->oldPos.y - inst->oldPos.y, instance->oldPos.z - inst->oldPos.z);
+
+        if (dist < 0x280 && dist < oldDist)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_GetCircleDestination);
 
@@ -1085,7 +1112,33 @@ void ALUKA_SwimToDestination(void) {};
 
 void ALUKA_GetRandomDestination(void) {};
 
-void ALUKA_NearAluka(void) {};
+int ALUKA_NearAluka(Instance *instance)
+{
+
+    int dist; // not from debug symbols
+    int oldDist; // not from debug symbols
+    Instance *inst; // not from debug symbols
+
+    for (inst = gameTrackerX.instanceList->first; inst != NULL; inst = inst->next)
+    {
+
+        if (inst == instance || INSTANCE_Query(inst, 1) != 0x82)
+        {
+            continue;
+        }
+
+        dist = MATH3D_LengthXYZ(instance->position.x - inst->position.x, instance->position.y - inst->position.y, instance->position.z - inst->position.z);
+        oldDist = MATH3D_LengthXYZ(instance->oldPos.x - inst->oldPos.x, instance->oldPos.y - inst->oldPos.y, instance->oldPos.z - inst->oldPos.z);
+
+        if (dist < 0x280 && dist < oldDist)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 
 void ALUKA_GetCircleDestination(void) {};
 
