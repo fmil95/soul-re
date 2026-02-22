@@ -1,7 +1,9 @@
 #include "common.h"
 #include "Game/COLLIDE.h"
+#include "Game/DEBUG.h"
 #include "Game/GAMELOOP.h"
 #include "Game/MATH3D.h"
+#include "Game/MEMPACK.h"
 #include "Game/G2/ANMCTRLR.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONSTER.h"
@@ -495,7 +497,56 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_JumpTo);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ChooseAttack);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Init);
+void ALUKA_Init(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    FXGlowEffect *glowEffect; // not from debug symbols
+
+    MON_DefaultInit(instance);
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv != NULL)
+    {
+
+        glowEffect = (FXGlowEffect *)MEMPACK_Malloc(sizeof(FXGlowEffect), 0x1B); // TODO: double check this type later
+
+        if (glowEffect == NULL)
+        {
+            mv->extraVars = NULL;
+        }
+        else
+        {
+            mv->extraVars = glowEffect;
+            glowEffect->fadein_time = 0;
+        }
+    }
+
+    instance->rotation.x = 0;
+
+    G2Anim_AttachControllerToSeg(&instance->anim, 1, 0xE);
+    G2Anim_AttachControllerToSeg(&instance->anim, 1, 0x26);
+    G2Anim_AttachControllerToSeg(&instance->anim, 0x13, 0xE);
+    G2Anim_AttachControllerToSeg(&instance->anim, 0x1A, 0xE);
+    G2Anim_AttachControllerToSeg(&instance->anim, 0x20, 0xE);
+    G2Anim_AttachControllerToSeg(&instance->anim, 5, 0xE);
+    G2Anim_AttachControllerToSeg(&instance->anim, 0xC, 0xE);
+    G2Anim_AttachControllerToSeg(&instance->anim, 4, 0xE);
+    G2Anim_AttachControllerToSeg(&instance->anim, 0xB, 0xE);
+
+    G2Anim_DisableController(&instance->anim, 1, 0xE);
+    G2Anim_DisableController(&instance->anim, 1, 0x26);
+    G2Anim_DisableController(&instance->anim, 0x13, 0xE);
+    G2Anim_DisableController(&instance->anim, 0x1A, 0xE);
+    G2Anim_DisableController(&instance->anim, 0x20, 0xE);
+    G2Anim_DisableController(&instance->anim, 5, 0xE);
+    G2Anim_DisableController(&instance->anim, 0xC, 0xE);
+    G2Anim_DisableController(&instance->anim, 4, 0xE);
+    G2Anim_DisableController(&instance->anim, 0xB, 0xE);
+
+    DEBUG_DoAreaProtection();
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_CleanUp);
 
@@ -1054,7 +1105,57 @@ void ALUKA_JumpTo(void) {};
 
 void ALUKA_ChooseAttack(void) {};
 
-void ALUKA_Init(void) {};
+
+void ALUKA_Init(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    FXGlowEffect *glowEffect; // not from debug symbols
+
+    MON_DefaultInit(instance);
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv != NULL)
+    {
+
+        glowEffect = (FXGlowEffect *)MEMPACK_Malloc(sizeof(FXGlowEffect), 0x1B); // TODO: double check this type later
+
+        if (glowEffect == NULL)
+        {
+            mv->extraVars = NULL;
+        }
+        else
+        {
+            mv->extraVars = glowEffect;
+            glowEffect->fadein_time = 0;
+        }
+    }
+
+    instance->rotation.x = 0;
+
+    G2Anim_AttachControllerToSeg(&instance->anim, 1, 0xE);
+    G2Anim_AttachControllerToSeg(&instance->anim, 1, 0x26);
+    G2Anim_AttachControllerToSeg(&instance->anim, 0x13, 0xE);
+    G2Anim_AttachControllerToSeg(&instance->anim, 0x1A, 0xE);
+    G2Anim_AttachControllerToSeg(&instance->anim, 0x20, 0xE);
+    G2Anim_AttachControllerToSeg(&instance->anim, 5, 0xE);
+    G2Anim_AttachControllerToSeg(&instance->anim, 0xC, 0xE);
+    G2Anim_AttachControllerToSeg(&instance->anim, 4, 0xE);
+    G2Anim_AttachControllerToSeg(&instance->anim, 0xB, 0xE);
+
+    G2Anim_DisableController(&instance->anim, 1, 0xE);
+    G2Anim_DisableController(&instance->anim, 1, 0x26);
+    G2Anim_DisableController(&instance->anim, 0x13, 0xE);
+    G2Anim_DisableController(&instance->anim, 0x1A, 0xE);
+    G2Anim_DisableController(&instance->anim, 0x20, 0xE);
+    G2Anim_DisableController(&instance->anim, 5, 0xE);
+    G2Anim_DisableController(&instance->anim, 0xC, 0xE);
+    G2Anim_DisableController(&instance->anim, 4, 0xE);
+    G2Anim_DisableController(&instance->anim, 0xB, 0xE);
+
+    DEBUG_DoAreaProtection();
+}
 
 void ALUKA_CleanUp(void) {};
 
