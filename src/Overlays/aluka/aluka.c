@@ -518,7 +518,21 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_JumpToEntry);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SetJumpVels);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SetHitGround);
+void ALUKA_SetHitGround(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    mv->auxFlags = mv->auxFlags & ~1;
+    mv->mvFlags = mv->mvFlags & ~0x800;
+
+    instance->zVel = 0;
+    instance->maxXVel = 0x190;
+    instance->maxYVel = 0x190;
+    instance->maxZVel = 0x190;
+
+    MON_SwitchState(instance, MONSTER_STATE_LANDONFEET);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_JumpTo);
 
@@ -1174,7 +1188,21 @@ void ALUKA_JumpToEntry(void) {};
 
 void ALUKA_SetJumpVels(void) {};
 
-void ALUKA_SetHitGround(void) {};
+void ALUKA_SetHitGround(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    mv->auxFlags = mv->auxFlags & ~1;
+    mv->mvFlags = mv->mvFlags & ~0x800;
+
+    instance->zVel = 0;
+    instance->maxXVel = 0x190;
+    instance->maxYVel = 0x190;
+    instance->maxZVel = 0x190;
+
+    MON_SwitchState(instance, MONSTER_STATE_LANDONFEET);
+}
 
 void ALUKA_JumpTo(void) {};
 

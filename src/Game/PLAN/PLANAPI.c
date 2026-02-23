@@ -566,17 +566,7 @@ int PLANAPI_FindClosestNodePositionInUnit(StreamUnit *streamUnit, Position *targ
 
     if (res != 0)
     {
-        short _x1;
-        short _y1;
-        short _z1;
-
-        _x1 = ptr->x;
-        _y1 = ptr->y;
-        _z1 = ptr->z;
-
-        pos->x = _x1;
-        pos->y = _y1;
-        pos->z = _z1;
+        COPY_SVEC(Position, pos, Position, ptr);
     }
 
     return res;
