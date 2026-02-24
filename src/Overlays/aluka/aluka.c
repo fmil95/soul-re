@@ -337,7 +337,33 @@ void ALUKA_MoveForward(Instance *instance, int time, int depth)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_FixPitch);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ProportionalLimitsAndAccels);
+void ALUKA_ProportionalLimitsAndAccels(Instance *instance, int angley, int anglep)
+{
+
+    int absYaw; // not from debug symbols
+    int absPitch; // not from debug symbols
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    absYaw = abs(angley);
+    absPitch = abs(anglep);
+
+    vars->use_yaw_speed_limit = MIN(abs(angley) >> 3, vars->yaw_speed_limit);
+    vars->use_pitch_speed_limit = MIN(abs(anglep) >> 3, vars->pitch_speed_limit);
+
+    vars->use_yaw_accel = MIN(MAX(abs(absYaw) >> 1, 1), attrs->yaw_accel);
+    vars->use_pitch_accel = MIN(MAX(abs(absPitch) >> 1, 1), attrs->pitch_accel);
+
+}
 
 int ALUKA_FacePoint(Instance *instance, Position *point, int rate)
 {
@@ -1117,7 +1143,33 @@ void ALUKA_MoveForward(Instance *instance, int time, int depth)
 
 void ALUKA_FixPitch(void) {};
 
-void ALUKA_ProportionalLimitsAndAccels(void) {};
+void ALUKA_ProportionalLimitsAndAccels(Instance *instance, int angley, int anglep)
+{
+
+    int absYaw; // not from debug symbols
+    int absPitch; // not from debug symbols
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    absYaw = abs(angley);
+    absPitch = abs(anglep);
+
+    vars->use_yaw_speed_limit = MIN(abs(angley) >> 3, vars->yaw_speed_limit);
+    vars->use_pitch_speed_limit = MIN(abs(anglep) >> 3, vars->pitch_speed_limit);
+
+    vars->use_yaw_accel = MIN(MAX(abs(absYaw) >> 1, 1), attrs->yaw_accel);
+    vars->use_pitch_accel = MIN(MAX(abs(absPitch) >> 1, 1), attrs->pitch_accel);
+
+}
 
 int ALUKA_FacePoint(Instance *instance, Position *point, int rate)
 {
