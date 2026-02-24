@@ -11,6 +11,9 @@
 #include "Game/STREAM.h"
 #include "Overlays/aluka/aluka.h"
 
+// TODO: These can be deleted once these functions are matched
+void ALUKA_SwimToDestination(Instance *instance);
+void ALUKA_GetRandomDestination(Instance *instance, Position *destination, Position *start, int range);
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -683,7 +686,65 @@ void ALUKA_WanderEntry(Instance *instance)
 
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Wander);
+void ALUKA_Wander(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+    int range; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    if (attrs == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Wander(instance);
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        return;
+    }
+
+    mv->auxFlags |= 0x20000000;
+
+    if (mv->enemy != NULL)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+    }
+    else if (rand() < 0xA3)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+
+    if (mv->wanderRange != 0)
+    {
+        range = mv->wanderRange;
+    }
+    else
+    {
+        range = attrs->wander_range;
+    }
+
+    if (MATH3D_LengthXYZ(instance->position.x - mv->destination.x, instance->position.y - mv->destination.y, instance->position.z - mv->destination.z) < 0x280)
+    {
+        ALUKA_GetRandomDestination(instance, &mv->destination, &instance->intro->position, range);
+    }
+
+    ALUKA_SetupSwimAnimWOTread(instance);
+    ALUKA_SwimToDestination(instance);
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_IdleEntry);
 
@@ -1184,9 +1245,9 @@ void ALUKA_SetupSwimAnimWTread(Instance *instance)
 }
 
 
-void ALUKA_SwimToDestination(void) {};
+void ALUKA_SwimToDestination(Instance *) {};
 
-void ALUKA_GetRandomDestination(void) {};
+void ALUKA_GetRandomDestination(Instance *instance, Position *destination, Position *start, int range) {};
 
 int ALUKA_NearAluka(Instance *instance)
 {
@@ -1404,7 +1465,64 @@ void ALUKA_WanderEntry(Instance *instance)
 
 }
 
-void ALUKA_Wander(void) {};
+void ALUKA_Wander(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+    int range; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    if (attrs == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Wander(instance);
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        return;
+    }
+
+    mv->auxFlags |= 0x20000000;
+
+    if (mv->enemy != NULL)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+    }
+    else if (rand() < 0xA3)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+
+    if (mv->wanderRange != 0)
+    {
+        range = mv->wanderRange;
+    }
+    else
+    {
+        range = attrs->wander_range;
+    }
+
+    if (MATH3D_LengthXYZ(instance->position.x - mv->destination.x, instance->position.y - mv->destination.y, instance->position.z - mv->destination.z) < 0x280)
+    {
+        ALUKA_GetRandomDestination(instance, &mv->destination, &instance->intro->position, range);
+    }
+
+    ALUKA_SetupSwimAnimWOTread(instance);
+    ALUKA_SwimToDestination(instance);
+}
 
 void ALUKA_IdleEntry(void) {};
 
