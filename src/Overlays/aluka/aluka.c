@@ -153,7 +153,17 @@ void ALUKA_SetSwimBodyTwist(Instance *instance, int pitch, int yaw)
 
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_NotDaylight);
+int ALUKA_NotDaylight(Level *level)
+{
+
+    if (level->unitFlags & 2 && GAMELOOP_GetTimeOfDay() == 700)
+    {
+        return 0;
+    }
+
+    return 1;
+
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_CapDepth);
 
@@ -823,7 +833,17 @@ void ALUKA_SetSwimBodyTwist(Instance *instance, int pitch, int yaw)
 
 }
 
-void ALUKA_NotDaylight(void) {};
+int ALUKA_NotDaylight(Level *level)
+{
+
+    if (level->unitFlags & 2 && GAMELOOP_GetTimeOfDay() == 700)
+    {
+        return 0;
+    }
+
+    return 1;
+
+}
 
 void ALUKA_CapDepth(void) {};
 
