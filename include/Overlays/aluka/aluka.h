@@ -23,6 +23,12 @@ enum AlukaAnim
     ALUKA_ANIM_SWIMDEATH = 14
 };
 
+enum AlukaAttack {
+    NO_ATTACK = 0,
+    CHOMP_ATTACK = 1,
+    SPIT_ATTACK = 2
+};
+
 // size: 0x38
 typedef struct _AlukaAttributes {
     // offset: 0x0000
