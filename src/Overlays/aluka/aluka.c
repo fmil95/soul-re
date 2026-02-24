@@ -639,7 +639,49 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_FleeEntry);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Flee);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_WanderEntry);
+void ALUKA_WanderEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+    int range; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_WanderEntry(instance);
+        return;
+    }
+
+
+    if (mv->wanderRange != 0)
+    {
+        range = mv->wanderRange;
+    }
+    else
+    {
+        range = attrs->wander_range;
+    }
+
+    ALUKA_GetRandomDestination(instance, &mv->destination, &instance->intro->position, range);
+
+    vars->forward_speed_limit = attrs->swimslow_speed;
+    vars->yaw_speed_limit = attrs->swimslow_yaw;
+    vars->pitch_speed_limit = attrs->slow_pitch;
+
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Wander);
 
@@ -1318,7 +1360,49 @@ void ALUKA_FleeEntry(void) {};
 
 void ALUKA_Flee(void) {};
 
-void ALUKA_WanderEntry(void) {};
+void ALUKA_WanderEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+    int range; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_WanderEntry(instance);
+        return;
+    }
+
+
+    if (mv->wanderRange != 0)
+    {
+        range = mv->wanderRange;
+    }
+    else
+    {
+        range = attrs->wander_range;
+    }
+
+    ALUKA_GetRandomDestination(instance, &mv->destination, &instance->intro->position, range);
+
+    vars->forward_speed_limit = attrs->swimslow_speed;
+    vars->yaw_speed_limit = attrs->swimslow_yaw;
+    vars->pitch_speed_limit = attrs->slow_pitch;
+
+}
 
 void ALUKA_Wander(void) {};
 
