@@ -570,7 +570,30 @@ int ALUKA_ShouldJumpIn(Instance *instance, Instance *enemy, Level *level)
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ShouldJumpOut);
+int ALUKA_ShouldJumpOut(Instance *instance, Instance *enemy, Level *level)
+{
+
+    int nodeType; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    (void)enemy;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->age == 0 || !ALUKA_NotDaylight(level))
+    {
+        return 0;
+    }
+
+    nodeType = ENMYPLAN_GetNodeTypeOfNextWaypoint((signed char)mv->pathSlotID);
+
+    if (nodeType != 0x40 && ((nodeType >> 3) & 3) == 0)
+    {
+        return 1;
+    }
+
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_JumpToEntry);
 
@@ -1597,7 +1620,30 @@ int ALUKA_ShouldJumpIn(Instance *instance, Instance *enemy, Level *level)
 }
 
 
-void ALUKA_ShouldJumpOut(void) {};
+int ALUKA_ShouldJumpOut(Instance *instance, Instance *enemy, Level *level)
+{
+
+    int nodeType; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    (void)enemy;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->age == 0 || !ALUKA_NotDaylight(level))
+    {
+        return 0;
+    }
+
+    nodeType = ENMYPLAN_GetNodeTypeOfNextWaypoint((signed char)mv->pathSlotID);
+
+    if (nodeType != 0x40 && ((nodeType >> 3) & 3) == 0)
+    {
+        return 1;
+    }
+
+    return 0;
+}
 
 void ALUKA_JumpToEntry(void) {};
 
