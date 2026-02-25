@@ -690,8 +690,26 @@ void ALUKA_FleeEntry(Instance *instance)
     mv->mode = 4;
 }
 
+void ALUKA_Flee(Instance *instance)
+{
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Flee);
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Flee(instance);
+        return;
+    }
+
+    mv->auxFlags |= 0x20000000;
+
+    ALUKA_SetupSwimAnimWOTread(instance);
+    ALUKA_SwimToDestination(instance);
+    MON_SwitchState(instance, MONSTER_STATE_IDLE);
+}
 
 void ALUKA_WanderEntry(Instance *instance)
 {
@@ -1664,7 +1682,26 @@ void ALUKA_FleeEntry(Instance *instance)
     mv->mode = 4;
 }
 
-void ALUKA_Flee(void) {};
+void ALUKA_Flee(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Flee(instance);
+        return;
+    }
+
+    mv->auxFlags |= 0x20000000;
+
+    ALUKA_SetupSwimAnimWOTread(instance);
+    ALUKA_SwimToDestination(instance);
+    MON_SwitchState(instance, MONSTER_STATE_IDLE);
+}
 
 void ALUKA_WanderEntry(Instance *instance)
 {
