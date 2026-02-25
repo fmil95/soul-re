@@ -9,6 +9,7 @@
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSTER.h"
+#include "Game/PLAN/ENMYPLAN.h"
 #include "Game/STREAM.h"
 #include "Overlays/aluka/aluka.h"
 
@@ -550,7 +551,24 @@ void ALUKA_ResetSwim(Instance *instance)
 
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ShouldJumpIn);
+int ALUKA_ShouldJumpIn(Instance *instance, Instance *enemy, Level *level)
+{
+
+    int nodeType; // not from debug symbols
+
+    (void)enemy;
+    (void)level;
+
+    nodeType = ENMYPLAN_GetNodeTypeOfNextWaypoint((signed char)((MonsterVars *)instance->extraData)->pathSlotID);
+
+    if (nodeType != 0x40 && ((nodeType >> 3) & 3) == 3)
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ShouldJumpOut);
 
@@ -1561,7 +1579,23 @@ void ALUKA_ResetSwim(Instance *instance)
 
 }
 
-void ALUKA_ShouldJumpIn(void) {};
+int ALUKA_ShouldJumpIn(Instance *instance, Instance *enemy, Level *level)
+{
+    int nodeType; // not from debug symbols
+
+    (void)enemy;
+    (void)level;
+
+    nodeType = ENMYPLAN_GetNodeTypeOfNextWaypoint((signed char)((MonsterVars *)instance->extraData)->pathSlotID);
+
+    if (nodeType != 0x40 && ((nodeType >> 3) & 3) == 3)
+    {
+        return 1;
+    }
+
+    return 0;
+}
+
 
 void ALUKA_ShouldJumpOut(void) {};
 
