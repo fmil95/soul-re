@@ -872,7 +872,36 @@ void ALUKA_Notice(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_EmbraceEntry);
+void ALUKA_EmbraceEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_EmbraceEntry(instance);
+        return;
+    }
+
+    vars->forward_speed_limit = 0;
+    vars->yaw_speed_limit = attrs->swimslow_yaw;
+    vars->pitch_speed_limit = attrs->slow_pitch;
+
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Embrace);
 
@@ -1733,7 +1762,36 @@ void ALUKA_Notice(Instance *instance)
     }
 }
 
-void ALUKA_EmbraceEntry(void) {};
+void ALUKA_EmbraceEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_EmbraceEntry(instance);
+        return;
+    }
+
+    vars->forward_speed_limit = 0;
+    vars->yaw_speed_limit = attrs->swimslow_yaw;
+    vars->pitch_speed_limit = attrs->slow_pitch;
+
+}
 
 void ALUKA_Embrace(void) {};
 
