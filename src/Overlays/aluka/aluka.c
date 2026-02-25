@@ -665,7 +665,31 @@ INCLUDE_RODATA("asm/nonmatchings/Overlays/aluka/aluka", D_88000000);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Attack);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_FleeEntry);
+void ALUKA_FleeEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_FleeEntry(instance);
+        return;
+    }
+
+    vars->forward_speed_limit = attrs->swimfast_speed;
+    vars->yaw_speed_limit = attrs->swimfast_yaw;
+    vars->pitch_speed_limit = attrs->swimfast_pitch;
+    mv->mode = 4;
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Flee);
 
@@ -1615,7 +1639,30 @@ void ALUKA_AttackEntry(void) {};
 
 void ALUKA_Attack(void) {};
 
-void ALUKA_FleeEntry(void) {};
+void ALUKA_FleeEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_FleeEntry(instance);
+        return;
+    }
+
+    vars->forward_speed_limit = attrs->swimfast_speed;
+    vars->yaw_speed_limit = attrs->swimfast_yaw;
+    vars->pitch_speed_limit = attrs->swimfast_pitch;
+    mv->mode = 4;
+}
 
 void ALUKA_Flee(void) {};
 
