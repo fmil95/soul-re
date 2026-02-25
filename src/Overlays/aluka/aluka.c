@@ -804,7 +804,34 @@ void ALUKA_IdleEntry(Instance *instance)
 
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Idle);
+void ALUKA_Idle(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Idle(instance);
+        return;
+    }
+
+    if (!(mv->mvFlags & 4))
+    {
+        mv->auxFlags |= 0x20000000;
+        if (mv->enemy != NULL)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+        }
+        else if (instance->flags2 & 0x12 && rand() < 0x2AAA)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_WANDER);
+        }
+    }
+
+    ALUKA_SwimToDestination(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_LandInWaterEntry);
 
@@ -1638,7 +1665,34 @@ void ALUKA_IdleEntry(Instance *instance)
 
 }
 
-void ALUKA_Idle(void) {};
+void ALUKA_Idle(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Idle(instance);
+        return;
+    }
+
+    if (!(mv->mvFlags & 4))
+    {
+        mv->auxFlags |= 0x20000000;
+        if (mv->enemy != NULL)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+        }
+        else if (instance->flags2 & 0x12 && rand() < 0x2AAA)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_WANDER);
+        }
+    }
+
+    ALUKA_SwimToDestination(instance);
+}
 
 void ALUKA_LandInWaterEntry(void) {};
 
