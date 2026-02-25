@@ -772,7 +772,37 @@ void ALUKA_Wander(Instance *instance)
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_IdleEntry);
+void ALUKA_IdleEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (AlukaVars *)mv->extraVars;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_IdleEntry(instance);
+        return;
+    }
+
+    vars->forward_speed_limit = 0;
+    vars->yaw_speed_limit = 0;
+    vars->pitch_speed_limit = 0;
+
+    ma = (MonsterAttributes *)instance->data;
+    MON_PlayAnimFromList(instance, ma->auxAnimList, 0, 2);
+    vars->swim_anim = ALUKA_ANIM_SWIMIDLE;
+    mv->mode = 1;
+
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Idle);
 
@@ -1576,7 +1606,37 @@ void ALUKA_Wander(Instance *instance)
     ALUKA_SwimToDestination(instance);
 }
 
-void ALUKA_IdleEntry(void) {};
+void ALUKA_IdleEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (AlukaVars *)mv->extraVars;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_IdleEntry(instance);
+        return;
+    }
+
+    vars->forward_speed_limit = 0;
+    vars->yaw_speed_limit = 0;
+    vars->pitch_speed_limit = 0;
+
+    ma = (MonsterAttributes *)instance->data;
+    MON_PlayAnimFromList(instance, ma->auxAnimList, 0, 2);
+    vars->swim_anim = ALUKA_ANIM_SWIMIDLE;
+    mv->mode = 1;
+
+}
 
 void ALUKA_Idle(void) {};
 
