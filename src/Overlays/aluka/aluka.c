@@ -7,6 +7,7 @@
 #include "Game/MEMPACK.h"
 #include "Game/G2/ANMCTRLR.h"
 #include "Game/MONSTER/MONLIB.h"
+#include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/STREAM.h"
 #include "Overlays/aluka/aluka.h"
@@ -903,7 +904,66 @@ void ALUKA_EmbraceEntry(Instance *instance)
 
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Embrace);
+void ALUKA_Embrace(Instance *instance)
+{
+
+    MonsterVars *mv; // not from dedbug symbols
+    MonsterAttributes *ma; // not from dedbug symbols
+    AlukaVars *vars; // not from dedbug symbols
+    Instance *enemyInst; // not from dedbug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukaVars *)mv->extraVars;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Embrace(instance);
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        return;
+    }
+
+    mv->auxFlags |= 0x20000000;
+
+    if (vars->swim_anim == ALUKA_ANIM_SWIMSOULSUCK)
+    {
+        if (mv->enemy != NULL && mv->subAttr->combatAttributes->suckRange >= mv->enemy->distance && mv->enemy->mirFlags & 0x1000)
+        {
+            enemyInst = mv->enemy->instance;
+            MON_DoDrainEffects(instance, enemyInst);
+            INSTANCE_Post(enemyInst, 0x40006, mv->subAttr->combatAttributes->suckPower << 8);
+            MON_TurnToPosition(instance, &enemyInst->position, mv->subAttr->speedPivotTurn);
+        }
+        else
+        {
+            MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+        }
+
+        MON_DefaultQueueHandler(instance);
+        return;
+    }
+
+    if (mv->speed > 0)
+    {
+        ALUKA_SetupSwimAnimWOTread(instance);
+        ALUKA_SwimToDestination(instance);
+        return;
+    }
+
+    MON_PlayAnimFromList(instance, ma->auxAnimList, 0xC, 2);
+    vars->swim_anim = ALUKA_ANIM_SWIMSOULSUCK;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_GeneralDeathEntry);
 
@@ -1793,7 +1853,66 @@ void ALUKA_EmbraceEntry(Instance *instance)
 
 }
 
-void ALUKA_Embrace(void) {};
+void ALUKA_Embrace(Instance *instance)
+{
+
+    MonsterVars *mv; // not from dedbug symbols
+    MonsterAttributes *ma; // not from dedbug symbols
+    AlukaVars *vars; // not from dedbug symbols
+    Instance *enemyInst; // not from dedbug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukaVars *)mv->extraVars;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Embrace(instance);
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        return;
+    }
+
+    mv->auxFlags |= 0x20000000;
+
+    if (vars->swim_anim == ALUKA_ANIM_SWIMSOULSUCK)
+    {
+        if (mv->enemy != NULL && mv->subAttr->combatAttributes->suckRange >= mv->enemy->distance && mv->enemy->mirFlags & 0x1000)
+        {
+            enemyInst = mv->enemy->instance;
+            MON_DoDrainEffects(instance, enemyInst);
+            INSTANCE_Post(enemyInst, 0x40006, mv->subAttr->combatAttributes->suckPower << 8);
+            MON_TurnToPosition(instance, &enemyInst->position, mv->subAttr->speedPivotTurn);
+        }
+        else
+        {
+            MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+        }
+
+        MON_DefaultQueueHandler(instance);
+        return;
+    }
+
+    if (mv->speed > 0)
+    {
+        ALUKA_SetupSwimAnimWOTread(instance);
+        ALUKA_SwimToDestination(instance);
+        return;
+    }
+
+    MON_PlayAnimFromList(instance, ma->auxAnimList, 0xC, 2);
+    vars->swim_anim = ALUKA_ANIM_SWIMSOULSUCK;
+}
 
 void ALUKA_GeneralDeathEntry(void) {};
 
