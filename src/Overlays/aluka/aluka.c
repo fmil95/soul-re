@@ -16,6 +16,7 @@
 // TODO: These can be deleted once these functions are matched
 void ALUKA_SwimToDestination(Instance *instance);
 void ALUKA_GetRandomDestination(Instance *instance, Position *destination, Position *start, int range);
+int ALUKA_CapDepth(Instance *instance, Level *level);
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -527,7 +528,49 @@ int ALUKA_NearAluka(Instance *instance)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_GetCircleDestination);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SwimPlanMovement);
+int ALUKA_SwimPlanMovement(Instance *instance, Position *target, Position *step, Level *level)
+{
+
+    int dist; // not from debug symbols
+    int depth; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    dist = MATH3D_LengthXYZ(instance->position.x - target->x, instance->position.y - target->y, instance->position.z - target->z);
+    depth = ALUKA_CapDepth(instance, level);
+
+    COPY_SVEC(Position, step, Position, target);
+
+    if (attrs->circle_start_dist < dist || (mv->age != 0 && depth < target->z && ALUKA_NotDaylight(level)))
+    {
+        switch (ENMYPLAN_MoveToTargetFinal(instance, step, (signed char)mv->pathSlotID, target, 0x1E00001F))
+        {
+        case 0:
+            if (attrs->circle_start_dist < dist)
+            {
+                return 2;
+            }
+            return 0;
+        case 3:
+            MON_GetPlanSlot(mv);
+            if (attrs->circle_start_dist >= dist)
+            {
+                return 0;
+            }
+            return 3;
+        default:
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 
 void ALUKA_ResetSwim(Instance *instance)
 {
@@ -1578,7 +1621,49 @@ int ALUKA_NearAluka(Instance *instance)
 
 void ALUKA_GetCircleDestination(void) {};
 
-void ALUKA_SwimPlanMovement(void) {};
+int ALUKA_SwimPlanMovement(Instance *instance, Position *target, Position *step, Level *level)
+{
+
+    int dist; // not from debug symbols
+    int depth; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    dist = MATH3D_LengthXYZ(instance->position.x - target->x, instance->position.y - target->y, instance->position.z - target->z);
+    depth = ALUKA_CapDepth(instance, level);
+
+    COPY_SVEC(Position, step, Position, target);
+
+    if (attrs->circle_start_dist < dist || (mv->age != 0 && depth < target->z && ALUKA_NotDaylight(level)))
+    {
+        switch (ENMYPLAN_MoveToTargetFinal(instance, step, (signed char)mv->pathSlotID, target, 0x1E00001F))
+        {                        /* irregular */
+        case 0:
+            if (attrs->circle_start_dist < dist)
+            {
+                return 2;
+            }
+            return 0;
+        case 3:
+            MON_GetPlanSlot(mv);
+            if (attrs->circle_start_dist >= dist)
+            {
+                return 0;
+            }
+            return 3;
+        default:
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
 
 void ALUKA_ResetSwim(Instance *instance)
 {
