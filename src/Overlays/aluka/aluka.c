@@ -1264,7 +1264,7 @@ int ALUKA_NotDaylight(Level *level)
 
 }
 
-void ALUKA_CapDepth(void) {};
+void ALUKA_CapDepth(Instance *instance, Level *level) {};
 
 int ALUKA_AngleTooWide(Position *first, Position *second, int cosmult, int cosshift)
 {
