@@ -638,7 +638,48 @@ int ALUKA_ShouldJumpOut(Instance *instance, Instance *enemy, Level *level)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_JumpToEntry);
+void ALUKA_JumpToEntry(Instance *instance, Position *target)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    mv->auxFlags |= 1;
+
+    if (mv->auxFlags & 2)
+    {
+        MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 6, 0);
+    }
+    else
+    {
+        vars->forward_speed_limit = 0;
+        vars->yaw_speed_limit = attrs->swimslow_yaw;
+        vars->pitch_speed_limit = attrs->slow_pitch;
+        mv->auxFlags &= ~0x10;
+    }
+
+    COPY_SVEC(Position, &vars->target, Position, target);
+
+    mv->auxFlags &= ~4;
+    mv->mvFlags |= 0x800;
+
+    instance->xAccl = 0;
+    instance->yAccl = 0;
+    instance->zAccl = -0x10;
+
+    instance->maxXVel = 0xFFFF;
+    instance->maxYVel = 0xFFFF;
+    instance->maxZVel = 0xFFFF;
+
+    mv->mode = 0x100000;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SetJumpVels);
 
@@ -1730,7 +1771,48 @@ int ALUKA_ShouldJumpOut(Instance *instance, Instance *enemy, Level *level)
     return 0;
 }
 
-void ALUKA_JumpToEntry(void) {};
+void ALUKA_JumpToEntry(Instance *instance, Position *target)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    mv->auxFlags |= 1;
+
+    if (mv->auxFlags & 2)
+    {
+        MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 6, 0);
+    }
+    else
+    {
+        vars->forward_speed_limit = 0;
+        vars->yaw_speed_limit = attrs->swimslow_yaw;
+        vars->pitch_speed_limit = attrs->slow_pitch;
+        mv->auxFlags &= ~0x10;
+    }
+
+    COPY_SVEC(Position, &vars->target, Position, target);
+
+    mv->auxFlags &= ~4;
+    mv->mvFlags |= 0x800;
+
+    instance->xAccl = 0;
+    instance->yAccl = 0;
+    instance->zAccl = -0x10;
+
+    instance->maxXVel = 0xFFFF;
+    instance->maxYVel = 0xFFFF;
+    instance->maxZVel = 0xFFFF;
+
+    mv->mode = 0x100000;
+}
 
 void ALUKA_SetJumpVels(void) {};
 
