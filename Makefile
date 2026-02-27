@@ -9,6 +9,7 @@ SKIP_ASM         ?= 0
 VERBOSE          ?= 0
 BUILD_DIR        ?= build
 TOOLS_DIR        := tools
+BIGFILE_DIR			 := bigfile	
 OBJDIFF_DIR      := $(TOOLS_DIR)/objdiff
 EXPECTED_DIR     ?= expected
 CHECK            ?= 1
@@ -195,11 +196,18 @@ clean:
 distclean: clean
 	$(V)rm -f $(LD_SCRIPT)
 	$(V)rm -rf asm
+	$(V)rm -rf $(BIGFILE_DIR)
 	$(V)rm -rf *_auto.txt
 
 setup: distclean split
 
 setupexe: distclean splitexe
+
+unpack:
+	@$(PYTHON) $(TOOLS_DIR)/cd-dat-utils/dat_utils.py --config dat-config.json unpack BIGFILE.DAT $(BIGFILE_DIR)
+
+setup-overlays:
+	$(V)$(foreach ov,$(OVERLAYS),$(PYTHON) $(TOOLS_DIR)/scripts/un_drm.py --input $(BIGFILE_DIR)/kain2/object/$(ov)/$(ov).drm --output .;)
 
 split:
 	$(V)$(SPLAT)
