@@ -93,7 +93,7 @@ typedef struct _AlukaAttributes {
     short swim_smell_distance;
 } AlukaAttributes;
 
-// size: 0x26
+// size: 0x2C
 typedef struct _AlukaVars {
     // offset 0x0000
     int special_time;
@@ -127,6 +127,12 @@ typedef struct _AlukaVars {
     short swim_anim;
     // offset 0x0020
     Position target;
+    // offset 0x0026
+    short last_pm;
+    // offset 0x0028
+    short pitch;
+    // offset 0x002A
+    short junk;
 } AlukaVars;
 
 #endif
