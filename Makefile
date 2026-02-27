@@ -206,7 +206,7 @@ setupexe: distclean splitexe
 unpack:
 	@$(PYTHON) $(TOOLS_DIR)/cd-dat-utils/dat_utils.py --config dat-config.json unpack BIGFILE.DAT $(BIGFILE_DIR)
 
-setup-overlays:
+setup-overlays: unpack
 	$(V)$(foreach ov,$(OVERLAYS),$(PYTHON) $(TOOLS_DIR)/scripts/un_drm.py --input $(BIGFILE_DIR)/kain2/object/$(ov)/$(ov).drm --output .;)
 
 split:
