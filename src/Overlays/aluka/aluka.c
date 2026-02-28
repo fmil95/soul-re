@@ -6,11 +6,13 @@
 #include "Game/MATH3D.h"
 #include "Game/MEMPACK.h"
 #include "Game/G2/ANMCTRLR.h"
+#include "Game/G2/ANMG2ILF.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/PHYSICS.h"
 #include "Game/PLAN/ENMYPLAN.h"
+#include "Game/STATE.h"
 #include "Game/STREAM.h"
 #include "Overlays/aluka/aluka.h"
 
@@ -1324,7 +1326,58 @@ void ALUKA_GeneralDeathEntry(Instance *instance)
     MON_DropAllObjects(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_GeneralDeath);
+void ALUKA_GeneralDeath(Instance *instance)
+{
+
+    int setDeadNoAnim; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    if (mv->extraVars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_GeneralDeath(instance);
+        return;
+    }
+
+    mv->auxFlags |= 0x20000000;
+    setDeadNoAnim = 0;
+
+    if (instance->flags2 & 2 && mv->generalTimer < MON_GetTime(instance))
+    {
+        if (mv->causeOfDeath == MONSTER_CAUSEOFDEATH_FIRE || mv->causeOfDeath == MONSTER_CAUSEOFDEATH_SUN)
+        {
+            MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMDEATH, 1);
+        }
+        else
+        {
+            setDeadNoAnim = 1;
+        }
+    }
+
+    if (instance->flags2 & 0x10)
+    {
+        setDeadNoAnim = 1;
+    }
+
+    if (setDeadNoAnim || mv->causeOfDeath == MONSTER_CAUSEOFDEATH_STONE)
+    {
+        mv->mvFlags &= ~0x10;
+        G2Anim_SetNoLooping(&instance->anim);
+        MON_SwitchState(instance, MONSTER_STATE_DEAD);
+    }
+
+    while (DeMessageQueue(&mv->messageQueue) != NULL);
+}
+
 
 #else
 
@@ -2626,6 +2679,57 @@ void ALUKA_GeneralDeathEntry(Instance *instance)
     MON_DropAllObjects(instance);
 }
 
-void ALUKA_GeneralDeath(void) {};
+void ALUKA_GeneralDeath(Instance *instance)
+{
+
+    int setDeadNoAnim; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    if (mv->extraVars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_GeneralDeath(instance);
+        return;
+    }
+
+    mv->auxFlags |= 0x20000000;
+    setDeadNoAnim = 0;
+
+    if (instance->flags2 & 2 && mv->generalTimer < MON_GetTime(instance))
+    {
+        if (mv->causeOfDeath == MONSTER_CAUSEOFDEATH_FIRE || mv->causeOfDeath == MONSTER_CAUSEOFDEATH_SUN)
+        {
+            MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMDEATH, 1);
+        }
+        else
+        {
+            setDeadNoAnim = 1;
+        }
+    }
+
+    if (instance->flags2 & 0x10)
+    {
+        setDeadNoAnim = 1;
+    }
+
+    if (setDeadNoAnim || mv->causeOfDeath == MONSTER_CAUSEOFDEATH_STONE)
+    {
+        mv->mvFlags &= ~0x10;
+        G2Anim_SetNoLooping(&instance->anim);
+        MON_SwitchState(instance, MONSTER_STATE_DEAD);
+    }
+
+    while (DeMessageQueue(&mv->messageQueue) != NULL);
+}
+
 
 #endif
