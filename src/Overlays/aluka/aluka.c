@@ -1131,7 +1131,45 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ProjectileEntry);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Projectile);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SurpriseAttackEntry);
+void ALUKA_SurpriseAttackEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (AlukaVars *)mv->extraVars;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_SurpriseAttackEntry(instance);
+        return;
+    }
+
+    instance->zAccl = 0;
+    instance->yAccl = 0;
+    instance->xAccl = 0;
+
+    instance->zVel = 0;
+    instance->yVel = 0;
+    instance->xVel = 0;
+
+    vars->pitch_offset_speed = 0;
+    vars->pitch_speed = 0;
+    vars->yaw_speed = 0;
+    mv->speed = 0;
+    vars->pitch_offset = 0x400;
+
+    ALUKA_EnableControllers(instance);
+    mv->mvFlags |= 0x800;
+    ALUKA_AttackEntry(instance);
+
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SurpriseAttack);
 
@@ -2519,7 +2557,45 @@ void ALUKA_ProjectileEntry(void) {};
 
 void ALUKA_Projectile(void) {};
 
-void ALUKA_SurpriseAttackEntry(void) {};
+void ALUKA_SurpriseAttackEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (AlukaVars *)mv->extraVars;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_SurpriseAttackEntry(instance);
+        return;
+    }
+
+    instance->zAccl = 0;
+    instance->yAccl = 0;
+    instance->xAccl = 0;
+
+    instance->zVel = 0;
+    instance->yVel = 0;
+    instance->xVel = 0;
+
+    vars->pitch_offset_speed = 0;
+    vars->pitch_speed = 0;
+    vars->yaw_speed = 0;
+    mv->speed = 0;
+    vars->pitch_offset = 0x400;
+
+    ALUKA_EnableControllers(instance);
+    mv->mvFlags |= 0x800;
+    ALUKA_AttackEntry(instance);
+
+}
 
 void ALUKA_SurpriseAttack(void) {};
 
