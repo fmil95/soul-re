@@ -9,6 +9,7 @@
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSTER.h"
+#include "Game/PHYSICS.h"
 #include "Game/PLAN/ENMYPLAN.h"
 #include "Game/STREAM.h"
 #include "Overlays/aluka/aluka.h"
@@ -1042,7 +1043,48 @@ void ALUKA_HitEntry(Instance *instance)
     mv->mode = 0x8000;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Hit);
+void ALUKA_Hit(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->extraVars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Hit(instance);
+        return;
+    }
+
+    mv->auxFlags |= 0x20000000;
+
+    if (mv->generalTimer < MON_GetTime(instance))
+    {
+        if (mv->mvFlags & 0x100)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_STUNNED);
+        }
+        else
+        {
+            MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+        }
+
+        instance->xVel = 0;
+        instance->yVel = 0;
+        instance->zVel = 0;
+
+    }
+
+    MON_DefaultQueueHandler(instance);
+    PHYSICS_StopIfCloseToTarget(instance, 0, 0, 0);
+    PhysicsMove(instance, &instance->position, gameTrackerX.timeMult);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_StunnedEntry);
 
@@ -2208,7 +2250,48 @@ void ALUKA_HitEntry(Instance *instance)
     mv->mode = 0x8000;
 }
 
-void ALUKA_Hit(void) {};
+void ALUKA_Hit(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->extraVars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Hit(instance);
+        return;
+    }
+
+    mv->auxFlags |= 0x20000000;
+
+    if (mv->generalTimer < MON_GetTime(instance))
+    {
+        if (mv->mvFlags & 0x100)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_STUNNED);
+        }
+        else
+        {
+            MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+        }
+
+        instance->xVel = 0;
+        instance->yVel = 0;
+        instance->zVel = 0;
+
+    }
+
+    MON_DefaultQueueHandler(instance);
+    PHYSICS_StopIfCloseToTarget(instance, 0, 0, 0);
+    PhysicsMove(instance, &instance->position, gameTrackerX.timeMult);
+}
 
 void ALUKA_StunnedEntry(void) {};
 
