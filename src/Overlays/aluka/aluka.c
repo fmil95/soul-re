@@ -787,7 +787,42 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_PursueEntry);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Pursue);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_AttackEntry);
+void ALUKA_AttackEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterCombatAttributes *combat; // not from debug symbols
+    int attack; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_AttackEntry(instance);
+        return;
+    }
+
+    combat = mv->subAttr->combatAttributes;
+    attack = (signed char)combat->numAttacks + 0x2B;
+
+    mv->attackType = &ma->attackAttributesList[*((signed char *)combat + attack)];
+    mv->attackState = 0;
+
+    vars->forward_speed_limit = attrs->swimattack_speed;
+    vars->yaw_speed_limit = attrs->swimattack_yaw;
+    vars->pitch_speed_limit = attrs->swimattack_pitch;
+}
 
 INCLUDE_RODATA("asm/nonmatchings/Overlays/aluka/aluka", D_88000000);
 
@@ -2143,7 +2178,42 @@ void ALUKA_PursueEntry(void) {};
 
 void ALUKA_Pursue(void) {};
 
-void ALUKA_AttackEntry(void) {};
+void ALUKA_AttackEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterCombatAttributes *combat; // not from debug symbols
+    int attack; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_AttackEntry(instance);
+        return;
+    }
+
+    combat = mv->subAttr->combatAttributes;
+    attack = (signed char)combat->numAttacks + 0x2B;
+
+    mv->attackType = &ma->attackAttributesList[*((signed char *)combat + attack)];
+    mv->attackState = 0;
+
+    vars->forward_speed_limit = attrs->swimattack_speed;
+    vars->yaw_speed_limit = attrs->swimattack_yaw;
+    vars->pitch_speed_limit = attrs->swimattack_pitch;
+}
 
 void ALUKA_Attack(void) {};
 
