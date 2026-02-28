@@ -1005,7 +1005,42 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_LandInWaterEntry);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_LandInWater);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_HitEntry);
+void ALUKA_HitEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukaVars *)mv->extraVars;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_HitEntry(instance);
+        return;
+    }
+
+    enemy = mv->enemy;
+    enemy->mirConditions |= 0x400;
+    enemy->mirFlags &= 0xEFFF;
+    mv->mvFlags |= 0x10000;
+
+    if (MON_SetUpKnockBack(instance, enemy->instance, (evMonsterHitData *)mv->messageData))
+    {
+        MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMHIT, 1);
+    }
+
+    vars->swim_anim = ALUKA_ANIM_NO_ANIM;
+    mv->mode = 0x8000;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Hit);
 
@@ -2136,7 +2171,42 @@ void ALUKA_LandInWaterEntry(void) {};
 
 void ALUKA_LandInWater(void) {};
 
-void ALUKA_HitEntry(void) {};
+void ALUKA_HitEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukaVars *)mv->extraVars;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_HitEntry(instance);
+        return;
+    }
+
+    enemy = mv->enemy;
+    enemy->mirConditions |= 0x400;
+    enemy->mirFlags &= 0xEFFF;
+    mv->mvFlags |= 0x10000;
+
+    if (MON_SetUpKnockBack(instance, enemy->instance, (evMonsterHitData *)mv->messageData))
+    {
+        MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMHIT, 1);
+    }
+
+    vars->swim_anim = ALUKA_ANIM_NO_ANIM;
+    mv->mode = 0x8000;
+}
 
 void ALUKA_Hit(void) {};
 
