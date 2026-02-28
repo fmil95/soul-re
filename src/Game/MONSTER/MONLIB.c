@@ -2393,7 +2393,7 @@ void MON_SetUpSaveInfo(Instance *instance, MonsterSaveInfo *saveData)
 
     saveData->causeOfDeath = mv->causeOfDeath;
 
-    if ((instance->currentMainState == MONSTER_STATE_DEAD) && (mv->causeOfDeath == 0))
+    if (instance->currentMainState == MONSTER_STATE_DEAD && mv->causeOfDeath == MONSTER_CAUSEOFDEATH_IMPALE)
     {
         saveData->soulJuice = mv->heldID;
     }
@@ -2463,7 +2463,7 @@ void MON_GetSaveInfo(Instance *instance, MonsterSaveInfo *saveData)
 
         mv->soulID = ~0x80000000;
     case 23:
-        if (mv->causeOfDeath == 0)
+        if (mv->causeOfDeath == MONSTER_CAUSEOFDEATH_IMPALE)
         {
             mv->heldID = mv->soulJuice;
 
@@ -2525,7 +2525,7 @@ void MON_KillMonster(Instance *instance)
     mv = (MonsterVars *)instance->extraData;
     MON_DropAllObjects(instance);
 
-    if (mv->causeOfDeath == 6)
+    if (mv->causeOfDeath == MONSTER_CAUSEOFDEATH_STONE)
     {
 
         MonsterAttributes *attr;

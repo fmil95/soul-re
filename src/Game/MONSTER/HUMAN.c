@@ -215,7 +215,7 @@ void HUMAN_Dead(Instance *instance)
 
     instance->fadeValue = (MON_GetTime(instance) - mv->damageTimer);
 
-    if (mv->causeOfDeath == 6)
+    if (mv->causeOfDeath == MONSTER_CAUSEOFDEATH_STONE)
     {
         MON_Dead(instance);
         return;
