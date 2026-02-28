@@ -1253,7 +1253,76 @@ void ALUKA_Embrace(Instance *instance)
     vars->swim_anim = ALUKA_ANIM_SWIMSOULSUCK;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_GeneralDeathEntry);
+void ALUKA_GeneralDeathEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_GeneralDeathEntry(instance);
+        return;
+    }
+
+    if (instance->LinkParent != NULL)
+    {
+        MON_UnlinkFromRaziel(instance);
+    }
+
+    instance->xAccl = 0;
+    instance->yAccl = 0;
+    // instance->zAccl = 0;
+    mv->mvFlags |= 0x202000;
+    mv->mvFlags &= ~0x10;
+
+    switch (mv->damageType)
+    {                          /* irregular */
+    case 0x20:
+        mv->causeOfDeath = MONSTER_CAUSEOFDEATH_FIRE;
+        /* fallthrough */
+    case 0x40:
+        MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMAGONY, 2);
+        if (mv->damageType == 0x40)
+        {
+            mv->causeOfDeath = MONSTER_CAUSEOFDEATH_SUN;
+        }
+        mv->generalTimer = (int)(MON_GetTime(instance) + 0xBB8);
+        mv->mvFlags = (int)(mv->mvFlags | 0x400000);
+        mv->effectTimer = (int)(MON_GetTime(instance) + 0x2710);
+        MON_MonsterGlow(instance, 0x4960, -1, 0, 0);
+        break;
+    case 0x200:
+        MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMAGONY, 2);
+        mv->causeOfDeath = MONSTER_CAUSEOFDEATH_SOUND;
+        mv->generalTimer = (int)(MON_GetTime(instance) + 0x3E8);
+        break;
+    case 0x400:
+        mv->causeOfDeath = MONSTER_CAUSEOFDEATH_STONE;
+        mv->generalTimer = 0;
+        break;
+    default:
+        mv->causeOfDeath = MONSTER_CAUSEOFDEATH_DAMAGE;
+        MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMDEATH, 1);
+        break;
+    }
+
+    MON_TurnOffAllSpheres(instance);
+    MON_DropAllObjects(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_GeneralDeath);
 
@@ -2486,7 +2555,76 @@ void ALUKA_Embrace(Instance *instance)
     vars->swim_anim = ALUKA_ANIM_SWIMSOULSUCK;
 }
 
-void ALUKA_GeneralDeathEntry(void) {};
+void ALUKA_GeneralDeathEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_GeneralDeathEntry(instance);
+        return;
+    }
+
+    if (instance->LinkParent != NULL)
+    {
+        MON_UnlinkFromRaziel(instance);
+    }
+
+    instance->xAccl = 0;
+    instance->yAccl = 0;
+    // instance->zAccl = 0;
+    mv->mvFlags |= 0x202000;
+    mv->mvFlags &= ~0x10;
+
+    switch (mv->damageType)
+    {                          /* irregular */
+    case 0x20:
+        mv->causeOfDeath = MONSTER_CAUSEOFDEATH_FIRE;
+        /* fallthrough */
+    case 0x40:
+        MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMAGONY, 2);
+        if (mv->damageType == 0x40)
+        {
+            mv->causeOfDeath = MONSTER_CAUSEOFDEATH_SUN;
+        }
+        mv->generalTimer = (int)(MON_GetTime(instance) + 0xBB8);
+        mv->mvFlags = (int)(mv->mvFlags | 0x400000);
+        mv->effectTimer = (int)(MON_GetTime(instance) + 0x2710);
+        MON_MonsterGlow(instance, 0x4960, -1, 0, 0);
+        break;
+    case 0x200:
+        MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMAGONY, 2);
+        mv->causeOfDeath = MONSTER_CAUSEOFDEATH_SOUND;
+        mv->generalTimer = (int)(MON_GetTime(instance) + 0x3E8);
+        break;
+    case 0x400:
+        mv->causeOfDeath = MONSTER_CAUSEOFDEATH_STONE;
+        mv->generalTimer = 0;
+        break;
+    default:
+        mv->causeOfDeath = MONSTER_CAUSEOFDEATH_DAMAGE;
+        MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMDEATH, 1);
+        break;
+    }
+
+    MON_TurnOffAllSpheres(instance);
+    MON_DropAllObjects(instance);
+}
 
 void ALUKA_GeneralDeath(void) {};
 
