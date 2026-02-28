@@ -1098,7 +1098,26 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SurpriseAttackEntry);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SurpriseAttack);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SurprisedEntry);
+void ALUKA_SurprisedEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->extraVars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_SurprisedEntry(instance);
+    }
+    else
+    {
+        MON_SwitchStateDoEntry(instance, MONSTER_STATE_PURSUE);
+    }
+}
 
 void ALUKA_Surprised(Instance *instance)
 {
@@ -2312,7 +2331,26 @@ void ALUKA_SurpriseAttackEntry(void) {};
 
 void ALUKA_SurpriseAttack(void) {};
 
-void ALUKA_SurprisedEntry(void) {};
+void ALUKA_SurprisedEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->extraVars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_SurprisedEntry(instance);
+    }
+    else
+    {
+        MON_SwitchStateDoEntry(instance, MONSTER_STATE_PURSUE);
+    }
+}
 
 void ALUKA_Surprised(Instance *instance)
 {
