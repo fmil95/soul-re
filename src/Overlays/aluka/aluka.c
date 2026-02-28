@@ -421,7 +421,7 @@ void ALUKA_SetupSwimAnimWOTread(Instance *instance)
     {
         if (vars->swim_anim != ALUKA_ANIM_SWIMSLOW)
         {
-            MON_PlayAnimFromList(instance, ma->auxAnimList, 1, 2);
+            MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMSLOW, 2);
             vars->swim_anim = ALUKA_ANIM_SWIMSLOW;
 
             if (vars->pitch_offset < 0x400)
@@ -439,7 +439,7 @@ void ALUKA_SetupSwimAnimWOTread(Instance *instance)
     if (vars->swim_anim != ALUKA_ANIM_SWIMFAST)
     {
 
-        MON_PlayAnimFromList(instance, ma->auxAnimList, 2, 2);
+        MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMFAST, 2);
         vars->swim_anim = ALUKA_ANIM_SWIMFAST;
 
         if (vars->pitch_offset < 0x400)
@@ -476,7 +476,7 @@ void ALUKA_SetupSwimAnimWTread(Instance *instance)
     {
         if (vars->swim_anim != ALUKA_ANIM_TREAD)
         {
-            MON_PlayAnimFromList(instance, ma->auxAnimList, 0xA, 2);
+            MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_TREAD, 2);
             vars->swim_anim = ALUKA_ANIM_TREAD;
             if (vars->pitch_offset > 0)
             {
@@ -656,7 +656,7 @@ void ALUKA_JumpToEntry(Instance *instance, Position *target)
 
     if (mv->auxFlags & 2)
     {
-        MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 6, 0);
+        MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, ALUKA_ANIM_JUMPIN, 0);
     }
     else
     {
@@ -967,7 +967,7 @@ void ALUKA_IdleEntry(Instance *instance)
     vars->pitch_speed_limit = 0;
 
     ma = (MonsterAttributes *)instance->data;
-    MON_PlayAnimFromList(instance, ma->auxAnimList, 0, 2);
+    MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMIDLE, 2);
     vars->swim_anim = ALUKA_ANIM_SWIMIDLE;
     mv->mode = 1;
 
@@ -1223,7 +1223,7 @@ void ALUKA_Embrace(Instance *instance)
         return;
     }
 
-    MON_PlayAnimFromList(instance, ma->auxAnimList, 0xC, 2);
+    MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMSOULSUCK, 2);
     vars->swim_anim = ALUKA_ANIM_SWIMSOULSUCK;
 }
 
@@ -1631,7 +1631,7 @@ void ALUKA_SetupSwimAnimWOTread(Instance *instance)
     {
         if (vars->swim_anim != ALUKA_ANIM_SWIMSLOW)
         {
-            MON_PlayAnimFromList(instance, ma->auxAnimList, 1, 2);
+            MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMSLOW, 2);
             vars->swim_anim = ALUKA_ANIM_SWIMSLOW;
 
             if (vars->pitch_offset < 0x400)
@@ -1649,7 +1649,7 @@ void ALUKA_SetupSwimAnimWOTread(Instance *instance)
     if (vars->swim_anim != ALUKA_ANIM_SWIMFAST)
     {
 
-        MON_PlayAnimFromList(instance, ma->auxAnimList, 2, 2);
+        MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMFAST, 2);
         vars->swim_anim = ALUKA_ANIM_SWIMFAST;
 
         if (vars->pitch_offset < 0x400)
@@ -1686,7 +1686,7 @@ void ALUKA_SetupSwimAnimWTread(Instance *instance)
     {
         if (vars->swim_anim != ALUKA_ANIM_TREAD)
         {
-            MON_PlayAnimFromList(instance, ma->auxAnimList, 0xA, 2);
+            MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_TREAD, 2);
             vars->swim_anim = ALUKA_ANIM_TREAD;
             if (vars->pitch_offset > 0)
             {
@@ -1865,7 +1865,7 @@ void ALUKA_JumpToEntry(Instance *instance, Position *target)
 
     if (mv->auxFlags & 2)
     {
-        MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 6, 0);
+        MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, ALUKA_ANIM_JUMPIN, 0);
     }
     else
     {
@@ -2174,7 +2174,7 @@ void ALUKA_IdleEntry(Instance *instance)
     vars->pitch_speed_limit = 0;
 
     ma = (MonsterAttributes *)instance->data;
-    MON_PlayAnimFromList(instance, ma->auxAnimList, 0, 2);
+    MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMIDLE, 2);
     vars->swim_anim = ALUKA_ANIM_SWIMIDLE;
     mv->mode = 1;
 
@@ -2430,7 +2430,7 @@ void ALUKA_Embrace(Instance *instance)
         return;
     }
 
-    MON_PlayAnimFromList(instance, ma->auxAnimList, 0xC, 2);
+    MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMSOULSUCK, 2);
     vars->swim_anim = ALUKA_ANIM_SWIMSOULSUCK;
 }
 
