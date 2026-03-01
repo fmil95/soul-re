@@ -785,7 +785,45 @@ void ALUKA_CleanUp(Instance *instance)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Message);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_PursueEntry);
+void ALUKA_PursueEntry(Instance *instance)
+{
+    MonsterVars *mv;
+    MonsterAttributes *ma;
+    AlukaVars *vars;
+    AlukaAttributes *attrs;
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_PursueEntry(instance);
+        return;
+    }
+
+    if (ALUKA_ControllersEnabled(instance) == G2FALSE)
+    {
+        mv->speed = 0;
+        vars->pitch_offset = 0x400;
+        vars->yaw_speed = 0;
+        vars->pitch_speed = 0;
+        vars->pitch_offset_speed = 0;
+        vars->swim_anim = ALUKA_ANIM_NO_ANIM;
+        ALUKA_EnableControllers(instance);
+    }
+
+    MON_GetPlanSlot(mv);
+    vars->last_pm = 0;
+    vars->special_time = MON_GetTime(instance) + (attrs->too_long_since_attack * 990);
+    mv->mode = 4;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Pursue);
 
@@ -1446,7 +1484,7 @@ void ALUKA_Projectile(Instance *instance)
                 if (!ALUKA_AngleTooWide(&facing, &delta, 0x3F0, 0xA))
                 {
                     MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, ALUKA_ANIM_SWIMSPIT, 1);
-                    vars->swim_anim = 9;
+                    vars->swim_anim = ALUKA_ANIM_SWIMSPIT;
                     mv->attackState++;
                     vars->special_time = MON_GetTime(instance) + ((unsigned char)attrs->spit_attack_frame * 0x21);
                 }
@@ -2566,7 +2604,45 @@ void ALUKA_CleanUp(Instance *instance)
 
 void ALUKA_Message(void) {};
 
-void ALUKA_PursueEntry(void) {};
+void ALUKA_PursueEntry(Instance *instance)
+{
+    MonsterVars *mv;
+    MonsterAttributes *ma;
+    AlukaVars *vars;
+    AlukaAttributes *attrs;
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_PursueEntry(instance);
+        return;
+    }
+
+    if (ALUKA_ControllersEnabled(instance) == G2FALSE)
+    {
+        mv->speed = 0;
+        vars->pitch_offset = 0x400;
+        vars->yaw_speed = 0;
+        vars->pitch_speed = 0;
+        vars->pitch_offset_speed = 0;
+        vars->swim_anim = ALUKA_ANIM_NO_ANIM;
+        ALUKA_EnableControllers(instance);
+    }
+
+    MON_GetPlanSlot(mv);
+    vars->last_pm = 0;
+    vars->special_time = MON_GetTime(instance) + (attrs->too_long_since_attack * 990);
+    mv->mode = 4;
+}
 
 void ALUKA_Pursue(void) {};
 
@@ -3225,7 +3301,7 @@ void ALUKA_Projectile(Instance *instance)
                 if (!ALUKA_AngleTooWide(&facing, &delta, 0x3F0, 0xA))
                 {
                     MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, ALUKA_ANIM_SWIMSPIT, 1);
-                    vars->swim_anim = 9;
+                    vars->swim_anim = ALUKA_ANIM_SWIMSPIT;
                     mv->attackState++;
                     vars->special_time = MON_GetTime(instance) + ((unsigned char)attrs->spit_attack_frame * 0x21);
                 }
