@@ -5528,7 +5528,7 @@ int SetStates(Instance *instance, GameTracker *GT, long *controlCommand, int Ana
     }
     else
     {
-        if (Raziel.Senses.Portal != NULL && INSTANCE_Query(Raziel.Senses.Portal, queryG2CurrentAnimation) != 0))
+        if (Raziel.Senses.Portal != NULL && INSTANCE_Query(Raziel.Senses.Portal, queryG2CurrentAnimation) != 0)
         {
             FX_EndInstanceParticleEffects(Raziel.Senses.Portal);
 
