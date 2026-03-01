@@ -20,6 +20,7 @@
 void ALUKA_SwimToDestination(Instance *instance);
 void ALUKA_GetRandomDestination(Instance *instance, Position *destination, Position *start, int range);
 int ALUKA_CapDepth(Instance *instance, Level *level);
+void ALUKA_ApplyRots(Instance *instance, int time);
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -1143,7 +1144,37 @@ void ALUKA_Idle(Instance *instance)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_LandInWaterEntry);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_LandInWater);
+void ALUKA_LandInWater(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    Level *level; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (AlukaVars *)mv->extraVars;
+    level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    vars->pitch_offset_speed = 0x67;
+    PhysicsMove(instance, &instance->position, gameTrackerX.timeMult);
+    ALUKA_ApplyRots(instance, gameTrackerX.timeMult);
+
+    if (ALUKA_CapDepth(instance, level) >= instance->position.z && vars->pitch_offset == 0x400)
+    {
+        instance->zVel = 0;
+        vars->pitch_offset_speed = 0;
+        vars->pitch_speed = 0;
+        MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+        vars->swim_anim = ALUKA_ANIM_NO_ANIM;
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 void ALUKA_HitEntry(Instance *instance)
 {
@@ -2769,7 +2800,37 @@ void ALUKA_Idle(Instance *instance)
 
 void ALUKA_LandInWaterEntry(void) {};
 
-void ALUKA_LandInWater(void) {};
+void ALUKA_LandInWater(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    Level *level; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (AlukaVars *)mv->extraVars;
+    level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    vars->pitch_offset_speed = 0x67;
+    PhysicsMove(instance, &instance->position, gameTrackerX.timeMult);
+    ALUKA_ApplyRots(instance, gameTrackerX.timeMult);
+
+    if (ALUKA_CapDepth(instance, level) >= instance->position.z && vars->pitch_offset == 0x400)
+    {
+        instance->zVel = 0;
+        vars->pitch_offset_speed = 0;
+        vars->pitch_speed = 0;
+        MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+        vars->swim_anim = ALUKA_ANIM_NO_ANIM;
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 void ALUKA_HitEntry(Instance *instance)
 {
