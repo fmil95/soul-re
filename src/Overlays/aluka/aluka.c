@@ -7,6 +7,7 @@
 #include "Game/MEMPACK.h"
 #include "Game/G2/ANMCTRLR.h"
 #include "Game/G2/ANMG2ILF.h"
+#include "Game/MONSTER/MISSILE.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSTER.h"
@@ -1379,8 +1380,102 @@ void ALUKA_ProjectileEntry(Instance *instance)
     vars->pitch_speed_limit = attrs->swimspit_pitch;
 }
 
+void ALUKA_Projectile(Instance *instance)
+{
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Projectile);
+    MonsterIR *enemy; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Projectile(instance);
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        return;
+    }
+
+    enemy = mv->enemy;
+    mv->auxFlags |= 0x20000000;
+
+    if (enemy != NULL)
+    {
+
+        Instance *enemyInst; // not from debug symbols
+        Position *enemyPos; // not from debug symbols
+
+        enemyInst = enemy->instance;
+        enemyPos = &enemyInst->position;
+
+        COPY_SVEC(Position, &mv->destination, Position, enemyPos);
+
+        mv->destination.z += attrs->attack_pos_bump;
+
+        switch ((signed char)mv->attackState)
+        {
+        case 0:
+            if (vars->pitch_offset <= 0)
+            {
+
+                Position delta; // not from debug symbols
+                Position facing; // not from debug symbols
+
+                delta.x = enemyPos->x - instance->position.x;
+                delta.y = enemyPos->y - instance->position.y;
+                delta.z = 0;
+
+                ALUKA_FacingVector(instance, &facing, 0x1000);
+                facing.z = 0;
+                if (!ALUKA_AngleTooWide(&facing, &delta, 0x3F0, 0xA))
+                {
+                    MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, ALUKA_ANIM_SWIMSPIT, 1);
+                    vars->swim_anim = 9;
+                    mv->attackState++;
+                    vars->special_time = MON_GetTime(instance) + ((unsigned char)attrs->spit_attack_frame * 0x21);
+                }
+            }
+            break;
+        case 1:
+            if (MON_GetTime(instance) >= (unsigned long)vars->special_time)
+            {
+                MISSILE_FireAtInstance(instance, &ma->missileList[(signed char)mv->subAttr->combatAttributes->missileAttack], mv->enemy->instance);
+                mv->attackState++;
+            }
+            break;
+        case 2:
+            if (instance->flags2 & 0x10)
+            {
+                vars->swim_anim = ALUKA_ANIM_NO_ANIM;
+                MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+            }
+            break;
+        }
+    }
+    else
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+
+    ALUKA_SetupSwimAnimWTread(instance);
+    ALUKA_SwimToDestination(instance);
+}
 
 void ALUKA_SurpriseAttackEntry(Instance *instance)
 {
@@ -1620,30 +1715,29 @@ void ALUKA_GeneralDeathEntry(Instance *instance)
 
     instance->xAccl = 0;
     instance->yAccl = 0;
-    // instance->zAccl = 0;
+
     mv->mvFlags |= 0x202000;
     mv->mvFlags &= ~0x10;
 
     switch (mv->damageType)
-    {                          /* irregular */
+    {
     case 0x20:
         mv->causeOfDeath = MONSTER_CAUSEOFDEATH_FIRE;
-        /* fallthrough */
     case 0x40:
         MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMAGONY, 2);
         if (mv->damageType == 0x40)
         {
             mv->causeOfDeath = MONSTER_CAUSEOFDEATH_SUN;
         }
-        mv->generalTimer = (int)(MON_GetTime(instance) + 0xBB8);
-        mv->mvFlags = (int)(mv->mvFlags | 0x400000);
-        mv->effectTimer = (int)(MON_GetTime(instance) + 0x2710);
+        mv->generalTimer = MON_GetTime(instance) + 0xBB8;
+        mv->mvFlags |= 0x400000;
+        mv->effectTimer = MON_GetTime(instance) + 0x2710;
         MON_MonsterGlow(instance, 0x4960, -1, 0, 0);
         break;
     case 0x200:
         MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMAGONY, 2);
         mv->causeOfDeath = MONSTER_CAUSEOFDEATH_SOUND;
-        mv->generalTimer = (int)(MON_GetTime(instance) + 0x3E8);
+        mv->generalTimer = MON_GetTime(instance) + 0x3E8;
         break;
     case 0x400:
         mv->causeOfDeath = MONSTER_CAUSEOFDEATH_STONE;
@@ -3065,7 +3159,102 @@ void ALUKA_ProjectileEntry(Instance *instance)
 }
 
 
-void ALUKA_Projectile(void) {};
+void ALUKA_Projectile(Instance *instance)
+{
+
+    MonsterIR *enemy; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukaVars *)mv->extraVars;
+    attrs = (AlukaAttributes *)ma->tunData;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Projectile(instance);
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        return;
+    }
+
+    enemy = mv->enemy;
+    mv->auxFlags |= 0x20000000;
+
+    if (enemy != NULL)
+    {
+
+        Instance *enemyInst; // not from debug symbols
+        Position *enemyPos; // not from debug symbols
+
+        enemyInst = enemy->instance;
+        enemyPos = &enemyInst->position;
+
+        COPY_SVEC(Position, &mv->destination, Position, enemyPos);
+
+        mv->destination.z += attrs->attack_pos_bump;
+
+        switch ((signed char)mv->attackState)
+        {
+        case 0:
+            if (vars->pitch_offset <= 0)
+            {
+
+                Position delta; // not from debug symbols
+                Position facing; // not from debug symbols
+
+                delta.x = enemyPos->x - instance->position.x;
+                delta.y = enemyPos->y - instance->position.y;
+                delta.z = 0;
+
+                ALUKA_FacingVector(instance, &facing, 0x1000);
+                facing.z = 0;
+                if (!ALUKA_AngleTooWide(&facing, &delta, 0x3F0, 0xA))
+                {
+                    MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, ALUKA_ANIM_SWIMSPIT, 1);
+                    vars->swim_anim = 9;
+                    mv->attackState++;
+                    vars->special_time = MON_GetTime(instance) + ((unsigned char)attrs->spit_attack_frame * 0x21);
+                }
+            }
+            break;
+        case 1:
+            if (MON_GetTime(instance) >= (unsigned long)vars->special_time)
+            {
+                MISSILE_FireAtInstance(instance, &ma->missileList[(signed char)mv->subAttr->combatAttributes->missileAttack], mv->enemy->instance);
+                mv->attackState++;
+            }
+            break;
+        case 2:
+            if (instance->flags2 & 0x10)
+            {
+                vars->swim_anim = ALUKA_ANIM_NO_ANIM;
+                MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+            }
+            break;
+        }
+    }
+    else
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+
+    ALUKA_SetupSwimAnimWTread(instance);
+    ALUKA_SwimToDestination(instance);
+}
 
 void ALUKA_SurpriseAttackEntry(Instance *instance)
 {
@@ -3305,30 +3494,29 @@ void ALUKA_GeneralDeathEntry(Instance *instance)
 
     instance->xAccl = 0;
     instance->yAccl = 0;
-    // instance->zAccl = 0;
+
     mv->mvFlags |= 0x202000;
     mv->mvFlags &= ~0x10;
 
     switch (mv->damageType)
-    {                          /* irregular */
+    {
     case 0x20:
         mv->causeOfDeath = MONSTER_CAUSEOFDEATH_FIRE;
-        /* fallthrough */
     case 0x40:
         MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMAGONY, 2);
         if (mv->damageType == 0x40)
         {
             mv->causeOfDeath = MONSTER_CAUSEOFDEATH_SUN;
         }
-        mv->generalTimer = (int)(MON_GetTime(instance) + 0xBB8);
-        mv->mvFlags = (int)(mv->mvFlags | 0x400000);
-        mv->effectTimer = (int)(MON_GetTime(instance) + 0x2710);
+        mv->generalTimer = MON_GetTime(instance) + 0xBB8;
+        mv->mvFlags |= 0x400000;
+        mv->effectTimer = MON_GetTime(instance) + 0x2710;
         MON_MonsterGlow(instance, 0x4960, -1, 0, 0);
         break;
     case 0x200:
         MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMAGONY, 2);
         mv->causeOfDeath = MONSTER_CAUSEOFDEATH_SOUND;
-        mv->generalTimer = (int)(MON_GetTime(instance) + 0x3E8);
+        mv->generalTimer = MON_GetTime(instance) + 0x3E8;
         break;
     case 0x400:
         mv->causeOfDeath = MONSTER_CAUSEOFDEATH_STONE;
