@@ -61,7 +61,7 @@ void MON_PupateMessageHandler(Instance *instance, Message *message)
         {
             mv->mvFlags &= ~0x80;
 
-            if ((mv->enemy == NULL) && ((data->sender != NULL) && ((INSTANCE_Query(data->sender, 1) & 0xB))))
+            if (mv->enemy == NULL && data->sender != NULL && INSTANCE_Query(data->sender, queryWhatAmI) & 0xB)
             {
                 MONSENSE_SetEnemy(instance, data->sender);
             }
@@ -148,7 +148,7 @@ void MON_IdleMessageHandler(Instance *instance, Message *message)
 
             mir = (MonsterIR *)message->Data;
 
-            if ((INSTANCE_Query(mir->instance, 1) & 0x1))
+            if (INSTANCE_Query(mir->instance, queryWhatAmI) & 0x1)
             {
                 MON_ChangeBehavior(instance, mv->triggeredBehavior);
             }
@@ -164,7 +164,7 @@ void MON_IdleMessageHandler(Instance *instance, Message *message)
 
             mir = (MonsterIR *)message->Data;
 
-            if ((INSTANCE_Query(mir->instance, 1) & 0x1))
+            if (INSTANCE_Query(mir->instance, queryWhatAmI) & 0x1)
             {
                 MON_ChangeBehavior(instance, mv->triggeredBehavior);
             }
@@ -219,7 +219,7 @@ void MON_DefaultMessageHandler(Instance *instance, Message *message)
         switch (mv->damageType)
         {
         case 0x20:
-            if ((id == 0x1000021) && ((INSTANCE_Query(instance, 0) & 0x10000000)))
+            if (id == 0x1000021 && INSTANCE_Query(instance, queryHitState) & 0x10000000)
             {
                 fatal = 1;
             }
@@ -279,7 +279,7 @@ void MON_DefaultMessageHandler(Instance *instance, Message *message)
 
             mv->mvFlags |= 0x40;
 
-            if (INSTANCE_Query(data->sender, 1) == 32)
+            if (INSTANCE_Query(data->sender, queryWhatAmI) == 32)
             {
                 MONSENSE_SetEnemy(instance, gameTrackerX.playerInstance);
             }
@@ -477,7 +477,7 @@ void MON_DefaultMessageHandler(Instance *instance, Message *message)
 
         enemy = data->sender;
 
-        if ((enemy != NULL) && ((INSTANCE_Query(enemy, 1) & 0xB)) && (MONSENSE_FindIR(mv, enemy) == NULL) && (MATH3D_LengthXYZ(instance->position.x - data->position.x, instance->position.y - data->position.y, instance->position.z - data->position.z) < mv->subAttr->senses->alarmRadius))
+        if (enemy != NULL && INSTANCE_Query(enemy, queryWhatAmI) & 0xB && MONSENSE_FindIR(mv, enemy) == NULL && MATH3D_LengthXYZ(instance->position.x - data->position.x, instance->position.y - data->position.y, instance->position.z - data->position.z) < mv->subAttr->senses->alarmRadius)
         {
             MonsterIR *mir;
 
@@ -499,7 +499,7 @@ void MON_DefaultMessageHandler(Instance *instance, Message *message)
 
             mir = (MonsterIR *)message->Data;
 
-            if ((INSTANCE_Query(mir->instance, 1) & 0x1))
+            if (INSTANCE_Query(mir->instance, queryWhatAmI) & 0x1)
             {
                 mv->behaviorState = mv->triggeredBehavior;
             }

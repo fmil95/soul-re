@@ -20,9 +20,9 @@ static char monsterSensed[40];
 
 static int lastSenseFrame;
 
-static RadarInfo radarDir[8] = { { 0, 0, 64256 }, { 512, 905, 64631 }, { 1024, 1280, 0 }, { 1536, 905, 905 }, { 2048, 0, 1280 }, { 2560, 64631, 905 }, { 3072, 64256, 0 }, { 3584, 64631, 64631 } };
+static RadarInfo radarDir[8] = {{ 0, 0, 64256 }, { 512, 905, 64631 }, { 1024, 1280, 0 }, { 1536, 905, 905 }, { 2048, 0, 1280 }, { 2560, 64631, 905 }, { 3072, 64256, 0 }, { 3584, 64631, 64631 }};
 
-static unsigned char radarDirIndex[8] = { 0, 4, 6, 2, 7, 3, 5, 1 };
+static unsigned char radarDirIndex[8] = {0, 4, 6, 2, 7, 3, 5, 1};
 
 MonsterIR *MONSENSE_FindIR(MonsterVars *mv, Instance *instance)
 {
@@ -75,7 +75,7 @@ int MONSENSE_See(Instance *instance, evCollideInstanceStatsData *data)
 
             target = data->instance;
 
-            if (INSTANCE_Query(target, 1) & 1)
+            if (INSTANCE_Query(target, queryWhatAmI) & 1)
             {
                 if (instance->matrix != NULL)
                 {
@@ -120,9 +120,9 @@ int MONSENSE_Hear(Instance *instance, evCollideInstanceStatsData *data)
 
     senses = mv->subAttr->senses;
 
-    mode = INSTANCE_Query(data->instance, 10);
+    mode = INSTANCE_Query(data->instance, queryMode);
 
-    if (((!(mode & 0x10B0143)) || ((mode & 0x200000))) && (data->distance < (unsigned)senses->soundRadius))
+    if ((!(mode & 0x10B0143) || mode & 0x200000) && data->distance < (unsigned)senses->soundRadius)
     {
         return MATH3D_ConeDetect(&data->relativePosition, senses->soundArc, senses->soundElevation);
     }
@@ -154,7 +154,7 @@ MonsterIR *MONSENSE_FirstSense(Instance *instance, Instance *sensed)
         long whatAmI;
         MonsterAllegiances *allegiances;
 
-        whatAmI = INSTANCE_Query(sensed, 1);
+        whatAmI = INSTANCE_Query(sensed, queryWhatAmI);
         allegiances = mv->subAttr->allegiances;
 
         mir->mirFlags = 0x100U;
@@ -165,7 +165,7 @@ MonsterIR *MONSENSE_FirstSense(Instance *instance, Instance *sensed)
         mv->monsterIRList = mir;
         mir->mirConditions = 0;
 
-        if (whatAmI & allegiances->enemies && !(INSTANCE_Query(sensed, 0) & 0x44000000))
+        if (whatAmI & allegiances->enemies && !(INSTANCE_Query(sensed, queryHitState) & 0x44000000))
         {
             mir->mirFlags |= 1;
         }
@@ -241,7 +241,7 @@ void MONSENSE_SetupMIR(Instance *instance, evCollideInstanceStatsData *data, int
             mir->mirConditions &= ~0x2;
         }
 
-        mode = INSTANCE_Query(mir->instance, 10);
+        mode = INSTANCE_Query(mir->instance, queryMode);
 
         if ((mode & 0x208000) == 0x208000)
         {
@@ -333,7 +333,7 @@ void MONSENSE_SetupMIR(Instance *instance, evCollideInstanceStatsData *data, int
 
         if ((mir->mirFlags & 0x200))
         {
-            if ((mir->distance > (mv->subAttr->combatAttributes->allyRange + 300)) || ((INSTANCE_Query(mir->instance, 0) & 0x44000000)))
+            if (mir->distance > (mv->subAttr->combatAttributes->allyRange + 300) || INSTANCE_Query(mir->instance, queryHitState) & 0x44000000)
             {
                 mir->mirFlags &= ~0x200;
             }
@@ -355,7 +355,7 @@ void MONSENSE_SenseInstance(Instance *instance, evCollideInstanceStatsData *data
 
     mv = (MonsterVars *)instance->extraData;
 
-    whatAmI = INSTANCE_Query(data->instance, 1);
+    whatAmI = INSTANCE_Query(data->instance, queryWhatAmI);
 
     if (!(mv->mvFlags & 0x200))
     {
@@ -592,7 +592,7 @@ void MONSENSE_ProcessIRList(Instance *instance)
         {
             if ((mir->mirFlags & 0x1))
             {
-                if ((INSTANCE_Query(mir->instance, 1) & 0x1))
+                if (INSTANCE_Query(mir->instance, queryWhatAmI) & 0x1)
                 {
                     player = mir;
                 }
@@ -631,7 +631,7 @@ void MONSENSE_ProcessIRList(Instance *instance)
                 }
             }
 
-            if (((mir->mirFlags & 0x2)) && (!(INSTANCE_Query(mir->instance, 1) & 0x4)))
+            if (mir->mirFlags & 0x2 && !(INSTANCE_Query(mir->instance, queryWhatAmI) & 0x4))
             {
                 if (closestAlly == NULL)
                 {

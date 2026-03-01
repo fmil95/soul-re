@@ -35,7 +35,7 @@ static short current_rain_fade = 0;
 static Instance *FX_reaver_instance = NULL;
 
 /* sv_vels */
-static SVector D_800D1018[4] = 
+static SVector D_800D1018[4] =
 {
     {  15,   0, 100, 6 },
     { -15,   0, 100, 6 },
@@ -44,7 +44,7 @@ static SVector D_800D1018[4] =
 };
 
 /* ??? */
-static short D_800D1038[2] = { 25637, 0 };
+static short D_800D1038[2] = {25637, 0};
 
 static short windx = 0;
 
@@ -54,7 +54,7 @@ static short wind_deg = 1024;
 
 static short wind_speed = 20;
 
-static long FX_ColorArray[6] = 
+static long FX_ColorArray[6] =
 {
     0x1010C8,
     0x10C810,
@@ -3151,114 +3151,114 @@ void FX_ProcessRain(FX_PRIM *fxPrim, FXTracker *fxTracker)
 
 void FX_ContinueRain(FXTracker *fxTracker)
 {
-    FX_PRIM *fxPrim;  
-    SVECTOR campos;   
-    int n;            
-    int rain_pct;     
-    long waterZLevel; 
-    int slack;        
-    int fade;         
-    
-    if (*(int*)&gameTrackerX.gameData.asmData.MorphTime != 66536) 
+    FX_PRIM *fxPrim;
+    SVECTOR campos;
+    int n;
+    int rain_pct;
+    long waterZLevel;
+    int slack;
+    int fade;
+
+    if (*(int *)&gameTrackerX.gameData.asmData.MorphTime != 66536)
     {
         rain_pct = rain_amount;
-            
-        if (gameTrackerX.gameData.asmData.MorphTime != 1000) 
+
+        if (gameTrackerX.gameData.asmData.MorphTime != 1000)
         {
             fade = 4096 - FX_GetMorphFadeVal();
             fade = (fade * current_rain_fade) / 4096;
-        } 
-        else 
+        }
+        else
         {
-            if (current_rain_fade < 4096) 
+            if (current_rain_fade < 4096)
             {
                 current_rain_fade += gameTrackerX.timeMult / 128;
-                
-                if (current_rain_fade > 4096) 
+
+                if (current_rain_fade > 4096)
                 {
                     current_rain_fade = 4096;
                 }
             }
-            
+
             fade = current_rain_fade;
         }
-        
+
         rain_pct = (rain_pct * fade) / 4096;
-        
+
         waterZLevel = STREAM_GetLevelWithID(gameTrackerX.playerInstance->currentStreamUnitID)->waterZLevel;
-       
+
         slack = theCamera.core.rotation.x;
-        
+
         slack &= 0xFFF;
-        
-        if (slack > 3072) 
+
+        if (slack > 3072)
         {
             slack = ((4096 - slack) * 3) / 2;
-        } 
-        else 
+        }
+        else
         {
             slack = 0;
         }
-        
+
         for (n = 0; n < 3; n++)
         {
             if (rain_pct >= (rand() & 0x3FF))
             {
-                SVector worldpos; 
-                int zvel;         
-                
+                SVector worldpos;
+                int zvel;
+
                 campos.vx = (rand() % (slack + 512)) - (slack / 2);
                 campos.vy = 5;
                 campos.vz = rand() & 0x7FF;
-                
-                FX_ConvertCamPersToWorld(&campos, (SVECTOR*)&worldpos);
-                
+
+                FX_ConvertCamPersToWorld(&campos, (SVECTOR *)&worldpos);
+
                 zvel = (-14 - (rand() & 0x3)) * 8;
-                
+
                 if ((worldpos.z + zvel) < waterZLevel)
                 {
                     FX_GetRandomScreenPt(&campos);
-                    
+
                     campos.vz += waterZLevel - worldpos.z;
-                    
-                    FX_ConvertCamPersToWorld(&campos, (SVECTOR*)&worldpos);
+
+                    FX_ConvertCamPersToWorld(&campos, (SVECTOR *)&worldpos);
                 }
-                
-                if ((worldpos.z + zvel) >= waterZLevel) 
+
+                if ((worldpos.z + zvel) >= waterZLevel)
                 {
                     fxPrim = FX_GetPrim(gFXT);
-                    
+
                     if (fxPrim != NULL)
                     {
                         fxPrim->v0.x = worldpos.x;
-                        fxPrim->v0.y = worldpos.y; 
+                        fxPrim->v0.y = worldpos.y;
                         fxPrim->v0.z = worldpos.z;
-                        
+
                         fxPrim->duo.phys.xVel = (windx * ((rand() & 0x3FF) + 3072)) / 4096;
                         fxPrim->duo.phys.yVel = (windy * ((rand() & 0x3FF) + 3072)) / 4096;
                         fxPrim->duo.phys.zVel = zvel;
-                        
+
                         fxPrim->timeToLive = 20;
-                        
+
                         fxPrim->flags = 0x1090000;
-                        
+
                         fxPrim->color = 0x52404040;
-                        
+
                         fxPrim->process = FX_ProcessRain;
-                        
+
                         fxPrim->work0 = waterZLevel;
-                        
+
                         fxPrim->endColor = 0;
-                        
+
                         fxPrim->v1.x = fxPrim->v0.x + fxPrim->duo.phys.xVel;
                         fxPrim->v1.y = fxPrim->v0.y + fxPrim->duo.phys.yVel;
                         fxPrim->v1.z = fxPrim->v0.z + fxPrim->duo.phys.zVel;
-                        
-                        LIST_InsertFunc(&fxTracker->usedPrimList, (NodeType*)fxPrim);
+
+                        LIST_InsertFunc(&fxTracker->usedPrimList, (NodeType *)fxPrim);
                     }
                 }
             }
-        } 
+        }
     }
 }
 
@@ -3800,69 +3800,69 @@ void FX_StopGlowEffect(FXGlowEffect *glowEffect, int fadeout_time)
     }
 }
 
-void FX_DrawLightning(FXLightning *zap, MATRIX *wcTransform, unsigned long **ot) 
+void FX_DrawLightning(FXLightning *zap, MATRIX *wcTransform, unsigned long **ot)
 {
-    SVector start;       
-    SVector end;         
-    SVector offset;      
-    MATRIX *swtransform; 
-    MATRIX mat;          
-    
-    if ((zap->type == 2) || (zap->matrixSeg != -1)) 
+    SVector start;
+    SVector end;
+    SVector offset;
+    MATRIX *swtransform;
+    MATRIX mat;
+
+    if ((zap->type == 2) || (zap->matrixSeg != -1))
     {
         start.x = zap->start_offset.x;
         start.y = zap->start_offset.y;
         start.z = zap->start_offset.z;
-    } 
-    else if (zap->instance->matrix != NULL) 
+    }
+    else if (zap->instance->matrix != NULL)
     {
         swtransform = &zap->instance->matrix[zap->startSeg];
-        
-        ApplyMatrixSV(swtransform, (SVECTOR*)&zap->start_offset, (SVECTOR*)&offset);
-        
+
+        ApplyMatrixSV(swtransform, (SVECTOR *)&zap->start_offset, (SVECTOR *)&offset);
+
         start.x = swtransform->t[0] + offset.x;
         start.y = swtransform->t[1] + offset.y;
         start.z = swtransform->t[2] + offset.z;
     }
-    else 
+    else
     {
         start.x = zap->instance->position.x;
         start.y = zap->instance->position.y;
         start.z = zap->instance->position.z;
     }
-    
-    if (((zap->type == 1) || (zap->type == 2)) || (zap->matrixSeg != -1)) 
+
+    if (((zap->type == 1) || (zap->type == 2)) || (zap->matrixSeg != -1))
     {
         end.x = zap->end_offset.x;
         end.y = zap->end_offset.y;
         end.z = zap->end_offset.z;
-    } 
+    }
     else if (zap->end_instance->matrix != NULL)
     {
         swtransform = &zap->end_instance->matrix[zap->endSeg];
-        
-        ApplyMatrixSV(swtransform, (SVECTOR*)&zap->end_offset, (SVECTOR*)&offset);
-        
+
+        ApplyMatrixSV(swtransform, (SVECTOR *)&zap->end_offset, (SVECTOR *)&offset);
+
         end.x = swtransform->t[0] + offset.x;
         end.y = swtransform->t[1] + offset.y;
         end.z = swtransform->t[2] + offset.z;
     }
-    else 
-    { 
+    else
+    {
         end.x = zap->instance->position.x;
         end.y = zap->instance->position.y;
         end.z = zap->instance->position.z;
     }
-    
+
     swtransform = NULL;
-    
-    if ((zap->matrixSeg != -1) && (zap->instance->matrix != NULL)) 
+
+    if ((zap->matrixSeg != -1) && (zap->instance->matrix != NULL))
     {
         CompMatrix(wcTransform, &zap->instance->matrix[zap->matrixSeg], &mat);
-        
+
         swtransform = &mat;
     }
-    
+
     FX_Lightning(wcTransform, ot, swtransform, zap->deg, &start, &end, zap->width, zap->small_width, zap->segs, zap->sine_size, zap->variation, zap->color, zap->glow_color);
 }
 
@@ -4524,71 +4524,71 @@ FXLightning *FX_CreateLightning(Instance *instance, int lifeTime, int deg, int d
     return zap;
 }
 
-void FX_SetLightingPos(FXLightning *zap, Instance *startInstance, int startSeg, Position *startOffset, Instance *endInstance, int endSeg, Position *endOffset, int matrixSeg) 
+void FX_SetLightingPos(FXLightning *zap, Instance *startInstance, int startSeg, Position *startOffset, Instance *endInstance, int endSeg, Position *endOffset, int matrixSeg)
 {
-    if (zap != NULL) 
+    if (zap != NULL)
     {
-        if (startInstance != NULL) 
+        if (startInstance != NULL)
         {
-            if (endInstance != NULL) 
+            if (endInstance != NULL)
             {
                 zap->type = 0;
-                
+
                 zap->instance = startInstance;
                 zap->end_instance = endInstance;
-            } 
-            else 
+            }
+            else
             {
                 zap->type = 1;
-                
+
                 zap->instance = startInstance;
             }
-            
-            if ((startInstance == NULL) && (endInstance == NULL)) 
+
+            if ((startInstance == NULL) && (endInstance == NULL))
             {
                 zap->type = 2;
             }
-        } 
-        else if (endInstance == NULL) 
+        }
+        else if (endInstance == NULL)
         {
             zap->type = 2;
         }
-        
-        if (startOffset != NULL) 
+
+        if (startOffset != NULL)
         {
             memcpy(&zap->start_offset, startOffset, 6);
         }
-        
-        if (endOffset != NULL) 
+
+        if (endOffset != NULL)
         {
             memcpy(&zap->end_offset, endOffset, 6);
         }
-        
+
         zap->startSeg = startSeg;
         zap->endSeg = endSeg;
         zap->matrixSeg = matrixSeg;
     }
 }
 
-FXLightning* FX_StartGenericLightning(Instance *instance, int num, int segOverride, int endSegOverride)
+FXLightning *FX_StartGenericLightning(Instance *instance, int num, int segOverride, int endSegOverride)
 {
-    FXLightning *zap;            
-    GenericFXObject *GFXO;       
-    GenericLightningParams *GLP; 
-    Object *particle;                                           
-    
-    particle = (Object*)objectAccess[10].object;
-    
-    if (particle == NULL) 
+    FXLightning *zap;
+    GenericFXObject *GFXO;
+    GenericLightningParams *GLP;
+    Object *particle;
+
+    particle = (Object *)objectAccess[10].object;
+
+    if (particle == NULL)
     {
-        return NULL; 
+        return NULL;
     }
-    
-    GFXO = (GenericFXObject*)particle->data;
-    
+
+    GFXO = (GenericFXObject *)particle->data;
+
     GLP = &GFXO->LightningList[num];
-    
-    if (GLP->lifeTime == 0) 
+
+    if (GLP->lifeTime == 0)
     {
         return NULL;
     }
@@ -4599,29 +4599,29 @@ FXLightning* FX_StartGenericLightning(Instance *instance, int num, int segOverri
         {
             instance = instance->LinkChild;
         }
-        else 
+        else
         {
             return NULL;
         }
     }
 
     zap = FX_CreateLightning(instance, GLP->lifeTime, GLP->deg, GLP->deg_inc, GLP->width, GLP->small_width, GLP->segs, GLP->sine_size, GLP->variation, GLP->color, GLP->glow_color);
-   
-    if (zap != NULL) 
+
+    if (zap != NULL)
     {
-        int startSeg;                
-        int endSeg; 
-        
-        if (segOverride == 0) 
+        int startSeg;
+        int endSeg;
+
+        if (segOverride == 0)
         {
             startSeg = GLP->startSeg;
         }
-        else 
+        else
         {
             startSeg = segOverride;
         }
-        
-        if (endSegOverride == 0) 
+
+        if (endSegOverride == 0)
         {
             endSeg = GLP->endSeg;
         }
@@ -4629,56 +4629,56 @@ FXLightning* FX_StartGenericLightning(Instance *instance, int num, int segOverri
         {
             endSeg = endSegOverride;
         }
-        
+
         FX_SetLightingPos(zap, instance, startSeg, &GLP->start_offset, instance, endSeg, &GLP->end_offset, GLP->matrixSeg);
-        
-        if ((GLP->type == 1) && (SoulReaverFire() != 0)) 
+
+        if ((GLP->type == 1) && (SoulReaverFire() != 0))
         {
-            int tmp_blue;                
-            CVECTOR *ptr;  
-            
-            ptr = (CVECTOR*)&zap->color;
+            int tmp_blue;
+            CVECTOR *ptr;
+
+            ptr = (CVECTOR *)&zap->color;
 
             tmp_blue = ptr->b;
 
             ptr->b = zap->color;
 
-            ptr = (CVECTOR*)&zap->glow_color;
+            ptr = (CVECTOR *)&zap->glow_color;
 
-            ((char*)&zap->color)[0] = tmp_blue;
+            ((char *)&zap->color)[0] = tmp_blue;
 
             tmp_blue = ptr->b;
 
             ptr->b = zap->glow_color;
 
-            ((char*)&zap->glow_color)[0] = tmp_blue;
+            ((char *)&zap->glow_color)[0] = tmp_blue;
         }
-    } 
-        
+    }
+
     return zap;
 }
 
 FXBlastringEffect *FX_StartGenericBlastring(Instance *instance, int num, int segOverride, int matrixSegOverride)
 {
-    FXBlastringEffect *blast;   
-    GenericFXObject *GFXO;       
-    GenericBlastringParams *GBP; 
-    Object *particle;            
-    SVector position;            
-    int segment;                
-    int matrix_segment;          
-    MATRIX mat;                  
-    MATRIX *swTransform;         
-    
+    FXBlastringEffect *blast;
+    GenericFXObject *GFXO;
+    GenericBlastringParams *GBP;
+    Object *particle;
+    SVector position;
+    int segment;
+    int matrix_segment;
+    MATRIX mat;
+    MATRIX *swTransform;
+
     particle = objectAccess[10].object;
-    
+
     if (particle == NULL)
     {
         return NULL;
     }
-    
-    GFXO = (GenericFXObject*)particle->data;
-    
+
+    GFXO = (GenericFXObject *)particle->data;
+
     GBP = &GFXO->BlastList[num];
 
     if (GBP->use_child != 0)
@@ -4687,55 +4687,55 @@ FXBlastringEffect *FX_StartGenericBlastring(Instance *instance, int num, int seg
         {
             instance = instance->LinkChild;
         }
-        else 
+        else
         {
             return NULL;
         }
     }
-    
+
     if (segOverride == 0)
     {
         segment = GBP->segment;
     }
-    else 
+    else
     {
         segment = segOverride;
     }
-    
-    if (matrixSegOverride == 0) 
+
+    if (matrixSegOverride == 0)
     {
         matrix_segment = GBP->matrixSeg;
     }
-    else 
+    else
     {
         matrix_segment = matrixSegOverride;
     }
 
     MATH3D_SetUnityMatrix(&mat);
-    
-    if (instance->matrix != NULL) 
+
+    if (instance->matrix != NULL)
     {
         swTransform = &instance->matrix[segment];
-        
+
         position.x = swTransform->t[0];
         position.y = swTransform->t[1];
         position.z = swTransform->t[2];
     }
-    else 
+    else
     {
         position.x = instance->position.x;
         position.y = instance->position.y;
         position.z = instance->position.z;
     }
-    
+
     position.x += GBP->offset.x;
     position.y += GBP->offset.y;
     position.z += GBP->offset.z;
-    
+
     blast = FX_DoBlastRing(instance, &position, &mat, matrix_segment, GBP->radius, GBP->endRadius, GBP->colorchange_radius, GBP->size1, GBP->size2, GBP->vel << 12, GBP->accl, GBP->height1, GBP->height2, GBP->height3, GBP->startColor, GBP->endColor, GBP->predator_offset, GBP->lifeTime, GBP->sortInWorld);
-    
+
     blast->stay_in_place = GBP->stay_in_place;
-        
+
     return blast;
 }
 
@@ -4780,14 +4780,14 @@ FXFlash *FX_StartGenericFlash(Instance *instance, int num)
         flash->timeFromColor = flash->timeAtColor + (GFP->timeFromColor * 256);
 
         FX_InsertGeneralEffect(flash);
-}
+    }
 
     return flash;
 }
 
 long FX_GetHealthColor(int currentHealth)
 {
-    static long HealthColors[/*6*/] = { 0x7F, 0x407F, 0x7F7F, 0x7F00, 0x404000, 0x7F0000 };
+    static long HealthColors[/*6*/] = {0x7F, 0x407F, 0x7F7F, 0x7F00, 0x404000, 0x7F0000};
     long color;
 
     if (currentHealth <= 0)
@@ -4925,7 +4925,7 @@ void FX_StartInstanceEffect(Instance *instance, ObjectEffect *effect, int InitFl
         FXParticle *currentParticle;
         evObjectDraftData *draft;
 
-        draft = (evObjectDraftData *)INSTANCE_Query(instance, 22);
+        draft = (evObjectDraftData *)INSTANCE_Query(instance, queryPhysicalDraftData);
 
         if (draft != NULL)
         {
@@ -5090,35 +5090,35 @@ void FX_EndInstanceParticleEffects(Instance *instance)
 
 void FX_GetSpiralPoint(int radius, int deg, int *x, int *y)
 {
-	int prevx; 
-	int prevy; 
+    int prevx;
+    int prevy;
 
-	prevx = (-radius * rcos(deg)) >> 12;
-	prevx = (prevx / 240) * 512;
+    prevx = (-radius * rcos(deg)) >> 12;
+    prevx = (prevx / 240) * 512;
 
-	if (prevx < 0)
-	{
-		prevx -= 2048;
-	}
-	else
-	{
-		prevx += 2048;
-	}
+    if (prevx < 0)
+    {
+        prevx -= 2048;
+    }
+    else
+    {
+        prevx += 2048;
+    }
 
-	*x = (prevx >> 12) + 438;
+    *x = (prevx >> 12) + 438;
 
-	prevy = (radius * rsin(deg)) >> 12;
+    prevy = (radius * rsin(deg)) >> 12;
 
-	if (prevy < 0)
-	{
-		prevy -= 2048;
-	}
-	else
-	{
-		prevy += 2048;
-	}
+    if (prevy < 0)
+    {
+        prevy -= 2048;
+    }
+    else
+    {
+        prevy += 2048;
+    }
 
-	*y = (prevy >> 12) + 201;
+    *y = (prevy >> 12) + 201;
 }
 
 void FX_GetLinePoint(int radius, int next_radius, int deg, int next_deg, int *pntx, int *pnty, int part)
@@ -5254,100 +5254,100 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Spiral);
 #else
 void FX_Spiral(PrimPool *primPool, unsigned long **ot)
 {
-    POLY_2G4 *poly; 
-    long prev; 
-    long offp; 
-    long offm; 
-    int n; 
+    POLY_2G4 *poly;
+    long prev;
+    long offp;
+    long offm;
+    int n;
     //DR_TPAGE *drtpage; // unused
-    int health; 
-    int health_mod; 
-    long no_color; 
-    long color; 
-    STATIC short cnt = 0; 
-    int current_cnt; 
-    int max64; 
-    long SPIRAL_COLOR; 
-    long SPIRAL_COLOR2; 
-    long SPIRAL_COLOR3; 
-    long SPIRAL_COLOR_END; 
-    long SPIRAL_NOCOLOR; 
+    int health;
+    int health_mod;
+    long no_color;
+    long color;
+    STATIC short cnt = 0;
+    int current_cnt;
+    int max64;
+    long SPIRAL_COLOR;
+    long SPIRAL_COLOR2;
+    long SPIRAL_COLOR3;
+    long SPIRAL_COLOR_END;
+    long SPIRAL_NOCOLOR;
 
-	if (((gameTrackerX.gameData.asmData.MorphTime != 1000) && (gameTrackerX.gameData.asmData.MorphType == 0)) && (Spiral_Number != 0))
-	{
+    if (((gameTrackerX.gameData.asmData.MorphTime != 1000) && (gameTrackerX.gameData.asmData.MorphType == 0)) && (Spiral_Number != 0))
+    {
         FX_Health_Spiral(1, Spiral_Current, Spiral_Max);
-	}
+    }
 
-	SPIRAL_COLOR = 0x3AFCFFD3;
-	SPIRAL_COLOR2 = 0x3ADCE0BA;
-	SPIRAL_COLOR3 = 0x3ABBC09D;
+    SPIRAL_COLOR = 0x3AFCFFD3;
+    SPIRAL_COLOR2 = 0x3ADCE0BA;
+    SPIRAL_COLOR3 = 0x3ABBC09D;
 
-	SPIRAL_COLOR_END = 0x3A483017;
+    SPIRAL_COLOR_END = 0x3A483017;
 
-	SPIRAL_NOCOLOR = 0x3A002A15;
+    SPIRAL_NOCOLOR = 0x3A002A15;
 
-	if (Spiral_Number == 0)
-	{
-		if (Spiral_Current == Spiral_Max)
-		{
-			if (++cnt > 80)
-			{
-				cnt = 0;
-			}
-		}
-		else
-		{
-			SPIRAL_COLOR = 0x3A00FF00;
-			SPIRAL_COLOR2 = 0x3A00E000;
-			SPIRAL_COLOR3 = 0x3A00BF00;
-            
-			SPIRAL_COLOR_END = 0x3A004500;
-		}
+    if (Spiral_Number == 0)
+    {
+        if (Spiral_Current == Spiral_Max)
+        {
+            if (++cnt > 80)
+            {
+                cnt = 0;
+            }
+        }
+        else
+        {
+            SPIRAL_COLOR = 0x3A00FF00;
+            SPIRAL_COLOR2 = 0x3A00E000;
+            SPIRAL_COLOR3 = 0x3A00BF00;
 
-		SPIRAL_NOCOLOR = 0x3A00150B;
-	}
+            SPIRAL_COLOR_END = 0x3A004500;
+        }
+
+        SPIRAL_NOCOLOR = 0x3A00150B;
+    }
     else if (++cnt > 80)
-	{
-		cnt = 0;
-	}
+    {
+        cnt = 0;
+    }
 
-	max64 = Spiral_Max / 64;
+    max64 = Spiral_Max / 64;
 
-	health = Spiral_Current / max64;
+    health = Spiral_Current / max64;
 
-	prev = *(unsigned long*)&Spiral_Array[64];
+    prev = *(unsigned long *)&Spiral_Array[64];
 
-	offm = *(unsigned long*)&Spiral_Array[64];
-	offp = *(unsigned long*)&Spiral_Array[64];
+    offm = *(unsigned long *)&Spiral_Array[64];
+    offp = *(unsigned long *)&Spiral_Array[64];
 
-	poly = (POLY_2G4*)primPool->nextPrim;
+    poly = (POLY_2G4 *)primPool->nextPrim;
 
-	health_mod = ((Spiral_Current - (health * max64)) * 4096) / max64;
+    health_mod = ((Spiral_Current - (health * max64)) * 4096) / max64;
 
-	if ((unsigned long*)(poly + 65) < primPool->lastPrim)
-	{
-		color = SPIRAL_NOCOLOR;
-		no_color = SPIRAL_NOCOLOR;
-        
-		current_cnt = cnt;
+    if ((unsigned long *)(poly + 65) < primPool->lastPrim)
+    {
+        color = SPIRAL_NOCOLOR;
+        no_color = SPIRAL_NOCOLOR;
 
-		for (n = 0; n < 64; n++, poly++)
-		{
-			*(unsigned long*)&poly->p1.r2 = color;
-			*(unsigned long*)&poly->p2.r0 = color;
+        current_cnt = cnt;
 
-			if (health < n)
-			{
-				color = no_color;
-			}
-			else
-			{
-                int tmp; 
-                
-				tmp = ((n + current_cnt) & 0xF) / 4;
+        for (n = 0; n < 64; n++, poly++)
+        {
+            *(unsigned long *)&poly->p1.r2 = color;
+            *(unsigned long *)&poly->p2.r0 = color;
 
-				switch (tmp)
-				{
+            if (health < n)
+            {
+                color = no_color;
+            }
+            else
+            {
+                int tmp;
+
+                tmp = ((n + current_cnt) & 0xF) / 4;
+
+                switch (tmp)
+                {
                 default:
                 case 0:
                     color = SPIRAL_COLOR;
@@ -5361,72 +5361,72 @@ void FX_Spiral(PrimPool *primPool, unsigned long **ot)
                 case 3:
                     color = SPIRAL_COLOR2;
                     break;
-				}
-			}
-            
+                }
+            }
+
             if (n == health)
             {
-                LoadAverageCol((unsigned char*)&color, (unsigned char*)&no_color, health_mod, 4096 - health_mod, (unsigned char*)&color);
+                LoadAverageCol((unsigned char *)&color, (unsigned char *)&no_color, health_mod, 4096 - health_mod, (unsigned char *)&color);
 
                 color &= 0xFFFFFF;
                 color |= SPIRAL_COLOR & 0xFF000000;
             }
 
-			*(unsigned long*)&poly->p1.r0 = SPIRAL_COLOR_END;
-			*(unsigned long*)&poly->p1.r1 = SPIRAL_COLOR_END;
-			*(unsigned long*)&poly->p1.r3 = color;
-            
-			*(unsigned long*)&poly->p2.r2 = SPIRAL_COLOR_END;
-			*(unsigned long*)&poly->p2.r3 = SPIRAL_COLOR_END;
-			*(unsigned long*)&poly->p2.r1 = color;
-            
-			*(unsigned long*)&poly->p2.x0 = prev;
-			*(unsigned long*)&poly->p1.x2 = prev;
+            *(unsigned long *)&poly->p1.r0 = SPIRAL_COLOR_END;
+            *(unsigned long *)&poly->p1.r1 = SPIRAL_COLOR_END;
+            *(unsigned long *)&poly->p1.r3 = color;
 
-			*(unsigned long*)&poly->p1.x0 = offp;
-			*(unsigned long*)&poly->p2.x2 = offm;
+            *(unsigned long *)&poly->p2.r2 = SPIRAL_COLOR_END;
+            *(unsigned long *)&poly->p2.r3 = SPIRAL_COLOR_END;
+            *(unsigned long *)&poly->p2.r1 = color;
 
-			prev = *(unsigned long*)&Spiral_Array[n];
+            *(unsigned long *)&poly->p2.x0 = prev;
+            *(unsigned long *)&poly->p1.x2 = prev;
 
-			offp = *(unsigned long*)&Spiral_OffsetP[n];
-			offm = *(unsigned long*)&Spiral_OffsetM[n];
+            *(unsigned long *)&poly->p1.x0 = offp;
+            *(unsigned long *)&poly->p2.x2 = offm;
 
-			*(unsigned long*)&poly->p2.x1 = prev;
-			*(unsigned long*)&poly->p1.x3 = prev;
+            prev = *(unsigned long *)&Spiral_Array[n];
 
-			*(unsigned long*)&poly->p1.x1 = offp;
-			*(unsigned long*)&poly->p2.x3 = offm;
+            offp = *(unsigned long *)&Spiral_OffsetP[n];
+            offm = *(unsigned long *)&Spiral_OffsetM[n];
 
-			// addPrim(poly, ot[1]);
+            *(unsigned long *)&poly->p2.x1 = prev;
+            *(unsigned long *)&poly->p1.x3 = prev;
 
-            *(int*)poly = getaddr(&ot[1]) | 0x10000000;
-            *(int*)&ot[1] = (intptr_t)poly & 0xFFFFFF; 
-		}
+            *(unsigned long *)&poly->p1.x1 = offp;
+            *(unsigned long *)&poly->p2.x3 = offm;
 
-		// setDrawTPage(poly, 1, 1, 32);
-        
-        ((unsigned long*)poly)[1] = _get_mode(1, 1, 32);
+            // addPrim(poly, ot[1]);
+
+            *(int *)poly = getaddr(&ot[1]) | 0x10000000;
+            *(int *)&ot[1] = (intptr_t)poly & 0xFFFFFF;
+        }
+
+        // setDrawTPage(poly, 1, 1, 32);
+
+        ((unsigned long *)poly)[1] = _get_mode(1, 1, 32);
 
         // addPrim(poly, ot[1]);
 
-        *(int*)poly = getaddr(&ot[1]) | 0x1000000;
-        *(int*)&ot[1] = (intptr_t)poly & 0xFFFFFF;
+        *(int *)poly = getaddr(&ot[1]) | 0x1000000;
+        *(int *)&ot[1] = (intptr_t)poly & 0xFFFFFF;
 
-		primPool->nextPrim = (unsigned long*)((char*)poly + 8);
+        primPool->nextPrim = (unsigned long *)((char *)poly + 8);
 
-		if ((Spiral_Number != 0) || (Spiral_Current == Spiral_Max))
-		{
-            STATIC short deg; 
-            Vector f1; 
-            
-			f1.x = Spiral_Glow_X;
-			f1.y = Spiral_Glow_Y;
+        if ((Spiral_Number != 0) || (Spiral_Current == Spiral_Max))
+        {
+            STATIC short deg;
+            Vector f1;
 
-			deg = (deg - 32) & 0xFFF;
+            f1.x = Spiral_Glow_X;
+            f1.y = Spiral_Glow_Y;
 
-			DRAW_CreateAGlowingCircle(&f1, 320, gameTrackerX.primPool, ot, 5, 32768, Spiral_Glow_Size, Spiral_Glow_Size, deg);
-		}
-	}
+            deg = (deg - 32) & 0xFFF;
+
+            DRAW_CreateAGlowingCircle(&f1, 320, gameTrackerX.primPool, ot, 5, 32768, Spiral_Glow_Size, Spiral_Glow_Size, deg);
+        }
+    }
 }
 #endif
 
@@ -5528,84 +5528,84 @@ void FX_Spiral_Init()
 
 void FX_DrawModel(Object *object, int model_num, SVector *rotation, SVector *position, SVector *offset, int transflag)
 {
-	Model *model;          
-    MFace *mface;          
-    MVertex *vertexList;   
-    TextureMT3 *texture;    
-    MATRIX matrix;         
-    int i;                  
-    POLY_GT3 *poly;         
-    unsigned long **drawot; 
-    SVector output;         
-    long color;            
+    Model *model;
+    MFace *mface;
+    MVertex *vertexList;
+    TextureMT3 *texture;
+    MATRIX matrix;
+    int i;
+    POLY_GT3 *poly;
+    unsigned long **drawot;
+    SVector output;
+    long color;
 
-	drawot = gameTrackerX.drawOT;
-	
-	poly = (POLY_GT3*)gameTrackerX.primPool->nextPrim;
+    drawot = gameTrackerX.drawOT;
 
-	PushMatrix();
+    poly = (POLY_GT3 *)gameTrackerX.primPool->nextPrim;
 
-	MATH3D_SetUnityMatrix(&matrix);
+    PushMatrix();
 
-	RotMatrixX(rotation->x, &matrix);
-	RotMatrixY(rotation->y, &matrix);
-	RotMatrixZ(rotation->z, &matrix);
+    MATH3D_SetUnityMatrix(&matrix);
 
-	PIPE3D_AspectAdjustMatrix(&matrix);
+    RotMatrixX(rotation->x, &matrix);
+    RotMatrixY(rotation->y, &matrix);
+    RotMatrixZ(rotation->z, &matrix);
 
-	ApplyMatrixSV(&matrix, (SVECTOR*)offset, (SVECTOR*)&output);
+    PIPE3D_AspectAdjustMatrix(&matrix);
 
-	matrix.t[0] = position->x + output.x;
-	matrix.t[1] = position->y + output.y;
-	matrix.t[2] = position->z + output.z;
+    ApplyMatrixSV(&matrix, (SVECTOR *)offset, (SVECTOR *)&output);
 
-	SetRotMatrix(&matrix);
-	SetTransMatrix(&matrix);
+    matrix.t[0] = position->x + output.x;
+    matrix.t[1] = position->y + output.y;
+    matrix.t[2] = position->z + output.z;
 
-	color = 0x34808080;
+    SetRotMatrix(&matrix);
+    SetTransMatrix(&matrix);
 
-	if (transflag != 0)
-	{
-		color = 0x36909090;
-	}
+    color = 0x34808080;
 
-	if (object != NULL)
-	{
-		model = object->modelList[model_num];
-		
-		mface = model->faceList;
-		
-		vertexList = model->vertexList;
-        
+    if (transflag != 0)
+    {
+        color = 0x36909090;
+    }
+
+    if (object != NULL)
+    {
+        model = object->modelList[model_num];
+
+        mface = model->faceList;
+
+        vertexList = model->vertexList;
+
         i = model->numFaces;
-        
+
         while (--i != -1)
         {
-            if ((char*)(poly + 1) >= (char*)gameTrackerX.primPool->lastPrim)
+            if ((char *)(poly + 1) >= (char *)gameTrackerX.primPool->lastPrim)
             {
-                gameTrackerX.primPool->nextPrim = (unsigned long*)poly;
-                
+                gameTrackerX.primPool->nextPrim = (unsigned long *)poly;
+
                 PopMatrix();
                 return;
             }
             else
             {
-                long clip;             
-                
-                texture = (TextureMT3*)mface->color;
+                long clip;
+
+                texture = (TextureMT3 *)mface->color;
 
                 gte_ldv3(&vertexList[mface->face.v0], &vertexList[mface->face.v1], &vertexList[mface->face.v2]);
                 gte_nrtpt();
 
-                *(unsigned int*)&poly->u0 = *(unsigned int*)&texture->u0;
-                *(unsigned int*)&poly->u1 = *(unsigned int*)&texture->u1;
-                *(unsigned int*)&poly->u2 = *(unsigned int*)&texture->u2;
+                *(unsigned int *)&poly->u0 = *(unsigned int *)&texture->u0;
+                *(unsigned int *)&poly->u1 = *(unsigned int *)&texture->u1;
+                *(unsigned int *)&poly->u2 = *(unsigned int *)&texture->u2;
 
                 gte_nclip();
 
-                *(unsigned int*)&poly->r2 = color;
-                *(unsigned int*)&poly->r1 = color;
-                *(unsigned int*)&poly->r0 = color;
+                *(unsigned int *)&poly->r2 = color;
+                *(unsigned int *)&poly->r1 = color;
+                *(unsigned int *)&poly->r0 = color;
 
                 gte_stopz(&clip);
 
@@ -5613,20 +5613,20 @@ void FX_DrawModel(Object *object, int model_num, SVector *rotation, SVector *pos
                 {
                     gte_stsxy3(&poly->x0, &poly->x1, &poly->x2);
 
-                    *(int*)poly = getaddr(&drawot[1]) | 0x9000000;
-                    *(int*)&drawot[1] = (intptr_t)poly & 0xFFFFFF;
-                    
+                    *(int *)poly = getaddr(&drawot[1]) | 0x9000000;
+                    *(int *)&drawot[1] = (intptr_t)poly & 0xFFFFFF;
+
                     poly++;
                 }
             }
 
             mface++;
         }
-	} 
+    }
 
-    gameTrackerX.primPool->nextPrim = (unsigned long*)poly; 
-    
-	PopMatrix();
+    gameTrackerX.primPool->nextPrim = (unsigned long *)poly;
+
+    PopMatrix();
 }
 
 void fx_calc_points(SVector *points, int degrees, int radius, int radius2, int radius3)

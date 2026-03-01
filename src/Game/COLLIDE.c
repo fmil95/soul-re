@@ -2141,7 +2141,7 @@ long COLLIDE_SAndT(SCollideInfo *scollideInfo, Level *level)
 
         bsp = &terrain->BSPTreeArray[curTree];
 
-        if ((((bsp->ID >= 0) && ((!(bsp->flags & 0x4000)) || (gameTrackerX.raziel_collide_override != 0))) && ((!(bsp->flags & 0x2000)) || ((unsigned char)gameTrackerX.monster_collide_override != 0))) && ((!(bsp->flags & 0x102)) || (((bsp->flags & 0xE0)) && ((INSTANCE_Query(CSpad->instance, 1) & 0x2)))))
+        if (((bsp->ID >= 0 && (!(bsp->flags & 0x4000) || gameTrackerX.raziel_collide_override != 0)) && ((!(bsp->flags & 0x2000)) || ((unsigned char)gameTrackerX.monster_collide_override != 0))) && ((!(bsp->flags & 0x102)) || (((bsp->flags & 0xE0)) && ((INSTANCE_Query(CSpad->instance, queryWhatAmI) & 0x2)))))
         {
             CSpad->collideInfo.bspID = bsp->ID;
 
@@ -2553,7 +2553,7 @@ void COLLIDE_InstanceTerrainSignal(Instance *instance, Level *level)
 
     if ((instance->matrix != NULL) && (instance->oldMatrix != NULL))
     {
-        if (((instance->object->oflags2 & 0x80000)) && (INSTANCE_Query(instance, 1) != 130))
+        if (((instance->object->oflags2 & 0x80000)) && (INSTANCE_Query(instance, queryWhatAmI) != 130))
         {
             startPoint = *(SVector *)&instance->oldPos;
 

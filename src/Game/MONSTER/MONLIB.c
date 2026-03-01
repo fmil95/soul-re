@@ -535,25 +535,25 @@ int MON_ShouldIAttackInstance(Instance *instance, Instance *ei)
         long mode;
         MonsterVars *mv;
 
-        enemyAttackee = (Instance *)INSTANCE_Query(ei, 34);
+        enemyAttackee = (Instance *)INSTANCE_Query(ei, queryPlayerAutoFaceInstance);
 
-        mode = INSTANCE_Query(ei, 10);
+        mode = INSTANCE_Query(ei, queryMode);
 
         mv = (MonsterVars *)instance->extraData;
 
         if ((mode & 0x20010000)) return 0;
         {
-            if (((enemyAttackee != NULL) && (enemyAttackee != instance)) && ((mode & 0x2000000)))
+            if ((enemyAttackee != NULL && enemyAttackee != instance) && mode & 0x2000000)
             {
                 return 0;
             }
 
-            if (INSTANCE_Query(ei, 46) != 0)
+            if (INSTANCE_Query(ei, queryInvincible) != 0)
             {
                 return 0;
             }
 
-            if ((mv->behaviorState == MONSTER_STATE_IMPALEDEATH) && ((instance->intro != NULL) && (instance->matrix != NULL)) && (((MATH3D_LengthXYZ(ei->position.x - instance->intro->position.x, ei->position.y - instance->intro->position.y, ei->position.z - instance->intro->position.z) > (mv->guardRange + 640)) != 0)))
+            if (mv->behaviorState == MONSTER_STATE_IMPALEDEATH && (instance->intro != NULL && instance->matrix != NULL) && (((MATH3D_LengthXYZ(ei->position.x - instance->intro->position.x, ei->position.y - instance->intro->position.y, ei->position.z - instance->intro->position.z) > (mv->guardRange + 640)) != 0)))
             {
                 return 0;
             }
@@ -2353,7 +2353,7 @@ int MON_TakeDamage(Instance *instance, int damage, int type)
         {
 
             uintptr_t enemyInstance;
-            enemyInstance = INSTANCE_Query(instance, 1);
+            enemyInstance = INSTANCE_Query(instance, queryWhatAmI);
 
             if (type != 0x40000 || enemyInstance & 8)
             {
@@ -3106,7 +3106,7 @@ int MON_SetVelocityTowardsImpalingObject(Instance *instance, int checkOrientatio
 
             for (target = gameTrackerX.instanceList->first; target != NULL; target = target->next)
             {
-                if ((INSTANCE_Query(target, 1) & 0x20))
+                if (INSTANCE_Query(target, queryWhatAmI) & 0x20)
                 {
                     PhysObProperties *prop;
 
@@ -3320,7 +3320,7 @@ void MON_UnlinkFromRaziel(Instance *instance)
 
     MON_SwitchState(instance, MONSTER_STATE_FALL);
 
-    data = (evPositionData *)INSTANCE_Query(enemy, 7);
+    data = (evPositionData *)INSTANCE_Query(enemy, queryOrientation);
 
     if (data != NULL)
     {

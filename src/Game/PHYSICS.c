@@ -583,7 +583,7 @@ int PhysicsCheckEdgeGrabbing(Instance *instance, GameTracker *gameTracker, intpt
     CInfo.oldPoint = &Old;
     CInfo.newPoint = &New;
 
-    ExtraRot = (SVECTOR *)INSTANCE_Query(instance, 7);
+    ExtraRot = (SVECTOR *)INSTANCE_Query(instance, queryOrientation);
 
     if (ExtraRot != NULL)
     {
@@ -1391,7 +1391,7 @@ int PhysicsCheckDropHeight(Instance *instance, intptr_t Data, int Mode)
         VECTOR outTrans;
         SVECTOR *ExtraRot;
 
-        ExtraRot = (SVECTOR *)INSTANCE_Query(instance, 8);
+        ExtraRot = (SVECTOR *)INSTANCE_Query(instance, queryExtraOrientation);
 
         if (ExtraRot != NULL)
         {
@@ -1512,7 +1512,7 @@ int PhysicsCheckDropOff(Instance *instance, intptr_t Data, short Mode)
     CInfo.oldPoint = &Old;
     CInfo.newPoint = &New;
 
-    ExtraRot = (SVECTOR *)INSTANCE_Query(instance, 8);
+    ExtraRot = (SVECTOR *)INSTANCE_Query(instance, queryExtraOrientation);
 
     rc = 0;
 
@@ -2081,7 +2081,7 @@ int PHYSICS_CheckDontGrabEdge(PCollideInfo *CInfo)
     }
     else if (CInfo->type == 5)
     {
-        if ((!(INSTANCE_Query(CInfo->inst, 1) & 0x20)) || ((INSTANCE_Query(CInfo->inst, 3) & 0x1)))
+        if ((!(INSTANCE_Query(CInfo->inst, queryWhatAmI) & 0x20)) || ((INSTANCE_Query(CInfo->inst, queryPhysicalMode) & 0x1)))
         {
             rc = 0;
         }

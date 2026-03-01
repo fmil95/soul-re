@@ -1266,7 +1266,7 @@ void GAMELOOP_DisplayFrame(GameTracker *gameTracker)
 
                     streamID = streamPortal2->toStreamUnit->StreamUnitID;
 
-                    instance = (Instance *)INSTANCE_Query(gameTrackerX.playerInstance, 34);
+                    instance = (Instance *)INSTANCE_Query(gameTrackerX.playerInstance, queryPlayerAutoFaceInstance);
 
                     if ((streamID == gameTrackerX.playerInstance->currentStreamUnitID) || ((instance != NULL) && (streamID == instance->currentStreamUnitID)))
                     {
