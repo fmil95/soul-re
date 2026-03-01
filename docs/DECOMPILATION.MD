@@ -13,7 +13,7 @@ ctc2
 swc2
 ```
 
-In decompilation, these will manifest as errors:
+In decompilation, these will manifest as M2C errors:
 
 ```c
 M2C_ERROR(/* unknown instruction: mtc2 $t4, $25 */);
@@ -61,25 +61,25 @@ As you go through and decompile code, you'll begin to see that there are common 
 
 These are the most common by far. To fully understand why this pattern manifests, it's helpful to understand the way that array elements are ordered in memory.
 
-Under the hood, array elements are stored contiguously in memory. So the address for an array element is:
+Under the hood, array elements are stored _contiguously_. So the address for an array element is:
 
 $$Address_{Element} = Address_{Array} + (Index * Size_{Element})$$
 
-So if we had an array of integers `myArray`, a given element `i` is located at:
+So if we had an array of integers `myArray`, the memory address of a given element `i` is calculated as:
 
 ```c
 myArray + (i * 4); // integers are 4 bytes in size
 ```
 
-Even though this code will work, the C devs gave us a much more convenient way to do this:
+Although this code will work, the C devs gave us a much more convenient way to do this:
 
 ```c
 myArray[i];
 ```
 
-When you start decompiling, the initial decompile will usually spit out the verbose format because it isn't always sure about what is and isn't an array access or some other pointer manipulation.
+When you start decompiling, the initial decompile will usually spit out the verbose format because it isn't always sure about what is and isn't an array access or some other kind of pointer manipulation.
 
-So we will usually end up with something like:
+As a result, we will usually end up with something like:
 
 ```c
 G2Matrix segMatrix;
@@ -145,7 +145,7 @@ if (a > 0)
 }
 ```
 
-Second, using if statements and a do while loop:
+Second, using if statements and a do-while loop:
 
 ```c
 int a;
@@ -239,7 +239,7 @@ if (i < 5)
 }
 ```
 
-You'll notice that this is quite similar to one of the while loop patterns. The biggest difference here is the variable that the loop condition hinges on (`i` in the above example) is _directly_ modified within the loop. Usually incremented or decremented.
+You'll notice that this is quite similar to one of the while loop patterns. The biggest difference here is the variable that the loop condition hinges on (`i` in the above example) is _directly modified_ within the loop. Usually incremented or decremented.
 
 The pattern can be rewritten as follows:
 
@@ -317,7 +317,7 @@ So the actual code should look something like this:
 camera->flags &= ~0x800;
 ```
 
-Although the 2 code snippets above do the exact same thing, semantically the second one makes much more sense. This is especially evident when flags have explicit names or definitions:
+Although the 2 code snippets above are functionally equal, semantically, the second statement best represents what action is being performed. This is especially evident when flags have explicit names or definitions:
 
 ```c
 #define MY_FLAG 0x80
@@ -357,13 +357,13 @@ What this boils down to is a simple division operation, but it's expanded as thi
 
 - For the operation $x / y$ where $y = 2^n$
 
-- If $x < 0$, increase it by $y-1$
+- If $x < 0$, add $y-1$ to $x$
 
 - Now, right shift $x$ by $n$ bits
 
-So why the addition of $y-1$? Well, let's walk through what happens when we don't. If we were calculating $-7 / 4$, that would simplify to $-7 >> 2$.
+So, why the addition of $y-1$? Well, let's walk through what happens when we don't perform the addition. If we were calculating $-7 / 4$, that would simplify to $-7 >> 2$.
 
-Since $-7$ is negative, it is represented with [2's complement](https://en.wikipedia.org/wiki/Two%27s_complement):
+Since $-7$ is negative, it's represented with [2's complement](https://en.wikipedia.org/wiki/Two%27s_complement):
 
 ```c
 11111001
@@ -403,7 +403,7 @@ We have 3 key sources of information when decompiling a function:
 
 1. The assembly - Gives the size of the stack
 2. The initial decompile - Outlines the stack variables and their position within the stack
-3. The `decls` file - Gives the names+types of the variables, as well as their offset from the top of the stack
+3. The `decls` file - Gives the names, types, and stack offsets of the variables
 
 With these pieces of information, all we need to do to resolve the names and types of our stack variables is follow this formula:
 
@@ -461,7 +461,7 @@ int CanBePickedUp(struct _Instance *instance, struct _Instance *Force, int LinkN
 Let's walk through the first variable: `pcollideInfo`. It's annotated as 80 bytes from the top of the stack. So we know where it is relative to the top of the stack, and we know how big the stack is, so let's do a little math:
 
 - The stack is 0x60 bytes
-- `pcollideInfo` is 80 bytes from the top of the stack.
+- `pcollideInfo` is 80 bytes from the top of the stack
 - First, let's convert that to hexidecimal: 80 -> 0x50
 - 0x60 - 0x50 = **0x10**
 
@@ -478,7 +478,7 @@ int CanBePickedUp(Instance *instance, Instance *Force, int LinkNode)
   Position newPos; // sp40
   short sp42;
   short sp44;
-  Position oldPod; // sp48
+  Position oldPos; // sp48
   short sp4A;
   short sp4C;
 
@@ -514,7 +514,7 @@ int CanBePickedUp(Instance *instance, Instance *Force, int LinkNode)
 {
   PCollideInfo pcollideInfo;
   Position newPos;
-  Position oldPod;
+  Position oldPos;
 
   // rest of the code
 }
