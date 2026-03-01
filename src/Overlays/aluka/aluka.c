@@ -1983,7 +1983,7 @@ void ALUKA_ApplyAngularAccel(Instance *instance, int yaw_accel, int pitch_accel,
     attrs->swimattack_speed = ALUKA_ApplyIncr(attrs->swimattack_speed, -attrs->yaw_accel, attrs->yaw_accel, pitch_accel, time);
 }
 
-void ALUKA_ApplyRots(void) {};
+void ALUKA_ApplyRots(Instance *instance, int time) {};
 
 void ALUKA_MoveForward(Instance *instance, int time, int depth)
 {
