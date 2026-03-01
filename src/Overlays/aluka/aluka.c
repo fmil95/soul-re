@@ -1225,7 +1225,50 @@ void ALUKA_Hit(Instance *instance)
     PhysicsMove(instance, &instance->position, gameTrackerX.timeMult);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_StunnedEntry);
+void ALUKA_StunnedEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    MonsterCombatAttributes *combat; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukaVars *)mv->extraVars;
+    combat = mv->subAttr->combatAttributes;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_StunnedEntry(instance);
+        return;
+    }
+
+    if (mv->damageType == 0x40)
+    {
+        MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMAGONY, 2);
+        vars->swim_anim = ALUKA_ANIM_SWIMAGONY;
+    }
+    else
+    {
+        MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMSTUN, 2);
+        vars->swim_anim = ALUKA_ANIM_SWIMSTUN;
+    }
+
+    mv->mvFlags |= 0x100;
+    mv->damageTimer = MON_GetTime(instance) + combat->damageTime;
+    mv->stunTimer = MON_GetTime(instance) + combat->stunTime;
+    mv->mode = 0x8000;
+
+    vars->forward_speed_limit = 0;
+    vars->yaw_speed_limit = 0;
+    vars->pitch_speed_limit = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Stunned);
 
@@ -2762,7 +2805,50 @@ void ALUKA_Hit(Instance *instance)
     PhysicsMove(instance, &instance->position, gameTrackerX.timeMult);
 }
 
-void ALUKA_StunnedEntry(void) {};
+void ALUKA_StunnedEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    MonsterCombatAttributes *combat; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukaVars *)mv->extraVars;
+    combat = mv->subAttr->combatAttributes;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        MON_StunnedEntry(instance);
+        return;
+    }
+
+    if (mv->damageType == 0x40)
+    {
+        MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMAGONY, 2);
+        vars->swim_anim = ALUKA_ANIM_SWIMAGONY;
+    }
+    else
+    {
+        MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMSTUN, 2);
+        vars->swim_anim = ALUKA_ANIM_SWIMSTUN;
+    }
+
+    mv->mvFlags |= 0x100;
+    mv->damageTimer = MON_GetTime(instance) + combat->damageTime;
+    mv->stunTimer = MON_GetTime(instance) + combat->stunTime;
+    mv->mode = 0x8000;
+
+    vars->forward_speed_limit = 0;
+    vars->yaw_speed_limit = 0;
+    vars->pitch_speed_limit = 0;
+}
 
 void ALUKA_Stunned(void) {};
 
