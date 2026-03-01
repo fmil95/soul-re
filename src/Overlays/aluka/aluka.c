@@ -787,10 +787,11 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Message);
 
 void ALUKA_PursueEntry(Instance *instance)
 {
-    MonsterVars *mv;
-    MonsterAttributes *ma;
-    AlukaVars *vars;
-    AlukaAttributes *attrs;
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
 
     mv = (MonsterVars *)instance->extraData;
     ma = (MonsterAttributes *)instance->data;
@@ -2606,10 +2607,11 @@ void ALUKA_Message(void) {};
 
 void ALUKA_PursueEntry(Instance *instance)
 {
-    MonsterVars *mv;
-    MonsterAttributes *ma;
-    AlukaVars *vars;
-    AlukaAttributes *attrs;
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
 
     mv = (MonsterVars *)instance->extraData;
     ma = (MonsterAttributes *)instance->data;
