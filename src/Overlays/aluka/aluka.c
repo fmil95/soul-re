@@ -826,7 +826,109 @@ void ALUKA_AttackEntry(Instance *instance)
 
 INCLUDE_RODATA("asm/nonmatchings/Overlays/aluka/aluka", D_88000000);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Attack);
+void ALUKA_Attack(Instance *instance)
+{
+
+    int destinationInRange; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (AlukaAttributes *)ma->tunData;
+    vars = (AlukaVars *)mv->extraVars;
+    enemy = mv->enemy;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Attack(instance);
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        return;
+    }
+
+    destinationInRange = 0;
+    mv->auxFlags |= 0x20000000;
+
+    if (enemy != NULL)
+    {
+        COPY_SVEC(Position, &mv->destination, Position, &enemy->instance->position);
+        mv->destination.z += attrs->attack_pos_bump;
+        destinationInRange = ALUKA_CapDepth(instance, STREAM_GetLevelWithID(instance->currentStreamUnitID)) > mv->destination.z;
+    }
+
+    if (destinationInRange)
+    {
+        switch ((signed char)mv->attackState)
+        {
+        case 0:
+            if (MATH3D_LengthXYZ(mv->destination.x - instance->position.x, mv->destination.y - instance->position.y, mv->destination.z - instance->position.z) < attrs->attack_dist)
+            {
+                mv->attackState++;
+            }
+            break;
+        case 1:
+            MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, ALUKA_ANIM_SWIMATTACK, 1);
+            vars->swim_anim = ALUKA_ANIM_SWIMATTACK;
+            mv->attackState++;
+            vars->special_time = MON_GetTime(instance) + ((signed char)mv->attackType->sphereOnFrame * 0x21);
+            break;
+        case 2:
+            if (MON_GetTime(instance) >= (unsigned long)vars->special_time)
+            {
+                MON_TurnOnWeaponSpheres(instance);
+                mv->attackState++;
+                vars->special_time = MON_GetTime(instance) + ((signed char)mv->attackType->sphereOffFrame * 0x21);
+            }
+            break;
+        case 3:
+            if (MON_GetTime(instance) >= (unsigned long)vars->special_time)
+            {
+                MON_TurnOffWeaponSpheres(instance);
+                mv->attackState++;
+            }
+            break;
+        case 4:
+            if (instance->flags2 & 0x10)
+            {
+
+                vars->swim_anim = ALUKA_ANIM_NO_ANIM;
+                mv->attackState = 0;
+
+                if (mv->mvFlags & 0x10000000 && mv->enemy->mirFlags & 0x1000)
+                {
+                    MON_SwitchState(instance, MONSTER_STATE_EMBRACE);
+                }
+                else
+                {
+                    MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+                }
+            }
+            break;
+        }
+    }
+    else
+    {
+        MON_TurnOffWeaponSpheres(instance);
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+
+    ALUKA_SetupSwimAnimWOTread(instance);
+    ALUKA_SwimToDestination(instance);
+}
 
 void ALUKA_FleeEntry(Instance *instance)
 {
@@ -2253,7 +2355,109 @@ void ALUKA_AttackEntry(Instance *instance)
     vars->pitch_speed_limit = attrs->swimattack_pitch;
 }
 
-void ALUKA_Attack(void) {};
+void ALUKA_Attack(Instance *instance)
+{
+
+    int destinationInRange; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+    AlukaAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (AlukaAttributes *)ma->tunData;
+    vars = (AlukaVars *)mv->extraVars;
+    enemy = mv->enemy;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Attack(instance);
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        return;
+    }
+
+    destinationInRange = 0;
+    mv->auxFlags |= 0x20000000;
+
+    if (enemy != NULL)
+    {
+        COPY_SVEC(Position, &mv->destination, Position, &enemy->instance->position);
+        mv->destination.z += attrs->attack_pos_bump;
+        destinationInRange = ALUKA_CapDepth(instance, STREAM_GetLevelWithID(instance->currentStreamUnitID)) > mv->destination.z;
+    }
+
+    if (destinationInRange)
+    {
+        switch ((signed char)mv->attackState)
+        {
+        case 0:
+            if (MATH3D_LengthXYZ(mv->destination.x - instance->position.x, mv->destination.y - instance->position.y, mv->destination.z - instance->position.z) < attrs->attack_dist)
+            {
+                mv->attackState++;
+            }
+            break;
+        case 1:
+            MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, ALUKA_ANIM_SWIMATTACK, 1);
+            vars->swim_anim = ALUKA_ANIM_SWIMATTACK;
+            mv->attackState++;
+            vars->special_time = MON_GetTime(instance) + ((signed char)mv->attackType->sphereOnFrame * 0x21);
+            break;
+        case 2:
+            if (MON_GetTime(instance) >= (unsigned long)vars->special_time)
+            {
+                MON_TurnOnWeaponSpheres(instance);
+                mv->attackState++;
+                vars->special_time = MON_GetTime(instance) + ((signed char)mv->attackType->sphereOffFrame * 0x21);
+            }
+            break;
+        case 3:
+            if (MON_GetTime(instance) >= (unsigned long)vars->special_time)
+            {
+                MON_TurnOffWeaponSpheres(instance);
+                mv->attackState++;
+            }
+            break;
+        case 4:
+            if (instance->flags2 & 0x10)
+            {
+
+                vars->swim_anim = ALUKA_ANIM_NO_ANIM;
+                mv->attackState = 0;
+
+                if (mv->mvFlags & 0x10000000 && mv->enemy->mirFlags & 0x1000)
+                {
+                    MON_SwitchState(instance, MONSTER_STATE_EMBRACE);
+                }
+                else
+                {
+                    MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+                }
+            }
+            break;
+        }
+    }
+    else
+    {
+        MON_TurnOffWeaponSpheres(instance);
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+
+    ALUKA_SetupSwimAnimWOTread(instance);
+    ALUKA_SwimToDestination(instance);
+}
 
 void ALUKA_FleeEntry(Instance *instance)
 {
