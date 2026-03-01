@@ -202,21 +202,21 @@ int _GlyphIsGlyphSet(int glyph)
 {
     unsigned long abilities;
 
-    abilities = INSTANCE_Query(gameTrackerX.playerInstance, 36) | debugRazielFlags3;
+    abilities = INSTANCE_Query(gameTrackerX.playerInstance, queryRazielAbilities) | debugRazielFlags3;
 
     return (1 << (glyph + 17)) & abilities;
 }
 
 int _GlyphIsGlyphUsable(int glyph)
 {
-    return (1 << (glyph + 17)) & INSTANCE_Query(gameTrackerX.playerInstance, 19);
+    return (1 << (glyph + 17)) & INSTANCE_Query(gameTrackerX.playerInstance, queryGlyphStatus);
 }
 
 int _GlyphIsAnyGlyphSet()
 {
     unsigned long abilities;
 
-    abilities = INSTANCE_Query(gameTrackerX.playerInstance, 36);
+    abilities = INSTANCE_Query(gameTrackerX.playerInstance, queryRazielAbilities);
 
     abilities |= debugRazielFlags3;
 
@@ -294,7 +294,7 @@ void GlyphDrawMenu(Instance *instance)
 
     glyphtunedata = (GlyphTuneData *)instance->object->data;
 
-    MANNA_Count = INSTANCE_Query(gameTrackerX.playerInstance, 32);
+    MANNA_Count = INSTANCE_Query(gameTrackerX.playerInstance, queryMana);
 
     if (data->target_glyph_rotation != data->glyph_rotation)
     {
@@ -1109,8 +1109,8 @@ void HUD_Draw()
         oldx = fontTracker.font_xpos;
         oldy = fontTracker.font_ypos;
 
-        MANNA_Count = INSTANCE_Query(gameTrackerX.playerInstance, 32);
-        MANNA_Max = INSTANCE_Query(gameTrackerX.playerInstance, 45);
+        MANNA_Count = INSTANCE_Query(gameTrackerX.playerInstance, queryMana);
+        MANNA_Max = INSTANCE_Query(gameTrackerX.playerInstance, queryManaMax);
 
         FX_MakeMannaIcon(MANNA_Position, 23, 51, 32);
 

@@ -365,7 +365,7 @@ void MonsterCollide(Instance *instance, GameTracker *gameTracker)
 
                     data->bspFlags = bsp->flags;
 
-                    if ((!(INSTANCE_Query(instance, 1) & 0x4)) || (tface->textoff == 0xFFFF) || (!(((TextureFT3 *)((char *)level->terrain->StartTextureList + tface->textoff))->attr & 0x1000)))
+                    if (!(INSTANCE_Query(instance, queryWhatAmI) & 0x4) || tface->textoff == 0xFFFF || !(((TextureFT3 *)((char *)level->terrain->StartTextureList + tface->textoff))->attr & 0x1000))
                     {
                         impaler = MON_TestForTerrainImpale(instance, level->terrain);
 

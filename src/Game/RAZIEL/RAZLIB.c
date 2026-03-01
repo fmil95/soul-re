@@ -23,7 +23,7 @@ void razAlignYMoveRot(Instance *dest, short distance, Position *position, Rotati
     d.vy = -distance;
     d.vz = 0;
 
-    rotation->z = ((evPositionData *)INSTANCE_Query(dest, 7))->z + (extraZ + temp);
+    rotation->z = ((evPositionData *)INSTANCE_Query(dest, queryOrientation))->z + (extraZ + temp);
 
     MATH3D_SetUnityMatrix(&mat);
 
@@ -365,7 +365,7 @@ int razPickupAndGrab(CharacterState *In, int CurrentSection)
 
         if (Raziel.Senses.EngagedList[5].instance->LinkParent != NULL)
         {
-            INSTANCE_Query(Raziel.Senses.EngagedList[5].instance->LinkParent, 0);
+            INSTANCE_Query(Raziel.Senses.EngagedList[5].instance->LinkParent, queryHitState);
         }
 
         objData = (evObjectData *)SetObjectData(0, 0, 8, In->CharacterInstance, CurrentSection);
@@ -397,7 +397,7 @@ int razPickupAndGrab(CharacterState *In, int CurrentSection)
 
                 temp->SectionList[0].Data1 = 0; // TODO: double-check, something looks a bit off here
 
-                index = INSTANCE_Query(Raziel.Senses.EngagedList[5].instance, 4);
+                index = INSTANCE_Query(Raziel.Senses.EngagedList[5].instance, queryPhysicalClass);
 
                 if ((Raziel.Mode & 0x40000))
                 {
@@ -499,7 +499,7 @@ Instance *razGetHeldWeapon()
             return Raziel.soulReaver;
         }
     }
-    else if ((INSTANCE_Query(instance, 1) & 0x20))
+    else if (INSTANCE_Query(instance, queryWhatAmI) & 0x20)
     {
         return instance;
     }
@@ -531,7 +531,7 @@ int razReaverOff()
     {
         HeldWeapon = razGetHeldWeapon();
 
-        if ((INSTANCE_Query(Raziel.soulReaver, 40) & 0x1))
+        if (INSTANCE_Query(Raziel.soulReaver, queryReaverStatus) & 0x1)
         {
             INSTANCE_Post(Raziel.soulReaver, 0x800101, 0);
         }
@@ -551,7 +551,7 @@ int razReaverOn()
 {
     if ((Raziel.soulReaver != NULL) && (razGetHeldItem() == NULL) && ((Raziel.HitPoints == GetMaxHealth()) || (Raziel.CurrentPlane == 2)))
     {
-        if (!(INSTANCE_Query(Raziel.soulReaver, 40) & 0x1))
+        if (!(INSTANCE_Query(Raziel.soulReaver, queryReaverStatus) & 0x1))
         {
             INSTANCE_Post(Raziel.soulReaver, 0x800100, 0);
         }
@@ -642,7 +642,7 @@ void razReaverScale(int scale)
 
     Inst = razGetHeldWeapon();
 
-    if ((Raziel.soulReaver != NULL) && (Inst == Raziel.soulReaver) && ((INSTANCE_Query(Inst, 40) & 0x2)))
+    if (Raziel.soulReaver != NULL && Inst == Raziel.soulReaver && INSTANCE_Query(Inst, queryReaverStatus) & 0x2)
     {
         INSTANCE_Post(Inst, 0x800107, scale);
     }
@@ -718,7 +718,7 @@ void razCenterWithBlock(Instance *inst, Instance *target, int dist)
     ApplyMatrixSV(&mat, &d, &dd);
 
     do {} while (0); // garbage code for reordering
-    
+
     d.vx = inst->position.x - target->position.x;
     d.vy = inst->position.y - target->position.y;
 
@@ -776,92 +776,92 @@ void razResetPauseTranslation(Instance *instance)
 
 void razSelectMotionAnim(CharacterState *In, int CurrentSection, int Frames, int *Anim)
 {
-	G2SVector3 Vec; 
-    int switchType; 
-    int frame; 
-	int adjustment; 
-	G2AnimSection *animSectionA; 
-    G2AnimSection *animSectionB; 
-    G2AnimKeylist *keylist; 
-    int keylistID; 
+    G2SVector3 Vec;
+    int switchType;
+    int frame;
+    int adjustment;
+    G2AnimSection *animSectionA;
+    G2AnimSection *animSectionB;
+    G2AnimKeylist *keylist;
+    int keylistID;
 
-	switchType = 0;
+    switchType = 0;
 
-	frame = 0;
+    frame = 0;
 
-	if (Raziel.Magnitude > 3768)
-	{
-		if (Raziel.nothingCounter == 0)
-		{
-			ControlFlag &= ~0x2000;
-		}
+    if (Raziel.Magnitude > 3768)
+    {
+        if (Raziel.nothingCounter == 0)
+        {
+            ControlFlag &= ~0x2000;
+        }
 
-		if ((ControlFlag & 0x20000000))
-		{
-			razResetPauseTranslation(In->CharacterInstance);
-		}
+        if ((ControlFlag & 0x20000000))
+        {
+            razResetPauseTranslation(In->CharacterInstance);
+        }
 
-		if (*Anim == 60)
-		{
-			if ((Raziel.passedMask & 0xF))
-			{
-				switchType = 3;
-			}
+        if (*Anim == 60)
+        {
+            if ((Raziel.passedMask & 0xF))
+            {
+                switchType = 3;
+            }
 
-			if ((Raziel.passedMask & 0x8))
-			{
-				frame = 5;
-			}
+            if ((Raziel.passedMask & 0x8))
+            {
+                frame = 5;
+            }
 
-			if ((Raziel.passedMask & 0x1))
-			{
-				frame = 23;
-			}
+            if ((Raziel.passedMask & 0x1))
+            {
+                frame = 23;
+            }
 
-			if ((Raziel.passedMask & 0x2))
-			{
-				frame = 17;
-			}
+            if ((Raziel.passedMask & 0x2))
+            {
+                frame = 17;
+            }
 
-			if ((Raziel.passedMask & 0x4))
-			{
-				frame = 11;
-			}
-		}
-		else if (*Anim == 64)
-		{
-			if ((Raziel.passedMask & 0xF0))
-			{
-				switchType = 3;
-			}
+            if ((Raziel.passedMask & 0x4))
+            {
+                frame = 11;
+            }
+        }
+        else if (*Anim == 64)
+        {
+            if ((Raziel.passedMask & 0xF0))
+            {
+                switchType = 3;
+            }
 
-			if ((Raziel.passedMask & 0x80))
-			{
-				frame = 5;
-			}
+            if ((Raziel.passedMask & 0x80))
+            {
+                frame = 5;
+            }
 
-			if ((Raziel.passedMask & 0x10))
-			{
-				frame = 23;
-			}
+            if ((Raziel.passedMask & 0x10))
+            {
+                frame = 23;
+            }
 
-			if ((Raziel.passedMask & 0x20))
-			{
-				frame = 17;
-			}
+            if ((Raziel.passedMask & 0x20))
+            {
+                frame = 17;
+            }
 
-			if ((Raziel.passedMask & 0x40))
-			{
-				frame = 11;
-			}
-		}
-		else if (*Anim != 68)
-		{
-			switchType = 3;
-		}
-	}
+            if ((Raziel.passedMask & 0x40))
+            {
+                frame = 11;
+            }
+        }
+        else if (*Anim != 68)
+        {
+            switchType = 3;
+        }
+    }
     else if (((Raziel.Magnitude - 2784) >= 0) && ((Raziel.Magnitude - 2784) <= 984))
-	{
+    {
         ControlFlag &= ~0x2000;
 
         if ((ControlFlag & 0x20000000))
@@ -927,7 +927,7 @@ void razSelectMotionAnim(CharacterState *In, int CurrentSection, int Frames, int
         {
             switchType = 2;
         }
-	}
+    }
     else if (Raziel.Magnitude < 2784)
     {
         ControlFlag |= 0x2000;
@@ -992,69 +992,69 @@ void razSelectMotionAnim(CharacterState *In, int CurrentSection, int Frames, int
         }
     }
 
-	switch (switchType)
-	{
-	case 1:
-		if (CurrentSection == 2)
-		{
-			Raziel.passedMask = 0;
-		}
+    switch (switchType)
+    {
+    case 1:
+        if (CurrentSection == 2)
+        {
+            Raziel.passedMask = 0;
+        }
 
-		if (razSwitchVAnimGroup(In->CharacterInstance, CurrentSection, 60, frame, Frames) != 0)
-		{
-			G2EmulationSwitchAnimation(In, CurrentSection, 123, frame, Frames, 2);
-		}
+        if (razSwitchVAnimGroup(In->CharacterInstance, CurrentSection, 60, frame, Frames) != 0)
+        {
+            G2EmulationSwitchAnimation(In, CurrentSection, 123, frame, Frames, 2);
+        }
 
-		Raziel.movementMinRate = 4096;
-		Raziel.movementMaxRate = 7168;
+        Raziel.movementMinRate = 4096;
+        Raziel.movementMaxRate = 7168;
 
-		Raziel.movementMinAnalog = 2300;
-		Raziel.movementMaxAnalog = 2783;
+        Raziel.movementMinAnalog = 2300;
+        Raziel.movementMaxAnalog = 2783;
 
-		*Anim = 60;
-		break;
-	case 2:
-		if (CurrentSection == 2)
-		{
-			Raziel.passedMask = 0;
-		}
+        *Anim = 60;
+        break;
+    case 2:
+        if (CurrentSection == 2)
+        {
+            Raziel.passedMask = 0;
+        }
 
-		if (razSwitchVAnimGroup(In->CharacterInstance, CurrentSection, 64, frame, Frames) != 0)
-		{
-			G2EmulationSwitchAnimation(In, CurrentSection, 124, frame, Frames, 2);
-		}
+        if (razSwitchVAnimGroup(In->CharacterInstance, CurrentSection, 64, frame, Frames) != 0)
+        {
+            G2EmulationSwitchAnimation(In, CurrentSection, 124, frame, Frames, 2);
+        }
 
-		Raziel.movementMinRate = 3276;
-		Raziel.movementMaxRate = 6144;
+        Raziel.movementMinRate = 3276;
+        Raziel.movementMaxRate = 6144;
 
-		Raziel.movementMinAnalog = 2783;
-		Raziel.movementMaxAnalog = 3768;
+        Raziel.movementMinAnalog = 2783;
+        Raziel.movementMaxAnalog = 3768;
 
-		*Anim = 64;
-		break;
-	case 3:
-		if (CurrentSection == 2)
-		{
-			Raziel.passedMask = 0;
-		}
+        *Anim = 64;
+        break;
+    case 3:
+        if (CurrentSection == 2)
+        {
+            Raziel.passedMask = 0;
+        }
 
-		if (razSwitchVAnimGroup(In->CharacterInstance, CurrentSection, 68, frame, Frames) != 0)
-		{
-			G2EmulationSwitchAnimation(In, CurrentSection, 2, frame, Frames, 2);
-		}
+        if (razSwitchVAnimGroup(In->CharacterInstance, CurrentSection, 68, frame, Frames) != 0)
+        {
+            G2EmulationSwitchAnimation(In, CurrentSection, 2, frame, Frames, 2);
+        }
 
-		Raziel.movementMinRate = 3547;
-		Raziel.movementMaxRate = 4096;
-        
-		Raziel.movementMinAnalog = 3768;
-		Raziel.movementMaxAnalog = 4096;
+        Raziel.movementMinRate = 3547;
+        Raziel.movementMaxRate = 4096;
 
-		*Anim = 68;
-		break;
-	}
+        Raziel.movementMinAnalog = 3768;
+        Raziel.movementMaxAnalog = 4096;
 
-	if ((CurrentSection == 0) && (!(ControlFlag & 0x20000000)))
-	{
+        *Anim = 68;
+        break;
+    }
+
+    if ((CurrentSection == 0) && (!(ControlFlag & 0x20000000)))
+    {
         Vec.z = 0;
         Vec.x = 0;
 
@@ -1081,19 +1081,19 @@ void razSelectMotionAnim(CharacterState *In, int CurrentSection, int Frames, int
         }
 
         G2Anim_SetController_Vector(&In->CharacterInstance->anim, 0, 34, &Vec);
-	}
+    }
 
-	if (CurrentSection != 0)
-	{
-		Frames = 6;
+    if (CurrentSection != 0)
+    {
+        Frames = 6;
 
-		if (In->SectionList->Process == StateHandlerMove)
-		{
-			animSectionA = In->CharacterInstance->anim.section;
-			animSectionB = &In->CharacterInstance->anim.section[CurrentSection];
+        if (In->SectionList->Process == StateHandlerMove)
+        {
+            animSectionA = In->CharacterInstance->anim.section;
+            animSectionB = &In->CharacterInstance->anim.section[CurrentSection];
 
-			if (((G2AnimSection_IsInInterpolation(animSectionA) == G2FALSE) && (G2AnimSection_IsInInterpolation(animSectionB) == G2FALSE)) && (G2AnimSection_GetKeyframeNumber(animSectionA) != G2AnimSection_GetKeyframeNumber(animSectionB)))
-			{
+            if (((G2AnimSection_IsInInterpolation(animSectionA) == G2FALSE) && (G2AnimSection_IsInInterpolation(animSectionB) == G2FALSE)) && (G2AnimSection_GetKeyframeNumber(animSectionA) != G2AnimSection_GetKeyframeNumber(animSectionB)))
+            {
                 keylist = animSectionA->keylist;
                 keylistID = animSectionA->keylistID;
 
@@ -1103,9 +1103,9 @@ void razSelectMotionAnim(CharacterState *In, int CurrentSection, int Frames, int
                 {
                     G2AnimSection_InterpToKeylistFrame(animSectionB, keylist, keylistID, frame, 600);
                 }
-			}
-		}
-	}
+            }
+        }
+    }
 }
 
 int razApplyMotion(CharacterState *In, int CurrentSection)
@@ -1192,7 +1192,7 @@ void razEnterWater(CharacterState *In, int CurrentSection, evPhysicsSwimData *Sw
 
             PhysicsMode = 0;
         }
-        else if ((Inst != NULL) && (INSTANCE_Query(Inst, 4) == 3))
+        else if (Inst != NULL && INSTANCE_Query(Inst, queryPhysicalClass) == 3)
         {
             G2Anim_SetSpeedAdjustment(&In->CharacterInstance->anim, 2048);
         }
@@ -1233,7 +1233,7 @@ void razEnterWater(CharacterState *In, int CurrentSection, evPhysicsSwimData *Sw
     {
         if (Inst != NULL)
         {
-            INSTANCE_Query(Inst, 4);
+            INSTANCE_Query(Inst, queryPhysicalClass);
         }
         else
         {
@@ -1581,7 +1581,7 @@ void razSetPlayerEvent()
 
     if (((Raziel.Senses.EngagedMask & 0x8)) && (Raziel.Senses.heldClass != 0x3) && (process == StateHandlerIdle))
     {
-        if (INSTANCE_Query(Raziel.Senses.EngagedList[3].instance, 4) == 9)
+        if (INSTANCE_Query(Raziel.Senses.EngagedList[3].instance, queryPhysicalClass) == 9)
         {
             Raziel.playerEvent |= 0x8;
         }
@@ -1596,7 +1596,7 @@ void razSetPlayerEvent()
         Raziel.playerEvent |= 0x10;
     }
 
-    if (((Raziel.Senses.EngagedMask & 0x40)) && (!(INSTANCE_Query(Raziel.Senses.EngagedList[6].instance, 10) & 0x4)))
+    if (((Raziel.Senses.EngagedMask & 0x40)) && (!(INSTANCE_Query(Raziel.Senses.EngagedList[6].instance, queryMode) & 0x4)))
     {
         Raziel.playerEvent |= 0x20;
     }

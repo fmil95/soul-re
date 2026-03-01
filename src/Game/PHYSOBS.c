@@ -255,7 +255,7 @@ void SetThrowDirection(Instance *instance, Instance *parent, evObjectThrowData *
 
         instance->zVel = 0;
 
-        matrix = (MATRIX *)INSTANCE_Query(itarget, 12);
+        matrix = (MATRIX *)INSTANCE_Query(itarget, queryLookatMatrix);
 
         if (ABS(instance->xVel) > ABS(instance->yVel))
         {
@@ -324,47 +324,47 @@ void SetThrowDirection(Instance *instance, Instance *parent, evObjectThrowData *
 
 void ThrowPhysOb(Instance *instance, evObjectThrowData *throwData)
 {
-    PhysObData *Data;        
-    int collFlg;             
-    int endAnimFlg;           
-    
+    PhysObData *Data;
+    int collFlg;
+    int endAnimFlg;
+
     endAnimFlg = 0;
-    
-    if (instance->LinkParent != NULL) 
+
+    if (instance->LinkParent != NULL)
     {
-        Instance *parent;          
-        PhysObProperties *Prop;   
-        
+        Instance *parent;
+        PhysObProperties *Prop;
+
         parent = instance->LinkParent;
-        
-        Prop = (PhysObProperties*)instance->data;
-        
-        Data = (PhysObData*)instance->extraData;
-        
+
+        Prop = (PhysObProperties *)instance->data;
+
+        Data = (PhysObData *)instance->extraData;
+
         instance->flags2 |= 0x4000;
-        
+
         Data->Force = NULL;
-        
+
         Data->physObTimer = 614400;
-        
-        if (throwData == NULL) 
+
+        if (throwData == NULL)
         {
-            throwData = (evObjectThrowData*)SetObjectThrowData(NULL, NULL, 0, 0, 384, 0, 64, -1024);
+            throwData = (evObjectThrowData *)SetObjectThrowData(NULL, NULL, 0, 0, 384, 0, 64, -1024);
         }
-        
+
         INSTANCE_UnlinkFromParent(instance);
-        
+
         SetThrowDirection(instance, parent, throwData, Data);
-        
+
         instance->zAccl = throwData->gravity;
-        
-        switch (throwData->spinType) 
-        {                          
+
+        switch (throwData->spinType)
+        {
         case 0:
             Data->xRotVel = 0;
             Data->yRotVel = 0;
             Data->zRotVel = 0;
-            
+
             Data->throwFlags &= ~0x1;
             break;
         case 1:
@@ -372,116 +372,116 @@ void ThrowPhysOb(Instance *instance, evObjectThrowData *throwData)
             break;
         case 2:
         {
-            SVector *sv;              
-                
+            SVector *sv;
+
             sv = &throwData->angularVel;
-            
+
             Data->xRotVel = sv->x;
             Data->yRotVel = sv->y;
-            Data->zRotVel = sv->z; 
-            
+            Data->zRotVel = sv->z;
+
             Data->throwFlags &= ~0x1;
             break;
         }
         }
-        
+
         Data->Mode = (Data->Mode | 0x1010) & ~0x81;
-        
+
         Data->initialXRot = throwData->initialXRot;
-        
+
         Data->throwingInstance = parent;
-        
-        if (Prop->family == 7) 
+
+        if (Prop->family == 7)
         {
-            PhysObProjData *ProjData; 
-            
-            ProjData = ((PhysObProjectileProperties*)Prop)->data + ((PhysObProjData*)instance->extraData)->flags;
-            
-            if (ProjData->loopAnim != -1) 
+            PhysObProjData *ProjData;
+
+            ProjData = ((PhysObProjectileProperties *)Prop)->data + ((PhysObProjData *)instance->extraData)->flags;
+
+            if (ProjData->loopAnim != -1)
             {
                 G2EmulationInstanceSetAnimation(instance, 0, ProjData->loopAnim, 0, 0);
                 G2EmulationInstanceSetMode(instance, 0, 2);
             }
-            
+
             if (ProjData->endAnim != -1)
             {
                 endAnimFlg = 1;
             }
-            
-            if (instance->currentModel == 0) 
+
+            if (instance->currentModel == 0)
             {
                 FX_EndFField(instance);
-                
+
                 FX_StartGenericParticle(instance, 0, 0, 0, 0);
             }
-            
+
             ExecuteThrow(instance);
         }
-        
+
         collFlg = PHYSOB_CheckThrownLineCollision(instance, parent);
-        
+
         instance->flags2 |= 0x80;
-        
-        if (collFlg != 0) 
+
+        if (collFlg != 0)
         {
             instance->xVel = 0;
             instance->yVel = 0;
             instance->zVel = 0;
-            
+
             instance->zAccl = 0;
-            
-            if ((CheckPhysObAbility(instance, 0x200) != 0) && (collFlg == 1)) 
+
+            if ((CheckPhysObAbility(instance, 0x200) != 0) && (collFlg == 1))
             {
-                PCollideInfo pcollideInfo; 
-                Position newPos;           
-                Position oldPos;           
-                MATRIX *mat;               
-                
+                PCollideInfo pcollideInfo;
+                Position newPos;
+                Position oldPos;
+                MATRIX *mat;
+
                 Data->Mode |= 0x1000;
-                
+
                 instance->flags2 &= ~0x80;
-                
+
                 Data->Mode &= ~0x10;
-                
+
                 mat = &instance->matrix[2];
-                
+
                 oldPos.x = mat->t[0];
                 oldPos.y = mat->t[1];
                 oldPos.z = mat->t[2];
-                
+
                 newPos.x = parent->position.x;
                 newPos.y = parent->position.y;
                 newPos.z = oldPos.z;
-                
-                pcollideInfo.newPoint = (SVECTOR*)&newPos;
-                pcollideInfo.oldPoint = (SVECTOR*)&oldPos;
-                
+
+                pcollideInfo.newPoint = (SVECTOR *)&newPos;
+                pcollideInfo.oldPoint = (SVECTOR *)&oldPos;
+
                 PHYSICS_CheckLineInWorld(instance, &pcollideInfo);
-                
-                if (pcollideInfo.type == 3) 
+
+                if (pcollideInfo.type == 3)
                 {
                     SUB_SVEC(Position, &oldPos, Position, &newPos, Position, &oldPos);
                     ADD_SVEC(Position, &instance->position, Position, &instance->position, Position, &oldPos);
                 }
-            } 
-            else if (endAnimFlg != 0) 
+            }
+            else if (endAnimFlg != 0)
             {
                 Data->Mode = (Data->Mode | 0x1000) & ~0x10;
-                
+
             }
-            else 
+            else
             {
                 Data->Mode &= ~0x1000;
             }
         }
-        
+
         if ((Data->Mode & 0x10))
         {
             if (collFlg == 0)
             {
                 PhysicsMove(instance, &instance->position, gameTrackerX.timeMult);
             }
-            
+
             TurnOnCollisionPhysOb(instance, 4);
         }
     }
@@ -653,132 +653,132 @@ int SwitchPhysOb(Instance *instance)
 
 int InteractPhysOb(Instance *instance, Instance *Force, int LinkNode, int Action)
 {
-    PhysObData *Data;                       
-    PhysObInteractProperties *interactProp; 
-    
-    interactProp = (PhysObInteractProperties*)instance->data;
-    
-    if (CheckPhysObFamily(instance, 3) == 0) 
+    PhysObData *Data;
+    PhysObInteractProperties *interactProp;
+
+    interactProp = (PhysObInteractProperties *)instance->data;
+
+    if (CheckPhysObFamily(instance, 3) == 0)
     {
         return 1;
-    } 
+    }
     else
     {
-        BreakOffData *BreakOff; 
-        
-        BreakOff = (BreakOffData*)(instance->extraData + 4);
-        
-        Data = (PhysObData*)instance->extraData; 
-        
-        if (interactProp->frame != 0xFF) 
+        BreakOffData *BreakOff;
+
+        BreakOff = (BreakOffData *)(instance->extraData + 4);
+
+        Data = (PhysObData *)instance->extraData;
+
+        if (interactProp->frame != 0xFF)
         {
-            switch (Action) 
-            {                         
+            switch (Action)
+            {
             case 1:
             {
-                Instance *lightInst; 
+                Instance *lightInst;
 
                 Data->Mode |= 0x1080;
                 Data->Mode &= ~0x1;
-                
-                if ((Data->Mode & 0x10000)) 
+
+                if ((Data->Mode & 0x10000))
                 {
                     lightInst = Force->LinkChild;
-                    
+
                     PHYSOB_StartLighting(lightInst, PhysObGetLight(lightInst));
                 }
-                
+
                 BreakOff->NewType = interactProp->newType;
                 BreakOff->NewClass = interactProp->newClass;
-                
+
                 INSTANCE_LinkToParent(instance, Force, LinkNode);
                 break;
             }
             case 2:
             {
-                Instance *lightInst; 
-                    
+                Instance *lightInst;
+
                 lightInst = Force->LinkChild;
-                
-                if (CheckPhysOb(lightInst) != 0) 
+
+                if (CheckPhysOb(lightInst) != 0)
                 {
                     PHYSOB_StartBurning(lightInst, PhysObGetLight(lightInst));
                 }
-                
+
                 break;
             }
             case 9:
                 INSTANCE_Post(instance, 0x40002, 5);
                 break;
             }
-            
-            if (Action == interactProp->action) 
+
+            if (Action == interactProp->action)
             {
                 instance->flags |= 0x8;
             }
-            
+
             if (Action == interactProp->auxAction)
             {
                 instance->flags |= 0x10;
             }
         }
-        
-        if ((interactProp->endAnim != 0xFF) && ((interactProp->Properties.Type & 0x8000))) 
+
+        if ((interactProp->endAnim != 0xFF) && ((interactProp->Properties.Type & 0x8000)))
         {
             G2EmulationInstanceSetAnimation(instance, 0, interactProp->endAnim, 0, 0);
-            
-            switch ((interactProp->startAnimMode & 0x30)) 
-            {                   
-            case 0:                                 
+
+            switch ((interactProp->startAnimMode & 0x30))
+            {
+            case 0:
                 G2EmulationInstanceSetMode(instance, 0, 2);
                 break;
-            case 0x10:                                
+            case 0x10:
                 G2EmulationInstanceSetMode(instance, 0, 1);
                 break;
-            case 0x20:                                
+            case 0x20:
                 G2EmulationInstanceSetMode(instance, 0, 0);
                 break;
             }
         }
-        
-        if (instance->object->modelList != NULL) 
+
+        if (instance->object->modelList != NULL)
         {
             if ((interactProp->startAnimMode & 0x80))
             {
-                int s; 
-                
-                for (s = 0; s < instance->object->modelList[0]->numSegments; s++) 
+                int s;
+
+                for (s = 0; s < instance->object->modelList[0]->numSegments; s++)
                 {
                     COLLIDE_SegmentCollisionOff(instance, s);
-                } 
-            } 
-            else 
+                }
+            }
+            else
             {
-                int s; 
-                
-                for (s = 0; s < instance->object->modelList[0]->numSegments; s++) 
+                int s;
+
+                for (s = 0; s < instance->object->modelList[0]->numSegments; s++)
                 {
                     COLLIDE_SegmentCollisionOn(instance, s);
                 }
             }
-        } 
+        }
 
         Data->Force = NULL;
-        
+
         Data->Step = 0;
         Data->Steps = 0;
-        
+
         BreakOff->NewType = interactProp->newType;
         BreakOff->NewClass = interactProp->newClass;
-        
+
         instance->xVel = 0;
         instance->yVel = 0;
         instance->zVel = 0;
-        
+
         instance->xAccl = 0;
         instance->yAccl = 0;
         instance->zAccl = 0;
-        
+
         return 0;
     }
 }
@@ -1575,7 +1575,7 @@ void InitPhysicalObject(Instance *instance, GameTracker *gameTracker)
             G2EmulationInstanceSetMode(instance, 0, 2);
         }
 
-        if ((collectibleProp->collectClass == 2) && (gameTrackerX.playerInstance != NULL) && (!(INSTANCE_Query(gameTrackerX.playerInstance, 36) & 0xFC0000)))
+        if ((collectibleProp->collectClass == 2) && (gameTrackerX.playerInstance != NULL) && (!(INSTANCE_Query(gameTrackerX.playerInstance, queryRazielAbilities) & 0xFC0000)))
         {
             instance->flags |= 0x20;
         }
@@ -1911,7 +1911,7 @@ void ProcessPhysicalObject(Instance *instance, GameTracker *gameTracker)
 
             if ((Prop->flags & 0x1))
             {
-                if ((INSTANCE_Query(gameTrackerX.playerInstance, 36) & 0x10))
+                if ((INSTANCE_Query(gameTrackerX.playerInstance, queryRazielAbilities) & 0x10))
                 {
                     instance->flags &= ~0x800;
                 }
@@ -2868,7 +2868,7 @@ void PhysicalObjectPost(Instance *instance, unsigned long Message, unsigned long
         {
             Prop = (PhysObProperties *)instance->data;
 
-            if ((Prop->family == 7) && (instance->parent != NULL) && ((INSTANCE_Query(instance->parent, 1) & 0xA)))
+            if ((Prop->family == 7) && (instance->parent != NULL) && ((INSTANCE_Query(instance->parent, queryWhatAmI) & 0xA)))
             {
                 instance->flags |= 0x20;
             }
@@ -2962,7 +2962,7 @@ void CheckForceCollision(struct _Instance *instance, struct _Instance *hitinst, 
         data->Mode |= 0x80000 | 0x1000 | 0x1;
     }
 
-    if ((instance->parent != 0) && (INSTANCE_Query(instance->parent, 1) & 1))
+    if (instance->parent != 0 && INSTANCE_Query(instance->parent, queryWhatAmI) & 1)
     {
         if ((tface != 0) && (gameTrackerX.gameData.asmData.MorphType == 0))
         {
@@ -3245,7 +3245,7 @@ int GetPhysObCollisionType(Instance *instance)
 
                 if (instance->LinkParent == NULL)
                 {
-                    if ((INSTANCE_Query(target, 0) & 0x10000000))
+                    if (INSTANCE_Query(target, queryHitState) & 0x10000000)
                     {
                         if (weapon->Class == 1)
                         {
@@ -3620,7 +3620,7 @@ long PHYSOB_CheckForEnemyInBlkSpot(Instance *instance, int dx, int dy)
 
     while (inst != NULL)
     {
-        if (((!(inst->object->oflags2 & 0x80000)) || ((inst->flags2 & 0x8000000))) || ((INSTANCE_Query(inst, 0) & 0x40000000)) || ((inst->position.x < x0) || (inst->position.x > x1)) || ((inst->position.y < y0) || (inst->position.y > y1)) || ((inst->position.z < z0) || (inst->position.z > z1)))
+        if ((!(inst->object->oflags2 & 0x80000) || inst->flags2 & 0x8000000) || INSTANCE_Query(inst, queryHitState) & 0x40000000 || (inst->position.x < x0 || inst->position.x > x1) || (inst->position.y < y0 || inst->position.y > y1) || (inst->position.z < z0 || inst->position.z > z1))
         {
             inst = inst->next;
         }

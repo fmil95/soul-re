@@ -79,7 +79,7 @@ void MON_ChangeHumanOpinion(Instance *instance)
 {
     int good;
 
-    good = INSTANCE_Query(instance, 1);
+    good = INSTANCE_Query(instance, queryWhatAmI);
 
     if ((good & 0xC000))
     {
@@ -201,7 +201,7 @@ void MON_DeadEntry(Instance *instance)
 
     MON_TurnOffAllSpheres(instance);
 
-    if ((mv->enemy != NULL) && ((INSTANCE_Query(mv->enemy->instance, 1) & 0x1)))
+    if (mv->enemy != NULL && INSTANCE_Query(mv->enemy->instance, queryWhatAmI) & 0x1)
     {
         MON_ChangeHumanOpinion(instance);
     }
@@ -879,7 +879,7 @@ void MON_TerrainImpaleDeath(Instance *instance)
 
         if ((instance->flags2 & 0x10))
         {
-            if ((mv->enemy != NULL) && ((INSTANCE_Query(mv->enemy->instance, 1) & 0x1)))
+            if (mv->enemy != NULL && INSTANCE_Query(mv->enemy->instance, queryWhatAmI) & 0x1)
             {
                 MON_ChangeHumanOpinion(instance);
             }
@@ -1122,7 +1122,7 @@ void MON_Grabbed(Instance *instance)
 
     time = mv->generalTimer - MON_GetTime(instance);
 
-    if ((time <= 0) && (INSTANCE_Query(mv->enemy->instance, 10) != 0x20000))
+    if (time <= 0 && INSTANCE_Query(mv->enemy->instance, queryMode) != 0x20000)
     {
         MON_SwitchState(instance, MONSTER_STATE_BREAKHOLD);
     }
@@ -1671,7 +1671,7 @@ void MON_Flee(Instance *instance)
 
     if (((mv->mvFlags & 0x2000000)) && (mv->ally != NULL) && (mv->ally->distance < mv->enemy->distance))
     {
-        if (!(INSTANCE_Query(instance, 1) & 0x4))
+        if (!(INSTANCE_Query(instance, queryWhatAmI) & 0x4))
         {
             MON_SwitchState(instance, MONSTER_STATE_PURSUE);
             return;
@@ -3022,7 +3022,7 @@ void MON_CleanUp(Instance *instance)
         G2Anim_DetachControllerFromSeg(&instance->anim, ma->spineSegment, 14);
     }
 
-    if ((INSTANCE_Query(instance, 1) & 0xC000))
+    if (INSTANCE_Query(instance, queryWhatAmI) & 0xC000)
     {
         GlobalSave->humanOpinionOfRaziel++;
     }

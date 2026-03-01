@@ -1424,7 +1424,7 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
     {
         evPositionData *position;
 
-        position = (evPositionData *)INSTANCE_Query(instance, 6);
+        position = (evPositionData *)INSTANCE_Query(instance, queryPosition);
 
         if (position == NULL)
         {
@@ -1449,7 +1449,7 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
         evPositionData *rotation;
         Rotation3d vector;
 
-        rotation = (evPositionData *)INSTANCE_Query(instance, 7);
+        rotation = (evPositionData *)INSTANCE_Query(instance, queryOrientation);
 
         if (rotation == NULL)
         {
@@ -1542,22 +1542,22 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
 
         break;
     case ATTR_MODE_STATUS:
-        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 10), 3);
+        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, queryMode), 3);
 
         retValue = 1;
         break;
     case ATTR_FULL_HEALTH:
-        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 43), 0);
+        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, queryPlayerAtMaxHealth), 0);
 
         retValue = 1;
         break;
     case ATTR_RAZ_HEALTH:
-        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 31), 0);
+        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, queryHealth), 0);
 
         retValue = 1;
         break;
     case ATTR_RAZ_MANA:
-        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 32), 0);
+        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, queryMana), 0);
 
         retValue = 1;
         break;
@@ -1566,7 +1566,7 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
         Instance *tmpI;
         long value;
 
-        tmpI = (Instance *)INSTANCE_Query(instance, 44);
+        tmpI = (Instance *)INSTANCE_Query(instance, queryHeldInstance);
 
         if (tmpI == NULL)
         {
@@ -1574,9 +1574,9 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
         }
         else
         {
-            if ((INSTANCE_Query(tmpI, 1) & 0x20))
+            if ((INSTANCE_Query(tmpI, queryWhatAmI) & 0x20))
             {
-                if ((INSTANCE_Query(tmpI, 4) & 0x3))
+                if ((INSTANCE_Query(tmpI, queryPhysicalClass) & 0x3))
                 {
                     return 1;
                 }
@@ -1594,12 +1594,12 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
     }
     case ATTR_DEAD:
     case ATTR_DEADORDESTROYED:
-        EVENT_ChangeOperandToNumber(stackObject, (INSTANCE_Query(instance, 0) >> 30) & 0x1, 0);
+        EVENT_ChangeOperandToNumber(stackObject, (INSTANCE_Query(instance, queryHitState) >> 30) & 0x1, 0);
 
         retValue = 1;
         break;
     case ATTR_DYING:
-        EVENT_ChangeOperandToNumber(stackObject, (INSTANCE_Query(instance, 0) >> 26) & 0x1, 0);
+        EVENT_ChangeOperandToNumber(stackObject, (INSTANCE_Query(instance, queryHitState) >> 26) & 0x1, 0);
 
         retValue = 1;
         break;
@@ -1607,7 +1607,7 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
     {
         unsigned long temp; // not from decls.h
 
-        temp = INSTANCE_Query(instance, 1) & 0x4;
+        temp = INSTANCE_Query(instance, queryWhatAmI) & 0x4;
 
         EVENT_ChangeOperandToNumber(stackObject, temp > 0, 0);
 
@@ -1615,12 +1615,12 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
         break;
     }
     case ATTR_WATERSTATUS:
-        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 9), 1);
+        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, queryWaterStatus), 1);
 
         retValue = 1;
         break;
     case ATTR_SPECIALINFO:
-        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 30), 0);
+        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, querySpecialInfo), 0);
 
         retValue = 1;
         break;
@@ -1781,7 +1781,7 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
         break;
     }
     case ATTR_ABILITY:
-        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, 36), 3);
+        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(instance, queryRazielAbilities), 3);
 
         retValue = 1;
         break;
@@ -2001,7 +2001,7 @@ long EVENT_TransformGameAttribute(PCodeStack *stack, StackType *stackObject, lon
         retValue = 1;
         break;
     case ATTR_SPECTRAL:
-        value = INSTANCE_Query(gameTrackerX.playerInstance, 11) >> 1;
+        value = INSTANCE_Query(gameTrackerX.playerInstance, queryPlane) >> 1;
 
         value &= 0x1;
 
@@ -2015,7 +2015,7 @@ long EVENT_TransformGameAttribute(PCodeStack *stack, StackType *stackObject, lon
         retValue = 1;
         break;
     case ATTR_MATERIAL:
-        value = INSTANCE_Query(gameTrackerX.playerInstance, 11) & 0x1;
+        value = INSTANCE_Query(gameTrackerX.playerInstance, queryPlane) & 0x1;
 
         if (STREAM_IsMorphInProgress() != 0)
         {
@@ -2187,12 +2187,12 @@ long EVENT_TransformGameAttribute(PCodeStack *stack, StackType *stackObject, lon
         break;
     }
     case ATTR_PLAYEREVENT:
-        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(gameTrackerX.playerInstance, 41), 3);
+        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(gameTrackerX.playerInstance, queryPlayerEvent), 3);
 
         retValue = 1;
         break;
     case ATTR_PLAYEREVENTHISTORY:
-        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(gameTrackerX.playerInstance, 42), 3);
+        EVENT_ChangeOperandToNumber(stackObject, INSTANCE_Query(gameTrackerX.playerInstance, queryPlayerEventHistory), 3);
 
         retValue = 1;
         break;
@@ -3544,12 +3544,12 @@ long EVENT_DoInstanceAction(InstanceObject *instanceObject, StackType *operand2,
         case 36:
             if (trueValue != 0)
             {
-                if (!(INSTANCE_Query(instanceObject->instance, 5) & 0x1))
+                if (!(INSTANCE_Query(instanceObject->instance, queryPhysicalStatus) & 0x1))
                 {
                     INSTANCE_Post(instance, 0x800020, 0);
                 }
             }
-            else if ((INSTANCE_Query(instanceObject->instance, 5) & 0x1))
+            else if ((INSTANCE_Query(instanceObject->instance, queryPhysicalStatus) & 0x1))
             {
                 INSTANCE_Post(instance, 0x800020, 0);
             }
@@ -3626,7 +3626,7 @@ long EVENT_DoInstanceAction(InstanceObject *instanceObject, StackType *operand2,
                 }
             }
 
-            if ((INSTANCE_Query(instance, 1) & 0xE))
+            if ((INSTANCE_Query(instance, queryWhatAmI) & 0xE))
             {
                 INSTANCE_Post(instance, 0x40013, trueValue);
             }
@@ -5366,7 +5366,7 @@ long EVENT_GetInstanceValue(InstanceObject *instanceObject)
         value = instance->introUniqueID;
         break;
     case 20:
-        value = INSTANCE_Query(instance, 11) >> 1;
+        value = INSTANCE_Query(instance, queryPlane) >> 1;
 
         value &= 0x1;
 
@@ -5377,7 +5377,7 @@ long EVENT_GetInstanceValue(InstanceObject *instanceObject)
 
         break;
     case 21:
-        value = INSTANCE_Query(instance, 11);
+        value = INSTANCE_Query(instance, queryPlane);
 
         value &= 0x1;
 
@@ -5399,7 +5399,7 @@ long EVENT_GetInstanceValue(InstanceObject *instanceObject)
         value = 0;
         break;
     case 16:
-        value = INSTANCE_Query(instance, 10);
+        value = INSTANCE_Query(instance, queryMode);
         break;
     case 53:
         value = EVENT_CheckFlagSet(instance->flags2, 0x20000000);
@@ -5412,26 +5412,26 @@ long EVENT_GetInstanceValue(InstanceObject *instanceObject)
         value = EVENT_CheckFlagUnset(instance->flags, 0x800);
         break;
     case 36:
-        value = (INSTANCE_Query(instance, 5) & 0x5) == 1;
+        value = (INSTANCE_Query(instance, queryPhysicalStatus) & 0x5) == 1;
         break;
     case 37:
-        value = (INSTANCE_Query(instance, 5) & 0x9) == 0;
+        value = (INSTANCE_Query(instance, queryPhysicalStatus) & 0x9) == 0;
         break;
     case 143:
-        value = INSTANCE_Query(instance, 5) >> 2;
+        value = INSTANCE_Query(instance, queryPhysicalStatus) >> 2;
 
         value &= 0x1;
         break;
     case 144:
-        value = INSTANCE_Query(instance, 5) >> 3;
+        value = INSTANCE_Query(instance, queryPhysicalStatus) >> 3;
 
         value &= 0x1;
         break;
     case 38:
-        value = INSTANCE_Query(instance, 27);
+        value = INSTANCE_Query(instance, queryPhysicalDisable);
         break;
     case 39:
-        value = INSTANCE_Query(instance, 26);
+        value = INSTANCE_Query(instance, queryPhysicalEnable);
         break;
     case 91:
         value = instance->lightGroup;
@@ -5612,10 +5612,10 @@ long EVENT_GetAnimateValue(InstanceAnimate *instanceAnimate)
         break;
     case 15:
     case 40:
-        value = INSTANCE_Query(instance, 18);
+        value = INSTANCE_Query(instance, queryG2CurrentFrame);
         break;
     case 30:
-        value = INSTANCE_Query(instance, 17);
+        value = INSTANCE_Query(instance, queryG2CurrentAnimation);
         break;
     }
 
