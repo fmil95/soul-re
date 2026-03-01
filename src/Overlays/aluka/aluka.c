@@ -1273,7 +1273,16 @@ void ALUKA_SurpriseAttackEntry(Instance *instance)
 
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_SurpriseAttack);
+void ALUKA_SurpriseAttack(Instance *instance)
+{
+    if (!(((MonsterVars *)instance->extraData)->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_SurpriseAttack(instance);
+        return;
+    }
+    ALUKA_Attack(instance);
+}
 
 void ALUKA_SurprisedEntry(Instance *instance)
 {
@@ -2801,7 +2810,16 @@ void ALUKA_SurpriseAttackEntry(Instance *instance)
 
 }
 
-void ALUKA_SurpriseAttack(void) {};
+void ALUKA_SurpriseAttack(Instance *instance)
+{
+    if (!(((MonsterVars *)instance->extraData)->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_SurpriseAttack(instance);
+        return;
+    }
+    ALUKA_Attack(instance);
+}
 
 void ALUKA_SurprisedEntry(Instance *instance)
 {
