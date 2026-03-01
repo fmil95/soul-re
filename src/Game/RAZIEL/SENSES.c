@@ -36,19 +36,19 @@ void UpdateEngagementList(evCollideInstanceStatsData *Ptr, Player *player)
     int hidden;
     PhysObCollectibleProperties *collectibleProp;
 
-    WhoAmI = INSTANCE_Query(Ptr->instance, 1);
+    WhoAmI = INSTANCE_Query(Ptr->instance, queryWhatAmI);
 
     hidden = Ptr->instance->flags & 0x800;
 
     if ((WhoAmI & 0x20))
     {
-        Ability = INSTANCE_Query(Ptr->instance, 2);
+        Ability = INSTANCE_Query(Ptr->instance, queryPhysicalAbility);
 
         if (((Ability & 0x100)) && (!(Ptr->instance->flags & 0x800)))
         {
             evObjectDraftData *draft;
 
-            draft = (evObjectDraftData *)INSTANCE_Query(Ptr->instance, 22);
+            draft = (evObjectDraftData *)INSTANCE_Query(Ptr->instance, queryPhysicalDraftData);
 
             if ((Ptr->xyDistance < draft->radius) && ((Ptr->zDelta < 0) && (Ptr->zDelta > -draft->height)))
             {
@@ -66,7 +66,7 @@ void UpdateEngagementList(evCollideInstanceStatsData *Ptr, Player *player)
                 Ptr->zDelta /= 2;
             }
 
-            if ((Ptr->instance->LinkParent == NULL) || ((INSTANCE_Query(Ptr->instance->LinkParent, 0) & 0x40000000)))
+            if (Ptr->instance->LinkParent == NULL || INSTANCE_Query(Ptr->instance->LinkParent, queryHitState) & 0x40000000)
             {
                 if ((Ptr->xyDistance < 512) && ((Ptr->zDelta > -256) && (Ptr->zDelta < 640)))
                 {
@@ -112,7 +112,7 @@ void UpdateEngagementList(evCollideInstanceStatsData *Ptr, Player *player)
         {
             PhysObSwitchProperties *prop;
 
-            prop = (PhysObSwitchProperties *)INSTANCE_Query(Ptr->instance, 23);
+            prop = (PhysObSwitchProperties *)INSTANCE_Query(Ptr->instance, queryPhysicalSwitchProperties);
 
             if ((Ptr->xyDistance < prop->engageXYDistance) && (Ptr->zDelta > (signed char)prop->engageZMinDelta) && (Ptr->zDelta < (signed char)prop->engageZMaxDelta))
             {
@@ -121,7 +121,7 @@ void UpdateEngagementList(evCollideInstanceStatsData *Ptr, Player *player)
                     SetEngagedInstance(player, Ptr, 3);
                 }
 
-                INSTANCE_Query(Ptr->instance, 5);
+                INSTANCE_Query(Ptr->instance, queryPhysicalStatus);
             }
         }
 
@@ -130,11 +130,11 @@ void UpdateEngagementList(evCollideInstanceStatsData *Ptr, Player *player)
             PhysObInteractProperties *interactProp;
             int testConditions;
 
-            interactProp = (PhysObInteractProperties *)INSTANCE_Query(Ptr->instance, 21);
+            interactProp = (PhysObInteractProperties *)INSTANCE_Query(Ptr->instance, queryPhysicalInteractProperties);
 
             testConditions = 0;
 
-            if (((interactProp->conditions & 0x1)) || ((interactProp->auxConditions & 0x1)))
+            if (interactProp->conditions & 0x1 || interactProp->auxConditions & 0x1)
             {
                 testConditions = 0xFFFF;
             }
@@ -161,9 +161,9 @@ void UpdateEngagementList(evCollideInstanceStatsData *Ptr, Player *player)
                         }
                     }
                 }
-                else if ((INSTANCE_Query(heldInst, 2) & 0x20))
+                else if (INSTANCE_Query(heldInst, queryPhysicalAbility) & 0x20)
                 {
-                    if ((INSTANCE_Query(heldInst, 3) & 0x10000))
+                    if (INSTANCE_Query(heldInst, queryPhysicalMode) & 0x10000)
                     {
                         testConditions = 0x200;
                     }
@@ -187,7 +187,7 @@ void UpdateEngagementList(evCollideInstanceStatsData *Ptr, Player *player)
             }
         }
 
-        collectibleProp = (PhysObCollectibleProperties *)INSTANCE_Query(Ptr->instance, 29);
+        collectibleProp = (PhysObCollectibleProperties *)INSTANCE_Query(Ptr->instance, queryPhysicalCollectibleData);
 
         if ((collectibleProp != NULL) && (hidden == 0))
         {
@@ -197,7 +197,7 @@ void UpdateEngagementList(evCollideInstanceStatsData *Ptr, Player *player)
             long headDistance;
             long rootDistance;
 
-            collectMat = (MATRIX *)INSTANCE_Query(Ptr->instance, 14);
+            collectMat = (MATRIX *)INSTANCE_Query(Ptr->instance, queryIDMatrix);
 
             if (collectMat != NULL)
             {
@@ -296,7 +296,7 @@ void UpdateEngagementList(evCollideInstanceStatsData *Ptr, Player *player)
     }
     else if (((WhoAmI & 0xA) || (Ptr->instance->flags2 & 0x20)) && !(Ptr->instance->flags2 & 0x20000000))
     {
-        if (!(INSTANCE_Query(Ptr->instance, 0) & 0x44000000))
+        if (!(INSTANCE_Query(Ptr->instance, queryHitState) & 0x44000000))
         {
             if (Ptr->instance->flags2 & 0x20)
             {
@@ -379,7 +379,7 @@ void UpdateEngagementList(evCollideInstanceStatsData *Ptr, Player *player)
         }
     }
 
-    if (INSTANCE_Query(Ptr->instance, 0) & 0x08000000)
+    if (INSTANCE_Query(Ptr->instance, queryHitState) & 0x08000000)
     {
         if (Ptr->xyDistance < 0x200)
         {

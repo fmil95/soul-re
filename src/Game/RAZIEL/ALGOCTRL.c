@@ -140,7 +140,7 @@ void AlgorithmicNeck(Instance *Player, Instance *Target)
     {
         MATRIX *matrix;
 
-        matrix = (MATRIX *)INSTANCE_Query(Target, 12);
+        matrix = (MATRIX *)INSTANCE_Query(Target, queryLookatMatrix);
 
         if (matrix == NULL)
         {

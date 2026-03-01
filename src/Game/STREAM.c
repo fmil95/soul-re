@@ -3518,9 +3518,9 @@ void MORPH_Continue()
         }
     }
 
-    mode = INSTANCE_Query(gameTrackerX.playerInstance, 10);
+    mode = INSTANCE_Query(gameTrackerX.playerInstance, queryMode);
 
-    if ((gameTrackerX.playerInstance->tface != NULL) && (mode >= 0))
+    if (gameTrackerX.playerInstance->tface != NULL && mode >= 0)
     {
         if (MORPH_SavedFace == gameTrackerX.playerInstance->tface)
         {

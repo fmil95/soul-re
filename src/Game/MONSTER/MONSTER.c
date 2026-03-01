@@ -27,7 +27,7 @@
 
 static burntTuneType burntTest = {300, 2};
 
-static unsigned char pupateObjects[/*4*/] = { 15, 17, 16, 18 }; 
+static unsigned char pupateObjects[/*4*/] = {15, 17, 16, 18};
 
 void MON_DoCombatTimers(Instance *instance)
 {
@@ -79,7 +79,7 @@ void MON_ChangeHumanOpinion(Instance *instance)
 {
     int good;
 
-    good = INSTANCE_Query(instance, 1);
+    good = INSTANCE_Query(instance, queryWhatAmI);
 
     if ((good & 0xC000))
     {
@@ -201,7 +201,7 @@ void MON_DeadEntry(Instance *instance)
 
     MON_TurnOffAllSpheres(instance);
 
-    if ((mv->enemy != NULL) && ((INSTANCE_Query(mv->enemy->instance, 1) & 0x1)))
+    if (mv->enemy != NULL && INSTANCE_Query(mv->enemy->instance, queryWhatAmI) & 0x1)
     {
         MON_ChangeHumanOpinion(instance);
     }
@@ -879,7 +879,7 @@ void MON_TerrainImpaleDeath(Instance *instance)
 
         if ((instance->flags2 & 0x10))
         {
-            if ((mv->enemy != NULL) && ((INSTANCE_Query(mv->enemy->instance, 1) & 0x1)))
+            if (mv->enemy != NULL && INSTANCE_Query(mv->enemy->instance, queryWhatAmI) & 0x1)
             {
                 MON_ChangeHumanOpinion(instance);
             }
@@ -1122,7 +1122,7 @@ void MON_Grabbed(Instance *instance)
 
     time = mv->generalTimer - MON_GetTime(instance);
 
-    if ((time <= 0) && (INSTANCE_Query(mv->enemy->instance, 10) != 0x20000))
+    if (time <= 0 && INSTANCE_Query(mv->enemy->instance, queryMode) != 0x20000)
     {
         MON_SwitchState(instance, MONSTER_STATE_BREAKHOLD);
     }
@@ -1671,7 +1671,7 @@ void MON_Flee(Instance *instance)
 
     if (((mv->mvFlags & 0x2000000)) && (mv->ally != NULL) && (mv->ally->distance < mv->enemy->distance))
     {
-        if (!(INSTANCE_Query(instance, 1) & 0x4))
+        if (!(INSTANCE_Query(instance, queryWhatAmI) & 0x4))
         {
             MON_SwitchState(instance, MONSTER_STATE_PURSUE);
             return;
@@ -2302,117 +2302,117 @@ void MON_PupateEntry(Instance *instance)
 void MON_Pupate(Instance *instance)
 {
     MonsterVars *mv; // not from decls.h
-    MonsterAttributes *ma;                 
-    Object *cocoonOb;                     
-    Instance *cocoon;                      
-    Instance *closest;                     
-    long closestDist;                      
-    int burst;                             
+    MonsterAttributes *ma;
+    Object *cocoonOb;
+    Instance *cocoon;
+    Instance *closest;
+    long closestDist;
+    int burst;
     int time; // not from decls.h
     int temp; // not from decls.h
-    
-    mv = (MonsterVars*)instance->extraData;
-    
-    if ((instance->flags & 0x800)) 
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if ((instance->flags & 0x800))
     {
         cocoonOb = NULL;
-        
+
         closest = NULL;
-        
+
         closestDist = 99999;
-        
-        ma = (MonsterAttributes*)instance->data;
-        
+
+        ma = (MonsterAttributes *)instance->data;
+
         burst = 0;
-        
+
         MON_PupateQueueHandler(instance);
-        
-        if ((signed char)ma->pupateObject != -1) 
+
+        if ((signed char)ma->pupateObject != -1)
         {
             cocoonOb = objectAccess[pupateObjects[(signed char)ma->pupateObject]].object;
-            
+
             for (cocoon = gameTrackerX.instanceList->first; cocoon != NULL; cocoon = cocoon->next)
             {
-                if ((cocoon->object == cocoonOb) && (!(cocoon->flags & 0x20)) && (MATH3D_LengthXYZ(cocoon->position.x - instance->intro->position.x, cocoon->position.y - instance->intro->position.y, cocoon->position.z - instance->intro->position.z) < mv->wanderRange)) 
+                if ((cocoon->object == cocoonOb) && (!(cocoon->flags & 0x20)) && (MATH3D_LengthXYZ(cocoon->position.x - instance->intro->position.x, cocoon->position.y - instance->intro->position.y, cocoon->position.z - instance->intro->position.z) < mv->wanderRange))
                 {
-                    long dist;                             
-                    
+                    long dist;
+
                     dist = MATH3D_LengthXYZ(cocoon->position.x - gameTrackerX.playerInstance->position.x, cocoon->position.y - gameTrackerX.playerInstance->position.y, cocoon->position.z - gameTrackerX.playerInstance->position.z);
-                   
+
                     if (dist < closestDist)
                     {
                         closestDist = dist;
-                        
+
                         closest = cocoon;
                     }
-                    
-                    if ((mv->effectTimer < MON_GetTime(instance)) && (!(rand() & 0xF))) 
+
+                    if ((mv->effectTimer < MON_GetTime(instance)) && (!(rand() & 0xF)))
                     {
                         INSTANCE_Post(cocoon, 0x8000008, SetAnimationInstanceSwitchData(cocoon, 0, 0, 0, 1));
-                       
+
                         time = MON_GetTime(instance);
-                        
+
                         temp = (rand() & 0xFFF) + 2000;
-                       
+
                         mv->effectTimer = time + temp;
                     }
                 }
-            } 
-            
+            }
+
             if (closest != NULL)
             {
                 instance->position = closest->position;
-                
-                if ((mv->enemy != NULL) && (mv->enemy->instance == gameTrackerX.playerInstance)) 
+
+                if ((mv->enemy != NULL) && (mv->enemy->instance == gameTrackerX.playerInstance))
                 {
                     mv->enemy->distance = closestDist;
                 }
             }
         }
-        
-        if (instance->currentMainState != MONSTER_STATE_PUPATE) 
+
+        if (instance->currentMainState != MONSTER_STATE_PUPATE)
         {
             burst = 1;
-        } 
-        else if ((closest != NULL) || (cocoonOb == NULL)) 
+        }
+        else if ((closest != NULL) || (cocoonOb == NULL))
         {
-            if (MON_ShouldIAmbushEnemy(instance) != 0) 
+            if (MON_ShouldIAmbushEnemy(instance) != 0)
             {
                 MON_PlayAnim(instance, MONSTER_ANIM_PUPATE, 1);
-                
+
                 burst = 1;
             }
-        } 
-        else 
+        }
+        else
         {
             mv->regenTime = 0;
-            
+
             MON_KillMonster(instance);
         }
-        
-        if (burst != 0) 
+
+        if (burst != 0)
         {
             instance->flags &= ~0x800;
             instance->flags2 &= ~0x20000000;
-            
+
             mv->mvFlags &= ~0x80;
-            
-            if (closest != NULL) 
+
+            if (closest != NULL)
             {
                 INSTANCE_Post(closest, 0x40002, 5);
             }
         }
-    } 
+    }
     else
     {
         MON_DefaultQueueHandler(instance);
-        
-        if (mv->enemy != NULL) 
+
+        if (mv->enemy != NULL)
         {
             MON_TurnToPosition(instance, &mv->enemy->instance->position, mv->subAttr->speedPivotTurn);
         }
-        
-        if ((instance->flags2 & 0x10)) 
+
+        if ((instance->flags2 & 0x10))
         {
             MON_ChangeBehavior(instance, mv->triggeredBehavior);
         }
@@ -2749,139 +2749,139 @@ void MONSTER_VertexBurnt(Instance *instance, burntTuneType *burntTune)
     }
 }
 
-void MON_DamageEffect(Instance* instance, evFXHitData* data)
+void MON_DamageEffect(Instance *instance, evFXHitData *data)
 {
-    SVector accel = {.x = 0, .y = 0, .z = -2}; 
-    MonsterVars *mv;               
-    
-    mv = (MonsterVars*)instance->extraData;
-    
-    if (data == NULL) 
+    SVector accel = {.x = 0, .y = 0, .z = -2};
+    MonsterVars *mv;
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (data == NULL)
     {
         MonsterAttributes *ma;
-        
-        ma = (MonsterAttributes*)instance->data;
-        
-        if ((mv->mvFlags & 0x10000200) == 0x10000000) 
+
+        ma = (MonsterAttributes *)instance->data;
+
+        if ((mv->mvFlags & 0x10000200) == 0x10000000)
         {
-            MATRIX *mat = &instance->matrix[rand() % instance->object->modelList[instance->currentModel]->numSegments];                
-            SVector location;            
-            SVector vel;                 
-            SVector accel = {.x = 0, .y = 0, .z = 1}; 
-                
+            MATRIX *mat = &instance->matrix[rand() % instance->object->modelList[instance->currentModel]->numSegments];
+            SVector location;
+            SVector vel;
+            SVector accel = {.x = 0, .y = 0, .z = 1};
+
             vel.x = 4 - (rand() & 0x7);
             vel.y = 4 - (rand() & 0x7);
             vel.z = 0;
-            
+
             location.x = mat->t[0];
             location.y = mat->t[1];
             location.z = mat->t[2];
-            
+
             FX_Dot(&location, &vel, &accel, 0, 0xFF2828, 24, 16, 2);
         }
-        
-        if ((mv->mvFlags & 0x800010) == 0x800010) 
+
+        if ((mv->mvFlags & 0x800010) == 0x800010)
         {
-            MATRIX *mat = &instance->matrix[ma->damageFXSegment];         
-            SVector location;    
-            SVector vel = { 0 }; 
-            
+            MATRIX *mat = &instance->matrix[ma->damageFXSegment];
+            SVector location;
+            SVector vel = {0};
+
             location.x = mat->t[0];
             location.y = mat->t[1];
             location.z = mat->t[2];
-            
+
             FX_Blood(&location, &vel, &accel, 4, 0x1800D0, 8);
         }
-        
-        if ((mv->mvFlags & 0x400000)) 
+
+        if ((mv->mvFlags & 0x400000))
         {
-            Object *flame;        
-            
+            Object *flame;
+
             flame = objectAccess[10].object;
-            
-            if (flame != NULL) 
+
+            if (flame != NULL)
             {
-                Model *model;         
-                
+                Model *model;
+
                 model = flame->modelList[0];
-                
+
                 FX_MakeSpark(instance, model, ma->leftShoulderSegment);
                 FX_MakeSpark(instance, model, ma->rightShoulderSegment);
                 FX_MakeSpark(instance, model, ma->waistSegment);
                 FX_MakeSpark(instance, model, ma->leftKneeSegment);
                 FX_MakeSpark(instance, model, ma->rightKneeSegment);
             }
-            
+
             MONSTER_VertexBurnt(instance, &burntTest);
         }
-        
+
         if ((mv->causeOfDeath == 3) && ((ma->whatAmI & 0x2)) && (MON_GetTime(instance) < mv->effectTimer))
         {
-            MATRIX *mat;        
-            SVector location;   
-            SVector vel;         
-            SVector accel;       
-            int n;               
-            int cnt;            
-            
+            MATRIX *mat;
+            SVector location;
+            SVector vel;
+            SVector accel;
+            int n;
+            int cnt;
+
             MONSTER_VertexBurnt(instance, &burntTest);
-            
+
             vel.y = 0;
             vel.x = 0;
             vel.z = 12;
-            
+
             accel.y = 0;
             accel.x = 0;
             accel.z = 0;
-            
+
             cnt = instance->object->modelList[instance->currentModel]->numSegments;
-            
-            for (n = 1; n < cnt; n++) 
+
+            for (n = 1; n < cnt; n++)
             {
                 mat = &instance->matrix[n];
-                
+
                 location.x = mat->t[0] + (rand() & 0x3);
                 location.y = mat->t[1] + (rand() & 0x3);
                 location.z = mat->t[2] + (rand() & 0x3);
-                
-                if (!(rand() & 0x1F)) 
+
+                if (!(rand() & 0x1F))
                 {
                     FX_Dot(&location, &vel, &accel, -256, 0x808080, 80, 32, 0);
                 }
-                else 
+                else
                 {
                     FX_Dot(&location, &vel, &accel, -256, 0x808080, 80, 2, 0);
                 }
             }
         }
-    } 
+    }
     else
     {
-        if (data->type == 0x20) 
+        if (data->type == 0x20)
         {
             if (data->amount != 0)
             {
-                MONSTER_StartVertexBurnt(instance, (SVector*)data, &burntTest);
-            } 
-            else 
+                MONSTER_StartVertexBurnt(instance, (SVector *)data, &burntTest);
+            }
+            else
             {
-                MONSTER_StartVertexBurnt(instance, (SVector*)&instance->position, &burntTest);
+                MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &burntTest);
             }
         }
         else if (data->type == 0x10)
         {
-            MONSTER_StartVertexBurnt(instance, (SVector*)&instance->position, &burntTest);
-        } 
-        else 
+            MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &burntTest);
+        }
+        else
         {
             mv->mainColorVertex = MONSTER_StartVertexBlood(instance, &data->location, MONSTER_CalcDamageIntensity(mv->hitPoints, mv->maxHitPoints));
         }
-        
-        if (data->amount != 0) 
+
+        if (data->amount != 0)
         {
             FX_Blood(&data->location, &data->velocity, &accel, data->amount, 0x1800D0, 8);
         }
-    } 
+    }
 }
 
 void MON_DefaultInit(Instance *instance)
@@ -3022,7 +3022,7 @@ void MON_CleanUp(Instance *instance)
         G2Anim_DetachControllerFromSeg(&instance->anim, ma->spineSegment, 14);
     }
 
-    if ((INSTANCE_Query(instance, 1) & 0xC000))
+    if (INSTANCE_Query(instance, queryWhatAmI) & 0xC000)
     {
         GlobalSave->humanOpinionOfRaziel++;
     }

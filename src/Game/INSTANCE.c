@@ -929,9 +929,9 @@ void INSTANCE_ProcessFunctions(InstanceList *instanceList)
             {
                 hidden = instance->flags & 0x800;
 
-                if ((INSTANCE_Query(instance, 2) & 0x20))
+                if ((INSTANCE_Query(instance, queryPhysicalAbility) & 0x20))
                 {
-                    burning = (unsigned int)burning < ((INSTANCE_Query(instance, 3) & 0x10000));
+                    burning = (unsigned int)burning < ((INSTANCE_Query(instance, queryPhysicalMode) & 0x10000));
                 }
                 else if (((instance->object->oflags2 & 0x80000)) && ((((PhysObData *)instance->extraData)->Mode & 0x400000)))
                 {
@@ -1172,7 +1172,7 @@ void INSTANCE_ProcessFunctions(InstanceList *instanceList)
                         INSTANCE_PlainDeath(instance);
                     }
 
-                    if (INSTANCE_Query(instance, 47) != 0)
+                    if (INSTANCE_Query(instance, queryBlockSave) != 0)
                     {
                         gameTrackerX.streamFlags |= 0x4;
                     }
@@ -1533,7 +1533,7 @@ void INSTANCE_Broadcast(Instance *sender, long whatAmIMask, int Message, intptr_
 
     while (instance != NULL)
     {
-        if ((instance != sender) && ((INSTANCE_Query(instance, 1) & whatAmIMask)) && (INSTANCE_InPlane(instance, plane) != 0))
+        if ((instance != sender) && ((INSTANCE_Query(instance, queryWhatAmI) & whatAmIMask)) && (INSTANCE_InPlane(instance, plane) != 0))
         {
             INSTANCE_Post(instance, Message, Data);
         }
@@ -2047,7 +2047,7 @@ void INSTANCE_SpatialRelationships(InstanceList *instanceList)
         {
             checkMask = instance->checkMask;
 
-            lookMatrix = (MATRIX *)INSTANCE_Query(instance, 13);
+            lookMatrix = (MATRIX *)INSTANCE_Query(instance, querySpatialMatrix);
 
             INSTANCE_Post(instance, 0x200000, 0);
 
@@ -2060,9 +2060,9 @@ void INSTANCE_SpatialRelationships(InstanceList *instanceList)
 
             for (checkee = instanceList->first; checkee != NULL; checkee = checkee->next)
             {
-                if ((checkee != instance) && (!(checkee->flags2 & 0x10000000)) && (!(checkee->flags & 0x20)) && ((INSTANCE_Query(checkee, 1) & checkMask)))
+                if ((checkee != instance) && (!(checkee->flags2 & 0x10000000)) && (!(checkee->flags & 0x20)) && ((INSTANCE_Query(checkee, queryWhatAmI) & checkMask)))
                 {
-                    mat = (MATRIX *)INSTANCE_Query(checkee, 14);
+                    mat = (MATRIX *)INSTANCE_Query(checkee, queryIDMatrix);
 
                     if (mat == NULL)
                     {

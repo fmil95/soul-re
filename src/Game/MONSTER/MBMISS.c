@@ -39,16 +39,15 @@ int WCBEGG_ShouldIgniteEgg(Instance *egg, WalbossAttributes *wa)
 
     instanceList = gameTrackerX.instanceList;
 
-    if (!(INSTANCE_Query(egg, 3) & 0x10000))
+    if (!(INSTANCE_Query(egg, queryPhysicalMode) & 0x10000))
     {
         instance = instanceList->first;
 
         while (instance != NULL)
         {
-            if (((INSTANCE_Query(instance, 1) & 0x20)) && (MATH3D_LengthXYZ(instance->position.x - egg->position.x,
-                                                                            instance->position.y - egg->position.y, instance->position.z - egg->position.z) < wa->eggIgniteDist))
+            if ((INSTANCE_Query(instance, queryWhatAmI) & 0x20) && MATH3D_LengthXYZ(instance->position.x - egg->position.x, instance->position.y - egg->position.y, instance->position.z - egg->position.z) < wa->eggIgniteDist)
             {
-                if ((INSTANCE_Query(instance, 3) & 0x10000))
+                if (INSTANCE_Query(instance, queryPhysicalMode) & 0x10000)
                 {
                     return 1;
                 }
@@ -104,7 +103,7 @@ void WCBEGG_Process(Instance *instance, GameTracker *gameTracker)
 
         if ((lastTime < timeBetween) && (time >= timeBetween))
         {
-            if ((INSTANCE_Query(instance, 3) & 0x10000))
+            if (INSTANCE_Query(instance, queryPhysicalMode) & 0x10000)
             {
                 G2EmulationInstanceSwitchAnimationAlpha(instance, 0, 4, 0, 0, 1, 0);
 
@@ -293,7 +292,7 @@ void WCBEGG_ExplodeCollide(Instance *instance, GameTracker *gameTracker)
     {
         inst1 = collideInfo->inst1;
 
-        if ((inst1 != NULL) && (INSTANCE_Query(inst1, 1) == 0x10102))
+        if (inst1 != NULL && INSTANCE_Query(inst1, queryWhatAmI) == 0x10102)
         {
             if (instance->LinkParent == NULL)
             {

@@ -43,7 +43,7 @@ void SAVE_GetInstanceRotation(Instance *instance, SmallRotation *vector)
 {
     evPositionData *rotation;
 
-    rotation = (evPositionData *)INSTANCE_Query(instance, 7);
+    rotation = (evPositionData *)INSTANCE_Query(instance, queryOrientation);
 
     if (rotation == NULL)
     {
@@ -678,7 +678,7 @@ void SAVE_Instance(Instance *instance, Level *level)
         {
             SAVE_DeleteInstance(instance);
 
-            extraData = (evControlSaveDataData *)INSTANCE_Query(instance, 24);
+            extraData = (evControlSaveDataData *)INSTANCE_Query(instance, querySaveData);
 
             if (extraData != NULL)
             {
@@ -696,7 +696,7 @@ void SAVE_Instance(Instance *instance, Level *level)
         {
             SAVE_DeleteInstance(instance);
 
-            extraData = (evControlSaveDataData *)INSTANCE_Query(instance, 24);
+            extraData = (evControlSaveDataData *)INSTANCE_Query(instance, querySaveData);
 
             if (extraData != NULL)
             {
@@ -714,7 +714,7 @@ void SAVE_Instance(Instance *instance, Level *level)
         {
             SAVE_DeleteInstance(instance);
 
-            extraData = (evControlSaveDataData *)INSTANCE_Query(instance, 24);
+            extraData = (evControlSaveDataData *)INSTANCE_Query(instance, querySaveData);
 
             if (extraData != NULL)
             {
