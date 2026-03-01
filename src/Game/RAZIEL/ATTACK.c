@@ -36,7 +36,7 @@ int StateHandlerDecodeHold(int *Message, int *Data)
     {
         if ((Raziel.Senses.EngagedMask & 0x200))
         {
-            WhoAmI = INSTANCE_Query(Raziel.Senses.EngagedList[9].instance, 1);
+            WhoAmI = INSTANCE_Query(Raziel.Senses.EngagedList[9].instance, queryWhatAmI);
         }
 
         if ((WhoAmI & 0x8))
@@ -56,7 +56,7 @@ int StateHandlerDecodeHold(int *Message, int *Data)
         {
             int hitState;
 
-            hitState = INSTANCE_Query(Raziel.Senses.EngagedList[9].instance, 0);
+            hitState = INSTANCE_Query(Raziel.Senses.EngagedList[9].instance, queryHitState);
 
             if ((hitState & 0x2000000))
             {
@@ -99,13 +99,13 @@ int StateHandlerDecodeHold(int *Message, int *Data)
                         *Data = 0;
                     }
                 }
-                else if ((INSTANCE_Query(heldInstance, 2) & 0x20))
+                else if (INSTANCE_Query(heldInstance, queryPhysicalAbility) & 0x20)
                 {
                     *Message = 0x1000018;
 
                     if (*Data != 0)
                     {
-                        if ((INSTANCE_Query(heldInstance, 3) & 0x10000))
+                        if (INSTANCE_Query(heldInstance, queryPhysicalMode) & 0x10000)
                         {
                             *Data = 1;
                         }
@@ -119,7 +119,7 @@ int StateHandlerDecodeHold(int *Message, int *Data)
         }
         else if (((Raziel.Senses.EngagedMask & 0x100)) && (heldInstance == NULL))
         {
-            if ((int)INSTANCE_Query(Raziel.Senses.EngagedList[8].instance, 0) < 0)
+            if ((int)INSTANCE_Query(Raziel.Senses.EngagedList[8].instance, queryHitState) < 0)
             {
                 *Data = 1;
 
@@ -275,9 +275,9 @@ void StateHandlerAttack2(CharacterState *In, int CurrentSection, intptr_t Data)
                 {
                     inst = razGetHeldWeapon();
 
-                    if ((INSTANCE_Query(inst, 2) & 0x20))
+                    if (INSTANCE_Query(inst, queryPhysicalAbility) & 0x20)
                     {
-                        if ((INSTANCE_Query(inst, 3) & 0x10000))
+                        if (INSTANCE_Query(inst, queryPhysicalMode) & 0x10000)
                         {
                             startColor = PlayerData->nonBurningRibbonStartColor;
                             endColor = PlayerData->nonBurningRibbonEndColor;
@@ -460,9 +460,9 @@ void StateHandlerAttack2(CharacterState *In, int CurrentSection, intptr_t Data)
                 {
                     weaponInst = razGetHeldWeapon();
 
-                    if ((INSTANCE_Query(weaponInst, 2) & 0x20))
+                    if (INSTANCE_Query(weaponInst, queryPhysicalAbility) & 0x20)
                     {
-                        if ((INSTANCE_Query(weaponInst, 3) & 0x10000))
+                        if (INSTANCE_Query(weaponInst, queryPhysicalMode) & 0x10000)
                         {
                             startColor = PlayerData->nonBurningRibbonStartColor;
                             endColor = PlayerData->nonBurningRibbonEndColor;
@@ -944,79 +944,79 @@ void StateHandlerStumble(CharacterState *In, int CurrentSection, intptr_t Data)
 
 void StateHandlerHitReaction(CharacterState *In, int CurrentSection, intptr_t Data)
 {
-    Message *Ptr;         
-    
+    Message *Ptr;
+
     while ((Ptr = PeekMessageQueue(&In->SectionList[CurrentSection].Event)) != NULL)
     {
         switch (Ptr->ID)
         {
         case 0x100001:
         {
-            evMonsterHitData *data; 
-                
-            data = (evMonsterHitData*)Ptr->Data;
-            
+            evMonsterHitData *data;
+
+            data = (evMonsterHitData *)Ptr->Data;
+
             if (CurrentSection == 0)
             {
-                Instance *weapon;      
-                
+                Instance *weapon;
+
                 Raziel.attackedBy = data->sender;
-                
+
                 weapon = razGetHeldWeapon();
-                
-                if (weapon != NULL) 
+
+                if (weapon != NULL)
                 {
                     TurnOffCollisionPhysOb(weapon, 7);
                 }
-                
+
                 if ((gameTrackerX.debugFlags2 & 0x800))
                 {
                     LoseHealth(data->power);
                 }
-                
+
                 PhysicsMode = 0;
-                
+
                 ControlFlag |= 0x1008;
                 ControlFlag &= ~0x8000000;
-                
+
                 Raziel.Mode |= 0x208000;
-                
+
                 ResetPhysics(In->CharacterInstance, -16);
-                
+
                 SteerSwitchMode(In->CharacterInstance, 10);
             }
-            
-            if (data->power > 4096) 
+
+            if (data->power > 4096)
             {
                 G2EmulationSwitchAnimation(In, CurrentSection, 56, 0, 2, 1);
-            } 
+            }
             else
             {
                 G2EmulationSwitchAnimation(In, CurrentSection, 125, 0, 2, 1);
             }
-            
+
             break;
         }
         case 0x8000000:
         case 0x8000001:
             if (CurrentSection == 0)
             {
-                if ((ControlFlag & 0x100000)) 
+                if ((ControlFlag & 0x100000))
                 {
                     StateSwitchStateCharacterData(In, StateHandlerGlyphs, 0);
                     break;
                 }
-                
-                if ((Raziel.Mode & 0x40000)) 
+
+                if ((Raziel.Mode & 0x40000))
                 {
                     StateSwitchStateCharacterData(In, StateHandlerSwim, 0);
-                } 
-                else 
+                }
+                else
                 {
                     StateSwitchStateCharacterData(In, StateHandlerIdle, SetControlInitIdleData(0, 0, 3));
                 }
-            } 
-            
+            }
+
             break;
         case 0x1000000:
         case 0x4020000:
@@ -1028,7 +1028,7 @@ void StateHandlerHitReaction(CharacterState *In, int CurrentSection, intptr_t Da
             DefaultStateHandler(In, CurrentSection, Data);
             break;
         }
-        
+
         DeMessageQueue(&In->SectionList[CurrentSection].Event);
     }
 }
@@ -1285,7 +1285,7 @@ void StateHandlerThrow2(CharacterState *In, int CurrentSection, intptr_t Data)
 
                     INSTANCE_Post(weaponInst, 0x800010, SetObjectThrowData(Raziel.Senses.EngagedList[7].instance, NULL, 1, spin_type, (unsigned short)Raziel.throwData->velocity, Raziel.throwData->gravity, 0, 0));
 
-                    matrix = (MATRIX *)INSTANCE_Query(Raziel.Senses.EngagedList[7].instance, 12);
+                    matrix = (MATRIX *)INSTANCE_Query(Raziel.Senses.EngagedList[7].instance, queryLookatMatrix);
 
                     To.x = (short)matrix->t[0];
                     To.y = (short)matrix->t[1];
@@ -1353,7 +1353,7 @@ void StateHandlerThrow2(CharacterState *In, int CurrentSection, intptr_t Data)
         Rotation Rot;
         MATRIX *matrix;
 
-        matrix = (MATRIX *)INSTANCE_Query(Raziel.Senses.EngagedList[7].instance, 12);
+        matrix = (MATRIX *)INSTANCE_Query(Raziel.Senses.EngagedList[7].instance, queryLookatMatrix);
 
         To.x = (short)matrix->t[0];
         To.y = (short)matrix->t[1];
@@ -1511,56 +1511,56 @@ void LimitRotation(Rotation *rot)
 
 void StateHandlerGrab(CharacterState *In, int CurrentSection, intptr_t Data)
 {
-    Message *Ptr;     
-    int Anim;        
+    Message *Ptr;
+    int Anim;
 
     Anim = G2EmulationQueryAnimation(In, CurrentSection);
-    
-    while ((Ptr = PeekMessageQueue(&In->SectionList[CurrentSection].Event)) != NULL) 
+
+    while ((Ptr = PeekMessageQueue(&In->SectionList[CurrentSection].Event)) != NULL)
     {
         switch (Ptr->ID)
-        {                        
+        {
         case 0x100001:
-            if (CurrentSection == 0) 
+            if (CurrentSection == 0)
             {
                 ControlFlag = 0x1043009;
-                
+
                 Raziel.throwData = PlayerData->throwList[6];
-                
+
                 PhysicsMode = 3;
-                
+
                 SteerSwitchMode(In->CharacterInstance, 0);
             }
-            
-            if (Ptr->Data != 0) 
+
+            if (Ptr->Data != 0)
             {
                 razSetPlayerEventHistory(0x40);
-                
-                if (CurrentSection == 2) 
+
+                if (CurrentSection == 2)
                 {
                     G2EmulationSwitchAnimation(In, CurrentSection, 0, 0, 3, 2);
-                } 
-                else 
+                }
+                else
                 {
                     G2EmulationSwitchAnimation(In, CurrentSection, Raziel.throwData->prepAnim, 0, Raziel.throwData->prepAnimFramesIn, 1);
                 }
-                
-                if (CurrentSection == 0) 
+
+                if (CurrentSection == 0)
                 {
-                    if ((Raziel.Senses.EngagedMask & 0x100)) 
+                    if ((Raziel.Senses.EngagedMask & 0x100))
                     {
-                        Instance *Inst;   
+                        Instance *Inst;
 
                         Inst = Raziel.Senses.EngagedList[8].instance;
-                        
+
                         razAlignYRotMoveInterp(In->CharacterInstance, Inst, 200, 0, Raziel.throwData->prepAnimFramesIn, 0);
                     }
-                    
+
                     SetTimer(Raziel.throwData->coilAnimFramesIn + Raziel.throwData->prepAnimFramesIn);
                 }
-                
+
                 Raziel.Mode = 0x20000000;
-                
+
                 In->SectionList[CurrentSection].Data2 = 11;
                 In->SectionList[CurrentSection].Data1 = 0;
             }
@@ -1569,116 +1569,116 @@ void StateHandlerGrab(CharacterState *In, int CurrentSection, intptr_t Data)
                 if (CurrentSection == 0)
                 {
                     G2EmulationSwitchAnimationCharacter(In, 71, 0, Raziel.throwData->prepAnimFramesIn, 1);
-                    
-                    if ((Raziel.Senses.EngagedMask & 0x100)) 
+
+                    if ((Raziel.Senses.EngagedMask & 0x100))
                     {
                         INSTANCE_Post(Raziel.Senses.EngagedList[8].instance, 0x1000002, 0);
                     }
                 }
-                
+
                 In->SectionList[CurrentSection].Data2 = 13;
                 In->SectionList[CurrentSection].Data1 = 0;
             }
-            
+
             break;
         case 0x100004:
         {
-            Instance *Inst; 
-            
+            Instance *Inst;
+
             Inst = razGetHeldItem();
-            
-            if (Inst != NULL) 
+
+            if (Inst != NULL)
             {
                 INSTANCE_Post(Inst, 0x1000003, SetMonsterThrownData(In->CharacterInstance, &In->CharacterInstance->rotation, 100));
-                
+
                 Inst = razGetHeldItem();
-                
-                if (Inst != NULL) 
+
+                if (Inst != NULL)
                 {
                     INSTANCE_UnlinkFromParent(Inst);
                 }
-                
+
                 razReaverOn();
             }
-            
+
             break;
         }
         case 0x10000000:
             if ((CurrentSection == 0) && ((Anim != Raziel.throwData->prepAnim) && (Anim != 71) && (Anim != Raziel.throwData->throwAnim)))
             {
                 SteerSwitchMode(In->CharacterInstance, 18);
-                
+
                 if (Anim == 55)
                 {
                     G2EmulationSwitchAnimation(In, 0, 1, 0, 3, 2);
                 }
             }
-            
+
             break;
         case 0:
-            if ((CurrentSection == 0) && ((Anim != Raziel.throwData->prepAnim) && (Anim != 71) && (Anim != Raziel.throwData->throwAnim))) 
+            if ((CurrentSection == 0) && ((Anim != Raziel.throwData->prepAnim) && (Anim != 71) && (Anim != Raziel.throwData->throwAnim)))
             {
                 SteerSwitchMode(In->CharacterInstance, 0);
-                
+
                 if (Anim == 1)
                 {
                     G2EmulationSwitchAnimation(In, 0, 55, 0, 3, 2);
                 }
             }
-            
+
             break;
         case 0x8000000:
-            if (CurrentSection == 0) 
+            if (CurrentSection == 0)
             {
-                if (In->SectionList->Data2 == 11) 
+                if (In->SectionList->Data2 == 11)
                 {
                     G2EmulationSwitchAnimation(In, 0, 55, 0, 3, 2);
-                    
+
                     In->SectionList->Data2 = 14;
-                } 
-                else 
+                }
+                else
                 {
                     StateSwitchStateCharacterData(In, StateHandlerIdle, SetControlInitIdleData(0, 0, 3));
                 }
             }
-            
+
             break;
         case 0x20000020:
-            if (CurrentSection == 0) 
+            if (CurrentSection == 0)
             {
                 if (In->SectionList->Data1 != 0)
                 {
-                    if (In->SectionList->Data2 != 12) 
+                    if (In->SectionList->Data2 != 12)
                     {
                         G2EmulationSwitchAnimationCharacter(In, Raziel.throwData->throwAnim, 0, Raziel.throwData->throwAnimFramesInFactor, 1);
-                        
+
                         PurgeMessageQueue(&In->SectionList->Event);
-                        
+
                         Raziel.Mode = 0x20000;
-                        
+
                         SetTimer(Raziel.throwData->throwFrameToLaunch + Raziel.throwData->throwAnimFramesInFactor);
-                       
+
                         In->SectionList->Data2 = 12;
                     }
-                } 
-                else 
+                }
+                else
                 {
                     EnMessageQueueData(&In->SectionList->Defer, 0x20000020, 0);
                 }
             }
-            
+
             break;
         case 0x100015:
             if (CurrentSection == 0)
             {
                 if (Anim == Raziel.throwData->prepAnim)
                 {
-                    if ((Raziel.Senses.EngagedMask & 0x100)) 
+                    if ((Raziel.Senses.EngagedMask & 0x100))
                     {
                         INSTANCE_Post(Raziel.Senses.EngagedList[8].instance, 0x1000002, (intptr_t)In->CharacterInstance);
-                        
+
                         razReaverOff();
-                        
+
                         In->SectionList[0].Data1 = 1;
                         In->SectionList[1].Data1 = 1;
                         In->SectionList[2].Data1 = 1;
@@ -1687,39 +1687,39 @@ void StateHandlerGrab(CharacterState *In, int CurrentSection, intptr_t Data)
                 else
                 {
                     Instance *Inst;
-                    
+
                     Inst = razGetHeldItem();
-                    
-                    if (Inst != NULL) 
+
+                    if (Inst != NULL)
                     {
                         INSTANCE_Post(Inst, 0x1000003, SetMonsterThrownData(In->CharacterInstance, &In->CharacterInstance->rotation, 100));
-                        
+
                         Inst = razGetHeldItem();
-                        
-                        if (Inst != NULL) 
-                        { 
+
+                        if (Inst != NULL)
+                        {
                             INSTANCE_UnlinkFromParent(Inst);
                         }
                     }
-                    
-                    razReaverOn();  
+
+                    razReaverOn();
                 }
             }
-            
+
             break;
         case 0x100014:
-            if (CurrentSection == 0) 
+            if (CurrentSection == 0)
             {
-                Instance *Inst; 
-                
+                Instance *Inst;
+
                 Inst = razGetHeldItem();
-                
-                if (Inst != NULL) 
+
+                if (Inst != NULL)
                 {
                     INSTANCE_Post(Inst, 0x1000003, SetMonsterThrownData(In->CharacterInstance, &In->CharacterInstance->rotation, 10));
-                    
+
                     Inst = razGetHeldItem();
-                    
+
                     if (Inst != NULL)
                     {
                         INSTANCE_UnlinkFromParent(Inst);
@@ -1732,25 +1732,25 @@ void StateHandlerGrab(CharacterState *In, int CurrentSection, intptr_t Data)
         case 0x1000000:
             if ((CurrentSection == 0) && (!(ControlFlag & 0x4000)) && (Raziel.invincibleTimer == 0))
             {
-                Instance *Inst; 
-                
+                Instance *Inst;
+
                 Inst = razGetHeldItem();
-                
-                if (Inst != NULL) 
+
+                if (Inst != NULL)
                 {
                     INSTANCE_Post(Inst, 0x1000003, SetMonsterThrownData(In->CharacterInstance, &In->CharacterInstance->rotation, 10));
                 }
-                
+
                 Inst = razGetHeldItem();
-                
-                if (Inst != NULL) 
+
+                if (Inst != NULL)
                 {
                     INSTANCE_UnlinkFromParent(Inst);
                 }
-                
+
                 StateSwitchStateCharacterData(In, StateHandlerHitReaction, Ptr->Data);
             }
-            
+
             break;
         case 0x1000001:
         case 0x4020000:
@@ -1759,9 +1759,9 @@ void StateHandlerGrab(CharacterState *In, int CurrentSection, intptr_t Data)
         case 0x80000020:
             break;
         case 0x4010080:
-            if (CurrentSection == 0) 
+            if (CurrentSection == 0)
             {
-                if (Ptr->Data != 0) 
+                if (Ptr->Data != 0)
                 {
                     razResetPauseTranslation(In->CharacterInstance);
                 }
@@ -1774,7 +1774,7 @@ void StateHandlerGrab(CharacterState *In, int CurrentSection, intptr_t Data)
             DefaultStateHandler(In, CurrentSection, Data);
             break;
         }
-        
+
         DeMessageQueue(&In->SectionList[CurrentSection].Event);
     }
 }

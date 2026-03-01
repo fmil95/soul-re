@@ -512,7 +512,7 @@ void HUMAN_GetAngry()
 
     while (instance != NULL)
     {
-        if ((INSTANCE_Query(instance, 1) & 0xC000))
+        if (INSTANCE_Query(instance, queryWhatAmI) & 0xC000)
         {
             MonsterVars *mv;
             MonsterAllegiances *allegiances;
@@ -549,7 +549,7 @@ int HUMAN_TypeOfHuman(Instance *instance)
     int type;
     MonsterVars *mv;
 
-    type = INSTANCE_Query(instance, 1);
+    type = INSTANCE_Query(instance, queryWhatAmI);
 
     mv = (MonsterVars *)instance->extraData;
 

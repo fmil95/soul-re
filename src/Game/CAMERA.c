@@ -359,7 +359,7 @@ void CAMERA_RestoreMode(Camera *camera)
 
             camera->mode = (short)mode;
 
-            if ((INSTANCE_Query(camera->focusInstance, 9) & 0x50))
+            if (INSTANCE_Query(camera->focusInstance, queryWaterStatus) & 0x50)
             {
                 CAMERA_ChangeToUnderWater(camera, camera->focusInstance);
             }
@@ -1065,7 +1065,7 @@ unsigned long CAMERA_QueryMode(Camera *camera)
 {
     unsigned long mode;
 
-    mode = INSTANCE_Query(camera->focusInstance, 10);
+    mode = INSTANCE_Query(camera->focusInstance, queryMode);
 
     if (camera->focusInstance == gameTrackerX.playerInstance)
     {
@@ -1208,7 +1208,7 @@ void CAMERA_SetFocus(Camera *camera, Position *targetfocusPoint)
         {
             ADD_SVEC(Position, targetfocusPoint, Position, targetfocusPoint, SVector, &temp1);
 
-            if ((INSTANCE_Query(focusInstance, 9) & 0x40))
+            if (INSTANCE_Query(focusInstance, queryWaterStatus) & 0x40)
             {
                 targetfocusPoint->z += 192;
             }
@@ -1223,7 +1223,7 @@ void CAMERA_SetFocus(Camera *camera, Position *targetfocusPoint)
         Instance *instance;
         SVector output;
 
-        if (((camera->instance_mode & 0x2000000)) && ((camera->mode >= 12) && (camera->mode < 14)) && ((instance = (Instance *)INSTANCE_Query(focusInstance, 34)) != NULL))
+        if (((camera->instance_mode & 0x2000000)) && ((camera->mode >= 12) && (camera->mode < 14)) && ((instance = (Instance *)INSTANCE_Query(focusInstance, queryPlayerAutoFaceInstance)) != NULL))
         {
             LoadAverageShort12((SVECTOR *)&instance->position, (SVECTOR *)&focusInstance->position, 4096 - combat_cam_weight, combat_cam_weight, (SVECTOR *)&output);
 
@@ -2605,34 +2605,34 @@ short CAMERA_update_z_damped(Camera *camera, short current, short target)
 
 void CAMERA_CombatCamDist(Camera *camera)
 {
-    DVECTOR xy;         
-    DVECTOR xy2;        
-    SVector position;   
-    long z;             
-    Instance *instance; 
+    DVECTOR xy;
+    DVECTOR xy2;
+    SVector position;
+    long z;
+    Instance *instance;
     short angle; // not from decls.h
 
-    instance = (Instance*)INSTANCE_Query(camera->focusInstance, 34);
-    
-    if (instance == NULL) 
+    instance = (Instance *)INSTANCE_Query(camera->focusInstance, queryPlayerAutoFaceInstance);
+
+    if (instance == NULL)
     {
         combat_cam_weight = 4096;
         combat_cam_distance = camera->targetFocusDistance;
         return;
     }
-    
+
     SetRotMatrix(camera->core.wcTransform);
     SetTransMatrix(camera->core.wcTransform);
-    
+
     position.x = camera->focusInstance->position.x;
     position.y = camera->focusInstance->position.y;
     position.z = camera->focusInstance->position.z;
-    
+
     gte_ldv0(&position);
     gte_nrtps();
     gte_stsxy(&xy.vx);
     gte_stsz(&z);
-    
+
     if (xy.vx < 256)
     {
         combat_cam_distance = -(((xy.vx - 256) * z) / 128);
@@ -2641,60 +2641,60 @@ void CAMERA_CombatCamDist(Camera *camera)
     {
         combat_cam_distance = ((xy.vx - 256) * z) / 128;
     }
-    
-    if (combat_cam_distance > 3000) 
+
+    if (combat_cam_distance > 3000)
     {
         combat_cam_distance = 3000;
     }
-    
+
     if (combat_cam_distance < camera->targetFocusDistance)
     {
         combat_cam_distance = camera->targetFocusDistance;
     }
-    
+
     if (xy.vy > 240)
     {
         combat_cam_weight += 48;
-        
-        if (combat_cam_weight > 4096) 
+
+        if (combat_cam_weight > 4096)
         {
             combat_cam_weight = 4096;
         }
     }
-    else if (xy.vy < 210) 
+    else if (xy.vy < 210)
     {
         combat_cam_weight -= 48;
-        
-        if (combat_cam_weight < 2048) 
+
+        if (combat_cam_weight < 2048)
         {
             combat_cam_weight = 2048;
         }
     }
-    
+
     position.x = instance->position.x;
     position.y = instance->position.y;
     position.z = instance->position.z;
-    
+
     gte_ldv0(&position);
-    gte_nrtps(); 
+    gte_nrtps();
     gte_stsxy(&xy2.vx);
-    
-    if (ratan2(xy2.vy - xy.vy, xy2.vx - xy.vx) >= 0) 
+
+    if (ratan2(xy2.vy - xy.vy, xy2.vx - xy.vx) >= 0)
     {
         angle = ratan2(xy2.vy - xy.vy, xy2.vx - xy.vx);
-    } 
-    else 
+    }
+    else
     {
         angle = -ratan2(xy2.vy - xy.vy, xy2.vx - xy.vx);
     }
-    
+
     combat_cam_angle = angle;
-    
-    if (angle > 1024) 
+
+    if (angle > 1024)
     {
         combat_cam_angle = 2048 - angle;
     }
-    
+
     combat_cam_angle = -170 - (combat_cam_angle / 8);
 }
 

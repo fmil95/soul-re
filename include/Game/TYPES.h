@@ -135,6 +135,60 @@ enum MonsterState
     MONSTER_NUM_STATES = 31,
 };
 
+enum InstanceQueryType
+{
+    queryHitState = 0,
+    queryWhatAmI = 1,
+    queryPhysicalAbility = 2,
+    queryPhysicalMode = 3,
+    queryPhysicalClass = 4,
+    queryPhysicalStatus = 5,
+    queryPosition = 6,
+    queryOrientation = 7,
+    queryExtraOrientation = 8,
+    queryWaterStatus = 9,
+    queryMode = 10,
+    queryPlane = 11,
+    queryLookatMatrix = 12,
+    querySpatialMatrix = 13,
+    queryIDMatrix = 14,
+    queryNeckSegment = 15,
+    queryFacingNormal = 16,
+    queryG2CurrentAnimation = 17,
+    queryG2CurrentFrame = 18,
+    queryGlyphStatus = 19,
+    queryPhysicalBreakOffData = 20,
+    queryPhysicalInteractProperties = 21,
+    queryPhysicalDraftData = 22,
+    queryPhysicalSwitchProperties = 23,
+    querySaveData = 24,
+    querySoulForce = 25,
+    queryPhysicalEnable = 26,
+    queryPhysicalDisable = 27,
+    queryPhysicalSwitchData = 28,
+    queryPhysicalCollectibleData = 29,
+    querySpecialInfo = 30,
+    queryHealth = 31,
+    queryMana = 32,
+    queryBoosted = 33,
+    queryPlayerAutoFaceInstance = 34,
+    queryMessageQueue = 35,
+    queryRazielAbilities = 36,
+    queryDangerous = 37,
+    queryShadowSegments = 38,
+    queryEngagementMask = 39,
+    queryReaverStatus = 40,
+    queryPlayerEvent = 41,
+    queryPlayerEventHistory = 42,
+    queryPlayerAtMaxHealth = 43,
+    queryHeldInstance = 44,
+    queryManaMax = 45,
+    queryInvincible = 46,
+    queryBlockSave = 47,
+    queryPlayerInPuppetShow = 48,
+    queryPlayerInGlyphShortcut = 49,
+};
+
 typedef enum language_t
 {
     language_english = 0,
@@ -6908,7 +6962,7 @@ typedef struct DISPENV
 typedef struct BLK_FILL // this struct was modified from the original
 {
     // offset: 0x0000
-    union 
+    union
     {
         // offset: 0x0000
         long color;

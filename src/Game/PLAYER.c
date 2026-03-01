@@ -5,7 +5,7 @@
 
 void PLAYER_TurnHead(Instance *instance, short *rotx, short *rotz, GameTracker *gameTracker)
 {
-    if ((INSTANCE_Query(instance, 1) & 0x1))
+    if (INSTANCE_Query(instance, queryWhatAmI) & 0x1)
     {
         RAZIEL_TurnHead(instance, rotx, rotz, gameTracker);
     }
@@ -17,7 +17,7 @@ void PLAYER_TurnHead(Instance *instance, short *rotx, short *rotz, GameTracker *
 
 long PLAYER_OkToLookAround(Instance *instance)
 {
-    if ((INSTANCE_Query(instance, 1) & 0x1))
+    if (INSTANCE_Query(instance, queryWhatAmI) & 0x1)
     {
         return RAZIEL_OkToLookAround(instance);
     }
@@ -29,7 +29,7 @@ long PLAYER_OkToLookAround(Instance *instance)
 
 void PLAYER_SetLookAround(Instance *instance)
 {
-    if ((INSTANCE_Query(instance, 1) & 0x1))
+    if (INSTANCE_Query(instance, queryWhatAmI) & 0x1)
     {
         RAZIEL_SetLookAround(instance);
     }
@@ -41,7 +41,7 @@ void PLAYER_SetLookAround(Instance *instance)
 
 void PLAYER_ReSetLookAround(Instance *instance)
 {
-    if ((INSTANCE_Query(instance, 1) & 0x1))
+    if (INSTANCE_Query(instance, queryWhatAmI) & 0x1)
     {
         RAZIEL_ResetLookAround(instance);
     }
