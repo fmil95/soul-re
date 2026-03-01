@@ -1270,7 +1270,53 @@ void ALUKA_StunnedEntry(Instance *instance)
     vars->pitch_speed_limit = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_Stunned);
+void ALUKA_Stunned(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukaVars *)mv->extraVars;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Stunned(instance);
+        return;
+    }
+
+    mv->auxFlags |= 0x20000000;
+
+    if (vars->swim_anim == ALUKA_ANIM_SWIMRECOVER)
+    {
+        if (!(mv->mvFlags & 0x100) && instance->flags2 & 0x10)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+        }
+    }
+    else if (vars->swim_anim == ALUKA_ANIM_SWIMSTUN)
+    {
+        if (!(mv->mvFlags & 0x100))
+        {
+            MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMRECOVER, 1);
+            vars->swim_anim = ALUKA_ANIM_SWIMRECOVER;
+        }
+    }
+    else
+    {
+        MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+    }
+
+    ALUKA_SwimToDestination(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ProjectileEntry);
 
@@ -2850,7 +2896,53 @@ void ALUKA_StunnedEntry(Instance *instance)
     vars->pitch_speed_limit = 0;
 }
 
-void ALUKA_Stunned(void) {};
+void ALUKA_Stunned(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukaVars *)mv->extraVars;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (!(mv->mvFlags & 0x400))
+    {
+        ALUKA_ResetSwim(instance);
+        MON_Stunned(instance);
+        return;
+    }
+
+    mv->auxFlags |= 0x20000000;
+
+    if (vars->swim_anim == ALUKA_ANIM_SWIMRECOVER)
+    {
+        if (!(mv->mvFlags & 0x100) && instance->flags2 & 0x10)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+        }
+    }
+    else if (vars->swim_anim == ALUKA_ANIM_SWIMSTUN)
+    {
+        if (!(mv->mvFlags & 0x100))
+        {
+            MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMRECOVER, 1);
+            vars->swim_anim = ALUKA_ANIM_SWIMRECOVER;
+        }
+    }
+    else
+    {
+        MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+    }
+
+    ALUKA_SwimToDestination(instance);
+}
 
 void ALUKA_ProjectileEntry(void) {};
 
