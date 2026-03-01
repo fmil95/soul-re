@@ -6,11 +6,20 @@
 
 Once you have run `make setup`, any unmatched assembly will be stored in `asm\nonmatchings`, each file contains the assembly of one function.
 
-To decompile, it's recommended to use [decomp.me](https://decomp.me), where there is already a profile set up for the project. First, search for the function name to see if a scratch has already been created. If not, create a new scratch, pick the **Legacy of Kain: Soul Reaver** preset, paste the assembly, and click **Create Scratch**.
+To decompile, it's recommended to use [decomp.me](https://decomp.me), where there is already a profile set up for the project. First, search for the function name to see if a scratch has already been created. If not:
+
+1. Create a new scratch
+2. Pick the correct preset:
+   - **Legacy of Kain: Soul Reaver** for work on the main binary
+   - **Legacy of Kain: Soul Reaver (overlays)** for overlay work
+
+3. Paste the assembly, and click **Create Scratch**.
 
 ### Function Signatures and Local Variables
 
-When unpacking your backup of the game, you'll notice a `.SYM` file. This is the file containing the debug information for the game. This can be used with [PSX_MND_SYM](https://github.com/Gillou68310/psx_mnd_sym/tree/kain2) to generate a `decls.h`. This header file contains the function signatures, all local variables declared in them, their registers, and any inner scopes.
+#### Main Binary
+
+When unpacking your backup of the game, you'll notice a `.SYM` file. This is the file containing the debug information for the game. This can be used with [PSX_MND_SYM](https://github.com/Gillou68310/psx_mnd_sym/tree/kain2) to generate a `decls.h` file. This header file contains the function signatures, all local variables declared in them, their registers, and any inner scopes.
 
 Ex:
 
@@ -39,6 +48,10 @@ void SAVE_SaveEverythingInMemory()
 
 This provides a huge amount of context for decompiling, do not deviate from the variables used in here unless you cannot get a function match otherwise.
 
+#### Overlays
+
+Debug symbols for the overlays are _not_ included in the sym file. To get those, download the [PDB files from the 2024 remaster](<https://debugging.games/_files/Windows/[WIN]%20Legacy%20of%20Kain%20Soul%20Reaver%201%20&%202%20Remastered%20[2024-10-18]%20(PDB).7z>) and use [Dia2Dump](https://github.com/KirillOsenkov/Dia2Dump) to dump the debug information. The info here is much sparser, missing nearly all of the local variable names and types. Fortunately, at the very least it does contain the function signatures and data types for the overlays.
+
 ## Styling Guides
 
 ### Indentation Style
@@ -65,16 +78,24 @@ if (c & 5) {
 
 ### Label Extra Variables
 
-Variables in the matched function that are *not* defined in `decls.h` should be marked with a comment.
+Variables in the matched function that are _not_ defined in `decls.h` should be marked with a comment.
 
 ```c
 Message *Ptr;
 int temp; // not from decls.h
 ```
 
+Similarly, any work on the overlays should have non-PDB variables marked as such. As much of the variable information in the overlays is absent from the PDB, these will be much more frequent compared to the main binary.
+
+```c
+MonsterVars *mv; // not from debug symbols
+```
+
+When creating a variable not outlined in the debug info, try to keep the names consistent with the rest of the codebase. The idea is to keep the project as "canonical" to the original source as possible.
+
 ### Label Extra Operations
 
-Sometimes seemingly uneccesary operations are included in the code solely because they affect instruction ordering and help achieve a better match. If you need to do this to your function, it should be marked with a comment.
+Sometimes seemingly unnecessary operations are included in the code solely because they affect instruction ordering and help achieve a better match. If you need to do this to your function, it should be marked with a comment.
 
 ```c
 do {} while (0); // garbage code for reordering
@@ -96,7 +117,7 @@ Next, run `make -j` to build. Warnings generated during this process such as imp
 
 ### Function Matches on Decomp but not When Building
 
-If your function matches on decomp, but doesn't match after it's been added to the codebase, then surround it *and* the `INCLUDE_ASSEMBLY` call with `NON_MATCHING`:
+If your function matches on decomp, but doesn't match after it's been added to the codebase, then surround it _and_ the `INCLUDE_ASSEMBLY` call with `NON_MATCHING`:
 
 ```c
 // Matches 100% on decomp.me but differs on this project
