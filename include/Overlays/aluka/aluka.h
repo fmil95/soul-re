@@ -3,6 +3,136 @@
 
 #include "common.h"
 
+enum AlukaAnim
+{
+    ALUKA_ANIM_NO_ANIM = -1,
+    ALUKA_ANIM_SWIMIDLE = 0,
+    ALUKA_ANIM_SWIMSLOW = 1,
+    ALUKA_ANIM_SWIMFAST = 2,
+    ALUKA_ANIM_SWIMATTACK = 3,
+    ALUKA_ANIM_JUMPOUT = 4,
+    ALUKA_ANIM_STARTSWIM = 5,
+    ALUKA_ANIM_JUMPIN = 6,
+    ALUKA_ANIM_SWIMSTUN = 7,
+    ALUKA_ANIM_SWIMRECOVER = 8,
+    ALUKA_ANIM_SWIMSPIT = 9,
+    ALUKA_ANIM_TREAD = 10,
+    ALUKA_ANIM_SWIMHIT = 11,
+    ALUKA_ANIM_SWIMSOULSUCK = 12,
+    ALUKA_ANIM_SWIMAGONY = 13,
+    ALUKA_ANIM_SWIMDEATH = 14
+};
 
+enum AlukaAttack {
+    NO_ATTACK = 0,
+    CHOMP_ATTACK = 1,
+    SPIT_ATTACK = 2
+};
+
+// size: 0x38
+typedef struct _AlukaAttributes {
+    // offset: 0x0000
+    short too_long_since_attack;
+    // offset: 0x0002
+    short swimslow_speed;
+    // offset: 0x0004
+    short swimfast_speed;
+    // offset: 0x0006
+    short swimattack_speed;
+    // offset: 0x0008
+    short min_swim_depth;
+    // offset: 0x000A
+    short circle_start_dist;
+    // offset: 0x000C
+    short circle_dist;
+    // offset: 0x000E
+    short wander_range;
+    // offset: 0x0010
+    short twist_mult;
+    // offset: 0x0012
+    short attack_dist;
+    // offset: 0x0014
+    short attack_pos_bump;
+    // offset: 0x0016
+    short pitch_offset_speed;
+    // offset: 0x0018
+    short yaw_accel;
+    // offset: 0x001A
+    short pitch_accel;
+    // offset: 0x001C
+    short forward_accel;
+    // offset: 0x001E
+    short swimslow_yaw;
+    // offset: 0x0020
+    short swimfast_yaw;
+    // offset: 0x0022
+    short swimattack_yaw;
+    // offset: 0x0024
+    short swimspit_yaw;
+    // offset: 0x0026
+    short slow_pitch;
+    // offset: 0x0028
+    short swimfast_pitch;
+    // offset: 0x002A
+    short swimattack_pitch;
+    // offset: 0x002C
+    short swimspit_pitch;
+    // offset: 0x002E
+    short homing_dist;
+    // offset: 0x0030
+    char attack_on_frame;
+    // offset: 0x0031
+    char attack_off_frame;
+    // offset: 0x0032
+    char spit_attack_frame;
+    // offset: 0x0033
+    char start_jump_frame;
+    // offset: 0x0034
+    short daylight_depth;
+    // offset: 0x0036
+    short swim_smell_distance;
+} AlukaAttributes;
+
+// size: 0x2C
+typedef struct _AlukaVars {
+    // offset 0x0000
+    int special_time;
+    // offset 0x0004
+    short yaw_speed;
+    // offset 0x0006
+    short pitch_speed;
+    // offset 0x0008
+    short pitch_offset;
+    // offset 0x000A
+    short pitch_offset_speed;
+    // offset 0x000C
+    short forward_speed_limit;
+    // offset 0x000E
+    short yaw_speed_limit;
+    // offset 0x0010
+    short pitch_speed_limit;
+    // offset 0x0012
+    short yaw_accel;
+    // offset 0x0014
+    short pitch_accel;
+    // offset 0x0016
+    short use_yaw_speed_limit;
+    // offset 0x0018
+    short use_pitch_speed_limit;
+    // offset 0x001A
+    short use_yaw_accel;
+    // offset 0x001C
+    short use_pitch_accel;
+    // offset 0x001E
+    short swim_anim;
+    // offset 0x0020
+    Position target;
+    // offset 0x0026
+    short last_pm;
+    // offset 0x0028
+    short pitch;
+    // offset 0x002A
+    short junk;
+} AlukaVars;
 
 #endif

@@ -36,6 +36,7 @@ void DEBUG_Process(GameTracker *gameTracker);
 void DEBUG_DrawShrinkCels(unsigned long **polyAddr);
 void DEBUG_Draw(GameTracker *gameTracker, unsigned long **ot);
 void DEBUG_ContinueGame();
+void DEBUG_DoAreaProtection();
 
 extern unsigned long debugRazielFlags1;
 extern unsigned long debugRazielFlags2;

@@ -253,7 +253,7 @@ void MON_MissileHitEntry(Instance *instance)
 
     MON_TurnOffAllSpheres(instance);
 
-    mv->causeOfDeath = 0;
+    mv->causeOfDeath = MONSTER_CAUSEOFDEATH_IMPALE;
 
     MON_DropAllObjects(instance);
 
@@ -853,7 +853,7 @@ void MON_ImpaleDeath(Instance *instance)
             mv->heldID = mv->held->introUniqueID;
             INSTANCE_Post(mv->held, 0x800002, SetObjectData(0, 0, 0, instance, 3));
             INSTANCE_Post(mv->held, 0x200003, 7);
-            mv->causeOfDeath = 0;
+            mv->causeOfDeath = MONSTER_CAUSEOFDEATH_IMPALE;
 
             do {} while (0); // garbage code for reordering
 
@@ -2090,7 +2090,7 @@ void MON_GeneralDeathEntry(Instance *instance)
 
         MON_PlayAnim(instance, MONSTER_ANIM_AGONY, 2);
 
-        mv->causeOfDeath = 3;
+        mv->causeOfDeath = MONSTER_CAUSEOFDEATH_WATER;
 
         mv->generalTimer = MON_GetTime(instance) + 3000;
         mv->effectTimer = MON_GetTime(instance) + 12000;
@@ -2102,7 +2102,7 @@ void MON_GeneralDeathEntry(Instance *instance)
         instance->yVel = 0;
         break;
     case 32:
-        mv->causeOfDeath = 1;
+        mv->causeOfDeath = MONSTER_CAUSEOFDEATH_FIRE;
     case 64:
         if ((mv != NULL) && (mv->mvFlags != 0)) // garbage code for reordering
         {
@@ -2120,7 +2120,7 @@ void MON_GeneralDeathEntry(Instance *instance)
 
         if (mv->damageType == 64)
         {
-            mv->causeOfDeath = 2;
+            mv->causeOfDeath = MONSTER_CAUSEOFDEATH_SUN;
         }
 
         mv->generalTimer = MON_GetTime(instance) + 2000;
@@ -2140,7 +2140,7 @@ void MON_GeneralDeathEntry(Instance *instance)
     case 1024:
         MON_PlayAnim(instance, MONSTER_ANIM_FALLOVER, 1);
 
-        mv->causeOfDeath = 6;
+        mv->causeOfDeath = MONSTER_CAUSEOFDEATH_STONE;
 
         mv->generalTimer = 0;
 
@@ -2169,7 +2169,7 @@ void MON_GeneralDeathEntry(Instance *instance)
 
         mv->generalTimer = 0;
 
-        mv->causeOfDeath = 7;
+        mv->causeOfDeath = MONSTER_CAUSEOFDEATH_DAMAGE;
 
         MON_TurnOffAllSpheres(instance);
 
@@ -2193,7 +2193,7 @@ void MON_GeneralDeath(Instance *instance)
 
     dead = 0;
 
-    if ((((instance->flags2 & 0x10)) && (MON_AnimPlaying(instance, MONSTER_ANIM_FALLOVER) != 0)) || (mv->causeOfDeath == 6))
+    if ((instance->flags2 & 0x10 && MON_AnimPlaying(instance, MONSTER_ANIM_FALLOVER)) || mv->causeOfDeath == MONSTER_CAUSEOFDEATH_STONE)
     {
         dead = 1;
     }
@@ -2815,7 +2815,7 @@ void MON_DamageEffect(Instance *instance, evFXHitData *data)
             MONSTER_VertexBurnt(instance, &burntTest);
         }
 
-        if ((mv->causeOfDeath == 3) && ((ma->whatAmI & 0x2)) && (MON_GetTime(instance) < mv->effectTimer))
+        if (mv->causeOfDeath == MONSTER_CAUSEOFDEATH_WATER && ma->whatAmI & 0x2 && MON_GetTime(instance) < mv->effectTimer)
         {
             MATRIX *mat;
             SVector location;
@@ -3000,7 +3000,7 @@ void MON_CleanUp(Instance *instance)
         MON_UnlinkFromRaziel(instance);
     }
 
-    if ((mv->causeOfDeath == 3) && (mv->effect != NULL))
+    if (mv->causeOfDeath == MONSTER_CAUSEOFDEATH_WATER && mv->effect != NULL)
     {
         SndEndLoop((unsigned long)mv->effect);
 
