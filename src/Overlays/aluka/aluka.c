@@ -21,7 +21,6 @@
 void ALUKA_SwimToDestination(Instance *instance);
 void ALUKA_GetRandomDestination(Instance *instance, Position *destination, Position *start, int range);
 int ALUKA_CapDepth(Instance *instance, Level *level);
-void ALUKA_ApplyRots(Instance *instance, int time);
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -325,7 +324,41 @@ void ALUKA_ApplyAngularAccel(Instance *instance, int yaw_accel, int pitch_accel,
     attrs->swimattack_speed = ALUKA_ApplyIncr(attrs->swimattack_speed, -attrs->yaw_accel, attrs->yaw_accel, pitch_accel, time);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_ApplyRots);
+void ALUKA_ApplyRots(Instance *instance, int time)
+{
+
+    int newDepth; // not from debug symbols
+    int newPitch; // not from debug symbols
+    int newRot; // not from debug symbols
+    int delta; // not from debug symbols
+    int pitch; // not from debug symbols
+    int swimPitch; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (AlukaVars *)mv->extraVars;
+
+    newRot = ALUKA_ApplyIncr(instance->rotation.z, -0x7FFF, 0x7FFF, vars->yaw_speed, time);
+    delta = vars->pitch_offset;
+    swimPitch = vars->pitch & 0xFFF;
+
+    if (swimPitch < 0x801)
+    {
+        delta = swimPitch - vars->pitch_offset;
+    }
+    else
+    {
+        delta = swimPitch - 0x1000 - vars->pitch_offset;
+    }
+
+    newDepth = ALUKA_ApplyIncr(delta, -0x2AA, 0x2AA, vars->pitch_speed, time);
+    newPitch = ALUKA_ApplyIncr(vars->pitch_offset, 0, 0x400, vars->pitch_offset_speed, time);
+    pitch = (newDepth + newPitch) & 0xFFF;
+    instance->rotation.z = newRot & 0xFFF;
+    ALUKA_SetPitch(instance, pitch);
+    vars->pitch_offset = newPitch;
+}
 
 void ALUKA_MoveForward(Instance *instance, int time, int depth)
 {
@@ -2145,7 +2178,41 @@ void ALUKA_ApplyAngularAccel(Instance *instance, int yaw_accel, int pitch_accel,
     attrs->swimattack_speed = ALUKA_ApplyIncr(attrs->swimattack_speed, -attrs->yaw_accel, attrs->yaw_accel, pitch_accel, time);
 }
 
-void ALUKA_ApplyRots(Instance *instance, int time) {};
+void ALUKA_ApplyRots(Instance *instance, int time)
+{
+
+    int newDepth; // not from debug symbols
+    int newPitch; // not from debug symbols
+    int newRot; // not from debug symbols
+    int delta; // not from debug symbols
+    int pitch; // not from debug symbols
+    int swimPitch; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (AlukaVars *)mv->extraVars;
+
+    newRot = ALUKA_ApplyIncr(instance->rotation.z, -0x7FFF, 0x7FFF, vars->yaw_speed, time);
+    delta = vars->pitch_offset;
+    swimPitch = vars->pitch & 0xFFF;
+
+    if (swimPitch < 0x801)
+    {
+        delta = swimPitch - vars->pitch_offset;
+    }
+    else
+    {
+        delta = swimPitch - 0x1000 - vars->pitch_offset;
+    }
+
+    newDepth = ALUKA_ApplyIncr(delta, -0x2AA, 0x2AA, vars->pitch_speed, time);
+    newPitch = ALUKA_ApplyIncr(vars->pitch_offset, 0, 0x400, vars->pitch_offset_speed, time);
+    pitch = (newDepth + newPitch) & 0xFFF;
+    instance->rotation.z = newRot & 0xFFF;
+    ALUKA_SetPitch(instance, pitch);
+    vars->pitch_offset = newPitch;
+}
 
 void ALUKA_MoveForward(Instance *instance, int time, int depth)
 {
