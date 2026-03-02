@@ -158,11 +158,8 @@ $(BUILD_DIR)/src/Game/MEMPACK.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/LOAD3D.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/FONT.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/EVENT.c.o: CFLAGS += -funsigned-char
-
 $(BUILD_DIR)/src/Game/MONSTER/MONMSG.c.o: CFLAGS += -funsigned-char
-
 $(BUILD_DIR)/src/Game/MENU/MENUFACE.c.o: CFLAGS += -funsigned-char
-
 $(BUILD_DIR)/src/Game/RAZIEL/RAZIEL.c.o: CFLAGS += -funsigned-char
 
 $(BUILD_DIR)/src/Overlays/cinemax/cinemax.c.o: CFLAGS += -G0
@@ -177,6 +174,8 @@ $(BUILD_DIR)/src/Overlays/walboss/walboss.c.o: CFLAGS += -G0
 $(BUILD_DIR)/src/Overlays/walbosb/walbosb.c.o: CFLAGS += -G0
 $(BUILD_DIR)/src/Overlays/alukabss/alukabss.c.o: CFLAGS += -G0
 $(BUILD_DIR)/src/Overlays/roninbss/roninbss.c.o: CFLAGS += -G0
+
+$(BUILD_DIR)/src/Overlays/aluka/aluka.c.o: CFLAGS += -fsigned-char
 
 ifeq ($(SKIP_ASM),1)
 all: $(OBJECTS) overlays

@@ -27,7 +27,7 @@ int ALUKA_CapDepth(Instance *instance, Level *level);
 
 G2Bool ALUKA_ControllersEnabled(Instance *instance)
 {
-    return G2Anim_IsControllerActive(&instance->anim, 1, 0x26) != 0;
+    return G2Anim_IsControllerActive(&instance->anim, 1, 0x26) != G2FALSE;
 }
 
 
@@ -38,7 +38,7 @@ void ALUKA_SetPitch(Instance *instance, int pitch)
 
     attributes = (AlukaAttributes *)((MonsterVars *)instance->extraData)->extraVars;
 
-    if (!ALUKA_ControllersEnabled(instance))
+    if (ALUKA_ControllersEnabled(instance) == G2FALSE)
     {
         return;
     }
@@ -57,7 +57,7 @@ void ALUKA_EnableControllers(Instance *instance)
 
     mv = (MonsterVars *)instance->extraData;
 
-    if (ALUKA_ControllersEnabled(instance))
+    if (ALUKA_ControllersEnabled(instance) != G2FALSE)
     {
         return;
     }
@@ -95,7 +95,7 @@ void ALUKA_DisableControllers(Instance *instance)
 
     mv = (MonsterVars *)instance->extraData;
 
-    if (!ALUKA_ControllersEnabled(instance))
+    if (ALUKA_ControllersEnabled(instance) == G2FALSE)
     {
         return;
     }
@@ -470,10 +470,8 @@ void ALUKA_SetupSwimAnimWOTread(Instance *instance)
                 vars->pitch_offset_speed = 0;
             }
         }
-        return;
     }
-
-    if (vars->swim_anim != ALUKA_ANIM_SWIMFAST)
+    else if (vars->swim_anim != ALUKA_ANIM_SWIMFAST)
     {
 
         MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMFAST, 2);
@@ -586,7 +584,7 @@ int ALUKA_SwimPlanMovement(Instance *instance, Position *target, Position *step,
 
     if (attrs->circle_start_dist < dist || (mv->age != 0 && depth < target->z && ALUKA_NotDaylight(level)))
     {
-        switch (ENMYPLAN_MoveToTargetFinal(instance, step, (signed char)mv->pathSlotID, target, 0x1E00001F))
+        switch (ENMYPLAN_MoveToTargetFinal(instance, step, mv->pathSlotID, target, 0x1E00001F))
         {
         case 0:
             if (attrs->circle_start_dist < dist)
@@ -640,7 +638,7 @@ int ALUKA_ShouldJumpIn(Instance *instance, Instance *enemy, Level *level)
     (void)enemy;
     (void)level;
 
-    nodeType = ENMYPLAN_GetNodeTypeOfNextWaypoint((signed char)((MonsterVars *)instance->extraData)->pathSlotID);
+    nodeType = ENMYPLAN_GetNodeTypeOfNextWaypoint(((MonsterVars *)instance->extraData)->pathSlotID);
 
     if (nodeType != 0x40 && ((nodeType >> 3) & 3) == 3)
     {
@@ -666,7 +664,7 @@ int ALUKA_ShouldJumpOut(Instance *instance, Instance *enemy, Level *level)
         return 0;
     }
 
-    nodeType = ENMYPLAN_GetNodeTypeOfNextWaypoint((signed char)mv->pathSlotID);
+    nodeType = ENMYPLAN_GetNodeTypeOfNextWaypoint(mv->pathSlotID);
 
     if (nodeType != 0x40 && ((nodeType >> 3) & 3) == 0)
     {
@@ -888,9 +886,15 @@ void ALUKA_AttackEntry(Instance *instance)
     }
 
     combat = mv->subAttr->combatAttributes;
-    attack = (signed char)combat->numAttacks + 0x2B;
 
+    /*
+     The pointer manipulation here is because of the fact that there is no field
+     at offset 0x2B. It's likely that the intent was to access 0x2C, which is
+     the `attackList` field.
+    */
+    attack = combat->numAttacks + 0x2B;
     mv->attackType = &ma->attackAttributesList[*((signed char *)combat + attack)];
+
     mv->attackState = 0;
 
     vars->forward_speed_limit = attrs->swimattack_speed;
@@ -946,7 +950,7 @@ void ALUKA_Attack(Instance *instance)
 
     if (destinationInRange)
     {
-        switch ((signed char)mv->attackState)
+        switch (mv->attackState)
         {
         case 0:
             if (MATH3D_LengthXYZ(mv->destination.x - instance->position.x, mv->destination.y - instance->position.y, mv->destination.z - instance->position.z) < attrs->attack_dist)
@@ -958,14 +962,14 @@ void ALUKA_Attack(Instance *instance)
             MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, ALUKA_ANIM_SWIMATTACK, 1);
             vars->swim_anim = ALUKA_ANIM_SWIMATTACK;
             mv->attackState++;
-            vars->special_time = MON_GetTime(instance) + ((signed char)mv->attackType->sphereOnFrame * 0x21);
+            vars->special_time = MON_GetTime(instance) + (mv->attackType->sphereOnFrame * 0x21);
             break;
         case 2:
             if (MON_GetTime(instance) >= (unsigned long)vars->special_time)
             {
                 MON_TurnOnWeaponSpheres(instance);
                 mv->attackState++;
-                vars->special_time = MON_GetTime(instance) + ((signed char)mv->attackType->sphereOffFrame * 0x21);
+                vars->special_time = MON_GetTime(instance) + (mv->attackType->sphereOffFrame * 0x21);
             }
             break;
         case 3:
@@ -1274,7 +1278,7 @@ void ALUKA_HitEntry(Instance *instance)
 
     enemy = mv->enemy;
     enemy->mirConditions |= 0x400;
-    enemy->mirFlags &= 0xEFFF;
+    enemy->mirFlags &= ~0x1000;
     mv->mvFlags |= 0x10000;
 
     if (MON_SetUpKnockBack(instance, enemy->instance, (evMonsterHitData *)mv->messageData))
@@ -1500,7 +1504,7 @@ void ALUKA_Projectile(Instance *instance)
 
         mv->destination.z += attrs->attack_pos_bump;
 
-        switch ((signed char)mv->attackState)
+        switch (mv->attackState)
         {
         case 0:
             if (vars->pitch_offset <= 0)
@@ -1527,7 +1531,7 @@ void ALUKA_Projectile(Instance *instance)
         case 1:
             if (MON_GetTime(instance) >= (unsigned long)vars->special_time)
             {
-                MISSILE_FireAtInstance(instance, &ma->missileList[(signed char)mv->subAttr->combatAttributes->missileAttack], mv->enemy->instance);
+                MISSILE_FireAtInstance(instance, &ma->missileList[(int)mv->subAttr->combatAttributes->missileAttack], mv->enemy->instance);
                 mv->attackState++;
             }
             break;
@@ -1732,7 +1736,7 @@ void ALUKA_Embrace(Instance *instance)
         {
             enemyInst = mv->enemy->instance;
             MON_DoDrainEffects(instance, enemyInst);
-            INSTANCE_Post(enemyInst, 0x40006, mv->subAttr->combatAttributes->suckPower << 8);
+            INSTANCE_Post(enemyInst, 0x40006, mv->subAttr->combatAttributes->suckPower * 256);
             MON_TurnToPosition(instance, &enemyInst->position, mv->subAttr->speedPivotTurn);
         }
         else
@@ -1882,7 +1886,7 @@ void ALUKA_GeneralDeath(Instance *instance)
 
 G2Bool ALUKA_ControllersEnabled(Instance *instance)
 {
-    return G2Anim_IsControllerActive(&instance->anim, 1, 0x26) != 0;
+    return G2Anim_IsControllerActive(&instance->anim, 1, 0x26) != G2FALSE;
 }
 
 void ALUKA_SetPitch(Instance *instance, int pitch)
@@ -1892,7 +1896,7 @@ void ALUKA_SetPitch(Instance *instance, int pitch)
 
     attributes = (AlukaAttributes *)((MonsterVars *)instance->extraData)->extraVars;
 
-    if (!ALUKA_ControllersEnabled(instance))
+    if (ALUKA_ControllersEnabled(instance) == G2FALSE)
     {
         return;
     }
@@ -1911,7 +1915,7 @@ void ALUKA_EnableControllers(Instance *instance)
 
     mv = (MonsterVars *)instance->extraData;
 
-    if (ALUKA_ControllersEnabled(instance))
+    if (ALUKA_ControllersEnabled(instance) != G2FALSE)
     {
         return;
     }
@@ -1949,7 +1953,7 @@ void ALUKA_DisableControllers(Instance *instance)
 
     mv = (MonsterVars *)instance->extraData;
 
-    if (!ALUKA_ControllersEnabled(instance))
+    if (ALUKA_ControllersEnabled(instance) == G2FALSE)
     {
         return;
     }
@@ -2324,10 +2328,8 @@ void ALUKA_SetupSwimAnimWOTread(Instance *instance)
                 vars->pitch_offset_speed = 0;
             }
         }
-        return;
     }
-
-    if (vars->swim_anim != ALUKA_ANIM_SWIMFAST)
+    else if (vars->swim_anim != ALUKA_ANIM_SWIMFAST)
     {
 
         MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMFAST, 2);
@@ -2440,7 +2442,7 @@ int ALUKA_SwimPlanMovement(Instance *instance, Position *target, Position *step,
 
     if (attrs->circle_start_dist < dist || (mv->age != 0 && depth < target->z && ALUKA_NotDaylight(level)))
     {
-        switch (ENMYPLAN_MoveToTargetFinal(instance, step, (signed char)mv->pathSlotID, target, 0x1E00001F))
+        switch (ENMYPLAN_MoveToTargetFinal(instance, step, mv->pathSlotID, target, 0x1E00001F))
         {                        /* irregular */
         case 0:
             if (attrs->circle_start_dist < dist)
@@ -2493,7 +2495,7 @@ int ALUKA_ShouldJumpIn(Instance *instance, Instance *enemy, Level *level)
     (void)enemy;
     (void)level;
 
-    nodeType = ENMYPLAN_GetNodeTypeOfNextWaypoint((signed char)((MonsterVars *)instance->extraData)->pathSlotID);
+    nodeType = ENMYPLAN_GetNodeTypeOfNextWaypoint(((MonsterVars *)instance->extraData)->pathSlotID);
 
     if (nodeType != 0x40 && ((nodeType >> 3) & 3) == 3)
     {
@@ -2519,7 +2521,7 @@ int ALUKA_ShouldJumpOut(Instance *instance, Instance *enemy, Level *level)
         return 0;
     }
 
-    nodeType = ENMYPLAN_GetNodeTypeOfNextWaypoint((signed char)mv->pathSlotID);
+    nodeType = ENMYPLAN_GetNodeTypeOfNextWaypoint(mv->pathSlotID);
 
     if (nodeType != 0x40 && ((nodeType >> 3) & 3) == 0)
     {
@@ -2741,10 +2743,17 @@ void ALUKA_AttackEntry(Instance *instance)
         return;
     }
 
-    combat = mv->subAttr->combatAttributes;
-    attack = (signed char)combat->numAttacks + 0x2B;
 
+    combat = mv->subAttr->combatAttributes;
+
+    /*
+     The pointer manipulation here is because of the fact that there is no field
+     at offset 0x2B. It's likely that the intent was to access 0x2C, which is
+     the `attackList` field.
+    */
+    attack = combat->numAttacks + 0x2B;
     mv->attackType = &ma->attackAttributesList[*((signed char *)combat + attack)];
+
     mv->attackState = 0;
 
     vars->forward_speed_limit = attrs->swimattack_speed;
@@ -2798,7 +2807,7 @@ void ALUKA_Attack(Instance *instance)
 
     if (destinationInRange)
     {
-        switch ((signed char)mv->attackState)
+        switch (mv->attackState)
         {
         case 0:
             if (MATH3D_LengthXYZ(mv->destination.x - instance->position.x, mv->destination.y - instance->position.y, mv->destination.z - instance->position.z) < attrs->attack_dist)
@@ -2810,14 +2819,14 @@ void ALUKA_Attack(Instance *instance)
             MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, ALUKA_ANIM_SWIMATTACK, 1);
             vars->swim_anim = ALUKA_ANIM_SWIMATTACK;
             mv->attackState++;
-            vars->special_time = MON_GetTime(instance) + ((signed char)mv->attackType->sphereOnFrame * 0x21);
+            vars->special_time = MON_GetTime(instance) + (mv->attackType->sphereOnFrame * 0x21);
             break;
         case 2:
             if (MON_GetTime(instance) >= (unsigned long)vars->special_time)
             {
                 MON_TurnOnWeaponSpheres(instance);
                 mv->attackState++;
-                vars->special_time = MON_GetTime(instance) + ((signed char)mv->attackType->sphereOffFrame * 0x21);
+                vars->special_time = MON_GetTime(instance) + (mv->attackType->sphereOffFrame * 0x21);
             }
             break;
         case 3:
@@ -3125,7 +3134,7 @@ void ALUKA_HitEntry(Instance *instance)
 
     enemy = mv->enemy;
     enemy->mirConditions |= 0x400;
-    enemy->mirFlags &= 0xEFFF;
+    enemy->mirFlags &= ~0x1000;
     mv->mvFlags |= 0x10000;
 
     if (MON_SetUpKnockBack(instance, enemy->instance, (evMonsterHitData *)mv->messageData))
@@ -3352,7 +3361,7 @@ void ALUKA_Projectile(Instance *instance)
 
         mv->destination.z += attrs->attack_pos_bump;
 
-        switch ((signed char)mv->attackState)
+        switch (mv->attackState)
         {
         case 0:
             if (vars->pitch_offset <= 0)
@@ -3379,7 +3388,7 @@ void ALUKA_Projectile(Instance *instance)
         case 1:
             if (MON_GetTime(instance) >= (unsigned long)vars->special_time)
             {
-                MISSILE_FireAtInstance(instance, &ma->missileList[(signed char)mv->subAttr->combatAttributes->missileAttack], mv->enemy->instance);
+                MISSILE_FireAtInstance(instance, &ma->missileList[(int)mv->subAttr->combatAttributes->missileAttack], mv->enemy->instance);
                 mv->attackState++;
             }
             break;
@@ -3584,7 +3593,7 @@ void ALUKA_Embrace(Instance *instance)
         {
             enemyInst = mv->enemy->instance;
             MON_DoDrainEffects(instance, enemyInst);
-            INSTANCE_Post(enemyInst, 0x40006, mv->subAttr->combatAttributes->suckPower << 8);
+            INSTANCE_Post(enemyInst, 0x40006, mv->subAttr->combatAttributes->suckPower * 256);
             MON_TurnToPosition(instance, &enemyInst->position, mv->subAttr->speedPivotTurn);
         }
         else
