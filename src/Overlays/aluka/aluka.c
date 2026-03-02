@@ -546,7 +546,7 @@ int ALUKA_NearAluka(Instance *instance)
     for (inst = gameTrackerX.instanceList->first; inst != NULL; inst = inst->next)
     {
 
-        if (inst == instance || INSTANCE_Query(inst, 1) != 0x82)
+        if (inst == instance || INSTANCE_Query(inst, queryWhatAmI) != 0x82)
         {
             continue;
         }
@@ -2400,7 +2400,7 @@ int ALUKA_NearAluka(Instance *instance)
     for (inst = gameTrackerX.instanceList->first; inst != NULL; inst = inst->next)
     {
 
-        if (inst == instance || INSTANCE_Query(inst, 1) != 0x82)
+        if (inst == instance || INSTANCE_Query(inst, queryWhatAmI) != 0x82)
         {
             continue;
         }
