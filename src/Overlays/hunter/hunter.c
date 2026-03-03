@@ -58,7 +58,25 @@ void HUNTER_Init(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/hunter/hunter", HUNTER_CleanUp);
+void HUNTER_CleanUp(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    HunterVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv != NULL)
+    {
+        vars = mv->extraVars;
+
+        if (vars != NULL)
+        {
+            MEMPACK_Free((char *)vars);
+        }
+    }
+    HUMAN_CleanUp(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/hunter/hunter", HUNTER_ProjectileEntry);
 
@@ -121,7 +139,25 @@ void HUNTER_Init(Instance *instance)
     }
 }
 
-void HUNTER_CleanUp(void) {};
+void HUNTER_CleanUp(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    HunterVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv != NULL)
+    {
+        vars = mv->extraVars;
+
+        if (vars != NULL)
+        {
+            MEMPACK_Free((char *)vars);
+        }
+    }
+    HUMAN_CleanUp(instance);
+}
 
 void HUNTER_ProjectileEntry(void) {};
 
