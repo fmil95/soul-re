@@ -304,7 +304,7 @@ void HUNTER_InitFlamethrow(Instance *instance)
     }
 }
 
-void HUNTER_Flamethrow(void) {};
+void HUNTER_Flamethrow(Instance *instance, int damage, int newPoint, int segment) {};
 
 void HUNTER_Init(Instance *instance)
 {
