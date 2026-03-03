@@ -3665,7 +3665,7 @@ void ALUKA_GeneralDeathEntry(Instance *instance)
         mv->generalTimer = MON_GetTime(instance) + 3000;
         mv->mvFlags |= 0x400000;
         mv->effectTimer = MON_GetTime(instance) + 10000;
-        MON_MonsterGlow(instance, 19784, -1, 0, 0);
+        MON_MonsterGlow(instance, 18784, -1, 0, 0);
         break;
     case 512:
         MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMAGONY, 2);
