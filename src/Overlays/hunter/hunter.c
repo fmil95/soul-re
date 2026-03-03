@@ -9,6 +9,9 @@
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/STATE.h"
 
+// TODO: Remove once function is matched
+int HUNTER_Flamethrow(Instance *instance, int damage, int newPoint, int segment);
+
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
 
@@ -16,11 +19,11 @@ void FX_MakeHitFlame(SVector *startpos, int zpos, int angle, int dist, int size,
 {
 
     SVector position;
-
     int cos; // not from debug symbols
     int sin; // not from debug symbols
     FX_PRIM *prim; // not from debug symbols
 
+    (void)q;
     prim = FX_GetPrim(gFXT);
 
     if (prim != NULL)
@@ -142,7 +145,113 @@ void HUNTER_ProjectileEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/hunter/hunter", HUNTER_Projectile);
+void HUNTER_Projectile(Instance *instance)
+{
+
+    int mode; // not from debug symbols
+    int dist; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    HunterVars *vars; // not from debug symbols
+    HunterAttributes *attrs; // not from debug symbols
+    MonsterMissile *missile; // not from debug symbols
+    MonsterSubAttributes *subAttrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    subAttrs = mv->subAttr;
+    vars = (HunterVars *)mv->extraVars;
+    attrs = (HunterAttributes *)ma->tunData;
+    missile = &ma->missileList[(int)subAttrs->combatAttributes->missileAttack];
+
+    if (mv->age == 0)
+    {
+        MON_Projectile(instance);
+        MON_DefaultQueueHandler(instance);
+    }
+    else if (vars != NULL && attrs != NULL)
+    {
+        if (!(mv->auxFlags & 1))
+        {
+            if (mv->enemy != NULL)
+            {
+                if (instance->flags2 & 0x10)
+                {
+
+                    mv->attackState++;
+
+                    if (mv->attackState < missile->numAnims)
+                    {
+                        if (mv->attackState == missile->anim)
+                        {
+                            mode = 2;
+                        }
+                        else
+                        {
+                            mode = 1;
+                        }
+                        MON_PlayAnimFromList(instance, missile->animList, mv->attackState, mode);
+                    }
+                    else
+                    {
+                        MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+                    }
+                }
+                else if (MON_AnimPlayingFromList(instance, missile->animList, missile->anim) && G2EmulationInstanceQueryPassedFrame(instance, 0, missile->frame) != 0)
+                {
+                    mv->auxFlags |= 1;
+                    HUNTER_InitFlamethrow(instance);
+                    vars->timer = MON_GetTime(instance) + (attrs->timeToFire * 33);
+                }
+            }
+            else
+            {
+                MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+            }
+        }
+        else if (mv->auxFlags & 2)
+        {
+            if (mv->enemy != NULL)
+            {
+                MON_TurnToPosition(instance, &mv->enemy->instance->position, subAttrs->speedPivotTurn);
+            }
+
+            if (HUNTER_Flamethrow(instance, missile->damage, 0, missile->segment) != 0)
+            {
+
+                mv->attackState++;
+
+                if (mv->attackState < missile->numAnims)
+                {
+                    MON_PlayAnimFromList(instance, missile->animList, mv->attackState, 1);
+                }
+                else
+                {
+                    MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+                }
+            }
+        }
+        else
+        {
+
+            HUNTER_Flamethrow(instance, missile->damage, 1, missile->segment);
+            mv->auxFlags |= 2;
+
+            if (mv->enemy != NULL)
+            {
+
+                dist = MATH3D_LengthXY(mv->enemy->instance->position.x - instance->position.x, mv->enemy->instance->position.y - instance->position.y);
+
+                if ((unsigned long)vars->timer >= MON_GetTime(instance) || dist < 1200)
+                {
+                    mv->auxFlags &= ~2;
+                }
+                MON_TurnToPosition(instance, &mv->enemy->instance->position, mv->subAttr->speedPivotTurn);
+            }
+        }
+        MON_DefaultQueueHandler(instance);
+    }
+}
 
 INCLUDE_RODATA("asm/nonmatchings/Overlays/hunter/hunter", D_88000000);
 
@@ -278,6 +387,112 @@ void HUNTER_ProjectileEntry(Instance *instance)
     }
 }
 
-void HUNTER_Projectile(void) {};
+void HUNTER_Projectile(Instance *instance)
+{
+
+    int mode; // not from debug symbols
+    int dist; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    HunterVars *vars; // not from debug symbols
+    HunterAttributes *attrs; // not from debug symbols
+    MonsterMissile *missile; // not from debug symbols
+    MonsterSubAttributes *subAttrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    subAttrs = mv->subAttr;
+    vars = (HunterVars *)mv->extraVars;
+    attrs = (HunterAttributes *)ma->tunData;
+    missile = &ma->missileList[(int)subAttrs->combatAttributes->missileAttack];
+
+    if (mv->age == 0)
+    {
+        MON_Projectile(instance);
+        MON_DefaultQueueHandler(instance);
+    }
+    else if (vars != NULL && attrs != NULL)
+    {
+        if (!(mv->auxFlags & 1))
+        {
+            if (mv->enemy != NULL)
+            {
+                if (instance->flags2 & 0x10)
+                {
+
+                    mv->attackState++;
+
+                    if (mv->attackState < missile->numAnims)
+                    {
+                        if (mv->attackState == missile->anim)
+                        {
+                            mode = 2;
+                        }
+                        else
+                        {
+                            mode = 1;
+                        }
+                        MON_PlayAnimFromList(instance, missile->animList, mv->attackState, mode);
+                    }
+                    else
+                    {
+                        MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+                    }
+                }
+                else if (MON_AnimPlayingFromList(instance, missile->animList, missile->anim) && G2EmulationInstanceQueryPassedFrame(instance, 0, missile->frame) != 0)
+                {
+                    mv->auxFlags |= 1;
+                    HUNTER_InitFlamethrow(instance);
+                    vars->timer = MON_GetTime(instance) + (attrs->timeToFire * 33);
+                }
+            }
+            else
+            {
+                MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+            }
+        }
+        else if (mv->auxFlags & 2)
+        {
+            if (mv->enemy != NULL)
+            {
+                MON_TurnToPosition(instance, &mv->enemy->instance->position, subAttrs->speedPivotTurn);
+            }
+
+            if (HUNTER_Flamethrow(instance, missile->damage, 0, missile->segment) != 0)
+            {
+
+                mv->attackState++;
+
+                if (mv->attackState < missile->numAnims)
+                {
+                    MON_PlayAnimFromList(instance, missile->animList, mv->attackState, 1);
+                }
+                else
+                {
+                    MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+                }
+            }
+        }
+        else
+        {
+
+            HUNTER_Flamethrow(instance, missile->damage, 1, missile->segment);
+            mv->auxFlags |= 2;
+
+            if (mv->enemy != NULL)
+            {
+
+                dist = MATH3D_LengthXY(mv->enemy->instance->position.x - instance->position.x, mv->enemy->instance->position.y - instance->position.y);
+
+                if ((unsigned long)vars->timer >= MON_GetTime(instance) || dist < 1200)
+                {
+                    mv->auxFlags &= ~2;
+                }
+                MON_TurnToPosition(instance, &mv->enemy->instance->position, mv->subAttr->speedPivotTurn);
+            }
+        }
+        MON_DefaultQueueHandler(instance);
+    }
+}
 
 #endif
