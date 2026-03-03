@@ -106,7 +106,7 @@ G2Bool G2Anim_Install()
 
     dummyController->segNumber = 255;
 
-    dummyController->type = 0;
+    dummyController->type = G2ANIM_CTRLRTYPE_DUMMY;
 
     return !G2FALSE;
 }
@@ -125,7 +125,7 @@ void G2Anim_ResetInternalState()
 
     dummyController->segNumber = 255;
 
-    dummyController->type = 0;
+    dummyController->type = G2ANIM_CTRLRTYPE_DUMMY;
 }
 
 void G2Anim_Init(G2Anim *anim, Model *modelData)

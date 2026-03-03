@@ -169,7 +169,7 @@ void _G2Instance_RebuildAnimatedTransforms(Instance *instance)
 
             for (segIndex = 0; segIndex < model->numSegments; segIndex++, tv++)
             {
-                if (G2Anim_IsControllerActive(&instance->anim, segIndex, 32) != G2FALSE)
+                if (G2Anim_IsControllerActive(&instance->anim, segIndex, G2ANIM_CTRLRTYPE_SET_WORLDTRANS) != G2FALSE)
                 {
                     break;
                 }

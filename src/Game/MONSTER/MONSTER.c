@@ -2929,16 +2929,16 @@ void MON_DefaultInit(Instance *instance)
 
     if (ma->neckSegment != 0)
     {
-        G2Anim_AttachControllerToSeg(&instance->anim, ma->neckSegment, 14);
+        G2Anim_AttachControllerToSeg(&instance->anim, ma->neckSegment, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
-        G2Anim_DisableController(&instance->anim, ma->neckSegment, 14);
+        G2Anim_DisableController(&instance->anim, ma->neckSegment, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
     }
 
     if ((ma->spineSegment != 0) && (ma->spineSegment != ma->neckSegment))
     {
-        G2Anim_AttachControllerToSeg(&instance->anim, ma->spineSegment, 14);
+        G2Anim_AttachControllerToSeg(&instance->anim, ma->spineSegment, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
-        G2Anim_DisableController(&instance->anim, ma->spineSegment, 14);
+        G2Anim_DisableController(&instance->anim, ma->spineSegment, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
     }
 
     if (!(instance->object->oflags & 0x80000))
@@ -3014,12 +3014,12 @@ void MON_CleanUp(Instance *instance)
 
     if (ma->neckSegment != 0)
     {
-        G2Anim_DetachControllerFromSeg(&instance->anim, ma->neckSegment, 14);
+        G2Anim_DetachControllerFromSeg(&instance->anim, ma->neckSegment, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
     }
 
     if ((ma->spineSegment != 0) && (ma->spineSegment != ma->neckSegment))
     {
-        G2Anim_DetachControllerFromSeg(&instance->anim, ma->spineSegment, 14);
+        G2Anim_DetachControllerFromSeg(&instance->anim, ma->spineSegment, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
     }
 
     if (INSTANCE_Query(instance, queryWhatAmI) & 0xC000)

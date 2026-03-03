@@ -77,7 +77,7 @@ void razAlignYRotMoveInterp(Instance *source, Instance *dest, short distance, un
     v.y = 0;
     v.z = rotation.z;
 
-    G2Anim_EnableController(&source->anim, segNumber, 8);
+    G2Anim_EnableController(&source->anim, segNumber, G2ANIM_CTRLRTYPE_SET_WORLDROT);
 
     G2EmulationSetInterpController_Vector(source, segNumber, 8, &v, Frames, 0);
 
@@ -181,7 +181,7 @@ void razRotateUpperBody(Instance *instance, evActionLookAroundData *data)
 
     MATH3D_ZYXtoXYZ((Rotation *)&Rot);
 
-    G2Anim_SetController_Vector((G2Anim *)&instance->anim, 14, 14, &Rot);
+    G2Anim_SetController_Vector((G2Anim *)&instance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &Rot);
 
     Rot.x = (-tx * 30) / 100;
     Rot.y = 0;
@@ -189,7 +189,7 @@ void razRotateUpperBody(Instance *instance, evActionLookAroundData *data)
 
     MATH3D_ZYXtoXYZ((Rotation *)&Rot);
 
-    G2Anim_SetController_Vector((G2Anim *)&instance->anim, 16, 14, &Rot);
+    G2Anim_SetController_Vector((G2Anim *)&instance->anim, 16, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &Rot);
 
     Rot.x = -tx / 5;
     Rot.y = 0;
@@ -197,7 +197,7 @@ void razRotateUpperBody(Instance *instance, evActionLookAroundData *data)
 
     MATH3D_ZYXtoXYZ((Rotation *)&Rot);
 
-    G2Anim_SetController_Vector((G2Anim *)&instance->anim, 17, 14, &Rot);
+    G2Anim_SetController_Vector((G2Anim *)&instance->anim, 17, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &Rot);
 }
 
 void razSetFadeEffect(short source, short dest, int steps)
@@ -737,12 +737,12 @@ void razCenterWithBlock(Instance *inst, Instance *target, int dist)
     v.y = dd.vy + (inst->position.y - d.vy);
     v.z = inst->position.z;
 
-    if (!G2Anim_IsControllerActive(&inst->anim, 0, 0x20))
+    if (!G2Anim_IsControllerActive(&inst->anim, 0, G2ANIM_CTRLRTYPE_SET_WORLDTRANS))
     {
-        G2Anim_EnableController(&inst->anim, 0, 0x20);
+        G2Anim_EnableController(&inst->anim, 0, G2ANIM_CTRLRTYPE_SET_WORLDTRANS);
     }
 
-    G2EmulationSetInterpController_Vector(inst, 0, 0x20, &v, 6, 0);
+    G2EmulationSetInterpController_Vector(inst, 0, G2ANIM_CTRLRTYPE_SET_WORLDTRANS, &v, 6, 0);
     inst->rotation.z = rot.z;
 }
 
@@ -750,25 +750,25 @@ void razSetPauseTranslation(Instance *instance)
 {
     G2SVector3 Vec;
 
-    if (G2Anim_IsControllerActive(&instance->anim, 0, 34) == G2FALSE)
+    if (G2Anim_IsControllerActive(&instance->anim, 0, G2ANIM_CTRLRTYPE_SET_LOCALTRANS) == G2FALSE)
     {
-        G2Anim_EnableController(&instance->anim, 0, 34);
+        G2Anim_EnableController(&instance->anim, 0, G2ANIM_CTRLRTYPE_SET_LOCALTRANS);
     }
 
     Vec.x = 0;
     Vec.y = 0;
     Vec.z = 0;
 
-    G2Anim_SetController_Vector(&instance->anim, 0, 34, &Vec);
+    G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_SET_LOCALTRANS, &Vec);
 
     ControlFlag |= 0x20000000;
 }
 
 void razResetPauseTranslation(Instance *instance)
 {
-    if (G2Anim_IsControllerActive(&instance->anim, 0, 34) != G2FALSE)
+    if (G2Anim_IsControllerActive(&instance->anim, 0, G2ANIM_CTRLRTYPE_SET_LOCALTRANS) != G2FALSE)
     {
-        G2Anim_DisableController(&instance->anim, 0, 34);
+        G2Anim_DisableController(&instance->anim, 0, G2ANIM_CTRLRTYPE_SET_LOCALTRANS);
     }
 
     ControlFlag &= ~0x20000000;
@@ -1075,12 +1075,12 @@ void razSelectMotionAnim(CharacterState *In, int CurrentSection, int Frames, int
 
         Vec.y = (((Vec.y * G2Timer_GetFrameTime()) * adjustment) >> 12) / 100;
 
-        if (G2Anim_IsControllerActive(&In->CharacterInstance->anim, 0, 34) == G2FALSE)
+        if (G2Anim_IsControllerActive(&In->CharacterInstance->anim, 0, G2ANIM_CTRLRTYPE_SET_LOCALTRANS) == G2FALSE)
         {
-            G2Anim_EnableController(&In->CharacterInstance->anim, 0, 34);
+            G2Anim_EnableController(&In->CharacterInstance->anim, 0, G2ANIM_CTRLRTYPE_SET_LOCALTRANS);
         }
 
-        G2Anim_SetController_Vector(&In->CharacterInstance->anim, 0, 34, &Vec);
+        G2Anim_SetController_Vector(&In->CharacterInstance->anim, 0, G2ANIM_CTRLRTYPE_SET_LOCALTRANS, &Vec);
     }
 
     if (CurrentSection != 0)
@@ -1130,23 +1130,23 @@ int razApplyMotion(CharacterState *In, int CurrentSection)
         {
             Vec.y = -16;
         }
-        else if (G2Anim_IsControllerActive(&In->CharacterInstance->anim, 0, 34) != G2FALSE)
+        else if (G2Anim_IsControllerActive(&In->CharacterInstance->anim, 0, G2ANIM_CTRLRTYPE_SET_LOCALTRANS) != G2FALSE)
         {
-            G2Anim_DisableController(&In->CharacterInstance->anim, 0, 34);
+            G2Anim_DisableController(&In->CharacterInstance->anim, 0, G2ANIM_CTRLRTYPE_SET_LOCALTRANS);
         }
 
         if (Vec.y != 0)
         {
-            if (G2Anim_IsControllerActive(&In->CharacterInstance->anim, 0, 34) == G2FALSE)
+            if (G2Anim_IsControllerActive(&In->CharacterInstance->anim, 0, G2ANIM_CTRLRTYPE_SET_LOCALTRANS) == G2FALSE)
             {
-                G2Anim_EnableController(&In->CharacterInstance->anim, 0, 34);
+                G2Anim_EnableController(&In->CharacterInstance->anim, 0, G2ANIM_CTRLRTYPE_SET_LOCALTRANS);
             }
 
             adjustment = In->CharacterInstance->anim.section->speedAdjustment;
 
             Vec.y = ((Vec.y * G2Timer_GetFrameTime() * adjustment) >> 12) / 100;
 
-            G2Anim_SetController_Vector(&In->CharacterInstance->anim, 0, 34, &Vec);
+            G2Anim_SetController_Vector(&In->CharacterInstance->anim, 0, G2ANIM_CTRLRTYPE_SET_LOCALTRANS, &Vec);
         }
     }
 
@@ -1155,9 +1155,9 @@ int razApplyMotion(CharacterState *In, int CurrentSection)
 
 void razResetMotion(Instance *instance)
 {
-    if (G2Anim_IsControllerActive(&instance->anim, 0, 34) != G2FALSE)
+    if (G2Anim_IsControllerActive(&instance->anim, 0, G2ANIM_CTRLRTYPE_SET_LOCALTRANS) != G2FALSE)
     {
-        G2Anim_DisableController(&instance->anim, 0, 34);
+        G2Anim_DisableController(&instance->anim, 0, G2ANIM_CTRLRTYPE_SET_LOCALTRANS);
     }
 
     Raziel.passedMask = 0;
@@ -1283,7 +1283,7 @@ void razSetWallCrawlNodes(Instance *instance, evPhysicsWallCrawlData *data)
         vec.y = data->DropRotation.y;
         vec.z = data->DropRotation.z;
 
-        G2Anim_SetController_Vector(&instance->anim, 0, 8, &vec);
+        G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_SET_WORLDROT, &vec);
     }
 
     if (data->rc == 10)
@@ -1292,7 +1292,7 @@ void razSetWallCrawlNodes(Instance *instance, evPhysicsWallCrawlData *data)
         vec.y = 0;
         vec.z = 0;
 
-        G2EmulationSetInterpController_Vector(instance, 14, 14, &vec, 3, 0);
+        G2EmulationSetInterpController_Vector(instance, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &vec, 3, 0);
     }
 }
 

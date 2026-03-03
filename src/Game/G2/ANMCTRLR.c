@@ -46,11 +46,11 @@ void G2Anim_EnableController(G2Anim *anim, int segNumber, int type)
 
         controller->flags = (unsigned char)controller->flags;
 
-        if (controller->type == 8)
+        if (controller->type == G2ANIM_CTRLRTYPE_SET_WORLDROT)
         {
             G2Quat_FromMatrix_S(&controller->data.quat.dest, &anim->segMatrices[segNumber]);
         }
-        else if (controller->type == 32)
+        else if (controller->type == G2ANIM_CTRLRTYPE_SET_WORLDTRANS)
         {
             segMatrix = &anim->segMatrices[segNumber];
 
@@ -94,7 +94,7 @@ void G2Anim_InterpDisableController(G2Anim *anim, int segNumber, int type, short
 
     if (controller != NULL)
     {
-        if (controller->type == 8)
+        if (controller->type == G2ANIM_CTRLRTYPE_SET_WORLDROT)
         {
             _G2AnimController_GetSimpleWorldRotQuat(controller, anim, &targetQuat);
 
@@ -184,9 +184,9 @@ void G2Anim_GetControllerCurrentInterpVector(G2Anim *anim, int segNumber, int ty
     }
     else
     {
-        if ((controller->type == 18) || (controller->type == 34))
+        if ((controller->type == G2ANIM_CTRLRTYPE_SET_LOCALSCALE) || (controller->type == G2ANIM_CTRLRTYPE_SET_LOCALTRANS))
         {
-            if (controller->type == 18)
+            if (controller->type == G2ANIM_CTRLRTYPE_SET_LOCALSCALE)
             {
                 G2Anim_GetSegChannelValue(anim, controller->segNumber, (unsigned short *)vector, 0x70);
             }
@@ -195,7 +195,7 @@ void G2Anim_GetControllerCurrentInterpVector(G2Anim *anim, int segNumber, int ty
                 G2Anim_GetSegChannelValue(anim, controller->segNumber, (unsigned short *)vector, 0x700);
             }
         }
-        else if (controller->type == 32)
+        else if (controller->type == G2ANIM_CTRLRTYPE_SET_WORLDTRANS)
         {
             segMatrix = &anim->segMatrices[controller->segNumber];
 
@@ -486,32 +486,32 @@ unsigned long _G2AnimController_ApplyToSegValue(G2AnimController *controller, G2
 
         switch (controller->type)
         {
-        case 0:
+        case G2ANIM_CTRLRTYPE_DUMMY:
             break;
-        case 1:
+        case G2ANIM_CTRLRTYPE_FUNCTION:
             flags = controller->data.callback.function(controller, segValue, parentMatrix, segMatrix, controller->data.callback.fnData);
             break;
-        case 8:
+        case G2ANIM_CTRLRTYPE_SET_WORLDROT:
             flags &= ~0x1;
-        case 10:
+        case G2ANIM_CTRLRTYPE_SET_LOCALROT:
             _G2AnimController_GetMatrix(controller, segMatrix);
             break;
-        case 76:
+        case G2ANIM_CTRLRTYPE_ADD_WORLDROT:
             flags &= ~0x1;
 
             gte_SetRotMatrix(parentMatrix);
 
             hasm_segmatrixop(segMatrix);
-        case 14:
+        case G2ANIM_CTRLRTYPE_ADD_LOCALROT:
             _G2AnimController_GetMatrix(controller, &tempMatrix);
 
             gte_SetRotMatrix(&tempMatrix);
 
             hasm_segmatrixop(segMatrix);
             break;
-        case 16:
+        case G2ANIM_CTRLRTYPE_SET_WORLDSCALE:
             flags &= ~0x2;
-        case 18:
+        case G2ANIM_CTRLRTYPE_SET_LOCALSCALE:
         {
             unsigned short z;
             unsigned long xy;
@@ -525,14 +525,14 @@ unsigned long _G2AnimController_ApplyToSegValue(G2AnimController *controller, G2
             segValue->scale.z = z;
             break;
         }
-        case 22:
+        case G2ANIM_CTRLRTYPE_ADD_LOCALSCALE:
             _G2AnimController_GetVector(controller, &tempVector);
 
             segValue->scale.x += tempVector.x;
             segValue->scale.y += tempVector.y;
             segValue->scale.z += tempVector.z;
             break;
-        case 32:
+        case G2ANIM_CTRLRTYPE_SET_WORLDTRANS:
             flags &= ~0x4;
 
             _G2AnimController_GetVector(controller, &tempVector);
@@ -541,7 +541,7 @@ unsigned long _G2AnimController_ApplyToSegValue(G2AnimController *controller, G2
             segValue->trans.y = tempVector.y - parentMatrix->trans.y;
             segValue->trans.z = tempVector.z - parentMatrix->trans.z;
             break;
-        case 34:
+        case G2ANIM_CTRLRTYPE_SET_LOCALTRANS:
         {
             unsigned short z;
             unsigned long xy;
@@ -555,7 +555,7 @@ unsigned long _G2AnimController_ApplyToSegValue(G2AnimController *controller, G2
             segValue->trans.z = z;
             break;
         }
-        case 38:
+        case G2ANIM_CTRLRTYPE_ADD_LOCALTRANS:
             _G2AnimController_GetVector(controller, &tempVector);
 
             segValue->trans.x += tempVector.x;
@@ -600,7 +600,7 @@ void _G2Anim_UpdateControllers(G2Anim *anim)
 
                         section = G2Anim_GetSectionWithSeg(anim, controller->segNumber);
 
-                        if ((section != NULL) && (section->callback != NULL))
+                        if (section != NULL && section->callback != NULL)
                         {
                             section->callback(anim, section->sectionID, G2ANIM_MSG_SEGCTRLR_INTERPDONE, controller->type, controller->segNumber, (Instance *)controller->callbackData);
                         }
@@ -687,7 +687,7 @@ void _G2AnimSection_ApplyControllersToStoredFrame(G2AnimSection *section)
 
                 while (controller->segNumber == segIndex)
                 {
-                    if ((segIndex != 0) || ((controller->type & 0x2)))
+                    if (segIndex != 0 || controller->type & 0x2)
                     {
                         if ((controller->type & 0x38) == 8)
                         {
@@ -916,7 +916,7 @@ G2AnimController *_G2AnimController_Destroy(G2AnimController *controller)
         {
             break;
         }
-    } while (controller->type == 0);
+    } while (controller->type == G2ANIM_CTRLRTYPE_DUMMY);
 
     return controller;
 }
@@ -968,18 +968,18 @@ void _G2AnimController_GetCurrentInterpQuat(G2AnimController *controller, G2Anim
     }
     else
     {
-        if (controller->type == 8)
+        if (controller->type == G2ANIM_CTRLRTYPE_SET_WORLDROT)
         {
             G2Quat_FromMatrix_S(quat, &anim->segMatrices[controller->segNumber]);
         }
-        else if (controller->type == 76)
+        else if (controller->type == G2ANIM_CTRLRTYPE_ADD_WORLDROT)
         {
             *(unsigned int *)&quat->x = 0;
             *(unsigned int *)&quat->z = 4096 << 16;
         }
         else
         {
-            if (controller->type == 14)
+            if (controller->type == G2ANIM_CTRLRTYPE_ADD_LOCALROT)
             {
                 _G2Anim_CopyVectorWithOrder(&controller->data.vector.base, &eulerVector, controller->flags & 0xFF);
             }

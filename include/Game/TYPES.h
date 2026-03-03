@@ -201,6 +201,24 @@ enum InstanceQueryType
     queryPlayerInGlyphShortcut = 49,
 };
 
+typedef enum _G2AnimControllerType_Enum {
+    G2ANIM_CTRLRTYPE_DUMMY = 0,
+    G2ANIM_CTRLRTYPE_FUNCTION = 1,
+    G2ANIM_CTRLRTYPE_SET_WORLDROT = 8,
+    G2ANIM_CTRLRTYPE_SET_LOCALROT = 10,
+    G2ANIM_CTRLRTYPE_ADD_LOCALROT = 14,
+    G2ANIM_CTRLRTYPE_SET_WORLDSCALE = 16,
+    G2ANIM_CTRLRTYPE_SET_LOCALSCALE = 18,
+    G2ANIM_CTRLRTYPE_ADD_LOCALSCALE = 22,
+    G2ANIM_CTRLRTYPE_SET_WORLDTRANS = 32,
+    G2ANIM_CTRLRTYPE_SET_LOCALTRANS = 34,
+    G2ANIM_CTRLRTYPE_ADD_LOCALTRANS = 38,
+    G2ANIM_CTRLRTYPE_ADD_WORLDROT = 76,
+    G2ANIM_CTRLRTYPE_ADD_WORLDSCALE = 84,
+    G2ANIM_CTRLRTYPE_ADD_WORLDTRANS = 100,
+    G2ANIM_CTRLRTYPE_COUNT = 101,
+} G2AnimControllerType;
+
 typedef enum language_t
 {
     language_english = 0,
@@ -11218,8 +11236,6 @@ typedef int G2AnimKeylistID;
 typedef int G2AnimSectionID;
 
 typedef unsigned char G2AnimSegmentID;
-
-typedef unsigned char G2AnimControllerType;
 
 typedef unsigned short G2AnimChanMask;
 

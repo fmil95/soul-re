@@ -208,9 +208,9 @@ int ProcessMovement(Instance *instance, long *controlCommand, GameTracker *GT)
     switch (Raziel.steeringMode)
     {
     case 11:
-        if (G2Anim_IsControllerActive(&instance->anim, 1, 14) == G2FALSE)
+        if (G2Anim_IsControllerActive(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT) == G2FALSE)
         {
-            G2Anim_EnableController(&instance->anim, 1, 14);
+            G2Anim_EnableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
         }
 
         G2EmulationSetInterpController_Vector(instance, 1, 14, &Raziel.extraRot, 5, 0);
@@ -267,7 +267,7 @@ int ProcessMovement(Instance *instance, long *controlCommand, GameTracker *GT)
             }
         }
 
-        G2Anim_SetController_Vector(&instance->anim, 1, 14, &rot);
+        G2Anim_SetController_Vector(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &rot);
         break;
     }
     case 14:
@@ -337,9 +337,9 @@ int ProcessMovement(Instance *instance, long *controlCommand, GameTracker *GT)
             SteerSwim(instance);
         }
 
-        if (G2Anim_IsControllerActive(&instance->anim, 1, 14) == G2FALSE)
+        if (G2Anim_IsControllerActive(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT) == G2FALSE)
         {
-            G2Anim_EnableController(&instance->anim, 1, 14);
+            G2Anim_EnableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
         }
 
         G2EmulationSetInterpController_Vector(instance, 1, 14, &Raziel.extraRot, 4, 3);
@@ -530,9 +530,9 @@ int SteerAutoFace(Instance *instance, long *controlCommand)
         autoFaceRot.y = 0;
         autoFaceRot.z = Raziel.autoFaceRootAngle;
 
-        if (G2Anim_IsControllerActive(&instance->anim, 1, 10) == G2FALSE)
+        if (G2Anim_IsControllerActive(&instance->anim, 1, G2ANIM_CTRLRTYPE_SET_LOCALROT) == G2FALSE)
         {
-            G2Anim_EnableController(&instance->anim, 1, 10);
+            G2Anim_EnableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_SET_LOCALROT);
         }
 
         if (Raziel.input == Raziel.lastInput)
@@ -541,15 +541,15 @@ int SteerAutoFace(Instance *instance, long *controlCommand)
         }
         else
         {
-            G2Anim_SetController_Vector(&instance->anim, 1, 10, &autoFaceRot);
+            G2Anim_SetController_Vector(&instance->anim, 1, G2ANIM_CTRLRTYPE_SET_LOCALROT, &autoFaceRot);
         }
     }
 
     diff = AngleDiff(instance->rotation.z, Raziel.autoFaceTrueAngle);
 
-    if (G2Anim_IsControllerInterpolating(&instance->anim, 1, 10) != G2FALSE)
+    if (G2Anim_IsControllerInterpolating(&instance->anim, 1, G2ANIM_CTRLRTYPE_SET_LOCALROT) != G2FALSE)
     {
-        if (G2Anim_IsControllerInterpolating(&instance->anim, 14, 14) == G2FALSE)
+        if (G2Anim_IsControllerInterpolating(&instance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT) == G2FALSE)
         {
             autoFaceRot.x = 0;
             autoFaceRot.y = 0;
@@ -564,12 +564,12 @@ int SteerAutoFace(Instance *instance, long *controlCommand)
         autoFaceRot.y = 0;
         autoFaceRot.z = diff - Raziel.autoFaceRootAngle;
 
-        if (G2Anim_IsControllerActive(&instance->anim, 14, 14) == G2FALSE)
+        if (G2Anim_IsControllerActive(&instance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT) == G2FALSE)
         {
-            G2Anim_EnableController(&instance->anim, 14, 14);
+            G2Anim_EnableController(&instance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
         }
 
-        G2Anim_SetController_Vector(&instance->anim, 14, 14, &autoFaceRot);
+        G2Anim_SetController_Vector(&instance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &autoFaceRot);
     }
 
     return rc;
@@ -620,14 +620,14 @@ void SteerWallcrawling(Instance *instance)
 
 void SteerDisableAutoFace(Instance *instance)
 {
-    if (G2Anim_IsControllerActive(&instance->anim, 1, 10) != G2FALSE)
+    if (G2Anim_IsControllerActive(&instance->anim, 1, G2ANIM_CTRLRTYPE_SET_LOCALROT) != G2FALSE)
     {
-        G2Anim_DisableController(&instance->anim, 1, 10);
+        G2Anim_DisableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_SET_LOCALROT);
     }
 
-    if (G2Anim_IsControllerActive(&instance->anim, 14, 14) != G2FALSE)
+    if (G2Anim_IsControllerActive(&instance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT) != G2FALSE)
     {
-        G2Anim_DisableController(&instance->anim, 14, 14);
+        G2Anim_DisableController(&instance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
     }
 
     instance->rotation.z += Raziel.autoFaceRootAngle;
@@ -646,9 +646,9 @@ void SteerSwitchMode(Instance *instance, int mode)
     case 4:
     case 8:
     case 18:
-        if (G2Anim_IsControllerActive(&instance->anim, 1, 14) != G2FALSE)
+        if (G2Anim_IsControllerActive(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT) != G2FALSE)
         {
-            G2Anim_DisableController(&instance->anim, 1, 14);
+            G2Anim_DisableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
             instance->rotation.z = Raziel.steeringLockRotation;
 
@@ -663,11 +663,11 @@ void SteerSwitchMode(Instance *instance, int mode)
         break;
     case 6:
     case 17:
-        if ((mode != 6) && (mode != 11) && (mode != 16) && (mode != 17))
+        if (mode != 6 && mode != 11 && mode != 16 && mode != 17)
         {
-            if (G2Anim_IsControllerActive(&instance->anim, 1, 14) != G2FALSE)
+            if (G2Anim_IsControllerActive(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT) != G2FALSE)
             {
-                G2Anim_InterpDisableController(&instance->anim, 1, 14, 600);
+                G2Anim_InterpDisableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT, 600);
             }
 
             Raziel.extraRot.x = 0;
@@ -761,7 +761,7 @@ void razInitWallCrawlSteering(Instance *instance)
 {
     G2SVector3 vec;
 
-    G2Anim_EnableController(&instance->anim, 1, 38);
+    G2Anim_EnableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALTRANS);
 
     vec.x = 0;
     vec.y = 0;
@@ -773,22 +773,22 @@ void razInitWallCrawlSteering(Instance *instance)
     instance->matrix->t[2] += 318;
     instance->oldMatrix->t[2] += 318;
 
-    G2Anim_SetController_Vector(&instance->anim, 1, 38, &vec);
+    G2Anim_SetController_Vector(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALTRANS, &vec);
 
-    G2Anim_EnableController(&instance->anim, 0, 14);
+    G2Anim_EnableController(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
     vec.x = instance->rotation.x;
     vec.y = instance->rotation.y;
     vec.z = instance->rotation.z;
 
-    G2Anim_EnableController(&instance->anim, 0, 8);
+    G2Anim_EnableController(&instance->anim, 0, G2ANIM_CTRLRTYPE_SET_WORLDROT);
 
-    G2Anim_SetControllerAngleOrder(&instance->anim, 0, 8, 1);
-    G2Anim_SetController_Vector(&instance->anim, 0, 8, &vec);
+    G2Anim_SetControllerAngleOrder(&instance->anim, 0, G2ANIM_CTRLRTYPE_SET_WORLDROT, 1);
+    G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_SET_WORLDROT, &vec);
 
-    G2Anim_EnableController(&instance->anim, 14, 14);
-    G2Anim_EnableController(&instance->anim, 50, 76);
-    G2Anim_EnableController(&instance->anim, 58, 76);
+    G2Anim_EnableController(&instance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 50, G2ANIM_CTRLRTYPE_ADD_WORLDROT);
+    G2Anim_EnableController(&instance->anim, 58, G2ANIM_CTRLRTYPE_ADD_WORLDROT);
 
     ExtraRot = &ExtraRotData;
 
@@ -799,7 +799,7 @@ void razInitWallCrawlSteering(Instance *instance)
 
 void razDeinitWallCrawlSteering(Instance *instance)
 {
-    G2Anim_DisableController(&instance->anim, 1, 38);
+    G2Anim_DisableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALTRANS);
 
     instance->position.z -= 318;
     instance->oldPos.z -= 318;
@@ -807,9 +807,9 @@ void razDeinitWallCrawlSteering(Instance *instance)
     instance->matrix->t[2] -= 318;
     instance->oldMatrix->t[2] -= 318;
 
-    G2Anim_InterpDisableController(&instance->anim, 0, 14, 300);
-    G2Anim_InterpDisableController(&instance->anim, 0, 8, 300);
-    G2Anim_InterpDisableController(&instance->anim, 14, 14, 300);
-    G2Anim_InterpDisableController(&instance->anim, 50, 76, 300);
-    G2Anim_InterpDisableController(&instance->anim, 58, 76, 300);
+    G2Anim_InterpDisableController(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT, 300);
+    G2Anim_InterpDisableController(&instance->anim, 0, G2ANIM_CTRLRTYPE_SET_WORLDROT, 300);
+    G2Anim_InterpDisableController(&instance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT, 300);
+    G2Anim_InterpDisableController(&instance->anim, 50, G2ANIM_CTRLRTYPE_ADD_WORLDROT, 300);
+    G2Anim_InterpDisableController(&instance->anim, 58, G2ANIM_CTRLRTYPE_ADD_WORLDROT, 300);
 }
