@@ -1,12 +1,44 @@
 #include "Overlays/hunter/hunter.h"
+#include "Game/FX.h"
+#include "Game/GAMELOOP.h"
+#include "Game/MATH3D.h"
 #include "Game/MEMPACK.h"
 #include "Game/MONSTER/HUMAN.h"
+#include "Game/MONSTER/MONLIB.h"
+#include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSTER.h"
+#include "Game/STATE.h"
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/hunter/hunter", FX_MakeHitFlame);
+void FX_MakeHitFlame(SVector *startpos, int zpos, int angle, int dist, int size, int q)
+{
+
+    SVector position;
+
+    int cos; // not from debug symbols
+    int sin; // not from debug symbols
+    FX_PRIM *prim; // not from debug symbols
+
+    prim = FX_GetPrim(gFXT);
+
+    if (prim != NULL)
+    {
+
+        cos = rcos(angle - 1024);
+        position.x = startpos->x + ((cos * dist) / 4096) + (rand() & 0xF);
+
+        sin = rsin(angle - 1024);
+        position.y = startpos->y + ((sin * dist) / 4096) + (rand() & 0xF);
+
+        position.z = startpos->z + zpos + (rand() & 0xF);
+
+        FX_MakeParticleTexFX(prim, &position, 0, 0, 0, 0, 0, 0x93E4, size, 2);
+        FX_Sprite_Insert(&gFXT->usedPrimListSprite, prim);
+
+    }
+}
 
 void HUNTER_InitFlamethrow(Instance *instance)
 {
@@ -116,7 +148,33 @@ INCLUDE_RODATA("asm/nonmatchings/Overlays/hunter/hunter", D_88000000);
 
 #else
 
-void FX_MakeHitFlame(void) {};
+void FX_MakeHitFlame(SVector *startpos, int zpos, int angle, int dist, int size, int q)
+{
+
+    SVector position;
+
+    int cos; // not from debug symbols
+    int sin; // not from debug symbols
+    FX_PRIM *prim; // not from debug symbols
+
+    prim = FX_GetPrim(gFXT);
+
+    if (prim != NULL)
+    {
+
+        cos = rcos(angle - 1024);
+        position.x = startpos->x + ((cos * dist) / 4096) + (rand() & 0xF);
+
+        sin = rsin(angle - 1024);
+        position.y = startpos->y + ((sin * dist) / 4096) + (rand() & 0xF);
+
+        position.z = startpos->z + zpos + (rand() & 0xF);
+
+        FX_MakeParticleTexFX(prim, &position, 0, 0, 0, 0, 0, 0x93E4, size, 2);
+        FX_Sprite_Insert(&gFXT->usedPrimListSprite, prim);
+
+    }
+}
 
 void HUNTER_InitFlamethrow(Instance *instance)
 {

@@ -9,6 +9,7 @@ void FX_EndInstanceEffects(Instance *instance);
 FXBlastringEffect *FX_DoBlastRing(Instance *instance, SVector *position, MATRIX *mat, int segment, int radius, int endRadius, int colorChangeRadius, int size1, int size2, int vel, int accl, int height1, int height2, int height3, long startColor, long endColor, int pred_offset, int lifeTime, int sortInWorld);
 void FX_ReaverBladeInit();
 void FX_DoInstancePowerRing(Instance *instance, long atuTime, long *color, long numColors, int follow_halveplane);
+FX_PRIM *FX_GetPrim(FXTracker *fxTracker);
 FX_PRIM *FX_Dot(SVector *location, SVector *vel, SVector *accel, int scale_speed, long color, long size, int lifetime, int texture_num);
 void FX_StartInstanceEffect(Instance *instance, ObjectEffect *effect, int InitFlag);
 void FX_SoulReaverWinding(Instance *instance, PrimPool *primPool, unsigned long **ot, MATRIX *wcTransform);
