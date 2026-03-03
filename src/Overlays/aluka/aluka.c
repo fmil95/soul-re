@@ -27,7 +27,7 @@ int ALUKA_CapDepth(Instance *instance, Level *level);
 
 G2Bool ALUKA_ControllersEnabled(Instance *instance)
 {
-    return G2Anim_IsControllerActive(&instance->anim, 1, 0x26) != G2FALSE;
+    return G2Anim_IsControllerActive(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALTRANS) != G2FALSE;
 }
 
 
@@ -46,7 +46,7 @@ void ALUKA_SetPitch(Instance *instance, int pitch)
     extraRot.x = pitch;
     extraRot.z = 0;
     extraRot.y = 0;
-    G2Anim_SetController_Vector(&instance->anim, 1, 0xE, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
     attributes->swimfast_pitch = pitch;
 }
 
@@ -62,31 +62,31 @@ void ALUKA_EnableControllers(Instance *instance)
         return;
     }
 
-    G2Anim_EnableController(&instance->anim, 1, 0x26);
-    G2Anim_EnableController(&instance->anim, 1, 0xE);
-    G2Anim_EnableController(&instance->anim, 0x13, 0xE);
-    G2Anim_EnableController(&instance->anim, 0x1A, 0xE);
-    G2Anim_EnableController(&instance->anim, 0x20, 0xE);
-    G2Anim_EnableController(&instance->anim, 5, 0xE);
-    G2Anim_EnableController(&instance->anim, 0xC, 0xE);
-    G2Anim_EnableController(&instance->anim, 4, 0xE);
-    G2Anim_EnableController(&instance->anim, 0xB, 0xE);
+    G2Anim_EnableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALTRANS);
+    G2Anim_EnableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 19, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 26, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 32, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 5, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 12, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 4, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 11, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
     translate.y = 0;
     translate.x = 0;
 
     if (mv->age != 0)
     {
-        translate.z = -0x1C2;
+        translate.z = -450;
         instance->position.z -= translate.z;
     }
     else
     {
-        translate.z = -0x190;
+        translate.z = -400;
         instance->position.z -= translate.z;
     }
 
-    G2Anim_SetController_Vector(&instance->anim, 1, 0x26, &translate);
+    G2Anim_SetController_Vector(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALTRANS, &translate);
 }
 
 void ALUKA_DisableControllers(Instance *instance)
@@ -100,23 +100,23 @@ void ALUKA_DisableControllers(Instance *instance)
         return;
     }
 
-    G2Anim_DisableController(&instance->anim, 1, 0x26);
-    G2Anim_DisableController(&instance->anim, 1, 0xE);
-    G2Anim_DisableController(&instance->anim, 0x13, 0xE);
-    G2Anim_DisableController(&instance->anim, 0x1A, 0xE);
-    G2Anim_DisableController(&instance->anim, 0x20, 0xE);
-    G2Anim_DisableController(&instance->anim, 5, 0xE);
-    G2Anim_DisableController(&instance->anim, 0xC, 0xE);
-    G2Anim_DisableController(&instance->anim, 4, 0xE);
-    G2Anim_DisableController(&instance->anim, 0xB, 0xE);
+    G2Anim_DisableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALTRANS);
+    G2Anim_DisableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 19, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 26, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 32, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 5, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 12, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 4, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 11, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
     if (mv->age != 0)
     {
-        instance->position.z = instance->position.z - 0x1C2;
+        instance->position.z -= 450;
     }
     else
     {
-        instance->position.z = instance->position.z - 0x190;
+        instance->position.z -= 400;
     }
 }
 
@@ -134,31 +134,31 @@ void ALUKA_SetSwimBodyTwist(Instance *instance, int pitch, int yaw)
     extraRot.x = 0;
     extraRot.y = -pitch & 0xFFF;
 
-    G2Anim_SetController_Vector(&instance->anim, 5, 0xE, &extraRot);
-    G2Anim_SetController_Vector(&instance->anim, 0xC, 0xE, &extraRot);
-    G2Anim_SetController_Vector(&instance->anim, 4, 0xE, &extraRot);
-    G2Anim_SetController_Vector(&instance->anim, 0xB, 0xE, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 5, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 12, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 4, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 11, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
 
     extraRot.y = pitch & 0xFFF;
     extraRot.x = yaw & 0xFFF;
 
-    G2Anim_SetController_Vector(&instance->anim, 0x13, 0xE, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 19, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
 
     extraRot.x = -yaw & 0xFFF;
 
     if (pitch > 0)
     {
         extraRot.y = -(pitch * 2) & 0xFFF;
-        G2Anim_SetController_Vector(&instance->anim, 0x1A, 0xE, &extraRot);
+        G2Anim_SetController_Vector(&instance->anim, 26, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
         extraRot.y = -pitch & 0xFFF;
-        G2Anim_SetController_Vector(&instance->anim, 0x20, 0xE, &extraRot);
+        G2Anim_SetController_Vector(&instance->anim, 32, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
     }
     else
     {
         extraRot.y = -pitch & 0xFFF;
-        G2Anim_SetController_Vector(&instance->anim, 0x1A, 0xE, &extraRot);
+        G2Anim_SetController_Vector(&instance->anim, 26, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
         extraRot.y = -(pitch * 2) & 0xFFF;
-        G2Anim_SetController_Vector(&instance->anim, 0x20, 0xE, &extraRot);
+        G2Anim_SetController_Vector(&instance->anim, 32, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
     }
 
 }
@@ -202,15 +202,15 @@ void ALUKA_VectorFromPitchYaw(Position *vector, int pitch, int yaw, int dist)
     oldVector.vy = -dist;
     oldVector.vz = 0;
 
-    mat.m[0][0] = 0x1000;
+    mat.m[0][0] = 4096;
     mat.m[0][1] = 0;
     mat.m[0][2] = 0;
     mat.m[1][0] = 0;
-    mat.m[1][1] = 0x1000;
+    mat.m[1][1] = 4096;
     mat.m[1][2] = 0;
     mat.m[2][0] = 0;
     mat.m[2][1] = 0;
-    mat.m[2][2] = 0x1000;
+    mat.m[2][2] = 4096;
 
     RotMatrixX(pitch, &mat);
     RotMatrixZ(yaw, &mat);
@@ -276,7 +276,7 @@ int ALUKA_TerrainInPath(Instance *instance)
 
     level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
 
-    ALUKA_FacingVector(instance, &vector, 0x190);
+    ALUKA_FacingVector(instance, &vector, 400);
     ADD_SVEC(Position, &vector, Position, &vector, Position, &instance->position);
 
     return ALUKA_SimpleLineCheck(0, level, &instance->position, &vector);
@@ -339,21 +339,21 @@ void ALUKA_ApplyRots(Instance *instance, int time)
     mv = (MonsterVars *)instance->extraData;
     vars = (AlukaVars *)mv->extraVars;
 
-    newRot = ALUKA_ApplyIncr(instance->rotation.z, -0x7FFF, 0x7FFF, vars->yaw_speed, time);
+    newRot = ALUKA_ApplyIncr(instance->rotation.z, -32767, 32767, vars->yaw_speed, time);
     delta = vars->pitch_offset;
     swimPitch = vars->pitch & 0xFFF;
 
-    if (swimPitch < 0x801)
+    if (swimPitch <= 2048)
     {
         delta = swimPitch - vars->pitch_offset;
     }
     else
     {
-        delta = swimPitch - 0x1000 - vars->pitch_offset;
+        delta = swimPitch - 4096 - vars->pitch_offset;
     }
 
-    newDepth = ALUKA_ApplyIncr(delta, -0x2AA, 0x2AA, vars->pitch_speed, time);
-    newPitch = ALUKA_ApplyIncr(vars->pitch_offset, 0, 0x400, vars->pitch_offset_speed, time);
+    newDepth = ALUKA_ApplyIncr(delta, -682, 682, vars->pitch_speed, time);
+    newPitch = ALUKA_ApplyIncr(vars->pitch_offset, 0, 1024, vars->pitch_offset_speed, time);
     pitch = (newDepth + newPitch) & 0xFFF;
     instance->rotation.z = newRot & 0xFFF;
     ALUKA_SetPitch(instance, pitch);
@@ -461,7 +461,7 @@ void ALUKA_SetupSwimAnimWOTread(Instance *instance)
             MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMSLOW, 2);
             vars->swim_anim = ALUKA_ANIM_SWIMSLOW;
 
-            if (vars->pitch_offset < 0x400)
+            if (vars->pitch_offset < 1024)
             {
                 vars->pitch_offset_speed = alukaAttrs->pitch_offset_speed;
             }
@@ -477,7 +477,7 @@ void ALUKA_SetupSwimAnimWOTread(Instance *instance)
         MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMFAST, 2);
         vars->swim_anim = ALUKA_ANIM_SWIMFAST;
 
-        if (vars->pitch_offset < 0x400)
+        if (vars->pitch_offset < 1024)
         {
             vars->pitch_offset_speed = alukaAttrs->pitch_offset_speed;
         }
@@ -544,7 +544,7 @@ int ALUKA_NearAluka(Instance *instance)
     for (inst = gameTrackerX.instanceList->first; inst != NULL; inst = inst->next)
     {
 
-        if (inst == instance || INSTANCE_Query(inst, queryWhatAmI) != 0x82)
+        if (inst == instance || INSTANCE_Query(inst, queryWhatAmI) != 130)
         {
             continue;
         }
@@ -552,7 +552,7 @@ int ALUKA_NearAluka(Instance *instance)
         dist = MATH3D_LengthXYZ(instance->position.x - inst->position.x, instance->position.y - inst->position.y, instance->position.z - inst->position.z);
         oldDist = MATH3D_LengthXYZ(instance->oldPos.x - inst->oldPos.x, instance->oldPos.y - inst->oldPos.y, instance->oldPos.z - inst->oldPos.z);
 
-        if (dist < 0x280 && dist < oldDist)
+        if (dist < 640 && dist < oldDist)
         {
             return 1;
         }
@@ -624,9 +624,9 @@ void ALUKA_ResetSwim(Instance *instance)
     MON_PlayCombatIdle(instance, 2);
     mv->mvFlags &= ~0x800;
     instance->zVel = 0;
-    instance->maxXVel = 0x190;
-    instance->maxYVel = 0x190;
-    instance->maxZVel = 0x190;
+    instance->maxXVel = 400;
+    instance->maxYVel = 400;
+    instance->maxZVel = 400;
 
 }
 
@@ -640,7 +640,7 @@ int ALUKA_ShouldJumpIn(Instance *instance, Instance *enemy, Level *level)
 
     nodeType = ENMYPLAN_GetNodeTypeOfNextWaypoint(((MonsterVars *)instance->extraData)->pathSlotID);
 
-    if (nodeType != 0x40 && ((nodeType >> 3) & 3) == 3)
+    if (nodeType != 64 && ((nodeType >> 3) & 3) == 3)
     {
         return 1;
     }
@@ -666,7 +666,7 @@ int ALUKA_ShouldJumpOut(Instance *instance, Instance *enemy, Level *level)
 
     nodeType = ENMYPLAN_GetNodeTypeOfNextWaypoint(mv->pathSlotID);
 
-    if (nodeType != 0x40 && ((nodeType >> 3) & 3) == 0)
+    if (nodeType != 64 && ((nodeType >> 3) & 3) == 0)
     {
         return 1;
     }
@@ -708,11 +708,11 @@ void ALUKA_JumpToEntry(Instance *instance, Position *target)
 
     instance->xAccl = 0;
     instance->yAccl = 0;
-    instance->zAccl = -0x10;
+    instance->zAccl = -16;
 
-    instance->maxXVel = 0xFFFF;
-    instance->maxYVel = 0xFFFF;
-    instance->maxZVel = 0xFFFF;
+    instance->maxXVel = 65535;
+    instance->maxYVel = 65535;
+    instance->maxZVel = 65535;
 
     mv->mode = 0x100000;
 }
@@ -728,9 +728,9 @@ void ALUKA_SetHitGround(Instance *instance)
     mv->mvFlags = mv->mvFlags & ~0x800;
 
     instance->zVel = 0;
-    instance->maxXVel = 0x190;
-    instance->maxYVel = 0x190;
-    instance->maxZVel = 0x190;
+    instance->maxXVel = 400;
+    instance->maxYVel = 400;
+    instance->maxZVel = 400;
 
     MON_SwitchState(instance, MONSTER_STATE_LANDONFEET);
 }
@@ -743,7 +743,7 @@ void ALUKA_Init(Instance *instance)
 {
 
     MonsterVars *mv; // not from debug symbols
-    FXGlowEffect *glowEffect; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
 
     MON_DefaultInit(instance);
 
@@ -752,40 +752,40 @@ void ALUKA_Init(Instance *instance)
     if (mv != NULL)
     {
 
-        glowEffect = (FXGlowEffect *)MEMPACK_Malloc(sizeof(FXGlowEffect), 0x1B); // TODO: double check this type later
+        vars = (AlukaVars *)MEMPACK_Malloc(sizeof(AlukaVars), 27);
 
-        if (glowEffect == NULL)
+        if (vars == NULL)
         {
             mv->extraVars = NULL;
         }
         else
         {
-            mv->extraVars = glowEffect;
-            glowEffect->fadein_time = 0;
+            mv->extraVars = vars;
+            vars->pitch = 0;
         }
     }
 
     instance->rotation.x = 0;
 
-    G2Anim_AttachControllerToSeg(&instance->anim, 1, 0xE);
-    G2Anim_AttachControllerToSeg(&instance->anim, 1, 0x26);
-    G2Anim_AttachControllerToSeg(&instance->anim, 0x13, 0xE);
-    G2Anim_AttachControllerToSeg(&instance->anim, 0x1A, 0xE);
-    G2Anim_AttachControllerToSeg(&instance->anim, 0x20, 0xE);
-    G2Anim_AttachControllerToSeg(&instance->anim, 5, 0xE);
-    G2Anim_AttachControllerToSeg(&instance->anim, 0xC, 0xE);
-    G2Anim_AttachControllerToSeg(&instance->anim, 4, 0xE);
-    G2Anim_AttachControllerToSeg(&instance->anim, 0xB, 0xE);
+    G2Anim_AttachControllerToSeg(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_AttachControllerToSeg(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALTRANS);
+    G2Anim_AttachControllerToSeg(&instance->anim, 19, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_AttachControllerToSeg(&instance->anim, 26, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_AttachControllerToSeg(&instance->anim, 32, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_AttachControllerToSeg(&instance->anim, 5, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_AttachControllerToSeg(&instance->anim, 12, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_AttachControllerToSeg(&instance->anim, 4, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_AttachControllerToSeg(&instance->anim, 11, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
-    G2Anim_DisableController(&instance->anim, 1, 0xE);
-    G2Anim_DisableController(&instance->anim, 1, 0x26);
-    G2Anim_DisableController(&instance->anim, 0x13, 0xE);
-    G2Anim_DisableController(&instance->anim, 0x1A, 0xE);
-    G2Anim_DisableController(&instance->anim, 0x20, 0xE);
-    G2Anim_DisableController(&instance->anim, 5, 0xE);
-    G2Anim_DisableController(&instance->anim, 0xC, 0xE);
-    G2Anim_DisableController(&instance->anim, 4, 0xE);
-    G2Anim_DisableController(&instance->anim, 0xB, 0xE);
+    G2Anim_DisableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALTRANS);
+    G2Anim_DisableController(&instance->anim, 19, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 26, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 32, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 5, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 12, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 4, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 11, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
     DEBUG_DoAreaProtection();
 }
@@ -794,15 +794,15 @@ void ALUKA_CleanUp(Instance *instance)
 {
     MonsterVars *mv; // not from debug symbols
 
-    G2Anim_DetachControllerFromSeg(&instance->anim, 1, 0xE);
-    G2Anim_DetachControllerFromSeg(&instance->anim, 1, 0x26);
-    G2Anim_DetachControllerFromSeg(&instance->anim, 0x13, 0xE);
-    G2Anim_DetachControllerFromSeg(&instance->anim, 0x1A, 0xE);
-    G2Anim_DetachControllerFromSeg(&instance->anim, 0x20, 0xE);
-    G2Anim_DetachControllerFromSeg(&instance->anim, 5, 0xE);
-    G2Anim_DetachControllerFromSeg(&instance->anim, 0xC, 0xE);
-    G2Anim_DetachControllerFromSeg(&instance->anim, 4, 0xE);
-    G2Anim_DetachControllerFromSeg(&instance->anim, 0xB, 0xE);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALTRANS);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 19, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 26, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 32, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 5, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 12, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 4, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 11, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
     mv = (MonsterVars *)instance->extraData;
 
@@ -843,7 +843,7 @@ void ALUKA_PursueEntry(Instance *instance)
     if (ALUKA_ControllersEnabled(instance) == G2FALSE)
     {
         mv->speed = 0;
-        vars->pitch_offset = 0x400;
+        vars->pitch_offset = 1024;
         vars->yaw_speed = 0;
         vars->pitch_speed = 0;
         vars->pitch_offset_speed = 0;
@@ -962,14 +962,14 @@ void ALUKA_Attack(Instance *instance)
             MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, ALUKA_ANIM_SWIMATTACK, 1);
             vars->swim_anim = ALUKA_ANIM_SWIMATTACK;
             mv->attackState++;
-            vars->special_time = MON_GetTime(instance) + (mv->attackType->sphereOnFrame * 0x21);
+            vars->special_time = MON_GetTime(instance) + (mv->attackType->sphereOnFrame * 33);
             break;
         case 2:
             if (MON_GetTime(instance) >= (unsigned long)vars->special_time)
             {
                 MON_TurnOnWeaponSpheres(instance);
                 mv->attackState++;
-                vars->special_time = MON_GetTime(instance) + (mv->attackType->sphereOffFrame * 0x21);
+                vars->special_time = MON_GetTime(instance) + (mv->attackType->sphereOffFrame * 33);
             }
             break;
         case 3:
@@ -1134,7 +1134,7 @@ void ALUKA_Wander(Instance *instance)
     {
         MON_SwitchState(instance, MONSTER_STATE_PURSUE);
     }
-    else if (rand() < 0xA3)
+    else if (rand() < 163)
     {
         MON_SwitchState(instance, MONSTER_STATE_IDLE);
     }
@@ -1148,7 +1148,7 @@ void ALUKA_Wander(Instance *instance)
         range = attrs->wander_range;
     }
 
-    if (MATH3D_LengthXYZ(instance->position.x - mv->destination.x, instance->position.y - mv->destination.y, instance->position.z - mv->destination.z) < 0x280)
+    if (MATH3D_LengthXYZ(instance->position.x - mv->destination.x, instance->position.y - mv->destination.y, instance->position.z - mv->destination.z) < 640)
     {
         ALUKA_GetRandomDestination(instance, &mv->destination, &instance->intro->position, range);
     }
@@ -1210,7 +1210,7 @@ void ALUKA_Idle(Instance *instance)
         {
             MON_SwitchState(instance, MONSTER_STATE_PURSUE);
         }
-        else if (instance->flags2 & 0x12 && rand() < 0x2AAA)
+        else if (instance->flags2 & 0x12 && rand() < 10922)
         {
             MON_SwitchState(instance, MONSTER_STATE_WANDER);
         }
@@ -1237,11 +1237,11 @@ void ALUKA_LandInWater(Instance *instance)
         return;
     }
 
-    vars->pitch_offset_speed = 0x67;
+    vars->pitch_offset_speed = 103;
     PhysicsMove(instance, &instance->position, gameTrackerX.timeMult);
     ALUKA_ApplyRots(instance, gameTrackerX.timeMult);
 
-    if (ALUKA_CapDepth(instance, level) >= instance->position.z && vars->pitch_offset == 0x400)
+    if (ALUKA_CapDepth(instance, level) >= instance->position.z && vars->pitch_offset == 1024)
     {
         instance->zVel = 0;
         vars->pitch_offset_speed = 0;
@@ -1357,7 +1357,7 @@ void ALUKA_StunnedEntry(Instance *instance)
         return;
     }
 
-    if (mv->damageType == 0x40)
+    if (mv->damageType == 64)
     {
         MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMAGONY, 2);
         vars->swim_anim = ALUKA_ANIM_SWIMAGONY;
@@ -1517,14 +1517,14 @@ void ALUKA_Projectile(Instance *instance)
                 delta.y = enemyPos->y - instance->position.y;
                 delta.z = 0;
 
-                ALUKA_FacingVector(instance, &facing, 0x1000);
+                ALUKA_FacingVector(instance, &facing, 4096);
                 facing.z = 0;
-                if (!ALUKA_AngleTooWide(&facing, &delta, 0x3F0, 0xA))
+                if (!ALUKA_AngleTooWide(&facing, &delta, 1008, 10))
                 {
                     MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, ALUKA_ANIM_SWIMSPIT, 1);
                     vars->swim_anim = ALUKA_ANIM_SWIMSPIT;
                     mv->attackState++;
-                    vars->special_time = MON_GetTime(instance) + ((unsigned char)attrs->spit_attack_frame * 0x21);
+                    vars->special_time = MON_GetTime(instance) + ((unsigned char)attrs->spit_attack_frame * 33);
                 }
             }
             break;
@@ -1585,7 +1585,7 @@ void ALUKA_SurpriseAttackEntry(Instance *instance)
     vars->pitch_speed = 0;
     vars->yaw_speed = 0;
     mv->speed = 0;
-    vars->pitch_offset = 0x400;
+    vars->pitch_offset = 1024;
 
     ALUKA_EnableControllers(instance);
     mv->mvFlags |= 0x800;
@@ -1797,25 +1797,25 @@ void ALUKA_GeneralDeathEntry(Instance *instance)
 
     switch (mv->damageType)
     {
-    case 0x20:
+    case 32:
         mv->causeOfDeath = MONSTER_CAUSEOFDEATH_FIRE;
-    case 0x40:
+    case 64:
         MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMAGONY, 2);
-        if (mv->damageType == 0x40)
+        if (mv->damageType == 64)
         {
             mv->causeOfDeath = MONSTER_CAUSEOFDEATH_SUN;
         }
-        mv->generalTimer = MON_GetTime(instance) + 0xBB8;
+        mv->generalTimer = MON_GetTime(instance) + 3000;
         mv->mvFlags |= 0x400000;
-        mv->effectTimer = MON_GetTime(instance) + 0x2710;
-        MON_MonsterGlow(instance, 0x4960, -1, 0, 0);
+        mv->effectTimer = MON_GetTime(instance) + 10000;
+        MON_MonsterGlow(instance, 18784, -1, 0, 0);
         break;
-    case 0x200:
+    case 512:
         MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMAGONY, 2);
         mv->causeOfDeath = MONSTER_CAUSEOFDEATH_SOUND;
-        mv->generalTimer = MON_GetTime(instance) + 0x3E8;
+        mv->generalTimer = MON_GetTime(instance) + 1000;
         break;
-    case 0x400:
+    case 1024:
         mv->causeOfDeath = MONSTER_CAUSEOFDEATH_STONE;
         mv->generalTimer = 0;
         break;
@@ -1886,7 +1886,7 @@ void ALUKA_GeneralDeath(Instance *instance)
 
 G2Bool ALUKA_ControllersEnabled(Instance *instance)
 {
-    return G2Anim_IsControllerActive(&instance->anim, 1, 0x26) != G2FALSE;
+    return G2Anim_IsControllerActive(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALTRANS) != G2FALSE;
 }
 
 void ALUKA_SetPitch(Instance *instance, int pitch)
@@ -1904,7 +1904,7 @@ void ALUKA_SetPitch(Instance *instance, int pitch)
     extraRot.x = pitch;
     extraRot.z = 0;
     extraRot.y = 0;
-    G2Anim_SetController_Vector(&instance->anim, 1, 0xE, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
     attributes->swimfast_pitch = pitch;
 }
 
@@ -1920,31 +1920,31 @@ void ALUKA_EnableControllers(Instance *instance)
         return;
     }
 
-    G2Anim_EnableController(&instance->anim, 1, 0x26);
-    G2Anim_EnableController(&instance->anim, 1, 0xE);
-    G2Anim_EnableController(&instance->anim, 0x13, 0xE);
-    G2Anim_EnableController(&instance->anim, 0x1A, 0xE);
-    G2Anim_EnableController(&instance->anim, 0x20, 0xE);
-    G2Anim_EnableController(&instance->anim, 5, 0xE);
-    G2Anim_EnableController(&instance->anim, 0xC, 0xE);
-    G2Anim_EnableController(&instance->anim, 4, 0xE);
-    G2Anim_EnableController(&instance->anim, 0xB, 0xE);
+    G2Anim_EnableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALTRANS);
+    G2Anim_EnableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 19, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 26, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 32, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 5, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 12, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 4, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 11, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
     translate.y = 0;
     translate.x = 0;
 
     if (mv->age != 0)
     {
-        translate.z = -0x1C2;
+        translate.z = -450;
         instance->position.z -= translate.z;
     }
     else
     {
-        translate.z = -0x190;
+        translate.z = -400;
         instance->position.z -= translate.z;
     }
 
-    G2Anim_SetController_Vector(&instance->anim, 1, 0x26, &translate);
+    G2Anim_SetController_Vector(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALTRANS, &translate);
 }
 
 void ALUKA_DisableControllers(Instance *instance)
@@ -1958,23 +1958,23 @@ void ALUKA_DisableControllers(Instance *instance)
         return;
     }
 
-    G2Anim_DisableController(&instance->anim, 1, 0x26);
-    G2Anim_DisableController(&instance->anim, 1, 0xE);
-    G2Anim_DisableController(&instance->anim, 0x13, 0xE);
-    G2Anim_DisableController(&instance->anim, 0x1A, 0xE);
-    G2Anim_DisableController(&instance->anim, 0x20, 0xE);
-    G2Anim_DisableController(&instance->anim, 5, 0xE);
-    G2Anim_DisableController(&instance->anim, 0xC, 0xE);
-    G2Anim_DisableController(&instance->anim, 4, 0xE);
-    G2Anim_DisableController(&instance->anim, 0xB, 0xE);
+    G2Anim_DisableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALTRANS);
+    G2Anim_DisableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 19, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 26, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 32, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 5, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 12, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 4, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 11, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
     if (mv->age != 0)
     {
-        instance->position.z = instance->position.z - 0x1C2;
+        instance->position.z -= 450;
     }
     else
     {
-        instance->position.z = instance->position.z - 0x190;
+        instance->position.z -= 400;
     }
 }
 
@@ -1992,31 +1992,31 @@ void ALUKA_SetSwimBodyTwist(Instance *instance, int pitch, int yaw)
     extraRot.x = 0;
     extraRot.y = -pitch & 0xFFF;
 
-    G2Anim_SetController_Vector(&instance->anim, 5, 0xE, &extraRot);
-    G2Anim_SetController_Vector(&instance->anim, 0xC, 0xE, &extraRot);
-    G2Anim_SetController_Vector(&instance->anim, 4, 0xE, &extraRot);
-    G2Anim_SetController_Vector(&instance->anim, 0xB, 0xE, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 5, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 12, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 4, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 11, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
 
     extraRot.y = pitch & 0xFFF;
     extraRot.x = yaw & 0xFFF;
 
-    G2Anim_SetController_Vector(&instance->anim, 0x13, 0xE, &extraRot);
+    G2Anim_SetController_Vector(&instance->anim, 19, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
 
     extraRot.x = -yaw & 0xFFF;
 
     if (pitch > 0)
     {
         extraRot.y = -(pitch * 2) & 0xFFF;
-        G2Anim_SetController_Vector(&instance->anim, 0x1A, 0xE, &extraRot);
+        G2Anim_SetController_Vector(&instance->anim, 26, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
         extraRot.y = -pitch & 0xFFF;
-        G2Anim_SetController_Vector(&instance->anim, 0x20, 0xE, &extraRot);
+        G2Anim_SetController_Vector(&instance->anim, 32, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
     }
     else
     {
         extraRot.y = -pitch & 0xFFF;
-        G2Anim_SetController_Vector(&instance->anim, 0x1A, 0xE, &extraRot);
+        G2Anim_SetController_Vector(&instance->anim, 26, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
         extraRot.y = -(pitch * 2) & 0xFFF;
-        G2Anim_SetController_Vector(&instance->anim, 0x20, 0xE, &extraRot);
+        G2Anim_SetController_Vector(&instance->anim, 32, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
     }
 
 }
@@ -2060,15 +2060,15 @@ void ALUKA_VectorFromPitchYaw(Position *vector, int pitch, int yaw, int dist)
     oldVector.vy = -dist;
     oldVector.vz = 0;
 
-    mat.m[0][0] = 0x1000;
+    mat.m[0][0] = 4096;
     mat.m[0][1] = 0;
     mat.m[0][2] = 0;
     mat.m[1][0] = 0;
-    mat.m[1][1] = 0x1000;
+    mat.m[1][1] = 4096;
     mat.m[1][2] = 0;
     mat.m[2][0] = 0;
     mat.m[2][1] = 0;
-    mat.m[2][2] = 0x1000;
+    mat.m[2][2] = 4096;
 
     RotMatrixX(pitch, &mat);
     RotMatrixZ(yaw, &mat);
@@ -2134,7 +2134,7 @@ int ALUKA_TerrainInPath(Instance *instance)
 
     level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
 
-    ALUKA_FacingVector(instance, &vector, 0x190);
+    ALUKA_FacingVector(instance, &vector, 400);
     ADD_SVEC(Position, &vector, Position, &vector, Position, &instance->position);
 
     return ALUKA_SimpleLineCheck(0, level, &instance->position, &vector);
@@ -2197,21 +2197,21 @@ void ALUKA_ApplyRots(Instance *instance, int time)
     mv = (MonsterVars *)instance->extraData;
     vars = (AlukaVars *)mv->extraVars;
 
-    newRot = ALUKA_ApplyIncr(instance->rotation.z, -0x7FFF, 0x7FFF, vars->yaw_speed, time);
+    newRot = ALUKA_ApplyIncr(instance->rotation.z, -32767, 32767, vars->yaw_speed, time);
     delta = vars->pitch_offset;
     swimPitch = vars->pitch & 0xFFF;
 
-    if (swimPitch < 0x801)
+    if (swimPitch <= 2048)
     {
         delta = swimPitch - vars->pitch_offset;
     }
     else
     {
-        delta = swimPitch - 0x1000 - vars->pitch_offset;
+        delta = swimPitch - 4096 - vars->pitch_offset;
     }
 
-    newDepth = ALUKA_ApplyIncr(delta, -0x2AA, 0x2AA, vars->pitch_speed, time);
-    newPitch = ALUKA_ApplyIncr(vars->pitch_offset, 0, 0x400, vars->pitch_offset_speed, time);
+    newDepth = ALUKA_ApplyIncr(delta, -682, 682, vars->pitch_speed, time);
+    newPitch = ALUKA_ApplyIncr(vars->pitch_offset, 0, 1024, vars->pitch_offset_speed, time);
     pitch = (newDepth + newPitch) & 0xFFF;
     instance->rotation.z = newRot & 0xFFF;
     ALUKA_SetPitch(instance, pitch);
@@ -2319,7 +2319,7 @@ void ALUKA_SetupSwimAnimWOTread(Instance *instance)
             MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMSLOW, 2);
             vars->swim_anim = ALUKA_ANIM_SWIMSLOW;
 
-            if (vars->pitch_offset < 0x400)
+            if (vars->pitch_offset < 1024)
             {
                 vars->pitch_offset_speed = alukaAttrs->pitch_offset_speed;
             }
@@ -2335,7 +2335,7 @@ void ALUKA_SetupSwimAnimWOTread(Instance *instance)
         MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMFAST, 2);
         vars->swim_anim = ALUKA_ANIM_SWIMFAST;
 
-        if (vars->pitch_offset < 0x400)
+        if (vars->pitch_offset < 1024)
         {
             vars->pitch_offset_speed = alukaAttrs->pitch_offset_speed;
         }
@@ -2402,7 +2402,7 @@ int ALUKA_NearAluka(Instance *instance)
     for (inst = gameTrackerX.instanceList->first; inst != NULL; inst = inst->next)
     {
 
-        if (inst == instance || INSTANCE_Query(inst, queryWhatAmI) != 0x82)
+        if (inst == instance || INSTANCE_Query(inst, queryWhatAmI) != 130)
         {
             continue;
         }
@@ -2410,7 +2410,7 @@ int ALUKA_NearAluka(Instance *instance)
         dist = MATH3D_LengthXYZ(instance->position.x - inst->position.x, instance->position.y - inst->position.y, instance->position.z - inst->position.z);
         oldDist = MATH3D_LengthXYZ(instance->oldPos.x - inst->oldPos.x, instance->oldPos.y - inst->oldPos.y, instance->oldPos.z - inst->oldPos.z);
 
-        if (dist < 0x280 && dist < oldDist)
+        if (dist < 640 && dist < oldDist)
         {
             return 1;
         }
@@ -2443,7 +2443,7 @@ int ALUKA_SwimPlanMovement(Instance *instance, Position *target, Position *step,
     if (attrs->circle_start_dist < dist || (mv->age != 0 && depth < target->z && ALUKA_NotDaylight(level)))
     {
         switch (ENMYPLAN_MoveToTargetFinal(instance, step, mv->pathSlotID, target, 0x1E00001F))
-        {                        /* irregular */
+        {
         case 0:
             if (attrs->circle_start_dist < dist)
             {
@@ -2482,9 +2482,9 @@ void ALUKA_ResetSwim(Instance *instance)
     MON_PlayCombatIdle(instance, 2);
     mv->mvFlags &= ~0x800;
     instance->zVel = 0;
-    instance->maxXVel = 0x190;
-    instance->maxYVel = 0x190;
-    instance->maxZVel = 0x190;
+    instance->maxXVel = 400;
+    instance->maxYVel = 400;
+    instance->maxZVel = 400;
 
 }
 
@@ -2497,7 +2497,7 @@ int ALUKA_ShouldJumpIn(Instance *instance, Instance *enemy, Level *level)
 
     nodeType = ENMYPLAN_GetNodeTypeOfNextWaypoint(((MonsterVars *)instance->extraData)->pathSlotID);
 
-    if (nodeType != 0x40 && ((nodeType >> 3) & 3) == 3)
+    if (nodeType != 64 && ((nodeType >> 3) & 3) == 3)
     {
         return 1;
     }
@@ -2523,7 +2523,7 @@ int ALUKA_ShouldJumpOut(Instance *instance, Instance *enemy, Level *level)
 
     nodeType = ENMYPLAN_GetNodeTypeOfNextWaypoint(mv->pathSlotID);
 
-    if (nodeType != 0x40 && ((nodeType >> 3) & 3) == 0)
+    if (nodeType != 64 && ((nodeType >> 3) & 3) == 0)
     {
         return 1;
     }
@@ -2565,11 +2565,11 @@ void ALUKA_JumpToEntry(Instance *instance, Position *target)
 
     instance->xAccl = 0;
     instance->yAccl = 0;
-    instance->zAccl = -0x10;
+    instance->zAccl = -16;
 
-    instance->maxXVel = 0xFFFF;
-    instance->maxYVel = 0xFFFF;
-    instance->maxZVel = 0xFFFF;
+    instance->maxXVel = 65535;
+    instance->maxYVel = 65535;
+    instance->maxZVel = 65535;
 
     mv->mode = 0x100000;
 }
@@ -2585,9 +2585,9 @@ void ALUKA_SetHitGround(Instance *instance)
     mv->mvFlags = mv->mvFlags & ~0x800;
 
     instance->zVel = 0;
-    instance->maxXVel = 0x190;
-    instance->maxYVel = 0x190;
-    instance->maxZVel = 0x190;
+    instance->maxXVel = 400;
+    instance->maxYVel = 400;
+    instance->maxZVel = 400;
 
     MON_SwitchState(instance, MONSTER_STATE_LANDONFEET);
 }
@@ -2601,7 +2601,7 @@ void ALUKA_Init(Instance *instance)
 {
 
     MonsterVars *mv; // not from debug symbols
-    FXGlowEffect *glowEffect; // not from debug symbols
+    AlukaVars *vars; // not from debug symbols
 
     MON_DefaultInit(instance);
 
@@ -2610,40 +2610,40 @@ void ALUKA_Init(Instance *instance)
     if (mv != NULL)
     {
 
-        glowEffect = (FXGlowEffect *)MEMPACK_Malloc(sizeof(FXGlowEffect), 0x1B); // TODO: double check this type later
+        vars = (AlukaVars *)MEMPACK_Malloc(sizeof(AlukaVars), 27);
 
-        if (glowEffect == NULL)
+        if (vars == NULL)
         {
             mv->extraVars = NULL;
         }
         else
         {
-            mv->extraVars = glowEffect;
-            glowEffect->fadein_time = 0;
+            mv->extraVars = vars;
+            vars->pitch = 0;
         }
     }
 
     instance->rotation.x = 0;
 
-    G2Anim_AttachControllerToSeg(&instance->anim, 1, 0xE);
-    G2Anim_AttachControllerToSeg(&instance->anim, 1, 0x26);
-    G2Anim_AttachControllerToSeg(&instance->anim, 0x13, 0xE);
-    G2Anim_AttachControllerToSeg(&instance->anim, 0x1A, 0xE);
-    G2Anim_AttachControllerToSeg(&instance->anim, 0x20, 0xE);
-    G2Anim_AttachControllerToSeg(&instance->anim, 5, 0xE);
-    G2Anim_AttachControllerToSeg(&instance->anim, 0xC, 0xE);
-    G2Anim_AttachControllerToSeg(&instance->anim, 4, 0xE);
-    G2Anim_AttachControllerToSeg(&instance->anim, 0xB, 0xE);
+    G2Anim_AttachControllerToSeg(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_AttachControllerToSeg(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALTRANS);
+    G2Anim_AttachControllerToSeg(&instance->anim, 19, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_AttachControllerToSeg(&instance->anim, 26, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_AttachControllerToSeg(&instance->anim, 32, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_AttachControllerToSeg(&instance->anim, 5, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_AttachControllerToSeg(&instance->anim, 12, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_AttachControllerToSeg(&instance->anim, 4, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_AttachControllerToSeg(&instance->anim, 11, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
-    G2Anim_DisableController(&instance->anim, 1, 0xE);
-    G2Anim_DisableController(&instance->anim, 1, 0x26);
-    G2Anim_DisableController(&instance->anim, 0x13, 0xE);
-    G2Anim_DisableController(&instance->anim, 0x1A, 0xE);
-    G2Anim_DisableController(&instance->anim, 0x20, 0xE);
-    G2Anim_DisableController(&instance->anim, 5, 0xE);
-    G2Anim_DisableController(&instance->anim, 0xC, 0xE);
-    G2Anim_DisableController(&instance->anim, 4, 0xE);
-    G2Anim_DisableController(&instance->anim, 0xB, 0xE);
+    G2Anim_DisableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALTRANS);
+    G2Anim_DisableController(&instance->anim, 19, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 26, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 32, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 5, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 12, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 4, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DisableController(&instance->anim, 11, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
     DEBUG_DoAreaProtection();
 }
@@ -2652,15 +2652,15 @@ void ALUKA_CleanUp(Instance *instance)
 {
     MonsterVars *mv; // not from debug symbols
 
-    G2Anim_DetachControllerFromSeg(&instance->anim, 1, 0xE);
-    G2Anim_DetachControllerFromSeg(&instance->anim, 1, 0x26);
-    G2Anim_DetachControllerFromSeg(&instance->anim, 0x13, 0xE);
-    G2Anim_DetachControllerFromSeg(&instance->anim, 0x1A, 0xE);
-    G2Anim_DetachControllerFromSeg(&instance->anim, 0x20, 0xE);
-    G2Anim_DetachControllerFromSeg(&instance->anim, 5, 0xE);
-    G2Anim_DetachControllerFromSeg(&instance->anim, 0xC, 0xE);
-    G2Anim_DetachControllerFromSeg(&instance->anim, 4, 0xE);
-    G2Anim_DetachControllerFromSeg(&instance->anim, 0xB, 0xE);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALTRANS);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 19, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 26, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 32, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 5, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 12, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 4, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 11, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
     mv = (MonsterVars *)instance->extraData;
 
@@ -2701,7 +2701,7 @@ void ALUKA_PursueEntry(Instance *instance)
     if (ALUKA_ControllersEnabled(instance) == G2FALSE)
     {
         mv->speed = 0;
-        vars->pitch_offset = 0x400;
+        vars->pitch_offset = 1024;
         vars->yaw_speed = 0;
         vars->pitch_speed = 0;
         vars->pitch_offset_speed = 0;
@@ -2819,14 +2819,14 @@ void ALUKA_Attack(Instance *instance)
             MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, ALUKA_ANIM_SWIMATTACK, 1);
             vars->swim_anim = ALUKA_ANIM_SWIMATTACK;
             mv->attackState++;
-            vars->special_time = MON_GetTime(instance) + (mv->attackType->sphereOnFrame * 0x21);
+            vars->special_time = MON_GetTime(instance) + (mv->attackType->sphereOnFrame * 33);
             break;
         case 2:
             if (MON_GetTime(instance) >= (unsigned long)vars->special_time)
             {
                 MON_TurnOnWeaponSpheres(instance);
                 mv->attackState++;
-                vars->special_time = MON_GetTime(instance) + (mv->attackType->sphereOffFrame * 0x21);
+                vars->special_time = MON_GetTime(instance) + (mv->attackType->sphereOffFrame * 33);
             }
             break;
         case 3:
@@ -2991,7 +2991,7 @@ void ALUKA_Wander(Instance *instance)
     {
         MON_SwitchState(instance, MONSTER_STATE_PURSUE);
     }
-    else if (rand() < 0xA3)
+    else if (rand() < 163)
     {
         MON_SwitchState(instance, MONSTER_STATE_IDLE);
     }
@@ -3005,7 +3005,7 @@ void ALUKA_Wander(Instance *instance)
         range = attrs->wander_range;
     }
 
-    if (MATH3D_LengthXYZ(instance->position.x - mv->destination.x, instance->position.y - mv->destination.y, instance->position.z - mv->destination.z) < 0x280)
+    if (MATH3D_LengthXYZ(instance->position.x - mv->destination.x, instance->position.y - mv->destination.y, instance->position.z - mv->destination.z) < 640)
     {
         ALUKA_GetRandomDestination(instance, &mv->destination, &instance->intro->position, range);
     }
@@ -3066,7 +3066,7 @@ void ALUKA_Idle(Instance *instance)
         {
             MON_SwitchState(instance, MONSTER_STATE_PURSUE);
         }
-        else if (instance->flags2 & 0x12 && rand() < 0x2AAA)
+        else if (instance->flags2 & 0x12 && rand() < 10922)
         {
             MON_SwitchState(instance, MONSTER_STATE_WANDER);
         }
@@ -3093,11 +3093,11 @@ void ALUKA_LandInWater(Instance *instance)
         return;
     }
 
-    vars->pitch_offset_speed = 0x67;
+    vars->pitch_offset_speed = 103;
     PhysicsMove(instance, &instance->position, gameTrackerX.timeMult);
     ALUKA_ApplyRots(instance, gameTrackerX.timeMult);
 
-    if (ALUKA_CapDepth(instance, level) >= instance->position.z && vars->pitch_offset == 0x400)
+    if (ALUKA_CapDepth(instance, level) >= instance->position.z && vars->pitch_offset == 1024)
     {
         instance->zVel = 0;
         vars->pitch_offset_speed = 0;
@@ -3213,7 +3213,7 @@ void ALUKA_StunnedEntry(Instance *instance)
         return;
     }
 
-    if (mv->damageType == 0x40)
+    if (mv->damageType == 64)
     {
         MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMAGONY, 2);
         vars->swim_anim = ALUKA_ANIM_SWIMAGONY;
@@ -3374,14 +3374,14 @@ void ALUKA_Projectile(Instance *instance)
                 delta.y = enemyPos->y - instance->position.y;
                 delta.z = 0;
 
-                ALUKA_FacingVector(instance, &facing, 0x1000);
+                ALUKA_FacingVector(instance, &facing, 4096);
                 facing.z = 0;
-                if (!ALUKA_AngleTooWide(&facing, &delta, 0x3F0, 0xA))
+                if (!ALUKA_AngleTooWide(&facing, &delta, 1008, 10))
                 {
                     MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, ALUKA_ANIM_SWIMSPIT, 1);
                     vars->swim_anim = ALUKA_ANIM_SWIMSPIT;
                     mv->attackState++;
-                    vars->special_time = MON_GetTime(instance) + ((unsigned char)attrs->spit_attack_frame * 0x21);
+                    vars->special_time = MON_GetTime(instance) + ((unsigned char)attrs->spit_attack_frame * 33);
                 }
             }
             break;
@@ -3442,7 +3442,7 @@ void ALUKA_SurpriseAttackEntry(Instance *instance)
     vars->pitch_speed = 0;
     vars->yaw_speed = 0;
     mv->speed = 0;
-    vars->pitch_offset = 0x400;
+    vars->pitch_offset = 1024;
 
     ALUKA_EnableControllers(instance);
     mv->mvFlags |= 0x800;
@@ -3654,25 +3654,25 @@ void ALUKA_GeneralDeathEntry(Instance *instance)
 
     switch (mv->damageType)
     {
-    case 0x20:
+    case 32:
         mv->causeOfDeath = MONSTER_CAUSEOFDEATH_FIRE;
-    case 0x40:
+    case 64:
         MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMAGONY, 2);
-        if (mv->damageType == 0x40)
+        if (mv->damageType == 64)
         {
             mv->causeOfDeath = MONSTER_CAUSEOFDEATH_SUN;
         }
-        mv->generalTimer = MON_GetTime(instance) + 0xBB8;
+        mv->generalTimer = MON_GetTime(instance) + 3000;
         mv->mvFlags |= 0x400000;
-        mv->effectTimer = MON_GetTime(instance) + 0x2710;
-        MON_MonsterGlow(instance, 0x4960, -1, 0, 0);
+        mv->effectTimer = MON_GetTime(instance) + 10000;
+        MON_MonsterGlow(instance, 19784, -1, 0, 0);
         break;
-    case 0x200:
+    case 512:
         MON_PlayAnimFromList(instance, ma->auxAnimList, ALUKA_ANIM_SWIMAGONY, 2);
         mv->causeOfDeath = MONSTER_CAUSEOFDEATH_SOUND;
-        mv->generalTimer = MON_GetTime(instance) + 0x3E8;
+        mv->generalTimer = MON_GetTime(instance) + 1000;
         break;
-    case 0x400:
+    case 1024:
         mv->causeOfDeath = MONSTER_CAUSEOFDEATH_STONE;
         mv->generalTimer = 0;
         break;

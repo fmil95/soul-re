@@ -1136,7 +1136,7 @@ void StateHandlerThrow2(CharacterState *In, int CurrentSection, intptr_t Data)
             In->SectionList[CurrentSection].Data2 = 1;
             break;
         case 0x100004:
-            G2Anim_InterpDisableController(&In->CharacterInstance->anim, 14, 14, 300);
+            G2Anim_InterpDisableController(&In->CharacterInstance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT, 300);
 
             if ((Raziel.effectsFlags & 0x2))
             {
@@ -1333,7 +1333,7 @@ void StateHandlerThrow2(CharacterState *In, int CurrentSection, intptr_t Data)
                 {
                     razSetFadeEffect(In->CharacterInstance->fadeValue, 0, -PlayerData->throwFadeInRate);
 
-                    G2Anim_InterpDisableController(&In->CharacterInstance->anim, 14, 14, 600);
+                    G2Anim_InterpDisableController(&In->CharacterInstance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT, 600);
 
                     Raziel.throwMode = 0;
                 }
@@ -1393,14 +1393,14 @@ void PointAt(Instance *instance, Position *Target, Rotation *Rot1)
 
     LimitRotation(Rot1);
 
-    if (G2Anim_IsControllerActive(&instance->anim, 14, 14) == G2FALSE)
+    if (G2Anim_IsControllerActive(&instance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT) == G2FALSE)
     {
-        G2Anim_EnableController(&instance->anim, 14, 14);
+        G2Anim_EnableController(&instance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
     }
 
     MATH3D_ZYXtoXYZ(Rot1);
 
-    G2Anim_SetController_Vector(&instance->anim, 14, 14, (G2SVector3 *)Rot1);
+    G2Anim_SetController_Vector(&instance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT, (G2SVector3 *)Rot1);
 }
 
 void ThrowSetFocusPoint(Instance *instance, Rotation *rot)
@@ -1428,14 +1428,14 @@ void ThrowSetFocusPoint(Instance *instance, Rotation *rot)
         Raziel.throwTarget.y = (short)v4.vy;
         Raziel.throwTarget.z = (short)v4.vz;
 
-        if (G2Anim_IsControllerActive(&instance->anim, 14, 14) == G2FALSE)
+        if (G2Anim_IsControllerActive(&instance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT) == G2FALSE)
         {
-            G2Anim_EnableController(&instance->anim, 14, 14);
+            G2Anim_EnableController(&instance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
         }
 
         MATH3D_ZYXtoXYZ(rot);
 
-        G2Anim_SetController_Vector(&instance->anim, 14, 14, (G2SVector3 *)rot);
+        G2Anim_SetController_Vector(&instance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT, (G2SVector3 *)rot);
 
         v4.vx = weaponInstance->matrix[1].t[0];
         v4.vy = weaponInstance->matrix[1].t[1];

@@ -669,9 +669,9 @@ void StateHandlerLookAround(CharacterState *In, int CurrentSection, intptr_t Dat
 
                 instance = In->CharacterInstance;
 
-                G2Anim_EnableController(&instance->anim, 17, 14);
-                G2Anim_EnableController(&instance->anim, 16, 14);
-                G2Anim_EnableController(&instance->anim, 14, 14);
+                G2Anim_EnableController(&instance->anim, 17, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+                G2Anim_EnableController(&instance->anim, 16, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+                G2Anim_EnableController(&instance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
                 ControlFlag = 0x8001008;
             }
@@ -689,9 +689,9 @@ void StateHandlerLookAround(CharacterState *In, int CurrentSection, intptr_t Dat
 
                 instance = In->CharacterInstance;
 
-                G2Anim_InterpDisableController(&instance->anim, 17, 14, 300);
-                G2Anim_InterpDisableController(&instance->anim, 16, 14, 300);
-                G2Anim_InterpDisableController(&instance->anim, 14, 14, 300);
+                G2Anim_InterpDisableController(&instance->anim, 17, G2ANIM_CTRLRTYPE_ADD_LOCALROT, 300);
+                G2Anim_InterpDisableController(&instance->anim, 16, G2ANIM_CTRLRTYPE_ADD_LOCALROT, 300);
+                G2Anim_InterpDisableController(&instance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT, 300);
             }
 
             break;
@@ -1928,9 +1928,9 @@ void StateHandlerCompression(CharacterState *In, int CurrentSection, intptr_t Da
 
                     In->CharacterInstance->yVel = 21;
 
-                    if (G2Anim_IsControllerActive(&In->CharacterInstance->anim, 1, 14) == G2FALSE)
+                    if (G2Anim_IsControllerActive(&In->CharacterInstance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT) == G2FALSE)
                     {
-                        G2Anim_EnableController(&In->CharacterInstance->anim, 1, 14);
+                        G2Anim_EnableController(&In->CharacterInstance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
                     }
 
                     break;
@@ -1941,9 +1941,9 @@ void StateHandlerCompression(CharacterState *In, int CurrentSection, intptr_t Da
 
                     In->CharacterInstance->yVel = 40;
 
-                    if (G2Anim_IsControllerActive(&In->CharacterInstance->anim, 1, 14) == G2FALSE)
+                    if (G2Anim_IsControllerActive(&In->CharacterInstance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT) == G2FALSE)
                     {
-                        G2Anim_EnableController(&In->CharacterInstance->anim, 1, 14);
+                        G2Anim_EnableController(&In->CharacterInstance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
                     }
                 }
             }
@@ -4402,9 +4402,9 @@ void DefaultStateHandler(CharacterState *In, int CurrentSection, intptr_t Data)
 
                 diff = MATH3D_AngleFromPosToPos(&pos1, &pos2);
 
-                if (G2Anim_IsControllerActive(&In->CharacterInstance->anim, 1, 14) != G2FALSE)
+                if (G2Anim_IsControllerActive(&In->CharacterInstance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT) != G2FALSE)
                 {
-                    G2Anim_DisableController(&In->CharacterInstance->anim, 1, 14);
+                    G2Anim_DisableController(&In->CharacterInstance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
                     if (ExtraRot != NULL)
                     {
@@ -6305,7 +6305,7 @@ void RazielAdditionalCollide(Instance *instance, GameTracker *gameTracker)
 
             if (ExtraRot != NULL)
             {
-                G2Anim_DisableController(&instance->anim, 1, 14);
+                G2Anim_DisableController(&instance->anim, 1, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
                 instance->rotation.z += ExtraRot->z;
 
@@ -6741,9 +6741,9 @@ void RAZIEL_TurnHead(Instance *instance, short *rotx, short *rotz, GameTracker *
 
 void RAZIEL_SetLookAround(Instance *instance)
 {
-    G2Anim_EnableController(&instance->anim, 17, 14);
-    G2Anim_EnableController(&instance->anim, 16, 14);
-    G2Anim_EnableController(&instance->anim, 14, 14);
+    G2Anim_EnableController(&instance->anim, 17, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 16, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
     INSTANCE_Post(instance, 0x100009, 1);
 
@@ -6753,9 +6753,9 @@ void RAZIEL_SetLookAround(Instance *instance)
 
 void RAZIEL_ResetLookAround(Instance *instance)
 {
-    G2Anim_InterpDisableController(&instance->anim, 17, 14, 300);
-    G2Anim_InterpDisableController(&instance->anim, 16, 14, 300);
-    G2Anim_InterpDisableController(&instance->anim, 14, 14, 300);
+    G2Anim_InterpDisableController(&instance->anim, 17, G2ANIM_CTRLRTYPE_ADD_LOCALROT, 300);
+    G2Anim_InterpDisableController(&instance->anim, 16, G2ANIM_CTRLRTYPE_ADD_LOCALROT, 300);
+    G2Anim_InterpDisableController(&instance->anim, 14, G2ANIM_CTRLRTYPE_ADD_LOCALROT, 300);
 
     INSTANCE_Post(instance, 0x100009, 0);
 }

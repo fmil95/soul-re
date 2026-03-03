@@ -28,7 +28,7 @@ void InitAlgorithmicWings(Instance *instance)
                     G2EulerAngles_FromMatrix(&Rot, &instance->anim.segMatrices[i - 1], 21);
                 }
 
-                G2Anim_EnableController(&instance->anim, i, 8);
+                G2Anim_EnableController(&instance->anim, i, G2ANIM_CTRLRTYPE_SET_WORLDROT);
 
                 G2EmulationSetInterpController_Vector(instance, i, 8, (G2SVector3 *)&Rot, (i - 50) * 3, 2);
             }
@@ -46,7 +46,7 @@ void InitAlgorithmicWings(Instance *instance)
                     G2EulerAngles_FromMatrix(&Rot, &instance->anim.segMatrices[i - 1], 21);
                 }
 
-                G2Anim_EnableController(&instance->anim, i, 8);
+                G2Anim_EnableController(&instance->anim, i, G2ANIM_CTRLRTYPE_SET_WORLDROT);
 
                 G2EmulationSetInterpController_Vector(instance, i, 8, (G2SVector3 *)&Rot, (i - 58) * 3, 2);
             }
@@ -64,12 +64,12 @@ void DeInitAlgorithmicWings(Instance *instance)
     {
         for (i = 51; i < 54; i++)
         {
-            G2Anim_DisableController(&instance->anim, i, 8);
+            G2Anim_DisableController(&instance->anim, i, G2ANIM_CTRLRTYPE_SET_WORLDROT);
         }
 
         for (i = 59; i < 62; i++)
         {
-            G2Anim_DisableController(&instance->anim, i, 8);
+            G2Anim_DisableController(&instance->anim, i, G2ANIM_CTRLRTYPE_SET_WORLDROT);
         }
 
         AlgoControlFlag &= ~0x1;
@@ -103,7 +103,7 @@ void AlgorithmicNeck(Instance *Player, Instance *Target)
 
     Raziel.Senses.Flags &= ~0x8;
 
-    if ((Raziel.Senses.Flags & 0x10))
+    if (Raziel.Senses.Flags & 0x10)
     {
         evCollideInstanceStatsData data;
 
@@ -115,19 +115,19 @@ void AlgorithmicNeck(Instance *Player, Instance *Target)
         }
     }
 
-    if ((Target == NULL) && (!(Raziel.Senses.Flags & 0x8)))
+    if (Target == NULL && !(Raziel.Senses.Flags & 0x8))
     {
-        if (G2Anim_IsControllerActive(&Player->anim, 17, 8) != G2FALSE)
+        if (G2Anim_IsControllerActive(&Player->anim, 17, G2ANIM_CTRLRTYPE_SET_WORLDROT) != G2FALSE)
         {
-            G2Anim_InterpDisableController(&Player->anim, 17, 8, 900);
+            G2Anim_InterpDisableController(&Player->anim, 17, G2ANIM_CTRLRTYPE_SET_WORLDROT, 900);
         }
 
         return;
     }
 
-    if (G2Anim_IsControllerActive(&Player->anim, 17, 8) == G2FALSE)
+    if (G2Anim_IsControllerActive(&Player->anim, 17, G2ANIM_CTRLRTYPE_SET_WORLDROT) == G2FALSE)
     {
-        G2Anim_EnableController(&Player->anim, 17, 8);
+        G2Anim_EnableController(&Player->anim, 17, G2ANIM_CTRLRTYPE_SET_WORLDROT);
     }
 
     if ((Raziel.Senses.Flags & 0x8))

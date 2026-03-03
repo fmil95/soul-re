@@ -800,7 +800,7 @@ void ResetOrientation(Instance *instance)
     int dz2;
     short temp; // not from decls.h
 
-    G2Anim_DisableController(&instance->anim, 0, 76);
+    G2Anim_DisableController(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_WORLDROT);
 
     Data = (PhysObData *)instance->extraData;
 
@@ -951,7 +951,7 @@ void ResetOrientation(Instance *instance)
         vec.z = vec2.z;
     }
 
-    G2Anim_SetController_Vector(&instance->anim, 2, 14, &vec);
+    G2Anim_SetController_Vector(&instance->anim, 2, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &vec);
 
     G2Instance_RebuildTransforms(instance);
 
@@ -971,8 +971,8 @@ void PhysOb_AlignPush(Instance *instance, int x, int y, int path, PhysObData *Da
     short temp2[3][3];
     G2EulerAngles ea;
 
-    G2Anim_EnableController(&instance->anim, 0, 76);
-    G2Anim_EnableController(&instance->anim, 2, 14);
+    G2Anim_EnableController(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_WORLDROT);
+    G2Anim_EnableController(&instance->anim, 2, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
     Data->xForce = x;
     Data->yForce = y;
@@ -1002,7 +1002,7 @@ void PhysOb_AlignPush(Instance *instance, int x, int y, int path, PhysObData *Da
     vec.y = 0;
     vec.z = rotZ;
 
-    G2Anim_SetController_Vector(&instance->anim, 0, 76, &vec);
+    G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_WORLDROT, &vec);
 
     vec.z = -rotZ;
 
@@ -1016,7 +1016,7 @@ void PhysOb_AlignPush(Instance *instance, int x, int y, int path, PhysObData *Da
     vec.y = ea.y;
     vec.z = ea.z;
 
-    G2Anim_SetController_Vector(&instance->anim, 2, 14, &vec);
+    G2Anim_SetController_Vector(&instance->anim, 2, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &vec);
 
     G2Anim_SwitchToKeylist(&instance->anim, instance->object->animList[path], path);
 }
@@ -1489,8 +1489,8 @@ void InitPhysicalObject(Instance *instance, GameTracker *gameTracker)
 
         if (CheckPhysObAbility(instance, 8) != 0)
         {
-            G2Anim_DetachControllerFromSeg(&instance->anim, 0, 76);
-            G2Anim_DetachControllerFromSeg(&instance->anim, 2, 14);
+            G2Anim_DetachControllerFromSeg(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_WORLDROT);
+            G2Anim_DetachControllerFromSeg(&instance->anim, 2, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
         }
 
         MEMPACK_Free((char *)instance->extraData);
@@ -1675,12 +1675,12 @@ void InitPhysicalObject(Instance *instance, GameTracker *gameTracker)
 
         G2EmulationInstanceInitSection(instance, 0, PhysobAnimCallback, instance);
 
-        G2Anim_AttachControllerToSeg(&instance->anim, 0, 76);
-        G2Anim_AttachControllerToSeg(&instance->anim, 2, 14);
+        G2Anim_AttachControllerToSeg(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_WORLDROT);
+        G2Anim_AttachControllerToSeg(&instance->anim, 2, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
-        G2Anim_DisableController(&instance->anim, 0, 76);
+        G2Anim_DisableController(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_WORLDROT);
 
-        G2Anim_EnableController(&instance->anim, 2, 14);
+        G2Anim_EnableController(&instance->anim, 2, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
         vec.x = instance->rotation.x;
         vec.y = instance->rotation.y;
@@ -1698,7 +1698,7 @@ void InitPhysicalObject(Instance *instance, GameTracker *gameTracker)
         instance->rotation.y = 0;
         instance->rotation.z = 0;
 
-        G2Anim_SetController_Vector(&instance->anim, 2, 14, &vec);
+        G2Anim_SetController_Vector(&instance->anim, 2, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &vec);
     }
     else
     {

@@ -2179,17 +2179,17 @@ void MON_EnableHeadMove(Instance *instance)
 
     ma = (MonsterAttributes *)instance->data;
 
-    if ((ma->neckSegment != 0) && (G2Anim_IsControllerActive(&instance->anim, ma->neckSegment, 14) == G2FALSE))
+    if ((ma->neckSegment != 0) && (G2Anim_IsControllerActive(&instance->anim, ma->neckSegment, G2ANIM_CTRLRTYPE_ADD_LOCALROT) == G2FALSE))
     {
-        G2Anim_SetControllerAngleOrder(&instance->anim, ma->neckSegment, 14, 1);
+        G2Anim_SetControllerAngleOrder(&instance->anim, ma->neckSegment, G2ANIM_CTRLRTYPE_ADD_LOCALROT, 1);
 
-        G2Anim_EnableController(&instance->anim, ma->neckSegment, 14);
+        G2Anim_EnableController(&instance->anim, ma->neckSegment, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
         if (ma->spineSegment != ma->neckSegment)
         {
-            G2Anim_SetControllerAngleOrder(&instance->anim, ma->spineSegment, 14, 1);
+            G2Anim_SetControllerAngleOrder(&instance->anim, ma->spineSegment, G2ANIM_CTRLRTYPE_ADD_LOCALROT, 1);
 
-            G2Anim_EnableController(&instance->anim, ma->spineSegment, 14);
+            G2Anim_EnableController(&instance->anim, ma->spineSegment, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
         }
     }
 }
@@ -2200,13 +2200,13 @@ void MON_DisableHeadMove(Instance *instance)
 
     ma = (MonsterAttributes *)instance->data;
 
-    if ((ma->neckSegment != 0) && (G2Anim_IsControllerActive(&instance->anim, ma->neckSegment, 14) != G2FALSE))
+    if ((ma->neckSegment != 0) && (G2Anim_IsControllerActive(&instance->anim, ma->neckSegment, G2ANIM_CTRLRTYPE_ADD_LOCALROT) != G2FALSE))
     {
-        G2Anim_DisableController(&instance->anim, ma->neckSegment, 14);
+        G2Anim_DisableController(&instance->anim, ma->neckSegment, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
 
         if ((ma->spineSegment != 0) && (ma->spineSegment != ma->neckSegment))
         {
-            G2Anim_DisableController(&instance->anim, ma->spineSegment, 14);
+            G2Anim_DisableController(&instance->anim, ma->spineSegment, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
         }
     }
 }
@@ -2226,7 +2226,7 @@ void MON_LookInDirection(Instance *instance, short tx, short tz)
             Rot.x = (tx * 70) / 100;
             Rot.z = (tz * 70) / 100;
 
-            G2Anim_SetController_Vector(&instance->anim, ma->neckSegment, 14, &Rot);
+            G2Anim_SetController_Vector(&instance->anim, ma->neckSegment, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &Rot);
 
             if (ma->spineSegment != 0)
             {
@@ -2234,7 +2234,7 @@ void MON_LookInDirection(Instance *instance, short tx, short tz)
                 Rot.x = (tx * 30) / 100;
                 Rot.z = (tz * 30) / 100;
 
-                G2Anim_SetController_Vector(&instance->anim, ma->spineSegment, 14, &Rot);
+                G2Anim_SetController_Vector(&instance->anim, ma->spineSegment, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &Rot);
             }
         }
         else
@@ -2243,7 +2243,7 @@ void MON_LookInDirection(Instance *instance, short tx, short tz)
             Rot.y = 0;
             Rot.z = tz;
 
-            G2Anim_SetController_Vector(&instance->anim, ma->neckSegment, 14, &Rot);
+            G2Anim_SetController_Vector(&instance->anim, ma->neckSegment, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &Rot);
         }
     }
 }
