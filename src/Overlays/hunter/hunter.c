@@ -8,7 +8,24 @@
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/hunter/hunter", FX_MakeHitFlame);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/hunter/hunter", HUNTER_InitFlamethrow);
+void HUNTER_InitFlamethrow(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    HunterVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (HunterVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        vars->endIdx = 0;
+        vars->startIdx = 0;
+        vars->timer = 0;
+        vars->rem_time = 0;
+        mv->auxFlags &= ~4;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/hunter/hunter", HUNTER_Flamethrow);
 
@@ -101,7 +118,24 @@ INCLUDE_RODATA("asm/nonmatchings/Overlays/hunter/hunter", D_88000000);
 
 void FX_MakeHitFlame(void) {};
 
-void HUNTER_InitFlamethrow(void) {};
+void HUNTER_InitFlamethrow(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    HunterVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (HunterVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        vars->endIdx = 0;
+        vars->startIdx = 0;
+        vars->timer = 0;
+        vars->rem_time = 0;
+        mv->auxFlags &= ~4;
+    }
+}
 
 void HUNTER_Flamethrow(void) {};
 
