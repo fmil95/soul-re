@@ -1,6 +1,7 @@
 #include "Overlays/hunter/hunter.h"
 #include "Game/MEMPACK.h"
 #include "Game/MONSTER/HUMAN.h"
+#include "Game/MONSTER/MONSTER.h"
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -78,7 +79,19 @@ void HUNTER_CleanUp(Instance *instance)
     HUMAN_CleanUp(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/hunter/hunter", HUNTER_ProjectileEntry);
+void HUNTER_ProjectileEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    MON_ProjectileEntry(instance);
+
+    if (mv->age != 0)
+    {
+        mv->auxFlags &= ~1;
+        mv->auxFlags &= ~2;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/hunter/hunter", HUNTER_Projectile);
 
@@ -159,7 +172,19 @@ void HUNTER_CleanUp(Instance *instance)
     HUMAN_CleanUp(instance);
 }
 
-void HUNTER_ProjectileEntry(void) {};
+void HUNTER_ProjectileEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    MON_ProjectileEntry(instance);
+
+    if (mv->age != 0)
+    {
+        mv->auxFlags &= ~1;
+        mv->auxFlags &= ~2;
+    }
+}
 
 void HUNTER_Projectile(void) {};
 
