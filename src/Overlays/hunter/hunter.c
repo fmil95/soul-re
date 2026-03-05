@@ -10,7 +10,7 @@
 #include "Game/SAVEINFO.h"
 #include "Game/STATE.h"
 
-MonsterStateChoice D_880009BC[] = {
+MonsterStateChoice HUNTER_StateChoiceTable[] = {
     {MONSTER_STATE_STUNNED, {HUMAN_StunnedEntry, HUMAN_Stunned}},
     {MONSTER_STATE_DEAD, {HUMAN_DeadEntry, HUMAN_Dead}},
     {MONSTER_STATE_EMBRACE, {HUMAN_EmbraceEntry, HUMAN_Embrace}},
@@ -19,13 +19,13 @@ MonsterStateChoice D_880009BC[] = {
     {-1, {NULL, NULL}}
 };
 
-const MonsterFunctionTable D_88000000 = {
+const MonsterFunctionTable HUNTER_FunctionTable = {
     HUNTER_Init,
     HUNTER_CleanUp,
     NULL,
     HUMAN_Query,
     NULL,
-    D_880009BC,
+    HUNTER_StateChoiceTable,
     monVersion,
     NULL
 };
