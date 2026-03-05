@@ -3,6 +3,12 @@
 
 #include "common.h"
 
+int HUNTER_Flamethrow(Instance *instance, int damage, int newPoint, int segment);
+void HUNTER_ProjectileEntry(Instance *instance);
+void HUNTER_Projectile(Instance *instance);
+void HUNTER_Init(Instance *instance);
+void HUNTER_CleanUp(Instance *instance);
+
 // size: 0x2C
 typedef struct _HunterVars {
     // offset: 0x0000

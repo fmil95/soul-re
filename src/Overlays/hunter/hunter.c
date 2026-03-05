@@ -10,12 +10,6 @@
 #include "Game/SAVEINFO.h"
 #include "Game/STATE.h"
 
-// TODO: Remove once function is matched
-int HUNTER_Flamethrow(Instance *instance, int damage, int newPoint, int segment);
-void HUNTER_ProjectileEntry(Instance *instance);
-void HUNTER_Projectile(Instance *instance);
-void HUNTER_Init(Instance *instance);
-
 MonsterStateChoice D_880009BC[] = {
     {MONSTER_STATE_STUNNED, {HUMAN_StunnedEntry, HUMAN_Stunned}},
     {MONSTER_STATE_DEAD, {HUMAN_DeadEntry, HUMAN_Dead}},
@@ -23,6 +17,17 @@ MonsterStateChoice D_880009BC[] = {
     {MONSTER_STATE_IDLE, {HUMAN_IdleEntry, HUMAN_Idle}},
     {MONSTER_STATE_PROJECTILE, {HUNTER_ProjectileEntry, HUNTER_Projectile}},
     {-1, {NULL, NULL}}
+};
+
+const MonsterFunctionTable D_88000000 = {
+    HUNTER_Init,
+    HUNTER_CleanUp,
+    NULL,
+    HUMAN_Query,
+    NULL,
+    D_880009BC,
+    monVersion,
+    NULL
 };
 
 // this conditional is for the objdiff report
@@ -265,8 +270,6 @@ void HUNTER_Projectile(Instance *instance)
         MON_DefaultQueueHandler(instance);
     }
 }
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/hunter/hunter", D_88000000);
 
 #else
 
