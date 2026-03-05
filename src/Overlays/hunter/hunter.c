@@ -7,10 +7,23 @@
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSTER.h"
+#include "Game/SAVEINFO.h"
 #include "Game/STATE.h"
 
 // TODO: Remove once function is matched
 int HUNTER_Flamethrow(Instance *instance, int damage, int newPoint, int segment);
+void HUNTER_ProjectileEntry(Instance *instance);
+void HUNTER_Projectile(Instance *instance);
+void HUNTER_Init(Instance *instance);
+
+MonsterStateChoice D_880009BC[] = {
+    {MONSTER_STATE_STUNNED, {HUMAN_StunnedEntry, HUMAN_Stunned}},
+    {MONSTER_STATE_DEAD, {HUMAN_DeadEntry, HUMAN_Dead}},
+    {MONSTER_STATE_EMBRACE, {HUMAN_EmbraceEntry, HUMAN_Embrace}},
+    {MONSTER_STATE_IDLE, {HUMAN_IdleEntry, HUMAN_Idle}},
+    {MONSTER_STATE_PROJECTILE, {HUNTER_ProjectileEntry, HUNTER_Projectile}},
+    {-1, {NULL, NULL}}
+};
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
