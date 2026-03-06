@@ -8,7 +8,60 @@
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", MON_GetRandomGroundPoint);
+int MON_GetRandomGroundPoint(Instance *instance, Position *out, Position *in, short r0, short r1, short theta0, short theta1, short h)
+{
+
+    SVECTOR bot;
+    SVECTOR top;
+    PCollideInfo pcollideInfo;
+    Level *level; // not from debug symbols
+    int radius; // not from debug symbols
+    int angle; // not from debug symbols
+    int rc; // not from debug symbols
+
+    level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
+    rc = 0;
+
+    radius = r0 + ((rand() * (r1 - r0)) / 32768);
+    angle = theta0 + ((rand() * (theta1 - theta0)) / 32768);
+
+    bot.vx = top.vx = in->x + ((radius * rcos(angle)) >> 12);
+    bot.vy = top.vy = in->y + ((radius * rsin(angle)) >> 12);
+
+    bot.vz = in->z + (h / 2);
+    top.vz = in->z - (h / 2);
+
+    pcollideInfo.collideType = 1;
+
+    pcollideInfo.instance = NULL;
+    pcollideInfo.inst = NULL;
+
+    pcollideInfo.oldPoint = &bot;
+    pcollideInfo.newPoint = &top;
+
+    COLLIDE_PointAndWorld(&pcollideInfo, level);
+
+
+    if (pcollideInfo.collideType & 1 && pcollideInfo.prim != NULL && level == (Level *)pcollideInfo.inst)
+    {
+
+        if (instance != NULL)
+        {
+            instance->oldTFace = instance->tface;
+            instance->tface = (TFace *)pcollideInfo.prim;
+            instance->tfaceLevel = level;
+            instance->bspTree = pcollideInfo.segment;
+        }
+
+        out->x = top.vx;
+        out->y = top.vy;
+        out->z = top.vz;
+
+        rc = 1;
+    }
+
+    return rc;
+}
 
 int MONSENSE_DetectPlayer(Instance *instance)
 {
@@ -118,7 +171,60 @@ INCLUDE_RODATA("asm/nonmatchings/Overlays/skinner/skinner", D_88000000);
 
 #else
 
-void MON_GetRandomGroundPoint(void) {};
+int MON_GetRandomGroundPoint(Instance *instance, Position *out, Position *in, short r0, short r1, short theta0, short theta1, short h)
+{
+
+    SVECTOR bot;
+    SVECTOR top;
+    PCollideInfo pcollideInfo;
+    Level *level; // not from debug symbols
+    int radius; // not from debug symbols
+    int angle; // not from debug symbols
+    int rc; // not from debug symbols
+
+    level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
+    rc = 0;
+
+    radius = r0 + ((rand() * (r1 - r0)) / 32768);
+    angle = theta0 + ((rand() * (theta1 - theta0)) / 32768);
+
+    bot.vx = top.vx = in->x + ((radius * rcos(angle)) >> 12);
+    bot.vy = top.vy = in->y + ((radius * rsin(angle)) >> 12);
+
+    bot.vz = in->z + (h / 2);
+    top.vz = in->z - (h / 2);
+
+    pcollideInfo.collideType = 1;
+
+    pcollideInfo.instance = NULL;
+    pcollideInfo.inst = NULL;
+
+    pcollideInfo.oldPoint = &bot;
+    pcollideInfo.newPoint = &top;
+
+    COLLIDE_PointAndWorld(&pcollideInfo, level);
+
+
+    if (pcollideInfo.collideType & 1 && pcollideInfo.prim != NULL && level == (Level *)pcollideInfo.inst)
+    {
+
+        if (instance != NULL)
+        {
+            instance->oldTFace = instance->tface;
+            instance->tface = (TFace *)pcollideInfo.prim;
+            instance->tfaceLevel = level;
+            instance->bspTree = pcollideInfo.segment;
+        }
+
+        out->x = top.vx;
+        out->y = top.vy;
+        out->z = top.vz;
+
+        rc = 1;
+    }
+
+    return rc;
+}
 
 int MONSENSE_DetectPlayer(Instance *instance)
 {
