@@ -89,7 +89,7 @@ void FX_StartInstanceBurrow(Instance *instance, Level *level, TFace *tface)
     translation.y = vertex->y + offset->y;
     translation.z = vertex->z + offset->z;
 
-    instance->halvePlane.d = -(((instance->halvePlane.a * translation.x) + (instance->halvePlane.b * translation.y) + (instance->halvePlane.c * translation.z)) >> 0xC);
+    instance->halvePlane.d = -(((instance->halvePlane.a * translation.x) + (instance->halvePlane.b * translation.y) + (instance->halvePlane.c * translation.z)) >> 12);
     instance->halvePlane.flags = 1;
 }
 
@@ -147,7 +147,39 @@ int SKINNER_BurrowIn(Instance *instance)
     return rc;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_GetBurrowDest);
+int SKINNER_GetBurrowDest(Instance *instance, Position *enemyPos)
+{
+
+    Position target;
+    TFace *tface; // not from debug symbols
+    int bspTree; // not from debug symbols
+    int rc; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    tface = instance->tface;
+    bspTree = instance->bspTree;
+    rc = 0;
+
+    if (MON_GetRandomGroundPoint(instance, &target, enemyPos, 0x80, 0xCC, 0, 0x1000, 0x2AA) != 0)
+    {
+        if (instance->tface->textoff != 0xFFFF)
+        {
+            if (((TextureFT3 *)((char *)((Level *)instance->tfaceLevel)->terrain->StartTextureList + instance->tface->textoff))->attr & 0x100)
+            {
+                if ((target.z - STREAM_GetWaterZLevel(STREAM_GetLevelWithID(instance->currentStreamUnitID), instance)) > 0)
+                {
+                    mv = (MonsterVars *)instance->extraData;
+                    mv->destination = target;
+                    rc = 1;
+                }
+            }
+        }
+    }
+
+    instance->tface = tface;
+    instance->bspTree = bspTree;
+    return rc;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_CalcBurrowingMove);
 
@@ -252,7 +284,7 @@ void FX_StartInstanceBurrow(Instance *instance, Level *level, TFace *tface)
     translation.y = vertex->y + offset->y;
     translation.z = vertex->z + offset->z;
 
-    instance->halvePlane.d = -(((instance->halvePlane.a * translation.x) + (instance->halvePlane.b * translation.y) + (instance->halvePlane.c * translation.z)) >> 0xC);
+    instance->halvePlane.d = -(((instance->halvePlane.a * translation.x) + (instance->halvePlane.b * translation.y) + (instance->halvePlane.c * translation.z)) >> 12);
     instance->halvePlane.flags = 1;
 }
 
@@ -310,7 +342,39 @@ int SKINNER_BurrowIn(Instance *instance)
     return rc;
 }
 
-void SKINNER_GetBurrowDest(void) {};
+int SKINNER_GetBurrowDest(Instance *instance, Position *enemyPos)
+{
+
+    Position target;
+    TFace *tface; // not from debug symbols
+    int bspTree; // not from debug symbols
+    int rc; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    tface = instance->tface;
+    bspTree = instance->bspTree;
+    rc = 0;
+
+    if (MON_GetRandomGroundPoint(instance, &target, enemyPos, 0x80, 0xCC, 0, 0x1000, 0x2AA) != 0)
+    {
+        if (instance->tface->textoff != 0xFFFF)
+        {
+            if (((TextureFT3 *)((char *)((Level *)instance->tfaceLevel)->terrain->StartTextureList + instance->tface->textoff))->attr & 0x100)
+            {
+                if ((target.z - STREAM_GetWaterZLevel(STREAM_GetLevelWithID(instance->currentStreamUnitID), instance)) > 0)
+                {
+                    mv = (MonsterVars *)instance->extraData;
+                    mv->destination = target;
+                    rc = 1;
+                }
+            }
+        }
+    }
+
+    instance->tface = tface;
+    instance->bspTree = bspTree;
+    return rc;
+}
 
 void SKINNER_CalcBurrowingMove(void) {};
 
