@@ -160,7 +160,7 @@ int SKINNER_GetBurrowDest(Instance *instance, Position *enemyPos)
     bspTree = instance->bspTree;
     rc = 0;
 
-    if (MON_GetRandomGroundPoint(instance, &target, enemyPos, 0x80, 0xCC, 0, 0x1000, 0x2AA) != 0)
+    if (MON_GetRandomGroundPoint(instance, &target, enemyPos, 128, 204, 0, 4096, 682) != 0)
     {
         if (instance->tface->textoff != 0xFFFF)
         {
@@ -181,7 +181,27 @@ int SKINNER_GetBurrowDest(Instance *instance, Position *enemyPos)
     return rc;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_CalcBurrowingMove);
+void SKINNER_CalcBurrowingMove(Instance *instance, Position *position)
+{
+
+    int time; // not from debug symbols
+    int deltaX; // not from debug symbols
+    int deltaY; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    Position *dest; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    dest = &mv->destination;
+    time = MON_GetTime(instance);
+
+    deltaX = abs(dest->x - instance->position.x);
+    deltaY = abs(dest->y - instance->position.y);
+
+    mv->generalTimer = time + (((deltaX + deltaY) * 1000) / 2560);
+    instance->position = mv->destination;
+    MON_TurnToPosition(instance, position, 4096);
+
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_PupateEntry);
 
@@ -355,7 +375,7 @@ int SKINNER_GetBurrowDest(Instance *instance, Position *enemyPos)
     bspTree = instance->bspTree;
     rc = 0;
 
-    if (MON_GetRandomGroundPoint(instance, &target, enemyPos, 0x80, 0xCC, 0, 0x1000, 0x2AA) != 0)
+    if (MON_GetRandomGroundPoint(instance, &target, enemyPos, 128, 204, 0, 4096, 682) != 0)
     {
         if (instance->tface->textoff != 0xFFFF)
         {
@@ -376,7 +396,27 @@ int SKINNER_GetBurrowDest(Instance *instance, Position *enemyPos)
     return rc;
 }
 
-void SKINNER_CalcBurrowingMove(void) {};
+void SKINNER_CalcBurrowingMove(Instance *instance, Position *position)
+{
+
+    int time; // not from debug symbols
+    int deltaX; // not from debug symbols
+    int deltaY; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    Position *dest; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    dest = &mv->destination;
+    time = MON_GetTime(instance);
+
+    deltaX = abs(dest->x - instance->position.x);
+    deltaY = abs(dest->y - instance->position.y);
+
+    mv->generalTimer = time + (((deltaX + deltaY) * 1000) / 2560);
+    instance->position = mv->destination;
+    MON_TurnToPosition(instance, position, 4096);
+
+}
 
 void SKINNER_PupateEntry(void) {};
 
