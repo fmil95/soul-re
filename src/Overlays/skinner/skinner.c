@@ -1,7 +1,9 @@
 #include "Overlays/skinner/skinner.h"
 #include "Game/COLLIDE.h"
 #include "Game/GAMELOOP.h"
+#include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONSENSE.h"
+#include "Game/STREAM.h"
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -43,7 +45,32 @@ void FX_StopInstanceBurrow(Instance *instance)
     instance->halvePlane.flags = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_BurrowInEntry);
+int SKINNER_BurrowInEntry(Instance *instance)
+{
+    Level *level; // not from debug symbols
+    int rc;// not from debug symbols
+    MonsterVars *mv;// not from debug symbols
+    MonsterAttributes *ma;// not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    rc = 0;
+
+    if (instance->tface != NULL &&
+        instance->tface->textoff != 0xFFFF &&
+        ((TextureFT3 *)((char *)((Level *)instance->tfaceLevel)->terrain->StartTextureList + instance->tface->textoff))->attr & 0x100)
+    {
+        level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
+        mv->auxFlags |= 1;
+        MON_TurnOffBodySpheres(instance);
+        MON_PlayAnimFromList(instance, ma->auxAnimList, SKINNER_ANIM_BURROW_IN, 1);
+        FX_StartInstanceBurrow(instance, level, instance->tface);
+        mv->avoidMask &= ~0x10;
+        rc = 1;
+    }
+
+    return rc;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_BurrowIn);
 
@@ -108,7 +135,32 @@ void FX_StopInstanceBurrow(Instance *instance)
     instance->halvePlane.flags = 0;
 }
 
-void SKINNER_BurrowInEntry(void) {};
+int SKINNER_BurrowInEntry(Instance *instance)
+{
+    Level *level; // not from debug symbols
+    int rc;// not from debug symbols
+    MonsterVars *mv;// not from debug symbols
+    MonsterAttributes *ma;// not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    rc = 0;
+
+    if (instance->tface != NULL &&
+        instance->tface->textoff != 0xFFFF &&
+        ((TextureFT3 *)((char *)((Level *)instance->tfaceLevel)->terrain->StartTextureList + instance->tface->textoff))->attr & 0x100)
+    {
+        level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
+        mv->auxFlags |= 1;
+        MON_TurnOffBodySpheres(instance);
+        MON_PlayAnimFromList(instance, ma->auxAnimList, SKINNER_ANIM_BURROW_IN, 1);
+        FX_StartInstanceBurrow(instance, level, instance->tface);
+        mv->avoidMask &= ~0x10;
+        rc = 1;
+    }
+
+    return rc;
+}
 
 void SKINNER_BurrowIn(void) {};
 
