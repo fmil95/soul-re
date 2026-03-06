@@ -72,7 +72,27 @@ int SKINNER_BurrowInEntry(Instance *instance)
     return rc;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_BurrowIn);
+int SKINNER_BurrowIn(Instance *instance)
+{
+
+    int rc; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    rc = 0;
+
+    if (instance->flags2 & 0x10)
+    {
+        FX_StopInstanceBurrow(instance);
+        mv->auxFlags &= ~1;
+        mv->auxFlags |= 4;
+        instance->flags |= 0x800;
+        MON_TurnOffWeaponSpheres(instance);
+        rc = 1;
+    }
+
+    return rc;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_GetBurrowDest);
 
@@ -162,7 +182,27 @@ int SKINNER_BurrowInEntry(Instance *instance)
     return rc;
 }
 
-void SKINNER_BurrowIn(void) {};
+int SKINNER_BurrowIn(Instance *instance)
+{
+
+    int rc; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    rc = 0;
+
+    if (instance->flags2 & 0x10)
+    {
+        FX_StopInstanceBurrow(instance);
+        mv->auxFlags &= ~1;
+        mv->auxFlags |= 4;
+        instance->flags |= 0x800;
+        MON_TurnOffWeaponSpheres(instance);
+        rc = 1;
+    }
+
+    return rc;
+}
 
 void SKINNER_GetBurrowDest(void) {};
 
