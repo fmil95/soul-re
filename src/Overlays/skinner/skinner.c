@@ -33,7 +33,10 @@ void FX_StartInstanceBurrow(Instance *instance, Level *level, TFace *tface)
     instance->halvePlane.flags = 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", FX_StopInstanceBurrow);
+void FX_StopInstanceBurrow(Instance *instance)
+{
+    instance->halvePlane.flags = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_BurrowInEntry);
 
@@ -92,7 +95,10 @@ void FX_StartInstanceBurrow(Instance *instance, Level *level, TFace *tface)
     instance->halvePlane.flags = 1;
 }
 
-void FX_StopInstanceBurrow(void) {};
+void FX_StopInstanceBurrow(Instance *instance)
+{
+    instance->halvePlane.flags = 0;
+}
 
 void SKINNER_BurrowInEntry(void) {};
 
