@@ -1,12 +1,17 @@
 #include "Overlays/skinner/skinner.h"
 #include "Game/COLLIDE.h"
+#include "Game/GAMELOOP.h"
+#include "Game/MONSTER/MONSENSE.h"
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", MON_GetRandomGroundPoint);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", MONSENSE_DetectPlayer);
+int MONSENSE_DetectPlayer(Instance *instance)
+{
+    return MONSENSE_FindIR((MonsterVars *)instance->extraData, gameTrackerX.playerInstance) != NULL;
+}
 
 void FX_StartInstanceBurrow(Instance *instance, Level *level, TFace *tface)
 {
@@ -68,7 +73,10 @@ INCLUDE_RODATA("asm/nonmatchings/Overlays/skinner/skinner", D_88000000);
 
 void MON_GetRandomGroundPoint(void) {};
 
-void MONSENSE_DetectPlayer(void) {};
+int MONSENSE_DetectPlayer(Instance *instance)
+{
+    return MONSENSE_FindIR((MonsterVars *)instance->extraData, gameTrackerX.playerInstance) != NULL;
+}
 
 void FX_StartInstanceBurrow(Instance *instance, Level *level, TFace *tface)
 {
