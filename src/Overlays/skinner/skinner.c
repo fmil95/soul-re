@@ -292,7 +292,22 @@ void SKINNER_Pursue(Instance *instance)
     while (DeMessageQueue(&mv->messageQueue) != NULL) {};
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_HideEntry);
+void SKINNER_HideEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->age == 0)
+    {
+        MON_HideEntry(instance);
+    }
+    else
+    {
+        SKINNER_BurrowInEntry(instance);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_Hide);
 
@@ -586,7 +601,22 @@ void SKINNER_Pursue(Instance *instance)
     while (DeMessageQueue(&mv->messageQueue) != NULL) {};
 }
 
-void SKINNER_HideEntry(void) {};
+void SKINNER_HideEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->age == 0)
+    {
+        MON_HideEntry(instance);
+    }
+    else
+    {
+        SKINNER_BurrowInEntry(instance);
+    }
+}
 
 void SKINNER_Hide(void) {};
 
