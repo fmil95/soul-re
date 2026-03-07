@@ -4,6 +4,7 @@
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONSENSE.h"
 #include "Game/MONSTER/MONSTER.h"
+#include "Game/STATE.h"
 #include "Game/STREAM.h"
 
 // this conditional is for the objdiff report
@@ -230,7 +231,66 @@ void SKINNER_PursueEntry(Instance *instance)
     MON_PursueEntry(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_Pursue);
+void SKINNER_Pursue(Instance *instance)
+{
+
+    int startedBurrow; // not from debug symbols
+    int destInRange; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+
+    if (enemy == NULL)
+    {
+        MON_Pursue(instance);
+        return;
+    }
+
+    if (!(mv->auxFlags & 7))
+    {
+        startedBurrow = 0;
+        if (mv->age != 0)
+        {
+            if (enemy->distance > 2048)
+            {
+                if (enemy->distance < 10240 && SKINNER_GetBurrowDest(instance, &enemy->instance->position) != 0)
+                {
+                    startedBurrow = SKINNER_BurrowInEntry(instance);
+                }
+            }
+        }
+
+        if (startedBurrow == 0)
+        {
+            MON_Pursue(instance);
+        }
+    }
+    else if (mv->auxFlags & 1)
+    {
+        if (SKINNER_BurrowIn(instance) != 0)
+        {
+            SKINNER_CalcBurrowingMove(instance, &enemy->instance->position);
+        }
+    }
+    else if (mv->auxFlags & 4 && mv->generalTimer < MON_GetTime(instance))
+    {
+        destInRange = 0;
+        if (((unsigned short)enemy->distance - 205U) < 10035U && SKINNER_GetBurrowDest(instance, &enemy->instance->position) != 0)
+        {
+            SKINNER_CalcBurrowingMove(instance, &enemy->instance->position);
+            destInRange = 1;
+        }
+
+        if (destInRange == 0)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_SURPRISEATTACK);
+        }
+    }
+
+    while (DeMessageQueue(&mv->messageQueue) != NULL) {};
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_HideEntry);
 
@@ -465,7 +525,66 @@ void SKINNER_PursueEntry(Instance *instance)
     MON_PursueEntry(instance);
 }
 
-void SKINNER_Pursue(void) {};
+void SKINNER_Pursue(Instance *instance)
+{
+
+    int startedBurrow; // not from debug symbols
+    int destInRange; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+
+    if (enemy == NULL)
+    {
+        MON_Pursue(instance);
+        return;
+    }
+
+    if (!(mv->auxFlags & 7))
+    {
+        startedBurrow = 0;
+        if (mv->age != 0)
+        {
+            if (enemy->distance > 2048)
+            {
+                if (enemy->distance < 10240 && SKINNER_GetBurrowDest(instance, &enemy->instance->position) != 0)
+                {
+                    startedBurrow = SKINNER_BurrowInEntry(instance);
+                }
+            }
+        }
+
+        if (startedBurrow == 0)
+        {
+            MON_Pursue(instance);
+        }
+    }
+    else if (mv->auxFlags & 1)
+    {
+        if (SKINNER_BurrowIn(instance) != 0)
+        {
+            SKINNER_CalcBurrowingMove(instance, &enemy->instance->position);
+        }
+    }
+    else if (mv->auxFlags & 4 && mv->generalTimer < MON_GetTime(instance))
+    {
+        destInRange = 0;
+        if (((unsigned short)enemy->distance - 205U) < 10035U && SKINNER_GetBurrowDest(instance, &enemy->instance->position) != 0)
+        {
+            SKINNER_CalcBurrowingMove(instance, &enemy->instance->position);
+            destInRange = 1;
+        }
+
+        if (destInRange == 0)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_SURPRISEATTACK);
+        }
+    }
+
+    while (DeMessageQueue(&mv->messageQueue) != NULL) {};
+}
 
 void SKINNER_HideEntry(void) {};
 
