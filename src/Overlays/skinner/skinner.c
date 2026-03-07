@@ -380,7 +380,23 @@ void SKINNER_SurpriseAttackEntry(Instance *instance)
     MON_SurpriseAttackEntry(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_SurpriseAttack);
+void SKINNER_SurpriseAttack(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    MON_SurpriseAttack(instance);
+
+    if (instance->currentMainState != MONSTER_STATE_SURPRISEATTACK)
+    {
+        mv->auxFlags &= ~2;
+        mv->auxFlags &= ~7;
+        FX_StopInstanceBurrow(instance);
+        MON_TurnOnBodySpheres(instance);
+        mv->avoidMask |= 0x10;
+    }
+}
 
 INCLUDE_RODATA("asm/nonmatchings/Overlays/skinner/skinner", D_88000000);
 
@@ -754,6 +770,22 @@ void SKINNER_SurpriseAttackEntry(Instance *instance)
     MON_SurpriseAttackEntry(instance);
 }
 
-void SKINNER_SurpriseAttack(void) {};
+void SKINNER_SurpriseAttack(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    MON_SurpriseAttack(instance);
+
+    if (instance->currentMainState != MONSTER_STATE_SURPRISEATTACK)
+    {
+        mv->auxFlags &= ~2;
+        mv->auxFlags &= ~7;
+        FX_StopInstanceBurrow(instance);
+        MON_TurnOnBodySpheres(instance);
+        mv->avoidMask |= 0x10;
+    }
+}
 
 #endif
