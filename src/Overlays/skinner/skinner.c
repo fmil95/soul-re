@@ -214,7 +214,16 @@ void SKINNER_PupateEntry(Instance *instance)
     mv->auxFlags |= 4;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_Pupate);
+void SKINNER_Pupate(Instance *instance)
+{
+    MON_Pupate(instance);
+
+    if (!(instance->flags & 0x800))
+    {
+        MON_OnGround(instance);
+        MON_SwitchState(instance, MONSTER_STATE_SURPRISEATTACK);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_PursueEntry);
 
@@ -437,7 +446,16 @@ void SKINNER_PupateEntry(Instance *instance)
     mv->auxFlags |= 4;
 }
 
-void SKINNER_Pupate(void) {};
+void SKINNER_Pupate(Instance *instance)
+{
+    MON_Pupate(instance);
+
+    if (!(instance->flags & 0x800))
+    {
+        MON_OnGround(instance);
+        MON_SwitchState(instance, MONSTER_STATE_SURPRISEATTACK);
+    }
+}
 
 void SKINNER_PursueEntry(void) {};
 
