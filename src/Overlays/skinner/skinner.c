@@ -2,6 +2,7 @@
 #include "Game/COLLIDE.h"
 #include "Game/GAMELOOP.h"
 #include "Game/MONSTER/MONLIB.h"
+#include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSENSE.h"
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/STATE.h"
@@ -309,7 +310,50 @@ void SKINNER_HideEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_Hide);
+void SKINNER_Hide(Instance *instance)
+{
+
+    MonsterIR *enemy; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->age == 0)
+    {
+        MON_Hide(instance);
+        return;
+    }
+
+    if (mv->auxFlags & 1)
+    {
+        SKINNER_BurrowIn(instance);
+    }
+    else if (mv->auxFlags & 4)
+    {
+        if (MONSENSE_DetectPlayer(instance) != 0)
+        {
+            if (mv->behaviorState == MONSTER_STATE_FALL)
+            {
+                MON_ChangeBehavior(instance, mv->triggeredBehavior);
+            }
+            else if (mv->behaviorState == MONSTER_STATE_HIT)
+            {
+                enemy = mv->enemy;
+                MON_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn);
+                if (enemy->distance < mv->ambushRange)
+                {
+                    MON_SwitchState(instance, MONSTER_STATE_SURPRISEATTACK);
+                }
+            }
+        }
+    }
+    else
+    {
+        MON_SwitchState(instance, MONSTER_STATE_WANDER);
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_SurpriseAttackEntry);
 
@@ -618,7 +662,50 @@ void SKINNER_HideEntry(Instance *instance)
     }
 }
 
-void SKINNER_Hide(void) {};
+void SKINNER_Hide(Instance *instance)
+{
+
+    MonsterIR *enemy; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->age == 0)
+    {
+        MON_Hide(instance);
+        return;
+    }
+
+    if (mv->auxFlags & 1)
+    {
+        SKINNER_BurrowIn(instance);
+    }
+    else if (mv->auxFlags & 4)
+    {
+        if (MONSENSE_DetectPlayer(instance) != 0)
+        {
+            if (mv->behaviorState == MONSTER_STATE_FALL)
+            {
+                MON_ChangeBehavior(instance, mv->triggeredBehavior);
+            }
+            else if (mv->behaviorState == MONSTER_STATE_HIT)
+            {
+                enemy = mv->enemy;
+                MON_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn);
+                if (enemy->distance < mv->ambushRange)
+                {
+                    MON_SwitchState(instance, MONSTER_STATE_SURPRISEATTACK);
+                }
+            }
+        }
+    }
+    else
+    {
+        MON_SwitchState(instance, MONSTER_STATE_WANDER);
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 void SKINNER_SurpriseAttackEntry(void) {};
 
