@@ -1,6 +1,7 @@
 #include "Overlays/skinner/skinner.h"
 #include "Game/COLLIDE.h"
 #include "Game/GAMELOOP.h"
+#include "Game/GAMEPAD.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSENSE.h"
@@ -355,7 +356,29 @@ void SKINNER_Hide(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_SurpriseAttackEntry);
+void SKINNER_SurpriseAttackEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    if (mv->auxFlags & 7)
+    {
+
+        mv->auxFlags &= ~4;
+        mv->auxFlags |= 2;
+        instance->flags &= ~0x800;
+
+        if (instance->tface != NULL)
+        {
+            FX_StartInstanceBurrow(instance, STREAM_GetLevelWithID(instance->currentStreamUnitID), instance->tface);
+        }
+
+        GAMEPAD_Shock1(64, 122880);
+    }
+
+    MON_SurpriseAttackEntry(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_SurpriseAttack);
 
@@ -707,7 +730,29 @@ void SKINNER_Hide(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-void SKINNER_SurpriseAttackEntry(void) {};
+void SKINNER_SurpriseAttackEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    if (mv->auxFlags & 7)
+    {
+
+        mv->auxFlags &= ~4;
+        mv->auxFlags |= 2;
+        instance->flags &= ~0x800;
+
+        if (instance->tface != NULL)
+        {
+            FX_StartInstanceBurrow(instance, STREAM_GetLevelWithID(instance->currentStreamUnitID), instance->tface);
+        }
+
+        GAMEPAD_Shock1(64, 122880);
+    }
+
+    MON_SurpriseAttackEntry(instance);
+}
 
 void SKINNER_SurpriseAttack(void) {};
 
