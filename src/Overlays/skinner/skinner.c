@@ -3,6 +3,7 @@
 #include "Game/GAMELOOP.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONSENSE.h"
+#include "Game/MONSTER/MONSTER.h"
 #include "Game/STREAM.h"
 
 // this conditional is for the objdiff report
@@ -203,7 +204,15 @@ void SKINNER_CalcBurrowingMove(Instance *instance, Position *position)
 
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_PupateEntry);
+void SKINNER_PupateEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    MON_PupateEntry(instance);
+    MON_TurnOffBodySpheres(instance);
+    mv->auxFlags |= 4;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_Pupate);
 
@@ -418,7 +427,15 @@ void SKINNER_CalcBurrowingMove(Instance *instance, Position *position)
 
 }
 
-void SKINNER_PupateEntry(void) {};
+void SKINNER_PupateEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    MON_PupateEntry(instance);
+    MON_TurnOffBodySpheres(instance);
+    mv->auxFlags |= 4;
+}
 
 void SKINNER_Pupate(void) {};
 
