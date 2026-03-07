@@ -225,7 +225,10 @@ void SKINNER_Pupate(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_PursueEntry);
+void SKINNER_PursueEntry(Instance *instance)
+{
+    MON_PursueEntry(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinner/skinner", SKINNER_Pursue);
 
@@ -457,7 +460,10 @@ void SKINNER_Pupate(Instance *instance)
     }
 }
 
-void SKINNER_PursueEntry(void) {};
+void SKINNER_PursueEntry(Instance *instance)
+{
+    MON_PursueEntry(instance);
+}
 
 void SKINNER_Pursue(void) {};
 
