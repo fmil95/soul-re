@@ -6,8 +6,28 @@
 #include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSENSE.h"
 #include "Game/MONSTER/MONSTER.h"
+#include "Game/SAVEINFO.h"
 #include "Game/STATE.h"
 #include "Game/STREAM.h"
+
+MonsterStateChoice SKINNER_StateChoiceTable[] = {
+    {0x14, {SKINNER_HideEntry, SKINNER_Hide}},
+    {1, {SKINNER_PursueEntry, SKINNER_Pursue}},
+    {0x15, {SKINNER_SurpriseAttackEntry, SKINNER_SurpriseAttack}},
+    {0x1A, {SKINNER_PupateEntry, SKINNER_Pupate}},
+    {-1, {NULL, NULL}}
+};
+
+const MonsterFunctionTable SKINNER_FunctionTable = {
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    SKINNER_StateChoiceTable,
+    monVersion,
+    NULL
+};
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -397,8 +417,6 @@ void SKINNER_SurpriseAttack(Instance *instance)
         mv->avoidMask |= 0x10;
     }
 }
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/skinner/skinner", D_88000000);
 
 #else
 
