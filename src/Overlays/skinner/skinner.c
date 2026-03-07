@@ -11,10 +11,10 @@
 #include "Game/STREAM.h"
 
 MonsterStateChoice SKINNER_StateChoiceTable[] = {
-    {0x14, {SKINNER_HideEntry, SKINNER_Hide}},
-    {1, {SKINNER_PursueEntry, SKINNER_Pursue}},
-    {0x15, {SKINNER_SurpriseAttackEntry, SKINNER_SurpriseAttack}},
-    {0x1A, {SKINNER_PupateEntry, SKINNER_Pupate}},
+    {MONSTER_STATE_HIDE, {SKINNER_HideEntry, SKINNER_Hide}},
+    {MONSTER_STATE_PURSUE, {SKINNER_PursueEntry, SKINNER_Pursue}},
+    {MONSTER_STATE_SURPRISEATTACK, {SKINNER_SurpriseAttackEntry, SKINNER_SurpriseAttack}},
+    {MONSTER_STATE_PUPATE, {SKINNER_PupateEntry, SKINNER_Pupate}},
     {-1, {NULL, NULL}}
 };
 
