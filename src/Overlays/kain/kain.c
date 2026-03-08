@@ -260,7 +260,49 @@ void KAIN_EndEffects(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_LightningEntry);
+void KAIN_LightningEntry(Instance *instance)
+{
+
+    MATRIX *mat; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (KainVars *)mv->extraVars;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars != NULL && attrs != NULL)
+    {
+        if (mv->auxFlags & 2)
+        {
+            vars->numBeams = 3;
+            vars->zap[2] = 0;
+            vars->zap[1] = 0;
+            vars->zap[0] = 0;
+        }
+        else
+        {
+            vars->numBeams = 1;
+            vars->zap[2] = 0;
+            vars->zap[1] = 0;
+            vars->zap[0] = 0;
+
+            if (!(mv->auxFlags & 1))
+            {
+                mat = (MATRIX *)INSTANCE_Query(vars->zapTarget, queryLookatMatrix);
+                vars->beamTarget.x = mat->t[0];
+                vars->beamTarget.y = mat->t[1];
+                vars->beamTarget.z = mat->t[2];
+            }
+        }
+
+        vars->beamTimer = MON_GetTime(instance);
+        vars->changeBeam = 0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Lightning);
 
@@ -556,7 +598,49 @@ void KAIN_EndEffects(Instance *instance)
     }
 }
 
-void KAIN_LightningEntry(void) {};
+void KAIN_LightningEntry(Instance *instance)
+{
+
+    MATRIX *mat; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (KainVars *)mv->extraVars;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars != NULL && attrs != NULL)
+    {
+        if (mv->auxFlags & 2)
+        {
+            vars->numBeams = 3;
+            vars->zap[2] = 0;
+            vars->zap[1] = 0;
+            vars->zap[0] = 0;
+        }
+        else
+        {
+            vars->numBeams = 1;
+            vars->zap[2] = 0;
+            vars->zap[1] = 0;
+            vars->zap[0] = 0;
+
+            if (!(mv->auxFlags & 1))
+            {
+                mat = (MATRIX *)INSTANCE_Query(vars->zapTarget, queryLookatMatrix);
+                vars->beamTarget.x = mat->t[0];
+                vars->beamTarget.y = mat->t[1];
+                vars->beamTarget.z = mat->t[2];
+            }
+        }
+
+        vars->beamTimer = MON_GetTime(instance);
+        vars->changeBeam = 0;
+    }
+}
 
 void KAIN_Lightning(void) {};
 
