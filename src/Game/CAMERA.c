@@ -3983,11 +3983,11 @@ void CAMERA_UpdateFocusRotationX(Camera *camera, Instance *focusInstance)
 
     tfaceFlag = 0;
 
-    if ((focusInstance->tface != NULL) &&
-        (((Level *)focusInstance->tfaceLevel)->terrain != NULL) &&
-        (focusInstance->tface->textoff != 0xFFFF) &&
-        ((((TextureFT3 *)((char *)((Level *)focusInstance->tfaceLevel)->terrain->StartTextureList + focusInstance->tface->textoff))->attr & 0x8000)) && /*TODO: FAKEMATCH?*/
-        (dist < 2912))
+    if (focusInstance->tface != NULL &&
+        ((Level *)focusInstance->tfaceLevel)->terrain != NULL &&
+        focusInstance->tface->textoff != 0xFFFF &&
+        (((TextureFT3 *)((char *)((Level *)focusInstance->tfaceLevel)->terrain->StartTextureList + focusInstance->tface->textoff))->attr & 0x8000) && /*TODO: FAKEMATCH?*/
+        dist < 2912)
     {
         COLLIDE_GetNormal(focusInstance->tface->normal, (short *)((Level *)focusInstance->tfaceLevel)->terrain->normalList, (SVector *)&normal);
 
