@@ -75,7 +75,31 @@ void KAIN_FindFarthestMarkerPosition(Instance *instance, Position *position, int
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_TeleportEntry);
+void KAIN_TeleportEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (KainVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+
+        Instance *linkedInst; // not from debug symbols
+
+        instance->fadeValue = 0;
+
+        for (linkedInst = instance->LinkChild; linkedInst != NULL; linkedInst = linkedInst->LinkSibling)
+        {
+            linkedInst->fadeValue = 0;
+        }
+
+        mv->auxFlags &= ~0x8000000;
+        vars->teleportState = K_NORMAL;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Teleport);
 
@@ -195,7 +219,31 @@ void KAIN_FindFarthestMarkerPosition(Instance *instance, Position *position, int
     }
 }
 
-void KAIN_TeleportEntry(void) {};
+void KAIN_TeleportEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (KainVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+
+        Instance *linkedInst; // not from debug symbols
+
+        instance->fadeValue = 0;
+
+        for (linkedInst = instance->LinkChild; linkedInst != NULL; linkedInst = linkedInst->LinkSibling)
+        {
+            linkedInst->fadeValue = 0;
+        }
+
+        mv->auxFlags &= ~0x8000000;
+        vars->teleportState = K_NORMAL;
+    }
+}
 
 void KAIN_Teleport(void) {};
 
