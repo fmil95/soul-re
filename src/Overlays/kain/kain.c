@@ -1,4 +1,8 @@
 #include "Overlays/kain/kain.h"
+#include "Game/GAMELOOP.h"
+#include "Game/INSTANCE.h"
+#include "Game/PSX/SUPPORT.h"
+#include "Game/STATE.h"
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -7,7 +11,39 @@ INCLUDE_RODATA("asm/nonmatchings/Overlays/kain/kain", D_88000000);
 
 INCLUDE_RODATA("asm/nonmatchings/Overlays/kain/kain", D_88000020);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_PickUpReaver);
+Instance *KAIN_PickUpReaver(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    Instance *inst; // not from debug symbols
+    Instance *target; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    target = NULL;
+
+    for (inst = gameTrackerX.instanceList->first; inst != NULL; inst = inst->next)
+    {
+        if (strcmpi(inst->object->name, "matsrevr") == 0)
+        {
+            target = inst;
+            break;
+        }
+
+    }
+
+    if (target != NULL)
+    {
+        mv->auxFlags |= 0x10;
+        INSTANCE_Post(target, 0x800002, SetObjectData(0, 0, 0, instance, 0xE));
+        G2EmulationInstanceSetAnimation(target, 0, 1, 0, 0);
+        G2EmulationInstanceSetMode(target, 0, 1);
+        return target;
+    }
+
+    mv->auxFlags &= ~0x10;
+    return NULL;
+
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_FindFarthestMarkerPosition);
 
@@ -65,68 +101,100 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Hit);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_DoNothingEntry);
 
-void KAIN_DoNothing() { };
+void KAIN_DoNothing() {};
 
 #else
 
-void KAIN_PickUpReaver(void) { };
+Instance *KAIN_PickUpReaver(Instance *instance)
+{
 
-void KAIN_FindFarthestMarkerPosition(void) { };
+    MonsterVars *mv; // not from debug symbols
+    Instance *inst; // not from debug symbols
+    Instance *target; // not from debug symbols
 
-void KAIN_TeleportEntry(void) { };           
+    mv = (MonsterVars *)instance->extraData;
+    target = NULL;
 
-void KAIN_Teleport(void) { }; 
+    for (inst = gameTrackerX.instanceList->first; inst != NULL; inst = inst->next)
+    {
+        if (strcmpi(inst->object->name, "matsrevr") == 0)
+        {
+            target = inst;
+            break;
+        }
 
-void KAIN_EndEffects(void) { };  
+    }
 
-void KAIN_LightningEntry(void) { };    
+    if (target != NULL)
+    {
+        mv->auxFlags |= 0x10;
+        INSTANCE_Post(target, 0x800002, SetObjectData(0, 0, 0, instance, 0xE));
+        G2EmulationInstanceSetAnimation(target, 0, 1, 0, 0);
+        G2EmulationInstanceSetMode(target, 0, 1);
+        return target;
+    }
 
-void KAIN_Lightning(void) { };      
+    mv->auxFlags &= ~0x10;
+    return NULL;
 
-void KAIN_FFieldOffset(void) { };    
+}
 
-void KAIN_ChargeEntry(void) { };    
+void KAIN_FindFarthestMarkerPosition(void) {};
 
-void KAIN_ChargeUp(void) { };      
+void KAIN_TeleportEntry(void) {};
 
-void KAIN_ChargeDown(void) { };  
+void KAIN_Teleport(void) {};
 
-void CheckHit(void) { };   
+void KAIN_EndEffects(void) {};
 
-void SwitchToHit(void) { };   
+void KAIN_LightningEntry(void) {};
 
-void KAIN_DamageEffect(void) { };     
+void KAIN_Lightning(void) {};
 
-void KAIN_Message(void) { };    
+void KAIN_FFieldOffset(void) {};
 
-void KAIN_Query(void) { };   
+void KAIN_ChargeEntry(void) {};
 
-void KAIN_Init(void) { };  
+void KAIN_ChargeUp(void) {};
 
-void KAIN_CleanUp(void) { };  
+void KAIN_ChargeDown(void) {};
 
-void KAIN_IdleEntry(void) { };   
+void CheckHit(void) {};
 
-void KAIN_Idle(void) { };       
+void SwitchToHit(void) {};
 
-void KAIN_CombatEntry(void) { };   
+void KAIN_DamageEffect(void) {};
 
-void KAIN_Combat(void) { };  
+void KAIN_Message(void) {};
 
-void KAIN_AttackEntry(void) { };    
-          
-void KAIN_Attack(void) { };     
+void KAIN_Query(void) {};
 
-void KAIN_PursueEntry(void) { };   
+void KAIN_Init(void) {};
 
-void KAIN_Pursue(void) { };   
+void KAIN_CleanUp(void) {};
 
-void KAIN_HitEntry(void) { };  
+void KAIN_IdleEntry(void) {};
 
-void KAIN_Hit(void) { };     
+void KAIN_Idle(void) {};
 
-void KAIN_DoNothingEntry(void) { };  
+void KAIN_CombatEntry(void) {};
 
-void KAIN_DoNothing(void) { };       
+void KAIN_Combat(void) {};
+
+void KAIN_AttackEntry(void) {};
+
+void KAIN_Attack(void) {};
+
+void KAIN_PursueEntry(void) {};
+
+void KAIN_Pursue(void) {};
+
+void KAIN_HitEntry(void) {};
+
+void KAIN_Hit(void) {};
+
+void KAIN_DoNothingEntry(void) {};
+
+void KAIN_DoNothing(void) {};
 
 #endif
