@@ -50,6 +50,5 @@ segments:
     subsegments:
       - [0x000000, .rodata, Overlays/hunter/hunter]
       - [0x000020, _c, Overlays/hunter/hunter]
-      - [0x0009BC, data, Overlays/hunter/hunter]
-      - [0x0009FC, bss, Overlays/hunter/hunter]
+      - [0x0009BC, .data, Overlays/hunter/hunter]
   - [0x000A04]
