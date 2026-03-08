@@ -1,4 +1,5 @@
 #include "Overlays/kain/kain.h"
+#include "Game/FX.h"
 #include "Game/GAMELOOP.h"
 #include "Game/INSTANCE.h"
 #include "Game/MATH3D.h"
@@ -240,7 +241,24 @@ int KAIN_Teleport(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_EndEffects);
+void KAIN_EndEffects(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (KainVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        vars->field = NULL;
+        vars->zap[2] = NULL;
+        vars->zap[1] = NULL;
+        vars->zap[0] = NULL;
+        FX_EndInstanceEffects(instance);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_LightningEntry);
 
@@ -519,7 +537,24 @@ int KAIN_Teleport(Instance *instance)
     }
 }
 
-void KAIN_EndEffects(void) {};
+void KAIN_EndEffects(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (KainVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        vars->field = NULL;
+        vars->zap[2] = NULL;
+        vars->zap[1] = NULL;
+        vars->zap[0] = NULL;
+        FX_EndInstanceEffects(instance);
+    }
+}
 
 void KAIN_LightningEntry(void) {};
 
