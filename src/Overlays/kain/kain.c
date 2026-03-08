@@ -3,6 +3,8 @@
 #include "Game/INSTANCE.h"
 #include "Game/MATH3D.h"
 #include "Game/PSX/SUPPORT.h"
+#include "Game/MONSTER/MONLIB.h"
+#include "Game/SOUND.h"
 #include "Game/STATE.h"
 #include "Game/STREAM.h"
 
@@ -101,7 +103,142 @@ void KAIN_TeleportEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Teleport);
+int KAIN_Teleport(Instance *instance)
+{
+
+    int temp; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (KainVars *)mv->extraVars;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return 1;
+    }
+
+    switch (vars->teleportState)
+    {
+    case K_NORMAL:
+
+        if (!(mv->auxFlags & 0x10))
+        {
+            MON_PlayAnimFromList(instance, ma->auxAnimList, MONSTER_ANIM_RUN, 1);
+        }
+
+        MON_StartSpecialFade(instance, 0x1000, attrs->timeToFadeOut);
+
+        temp = MON_GetTime(instance) + 33;
+        vars->timer = temp + (attrs->timeToFadeOut * 33);
+
+        vars->teleportState = K_PHASING_OUT;
+        SOUND_Play3dSound(&instance->position, 406, 0, 90, 32000);
+
+        return 0;
+
+    case K_PHASING_OUT:
+
+        if (MON_GetTime(instance) >= (unsigned long)vars->timer)
+        {
+            if (mv->auxFlags & 0x100)
+            {
+
+                Instance *childInst; // not from debug symbols
+
+                childInst = instance->LinkChild;
+
+                while (childInst != NULL)
+                {
+                    Instance *tempInst; // not from debug symbols
+
+                    tempInst = childInst->LinkSibling;
+                    INSTANCE_KillInstance(childInst);
+                    childInst = tempInst;
+                }
+
+                INSTANCE_KillInstance(instance);
+                mv->auxFlags &= ~0x100;
+
+            }
+            else if (!(mv->auxFlags & 0x800))
+            {
+                vars->timer = MON_GetTime(instance) + (attrs->timeFadePause * 33);
+                vars->teleportState = K_TELEPORT_PAUSE;
+            }
+            else
+            {
+                vars->teleportState = K_TELEPORT_HOLD;
+            }
+        }
+        return 0;
+
+    case K_TELEPORT_PAUSE:
+
+        if (MON_GetTime(instance) >= (unsigned int)vars->timer)
+        {
+
+            int temp; // not from debug symbols
+
+            instance->flags2 |= 0x20000000;
+            MON_StartSpecialFade(instance, 0, attrs->timeToFadeIn);
+            temp = MON_GetTime(instance) + 33;
+            vars->timer = temp + (attrs->timeToFadeIn * 33);
+            vars->teleportState = K_MOVE_DONE;
+
+            COPY_SVEC(Position, &instance->position, Position, &vars->teleportTarget);
+            COPY_SVEC(Position, &instance->oldPos, Position, &vars->teleportTarget);
+
+            MON_TurnToPosition(instance, &gameTrackerX.playerInstance->position, 4096);
+        }
+
+        return 0;
+
+    case K_TELEPORT_HOLD:
+
+        if (mv->auxFlags & 0x1000)
+        {
+            int temp; // not from debug symbols
+
+            MON_StartSpecialFade(instance, 0, attrs->timeToFadeIn);
+            temp = MON_GetTime(instance) + 33;
+            vars->timer = temp + (attrs->timeToFadeIn * 33);
+            vars->teleportState = K_MOVE_DONE;
+        }
+
+        return 0;
+
+    case K_MOVE_DONE:
+
+        if (!(mv->auxFlags & 0x10))
+        {
+            MON_PlayAnimFromList(instance, ma->auxAnimList, MONSTER_ANIM_WALK, 2);
+        }
+
+        instance->flags2 &= ~0x20000000;
+        vars->teleportState = K_PHASING_IN;
+        SOUND_Play3dSound(&instance->position, 405, 0, 90, 32000);
+
+    case K_PHASING_IN:
+
+        if (MON_GetTime(instance) >= (unsigned long)vars->timer)
+        {
+            vars->teleportState = K_NO_TELEPORT;
+            return 1;
+        }
+
+        return 0;
+
+    case K_NO_TELEPORT:
+        return 1;
+    default:
+        return 0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_EndEffects);
 
@@ -245,7 +382,142 @@ void KAIN_TeleportEntry(Instance *instance)
     }
 }
 
-void KAIN_Teleport(void) {};
+int KAIN_Teleport(Instance *instance)
+{
+
+    int temp; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (KainVars *)mv->extraVars;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return 1;
+    }
+
+    switch (vars->teleportState)
+    {
+    case K_NORMAL:
+
+        if (!(mv->auxFlags & 0x10))
+        {
+            MON_PlayAnimFromList(instance, ma->auxAnimList, MONSTER_ANIM_RUN, 1);
+        }
+
+        MON_StartSpecialFade(instance, 0x1000, attrs->timeToFadeOut);
+
+        temp = MON_GetTime(instance) + 33;
+        vars->timer = temp + (attrs->timeToFadeOut * 33);
+
+        vars->teleportState = K_PHASING_OUT;
+        SOUND_Play3dSound(&instance->position, 406, 0, 90, 32000);
+
+        return 0;
+
+    case K_PHASING_OUT:
+
+        if (MON_GetTime(instance) >= (unsigned long)vars->timer)
+        {
+            if (mv->auxFlags & 0x100)
+            {
+
+                Instance *childInst; // not from debug symbols
+
+                childInst = instance->LinkChild;
+
+                while (childInst != NULL)
+                {
+                    Instance *tempInst; // not from debug symbols
+
+                    tempInst = childInst->LinkSibling;
+                    INSTANCE_KillInstance(childInst);
+                    childInst = tempInst;
+                }
+
+                INSTANCE_KillInstance(instance);
+                mv->auxFlags &= ~0x100;
+
+            }
+            else if (!(mv->auxFlags & 0x800))
+            {
+                vars->timer = MON_GetTime(instance) + (attrs->timeFadePause * 33);
+                vars->teleportState = K_TELEPORT_PAUSE;
+            }
+            else
+            {
+                vars->teleportState = K_TELEPORT_HOLD;
+            }
+        }
+        return 0;
+
+    case K_TELEPORT_PAUSE:
+
+        if (MON_GetTime(instance) >= (unsigned int)vars->timer)
+        {
+
+            int temp; // not from debug symbols
+
+            instance->flags2 |= 0x20000000;
+            MON_StartSpecialFade(instance, 0, attrs->timeToFadeIn);
+            temp = MON_GetTime(instance) + 33;
+            vars->timer = temp + (attrs->timeToFadeIn * 33);
+            vars->teleportState = K_MOVE_DONE;
+
+            COPY_SVEC(Position, &instance->position, Position, &vars->teleportTarget);
+            COPY_SVEC(Position, &instance->oldPos, Position, &vars->teleportTarget);
+
+            MON_TurnToPosition(instance, &gameTrackerX.playerInstance->position, 4096);
+        }
+
+        return 0;
+
+    case K_TELEPORT_HOLD:
+
+        if (mv->auxFlags & 0x1000)
+        {
+            int temp; // not from debug symbols
+
+            MON_StartSpecialFade(instance, 0, attrs->timeToFadeIn);
+            temp = MON_GetTime(instance) + 33;
+            vars->timer = temp + (attrs->timeToFadeIn * 33);
+            vars->teleportState = K_MOVE_DONE;
+        }
+
+        return 0;
+
+    case K_MOVE_DONE:
+
+        if (!(mv->auxFlags & 0x10))
+        {
+            MON_PlayAnimFromList(instance, ma->auxAnimList, MONSTER_ANIM_WALK, 2);
+        }
+
+        instance->flags2 &= ~0x20000000;
+        vars->teleportState = K_PHASING_IN;
+        SOUND_Play3dSound(&instance->position, 405, 0, 90, 32000);
+
+    case K_PHASING_IN:
+
+        if (MON_GetTime(instance) >= (unsigned long)vars->timer)
+        {
+            vars->teleportState = K_NO_TELEPORT;
+            return 1;
+        }
+
+        return 0;
+
+    case K_NO_TELEPORT:
+        return 1;
+    default:
+        return 0;
+    }
+}
 
 void KAIN_EndEffects(void) {};
 
