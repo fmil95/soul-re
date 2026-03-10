@@ -2,6 +2,7 @@
 #include "Game/PSX/AADSEQEV.h"
 #include "Game/PSX/AADSQCMD.h"
 #include "Game/PSX/AADVOICE.h"
+#include "Game/MATH3D.h"
 
 static char midiDataByteCount[8] = {2, 2, 2, 2, 1, 1, 2, 2};
 
@@ -343,7 +344,106 @@ void midiNoteOn(AadSeqEvent *event, AadSequenceSlot *slot)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", aadUpdateChannelVolPan);
+void aadUpdateChannelVolPan(AadSequenceSlot *slot, int channel) 
+{
+    AadSynthVoice *voice; 
+    int i; 
+    AadVolume newVoiceVol; 
+
+    for (i = 0; i < 24; i++) 
+    {
+        voice = &aadMem->synthVoice[i];
+        
+        if (voice->voiceID == (slot->slotID | channel)) 
+        {
+            newVoiceVol.left = POW2(voice->volume);
+            newVoiceVol.right = POW2(voice->volume);
+            
+            if (!(aadMem->flags & 0x1)) 
+            {
+                if (slot->panPosition[channel] > 64) 
+                {
+                    unsigned long tmp; 
+
+                    tmp = POW2(128 - slot->panPosition[channel]) - 1;
+                    
+                    newVoiceVol.left = (newVoiceVol.right * tmp) / 4096;
+                }
+                else if (slot->panPosition[channel] < 63) 
+                {
+                    newVoiceVol.right = (newVoiceVol.left * (POW2(slot->panPosition[channel] + 1) + 1)) >> 12;
+                }
+            }
+
+            {
+            unsigned long masterVolumeSquared; 
+                
+            masterVolumeSquared = POW2(voice->toneAtr->volume + 1) - 1;
+                
+            newVoiceVol.left = (newVoiceVol.left * masterVolumeSquared) / 16384;
+            newVoiceVol.right = (newVoiceVol.right * masterVolumeSquared) / 16384;
+            }
+            
+            if (!(aadMem->flags & 0x1)) 
+            {
+                if (voice->toneAtr->panPosition > 64) 
+                {
+                    unsigned long tmp; 
+
+                    tmp = POW2(128 - voice->toneAtr->panPosition) - 1;
+                    
+                    newVoiceVol.left = (newVoiceVol.right * tmp) / 4096;
+                }
+                else if (voice->toneAtr->panPosition < 63) 
+                {
+                    newVoiceVol.right = (newVoiceVol.left * (POW2(voice->toneAtr->panPosition + 1) + 1)) >> 12;
+                }
+            }
+
+            {
+            unsigned long masterVolumeSquared; 
+                
+            masterVolumeSquared = POW2(slot->volume[channel] + 1);
+                
+            newVoiceVol.left = (newVoiceVol.left * (masterVolumeSquared - 1)) / 16384; 
+            newVoiceVol.right = (newVoiceVol.right * (masterVolumeSquared - 1)) / 16384;
+            }
+
+            {
+            unsigned long masterVolumeSquared; 
+                
+            masterVolumeSquared = POW2(voice->progAtr->volume + 1);
+                
+            newVoiceVol.left = (newVoiceVol.left * (masterVolumeSquared - 1)) / 16384;
+            newVoiceVol.right = (newVoiceVol.right * (masterVolumeSquared - 1)) / 16384;
+            }
+
+            {
+            unsigned long masterVolumeSquared; 
+                
+            masterVolumeSquared = POW2(slot->slotVolume + 1);
+                
+            newVoiceVol.left = (newVoiceVol.left * (masterVolumeSquared - 1)) / 16384;
+            newVoiceVol.right = (newVoiceVol.right * (masterVolumeSquared - 1)) / 16384;
+            }
+
+            {
+            unsigned long masterVolumeSquared; 
+                
+            masterVolumeSquared = POW2(*slot->masterVolPtr + 1);
+                
+            newVoiceVol.left = (newVoiceVol.left * (masterVolumeSquared - 1)) / 16384;
+            newVoiceVol.right = (newVoiceVol.right * (masterVolumeSquared - 1)) / 16384;
+            }
+
+            SpuSetVoiceVolume(i, newVoiceVol.left, newVoiceVol.right);
+
+            voice->updateVol = slot->volume[channel];
+            
+            voice->pan = slot->panPosition[channel];
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", aadUpdateSlotVolPan);
 

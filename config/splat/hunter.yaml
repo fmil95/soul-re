@@ -1,24 +1,24 @@
-name: cinemax (Overlay)
-sha1: 4ba914448fe99202d9e832a1fc0b7826b642bef0
+name: hunter (Overlay)
+sha1: 8589840c20cb6585f8f3345f903b8a636aa9adfa
 options:
-  basename: KAIN2_CINEMAX
-  target_path: cinemax.bin
-  base_path: .
+  basename: KAIN2_HUNTER
+  target_path: game/hunter.bin
+  base_path: ../../
   platform: psx
   compiler: gcc
   build_path: BUILD_PATH
-  ld_script_path: cinemax.ld
+  ld_script_path: game/ld/hunter.ld
   find_file_boundaries: False
   use_legacy_include_asm: False
   gp_value: 0x800D7598
   section_order: [".rodata", ".text", ".data", ".bss"]
   symbol_addrs_path:
-    - symbol_addrs.txt
-    - symbol_addrs.cinemax.txt
+    - config/syms/symbol_addrs.txt
+    - config/syms/symbol_addrs.hunter.txt
   reloc_addrs_path:
-    - reloc_addrs.cinemax.txt
-  undefined_funcs_auto_path: undefined_funcs_auto.cinemax.txt
-  undefined_syms_auto_path: undefined_syms_auto.cinemax.txt
+    - config/syms/reloc_addrs.hunter.txt
+  undefined_funcs_auto_path: config/syms/undefined_funcs_auto.hunter.txt
+  undefined_syms_auto_path: config/syms/undefined_syms_auto.hunter.txt
   extensions_path: tools/splat_ext
   string_encoding: ASCII
   rodata_string_guesser_level: 2
@@ -45,11 +45,10 @@ segments:
     start: 0x00
     vram: 0x88000000
     align: 4
-    bss_size: 0x58
+    bss_size: 0x8
     bss_contains_common: True
     subsegments:
-      - [0x000000, .rodata, Overlays/cinemax/cinemax]
-      - [0x000068, _c, Overlays/cinemax/cinemax]
-      - [0x001434, data, Overlays/cinemax/cinemax]
-      - [0x0125B8, bss, Overlays/cinemax/cinemax]
-  - [0x012610]
+      - [0x000000, .rodata, Overlays/hunter/hunter]
+      - [0x000020, _c, Overlays/hunter/hunter]
+      - [0x0009BC, .data, Overlays/hunter/hunter]
+  - [0x000A04]

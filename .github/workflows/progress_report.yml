@@ -24,44 +24,8 @@ jobs:
           submodules: recursive
           lfs: true
 
-      - name: Copy Game Binary
-        run: cp /game/SLUS_007.08 SLUS_007.08
-
-      - name: Copy Overlay (cinemax.bin)
-        run: cp /game/cinemax.bin cinemax.bin
-
-      - name: Copy Overlay (mcardx.bin)
-        run: cp /game/mcardx.bin mcardx.bin
-        
-      - name: Copy Overlay (hunter.bin)
-        run: cp /game/hunter.bin hunter.bin
-
-      - name: Copy Overlay (skinner.bin)
-        run: cp /game/skinner.bin skinner.bin
-      
-      - name: Copy Overlay (wallcr.bin)
-        run: cp /game/wallcr.bin wallcr.bin
-
-      - name: Copy Overlay (aluka.bin)
-        run: cp /game/aluka.bin aluka.bin
-
-      - name: Copy Overlay (skinbos.bin)
-        run: cp /game/skinbos.bin skinbos.bin
-
-      - name: Copy Overlay (kain.bin)
-        run: cp /game/kain.bin kain.bin
-
-      - name: Copy Overlay (walboss.bin)
-        run: cp /game/walboss.bin walboss.bin
-
-      - name: Copy Overlay (walbosb.bin)
-        run: cp /game/walbosb.bin walbosb.bin
-
-      - name: Copy Overlay (alukabss.bin)
-        run: cp /game/alukabss.bin alukabss.bin
-
-      - name: Copy Overlay (roninbss.bin)
-        run: cp /game/roninbss.bin roninbss.bin
+      - name: Copy Binaries
+        run: cp -r /game/* ./game
 
       - name: Setup
         run: make setup

@@ -187,18 +187,22 @@ def get_yaml_string(name: str, eof: int, sha_hash: str) -> str:
     out.append("  platform: psx")
     out.append("  compiler: gcc")
     out.append("  build_path: BUILD_PATH")
-    out.append(f"  ld_script_path: {name}.ld")
+    out.append(f"  ld_script_path: game/ld/{name}.ld")
     out.append("  find_file_boundaries: False")
     out.append("  use_legacy_include_asm: False")
     out.append("  gp_value: 0x800D7598")
     out.append('  section_order: [".rodata", ".text", ".data", ".bss"]')
     out.append("  symbol_addrs_path:")
-    out.append("    - symbol_addrs.txt")
-    out.append(f"    - symbol_addrs.{name}.txt")
+    out.append("    - config/syms/symbol_addrs.txt")
+    out.append(f"    - config/syms/symbol_addrs.{name}.txt")
     out.append("  reloc_addrs_path:")
-    out.append(f"    - reloc_addrs.{name}.txt")
-    out.append(f"  undefined_funcs_auto_path: undefined_funcs_auto.{name}.txt")
-    out.append(f"  undefined_syms_auto_path: undefined_syms_auto.{name}.txt")
+    out.append(f"    - config/syms/reloc_addrs.{name}.txt")
+    out.append(
+        f"  undefined_funcs_auto_path: config/syms/undefined_funcs_auto.{name}.txt"
+    )
+    out.append(
+        f"  undefined_syms_auto_path: config/syms/undefined_syms_auto.{name}.txt"
+    )
     out.append("  extensions_path: tools/splat_ext")
     out.append("  string_encoding: ASCII")
     out.append("  rodata_string_guesser_level: 2")

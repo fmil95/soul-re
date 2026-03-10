@@ -1,24 +1,24 @@
-name: mcardx (Overlay)
-sha1: ca505f85770e30898f5111c6dc6f62c1df44782a
+name: cinemax (Overlay)
+sha1: 4ba914448fe99202d9e832a1fc0b7826b642bef0
 options:
-  basename: KAIN2_MCARDX
-  target_path: mcardx.bin
-  base_path: .
+  basename: KAIN2_CINEMAX
+  target_path: game/cinemax.bin
+  base_path: ../../
   platform: psx
   compiler: gcc
   build_path: BUILD_PATH
-  ld_script_path: mcardx.ld
+  ld_script_path: game/ld/cinemax.ld
   find_file_boundaries: False
   use_legacy_include_asm: False
   gp_value: 0x800D7598
   section_order: [".rodata", ".text", ".data", ".bss"]
   symbol_addrs_path:
-    - symbol_addrs.txt
-    - symbol_addrs.mcardx.txt
+    - config/syms/symbol_addrs.txt
+    - config/syms/symbol_addrs.cinemax.txt
   reloc_addrs_path:
-    - reloc_addrs.mcardx.txt
-  undefined_funcs_auto_path: undefined_funcs_auto.mcardx.txt
-  undefined_syms_auto_path: undefined_syms_auto.mcardx.txt
+    - config/syms/reloc_addrs.cinemax.txt
+  undefined_funcs_auto_path: config/syms/undefined_funcs_auto.cinemax.txt
+  undefined_syms_auto_path: config/syms/undefined_syms_auto.cinemax.txt
   extensions_path: tools/splat_ext
   string_encoding: ASCII
   rodata_string_guesser_level: 2
@@ -45,11 +45,11 @@ segments:
     start: 0x00
     vram: 0x88000000
     align: 4
-    bss_size: 0x400
+    bss_size: 0x58
     bss_contains_common: True
     subsegments:
-      - [0x000000, .rodata, Overlays/mcardx/mcardx]
-      - [0x0003B4, _c, Overlays/mcardx/mcardx]
-      - [0x00570C, data, Overlays/mcardx/mcardx]
-      - [0x005958, bss, Overlays/mcardx/mcardx] # a bit unsure it actually starts here, needs decompilation of the module
-  - [0x005D58]
+      - [0x000000, .rodata, Overlays/cinemax/cinemax]
+      - [0x000068, _c, Overlays/cinemax/cinemax]
+      - [0x001434, data, Overlays/cinemax/cinemax]
+      - [0x0125B8, bss, Overlays/cinemax/cinemax]
+  - [0x012610]

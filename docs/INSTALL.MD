@@ -6,17 +6,7 @@
 
 The commercial releases of Soul Reaver don't have debugging symbols, except for the German release. However, the .SYM file that is available on that version's CD-ROM is from an earlier build of the game, which would render reverse-engineering it confusing as the symbols would be mapped to different addresses in memory and have breaking changes in regards to the actual compiled data on the binary. Instead, you must download the **1999-07-14 build** which can be found on Internet Archive, and unpack it to get the both `SLUS_007.08` and `BIGFILE.DAT`.
 
-Once those files have been obtained, place them at the root of the project.
-
-### Preparing the Overlays
-
-Ensure that all of the submodules have been initialized, as the overlay setup depends on [cd-dat-utils](https://github.com/StableCrimson/cd-dat-utils/). With `BIGFILE.DAT` in the project root, run the following command:
-
-```bash
-make setup-overlays
-```
-
-This will unpack the BIGFILE, extract the overlay binaries, and undo the memory relocation so that they can be properly split via splat.
+Once those files have been obtained, place them inside the `game` folder.
 
 ### IDE and Plugins
 
@@ -80,13 +70,19 @@ pip install -r requirements.txt
 
 ## Splitting and Building
 
+> [!IMPORTANT]
+> Before splitting, ensure that all of the submodules have been initialized, as overlay setup depends on [cd-dat-utils](https://github.com/StableCrimson/cd-dat-utils/).
+
 With everything in place, run:
 
 ```bash
+make setup-overlays
 make setup
 ```
 
-That will split the executable into individual assembly files. As a final test, run the build command:
+That will split the main executable into individual assembly files, unpack the BIGFILE, extract the overlay binaries, and undo the memory relocation so that they can be properly split as well.
+
+Once that succeeds, run the build command:
 
 ```bash
 make

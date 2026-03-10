@@ -8,15 +8,18 @@ NON_MATCHING     ?= 0
 SKIP_ASM         ?= 0
 VERBOSE          ?= 0
 BUILD_DIR        ?= build
+CONFIG_DIR       := config
+GAME_DIR         := game
+LD_DIR	         := $(GAME_DIR)/ld
 TOOLS_DIR        := tools
-BIGFILE_DIR      := bigfile
+BIGFILE_DIR      := $(GAME_DIR)/bigfile
 OBJDIFF_DIR      := $(TOOLS_DIR)/objdiff
 EXPECTED_DIR     ?= expected
 CHECK            ?= 1
 
 # Fail early if baserom does not exist
-ifeq ($(wildcard $(BASEEXE)),)
-$(error Baserom `$(BASEEXE)' not found.)
+ifeq ($(wildcard $(GAME_DIR)/$(BASEEXE)),)
+$(error Baserom `$(GAME_DIR)/$(BASEEXE)' not found.)
 endif
 
 # NON_MATCHING=1 implies COMPARE=0
@@ -52,7 +55,6 @@ LD_MAP       := $(BUILD_DIR)/$(TARGET).map
 ### Tools ###
 
 PYTHON         := python3
-EXE_YAML       := $(BASEEXE).yaml
 SPLAT          := splat split $(EXE_YAML)
 DIFF           := diff
 MASPSX         := $(PYTHON) tools/maspsx/maspsx.py --use-comm-section --aspsx-version=2.81 -G4096
@@ -85,7 +87,7 @@ ENDLINE := \n'
 ASFLAGS        := -Iinclude -march=r3000 -mtune=r3000 -no-pad-sections
 CFLAGS         := -O2 -G4096 -gcoff -quiet -fsigned-char
 CPPFLAGS       := -Iinclude -Isrc -DTARGET_PSX
-LDFLAGS        := -T undefined_syms.txt -T undefined_funcs.txt -T $(BUILD_DIR)/$(LD_SCRIPT) -Map $(LD_MAP) \
+LDFLAGS        := -T $(CONFIG_DIR)/syms/undefined_syms.txt -T $(CONFIG_DIR)/syms/undefined_funcs.txt -T $(BUILD_DIR)/$(LD_SCRIPT) -Map $(LD_MAP) \
                   --no-check-sections -nostdlib
 CFLAGS_CHECK   := -fsyntax-only -fno-builtin -std=gnu90
 CHECK_WARNINGS := -Wall -Wextra
@@ -105,7 +107,7 @@ ASM_OBJS := $(ASM_SRCS:.s=.s.o)
 ASM_OBJS := $(ASM_OBJS:%=$(BUILD_DIR)/%)
 
 # Object files
-OBJECTS := $(shell grep -E 'BUILD_PATH.+\.o' $(LD_SCRIPT) -o)
+OBJECTS := $(shell grep -E 'BUILD_PATH.+\.o' $(LD_DIR)/$(LD_SCRIPT) -o)
 OBJECTS := $(OBJECTS:BUILD_PATH/%=$(BUILD_DIR)/%)
 ifeq ($(SKIP_ASM),1)
 OBJECTS += $(ASM_OBJS)
@@ -121,7 +123,7 @@ define get_overlay_objs
 endef
 
 $(foreach ov,$(OVERLAYS), \
-    $(eval SPLAT_$(ov) := splat split $(ov).yaml) \
+    $(eval SPLAT_$(ov) := splat split $(CONFIG_DIR)/splat/$(ov).yaml) \
     $(eval $(ov)_OBJS  := $(call get_overlay_objs,$(ov))) \
     $(eval $(BUILD_DIR)/$(ov).elf: O_FILES := $($(ov)_OBJS)) \
 )
@@ -193,7 +195,7 @@ clean:
 	$(V)rm -rf $(EXPECTED_DIR)
 
 distclean: clean
-	$(V)rm -f $(LD_SCRIPT)
+	$(V)rm -rf $(LD_DIR)
 	$(V)rm -rf asm
 	$(V)rm -rf $(BIGFILE_DIR)
 	$(V)rm -rf *_auto.txt
@@ -203,17 +205,18 @@ setup: distclean split
 setupexe: distclean splitexe
 
 unpack:
-	@$(PYTHON) $(TOOLS_DIR)/cd-dat-utils/dat_utils.py --config dat-config.json unpack BIGFILE.DAT $(BIGFILE_DIR)
+	@$(PYTHON) $(TOOLS_DIR)/cd-dat-utils/dat_utils.py --config $(CONFIG_DIR)/bigfile.json unpack $(GAME_DIR)/BIGFILE.DAT $(BIGFILE_DIR)
 
 setup-overlays: unpack
-	$(V)$(foreach ov,$(OVERLAYS),$(PYTHON) $(TOOLS_DIR)/scripts/un_drm.py --input $(BIGFILE_DIR)/kain2/object/$(ov)/$(ov).drm --output .;)
+	$(V)$(foreach ov,$(OVERLAYS),$(PYTHON) $(TOOLS_DIR)/scripts/un_drm.py --input $(BIGFILE_DIR)/kain2/object/$(ov)/$(ov).drm --output $(GAME_DIR);)
 
-split:
-	$(V)$(SPLAT)
-	$(V)$(foreach ov,$(OVERLAYS),splat split $(ov).yaml;)
+split-overlays:
+	$(V)$(foreach ov,$(OVERLAYS),splat split $(CONFIG_DIR)/splat/$(ov).yaml;)
 
-splitexe:
-	$(V)$(SPLAT)
+split-exe:
+	$(V)splat split ${CONFIG_DIR}/splat/${BASEEXE}.yaml
+
+split: split-exe split-overlays
 
 reset: clean
 	$(V)rm -rf $(EXPECTED_DIR)
@@ -222,7 +225,7 @@ regenerate: reset
 
 objdiff-config: regenerate
 	@$(MAKE) NON_MATCHING=1 SKIP_ASM=1 expected -j12
-	@$(PYTHON) $(OBJDIFF_DIR)/objdiff_generate.py $(OBJDIFF_DIR)/config.yaml
+	@$(PYTHON) $(OBJDIFF_DIR)/objdiff_generate.py $(CONFIG_DIR)/objdiff.yaml
 
 report: objdiff-config
 	@$(OBJDIFF) report generate > $(BUILD_DIR)/progress.json
@@ -259,7 +262,7 @@ $(BUILD_DIR)/%.bin.o: %.bin
 	@mkdir -p $(shell dirname $@)
 	$(V)$(LD) -r -b binary -o $@ $<
 
-$(BUILD_DIR)/$(LD_SCRIPT): $(LD_SCRIPT)
+$(BUILD_DIR)/$(LD_SCRIPT): $(LD_DIR)/$(LD_SCRIPT)
 	@$(PRINT)$(GREEN)Preprocessing linker script: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
 	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
 #Temporary hack for noload segment wrong alignment
@@ -286,11 +289,11 @@ $(EXE): $(BUILD_DIR)/$(TARGET).elf
 	$(V)$(OBJCOPY) $< $@ -O binary
 	$(V)$(OBJCOPY) -O binary --gap-fill 0x00 --pad-to 0x0C3000 $< $@
 ifeq ($(COMPARE),1)
-	@$(DIFF) $(BASEEXE) $(EXE) && printf "EXE: OK\n" || (echo 'The build succeeded, but did not match the base EXE. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+	@$(DIFF) $(GAME_DIR)/$(BASEEXE) $(EXE) && printf "EXE: OK\n" || (echo 'The build succeeded, but did not match the base EXE. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 endif
 
-$(BUILD_DIR)/%.ld: %.ld
+$(BUILD_DIR)/%.ld: $(LD_DIR)/%.ld
 	@$(PRINT)$(GREEN)Preprocessing overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
 	@mkdir -p $(BUILD_DIR)
 	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
@@ -299,15 +302,15 @@ $(BUILD_DIR)/%.ld: %.ld
 $(BUILD_DIR)/%.elf: $$(O_FILES) $(BUILD_DIR)/%.ld
 	@$(PRINT)$(GREEN)Linking Overlay ELF: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(LD) --no-check-sections -nostdlib \
-		-T undefined_syms_auto.$*.txt \
-		-T undefined_funcs_auto.$*.txt \
+		-T $(CONFIG_DIR)/syms/undefined_syms_auto.$*.txt \
+		-T $(CONFIG_DIR)/syms/undefined_funcs_auto.$*.txt \
 		-T $(BUILD_DIR)/$*.ld -Map $(BUILD_DIR)/$*.map -o $@
 
 $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf
 	@$(PRINT)$(GREEN)Creating BIN: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
-	@$(DIFF) $*.bin $@ && printf "$*.bin: OK\n" || (echo 'Match failed for $*.bin' && false)
+	@$(DIFF) $(GAME_DIR)/$*.bin $@ && printf "$*.bin: OK\n" || (echo 'Match failed for $*.bin' && false)
 endif
 
 .SECONDARY:
