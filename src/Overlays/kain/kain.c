@@ -316,7 +316,28 @@ void KAIN_FFieldOffset(Instance *instance, int segment, Position *position)
     position->z = mat->t[2] - instance->position.z;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_ChargeEntry);
+void KAIN_ChargeEntry(Instance *instance, int segment)
+{
+
+    Position offset;
+    long color; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    color = 0xBF1F1F;
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (KainVars *)mv->extraVars;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars != NULL && attrs != NULL)
+    {
+        KAIN_FFieldOffset(instance, segment, &offset);
+        vars->field = FX_StartFField(instance, 0x80, &offset, 0, 0x400, 0, color);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_ChargeUp);
 
@@ -669,7 +690,28 @@ void KAIN_FFieldOffset(Instance *instance, int segment, Position *position)
     position->z = mat->t[2] - instance->position.z;
 }
 
-void KAIN_ChargeEntry(void) {};
+void KAIN_ChargeEntry(Instance *instance, int segment)
+{
+
+    Position offset;
+    long color; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    color = 0xBF1F1F;
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (KainVars *)mv->extraVars;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars != NULL && attrs != NULL)
+    {
+        KAIN_FFieldOffset(instance, segment, &offset);
+        vars->field = FX_StartFField(instance, 0x80, &offset, 0, 0x400, 0, color);
+    }
+}
 
 void KAIN_ChargeUp(void) {};
 
