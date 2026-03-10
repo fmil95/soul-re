@@ -374,7 +374,12 @@ void KAIN_ChargeUp(Instance *instance, int time, int segment)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_ChargeDown);
+void KAIN_ChargeDown(Instance *instance, int time, int segment)
+{
+    (void)time;
+    (void)segment;
+    KAIN_EndEffects(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", CheckHit);
 
@@ -781,7 +786,12 @@ void KAIN_ChargeUp(Instance *instance, int time, int segment)
     }
 }
 
-void KAIN_ChargeDown(void) {};
+void KAIN_ChargeDown(Instance *instance, int time, int segment)
+{
+    (void)time;
+    (void)segment;
+    KAIN_EndEffects(instance);
+}
 
 void CheckHit(void) {};
 
