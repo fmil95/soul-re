@@ -1,24 +1,24 @@
-name: roninbss (Overlay)
-sha1: 4e7cadbe3e5e988c70aa2e7c476cd523a939e2e1
+name: aluka (Overlay)
+sha1: 57b93ec9901868a22914120a8682b4f268135e9d
 options:
-  basename: KAIN2_RONINBSS
-  target_path: roninbss.bin
-  base_path: .
+  basename: KAIN2_ALUKA
+  target_path: aluka.bin
+  base_path: ../../
   platform: psx
   compiler: gcc
   build_path: BUILD_PATH
-  ld_script_path: roninbss.ld
+  ld_script_path: aluka.ld
   find_file_boundaries: False
   use_legacy_include_asm: False
   gp_value: 0x800D7598
   section_order: [".rodata", ".text", ".data", ".bss"]
   symbol_addrs_path:
-    - symbol_addrs.txt
-    - symbol_addrs.roninbss.txt
+    - config/syms/symbol_addrs.txt
+    - config/syms/symbol_addrs.aluka.txt
   reloc_addrs_path:
-    - reloc_addrs.roninbss.txt
-  undefined_funcs_auto_path: undefined_funcs_auto.roninbss.txt
-  undefined_syms_auto_path: undefined_syms_auto.roninbss.txt
+    - reloc_addrs.aluka.txt
+  undefined_funcs_auto_path: config/syms/undefined_funcs_auto.aluka.txt
+  undefined_syms_auto_path: config/syms/undefined_syms_auto.aluka.txt
   extensions_path: tools/splat_ext
   string_encoding: ASCII
   rodata_string_guesser_level: 2
@@ -45,10 +45,11 @@ segments:
     start: 0x00
     vram: 0x88000000
     align: 4
-    bss_size: 0x0
+    bss_size: 0x8
     bss_contains_common: True
     subsegments:
-      - [0x000000, .rodata, Overlays/roninbss/roninbss]
-      - [0x000060, _c, Overlays/roninbss/roninbss]
-      - [0x002800, data, Overlays/roninbss/roninbss]
-  - [0x0028A4]
+      - [0x000000, .rodata, Overlays/aluka/aluka]
+      - [0x000034, _c, Overlays/aluka/aluka]
+      - [0x004598, data, Overlays/aluka/aluka]
+      - [0x004644, bss, Overlays/aluka/aluka]
+  - [0x00464C]

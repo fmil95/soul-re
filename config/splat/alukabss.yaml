@@ -1,24 +1,24 @@
-name: skinner (Overlay)
-sha1: 71987ff47731b55c57e290afa805ea58a333bd35
+name: alukabss (Overlay)
+sha1: 88fb7bfd571aba1d68c2ffcf6c72ff57513db4a3
 options:
-  basename: KAIN2_SKINNER
-  target_path: skinner.bin
-  base_path: .
+  basename: KAIN2_ALUKABSS
+  target_path: alukabss.bin
+  base_path: ../../
   platform: psx
   compiler: gcc
   build_path: BUILD_PATH
-  ld_script_path: skinner.ld
+  ld_script_path: alukabss.ld
   find_file_boundaries: False
   use_legacy_include_asm: False
   gp_value: 0x800D7598
   section_order: [".rodata", ".text", ".data", ".bss"]
   symbol_addrs_path:
-    - symbol_addrs.txt
-    - symbol_addrs.skinner.txt
+    - config/syms/symbol_addrs.txt
+    - config/syms/symbol_addrs.alukabss.txt
   reloc_addrs_path:
-    - reloc_addrs.skinner.txt
-  undefined_funcs_auto_path: undefined_funcs_auto.skinner.txt
-  undefined_syms_auto_path: undefined_syms_auto.skinner.txt
+    - reloc_addrs.alukabss.txt
+  undefined_funcs_auto_path: config/syms/undefined_funcs_auto.alukabss.txt
+  undefined_syms_auto_path: config/syms/undefined_syms_auto.alukabss.txt
   extensions_path: tools/splat_ext
   string_encoding: ASCII
   rodata_string_guesser_level: 2
@@ -45,10 +45,10 @@ segments:
     start: 0x00
     vram: 0x88000000
     align: 4
-    bss_size: 0x8
+    bss_size: 0x0
     bss_contains_common: True
     subsegments:
-      - [0x000000, .rodata, Overlays/skinner/skinner]
-      - [0x000020, _c, Overlays/skinner/skinner]
-      - [0x000B90, .data, Overlays/skinner/skinner]
-  - [0x000BCC]
+      - [0x000000, .rodata, Overlays/alukabss/alukabss]
+      - [0x00002C, _c, Overlays/alukabss/alukabss]
+      - [0x00157C, data, Overlays/alukabss/alukabss]
+  - [0x001608]

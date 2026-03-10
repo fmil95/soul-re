@@ -3,7 +3,7 @@ sha1: 30a86e03be3b14ee77ccd5969e1884b92182fff4
 options:
   basename: KAIN2_KAIN
   target_path: kain.bin
-  base_path: .
+  base_path: ../../
   platform: psx
   compiler: gcc
   build_path: BUILD_PATH
@@ -13,12 +13,12 @@ options:
   gp_value: 0x800D7598
   section_order: [".rodata", ".text", ".data", ".bss"]
   symbol_addrs_path:
-    - symbol_addrs.txt
-    - symbol_addrs.kain.txt
+    - config/syms/symbol_addrs.txt
+    - config/syms/symbol_addrs.kain.txt
   reloc_addrs_path:
     - reloc_addrs.kain.txt
-  undefined_funcs_auto_path: undefined_funcs_auto.kain.txt
-  undefined_syms_auto_path: undefined_syms_auto.kain.txt
+  undefined_funcs_auto_path: config/syms/undefined_funcs_auto.kain.txt
+  undefined_syms_auto_path: config/syms/undefined_syms_auto.kain.txt
   extensions_path: tools/splat_ext
   string_encoding: ASCII
   rodata_string_guesser_level: 2

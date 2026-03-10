@@ -1,24 +1,24 @@
-name: skinbos (Overlay)
-sha1: 0b26b090f4b09090e8cb836de4ea8d1ac6dada37
+name: mcardx (Overlay)
+sha1: ca505f85770e30898f5111c6dc6f62c1df44782a
 options:
-  basename: KAIN2_SKINBOS
-  target_path: skinbos.bin
-  base_path: .
+  basename: KAIN2_MCARDX
+  target_path: mcardx.bin
+  base_path: ../../
   platform: psx
   compiler: gcc
   build_path: BUILD_PATH
-  ld_script_path: skinbos.ld
+  ld_script_path: mcardx.ld
   find_file_boundaries: False
   use_legacy_include_asm: False
   gp_value: 0x800D7598
   section_order: [".rodata", ".text", ".data", ".bss"]
   symbol_addrs_path:
-    - symbol_addrs.txt
-    - symbol_addrs.skinbos.txt
+    - config/syms/symbol_addrs.txt
+    - config/syms/symbol_addrs.mcardx.txt
   reloc_addrs_path:
-    - reloc_addrs.skinbos.txt
-  undefined_funcs_auto_path: undefined_funcs_auto.skinbos.txt
-  undefined_syms_auto_path: undefined_syms_auto.skinbos.txt
+    - reloc_addrs.mcardx.txt
+  undefined_funcs_auto_path: config/syms/undefined_funcs_auto.mcardx.txt
+  undefined_syms_auto_path: config/syms/undefined_syms_auto.mcardx.txt
   extensions_path: tools/splat_ext
   string_encoding: ASCII
   rodata_string_guesser_level: 2
@@ -45,11 +45,11 @@ segments:
     start: 0x00
     vram: 0x88000000
     align: 4
-    bss_size: 0x8
+    bss_size: 0x400
     bss_contains_common: True
     subsegments:
-      - [0x000000, .rodata, Overlays/skinbos/skinbos]
-      - [0x00009C, _c, Overlays/skinbos/skinbos]
-      - [0x002D88, data, Overlays/skinbos/skinbos]
-      - [0x002E18, bss, Overlays/skinbos/skinbos]
-  - [0x002E20]
+      - [0x000000, .rodata, Overlays/mcardx/mcardx]
+      - [0x0003B4, _c, Overlays/mcardx/mcardx]
+      - [0x00570C, data, Overlays/mcardx/mcardx]
+      - [0x005958, bss, Overlays/mcardx/mcardx] # a bit unsure it actually starts here, needs decompilation of the module
+  - [0x005D58]

@@ -1,24 +1,24 @@
-name: hunter (Overlay)
-sha1: 8589840c20cb6585f8f3345f903b8a636aa9adfa
+name: walboss (Overlay)
+sha1: 324b147490051d8fd5d9939b5e61de31aa4b4f4f
 options:
-  basename: KAIN2_HUNTER
-  target_path: hunter.bin
-  base_path: .
+  basename: KAIN2_WALBOSS
+  target_path: walboss.bin
+  base_path: ../../
   platform: psx
   compiler: gcc
   build_path: BUILD_PATH
-  ld_script_path: hunter.ld
+  ld_script_path: walboss.ld
   find_file_boundaries: False
   use_legacy_include_asm: False
   gp_value: 0x800D7598
   section_order: [".rodata", ".text", ".data", ".bss"]
   symbol_addrs_path:
-    - symbol_addrs.txt
-    - symbol_addrs.hunter.txt
+    - config/syms/symbol_addrs.txt
+    - config/syms/symbol_addrs.walboss.txt
   reloc_addrs_path:
-    - reloc_addrs.hunter.txt
-  undefined_funcs_auto_path: undefined_funcs_auto.hunter.txt
-  undefined_syms_auto_path: undefined_syms_auto.hunter.txt
+    - reloc_addrs.walboss.txt
+  undefined_funcs_auto_path: config/syms/undefined_funcs_auto.walboss.txt
+  undefined_syms_auto_path: config/syms/undefined_syms_auto.walboss.txt
   extensions_path: tools/splat_ext
   string_encoding: ASCII
   rodata_string_guesser_level: 2
@@ -48,7 +48,8 @@ segments:
     bss_size: 0x8
     bss_contains_common: True
     subsegments:
-      - [0x000000, .rodata, Overlays/hunter/hunter]
-      - [0x000020, _c, Overlays/hunter/hunter]
-      - [0x0009BC, .data, Overlays/hunter/hunter]
-  - [0x000A04]
+      - [0x000000, .rodata, Overlays/walboss/walboss]
+      - [0x000194, _c, Overlays/walboss/walboss]
+      - [0x002280, data, Overlays/walboss/walboss]
+      - [0x002308, bss, Overlays/walboss/walboss]
+  - [0x002310]
