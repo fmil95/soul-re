@@ -309,7 +309,7 @@ $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf
 	@$(PRINT)$(GREEN)Creating BIN: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(OBJCOPY) -O binary $< $@
 ifeq ($(COMPARE),1)
-	@$(DIFF) $*.bin $@ && printf "$*.bin: OK\n" || (echo 'Match failed for $*.bin' && false)
+	@$(DIFF) $(GAME_DIR)/$*.bin $@ && printf "$*.bin: OK\n" || (echo 'Match failed for $*.bin' && false)
 endif
 
 .SECONDARY:
