@@ -8,6 +8,7 @@ NON_MATCHING     ?= 0
 SKIP_ASM         ?= 0
 VERBOSE          ?= 0
 BUILD_DIR        ?= build
+CONFIG_DIR       := config
 TOOLS_DIR        := tools
 BIGFILE_DIR      := bigfile
 OBJDIFF_DIR      := $(TOOLS_DIR)/objdiff
@@ -52,7 +53,6 @@ LD_MAP       := $(BUILD_DIR)/$(TARGET).map
 ### Tools ###
 
 PYTHON         := python3
-EXE_YAML       := $(BASEEXE).yaml
 SPLAT          := splat split $(EXE_YAML)
 DIFF           := diff
 MASPSX         := $(PYTHON) tools/maspsx/maspsx.py --use-comm-section --aspsx-version=2.81 -G4096
@@ -85,7 +85,7 @@ ENDLINE := \n'
 ASFLAGS        := -Iinclude -march=r3000 -mtune=r3000 -no-pad-sections
 CFLAGS         := -O2 -G4096 -gcoff -quiet -fsigned-char
 CPPFLAGS       := -Iinclude -Isrc -DTARGET_PSX
-LDFLAGS        := -T undefined_syms.txt -T undefined_funcs.txt -T $(BUILD_DIR)/$(LD_SCRIPT) -Map $(LD_MAP) \
+LDFLAGS        := -T $(CONFIG_DIR)/syms/undefined_syms.txt -T $(CONFIG_DIR)/syms/undefined_funcs.txt -T $(BUILD_DIR)/$(LD_SCRIPT) -Map $(LD_MAP) \
                   --no-check-sections -nostdlib
 CFLAGS_CHECK   := -fsyntax-only -fno-builtin -std=gnu90
 CHECK_WARNINGS := -Wall -Wextra
@@ -121,7 +121,7 @@ define get_overlay_objs
 endef
 
 $(foreach ov,$(OVERLAYS), \
-    $(eval SPLAT_$(ov) := splat split $(ov).yaml) \
+    $(eval SPLAT_$(ov) := splat split $(CONFIG_DIR)/splat/$(ov).yaml) \
     $(eval $(ov)_OBJS  := $(call get_overlay_objs,$(ov))) \
     $(eval $(BUILD_DIR)/$(ov).elf: O_FILES := $($(ov)_OBJS)) \
 )
@@ -203,17 +203,18 @@ setup: distclean split
 setupexe: distclean splitexe
 
 unpack:
-	@$(PYTHON) $(TOOLS_DIR)/cd-dat-utils/dat_utils.py --config dat-config.json unpack BIGFILE.DAT $(BIGFILE_DIR)
+	@$(PYTHON) $(TOOLS_DIR)/cd-dat-utils/dat_utils.py --config $(CONFIG_DIR)/bigfile.json unpack BIGFILE.DAT $(BIGFILE_DIR)
 
 setup-overlays: unpack
 	$(V)$(foreach ov,$(OVERLAYS),$(PYTHON) $(TOOLS_DIR)/scripts/un_drm.py --input $(BIGFILE_DIR)/kain2/object/$(ov)/$(ov).drm --output .;)
 
-split:
-	$(V)$(SPLAT)
-	$(V)$(foreach ov,$(OVERLAYS),splat split $(ov).yaml;)
+split-overlays:
+	$(V)$(foreach ov,$(OVERLAYS),splat split $(CONFIG_DIR)/splat/$(ov).yaml;)
 
-splitexe:
-	$(V)$(SPLAT)
+split-exe:
+	$(V)splat split ${CONFIG_DIR}/splat/${BASEEXE}.yaml
+
+split: split-exe split-overlays
 
 reset: clean
 	$(V)rm -rf $(EXPECTED_DIR)
@@ -222,7 +223,7 @@ regenerate: reset
 
 objdiff-config: regenerate
 	@$(MAKE) NON_MATCHING=1 SKIP_ASM=1 expected -j12
-	@$(PYTHON) $(OBJDIFF_DIR)/objdiff_generate.py $(OBJDIFF_DIR)/config.yaml
+	@$(PYTHON) $(OBJDIFF_DIR)/objdiff_generate.py $(CONFIG_DIR)/objdiff.yaml
 
 report: objdiff-config
 	@$(OBJDIFF) report generate > $(BUILD_DIR)/progress.json
@@ -299,8 +300,8 @@ $(BUILD_DIR)/%.ld: %.ld
 $(BUILD_DIR)/%.elf: $$(O_FILES) $(BUILD_DIR)/%.ld
 	@$(PRINT)$(GREEN)Linking Overlay ELF: $(ENDGREEN)$(BLUE)$@$(ENDBLUE)$(ENDLINE)
 	$(V)$(LD) --no-check-sections -nostdlib \
-		-T undefined_syms_auto.$*.txt \
-		-T undefined_funcs_auto.$*.txt \
+		-T $(CONFIG_DIR)/syms/undefined_syms_auto.$*.txt \
+		-T $(CONFIG_DIR)/syms/undefined_funcs_auto.$*.txt \
 		-T $(BUILD_DIR)/$*.ld -Map $(BUILD_DIR)/$*.map -o $@
 
 $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf
@@ -314,7 +315,7 @@ endif
 
 ### Make Settings ###
 
-.PHONY: all clean distclean overlays setup split
+.PHONY: all clean distclean overlays setup-overlays setup split
 
 # Remove built-in implicit rules to improve performance
 MAKEFLAGS += --no-builtin-rules
