@@ -381,7 +381,14 @@ void KAIN_ChargeDown(Instance *instance, int time, int segment)
     KAIN_EndEffects(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", CheckHit);
+int CheckHit(Instance *instance)
+{
+    if (instance->currentMainState == MONSTER_STATE_COMBAT || instance->currentMainState == MONSTER_STATE_ATTACK)
+    {
+        return 1;
+    }
+    return 0;
+}
 
 void SwitchToHit(Instance *instance)
 {
@@ -793,7 +800,14 @@ void KAIN_ChargeDown(Instance *instance, int time, int segment)
     KAIN_EndEffects(instance);
 }
 
-void CheckHit(void) {};
+int CheckHit(Instance *instance)
+{
+    if (instance->currentMainState == MONSTER_STATE_COMBAT || instance->currentMainState == MONSTER_STATE_ATTACK)
+    {
+        return 1;
+    }
+    return 0;
+}
 
 void SwitchToHit(Instance *instance)
 {
