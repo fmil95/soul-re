@@ -245,7 +245,7 @@ $(BUILD_DIR)/%.c.o: %.c
 ifeq ($(CHECK),1)
 	@$(CC_HOST) $(CFLAGS_CHECK) $(CHECK_WARNINGS) $(CPPFLAGS) -UTARGET_PSX $<
 endif
-	$(V)$(CPP) $(CPPFLAGS) -ffreestanding -MMD -MP -MT $@ -MF $@.d $< | $(CC) $(CFLAGS) | $(MASPSX) | $(AS) $(ASFLAGS) -o $@
+	$(V)$(CPP) $(CPPFLAGS) -ffreestanding -MMD -MP -MT $@ -MF $@.d $< | $(CC) $(CFLAGS) | $(MASPSX) $(if $(findstring Overlays,$@),--expand-div,) | $(AS) $(ASFLAGS) -o $@
 
 # Compile .s files
 $(BUILD_DIR)/%.s.o: %.s
