@@ -16,7 +16,7 @@ options:
     - config/syms/symbol_addrs.txt
     - config/syms/symbol_addrs.walboss.txt
   reloc_addrs_path:
-    - reloc_addrs.walboss.txt
+    - config/syms/reloc_addrs.walboss.txt
   undefined_funcs_auto_path: config/syms/undefined_funcs_auto.walboss.txt
   undefined_syms_auto_path: config/syms/undefined_syms_auto.walboss.txt
   extensions_path: tools/splat_ext

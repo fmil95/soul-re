@@ -196,7 +196,7 @@ def get_yaml_string(name: str, eof: int, sha_hash: str) -> str:
     out.append("    - config/syms/symbol_addrs.txt")
     out.append(f"    - config/syms/symbol_addrs.{name}.txt")
     out.append("  reloc_addrs_path:")
-    out.append(f"    - reloc_addrs.{name}.txt")
+    out.append(f"    - config/syms/reloc_addrs.{name}.txt")
     out.append(
         f"  undefined_funcs_auto_path: config/syms/undefined_funcs_auto.{name}.txt"
     )

@@ -16,7 +16,7 @@ options:
     - config/syms/symbol_addrs.txt
     - config/syms/symbol_addrs.alukabss.txt
   reloc_addrs_path:
-    - reloc_addrs.alukabss.txt
+    - config/syms/reloc_addrs.alukabss.txt
   undefined_funcs_auto_path: config/syms/undefined_funcs_auto.alukabss.txt
   undefined_syms_auto_path: config/syms/undefined_syms_auto.alukabss.txt
   extensions_path: tools/splat_ext

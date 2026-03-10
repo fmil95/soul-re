@@ -16,7 +16,7 @@ options:
     - config/syms/symbol_addrs.txt
     - config/syms/symbol_addrs.cinemax.txt
   reloc_addrs_path:
-    - reloc_addrs.cinemax.txt
+    - config/syms/reloc_addrs.cinemax.txt
   undefined_funcs_auto_path: config/syms/undefined_funcs_auto.cinemax.txt
   undefined_syms_auto_path: config/syms/undefined_syms_auto.cinemax.txt
   extensions_path: tools/splat_ext

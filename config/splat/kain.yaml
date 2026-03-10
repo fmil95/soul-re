@@ -16,7 +16,7 @@ options:
     - config/syms/symbol_addrs.txt
     - config/syms/symbol_addrs.kain.txt
   reloc_addrs_path:
-    - reloc_addrs.kain.txt
+    - config/syms/reloc_addrs.kain.txt
   undefined_funcs_auto_path: config/syms/undefined_funcs_auto.kain.txt
   undefined_syms_auto_path: config/syms/undefined_syms_auto.kain.txt
   extensions_path: tools/splat_ext

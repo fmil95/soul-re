@@ -20,7 +20,7 @@ options:
   symbol_addrs_path:
     - config/syms/symbol_addrs.txt
   reloc_addrs_path:
-    - reloc_addrs.txt
+    - config/syms/reloc_addrs.txt
   create_undefined_funcs_auto: False
   create_undefined_syms_auto: False
   # undefined_funcs_auto_path: config/syms/undefined_funcs_auto.txt

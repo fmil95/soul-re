@@ -16,7 +16,7 @@ options:
     - config/syms/symbol_addrs.txt
     - config/syms/symbol_addrs.skinner.txt
   reloc_addrs_path:
-    - reloc_addrs.skinner.txt
+    - config/syms/reloc_addrs.skinner.txt
   undefined_funcs_auto_path: config/syms/undefined_funcs_auto.skinner.txt
   undefined_syms_auto_path: config/syms/undefined_syms_auto.skinner.txt
   extensions_path: tools/splat_ext

@@ -16,7 +16,7 @@ options:
     - config/syms/symbol_addrs.txt
     - config/syms/symbol_addrs.hunter.txt
   reloc_addrs_path:
-    - reloc_addrs.hunter.txt
+    - config/syms/reloc_addrs.hunter.txt
   undefined_funcs_auto_path: config/syms/undefined_funcs_auto.hunter.txt
   undefined_syms_auto_path: config/syms/undefined_syms_auto.hunter.txt
   extensions_path: tools/splat_ext

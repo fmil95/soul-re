@@ -16,7 +16,7 @@ options:
     - config/syms/symbol_addrs.txt
     - config/syms/symbol_addrs.aluka.txt
   reloc_addrs_path:
-    - reloc_addrs.aluka.txt
+    - config/syms/reloc_addrs.aluka.txt
   undefined_funcs_auto_path: config/syms/undefined_funcs_auto.aluka.txt
   undefined_syms_auto_path: config/syms/undefined_syms_auto.aluka.txt
   extensions_path: tools/splat_ext

@@ -16,7 +16,7 @@ options:
     - config/syms/symbol_addrs.txt
     - config/syms/symbol_addrs.skinbos.txt
   reloc_addrs_path:
-    - reloc_addrs.skinbos.txt
+    - config/syms/reloc_addrs.skinbos.txt
   undefined_funcs_auto_path: config/syms/undefined_funcs_auto.skinbos.txt
   undefined_syms_auto_path: config/syms/undefined_syms_auto.skinbos.txt
   extensions_path: tools/splat_ext

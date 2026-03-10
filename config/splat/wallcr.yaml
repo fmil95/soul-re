@@ -16,7 +16,7 @@ options:
     - config/syms/symbol_addrs.txt
     - config/syms/symbol_addrs.wallcr.txt
   reloc_addrs_path:
-    - reloc_addrs.wallcr.txt
+    - config/syms/reloc_addrs.wallcr.txt
   undefined_funcs_auto_path: config/syms/undefined_funcs_auto.wallcr.txt
   undefined_syms_auto_path: config/syms/undefined_syms_auto.wallcr.txt
   extensions_path: tools/splat_ext

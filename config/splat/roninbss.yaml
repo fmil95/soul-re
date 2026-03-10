@@ -16,7 +16,7 @@ options:
     - config/syms/symbol_addrs.txt
     - config/syms/symbol_addrs.roninbss.txt
   reloc_addrs_path:
-    - reloc_addrs.roninbss.txt
+    - config/syms/reloc_addrs.roninbss.txt
   undefined_funcs_auto_path: config/syms/undefined_funcs_auto.roninbss.txt
   undefined_syms_auto_path: config/syms/undefined_syms_auto.roninbss.txt
   extensions_path: tools/splat_ext

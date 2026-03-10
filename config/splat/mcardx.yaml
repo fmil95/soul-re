@@ -16,7 +16,7 @@ options:
     - config/syms/symbol_addrs.txt
     - config/syms/symbol_addrs.mcardx.txt
   reloc_addrs_path:
-    - reloc_addrs.mcardx.txt
+    - config/syms/reloc_addrs.mcardx.txt
   undefined_funcs_auto_path: config/syms/undefined_funcs_auto.mcardx.txt
   undefined_syms_auto_path: config/syms/undefined_syms_auto.mcardx.txt
   extensions_path: tools/splat_ext
