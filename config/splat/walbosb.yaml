@@ -1,24 +1,24 @@
-name: skinner (Overlay)
-sha1: 71987ff47731b55c57e290afa805ea58a333bd35
+name: walbosb (Overlay)
+sha1: 97a3990482521a294cf8abb1d21aa9a51c32c25b
 options:
-  basename: KAIN2_SKINNER
-  target_path: skinner.bin
-  base_path: .
+  basename: KAIN2_WALBOSB
+  target_path: game/walbosb.bin
+  base_path: ../../
   platform: psx
   compiler: gcc
   build_path: BUILD_PATH
-  ld_script_path: skinner.ld
+  ld_script_path: game/ld/walbosb.ld
   find_file_boundaries: False
   use_legacy_include_asm: False
   gp_value: 0x800D7598
   section_order: [".rodata", ".text", ".data", ".bss"]
   symbol_addrs_path:
-    - symbol_addrs.txt
-    - symbol_addrs.skinner.txt
+    - config/syms/symbol_addrs.txt
+    - config/syms/symbol_addrs.walbosb.txt
   reloc_addrs_path:
-    - reloc_addrs.skinner.txt
-  undefined_funcs_auto_path: undefined_funcs_auto.skinner.txt
-  undefined_syms_auto_path: undefined_syms_auto.skinner.txt
+    - config/syms/reloc_addrs.walbosb.txt
+  undefined_funcs_auto_path: config/syms/undefined_funcs_auto.walbosb.txt
+  undefined_syms_auto_path: config/syms/undefined_syms_auto.walbosb.txt
   extensions_path: tools/splat_ext
   string_encoding: ASCII
   rodata_string_guesser_level: 2
@@ -48,7 +48,8 @@ segments:
     bss_size: 0x8
     bss_contains_common: True
     subsegments:
-      - [0x000000, .rodata, Overlays/skinner/skinner]
-      - [0x000020, _c, Overlays/skinner/skinner]
-      - [0x000B90, .data, Overlays/skinner/skinner]
-  - [0x000BCC]
+      - [0x000000, .rodata, Overlays/walbosb/walbosb]
+      - [0x000794, _c, Overlays/walbosb/walbosb]
+      - [0x001D10, data, Overlays/walbosb/walbosb]
+      - [0x001DA4, bss, Overlays/walbosb/walbosb]
+  - [0x001DAC]

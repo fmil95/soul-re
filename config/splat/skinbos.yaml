@@ -1,24 +1,24 @@
-name: roninbss (Overlay)
-sha1: 4e7cadbe3e5e988c70aa2e7c476cd523a939e2e1
+name: skinbos (Overlay)
+sha1: 0b26b090f4b09090e8cb836de4ea8d1ac6dada37
 options:
-  basename: KAIN2_RONINBSS
-  target_path: roninbss.bin
-  base_path: .
+  basename: KAIN2_SKINBOS
+  target_path: game/skinbos.bin
+  base_path: ../../
   platform: psx
   compiler: gcc
   build_path: BUILD_PATH
-  ld_script_path: roninbss.ld
+  ld_script_path: game/ld/skinbos.ld
   find_file_boundaries: False
   use_legacy_include_asm: False
   gp_value: 0x800D7598
   section_order: [".rodata", ".text", ".data", ".bss"]
   symbol_addrs_path:
-    - symbol_addrs.txt
-    - symbol_addrs.roninbss.txt
+    - config/syms/symbol_addrs.txt
+    - config/syms/symbol_addrs.skinbos.txt
   reloc_addrs_path:
-    - reloc_addrs.roninbss.txt
-  undefined_funcs_auto_path: undefined_funcs_auto.roninbss.txt
-  undefined_syms_auto_path: undefined_syms_auto.roninbss.txt
+    - config/syms/reloc_addrs.skinbos.txt
+  undefined_funcs_auto_path: config/syms/undefined_funcs_auto.skinbos.txt
+  undefined_syms_auto_path: config/syms/undefined_syms_auto.skinbos.txt
   extensions_path: tools/splat_ext
   string_encoding: ASCII
   rodata_string_guesser_level: 2
@@ -45,10 +45,11 @@ segments:
     start: 0x00
     vram: 0x88000000
     align: 4
-    bss_size: 0x0
+    bss_size: 0x8
     bss_contains_common: True
     subsegments:
-      - [0x000000, .rodata, Overlays/roninbss/roninbss]
-      - [0x000060, _c, Overlays/roninbss/roninbss]
-      - [0x002800, data, Overlays/roninbss/roninbss]
-  - [0x0028A4]
+      - [0x000000, .rodata, Overlays/skinbos/skinbos]
+      - [0x00009C, _c, Overlays/skinbos/skinbos]
+      - [0x002D88, data, Overlays/skinbos/skinbos]
+      - [0x002E18, bss, Overlays/skinbos/skinbos]
+  - [0x002E20]
