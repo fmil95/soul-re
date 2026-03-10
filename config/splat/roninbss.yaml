@@ -7,7 +7,7 @@ options:
   platform: psx
   compiler: gcc
   build_path: BUILD_PATH
-  ld_script_path: roninbss.ld
+  ld_script_path: game/ld/roninbss.ld
   find_file_boundaries: False
   use_legacy_include_asm: False
   gp_value: 0x800D7598

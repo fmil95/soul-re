@@ -187,7 +187,7 @@ def get_yaml_string(name: str, eof: int, sha_hash: str) -> str:
     out.append("  platform: psx")
     out.append("  compiler: gcc")
     out.append("  build_path: BUILD_PATH")
-    out.append(f"  ld_script_path: {name}.ld")
+    out.append(f"  ld_script_path: game/ld/{name}.ld")
     out.append("  find_file_boundaries: False")
     out.append("  use_legacy_include_asm: False")
     out.append("  gp_value: 0x800D7598")

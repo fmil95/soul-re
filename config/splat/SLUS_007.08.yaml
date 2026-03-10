@@ -11,7 +11,7 @@ options:
   nonmatchings_path: nonmatchings
   build_path: BUILD_PATH
   # create_asm_dependencies: True
-  ld_script_path: KAIN2.ld
+  ld_script_path: game/ld/KAIN2.ld
   find_file_boundaries: False
   gp_value: 0x800D7598
   use_legacy_include_asm: False

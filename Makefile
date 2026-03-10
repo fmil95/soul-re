@@ -10,6 +10,7 @@ VERBOSE          ?= 0
 BUILD_DIR        ?= build
 CONFIG_DIR       := config
 GAME_DIR         := game
+LD_DIR	         := $(GAME_DIR)/ld
 TOOLS_DIR        := tools
 BIGFILE_DIR      := $(GAME_DIR)/bigfile
 OBJDIFF_DIR      := $(TOOLS_DIR)/objdiff
@@ -106,7 +107,7 @@ ASM_OBJS := $(ASM_SRCS:.s=.s.o)
 ASM_OBJS := $(ASM_OBJS:%=$(BUILD_DIR)/%)
 
 # Object files
-OBJECTS := $(shell grep -E 'BUILD_PATH.+\.o' $(LD_SCRIPT) -o)
+OBJECTS := $(shell grep -E 'BUILD_PATH.+\.o' $(LD_DIR)/$(LD_SCRIPT) -o)
 OBJECTS := $(OBJECTS:BUILD_PATH/%=$(BUILD_DIR)/%)
 ifeq ($(SKIP_ASM),1)
 OBJECTS += $(ASM_OBJS)
@@ -194,7 +195,7 @@ clean:
 	$(V)rm -rf $(EXPECTED_DIR)
 
 distclean: clean
-	$(V)rm -f $(LD_SCRIPT)
+	$(V)rm -rf $(LD_DIR)
 	$(V)rm -rf asm
 	$(V)rm -rf $(BIGFILE_DIR)
 	$(V)rm -rf *_auto.txt
@@ -261,7 +262,7 @@ $(BUILD_DIR)/%.bin.o: %.bin
 	@mkdir -p $(shell dirname $@)
 	$(V)$(LD) -r -b binary -o $@ $<
 
-$(BUILD_DIR)/$(LD_SCRIPT): $(LD_SCRIPT)
+$(BUILD_DIR)/$(LD_SCRIPT): $(LD_DIR)/$(LD_SCRIPT)
 	@$(PRINT)$(GREEN)Preprocessing linker script: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
 	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
 #Temporary hack for noload segment wrong alignment
@@ -292,7 +293,7 @@ ifeq ($(COMPARE),1)
 endif
 endif
 
-$(BUILD_DIR)/%.ld: %.ld
+$(BUILD_DIR)/%.ld: $(LD_DIR)/%.ld
 	@$(PRINT)$(GREEN)Preprocessing overlay ld: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
 	@mkdir -p $(BUILD_DIR)
 	$(V)$(CPP) -P -DBUILD_PATH=$(BUILD_DIR) $< -o $@
