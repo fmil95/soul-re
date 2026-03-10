@@ -316,7 +316,14 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_ChargeDown);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", CheckHit);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", SwitchToHit);
+void SwitchToHit(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = instance->extraData;
+    mv->mvFlags |= 0x40;
+    MON_SwitchStateDoEntry(instance, MONSTER_STATE_HIT);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_DamageEffect);
 
@@ -654,7 +661,14 @@ void KAIN_ChargeDown(void) {};
 
 void CheckHit(void) {};
 
-void SwitchToHit(void) {};
+void SwitchToHit(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = instance->extraData;
+    mv->mvFlags |= 0x40;
+    MON_SwitchStateDoEntry(instance, MONSTER_STATE_HIT);
+}
 
 void KAIN_DamageEffect(void) {};
 
