@@ -2,7 +2,7 @@ name: skinbos (Overlay)
 sha1: 0b26b090f4b09090e8cb836de4ea8d1ac6dada37
 options:
   basename: KAIN2_SKINBOS
-  target_path: skinbos.bin
+  target_path: game/skinbos.bin
   base_path: ../../
   platform: psx
   compiler: gcc

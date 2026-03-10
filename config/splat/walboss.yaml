@@ -2,7 +2,7 @@ name: walboss (Overlay)
 sha1: 324b147490051d8fd5d9939b5e61de31aa4b4f4f
 options:
   basename: KAIN2_WALBOSS
-  target_path: walboss.bin
+  target_path: game/walboss.bin
   base_path: ../../
   platform: psx
   compiler: gcc

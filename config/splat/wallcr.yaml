@@ -2,7 +2,7 @@ name: wallcr (Overlay)
 sha1: 5de4dcdb95ede16e867283220d5300f79e428153
 options:
   basename: KAIN2_WALLCR
-  target_path: wallcr.bin
+  target_path: game/wallcr.bin
   base_path: ../../
   platform: psx
   compiler: gcc

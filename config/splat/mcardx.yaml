@@ -2,7 +2,7 @@ name: mcardx (Overlay)
 sha1: ca505f85770e30898f5111c6dc6f62c1df44782a
 options:
   basename: KAIN2_MCARDX
-  target_path: mcardx.bin
+  target_path: game/mcardx.bin
   base_path: ../../
   platform: psx
   compiler: gcc

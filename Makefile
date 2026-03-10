@@ -9,15 +9,16 @@ SKIP_ASM         ?= 0
 VERBOSE          ?= 0
 BUILD_DIR        ?= build
 CONFIG_DIR       := config
+GAME_DIR         := game
 TOOLS_DIR        := tools
-BIGFILE_DIR      := bigfile
+BIGFILE_DIR      := $(GAME_DIR)/bigfile
 OBJDIFF_DIR      := $(TOOLS_DIR)/objdiff
 EXPECTED_DIR     ?= expected
 CHECK            ?= 1
 
 # Fail early if baserom does not exist
-ifeq ($(wildcard $(BASEEXE)),)
-$(error Baserom `$(BASEEXE)' not found.)
+ifeq ($(wildcard $(GAME_DIR)/$(BASEEXE)),)
+$(error Baserom `$(GAME_DIR)/$(BASEEXE)' not found.)
 endif
 
 # NON_MATCHING=1 implies COMPARE=0
@@ -203,10 +204,10 @@ setup: distclean split
 setupexe: distclean splitexe
 
 unpack:
-	@$(PYTHON) $(TOOLS_DIR)/cd-dat-utils/dat_utils.py --config $(CONFIG_DIR)/bigfile.json unpack BIGFILE.DAT $(BIGFILE_DIR)
+	@$(PYTHON) $(TOOLS_DIR)/cd-dat-utils/dat_utils.py --config $(CONFIG_DIR)/bigfile.json unpack $(GAME_DIR)/BIGFILE.DAT $(BIGFILE_DIR)
 
 setup-overlays: unpack
-	$(V)$(foreach ov,$(OVERLAYS),$(PYTHON) $(TOOLS_DIR)/scripts/un_drm.py --input $(BIGFILE_DIR)/kain2/object/$(ov)/$(ov).drm --output .;)
+	$(V)$(foreach ov,$(OVERLAYS),$(PYTHON) $(TOOLS_DIR)/scripts/un_drm.py --input $(BIGFILE_DIR)/kain2/object/$(ov)/$(ov).drm --output $(GAME_DIR);)
 
 split-overlays:
 	$(V)$(foreach ov,$(OVERLAYS),splat split $(CONFIG_DIR)/splat/$(ov).yaml;)
@@ -287,7 +288,7 @@ $(EXE): $(BUILD_DIR)/$(TARGET).elf
 	$(V)$(OBJCOPY) $< $@ -O binary
 	$(V)$(OBJCOPY) -O binary --gap-fill 0x00 --pad-to 0x0C3000 $< $@
 ifeq ($(COMPARE),1)
-	@$(DIFF) $(BASEEXE) $(EXE) && printf "EXE: OK\n" || (echo 'The build succeeded, but did not match the base EXE. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
+	@$(DIFF) $(GAME_DIR)/$(BASEEXE) $(EXE) && printf "EXE: OK\n" || (echo 'The build succeeded, but did not match the base EXE. This is expected if you are making changes to the game. To skip this check, use "make COMPARE=0".' && false)
 endif
 endif
 
@@ -315,7 +316,7 @@ endif
 
 ### Make Settings ###
 
-.PHONY: all clean distclean overlays setup-overlays setup split
+.PHONY: all clean distclean overlays setup split
 
 # Remove built-in implicit rules to improve performance
 MAKEFLAGS += --no-builtin-rules

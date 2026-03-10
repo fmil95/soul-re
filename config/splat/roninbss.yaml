@@ -2,7 +2,7 @@ name: roninbss (Overlay)
 sha1: 4e7cadbe3e5e988c70aa2e7c476cd523a939e2e1
 options:
   basename: KAIN2_RONINBSS
-  target_path: roninbss.bin
+  target_path: game/roninbss.bin
   base_path: ../../
   platform: psx
   compiler: gcc

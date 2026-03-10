@@ -2,7 +2,7 @@ name: hunter (Overlay)
 sha1: 8589840c20cb6585f8f3345f903b8a636aa9adfa
 options:
   basename: KAIN2_HUNTER
-  target_path: hunter.bin
+  target_path: game/hunter.bin
   base_path: ../../
   platform: psx
   compiler: gcc

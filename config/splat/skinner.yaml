@@ -2,7 +2,7 @@ name: skinner (Overlay)
 sha1: 71987ff47731b55c57e290afa805ea58a333bd35
 options:
   basename: KAIN2_SKINNER
-  target_path: skinner.bin
+  target_path: game/skinner.bin
   base_path: ../../
   platform: psx
   compiler: gcc

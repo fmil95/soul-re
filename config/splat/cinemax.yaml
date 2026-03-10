@@ -2,7 +2,7 @@ name: cinemax (Overlay)
 sha1: 4ba914448fe99202d9e832a1fc0b7826b642bef0
 options:
   basename: KAIN2_CINEMAX
-  target_path: cinemax.bin
+  target_path: game/cinemax.bin
   base_path: ../../
   platform: psx
   compiler: gcc

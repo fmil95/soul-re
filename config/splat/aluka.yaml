@@ -2,7 +2,7 @@ name: aluka (Overlay)
 sha1: 57b93ec9901868a22914120a8682b4f268135e9d
 options:
   basename: KAIN2_ALUKA
-  target_path: aluka.bin
+  target_path: game/aluka.bin
   base_path: ../../
   platform: psx
   compiler: gcc

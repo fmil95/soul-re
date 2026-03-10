@@ -2,7 +2,7 @@ name: kain (Overlay)
 sha1: 30a86e03be3b14ee77ccd5969e1884b92182fff4
 options:
   basename: KAIN2_KAIN
-  target_path: kain.bin
+  target_path: game/kain.bin
   base_path: ../../
   platform: psx
   compiler: gcc

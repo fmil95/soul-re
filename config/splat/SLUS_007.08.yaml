@@ -2,7 +2,7 @@ name: SLUS_007.08
 sha1: b7f430596aa0c4f1f7b6550aa12a31c38f980cbb
 options:
   basename: KAIN2
-  target_path: SLUS_007.08
+  target_path: game/SLUS_007.08
   base_path: ../../
   platform: psx
   compiler: GCC

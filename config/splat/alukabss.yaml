@@ -2,7 +2,7 @@ name: alukabss (Overlay)
 sha1: 88fb7bfd571aba1d68c2ffcf6c72ff57513db4a3
 options:
   basename: KAIN2_ALUKABSS
-  target_path: alukabss.bin
+  target_path: game/alukabss.bin
   base_path: ../../
   platform: psx
   compiler: gcc

@@ -2,7 +2,7 @@ name: walbosb (Overlay)
 sha1: 97a3990482521a294cf8abb1d21aa9a51c32c25b
 options:
   basename: KAIN2_WALBOSB
-  target_path: walbosb.bin
+  target_path: game/walbosb.bin
   base_path: ../../
   platform: psx
   compiler: gcc
