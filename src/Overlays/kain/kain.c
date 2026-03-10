@@ -306,7 +306,15 @@ void KAIN_LightningEntry(Instance *instance)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Lightning);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_FFieldOffset);
+void KAIN_FFieldOffset(Instance *instance, int segment, Position *position)
+{
+    MATRIX *mat; // not from debug symbols
+
+    mat = &instance->matrix[segment];
+    position->x = mat->t[0] - instance->position.x;
+    position->y = mat->t[1] - instance->position.y;
+    position->z = mat->t[2] - instance->position.z;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_ChargeEntry);
 
@@ -651,7 +659,15 @@ void KAIN_LightningEntry(Instance *instance)
 
 void KAIN_Lightning(void) {};
 
-void KAIN_FFieldOffset(void) {};
+void KAIN_FFieldOffset(Instance *instance, int segment, Position *position)
+{
+    MATRIX *mat; // not from debug symbols
+
+    mat = &instance->matrix[segment];
+    position->x = mat->t[0] - instance->position.x;
+    position->y = mat->t[1] - instance->position.y;
+    position->z = mat->t[2] - instance->position.z;
+}
 
 void KAIN_ChargeEntry(void) {};
 
