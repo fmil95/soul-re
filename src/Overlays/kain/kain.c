@@ -339,7 +339,40 @@ void KAIN_ChargeEntry(Instance *instance, int segment)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_ChargeUp);
+void KAIN_ChargeUp(Instance *instance, int time, int segment)
+{
+
+    int timeLeft; // not from debug symbols
+    int timeToBolt; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (KainVars *)mv->extraVars;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars != NULL && attrs != NULL && vars->field != NULL)
+    {
+
+        timeLeft = MAX(vars->timer - time, 0);
+        KAIN_FFieldOffset(instance, segment, (Position *)&vars->field->offset);
+
+        if (mv->auxFlags & 0x10)
+        {
+            timeToBolt = attrs->timeToBolt[vars->numHits] * 33;
+        }
+        else
+        {
+            timeToBolt = attrs->timeToBolt[vars->numHits + attrs->maxHits] * 33;
+        }
+
+        vars->field->size_change = ((timeLeft * 960) / timeToBolt) + 64;
+        vars->field->size = (timeLeft * 128) / timeToBolt;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_ChargeDown);
 
@@ -713,7 +746,40 @@ void KAIN_ChargeEntry(Instance *instance, int segment)
     }
 }
 
-void KAIN_ChargeUp(void) {};
+void KAIN_ChargeUp(Instance *instance, int time, int segment)
+{
+
+    int timeLeft; // not from debug symbols
+    int timeToBolt; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (KainVars *)mv->extraVars;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars != NULL && attrs != NULL && vars->field != NULL)
+    {
+
+        timeLeft = MAX(vars->timer - time, 0);
+        KAIN_FFieldOffset(instance, segment, (Position *)&vars->field->offset);
+
+        if (mv->auxFlags & 0x10)
+        {
+            timeToBolt = attrs->timeToBolt[vars->numHits] * 33;
+        }
+        else
+        {
+            timeToBolt = attrs->timeToBolt[vars->numHits + attrs->maxHits] * 33;
+        }
+
+        vars->field->size_change = ((timeLeft * 960) / timeToBolt) + 64;
+        vars->field->size = (timeLeft * 128) / timeToBolt;
+    }
+}
 
 void KAIN_ChargeDown(void) {};
 
