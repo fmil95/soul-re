@@ -441,7 +441,7 @@ void KAIN_Init(Instance *instance)
 
     if (mv != NULL)
     {
-        vars = (KainVars *)MEMPACK_Malloc(sizeof(KainVars), 46);
+        vars = (KainVars *)MEMPACK_Malloc(sizeof(KainVars), MEMORY_TYPE_KAINDATA);
 
         if (vars == NULL)
         {
@@ -910,7 +910,7 @@ void KAIN_Init(Instance *instance)
 
     if (mv != NULL)
     {
-        vars = (KainVars *)MEMPACK_Malloc(sizeof(KainVars), 46);
+        vars = (KainVars *)MEMPACK_Malloc(sizeof(KainVars), MEMORY_TYPE_KAINDATA);
 
         if (vars == NULL)
         {
