@@ -1,11 +1,14 @@
 #include "Overlays/kain/kain.h"
+#include "Game/DEBUG.h"
 #include "Game/FX.h"
 #include "Game/GAMELOOP.h"
 #include "Game/INSTANCE.h"
 #include "Game/MATH3D.h"
 #include "Game/PSX/SUPPORT.h"
+#include "Game/MEMPACK.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONSTER.h"
+#include "Game/RAZIEL/RAZIEL.h"
 #include "Game/SOUND.h"
 #include "Game/STATE.h"
 #include "Game/STREAM.h"
@@ -427,7 +430,36 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Message);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Query);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Init);
+void KAIN_Init(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+
+    MON_DefaultInit(instance);
+    mv = instance->extraData;
+
+    if (mv != NULL)
+    {
+        vars = (KainVars *)MEMPACK_Malloc(sizeof(KainVars), 46);
+
+        if (vars == NULL)
+        {
+            mv->extraVars = NULL;
+        }
+        else
+        {
+            mv->extraVars = vars;
+            vars->numHits = 0;
+            vars->tier = 0;
+            vars->teleportState = K_NO_TELEPORT;
+        }
+    }
+
+    KAIN_PickUpReaver(instance);
+    RAZIEL_SetInteractiveMusic(15, 1);
+    DEBUG_DoAreaProtection();
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_CleanUp);
 
@@ -867,7 +899,36 @@ void KAIN_Message(void) {};
 
 void KAIN_Query(void) {};
 
-void KAIN_Init(void) {};
+void KAIN_Init(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+
+    MON_DefaultInit(instance);
+    mv = instance->extraData;
+
+    if (mv != NULL)
+    {
+        vars = (KainVars *)MEMPACK_Malloc(sizeof(KainVars), 46);
+
+        if (vars == NULL)
+        {
+            mv->extraVars = NULL;
+        }
+        else
+        {
+            mv->extraVars = vars;
+            vars->numHits = 0;
+            vars->tier = 0;
+            vars->teleportState = K_NO_TELEPORT;
+        }
+    }
+
+    KAIN_PickUpReaver(instance);
+    RAZIEL_SetInteractiveMusic(15, 1);
+    DEBUG_DoAreaProtection();
+}
 
 void KAIN_CleanUp(void) {};
 
