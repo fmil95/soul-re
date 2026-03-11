@@ -91,7 +91,7 @@ void SAVE_Init(GameTracker *gt)
 {
     void *buffer;
 
-    buffer = MEMPACK_Malloc(24576, 18);
+    buffer = MEMPACK_Malloc(24576, MEMORY_TYPE_SAVEINFO);
 
     if (DoMainMenu != 0)
     {

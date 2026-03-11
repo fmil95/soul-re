@@ -678,7 +678,7 @@ void G2EmulationInit()
 
     if (G2AlphaTables[1] == NULL)
     {
-        G2AlphaTables[1] = (G2AnimAlphaTable *)MEMPACK_Malloc(18, 25); // TODO: find struct sizeof for allocSize parameter
+        G2AlphaTables[1] = (G2AnimAlphaTable *)MEMPACK_Malloc(18, MEMORY_TYPE_G2ANIMATION); // TODO: find struct sizeof for allocSize parameter
 
         G2AlphaTables[1]->size = 4;
 
@@ -690,7 +690,7 @@ void G2EmulationInit()
 
     if (G2AlphaTables[2] == NULL)
     {
-        G2AlphaTables[2] = (G2AnimAlphaTable *)MEMPACK_Malloc(18, 25);
+        G2AlphaTables[2] = (G2AnimAlphaTable *)MEMPACK_Malloc(18, MEMORY_TYPE_G2ANIMATION);
 
         G2AlphaTables[2]->size = 4;
 
@@ -702,7 +702,7 @@ void G2EmulationInit()
 
     if (G2AlphaTables[3] == NULL)
     {
-        G2AlphaTables[3] = (G2AnimAlphaTable *)MEMPACK_Malloc(6, 25); // TODO: find struct sizeof for allocSize parameter
+        G2AlphaTables[3] = (G2AnimAlphaTable *)MEMPACK_Malloc(6, MEMORY_TYPE_G2ANIMATION); // TODO: find struct sizeof for allocSize parameter
 
         G2AlphaTables[3]->size = 1;
 
@@ -711,7 +711,7 @@ void G2EmulationInit()
 
     if (G2AlphaTables[4] == NULL)
     {
-        G2AlphaTables[4] = (G2AnimAlphaTable *)MEMPACK_Malloc(18, 25);
+        G2AlphaTables[4] = (G2AnimAlphaTable *)MEMPACK_Malloc(18, MEMORY_TYPE_G2ANIMATION);
 
         G2AlphaTables[4]->size = 4;
 
@@ -723,7 +723,7 @@ void G2EmulationInit()
 
     if (G2AlphaTables[5] == NULL)
     {
-        G2AlphaTables[5] = (G2AnimAlphaTable *)MEMPACK_Malloc(18, 25);
+        G2AlphaTables[5] = (G2AnimAlphaTable *)MEMPACK_Malloc(18, MEMORY_TYPE_G2ANIMATION);
 
         G2AlphaTables[5]->size = 4;
 
@@ -735,7 +735,7 @@ void G2EmulationInit()
 
     if (G2AlphaTables[6] == NULL)
     {
-        G2AlphaTables[6] = (G2AnimAlphaTable *)MEMPACK_Malloc(18, 25);
+        G2AlphaTables[6] = (G2AnimAlphaTable *)MEMPACK_Malloc(18, MEMORY_TYPE_G2ANIMATION);
 
         G2AlphaTables[6]->size = 4;
 

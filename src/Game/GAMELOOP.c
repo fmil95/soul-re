@@ -102,10 +102,10 @@ unsigned long StackSave;
 
 void GAMELOOP_AllocStaticMemory()
 {
-    instanceList = (InstanceList *)MEMPACK_Malloc(sizeof(InstanceList), 6);
-    instancePool = (InstancePool *)MEMPACK_Malloc(sizeof(InstancePool), 6);
+    instanceList = (InstanceList *)MEMPACK_Malloc(sizeof(InstanceList), MEMORY_TYPE_GAME_STATIC);
+    instancePool = (InstancePool *)MEMPACK_Malloc(sizeof(InstancePool), MEMORY_TYPE_GAME_STATIC);
 
-    primBase = MEMPACK_Malloc(216600, 6);
+    primBase = MEMPACK_Malloc(216600, MEMORY_TYPE_GAME_STATIC);
 
     gOt[0] = (unsigned long **)primBase;
     gOt[1] = (unsigned long **)(primBase + (3072 * 4));
@@ -113,20 +113,20 @@ void GAMELOOP_AllocStaticMemory()
     primPool[0] = (PrimPool *)(primBase + ((3072 * 4) + (3072 * 4)));
     primPool[1] = (PrimPool *)(primBase + ((3072 * 4) + (3072 * 4) + 96012));
 
-    gLightInfo = (LightInfo *)MEMPACK_Malloc(sizeof(LightInfo), 6);
+    gLightInfo = (LightInfo *)MEMPACK_Malloc(sizeof(LightInfo), MEMORY_TYPE_GAME_STATIC);
 
     memset(gLightInfo, 0, sizeof(LightInfo));
 
-    gVertexPool = (VertexPool *)MEMPACK_Malloc(sizeof(VertexPool), 6);
+    gVertexPool = (VertexPool *)MEMPACK_Malloc(sizeof(VertexPool), MEMORY_TYPE_GAME_STATIC);
 
     gPolytopeList = (PolytopeList *)gVertexPool;
 
-    gFXT = fxTracker = (FXTracker *)MEMPACK_Malloc(sizeof(FXTracker), 6);
+    gFXT = fxTracker = (FXTracker *)MEMPACK_Malloc(sizeof(FXTracker), MEMORY_TYPE_GAME_STATIC);
 
-    planningPool = MEMPACK_Malloc(3000, 6);
-    enemyPlanPool = MEMPACK_Malloc(1000, 6);
+    planningPool = MEMPACK_Malloc(3000, MEMORY_TYPE_GAME_STATIC);
+    enemyPlanPool = MEMPACK_Malloc(1000, MEMORY_TYPE_GAME_STATIC);
 
-    GlobalObjects = (ObjectTracker *)MEMPACK_Malloc(1728, 6);
+    GlobalObjects = (ObjectTracker *)MEMPACK_Malloc(1728, MEMORY_TYPE_GAME_STATIC);
 
     G2Anim_Install();
 }

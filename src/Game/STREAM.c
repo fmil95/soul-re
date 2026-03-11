@@ -1464,7 +1464,7 @@ void STREAM_LoadMainVram(GameTracker *gameTracker, char *baseAreaName, StreamUni
 
     STREAM_FillOutFileNames(gameTracker->baseAreaName, dramName, vramName, NULL);
 
-    vramBuffer = (VramBuffer *)MEMPACK_Malloc((level->vramSize.w << 1) + 20, 35);
+    vramBuffer = (VramBuffer *)MEMPACK_Malloc((level->vramSize.w << 1) + 20, MEMORY_TYPE_TEMP_BUFFER);
 
     vramBuffer->lineOverFlow = (short *)(vramBuffer + 1);
 
@@ -2513,7 +2513,7 @@ void STREAM_PackVRAMObject(ObjectTracker *objectTracker)
 
         sprintf(fileName, "\\kain2\\object\\%s\\%s.crm", objectTracker->name, objectTracker->name);
 
-        vramBuffer = (VramBuffer *)MEMPACK_Malloc((vramBlock->w << 1) + sizeof(VramBuffer), 35);
+        vramBuffer = (VramBuffer *)MEMPACK_Malloc((vramBlock->w << 1) + sizeof(VramBuffer), MEMORY_TYPE_TEMP_BUFFER);
 
         vramBuffer->lineOverFlow = (short *)(vramBuffer + 1);
 

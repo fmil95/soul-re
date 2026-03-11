@@ -55,7 +55,7 @@ void menuface_initialize()
 
         if (buttonAddr != NULL)
         {
-            FaceButtons = (ButtonTexture *)MEMPACK_Malloc(sizeof(ButtonTexture) * 56, 45);
+            FaceButtons = (ButtonTexture *)MEMPACK_Malloc(sizeof(ButtonTexture) * 56, MEMORY_TYPE_MENU);
 
             if (FaceButtons == NULL)
             {

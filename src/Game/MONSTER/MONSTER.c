@@ -2561,7 +2561,7 @@ void MONSTER_InitVertexColors(Instance *instance, Model *model)
     int i;
     CVECTOR *ptr;
 
-    instance->perVertexColor = (CVECTOR *)MEMPACK_Malloc(model->numVertices * 4, 33);
+    instance->perVertexColor = (CVECTOR *)MEMPACK_Malloc(model->numVertices * 4, MEMORY_TYPE_INSTVTXCOLOR);
 
     for (ptr = instance->perVertexColor, i = model->numVertices; i != 0; i--, ptr++)
     {

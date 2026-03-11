@@ -26,7 +26,7 @@ void SoulReaverInit(Instance *instance, GameTracker *gameTracker)
     }
     else
     {
-        data = (ReaverData *)MEMPACK_Malloc(sizeof(ReaverData), 30);
+        data = (ReaverData *)MEMPACK_Malloc(sizeof(ReaverData), MEMORY_TYPE_REAVERDATA);
 
         instance->extraData = (void *)data;
 
