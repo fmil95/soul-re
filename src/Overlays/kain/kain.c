@@ -7,6 +7,7 @@
 #include "Game/PSX/SUPPORT.h"
 #include "Game/MEMPACK.h"
 #include "Game/MONSTER/MONLIB.h"
+#include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/RAZIEL/RAZIEL.h"
 #include "Game/SOUND.h"
@@ -532,7 +533,43 @@ void KAIN_IdleEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Idle);
+void KAIN_Idle(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (KainVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        if ((mv->auxFlags & 0x800 && (vars->teleportState != K_TELEPORT_HOLD || mv->auxFlags & 0x1000)) || mv->auxFlags & 0x100)
+        {
+            if (KAIN_Teleport(instance) != 0)
+            {
+                mv->auxFlags &= ~0x800;
+                mv->auxFlags &= ~0x1000;
+            }
+
+            MON_DefaultQueueHandler(instance);
+            return;
+        }
+
+        if (mv->mvFlags & 4)
+        {
+            MON_Idle(instance);
+            return;
+        }
+
+        if (!(mv->auxFlags & 0x828) && instance->currentStreamUnitID == gameTrackerX.playerInstance->currentStreamUnitID)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+        }
+
+        MON_DefaultQueueHandler(instance);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_CombatEntry);
 
@@ -1068,7 +1105,43 @@ void KAIN_IdleEntry(Instance *instance)
     }
 }
 
-void KAIN_Idle(void) {};
+void KAIN_Idle(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (KainVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        if ((mv->auxFlags & 0x800 && (vars->teleportState != K_TELEPORT_HOLD || mv->auxFlags & 0x1000)) || mv->auxFlags & 0x100)
+        {
+            if (KAIN_Teleport(instance) != 0)
+            {
+                mv->auxFlags &= ~0x800;
+                mv->auxFlags &= ~0x1000;
+            }
+
+            MON_DefaultQueueHandler(instance);
+            return;
+        }
+
+        if (mv->mvFlags & 4)
+        {
+            MON_Idle(instance);
+            return;
+        }
+
+        if (!(mv->auxFlags & 0x828) && instance->currentStreamUnitID == gameTrackerX.playerInstance->currentStreamUnitID)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+        }
+
+        MON_DefaultQueueHandler(instance);
+    }
+}
 
 void KAIN_CombatEntry(void) {};
 
