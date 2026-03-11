@@ -14,7 +14,7 @@ enum KainTeleportState
     K_NO_TELEPORT = 6,
 };
 
-// size: 0x50
+// size: 0x38
 typedef struct _KainVars
 {
     // offset: 0x0000
@@ -25,26 +25,26 @@ typedef struct _KainVars
     int timer;
     // offset: 0x0008
     int beamTimer;
+    // offset: 0x000C
+    FXForceFieldEffect *field;
     // offset: 0x0010
-    struct _FXForceFieldEffect *field;
-    // offset: 0x0018
-    struct _FXLightning *zap[3];
-    // offset: 0x0030
-    struct _Instance *zapTarget;
-    // offset: 0x0038
+    FXLightning *zap[3];
+    // offset: 0x001C
+    Instance *zapTarget;
+    // offset: 0x0020
     char hitSegment[3];
-    // offset: 0x003B
+    // offset: 0x0023
     char numBeams;
-    // offset: 0x003C
+    // offset: 0x0024
     char changeBeam;
-    // offset: 0x003D
+    // offset: 0x0025
     char tier;
-    // offset: 0x0040
+    // offset: 0x0026
     int soundHandle;
-    // offset: 0x0044
-    struct _Position beamTarget;
-    // offset: 0x004A
-    struct _Position teleportTarget;
+    // offset: 0x002A
+    Position beamTarget;
+    // offset: 0x0030
+    Position teleportTarget;
 } KainVars;
 
 // size: 0x1E

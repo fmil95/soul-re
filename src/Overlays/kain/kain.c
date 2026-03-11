@@ -461,7 +461,33 @@ void KAIN_Init(Instance *instance)
     DEBUG_DoAreaProtection();
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_CleanUp);
+void KAIN_CleanUp(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    RAZIEL_SetInteractiveMusic(0xF, 0);
+
+    if (mv != NULL)
+    {
+
+        vars = (KainVars *)mv->extraVars;
+
+        if (vars != NULL)
+        {
+            if (SndIsPlaying(vars->soundHandle))
+            {
+                SndEndLoop(vars->soundHandle);
+            }
+
+            MEMPACK_Free((char *)vars);
+        }
+    }
+
+    MON_CleanUp(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_IdleEntry);
 
@@ -930,7 +956,33 @@ void KAIN_Init(Instance *instance)
     DEBUG_DoAreaProtection();
 }
 
-void KAIN_CleanUp(void) {};
+void KAIN_CleanUp(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    RAZIEL_SetInteractiveMusic(0xF, 0);
+
+    if (mv != NULL)
+    {
+
+        vars = (KainVars *)mv->extraVars;
+
+        if (vars != NULL)
+        {
+            if (SndIsPlaying(vars->soundHandle))
+            {
+                SndEndLoop(vars->soundHandle);
+            }
+
+            MEMPACK_Free((char *)vars);
+        }
+    }
+
+    MON_CleanUp(instance);
+}
 
 void KAIN_IdleEntry(void) {};
 
