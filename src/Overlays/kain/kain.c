@@ -489,7 +489,48 @@ void KAIN_CleanUp(Instance *instance)
     MON_CleanUp(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_IdleEntry);
+void KAIN_IdleEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->extraVars == NULL)
+    {
+        return;
+    }
+
+    if (mv->auxFlags & 0x6100)
+    {
+        KAIN_EndEffects(instance);
+        KAIN_TeleportEntry(instance);
+
+        if (mv->auxFlags & 0x4000)
+        {
+            MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+            mv->auxFlags &= ~0x4000;
+            mv->auxFlags |= 0x800;
+        }
+        else if (mv->auxFlags & 0x2000)
+        {
+            mv->auxFlags &= ~0x2000;
+            mv->auxFlags |= 0x800;
+        }
+    }
+    else
+    {
+        if (mv->mvFlags & 4)
+        {
+            MON_IdleEntry(instance);
+        }
+        else
+        {
+            MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+            KAIN_EndEffects(instance);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Idle);
 
@@ -984,7 +1025,48 @@ void KAIN_CleanUp(Instance *instance)
     MON_CleanUp(instance);
 }
 
-void KAIN_IdleEntry(void) {};
+void KAIN_IdleEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->extraVars == NULL)
+    {
+        return;
+    }
+
+    if (mv->auxFlags & 0x6100)
+    {
+        KAIN_EndEffects(instance);
+        KAIN_TeleportEntry(instance);
+
+        if (mv->auxFlags & 0x4000)
+        {
+            MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+            mv->auxFlags &= ~0x4000;
+            mv->auxFlags |= 0x800;
+        }
+        else if (mv->auxFlags & 0x2000)
+        {
+            mv->auxFlags &= ~0x2000;
+            mv->auxFlags |= 0x800;
+        }
+    }
+    else
+    {
+        if (mv->mvFlags & 4)
+        {
+            MON_IdleEntry(instance);
+        }
+        else
+        {
+            MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+            KAIN_EndEffects(instance);
+        }
+    }
+}
 
 void KAIN_Idle(void) {};
 
