@@ -1366,7 +1366,7 @@ void INSTANCE_DefaultInit(Instance *instance, Object *object, int modelNum)
 
     if (numHPrims != 0)
     {
-        instance->hModelList = (HModel *)MEMPACK_Malloc((instance->object->numModels + numHPrims) * sizeof(HModel), 14);
+        instance->hModelList = (HModel *)MEMPACK_Malloc((instance->object->numModels + numHPrims) * sizeof(HModel), MEMORY_TYPE_INSTANCECOLL);
 
         pModel = object->modelList;
 

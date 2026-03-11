@@ -20,7 +20,7 @@ void MEMPACK_Init()
     newMemTracker.rootNode->magicNumber = 0xBADE;
 
     newMemTracker.rootNode->memStatus = 0;
-    newMemTracker.rootNode->memType = 0;
+    newMemTracker.rootNode->memType = MEMORY_TYPE_STATIC;
     newMemTracker.rootNode->memSize = newMemTracker.totalMemory;
 
     newMemTracker.lastMemoryAddress = (char *)newMemTracker.rootNode + newMemTracker.totalMemory;
@@ -77,7 +77,11 @@ MemHeader *MEMPACK_GetSmallestBlockBottomTop(long allocSize)
 
 long MEMPACK_RelocatableType(long memType)
 {
-    if ((memType == 1) || (memType == 2) || (memType == 44) || (memType == 47) || (memType == 4))
+    if (memType == MEMORY_TYPE_OBJECT ||
+        memType == MEMORY_TYPE_AREA ||
+        memType == MEMORY_TYPE_RELOCATABLE_CD_LOADER ||
+        memType == MEMORY_TYPE_SFX ||
+        memType == MEMORY_TYPE_MUSIC)
     {
         return 1;
     }
@@ -121,7 +125,7 @@ char *MEMPACK_Malloc(unsigned long allocSize, unsigned char memType)
 
             if ((unsigned int)curMem == newMemTracker.currentMemoryUsed)
             {
-                if (memType == 16)
+                if (memType == MEMORY_TYPE_REARRANGE_VRAM)
                 {
                     return NULL;
                 }
@@ -154,7 +158,7 @@ char *MEMPACK_Malloc(unsigned long allocSize, unsigned char memType)
             address->magicNumber = 0xBADE;
 
             address->memStatus = 0;
-            address->memType = 0;
+            address->memType = MEMORY_TYPE_STATIC;
             address->memSize = bestAddress->memSize - allocSize;
 
             bestAddress->magicNumber = 0xBADE;
@@ -180,7 +184,7 @@ char *MEMPACK_Malloc(unsigned long allocSize, unsigned char memType)
             bestAddress->magicNumber = 0xBADE;
 
             bestAddress->memStatus = 0;
-            bestAddress->memType = 0;
+            bestAddress->memType = MEMORY_TYPE_STATIC;
             bestAddress->memSize = topOffset - allocSize;
 
             bestAddress = address;
@@ -231,7 +235,7 @@ void MEMPACK_Return(char *address, long takeBackSize)
         memAddress->magicNumber = 0xBADE;
 
         memAddress->memStatus = 0;
-        memAddress->memType = 0;
+        memAddress->memType = MEMORY_TYPE_STATIC;
         memAddress->memSize = takeBackSize;
 
         nextAddress = (MemHeader *)((char *)memAddress + takeBackSize);
@@ -251,7 +255,7 @@ void MEMPACK_Free(char *address)
     memAddress = (MemHeader *)(address - sizeof(MemHeader));
 
     memAddress->memStatus = 0;
-    memAddress->memType = 0;
+    memAddress->memType = MEMORY_TYPE_STATIC;
 
     newMemTracker.currentMemoryUsed -= memAddress->memSize;
 
@@ -454,7 +458,7 @@ void MEMPACK_GarbageSplitMemoryNow(unsigned long allocSize, MemHeader *bestAddre
         address->magicNumber = 0xBADE;
 
         address->memStatus = 0;
-        address->memType = 0;
+        address->memType = MEMORY_TYPE_STATIC;
         address->memSize = freeSize;
     }
 }
@@ -464,7 +468,7 @@ void MEMPACK_GarbageCollectFree(MemHeader *memAddress)
     MemHeader *secondAddress;
 
     memAddress->memStatus = 0;
-    memAddress->memType = 0;
+    memAddress->memType = MEMORY_TYPE_STATIC;
 
     newMemTracker.currentMemoryUsed -= memAddress->memSize;
 
@@ -549,38 +553,38 @@ void MEMPACK_DoGarbageCollection()
 
             if (newAddress != NULL)
             {
-                if (addressMemType == 2)
+                if (addressMemType == MEMORY_TYPE_AREA)
                 {
                     RemoveIntroducedLights((Level *)oldAddress);
                 }
-                else if (addressMemType == 4)
+                else if (addressMemType == MEMORY_TYPE_MUSIC)
                 {
                     aadRelocateMusicMemoryBegin();
                 }
 
                 memcpy(newAddress, oldAddress, addressSize);
 
-                if (addressMemType == 2)
+                if (addressMemType == MEMORY_TYPE_AREA)
                 {
                     MEMPACK_RelocateAreaType((MemHeader *)(newAddress - sizeof(MemHeader)), newAddress - oldAddress, (Level *)oldAddress);
                 }
-                else if (addressMemType == 1)
+                else if (addressMemType == MEMORY_TYPE_OBJECT)
                 {
                     MEMPACK_RelocateObjectType((MemHeader *)(newAddress - sizeof(MemHeader)), newAddress - oldAddress, (Object *)oldAddress);
                 }
-                else if (addressMemType == 14)
+                else if (addressMemType == MEMORY_TYPE_INSTANCECOLL)
                 {
                     STREAM_UpdateInstanceCollisionInfo((HModel *)oldAddress, (HModel *)newAddress);
                 }
-                else if (addressMemType == 44)
+                else if (addressMemType == MEMORY_TYPE_RELOCATABLE_CD_LOADER)
                 {
                     MEMPACK_RelocateCDMemory((MemHeader *)(newAddress - sizeof(MemHeader)), newAddress - oldAddress, (BigFileDir *)oldAddress);
                 }
-                else if (addressMemType == 4)
+                else if (addressMemType == MEMORY_TYPE_MUSIC)
                 {
                     aadRelocateMusicMemoryEnd(oldAddress, newAddress - oldAddress);
                 }
-                else if (addressMemType == 47)
+                else if (addressMemType == MEMORY_TYPE_SFX)
                 {
                     aadRelocateSfxMemory(oldAddress, newAddress - oldAddress);
                 }

@@ -75,7 +75,7 @@ void GlyphInit(Instance *instance, GameTracker *gameTracker)
     }
     else
     {
-        data = (GlyphData *)MEMPACK_Malloc(sizeof(GlyphData), 29);
+        data = (GlyphData *)MEMPACK_Malloc(sizeof(GlyphData), MEMORY_TYPE_GLYPHDATA);
 
         instance->extraData = data;
 

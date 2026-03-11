@@ -438,7 +438,7 @@ void STREAM_QueueNonblockingLoads(char *fileName, unsigned char memType, void *r
 
     currentEntry->relocateBinary = relocateBinary;
 
-    if (memType == 0)
+    if (memType == MEMORY_TYPE_STATIC)
     {
         currentEntry->status = 5;
     }

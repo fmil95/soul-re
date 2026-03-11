@@ -206,7 +206,7 @@ void UNDERWORLD_InitDisplayProcess()
         while (CheckVolatile(gameTrackerX.drawTimerReturn) != 0);
     } while (CheckVolatile(gameTrackerX.reqDisp) != 0);
 
-    ScreenMorphArray = (UW_ScreenXY *)MEMPACK_Malloc(sizeof(UW_ScreenXY[3][3]), 24);
+    ScreenMorphArray = (UW_ScreenXY *)MEMPACK_Malloc(sizeof(UW_ScreenXY[3][3]), MEMORY_TYPE_SCREEN_MORPH);
 
     for (row = 0; row < 3; row++)
     {

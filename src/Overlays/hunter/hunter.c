@@ -114,7 +114,7 @@ void HUNTER_Init(Instance *instance)
     {
         if (mv != NULL)
         {
-            vars = (HunterVars *)MEMPACK_Malloc(sizeof(HunterVars), 36);
+            vars = (HunterVars *)MEMPACK_Malloc(sizeof(HunterVars), MEMORY_TYPE_HUNTERDATA);
 
             if (vars != NULL)
             {
@@ -354,7 +354,7 @@ void HUNTER_Init(Instance *instance)
     {
         if (mv != NULL)
         {
-            vars = (HunterVars *)MEMPACK_Malloc(sizeof(HunterVars), 36);
+            vars = (HunterVars *)MEMPACK_Malloc(sizeof(HunterVars), MEMORY_TYPE_HUNTERDATA);
 
             if (vars != NULL)
             {

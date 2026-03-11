@@ -100,7 +100,7 @@ void MonsterInit(Instance *instance, GameTracker *gameTracker)
     }
     else
     {
-        mv = (MonsterVars *)MEMPACK_Malloc(608, 23);
+        mv = (MonsterVars *)MEMPACK_Malloc(608, MEMORY_TYPE_MONSTERDATA);
 
         instance->extraData = mv;
 
