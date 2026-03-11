@@ -1499,7 +1499,7 @@ void InitPhysicalObject(Instance *instance, GameTracker *gameTracker)
 
     Prop = (PhysObProperties *)instance->data;
 
-    Data = (PhysObData *)MEMPACK_Malloc(sizeof(PhysObData), 26);
+    Data = (PhysObData *)MEMPACK_Malloc(sizeof(PhysObData), MEMORY_TYPE_PHYSOBDATA);
 
     instance->extraData = Data;
 

@@ -56,14 +56,14 @@ int nosound = 0;
 
 int nomusic = 0;
 
-InterfaceItem InterfaceItems[6] = 
-{ 
+InterfaceItem InterfaceItems[6] =
+{
     { "\\PUBLOGO.STR;1",                         0,     0, 0,  1 },
-	{ "\\CRYLOGO.STR;1",                         0,     0, 0,  5 },
-	{ "\\KAININT.STR;1",                         0,     0, 0, -1 },
-	{ "\\VERSE.STR;1",                           0,     0, 0,  4 },
-	{ "\\CREDITS.STR;1",                         0,     0, 0, -1 },
-    { "\\kain2\\game\\psx\\mainmenu\\legal.tim", 165, 165, 1, -1 }, 
+    { "\\CRYLOGO.STR;1",                         0,     0, 0,  5 },
+    { "\\KAININT.STR;1",                         0,     0, 0, -1 },
+    { "\\VERSE.STR;1",                           0,     0, 0,  4 },
+    { "\\CREDITS.STR;1",                         0,     0, 0, -1 },
+    { "\\kain2\\game\\psx\\mainmenu\\legal.tim", 165, 165, 1, -1 },
 };
 
 long DoMainMenu = 0;
@@ -196,7 +196,7 @@ void ProcessArgs(char *baseAreaName, GameTracker *gameTracker)
     char worldName[32];
     intptr_t *argData;
 
-    argData = (intptr_t*)LOAD_ReadFile("\\kain2\\game\\psx\\kain2.arg", 10);
+    argData = (intptr_t *)LOAD_ReadFile("\\kain2\\game\\psx\\kain2.arg", 10);
 
     if (argData != NULL)
     {
@@ -205,48 +205,48 @@ void ProcessArgs(char *baseAreaName, GameTracker *gameTracker)
 
         sprintf(baseAreaName, "%s%s", worldName, levelNum);
 
-        if (FindTextInLine("-NOSOUND", (char*)argData) != 0) 
+        if (FindTextInLine("-NOSOUND", (char *)argData) != 0)
         {
             nosound = 1;
             nomusic = 1;
         }
 
-        if (FindTextInLine("-NOMUSIC", (char*)argData) != 0) 
+        if (FindTextInLine("-NOMUSIC", (char *)argData) != 0)
         {
             nomusic = 1;
         }
 
-        if (FindTextInLine("-TIMEOUT", (char*)argData) != 0)
+        if (FindTextInLine("-TIMEOUT", (char *)argData) != 0)
         {
             gameTracker->debugFlags |= 0x20000;
         }
 
-        if (FindTextInLine("-MAINMENU", (char*)argData) != 0) 
+        if (FindTextInLine("-MAINMENU", (char *)argData) != 0)
         {
             DoMainMenu = 1;
         }
 
-        if (FindTextInLine("-INSPECTRAL", (char*)argData) != 0) 
+        if (FindTextInLine("-INSPECTRAL", (char *)argData) != 0)
         {
             gameTrackerX.gameData.asmData.MorphType = 1;
         }
 
-        if (FindTextInLine("-VOICE", (char*)argData) != 0)
+        if (FindTextInLine("-VOICE", (char *)argData) != 0)
         {
             gameTracker->debugFlags |= 0x80000;
         }
 
-        if (FindTextInLine("-DEBUG_CD", (char*)argData) != 0) 
+        if (FindTextInLine("-DEBUG_CD", (char *)argData) != 0)
         {
             gameTracker->debugFlags |= 0x80000000;
         }
 
-        if (FindTextInLine("-LOADGAME", (char*)argData) != 0)
+        if (FindTextInLine("-LOADGAME", (char *)argData) != 0)
         {
             gameTrackerX.streamFlags |= 0x200000;
         }
 
-        if (FindTextInLine("-ALLWARP", (char*)argData) != 0) 
+        if (FindTextInLine("-ALLWARP", (char *)argData) != 0)
         {
             gameTrackerX.streamFlags |= 0x400000;
         }
@@ -264,7 +264,7 @@ void ProcessArgs(char *baseAreaName, GameTracker *gameTracker)
 void InitDisplay()
 {
     int i;
-    RECT r = { 512, 0, 512, 512 };
+    RECT r = {512, 0, 512, 512};
 
     ResetGraph(3);
 
@@ -286,7 +286,7 @@ void InitDisplay()
 
     for (i = 0; i < 2; i++)
     {
-        clearRect[i].tag.rgba.a = 3; 
+        clearRect[i].tag.rgba.a = 3;
 
         clearRect[i].code = 2;
 
@@ -298,8 +298,8 @@ void InitDisplay()
 
     ClearDisplay();
 
-    ClearOTagR((unsigned long*)gameTrackerX.drawOT, 3072);
-    ClearOTagR((unsigned long*)gameTrackerX.dispOT, 3072);
+    ClearOTagR((unsigned long *)gameTrackerX.drawOT, 3072);
+    ClearOTagR((unsigned long *)gameTrackerX.dispOT, 3072);
 
     ClearImage(&r, 0, 255, 0);
 }
@@ -426,7 +426,7 @@ void MAIN_ShowLoadingScreen()
     long *loadingScreen;
     char langChar[5];
     int lang;
-    char* temp; // not from decls.h
+    char *temp; // not from decls.h
 
     temp = langChar;
 
@@ -453,7 +453,7 @@ void MAIN_ShowLoadingScreen()
     {
         screen_to_vram(loadingScreen, gameTrackerX.gameData.asmData.dispPage);
 
-        MEMPACK_Free((char*)loadingScreen);
+        MEMPACK_Free((char *)loadingScreen);
     }
 }
 
@@ -466,7 +466,7 @@ void init_menus(GameTracker *gt)
 {
     menu_t *menu;
 
-    menu = (menu_t *)MEMPACK_Malloc(menu_data_size(), 45);
+    menu = (menu_t *)MEMPACK_Malloc(menu_data_size(), MEMORY_TYPE_MENU);
 
     menu_initialize(menu, gt);
 
@@ -536,7 +536,7 @@ void MAIN_ResetGame()
 void MAIN_MainMenuInit()
 {
     char sfxFileName[64];
-    char* temp; // not from decls.h
+    char *temp; // not from decls.h
 
     mainMenuMode = 0;
     mainMenuTimeOut = 0;
@@ -559,7 +559,7 @@ void MAIN_MainMenuInit()
         }
     }
 
-    mainMenuScreen = (intptr_t*)MAIN_LoadTim("\\kain2\\game\\psx\\frontend\\title1.tim\0\\kain2\\game\\psx\\mainmenu\\features.tim");
+    mainMenuScreen = (intptr_t *)MAIN_LoadTim("\\kain2\\game\\psx\\frontend\\title1.tim\0\\kain2\\game\\psx\\mainmenu\\features.tim");
 
     VRAM_EnableTerrainArea();
 

@@ -33,7 +33,7 @@ void load(memcard_t *memcard)
     }
     else
     {
-        object = (Object *)MEMPACK_Malloc(40000, 43);
+        object = (Object *)MEMPACK_Malloc(40000, MEMORY_TYPE_MCARD);
     }
 
     LOAD_LoadToAddress("\\kain2\\object\\mcardx\\mcardx.drm", object, 1);

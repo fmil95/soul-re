@@ -752,7 +752,7 @@ void ALUKA_Init(Instance *instance)
     if (mv != NULL)
     {
 
-        vars = (AlukaVars *)MEMPACK_Malloc(sizeof(AlukaVars), 27);
+        vars = (AlukaVars *)MEMPACK_Malloc(sizeof(AlukaVars), MEMORY_TYPE_ALUKADATA);
 
         if (vars == NULL)
         {
@@ -2610,7 +2610,7 @@ void ALUKA_Init(Instance *instance)
     if (mv != NULL)
     {
 
-        vars = (AlukaVars *)MEMPACK_Malloc(sizeof(AlukaVars), 27);
+        vars = (AlukaVars *)MEMPACK_Malloc(sizeof(AlukaVars), MEMORY_TYPE_ALUKADATA);
 
         if (vars == NULL)
         {

@@ -432,7 +432,7 @@ BigFileDir *LOAD_ReadDirectory(BigFileDirEntry *dirEntry)
 
     sizeOfDir = (dirEntry->numFiles * sizeof(BigFileEntry)) + sizeof(long);
 
-    dir = (BigFileDir *)MEMPACK_Malloc(sizeOfDir, 44);
+    dir = (BigFileDir *)MEMPACK_Malloc(sizeOfDir, MEMORY_TYPE_RELOCATABLE_CD_LOADER);
 
     LOAD_CdReadFromBigFile(dirEntry->subDirOffset, (uintptr_t *)dir, sizeOfDir, 0, 0);
 
@@ -489,7 +489,7 @@ void LOAD_InitCdLoader(char *bigFileName, char *voiceFileName)
 
         i = (loadStatus.bigFile.numSubDirs * 8) + 4;
 
-        ptr = MEMPACK_Malloc(i, 8);
+        ptr = MEMPACK_Malloc(i, MEMORY_TYPE_CD_LOADER);
 
         CdSync(0, NULL);
 
@@ -591,7 +591,7 @@ void LOAD_CD_ReadPartOfFile(NonBlockLoadEntry *loadEntry)
     }
 }
 
-static char HashExtensions[7][4] = { "drm", "crm", "tim", "smp", "snd", "smf", "snf" };
+static char HashExtensions[7][4] = {"drm", "crm", "tim", "smp", "snd", "smf", "snf"};
 
 long LOAD_HashName(char *string)
 {
@@ -878,8 +878,8 @@ void LOAD_CleanUpBuffers()
 
 void *LOAD_InitBuffers()
 {
-    loadStatus.buffer1 = MEMPACK_Malloc(2048, 35);
-    loadStatus.buffer2 = MEMPACK_Malloc(2048, 35);
+    loadStatus.buffer1 = MEMPACK_Malloc(2048, MEMORY_TYPE_TEMP_BUFFER);
+    loadStatus.buffer2 = MEMPACK_Malloc(2048, MEMORY_TYPE_TEMP_BUFFER);
 
     return loadStatus.buffer1;
 }

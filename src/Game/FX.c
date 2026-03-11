@@ -245,7 +245,7 @@ FXParticle *FX_GetParticle(Instance *instance, short startSegment)
 {
     FXParticle *particle;
 
-    particle = (FXParticle *)MEMPACK_Malloc(sizeof(FXParticle), 13);
+    particle = (FXParticle *)MEMPACK_Malloc(sizeof(FXParticle), MEMORY_TYPE_FX);
 
     if (particle != NULL)
     {
@@ -2213,7 +2213,7 @@ FXRibbon *FX_StartRibbon(Instance *instance, short startSegment, short endSegmen
         return NULL;
     }
 
-    ribbon = (FXRibbon *)MEMPACK_Malloc(sizeof(FXRibbon), 13);
+    ribbon = (FXRibbon *)MEMPACK_Malloc(sizeof(FXRibbon), MEMORY_TYPE_FX);
 
     if (ribbon == NULL)
     {
@@ -2235,7 +2235,7 @@ FXRibbon *FX_StartRibbon(Instance *instance, short startSegment, short endSegmen
         ribbon->numberVerts = 4;
     }
 
-    ribbon->vertexPool = (SVECTOR *)MEMPACK_Malloc(ribbon->numberVerts * 8, 13);
+    ribbon->vertexPool = (SVECTOR *)MEMPACK_Malloc(ribbon->numberVerts * 8, MEMORY_TYPE_FX);
 
     if (ribbon->vertexPool == NULL)
     {
@@ -3492,7 +3492,7 @@ void FX_DoInstancePowerRing(Instance *instance, long atuTime, long *color, long 
     SVector point;
     FXHalvePlane *ring;
 
-    ring = (FXHalvePlane *)MEMPACK_Malloc(sizeof(FXHalvePlane) + (numColors * 4), 13);
+    ring = (FXHalvePlane *)MEMPACK_Malloc(sizeof(FXHalvePlane) + (numColors * 4), MEMORY_TYPE_FX);
 
     if (ring == NULL) { return; }
 
@@ -3634,7 +3634,7 @@ FXGlowEffect *FX_DoInstanceOneSegmentGlow(Instance *instance, long segment, long
 
     atuColorCycleRate *= 33;
 
-    glowEffect = (FXGlowEffect *)MEMPACK_Malloc((numColors * 4) + sizeof(FXGlowEffect), 13);
+    glowEffect = (FXGlowEffect *)MEMPACK_Malloc((numColors * 4) + sizeof(FXGlowEffect), MEMORY_TYPE_FX);
 
     if (glowEffect != NULL)
     {
@@ -4002,7 +4002,7 @@ FXBlastringEffect *FX_DoBlastRing(Instance *instance, SVector *position, MATRIX 
 {
     FXBlastringEffect *blast;
 
-    blast = (FXBlastringEffect *)MEMPACK_Malloc(sizeof(FXBlastringEffect), 13);
+    blast = (FXBlastringEffect *)MEMPACK_Malloc(sizeof(FXBlastringEffect), MEMORY_TYPE_FX);
 
     if (blast != NULL)
     {
@@ -4485,7 +4485,7 @@ FXLightning *FX_CreateLightning(Instance *instance, int lifeTime, int deg, int d
 {
     FXLightning *zap;
 
-    zap = (FXLightning *)MEMPACK_Malloc(sizeof(FXLightning), 13);
+    zap = (FXLightning *)MEMPACK_Malloc(sizeof(FXLightning), MEMORY_TYPE_FX);
 
     if (zap != NULL)
     {
@@ -4757,7 +4757,7 @@ FXFlash *FX_StartGenericFlash(Instance *instance, int num)
 
     GFP = &GFXO->FlashList[num];
 
-    flash = (FXFlash *)MEMPACK_Malloc(sizeof(FXFlash), 13);
+    flash = (FXFlash *)MEMPACK_Malloc(sizeof(FXFlash), MEMORY_TYPE_FX);
 
     if (flash != NULL)
     {
@@ -4837,7 +4837,7 @@ void FX_StartLightbeam(Instance *instance, int startSeg, int endSeg, int color_n
 
         color = GFXO->ColorList[color_num];
 
-        beam = (FXLightBeam *)MEMPACK_Malloc(sizeof(FXLightBeam), 13);
+        beam = (FXLightBeam *)MEMPACK_Malloc(sizeof(FXLightBeam), MEMORY_TYPE_FX);
 
         if (beam != NULL)
         {
@@ -5775,7 +5775,7 @@ FXForceFieldEffect *FX_StartFField(Instance *instance, int size, Position *offse
 {
     FXForceFieldEffect *field;
 
-    field = (FXForceFieldEffect *)MEMPACK_Malloc(sizeof(FXForceFieldEffect), 13);
+    field = (FXForceFieldEffect *)MEMPACK_Malloc(sizeof(FXForceFieldEffect), MEMORY_TYPE_FX);
 
     if (field != NULL)
     {
