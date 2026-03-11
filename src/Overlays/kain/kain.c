@@ -5,6 +5,7 @@
 #include "Game/MATH3D.h"
 #include "Game/PSX/SUPPORT.h"
 #include "Game/MONSTER/MONLIB.h"
+#include "Game/MONSTER/MONSTER.h"
 #include "Game/SOUND.h"
 #include "Game/STATE.h"
 #include "Game/STREAM.h"
@@ -399,7 +400,28 @@ void SwitchToHit(Instance *instance)
     MON_SwitchStateDoEntry(instance, MONSTER_STATE_HIT);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_DamageEffect);
+void KAIN_DamageEffect(Instance *instance, evFXHitData *data)
+{
+
+    SVector localloc;
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (data != NULL)
+    {
+        if ((mv->auxFlags & 0x50) == 0x50 || (mv->auxFlags & 0x14) == 4)
+        {
+            MON_DamageEffect(instance, data);
+        }
+        else
+        {
+            localloc = data->location;
+            FX_MakeHitFX(&localloc);
+            SOUND_Play3dSound(&instance->position, 21, 650, 80, 15500);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Message);
 
@@ -818,7 +840,28 @@ void SwitchToHit(Instance *instance)
     MON_SwitchStateDoEntry(instance, MONSTER_STATE_HIT);
 }
 
-void KAIN_DamageEffect(void) {};
+void KAIN_DamageEffect(Instance *instance, evFXHitData *data)
+{
+
+    SVector localloc;
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (data != NULL)
+    {
+        if ((mv->auxFlags & 0x50) == 0x50 || (mv->auxFlags & 0x14) == 4)
+        {
+            MON_DamageEffect(instance, data);
+        }
+        else
+        {
+            localloc = data->location;
+            FX_MakeHitFX(&localloc);
+            SOUND_Play3dSound(&instance->position, 21, 650, 80, 15500);
+        }
+    }
+}
 
 void KAIN_Message(void) {};
 
