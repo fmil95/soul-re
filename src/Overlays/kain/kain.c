@@ -633,7 +633,25 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_HitEntry);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Hit);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_DoNothingEntry);
+void KAIN_DoNothingEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (KainVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        if (SndIsPlaying(vars->soundHandle))
+        {
+            SndEndLoop(vars->soundHandle);
+        }
+
+        MON_SwitchState(instance, mv->previousMainState);
+    }
+}
 
 void KAIN_DoNothing() {};
 
@@ -1250,7 +1268,25 @@ void KAIN_HitEntry(void) {};
 
 void KAIN_Hit(void) {};
 
-void KAIN_DoNothingEntry(void) {};
+void KAIN_DoNothingEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (KainVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        if (SndIsPlaying(vars->soundHandle))
+        {
+            SndEndLoop(vars->soundHandle);
+        }
+
+        MON_SwitchState(instance, mv->previousMainState);
+    }
+}
 
 void KAIN_DoNothing(void) {};
 

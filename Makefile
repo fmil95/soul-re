@@ -178,6 +178,7 @@ $(BUILD_DIR)/src/Overlays/alukabss/alukabss.c.o: CFLAGS += -G0
 $(BUILD_DIR)/src/Overlays/roninbss/roninbss.c.o: CFLAGS += -G0
 
 $(BUILD_DIR)/src/Overlays/aluka/aluka.c.o: CFLAGS += -fsigned-char
+$(BUILD_DIR)/src/Overlays/kain/kain.c.o: CFLAGS += -fsigned-char
 
 ifeq ($(SKIP_ASM),1)
 all: $(OBJECTS) overlays
