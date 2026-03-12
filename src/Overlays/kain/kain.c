@@ -6,6 +6,7 @@
 #include "Game/MATH3D.h"
 #include "Game/PSX/SUPPORT.h"
 #include "Game/MEMPACK.h"
+#include "Game/MONSTER/MONAPI.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSTER.h"
@@ -429,7 +430,52 @@ void KAIN_DamageEffect(Instance *instance, evFXHitData *data)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Message);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Query);
+uintptr_t KAIN_Query(Instance *instance, unsigned long query)
+{
+
+    uintptr_t ret; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (KainVars *)mv->extraVars;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return MonsterQuery(instance, query);
+    }
+
+    switch (query)
+    {                                 /* irregular */
+    case queryHitState:
+        ret = 0x1000000;
+        break;
+    case querySpecialInfo:
+
+        ret = 0;
+
+        if (mv->auxFlags & 0x20)
+        {
+            ret = 1;
+        }
+
+        if (mv->auxFlags & 8)
+        {
+            ret |= 2;
+        }
+
+        break;
+    default:
+        ret = MonsterQuery(instance, query);
+        break;
+    }
+
+    return ret;
+}
 
 void KAIN_Init(Instance *instance)
 {
@@ -1001,7 +1047,52 @@ void KAIN_DamageEffect(Instance *instance, evFXHitData *data)
 
 void KAIN_Message(void) {};
 
-void KAIN_Query(void) {};
+uintptr_t KAIN_Query(Instance *instance, unsigned long query)
+{
+
+    uintptr_t ret; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (KainVars *)mv->extraVars;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return MonsterQuery(instance, query);
+    }
+
+    switch (query)
+    {                                 /* irregular */
+    case queryHitState:
+        ret = 0x1000000;
+        break;
+    case querySpecialInfo:
+
+        ret = 0;
+
+        if (mv->auxFlags & 0x20)
+        {
+            ret = 1;
+        }
+
+        if (mv->auxFlags & 8)
+        {
+            ret |= 2;
+        }
+
+        break;
+    default:
+        ret = MonsterQuery(instance, query);
+        break;
+    }
+
+    return ret;
+}
 
 void KAIN_Init(Instance *instance)
 {
