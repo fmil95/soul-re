@@ -786,7 +786,33 @@ void KAIN_Attack(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_PursueEntry);
+void KAIN_PursueEntry(Instance *instance)
+{
+
+    enum MonsterAnim anim; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    if (mv->extraVars != NULL)
+    {
+        if (mv->mvFlags & 4)
+        {
+            MON_PursueEntry(instance);
+            return;
+        }
+
+        if (mv->previousMainState != MONSTER_STATE_PURSUE)
+        {
+            KAIN_EndEffects(instance);
+            anim = mv->auxFlags & 0x10 ? MONSTER_ANIM_HIT2 : MONSTER_ANIM_WALK;
+            MON_PlayAnimFromList(instance, ma->auxAnimList, anim, 2);
+            KAIN_TeleportEntry(instance);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Pursue);
 
@@ -1579,7 +1605,33 @@ void KAIN_Attack(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-void KAIN_PursueEntry(void) {};
+void KAIN_PursueEntry(Instance *instance)
+{
+
+    enum MonsterAnim anim; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    if (mv->extraVars != NULL)
+    {
+        if (mv->mvFlags & 4)
+        {
+            MON_PursueEntry(instance);
+            return;
+        }
+
+        if (mv->previousMainState != MONSTER_STATE_PURSUE)
+        {
+            KAIN_EndEffects(instance);
+            anim = mv->auxFlags & 0x10 ? MONSTER_ANIM_HIT2 : MONSTER_ANIM_WALK;
+            MON_PlayAnimFromList(instance, ma->auxAnimList, anim, 2);
+            KAIN_TeleportEntry(instance);
+        }
+    }
+}
 
 void KAIN_Pursue(void) {};
 
