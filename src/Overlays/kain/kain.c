@@ -6,6 +6,7 @@
 #include "Game/INSTANCE.h"
 #include "Game/MATH3D.h"
 #include "Game/PSX/SUPPORT.h"
+#include "Game/PLAN/PLANAPI.h"
 #include "Game/MEMPACK.h"
 #include "Game/MONSTER/MONAPI.h"
 #include "Game/MONSTER/MONLIB.h"
@@ -814,7 +815,66 @@ void KAIN_PursueEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Pursue);
+void KAIN_Pursue(Instance *instance)
+{
+
+    Position pos;
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (KainVars *)mv->extraVars;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_Pursue(instance);
+        return;
+    }
+
+    if (vars->teleportState == K_TELEPORT_PAUSE && MON_GetTime(instance) >= (unsigned long)vars->timer)
+    {
+        if (mv->auxFlags & 0x10)
+        {
+            PLANAPI_FindNodePositionInUnit(STREAM_GetStreamUnitWithID(instance->currentStreamUnitID), &pos, 1, 4);
+
+            if (MATH3D_LengthXY(pos.x - gameTrackerX.playerInstance->position.x, pos.y - gameTrackerX.playerInstance->position.y) < attrs->outsideOfRoom)
+            {
+                KAIN_FindFarthestMarkerPosition(instance, &vars->teleportTarget, 1, 4);
+            }
+            else
+            {
+                COPY_SVEC(Position, &vars->teleportTarget, Position, &pos);
+            }
+        }
+        else
+        {
+            KAIN_FindFarthestMarkerPosition(instance, &vars->teleportTarget, ((unsigned char)vars->tier * 4) | 1, ((unsigned char)vars->tier * 4) + 4);
+        }
+    }
+
+    if (KAIN_Teleport(instance) != 0)
+    {
+        if (instance->currentStreamUnitID == gameTrackerX.playerInstance->currentStreamUnitID)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+        }
+        else
+        {
+            MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        }
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_HitEntry);
 
@@ -1633,7 +1693,66 @@ void KAIN_PursueEntry(Instance *instance)
     }
 }
 
-void KAIN_Pursue(void) {};
+void KAIN_Pursue(Instance *instance)
+{
+
+    Position pos;
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (KainVars *)mv->extraVars;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_Pursue(instance);
+        return;
+    }
+
+    if (vars->teleportState == K_TELEPORT_PAUSE && MON_GetTime(instance) >= (unsigned long)vars->timer)
+    {
+        if (mv->auxFlags & 0x10)
+        {
+            PLANAPI_FindNodePositionInUnit(STREAM_GetStreamUnitWithID(instance->currentStreamUnitID), &pos, 1, 4);
+
+            if (MATH3D_LengthXY(pos.x - gameTrackerX.playerInstance->position.x, pos.y - gameTrackerX.playerInstance->position.y) < attrs->outsideOfRoom)
+            {
+                KAIN_FindFarthestMarkerPosition(instance, &vars->teleportTarget, 1, 4);
+            }
+            else
+            {
+                COPY_SVEC(Position, &vars->teleportTarget, Position, &pos);
+            }
+        }
+        else
+        {
+            KAIN_FindFarthestMarkerPosition(instance, &vars->teleportTarget, ((unsigned char)vars->tier * 4) | 1, ((unsigned char)vars->tier * 4) + 4);
+        }
+    }
+
+    if (KAIN_Teleport(instance) != 0)
+    {
+        if (instance->currentStreamUnitID == gameTrackerX.playerInstance->currentStreamUnitID)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+        }
+        else
+        {
+            MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        }
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 void KAIN_HitEntry(void) {};
 
