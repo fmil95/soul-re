@@ -2,6 +2,7 @@
 #include "Game/DEBUG.h"
 #include "Game/FX.h"
 #include "Game/GAMELOOP.h"
+#include "Game/GAMEPAD.h"
 #include "Game/INSTANCE.h"
 #include "Game/MATH3D.h"
 #include "Game/PSX/SUPPORT.h"
@@ -14,6 +15,8 @@
 #include "Game/SOUND.h"
 #include "Game/STATE.h"
 #include "Game/STREAM.h"
+
+int KAIN_Lightning(Instance *instance); // TODO: Delete once matched
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -677,7 +680,111 @@ void KAIN_AttackEntry(Instance *instance)
     mv->attackState = K_NORMAL;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Attack);
+void KAIN_Attack(Instance *instance)
+{
+
+    int motorSpeed; // not from debug symbols
+    int time; // not from debug symbols
+    int motorTime; // not from debug symbols
+    int attackState; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (KainVars *)mv->extraVars;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return;
+    }
+
+    MON_TurnToPosition(instance, &vars->zapTarget->position, 4096);
+    time = MON_GetTime(instance);
+    attackState = mv->attackState;
+
+    switch (attackState)
+    {
+    case 0:
+        KAIN_ChargeDown(instance, vars->timer - (attrs->attackLength * 33), mv->attackType->sphereSegment);
+
+        if (time >= vars->timer)
+        {
+            GAMEPAD_Shock0(1, 8192);
+            KAIN_LightningEntry(instance);
+            vars->soundHandle = SOUND_Play3dSound(&instance->position, 397, 0, 100, 32762);
+            vars->timer = MON_GetTime(instance) + (attrs->attackLength * 33);
+            mv->attackState++;
+        }
+
+        if (instance->flags2 & 0x10 && mv->attackType->numAnims > 1)
+        {
+            MON_PlayAnimFromList(instance, mv->attackType->animList, MONSTER_ANIM_HIT2, 2);
+        }
+        break;
+    case 1:
+        if (mv->auxFlags & 0x200)
+        {
+            KAIN_Lightning(instance);
+
+            if (mv->auxFlags & 0x400)
+            {
+                KAIN_EndEffects(instance);
+                mv->auxFlags &= ~0x200;
+                mv->auxFlags &= ~0x400;
+                MON_SwitchState(instance, 2);
+            }
+        }
+        else
+        {
+            if (KAIN_Lightning(instance) != 0)
+            {
+                motorTime = ((vars->timer - time) * 4096) / 33;
+                INSTANCE_Post(vars->zapTarget, 0x40025, motorTime / 30);
+                mv->attackState++;
+                motorSpeed = mv->auxFlags & 2 ? 128 : 196;
+                GAMEPAD_Shock1(motorSpeed, motorTime);
+            }
+
+            if (time >= vars->timer)
+            {
+                MON_SwitchState(instance, 1);
+            }
+        }
+        if (instance->flags2 & 0x10 && mv->attackType->numAnims > 1)
+        {
+            MON_PlayAnimFromList(instance, mv->attackType->animList, MONSTER_ANIM_HIT2, 2);
+        }
+        break;
+    case 2:
+        INSTANCE_Post(vars->zapTarget, 0x40003, SetActionPlayHostAnimationData(vars->zapTarget, instance, 20, 0, 0, attackState));
+        INSTANCE_Post(vars->zapTarget, 0x1000000, SetMonsterHitData(instance, 0, mv->attackType->damage * 512, 0, 0));
+        mv->attackState++;
+    case 3:
+        KAIN_Lightning(instance);
+
+        if (instance->flags2 & 0x10 && mv->attackType->numAnims > 1)
+        {
+            MON_PlayAnimFromList(instance, mv->attackType->animList, MONSTER_ANIM_HIT2, 2);
+        }
+
+        if (time >= vars->timer)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+        }
+        break;
+    }
+
+    if (instance->currentMainState != MONSTER_STATE_ATTACK && SndIsPlaying(vars->soundHandle))
+    {
+        SndEndLoop(vars->soundHandle);
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_PursueEntry);
 
@@ -999,7 +1106,7 @@ void KAIN_LightningEntry(Instance *instance)
     }
 }
 
-void KAIN_Lightning(void) {};
+int KAIN_Lightning(Instance *instance) {};
 
 void KAIN_FFieldOffset(Instance *instance, int segment, Position *position)
 {
@@ -1366,7 +1473,111 @@ void KAIN_AttackEntry(Instance *instance)
     mv->attackState = K_NORMAL;
 }
 
-void KAIN_Attack(void) {};
+void KAIN_Attack(Instance *instance)
+{
+
+    int motorSpeed; // not from debug symbols
+    int time; // not from debug symbols
+    int motorTime; // not from debug symbols
+    int attackState; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (KainVars *)mv->extraVars;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return;
+    }
+
+    MON_TurnToPosition(instance, &vars->zapTarget->position, 4096);
+    time = MON_GetTime(instance);
+    attackState = mv->attackState;
+
+    switch (attackState)
+    {
+    case 0:
+        KAIN_ChargeDown(instance, vars->timer - (attrs->attackLength * 33), mv->attackType->sphereSegment);
+
+        if (time >= vars->timer)
+        {
+            GAMEPAD_Shock0(1, 8192);
+            KAIN_LightningEntry(instance);
+            vars->soundHandle = SOUND_Play3dSound(&instance->position, 397, 0, 100, 32762);
+            vars->timer = MON_GetTime(instance) + (attrs->attackLength * 33);
+            mv->attackState++;
+        }
+
+        if (instance->flags2 & 0x10 && mv->attackType->numAnims > 1)
+        {
+            MON_PlayAnimFromList(instance, mv->attackType->animList, MONSTER_ANIM_HIT2, 2);
+        }
+        break;
+    case 1:
+        if (mv->auxFlags & 0x200)
+        {
+            KAIN_Lightning(instance);
+
+            if (mv->auxFlags & 0x400)
+            {
+                KAIN_EndEffects(instance);
+                mv->auxFlags &= ~0x200;
+                mv->auxFlags &= ~0x400;
+                MON_SwitchState(instance, 2);
+            }
+        }
+        else
+        {
+            if (KAIN_Lightning(instance) != 0)
+            {
+                motorTime = ((vars->timer - time) * 4096) / 33;
+                INSTANCE_Post(vars->zapTarget, 0x40025, motorTime / 30);
+                mv->attackState++;
+                motorSpeed = mv->auxFlags & 2 ? 128 : 196;
+                GAMEPAD_Shock1(motorSpeed, motorTime);
+            }
+
+            if (time >= vars->timer)
+            {
+                MON_SwitchState(instance, 1);
+            }
+        }
+        if (instance->flags2 & 0x10 && mv->attackType->numAnims > 1)
+        {
+            MON_PlayAnimFromList(instance, mv->attackType->animList, MONSTER_ANIM_HIT2, 2);
+        }
+        break;
+    case 2:
+        INSTANCE_Post(vars->zapTarget, 0x40003, SetActionPlayHostAnimationData(vars->zapTarget, instance, 20, 0, 0, attackState));
+        INSTANCE_Post(vars->zapTarget, 0x1000000, SetMonsterHitData(instance, 0, mv->attackType->damage * 512, 0, 0));
+        mv->attackState++;
+    case 3:
+        KAIN_Lightning(instance);
+
+        if (instance->flags2 & 0x10 && mv->attackType->numAnims > 1)
+        {
+            MON_PlayAnimFromList(instance, mv->attackType->animList, MONSTER_ANIM_HIT2, 2);
+        }
+
+        if (time >= vars->timer)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+        }
+        break;
+    }
+
+    if (instance->currentMainState != MONSTER_STATE_ATTACK && SndIsPlaying(vars->soundHandle))
+    {
+        SndEndLoop(vars->soundHandle);
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 void KAIN_PursueEntry(void) {};
 
