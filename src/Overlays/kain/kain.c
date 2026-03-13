@@ -621,7 +621,61 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_CombatEntry);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Combat);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_AttackEntry);
+void KAIN_AttackEntry(Instance *instance)
+{
+
+    int attackIndex; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (KainVars *)mv->extraVars;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return;
+    }
+
+    if (mv->auxFlags & 0x200)
+    {
+        mv->attackType = &ma->attackAttributesList[(int)mv->subAttr->combatAttributes->attackList[4]];
+        mv->auxFlags |= 2;
+    }
+    else
+    {
+
+        vars->zapTarget = gameTrackerX.playerInstance;
+        attackIndex = mv->auxFlags & 0x10 ? 0 : 2;
+
+        if (MATH3D_LengthXY(instance->position.x - gameTrackerX.playerInstance->position.x, instance->position.y - gameTrackerX.playerInstance->position.y) < attrs->handHitDist)
+        {
+            mv->attackType = &ma->attackAttributesList[(int)mv->subAttr->combatAttributes->attackList[attackIndex]];
+            mv->auxFlags |= 2;
+        }
+        else
+        {
+            mv->attackType = &ma->attackAttributesList[(int)mv->subAttr->combatAttributes->attackList[attackIndex + 1]];
+            mv->auxFlags &= ~2;
+
+            if (MATH3D_LengthXY(gameTrackerX.playerInstance->oldPos.x - gameTrackerX.playerInstance->position.x, gameTrackerX.playerInstance->oldPos.y - gameTrackerX.playerInstance->position.y) > 10)
+            {
+                mv->auxFlags |= 1;
+            }
+            else
+            {
+                mv->auxFlags &= ~1;
+            }
+        }
+    }
+
+    vars->timer = MON_GetTime(instance) + (mv->attackType->sphereOnFrame * 33);
+    MON_PlayAnimFromList(instance, mv->attackType->animList, MONSTER_ANIM_HIT1, 1);
+    mv->attackState = K_NORMAL;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Attack);
 
@@ -1256,7 +1310,61 @@ void KAIN_CombatEntry(void) {};
 
 void KAIN_Combat(void) {};
 
-void KAIN_AttackEntry(void) {};
+void KAIN_AttackEntry(Instance *instance)
+{
+
+    int attackIndex; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (KainVars *)mv->extraVars;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return;
+    }
+
+    if (mv->auxFlags & 0x200)
+    {
+        mv->attackType = &ma->attackAttributesList[(int)mv->subAttr->combatAttributes->attackList[4]];
+        mv->auxFlags |= 2;
+    }
+    else
+    {
+
+        vars->zapTarget = gameTrackerX.playerInstance;
+        attackIndex = mv->auxFlags & 0x10 ? 0 : 2;
+
+        if (MATH3D_LengthXY(instance->position.x - gameTrackerX.playerInstance->position.x, instance->position.y - gameTrackerX.playerInstance->position.y) < attrs->handHitDist)
+        {
+            mv->attackType = &ma->attackAttributesList[(int)mv->subAttr->combatAttributes->attackList[attackIndex]];
+            mv->auxFlags |= 2;
+        }
+        else
+        {
+            mv->attackType = &ma->attackAttributesList[(int)mv->subAttr->combatAttributes->attackList[attackIndex + 1]];
+            mv->auxFlags &= ~2;
+
+            if (MATH3D_LengthXY(gameTrackerX.playerInstance->oldPos.x - gameTrackerX.playerInstance->position.x, gameTrackerX.playerInstance->oldPos.y - gameTrackerX.playerInstance->position.y) > 10)
+            {
+                mv->auxFlags |= 1;
+            }
+            else
+            {
+                mv->auxFlags &= ~1;
+            }
+        }
+    }
+
+    vars->timer = MON_GetTime(instance) + (mv->attackType->sphereOnFrame * 33);
+    MON_PlayAnimFromList(instance, mv->attackType->animList, MONSTER_ANIM_HIT1, 1);
+    mv->attackState = K_NORMAL;
+}
 
 void KAIN_Attack(void) {};
 
