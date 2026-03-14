@@ -1632,9 +1632,9 @@ void KAIN_Idle(Instance *instance)
     }
 }
 
-void KAIN_CombatEntry(void) {};
+void KAIN_CombatEntry(Instance *instance) {};
 
-void KAIN_Combat(void) {};
+void KAIN_Combat(Instance *instance) {};
 
 void KAIN_AttackEntry(Instance *instance)
 {
