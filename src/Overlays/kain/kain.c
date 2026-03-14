@@ -876,7 +876,72 @@ void KAIN_Pursue(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_HitEntry);
+void KAIN_HitEntry(Instance *instance)
+{
+
+    int mode; // not from debug symbols
+    int animType; // not from debug symbols
+    int hits; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (KainVars *)mv->extraVars;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars != NULL && attrs != NULL)
+    {
+
+        GAMEPAD_Shock0(1, 8192);
+
+        animType = 0;
+        mode = 2;
+        hits = MIN(vars->numHits, attrs->maxHits);
+
+        if ((mv->auxFlags & 0x50) == 0x50)
+        {
+            animType = hits + 4;
+            mode = 1;
+            vars->numHits++;
+        }
+        else if ((mv->auxFlags & 0x14) == 4)
+        {
+            mode = 1;
+            vars->numHits++;
+            animType = hits + 7;
+
+            if (vars->numHits < attrs->maxHits)
+            {
+                mv->auxFlags |= 8;
+            }
+            else
+            {
+                mv->auxFlags |= 0x20;
+            }
+        }
+        else
+        {
+            vars->timer = MON_GetTime(instance) + 1320;
+            SOUND_Play3dSound(&instance->position, 403, 0, 100, 15500);
+            SOUND_Play3dSound(&instance->position, 21, 650, 70, 15500);
+        }
+
+        if (!MON_AnimPlayingFromList(instance, ma->auxAnimList, animType))
+        {
+            MON_PlayAnimFromList(instance, ma->auxAnimList, animType, mode);
+            mv->mode = 0x8000;
+            KAIN_EndEffects(instance);
+        }
+
+        if (SndIsPlaying(vars->soundHandle))
+        {
+            SndEndLoop(vars->soundHandle);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Hit);
 
@@ -1754,7 +1819,72 @@ void KAIN_Pursue(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-void KAIN_HitEntry(void) {};
+void KAIN_HitEntry(Instance *instance)
+{
+
+    int mode; // not from debug symbols
+    int animType; // not from debug symbols
+    int hits; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (KainVars *)mv->extraVars;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars != NULL && attrs != NULL)
+    {
+
+        GAMEPAD_Shock0(1, 8192);
+
+        animType = 0;
+        mode = 2;
+        hits = MIN(vars->numHits, attrs->maxHits);
+
+        if ((mv->auxFlags & 0x50) == 0x50)
+        {
+            animType = hits + 4;
+            mode = 1;
+            vars->numHits++;
+        }
+        else if ((mv->auxFlags & 0x14) == 4)
+        {
+            mode = 1;
+            vars->numHits++;
+            animType = hits + 7;
+
+            if (vars->numHits < attrs->maxHits)
+            {
+                mv->auxFlags |= 8;
+            }
+            else
+            {
+                mv->auxFlags |= 0x20;
+            }
+        }
+        else
+        {
+            vars->timer = MON_GetTime(instance) + 1320;
+            SOUND_Play3dSound(&instance->position, 403, 0, 100, 15500);
+            SOUND_Play3dSound(&instance->position, 21, 650, 70, 15500);
+        }
+
+        if (!MON_AnimPlayingFromList(instance, ma->auxAnimList, animType))
+        {
+            MON_PlayAnimFromList(instance, ma->auxAnimList, animType, mode);
+            mv->mode = 0x8000;
+            KAIN_EndEffects(instance);
+        }
+
+        if (SndIsPlaying(vars->soundHandle))
+        {
+            SndEndLoop(vars->soundHandle);
+        }
+    }
+}
 
 void KAIN_Hit(void) {};
 
