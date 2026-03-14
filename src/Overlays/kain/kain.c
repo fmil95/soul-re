@@ -13,18 +13,37 @@
 #include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/RAZIEL/RAZIEL.h"
+#include "Game/SAVEINFO.h"
 #include "Game/SOUND.h"
 #include "Game/STATE.h"
 #include "Game/STREAM.h"
 
 int KAIN_Lightning(Instance *instance); // TODO: Delete once matched
 
+MonsterStateChoice KAIN_StateChoiceTable[] = {
+    {MONSTER_STATE_PURSUE, {KAIN_PursueEntry, KAIN_Pursue}},
+    {MONSTER_STATE_COMBAT, {KAIN_CombatEntry, KAIN_Combat}},
+    {MONSTER_STATE_IDLE, {KAIN_IdleEntry, KAIN_Idle}},
+    {MONSTER_STATE_ATTACK, {KAIN_AttackEntry, KAIN_Attack}},
+    {MONSTER_STATE_HIT, {KAIN_HitEntry, KAIN_Hit}},
+    {MONSTER_STATE_NOTICE, {KAIN_DoNothingEntry, KAIN_DoNothing}},
+    {MONSTER_STATE_SURPRISED, {KAIN_DoNothingEntry, KAIN_DoNothing}},
+    {-1, {NULL, NULL}},
+};
+
+const MonsterFunctionTable KAIN_FunctionTable = {
+    KAIN_Init,
+    KAIN_CleanUp,
+    KAIN_DamageEffect,
+    KAIN_Query,
+    KAIN_Message,
+    KAIN_StateChoiceTable,
+    monVersion,
+    "Jul 14 1999"
+};
+
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/kain/kain", D_88000000);
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/kain/kain", D_88000020);
 
 Instance *KAIN_PickUpReaver(Instance *instance)
 {
@@ -1011,7 +1030,10 @@ void KAIN_DoNothingEntry(Instance *instance)
     }
 }
 
-void KAIN_DoNothing() {};
+void KAIN_DoNothing(Instance *instance)
+{
+    (void)instance;
+};
 
 #else
 
@@ -2000,6 +2022,9 @@ void KAIN_DoNothingEntry(Instance *instance)
     }
 }
 
-void KAIN_DoNothing(void) {};
+void KAIN_DoNothing(Instance *instance)
+{
+    (void)instance;
+};
 
 #endif
