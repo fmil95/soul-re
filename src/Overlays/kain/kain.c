@@ -1443,7 +1443,7 @@ void KAIN_DamageEffect(Instance *instance, evFXHitData *data)
     }
 }
 
-void KAIN_Message(void) {};
+void KAIN_Message(Instance *instance, unsigned long message, unsigned long data) {};
 
 uintptr_t KAIN_Query(Instance *instance, unsigned long query)
 {
