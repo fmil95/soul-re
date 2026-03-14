@@ -943,7 +943,53 @@ void KAIN_HitEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/kain/kain", KAIN_Hit);
+void KAIN_Hit(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (KainVars *)mv->extraVars;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars != NULL && attrs != NULL)
+    {
+        if (!MON_AnimPlayingFromList(instance, ma->auxAnimList, 0))
+        {
+            if (instance->flags2 & 0x10)
+            {
+                goto label;
+            }
+        }
+        else if (MON_GetTime(instance) >= (unsigned long)vars->timer)
+        {
+        label:
+            if ((mv->auxFlags & 0x50) == 0x50 && vars->numHits >= attrs->maxHits)
+            {
+                mv->auxFlags |= 0x20;
+                MON_SwitchState(instance, MONSTER_STATE_IDLE);
+            }
+            else if ((mv->auxFlags & 0x14) == 4)
+            {
+                mv->auxFlags |= 0x4000;
+                MON_SwitchState(instance, MONSTER_STATE_IDLE);
+            }
+            else
+            {
+                MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+            }
+
+            mv->auxFlags &= ~0x40;
+            mv->auxFlags &= ~4;
+        }
+
+        MON_DefaultQueueHandler(instance);
+    }
+}
 
 void KAIN_DoNothingEntry(Instance *instance)
 {
@@ -1886,7 +1932,53 @@ void KAIN_HitEntry(Instance *instance)
     }
 }
 
-void KAIN_Hit(void) {};
+void KAIN_Hit(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    KainVars *vars; // not from debug symbols
+    KainAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (KainVars *)mv->extraVars;
+    attrs = (KainAttributes *)ma->tunData;
+
+    if (vars != NULL && attrs != NULL)
+    {
+        if (!MON_AnimPlayingFromList(instance, ma->auxAnimList, 0))
+        {
+            if (instance->flags2 & 0x10)
+            {
+                goto label;
+            }
+        }
+        else if (MON_GetTime(instance) >= (unsigned long)vars->timer)
+        {
+        label:
+            if ((mv->auxFlags & 0x50) == 0x50 && vars->numHits >= attrs->maxHits)
+            {
+                mv->auxFlags |= 0x20;
+                MON_SwitchState(instance, MONSTER_STATE_IDLE);
+            }
+            else if ((mv->auxFlags & 0x14) == 4)
+            {
+                mv->auxFlags |= 0x4000;
+                MON_SwitchState(instance, MONSTER_STATE_IDLE);
+            }
+            else
+            {
+                MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+            }
+
+            mv->auxFlags &= ~0x40;
+            mv->auxFlags &= ~4;
+        }
+
+        MON_DefaultQueueHandler(instance);
+    }
+}
 
 void KAIN_DoNothingEntry(Instance *instance)
 {
