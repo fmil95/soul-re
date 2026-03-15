@@ -5,7 +5,10 @@
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000068);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880000A4);
+int func_880000A4(char* strfile, unsigned short mask, int buffers)
+{
+	return func_880001C4(strfile, mask, buffers);
+}
 
 void func_880000C4()
 {
