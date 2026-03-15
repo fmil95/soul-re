@@ -4,10 +4,19 @@
 #define DecDCTReset func_88000F78
 #define DecDCToutCallback func_88001048 
 
+int D_88012608;
+
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000068);
+int func_88000068()
+{
+    CdlLOC loc[2]; // should be just one element, but fuck knows why only two match
+
+    CdControlB(CdlGetlocP, NULL, &loc[0].minute);
+
+    return CdPosToInt((CdlLOC*)&loc[1].second) >= D_88012608;
+}
 
 int func_880000A4(char* strfile, unsigned short mask, int buffers)
 {

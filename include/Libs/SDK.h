@@ -651,6 +651,7 @@ CdlCB CdSyncCallback(CdlCB func);
 int CdPosToInt(CdlLOC *p);
 CdlFILE *CdSearchFile(CdlFILE *fp, char *name);
 int CdControl(u_char com, u_char *param, u_char *result);
+int CdControlB(u_char com, u_char *param, u_char *result);
 CdlCB CdSyncCallback(CdlCB func);
 void SpuSetCommonAttr(SpuCommonAttr *attr);
 int VSync(int mode);

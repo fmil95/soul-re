@@ -29,6 +29,7 @@ typedef struct BufferInfo
 	int            unk_3C;
 } BufferInfo;
 
+int func_88000068();
 int func_880000A4(char* strfile, unsigned short mask, int buffers);
 void func_880000C4();
 int func_880001C4(char* strfile, unsigned short mask, int buffers);
