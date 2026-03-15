@@ -178,6 +178,7 @@ $(BUILD_DIR)/src/Overlays/alukabss/alukabss.c.o: CFLAGS += -G0
 $(BUILD_DIR)/src/Overlays/roninbss/roninbss.c.o: CFLAGS += -G0
 
 $(BUILD_DIR)/src/Overlays/aluka/aluka.c.o: CFLAGS += -fsigned-char
+$(BUILD_DIR)/src/Overlays/kain/kain.c.o: CFLAGS += -fsigned-char
 
 ifeq ($(SKIP_ASM),1)
 all: $(OBJECTS) overlays
@@ -248,7 +249,7 @@ $(BUILD_DIR)/%.c.o: %.c
 ifeq ($(CHECK),1)
 	@$(CC_HOST) $(CFLAGS_CHECK) $(CHECK_WARNINGS) $(CPPFLAGS) -UTARGET_PSX $<
 endif
-	$(V)$(CPP) $(CPPFLAGS) -ffreestanding -MMD -MP -MT $@ -MF $@.d $< | $(CC) $(CFLAGS) | $(MASPSX) | $(AS) $(ASFLAGS) -o $@
+	$(V)$(CPP) $(CPPFLAGS) -ffreestanding -MMD -MP -MT $@ -MF $@.d $< | $(CC) $(CFLAGS) | $(MASPSX) $(if $(findstring Overlays,$@),--expand-div,) | $(AS) $(ASFLAGS) -o $@
 
 # Compile .s files
 $(BUILD_DIR)/%.s.o: %.s

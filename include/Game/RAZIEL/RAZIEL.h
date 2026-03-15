@@ -13,6 +13,7 @@ void RAZIEL_SetLookAround(Instance *instance);
 void RAZIEL_TurnHead(Instance *instance, short *rotx, short *rotz, GameTracker *gameTracker);
 long RAZIEL_OkToLookAround(Instance *playerInstance);
 Instance *RAZIEL_QueryEngagedInstance(int index);
+void RAZIEL_SetInteractiveMusic(int modifier, int action);
 void StateInitIdle(CharacterState *In, int CurrentSection, intptr_t Ptr);
 void StateHandlerDeCompression(CharacterState *In, int CurrentSection, intptr_t Data);
 void ProcessHints();
