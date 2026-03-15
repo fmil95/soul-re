@@ -1,5 +1,9 @@
 #include "Overlays/cinemax/cinemax.h"
 
+// TODO: get rid of these defines by identifying the SDK functions properly via symbol_addrs.txt
+#define DecDCTReset func_88000F78
+#define DecDCToutCallback func_88001048 
+
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
 
@@ -37,7 +41,17 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880001C4);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880006C0);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000720);
+void func_88000720(char* buffer, CdlLOC* fp, void (*func)())
+{
+	DecDCTReset(0);
+    
+	DecDCToutCallback(func);
+    
+	StSetRing((unsigned long*)buffer, (RING_SIZE * 2) + 2);
+	StSetStream(1, 1, -1, NULL, NULL);
+    
+	func_88000BB8(fp);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000794);
 

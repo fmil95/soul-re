@@ -594,6 +594,12 @@ typedef void (*CdlCB)(u_char, u_char *);
 #define CdlDataEnd	0x04	/* End of Data Detected */
 #define CdlDiskError	0x05	/* Error Detected */
 
+#define RING_SIZE 23
+
+void StSetRing( u_long* ring_addr, u_long ring_size );
+void StSetStream( u_long mode, u_long start_frame, u_long end_frame, void ( *func1 )(), void ( *func2 )() );
+void DecDCTReset(int mode);
+int DecDCToutCallback(void (*func)());
 void SpuSetCommonCDMix(long cd_mix);
 void SpuSetCommonMasterVolume(short mvol_left, short mvol_right);
 long EnableEvent(long);
