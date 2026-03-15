@@ -46,7 +46,20 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880009B4);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000B04);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000BB8);
+void func_88000BB8(CdlLOC* fp)
+{
+	unsigned char param;
+	
+	param = CdlModeSpeed;
+
+	do
+	{
+		while (CdControl(CdlSetloc, (unsigned char*)fp, NULL) == 0);
+		while (CdControl(CdlSetmode, &param, NULL) == 0);
+
+		VSync(3);
+	} while (CdRead2(CdlModeStream | CdlModeSpeed | CdlModeRT | CdlModeSize1) == 0);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000C28);
 
