@@ -48,30 +48,30 @@ INCLUDE_RODATA("asm/nonmatchings/Overlays/cinemax/cinemax", D_88000000);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880001C4);
 
-void func_880006C0(char* b1, char* b2, char* b3, char* b4, BufferInfo* bd)
+void func_880006C0(char* buff1, char* buff2, char* buff3, char* buff4, BufferInfo* bufferInfo)
 {
-	bd->unk_22 = 256;
-	bd->unk_28 = 480;
+	bufferInfo->unk_22 = 256;
+	bufferInfo->unk_28 = 480;
     
-	bd->unk_32 = -1;
+	bufferInfo->unk_32 = -1;
     
-	bd->buffer[0] = b1;
-	bd->buffer[1] = b2;
-	bd->buffer[2] = NULL;
+	bufferInfo->buffer[0] = buff1;
+	bufferInfo->buffer[1] = buff2;
+	bufferInfo->buffer[2] = NULL;
     
-	bd->buffer[3] = b3;
-	bd->buffer[4] = b4;
-	bd->buffer[5] = NULL;
+	bufferInfo->buffer[3] = buff3;
+	bufferInfo->buffer[4] = buff4;
+	bufferInfo->buffer[5] = NULL;
 
-	bd->unk_18 = 0;
-	bd->unk_1A = 0;
-	bd->unk_20 = 0;
-	bd->unk_2A = 0;
-	bd->unk_30 = 0;
-	bd->unk_34 = 0;
-	bd->unk_36 = 0;
-	bd->unk_38 = 24;
-	bd->unk_3C = 0;
+	bufferInfo->unk_18 = 0;
+	bufferInfo->unk_1A = 0;
+	bufferInfo->unk_20 = 0;
+	bufferInfo->unk_2A = 0;
+	bufferInfo->unk_30 = 0;
+	bufferInfo->unk_34 = 0;
+	bufferInfo->unk_36 = 0;
+	bufferInfo->unk_38 = 24;
+	bufferInfo->unk_3C = 0;
 }
 
 void func_88000720(char* buffer, CdlLOC* fp, void (*func)())
