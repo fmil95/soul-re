@@ -39,11 +39,11 @@ typedef struct _KainVars
     char changeBeam;
     // offset: 0x0025
     char tier;
-    // offset: 0x0026
+    // offset: 0x0028
     int soundHandle;
-    // offset: 0x002A
+    // offset: 0x002C
     Position beamTarget;
-    // offset: 0x0030
+    // offset: 0x0032
     Position teleportTarget;
 } KainVars;
 
