@@ -7,7 +7,24 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000068);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880000A4);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880000C4);
+void func_880000C4()
+{
+	RECT rect;
+    
+	rect.x = 0;
+	rect.y = 0;
+	rect.w = 512;
+	rect.h = 256;
+
+	ClearImage(&rect, 0, 0, 0);
+
+	rect.x = 0;
+	rect.y = 256;
+	rect.w = 512;
+	rect.h = 256;
+    
+	ClearImage(&rect, 0, 0, 0);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000138);
 
