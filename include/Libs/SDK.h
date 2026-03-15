@@ -594,6 +594,12 @@ typedef void (*CdlCB)(u_char, u_char *);
 #define CdlDataEnd	0x04	/* End of Data Detected */
 #define CdlDiskError	0x05	/* Error Detected */
 
+#define RING_SIZE 23
+
+void StSetRing( u_long* ring_addr, u_long ring_size );
+void StSetStream( u_long mode, u_long start_frame, u_long end_frame, void ( *func1 )(), void ( *func2 )() );
+void DecDCTReset(int mode);
+int DecDCToutCallback(void (*func)());
 void SpuSetCommonCDMix(long cd_mix);
 void SpuSetCommonMasterVolume(short mvol_left, short mvol_right);
 long EnableEvent(long);
@@ -645,6 +651,7 @@ CdlCB CdSyncCallback(CdlCB func);
 int CdPosToInt(CdlLOC *p);
 CdlFILE *CdSearchFile(CdlFILE *fp, char *name);
 int CdControl(u_char com, u_char *param, u_char *result);
+int CdControlB(u_char com, u_char *param, u_char *result);
 CdlCB CdSyncCallback(CdlCB func);
 void SpuSetCommonAttr(SpuCommonAttr *attr);
 int VSync(int mode);
@@ -680,6 +687,7 @@ int CdInit(void);
 CdlCB CdReadyCallback(CdlCB func);
 CdlCB CdSyncCallback(CdlCB func);
 int CdControl(u_char com, u_char *param, u_char *result);
+int CdRead2(long mode);
 void SetDispMask(int mask);
 void InitGeom();
 void SetGeomOffset(long ofx, long ofy);

@@ -1,13 +1,46 @@
 #include "Overlays/cinemax/cinemax.h"
 
+// TODO: get rid of these defines by identifying the SDK functions properly via symbol_addrs.txt
+#define DecDCTReset func_88000F78
+#define DecDCToutCallback func_88001048 
+
+int D_88012608;
+
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000068);
+int func_88000068()
+{
+    CdlLOC loc[2]; // should be just one element, but fuck knows why only two match
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880000A4);
+    CdControlB(CdlGetlocP, NULL, &loc[0].minute);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880000C4);
+    return CdPosToInt((CdlLOC*)&loc[1].second) >= D_88012608;
+}
+
+int func_880000A4(char* strfile, unsigned short mask, int buffers)
+{
+	return func_880001C4(strfile, mask, buffers);
+}
+
+void func_880000C4()
+{
+	RECT rect;
+    
+	rect.x = 0;
+	rect.y = 0;
+	rect.w = 512;
+	rect.h = 256;
+
+	ClearImage(&rect, 0, 0, 0);
+
+	rect.x = 0;
+	rect.y = 256;
+	rect.w = 512;
+	rect.h = 256;
+    
+	ClearImage(&rect, 0, 0, 0);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000138);
 
@@ -15,9 +48,43 @@ INCLUDE_RODATA("asm/nonmatchings/Overlays/cinemax/cinemax", D_88000000);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880001C4);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880006C0);
+void func_880006C0(char* buff1, char* buff2, char* buff3, char* buff4, BufferInfo* bufferInfo)
+{
+	bufferInfo->unk_22 = 256;
+	bufferInfo->unk_28 = 480;
+    
+	bufferInfo->unk_32 = -1;
+    
+	bufferInfo->buffer[0] = buff1;
+	bufferInfo->buffer[1] = buff2;
+	bufferInfo->buffer[2] = NULL;
+    
+	bufferInfo->buffer[3] = buff3;
+	bufferInfo->buffer[4] = buff4;
+	bufferInfo->buffer[5] = NULL;
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000720);
+	bufferInfo->unk_18 = 0;
+	bufferInfo->unk_1A = 0;
+	bufferInfo->unk_20 = 0;
+	bufferInfo->unk_2A = 0;
+	bufferInfo->unk_30 = 0;
+	bufferInfo->unk_34 = 0;
+	bufferInfo->unk_36 = 0;
+	bufferInfo->unk_38 = 24;
+	bufferInfo->unk_3C = 0;
+}
+
+void func_88000720(char* buffer, CdlLOC* fp, void (*func)())
+{
+	DecDCTReset(0);
+    
+	DecDCToutCallback(func);
+    
+	StSetRing((unsigned long*)buffer, (RING_SIZE * 2) + 2);
+	StSetStream(1, 1, -1, NULL, NULL);
+    
+	func_88000BB8(fp);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000794);
 
@@ -29,7 +96,20 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880009B4);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000B04);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000BB8);
+void func_88000BB8(CdlLOC* fp)
+{
+	unsigned char param;
+	
+	param = CdlModeSpeed;
+
+	do
+	{
+		while (CdControl(CdlSetloc, (unsigned char*)fp, NULL) == 0);
+		while (CdControl(CdlSetmode, &param, NULL) == 0);
+
+		VSync(3);
+	} while (CdRead2(CdlModeStream | CdlModeSpeed | CdlModeRT | CdlModeSize1) == 0);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000C28);
 
