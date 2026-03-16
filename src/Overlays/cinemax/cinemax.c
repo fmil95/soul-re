@@ -1,9 +1,5 @@
 #include "Overlays/cinemax/cinemax.h"
 
-// TODO: get rid of these defines by identifying the SDK functions properly via symbol_addrs.txt
-#define DecDCTReset func_88000F78
-#define DecDCToutCallback func_88001048 
-
 int D_88012604;
 int D_88012608;
 
@@ -115,7 +111,7 @@ int func_88000904(BufferInfo *bufferInfo)
     {
         bufferInfo->buffer[2] = (char*)(intptr_t)!bufferInfo->buffer[2];
         
-        func_88000C28(buffer, bufferInfo->buffer[(intptr_t)bufferInfo->buffer[2]]);
+        DecDCTvlc((unsigned long*)buffer, (unsigned long*)bufferInfo->buffer[(intptr_t)bufferInfo->buffer[2]]);
         
         StFreeRing((unsigned long*)buffer);
         
@@ -144,29 +140,29 @@ void func_88000BB8(CdlLOC *fp)
     } while (CdRead2(CdlModeStream | CdlModeSpeed | CdlModeRT | CdlModeSize1) == 0);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000C28);
+INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", DecDCTvlc);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000F78);
+INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", DecDCTReset);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000FAC);
+INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", DecDCTin);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88001028);
+INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", DecDCTout);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88001048);
+INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", DecDCToutCallback);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_8800106C);
+INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", LIBPRESS_OBJ1);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_8800115C);
+INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", LIBPRESS_OBJ2);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880011EC);
+INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", LIBPRESS_OBJ3);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88001278);
+INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", LIBPRESS_OBJ4);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_8800130C);
+INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", LIBPRESS_OBJ5);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880013A0);
+INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", LIBPRESS_OBJ6);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880013B8);
+INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", LIBPRESS_OBJ7);
 
 #else
 
@@ -190,34 +186,34 @@ void func_880007C8(void) {};
 
 int func_88000904(BufferInfo *bufferInfo) {};
 
-void func_880009B4(void) {};
+char *func_880009B4(BufferInfo *bufferInfo) {};
 
 void func_88000B04(void) {};
 
 void func_88000BB8(CdlLOC *fp) {};
 
-void func_88000C28(void) {};
+int DecDCTvlc(u_long *bs, u_long *buf) {};
 
-void func_88000F78(int mode) {};
+void DecDCTReset(int mode) {};
 
-void func_88000FAC(void) {};
+void DecDCTin(u_long *buf, int mode) {};
 
-void func_88001028(void) {};
+void DecDCTout(u_long *buf, int size) {};
 
-int func_88001048(void (*func)()) {};
+int DecDCToutCallback(void (*func)()) {};
 
-void func_8800106C(void) {};
+void LIBPRESS_OBJ1(void) {};
 
-void func_8800115C(void) {};
+void LIBPRESS_OBJ2(void) {};
 
-void func_880011EC(void) {};
+void LIBPRESS_OBJ3(void) {};
 
-void func_88001278(void) {};
+void LIBPRESS_OBJ4(void) {};
 
-void func_8800130C(void) {};
+void LIBPRESS_OBJ5(void) {};
 
-void func_880013A0(void) {};
+void LIBPRESS_OBJ6(void) {};
 
-void func_880013B8(void) {};
+void LIBPRESS_OBJ7(void) {};
 
 #endif

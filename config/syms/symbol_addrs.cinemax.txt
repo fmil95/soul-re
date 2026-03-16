@@ -1,0 +1,12 @@
+DecDCTvlc                                             = 0x88000C28; // type:func
+DecDCTReset                                           = 0x88000F78; // type:func
+DecDCTin                                              = 0x88000FAC; // type:func
+DecDCTout                                             = 0x88001028; // type:func
+DecDCToutCallback                                     = 0x88001048; // type:func
+LIBPRESS_OBJ1                                         = 0x8800106C; // type:func
+LIBPRESS_OBJ2                                         = 0x8800115C; // type:func
+LIBPRESS_OBJ3                                         = 0x880011EC; // type:func
+LIBPRESS_OBJ4                                         = 0x88001278; // type:func
+LIBPRESS_OBJ5                                         = 0x8800130C; // type:func
+LIBPRESS_OBJ6                                         = 0x880013A0; // type:func
+LIBPRESS_OBJ7                                         = 0x880013B8; // type:func
