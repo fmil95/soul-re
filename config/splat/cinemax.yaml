@@ -49,7 +49,9 @@ segments:
     bss_contains_common: True
     subsegments:
       - [0x000000, .rodata, Overlays/cinemax/cinemax]
+      - [0x000018, rodata, Overlays/cinemax/LIBS]
       - [0x000068, _c, Overlays/cinemax/cinemax]
+      - [0x000C28, asm, Overlays/cinemax/LIBS]
       - [0x001434, data, Overlays/cinemax/cinemax]
       - [0x0125B8, bss, Overlays/cinemax/cinemax]
   - [0x012610]
