@@ -423,7 +423,7 @@ void SwitchToHit(Instance *instance)
 {
     MonsterVars *mv; // not from debug symbols
 
-    mv = instance->extraData;
+    mv = (MonsterVars *)instance->extraData;
     mv->mvFlags |= 0x40;
     MON_SwitchStateDoEntry(instance, MONSTER_STATE_HIT);
 }
@@ -473,7 +473,7 @@ uintptr_t KAIN_Query(Instance *instance, unsigned long query)
     }
 
     switch (query)
-    {                                 /* irregular */
+    {
     case queryHitState:
         ret = 0x1000000;
         break;
@@ -507,7 +507,7 @@ void KAIN_Init(Instance *instance)
     KainVars *vars; // not from debug symbols
 
     MON_DefaultInit(instance);
-    mv = instance->extraData;
+    mv = (MonsterVars *)instance->extraData;
 
     if (mv != NULL)
     {
@@ -1415,7 +1415,7 @@ void SwitchToHit(Instance *instance)
 {
     MonsterVars *mv; // not from debug symbols
 
-    mv = instance->extraData;
+    mv = (MonsterVars *)instance->extraData;
     mv->mvFlags |= 0x40;
     MON_SwitchStateDoEntry(instance, MONSTER_STATE_HIT);
 }
@@ -1465,7 +1465,7 @@ uintptr_t KAIN_Query(Instance *instance, unsigned long query)
     }
 
     switch (query)
-    {                                 /* irregular */
+    {
     case queryHitState:
         ret = 0x1000000;
         break;
@@ -1499,7 +1499,7 @@ void KAIN_Init(Instance *instance)
     KainVars *vars; // not from debug symbols
 
     MON_DefaultInit(instance);
-    mv = instance->extraData;
+    mv = (MonsterVars *)instance->extraData;
 
     if (mv != NULL)
     {
