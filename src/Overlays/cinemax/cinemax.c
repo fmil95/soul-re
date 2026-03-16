@@ -4,6 +4,7 @@
 #define DecDCTReset func_88000F78
 #define DecDCToutCallback func_88001048 
 
+int D_88012604;
 int D_88012608;
 
 // this conditional is for the objdiff report
@@ -90,7 +91,39 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000794);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880007C8);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000904);
+int func_88000904(BufferInfo *bufferInfo) 
+{
+    int i;
+    char *buffer;
+
+	for (i = 150; i != 0; i--) 
+    {
+		buffer = func_880009B4(bufferInfo);
+
+		if (buffer != NULL) 
+        {
+            break;
+        }
+        
+        if (D_88012604 == 1) 
+        {
+            return 0;
+        }
+	}
+
+    if (buffer != NULL)
+    {
+        bufferInfo->buffer[2] = (char*)(intptr_t)!bufferInfo->buffer[2];
+        
+        func_88000C28(buffer, bufferInfo->buffer[(intptr_t)bufferInfo->buffer[2]]);
+        
+        StFreeRing((unsigned long*)buffer);
+        
+        return 0;
+    }
+    
+    return -1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880009B4);
 
@@ -155,7 +188,7 @@ void func_88000794(void) {};
 
 void func_880007C8(void) {};
 
-void func_88000904(void) {};
+int func_88000904(BufferInfo *bufferInfo) {};
 
 void func_880009B4(void) {};
 

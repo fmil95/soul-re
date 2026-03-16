@@ -596,6 +596,7 @@ typedef void (*CdlCB)(u_char, u_char *);
 
 #define RING_SIZE 23
 
+u_long	StFreeRing(u_long *base); 
 void StSetRing( u_long* ring_addr, u_long ring_size );
 void StSetStream( u_long mode, u_long start_frame, u_long end_frame, void ( *func1 )(), void ( *func2 )() );
 void DecDCTReset(int mode);
