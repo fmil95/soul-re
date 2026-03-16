@@ -866,7 +866,7 @@ int MainG2(void *appData)
 
                     RemoveAllObjects(gameTracker);
 
-                    while ((aadGetNumLoadsQueued() != 0) || (aadMem->sramDefragInfo.status != 0))
+                    while (aadGetNumLoadsQueued() != 0 || aadMem->sramDefragInfo.status != 0)
                     {
                         SOUND_UpdateSound();
 
@@ -875,7 +875,7 @@ int MainG2(void *appData)
 
                     SOUND_ShutdownMusic();
 
-                    MEMPACK_FreeByType(14);
+                    MEMPACK_FreeByType(MEMORY_TYPE_INSTANCECOLL);
 
                     GAMELOOP_ResetGameStates();
 

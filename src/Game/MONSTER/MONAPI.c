@@ -460,7 +460,7 @@ uintptr_t MonsterQuery(Instance *instance, unsigned long query)
 
     switch (query)
     {
-    case 38:
+    case queryShadowSegments:
         shadowData = (evShadowSegmentData *)SetShadowSegmentData(2);
 
         shadowData->shadowSegments[0] = ma->leftFootSegment;
@@ -468,7 +468,7 @@ uintptr_t MonsterQuery(Instance *instance, unsigned long query)
 
         ret = (intptr_t)shadowData;
         break;
-    case 0:
+    case queryHitState:
         if ((mv->mvFlags & 0x200))
         {
             ret = 0x40000000;
@@ -485,7 +485,7 @@ uintptr_t MonsterQuery(Instance *instance, unsigned long query)
 
         if (!(mv->mvFlags & 0x200000))
         {
-            if (((mv->mvFlags & 0x10)) || (mv->enemy == NULL) || (instance->currentMainState == MONSTER_STATE_SURPRISED))
+            if (mv->mvFlags & 0x10 || mv->enemy == NULL || instance->currentMainState == MONSTER_STATE_SURPRISED)
             {
                 if (mv->subAttr->grabable != 0)
                 {
@@ -508,13 +508,13 @@ uintptr_t MonsterQuery(Instance *instance, unsigned long query)
         }
 
         break;
-    case 1:
+    case queryWhatAmI:
         ret = ma->whatAmI;
         break;
-    case 2:
+    case queryPhysicalAbility:
         ret = (intptr_t)mv->subAttr->physAbility;
         break;
-    case 9:
+    case queryWaterStatus:
         if ((mv->mvFlags & 0x400))
         {
             ret = 16;
@@ -525,10 +525,10 @@ uintptr_t MonsterQuery(Instance *instance, unsigned long query)
         }
 
         break;
-    case 10:
+    case queryMode:
         ret = mv->mode;
         break;
-    case 13:
+    case querySpatialMatrix:
         if (instance->matrix != NULL)
         {
             ret = (intptr_t)&instance->matrix[1];
@@ -539,7 +539,7 @@ uintptr_t MonsterQuery(Instance *instance, unsigned long query)
         }
 
         break;
-    case 12:
+    case queryLookatMatrix:
         if (instance->matrix != NULL)
         {
             ret = (intptr_t)&instance->matrix[ma->headSegment];
@@ -550,28 +550,27 @@ uintptr_t MonsterQuery(Instance *instance, unsigned long query)
         }
 
         break;
-    case 15:
+    case queryNeckSegment:
         ret = (intptr_t)ma->neckSegment;
         break;
-    case 25:
+    case querySoulForce:
         ret = (intptr_t)mv->soulJuice;
         break;
-    case 24:
+    case querySaveData:
         saveInfo = (MonsterSaveInfo *)CIRC_Alloc(sizeof(MonsterSaveInfo));
 
         MON_SetUpSaveInfo(instance, saveInfo);
 
         ret = SetControlSaveDataData(sizeof(MonsterSaveInfo), saveInfo);
         break;
-    case 33:
+    case queryBoosted:
         ret = mv->mvFlags >> 29;
-
         ret &= 0x1;
         break;
-    case 35:
+    case queryMessageQueue:
         ret = (intptr_t)PeekMessageQueue(&mv->messageQueue);
         break;
-    case 47:
+    case queryBlockSave:
         ret = 0;
 
         if ((instance->currentMainState == MONSTER_STATE_THROWN) || (instance->currentMainState == MONSTER_STATE_IMPACT) || (instance->currentMainState == MONSTER_STATE_FALL) || (instance->currentMainState == MONSTER_STATE_GRABBED))
@@ -580,7 +579,7 @@ uintptr_t MonsterQuery(Instance *instance, unsigned long query)
         }
 
         break;
-    case 37:
+    case queryDangerous:
         ret = 1;
         break;
     default:

@@ -295,7 +295,7 @@ void MEMPACK_FreeByType(unsigned char memType)
 
         while ((char *)address != newMemTracker.lastMemoryAddress)
         {
-            if ((address->memStatus == 1) && (address->memType == memType))
+            if (address->memStatus == 1 && address->memType == memType)
             {
                 address++;
 
