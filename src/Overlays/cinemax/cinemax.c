@@ -171,7 +171,7 @@ void func_88000FAC(void) {};
 
 void func_88001028(void) {};
 
-void func_88001048(void (*func)()) {};
+int func_88001048(void (*func)()) {};
 
 void func_8800106C(void) {};
 
