@@ -596,6 +596,35 @@ typedef void (*CdlCB)(u_char, u_char *);
 
 #define RING_SIZE 23
 
+/*
+ * Location
+ */
+typedef struct {
+	u_char minute;		/* minute (BCD) */
+	u_char second;		/* second (BCD) */
+	u_char sector;		/* sector (BCD) */
+	u_char track;		/* track (void) */
+} DslLOC;
+
+/*
+ * Streaming Structures
+ */
+typedef struct {
+	u_short id;
+	u_short type;
+	u_short secCount;
+	u_short nSectors;
+	u_long frameCount;
+	u_long frameSize;
+
+	u_short width;
+	u_short height;
+	u_long dummy1;
+	u_long dummy2;
+	DslLOC loc;
+} StHEADER;		/* CD-ROM STR structure */
+
+u_long	StGetNext(u_long **addr,u_long **header);
 u_long	StFreeRing(u_long *base);
 void StSetRing( u_long* ring_addr, u_long ring_size );
 void StSetStream( u_long mode, u_long start_frame, u_long end_frame, void ( *func1 )(), void ( *func2 )() );

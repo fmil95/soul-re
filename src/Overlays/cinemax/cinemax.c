@@ -1,5 +1,8 @@
 #include "Overlays/cinemax/cinemax.h"
 
+unsigned int D_880125F8;
+int D_880125FC;
+int D_88012600;
 int D_88012604;
 int D_88012608;
 
@@ -12,7 +15,7 @@ int func_88000068()
 
     CdControlB(CdlGetlocP, NULL, &loc[0].minute);
 
-    return CdPosToInt((CdlLOC *)&loc[1].second) >= D_88012608;
+    return CdPosToInt((CdlLOC*)&loc[1].second) >= D_88012608;
 }
 
 int func_880000A4(char *strfile, unsigned short mask, int buffers)
@@ -77,7 +80,7 @@ void func_88000720(char *buffer, CdlLOC *fp, void (*func)())
 
     DecDCToutCallback(func);
 
-    StSetRing((unsigned long *)buffer, (RING_SIZE * 2) + 2);
+    StSetRing((unsigned long*)buffer, (RING_SIZE * 2) + 2);
     StSetStream(1, 1, -1, NULL, NULL);
 
     func_88000BB8(fp);
@@ -121,7 +124,76 @@ int func_88000904(BufferInfo *bufferInfo)
     return -1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880009B4);
+char *func_880009B4(BufferInfo *buffer_info) 
+{
+    int i;
+	char* buffer;
+	StHEADER* header; 
+    unsigned int mult;
+    int temp;
+
+    for (i = 14000; i != 0; ) 
+    {
+        if (StGetNext((unsigned long**)&buffer, (unsigned long**)&header) == 0)
+        {
+            break;
+        }
+
+        if (--i == 0)
+        {
+            if (func_88000068() != 0)
+            {
+                D_88012604 = 1;
+                
+                return 0;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+    }
+
+    if (header != NULL) 
+    {
+        if (header->frameCount < D_880125F8) 
+        {
+            D_88012604 = 1;
+            
+            return 0;
+        }
+    
+        D_880125F8 = header->frameCount;
+    }
+
+	if (func_88000068() != 0)
+	{
+        D_88012604 = 1;
+	}
+
+    if ((D_880125FC != header->width) || (D_88012600 != header->height)) 
+    {
+        func_880000C4();
+        
+        D_880125FC = header->width;
+        D_88012600 = header->height;
+    }
+
+    mult = D_880125FC * 3;
+    
+    temp = (int)(mult + (mult >> 31)) >> 1;
+    
+    buffer_info->unk_2C = temp; 
+    buffer_info->unk_24 = temp;
+    buffer_info->unk_1C = temp;
+    
+    buffer_info->unk_2E = D_88012600;
+    buffer_info->unk_26 = D_88012600;
+    buffer_info->unk_1E = D_88012600;
+    buffer_info->unk_3A = D_88012600;
+    
+    return buffer;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000B04);
 
@@ -133,7 +205,7 @@ void func_88000BB8(CdlLOC *fp)
 
     do
     {
-        while (CdControl(CdlSetloc, (unsigned char *)fp, NULL) == 0);
+        while (CdControl(CdlSetloc, (unsigned char*)fp, NULL) == 0);
         while (CdControl(CdlSetmode, &param, NULL) == 0);
 
         VSync(3);
@@ -162,7 +234,7 @@ void func_880007C8(void) {};
 
 int func_88000904(BufferInfo *bufferInfo) {};
 
-char *func_880009B4(BufferInfo *bufferInfo) {};
+char *func_880009B4(BufferInfo *buffer_info) {};
 
 void func_88000B04(void) {};
 
