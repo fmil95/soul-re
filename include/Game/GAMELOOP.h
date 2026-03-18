@@ -30,6 +30,7 @@ void GAMELOOP_SystemInit(GameTracker *gameTracker);
 void GAMELOOP_LevelLoadAndInit(char *baseAreaName, struct GameTracker *gameTracker);
 void PSX_GameLoop(GameTracker *gameTracker);
 void GAMELOOP_ResetGameStates();
+GameTracker *GAMELOOP_GetGT(); 
 
 GameTracker gameTrackerX;
 GameTracker *gameTracker;

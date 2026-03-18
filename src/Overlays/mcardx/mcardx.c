@@ -1,4 +1,6 @@
 #include "Overlays/mcardx/mcardx.h"
+#include "Game/MENU/MENUDEFS.h"
+#include "Game/GAMELOOP.h" 
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -105,7 +107,18 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880013DC);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88001D50);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88001DBC);
+int func_88001DBC(mcmenu_t *mcmenu, int index)
+{
+	GameTracker* gt;
+	
+	gt = GAMELOOP_GetGT();
+	
+	gt->gameFlags |= 0x20000000;
+
+	do_check_controller(gt);
+
+	return func_880013DC(mcmenu, index, 0);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88001E14);
 
@@ -223,11 +236,11 @@ void func_8800125C(void) { };
 
 void func_880012E8(void) { };
 
-void func_880013DC(void) { };
+int func_880013DC(mcmenu_t *mcmenu, int index, int arg2) { };  
 
 void func_88001D50(void) { };
 
-void func_88001DBC(void) { };
+int func_88001DBC(mcmenu_t *mcmenu, int index) { };
 
 void func_88001E14(void) { };
 

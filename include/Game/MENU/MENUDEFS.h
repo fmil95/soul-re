@@ -11,5 +11,6 @@ int options_menu(void *gt, int index);
 char *flashStart();
 void menudefs_reset_hack_attract_mode();
 int menudefs_main_menu(void *gt, int index);
+void do_check_controller(void *gt);
 
 #endif
