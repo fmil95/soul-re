@@ -126,7 +126,33 @@ int func_88001148(void *opaque, int param, menu_ctrl_t ctrl)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880011CC);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_8800125C);
+int func_8800125C(void *opaque, int param, menu_ctrl_t ctrl)
+{
+	mcmenu_t *mcmenu;
+    GameTracker *gt;
+	
+	mcmenu = (mcmenu_t*)gt2mcmenu(opaque); 
+
+	if (ctrl == menu_ctrl_engage)
+	{
+        mcmenu->state.slot = (fsm_t)param;
+        mcmenu->state.fsm = 8;
+        
+		return 1;
+	}
+	else if (ctrl == menu_ctrl_cancel)
+	{
+		memcard_pop(mcmenu->opaque);
+
+        gt = GAMELOOP_GetGT();
+        
+		gt->gameFlags &= ~0x20000000;
+        
+		return 1;
+	}
+
+	return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880012E8);
 
@@ -268,11 +294,11 @@ void func_880010AC(void) { };
 
 void func_880010DC(void) { };
 
-void func_88001148(void) { };
+int func_88001148(void *opaque, int param, menu_ctrl_t ctrl) { };
 
 void func_880011CC(void) { };
 
-void func_8800125C(void) { };
+int func_8800125C(void *opaque, int param, menu_ctrl_t ctrl) { };
 
 void func_880012E8(void) { };
 
