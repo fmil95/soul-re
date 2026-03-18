@@ -49,7 +49,9 @@ segments:
     bss_contains_common: True
     subsegments:
       - [0x000000, .rodata, Overlays/mcardx/mcardx]
+      - [0x0000F0, rodata, Overlays/mcardx/LIBS]
       - [0x0003B4, _c, Overlays/mcardx/mcardx]
+      - [0x0022FC, asm, Overlays/mcardx/LIBS]
       - [0x00570C, data, Overlays/mcardx/mcardx]
       - [0x005958, bss, Overlays/mcardx/mcardx] # a bit unsure it actually starts here, needs decompilation of the module
   - [0x005D58]
