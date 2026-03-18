@@ -95,7 +95,28 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_8800107C);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880010AC);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880010DC);
+int func_880010DC(void *opaque, int param, menu_ctrl_t ctrl)
+{
+	mcmenu_t *mcmenu;
+    GameTracker *gt;
+
+    (void)param;
+	
+	mcmenu = (mcmenu_t*)gt2mcmenu(opaque); 
+
+	if ((ctrl == menu_ctrl_engage) || (ctrl == menu_ctrl_cancel)) 
+	{
+		memcard_pop(mcmenu->opaque);
+
+        gt = GAMELOOP_GetGT();
+        
+		gt->gameFlags &= ~0x20000000;
+        
+		return 1;
+	}
+
+	return 0;
+}
 
 int func_88001148(void *opaque, int param, menu_ctrl_t ctrl)
 {
@@ -292,7 +313,7 @@ void func_8800107C(void) { };
 
 void func_880010AC(void) { };
 
-void func_880010DC(void) { };
+int func_880010DC(void *opaque, int param, menu_ctrl_t ctrl) { };
 
 int func_88001148(void *opaque, int param, menu_ctrl_t ctrl) { };
 
