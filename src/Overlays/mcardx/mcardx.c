@@ -1,4 +1,5 @@
 #include "Overlays/mcardx/mcardx.h"
+#include "Game/MCARD/MEMCARD.h"
 #include "Game/MENU/MENUDEFS.h"
 #include "Game/MENU/MENUFACE.h"
 #include "Game/GAMELOOP.h" 
@@ -96,7 +97,32 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880010AC);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880010DC);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88001148);
+int func_88001148(void *opaque, int param, menu_ctrl_t ctrl)
+{
+	mcmenu_t *mcmenu;
+    GameTracker *gt;
+	
+	mcmenu = (mcmenu_t*)gt2mcmenu(opaque); 
+
+	if (ctrl == menu_ctrl_engage)
+	{
+		mcmenu->state.fsm = (fsm_t)param;
+        
+		return 1;
+	}
+	else if (ctrl == menu_ctrl_cancel)
+	{
+		memcard_pop(mcmenu->opaque);
+
+        gt = GAMELOOP_GetGT();
+        
+		gt->gameFlags &= ~0x20000000;
+        
+		return 1;
+	}
+
+	return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880011CC);
 
