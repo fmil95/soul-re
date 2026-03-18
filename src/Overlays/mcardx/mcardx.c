@@ -1,5 +1,6 @@
 #include "Overlays/mcardx/mcardx.h"
 #include "Game/MENU/MENUDEFS.h"
+#include "Game/MENU/MENUFACE.h"
 #include "Game/GAMELOOP.h" 
 
 // this conditional is for the objdiff report
@@ -105,11 +106,24 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880012E8);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880013DC);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88001D50);
+int func_88001D50(mcmenu_t *mcmenu, int index)
+{
+	GameTracker *gt;
+	
+	gt = GAMELOOP_GetGT();
+
+	gt->gameFlags |= 0x20000000;
+
+	MENUFACE_ChangeStateRandomly(0);
+
+	do_check_controller(gt);
+
+	return func_880013DC(mcmenu, index, 1);
+}
 
 int func_88001DBC(mcmenu_t *mcmenu, int index)
 {
-	GameTracker* gt;
+	GameTracker *gt;
 	
 	gt = GAMELOOP_GetGT();
 	
@@ -238,7 +252,7 @@ void func_880012E8(void) { };
 
 int func_880013DC(mcmenu_t *mcmenu, int index, int arg2) { };  
 
-void func_88001D50(void) { };
+int func_88001D50(mcmenu_t *mcmenu, int index) { };
 
 int func_88001DBC(mcmenu_t *mcmenu, int index) { };
 
