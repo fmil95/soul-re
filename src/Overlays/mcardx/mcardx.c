@@ -27,7 +27,14 @@ void func_88000464(mcpsx_t *mcpsx)
 	mcpsx->state.err = mcpsx_err_busy;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880004A8);
+void func_880004A8(mcpsx_t *mcpsx)
+{
+	MemCardStart();
+
+	func_88000464(mcpsx);
+
+	mcpsx->state.mode = mode_running;
+}
 
 void func_880004DC(mcpsx_t *mcpsx)
 {
@@ -277,7 +284,7 @@ void func_88000438(void) { };
 
 void func_88000464(mcpsx_t *mcpsx) { };
 
-void func_880004A8(void) { };
+void func_880004A8(mcpsx_t *mcpsx) { };
 
 void func_880004DC(mcpsx_t *mcpsx) { };
 
