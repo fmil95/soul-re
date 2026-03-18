@@ -624,6 +624,7 @@ typedef struct {
 	DslLOC loc;
 } StHEADER;		/* CD-ROM STR structure */
 
+long MemCardSync( long mode, long* cmds, long* rslt ); 
 u_long	StGetNext(u_long **addr,u_long **header);
 u_long	StFreeRing(u_long *base);
 void StSetRing( u_long* ring_addr, u_long ring_size );

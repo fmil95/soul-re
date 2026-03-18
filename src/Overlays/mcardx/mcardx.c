@@ -13,7 +13,19 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880003BC);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000438);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000464);
+void func_88000464(mcpsx_t *mcpsx)
+{
+	long commands;
+	long result;
+    
+	MemCardSync(0, &commands, &result);
+
+	mcpsx->state.sync = sync_idle;
+    
+	mcpsx->state.func = func_none;
+    
+	mcpsx->state.err = mcpsx_err_busy;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880004A8);
 
@@ -233,7 +245,7 @@ void func_880003BC(void) { };
 
 void func_88000438(void) { };
 
-void func_88000464(void) { };
+void func_88000464(mcpsx_t *mcpsx) { };
 
 void func_880004A8(void) { };
 

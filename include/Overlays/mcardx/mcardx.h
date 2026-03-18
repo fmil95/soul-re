@@ -3,6 +3,7 @@
 
 #include "common.h"
 
+void func_88000464(mcpsx_t *mcpsx);
 int func_880010DC(void *opaque, int param, menu_ctrl_t ctrl);
 int func_88001148(void *opaque, int param, menu_ctrl_t ctrl);
 int func_8800125C(void *opaque, int param, menu_ctrl_t ctrl);
