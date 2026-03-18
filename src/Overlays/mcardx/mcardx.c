@@ -31,7 +31,16 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880004A8);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880004DC);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000510);
+void func_88000510(mcpsx_t *mcpsx, int err)
+{
+	mcpsx->state.func = func_none;
+    
+	mcpsx->state.sync = sync_idle;
+    
+	mcpsx->state.err = err;
+    
+	mcpsx->state.observed = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000528);
 
