@@ -403,55 +403,19 @@ void COLLIDE_MoveAllTransforms(Instance *instance, Position *offset)
     }
 }
 
-long COLLIDE_WithinYZBounds(SVector *point, HBox *hbox)
+long COLLIDE_WithinYZBounds(SVector* point, HBox* hbox) 
 {
-    int temp; // not from decls.h
-
-    temp = 0;
-
-    if ((point->y >= hbox->minY) && (hbox->maxY >= point->y))
-    {
-        if (point->z >= hbox->minZ)
-        {
-            temp = hbox->maxZ >= point->z;
-        }
-    }
-
-    return temp;
+    return ((point->y >= hbox->minY) && (point->y <= hbox->maxY)) && ((point->z >= hbox->minZ) && (point->z <= hbox->maxZ));
 }
 
-long COLLIDE_WithinXZBounds(SVector *point, HBox *hbox)
+long COLLIDE_WithinXZBounds(SVector* point, HBox* hbox) 
 {
-    int temp; // not from decls.h
-
-    temp = 0;
-
-    if ((point->x >= hbox->minX) && (hbox->maxX >= point->x))
-    {
-        if (point->z >= hbox->minZ)
-        {
-            temp = hbox->maxZ >= point->z;
-        }
-    }
-
-    return temp;
+    return ((point->x >= hbox->minX) && (point->x <= hbox->maxX)) && ((point->z >= hbox->minZ) && (point->z <= hbox->maxZ));
 }
 
-long COLLIDE_WithinXYBounds(SVector *point, HBox *hbox)
+long COLLIDE_WithinXYBounds(SVector* point, HBox* hbox)
 {
-    int temp; // not from decls.h
-
-    temp = 0;
-
-    if ((point->x >= hbox->minX) && (hbox->maxX >= point->x))
-    {
-        if (point->y >= hbox->minY)
-        {
-            temp = hbox->maxY >= point->y;
-        }
-    }
-
-    return temp;
+    return ((point->x >= hbox->minX) && (point->x <= hbox->maxX)) && ((point->y >= hbox->minY) && (point->y <= hbox->maxY));
 }
 
 INCLUDE_ASM("asm/nonmatchings/Game/COLLIDE", COLLIDE_LineWithBoxFace);
