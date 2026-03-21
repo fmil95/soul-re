@@ -621,7 +621,75 @@ unsigned long SplineGetNext(Spline *spline, SplineDef *def)
     return movedSplineOk;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/SPLINE", SplineGetPrev);
+unsigned long SplineGetPrev(Spline *spline, SplineDef *def)
+{ 
+    unsigned long movedSplineOk; 
+    unsigned long isRot; 
+    int count; 
+
+    movedSplineOk = 0; 
+    
+    if ((spline != NULL) && (def != NULL))
+    {
+        SplineSetDefDenom(spline, def, 0); 
+        
+        isRot = spline->type == 1; 
+        
+        if (def->currkey < spline->numkeys)  
+        {
+            // debug code?
+            if (0) while (1);
+            
+            movedSplineOk = 1;
+            
+            if (def->fracCurr > 4096)  
+            {
+                def->fracCurr -= 4096;
+            } 
+            else if (def->currkey <= 0) 
+            {
+                if (((spline->flags & 0x4)) || ((spline->flags & 0x2))) 
+                {
+                    def->currkey = spline->numkeys - 2; 
+                    
+                    if (isRot != 0) 
+                    {
+                        count = ((RSpline*)spline)->key[def->currkey].count;
+                    }
+                    else 
+                    {
+                        count = spline->key[def->currkey].count;
+                    }
+                    
+                    def->fracCurr = (count - 1) << 12;
+                } 
+                else 
+                {
+                    def->fracCurr = def->currkey = 0; 
+                    
+                    movedSplineOk = 0; 
+                }
+            }
+            else 
+            {
+                def->currkey--;
+                
+                if (isRot != 0) 
+                {
+                    count = ((RSpline*)spline)->key[def->currkey].count;
+                }
+                else 
+                {
+                    count = spline->key[def->currkey].count;
+                }
+                
+                def->fracCurr = (count - 1) << 12; 
+            }
+        }
+    } 
+    
+    return movedSplineOk; 
+} 
 
 unsigned long SplineGetOffsetNext(Spline *spline, SplineDef *def, long fracOffset)
 {
