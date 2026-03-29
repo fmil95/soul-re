@@ -22,23 +22,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 RUN mkdir -p /game
 
-COPY SLUS_007.08 /game/SLUS_007.08
-COPY cinemax.bin /game/cinemax.bin
-COPY mcardx.bin /game/mcardx.bin
-COPY hunter.bin /game/hunter.bin
-COPY skinner.bin /game/skinner.bin
-COPY wallcr.bin /game/wallcr.bin
-COPY aluka.bin /game/aluka.bin
-COPY skinbos.bin /game/skinbos.bin
-COPY kain.bin /game/kain.bin
-COPY walboss.bin /game/walboss.bin
-COPY walbosb.bin /game/walbosb.bin
-COPY alukabss.bin /game/alukabss.bin
-COPY roninbss.bin /game/roninbss.bin
+COPY game/SLUS_007.08 /game/SLUS_007.08
+COPY game/cinemax.bin /game/cinemax.bin
+COPY game/mcardx.bin /game/mcardx.bin
+COPY game/hunter.bin /game/hunter.bin
+COPY game/skinner.bin /game/skinner.bin
+COPY game/wallcr.bin /game/wallcr.bin
+COPY game/aluka.bin /game/aluka.bin
+COPY game/skinbos.bin /game/skinbos.bin
+COPY game/kain.bin /game/kain.bin
+COPY game/walboss.bin /game/walboss.bin
+COPY game/walbosb.bin /game/walbosb.bin
+COPY game/alukabss.bin /game/alukabss.bin
+COPY game/roninbss.bin /game/roninbss.bin
 
-RUN mkdir -p /tmp/tools/cd-dat-utils
 COPY requirements.txt /tmp/requirements.txt
-COPY tools/cd-dat-utils/requirements.txt /tmp/tools/cd-dat-utils/requirements.txt
 
 RUN pip install --no-cache-dir -r /tmp/requirements.txt \
     && rm -rf /tmp

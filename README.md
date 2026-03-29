@@ -36,7 +36,7 @@ Once its fully overhauled, the source code could then be used for many different
 
 In case you wonder what an overlay is: Soul Reaver like many other titles for the PlayStation (especially those near the end of the system's life cycle) distributes a good amount of game logic throughout _overlays_. For those not familiar with the concept, overlays are binaries which contain code that is loaded at specific instances during gameplay by the primary executable. This was designed such to taper the maximum amount of memory that the game consumes at once, which could never be too high due to hardware limitations.
 
-While overlays are fairly common, Crystal Dynamics designed some noteworthy tech to link DRM files dynamically on runtime, which means that the game's overlays never load at the same address during execution. The [un_drm script](/tools/scripts/un_drm.py) circumvents that to allow matching decompilation of the modules.
+While overlays are fairly common, Crystal Dynamics designed some noteworthy tech to link DRM files dynamically on runtime, which means that the game's overlays never load at the same address during execution. The `undrm` function of [cd-dat-utils](https://github.com/StableCrimson/cd-dat-utils) circumvents that, allowing decompilation of the modules.
 
 ### Setting Up
 
@@ -54,4 +54,4 @@ New to the PSX, decompilation as a whole, or just stuck on a function? Check out
 
 The **PS1/PS2 Decompilation** Discord server has an exclusive channel for this decompilation titled **#soul-reaver**, which is the main medium of communication for anything in relation to it: [REDACTED].
 
-Alternatively, if you aren't able to join the server for some reason, you can write me an email to frozenburnside@hotmail.com with any query you might have.
+Alternatively, if you aren't able to join the server for some reason, you can write me an email to <frozenburnside@hotmail.com> with any query you might have.

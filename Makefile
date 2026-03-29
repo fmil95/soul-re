@@ -206,11 +206,11 @@ setup: distclean split
 setupexe: distclean splitexe
 
 unpack:
-	@$(PYTHON) $(TOOLS_DIR)/cd-dat-utils/dat_utils.py --config $(CONFIG_DIR)/bigfile.json unpack $(GAME_DIR)/BIGFILE.DAT $(BIGFILE_DIR)
+	$(V)cd-dat-utils unpack $(CONFIG_DIR)/cd-dat-utils/config.yaml
 
 setup-overlays: unpack
-	$(V)$(foreach ov,$(OVERLAYS),$(PYTHON) $(TOOLS_DIR)/scripts/un_drm.py --input $(BIGFILE_DIR)/kain2/object/$(ov)/$(ov).drm --output $(GAME_DIR);)
-
+	$(V)cd-dat-utils undrm $(CONFIG_DIR)/cd-dat-utils/config.yaml
+	
 split-overlays:
 	$(V)$(foreach ov,$(OVERLAYS),splat split $(CONFIG_DIR)/splat/$(ov).yaml;)
 

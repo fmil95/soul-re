@@ -70,9 +70,6 @@ pip install -r requirements.txt
 
 ## Splitting and Building
 
-> [!IMPORTANT]
-> Before splitting, ensure that all of the submodules have been initialized, as overlay setup depends on [cd-dat-utils](https://github.com/StableCrimson/cd-dat-utils/).
-
 With everything in place, run:
 
 ```bash

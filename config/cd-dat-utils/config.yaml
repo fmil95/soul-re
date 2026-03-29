@@ -1,0 +1,54 @@
+bigfile:
+  src_path: game/BIGFILE.DAT
+  unpacked_path: game/bigfile
+  structure_path: config/cd-dat-utils/structure.yaml
+  file_map_path: config/cd-dat-utils/symbols.yaml
+overlays:
+  - name: aluka
+    src_path: game/bigfile/kain2/object/aluka/aluka.drm
+    out_path: game/aluka.bin
+    splat_yaml_path: config/splat/aluka.yaml
+  - name: alukabss
+    src_path: game/bigfile/kain2/object/alukabss/alukabss.drm
+    out_path: game/alukabss.bin
+    splat_yaml_path: config/splat/alukabss.yaml
+  - name: cinemax
+    src_path: game/bigfile/kain2/object/cinemax/cinemax.drm
+    out_path: game/cinemax.bin
+    splat_yaml_path: config/splat/cinemax.yaml
+  - name: hunter
+    src_path: game/bigfile/kain2/object/hunter/hunter.drm
+    out_path: game/hunter.bin
+    splat_yaml_path: config/splat/hunter.yaml
+  - name: kain
+    src_path: game/bigfile/kain2/object/kain/kain.drm
+    out_path: game/kain.bin
+    splat_yaml_path: config/splat/kain.yaml
+  - name: mcardx
+    src_path: game/bigfile/kain2/object/mcardx/mcardx.drm
+    out_path: game/mcardx.bin
+    splat_yaml_path: config/splat/mcardx.yaml
+  - name: roninbss
+    src_path: game/bigfile/kain2/object/roninbss/roninbss.drm
+    out_path: game/roninbss.bin
+    splat_yaml_path: config/splat/roninbss.yaml
+  - name: skinbos
+    src_path: game/bigfile/kain2/object/skinbos/skinbos.drm
+    out_path: game/skinbos.bin
+    splat_yaml_path: config/splat/skinbos.yaml
+  - name: skinner
+    src_path: game/bigfile/kain2/object/skinner/skinner.drm
+    out_path: game/skinner.bin
+    splat_yaml_path: config/splat/skinner.yaml
+  - name: walbosb
+    src_path: game/bigfile/kain2/object/walbosb/walbosb.drm
+    out_path: game/walbosb.bin
+    splat_yaml_path: config/splat/walbosb.yaml
+  - name: walboss
+    src_path: game/bigfile/kain2/object/walboss/walboss.drm
+    out_path: game/walboss.bin
+    splat_yaml_path: config/splat/walboss.yaml
+  - name: wallcr
+    src_path: game/bigfile/kain2/object/wallcr/wallcr.drm
+    out_path: game/wallcr.bin
+    splat_yaml_path: config/splat/wallcr.yaml
