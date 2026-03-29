@@ -2,6 +2,7 @@
 #include "Game/G2/ANMCTRLR.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/PLAN/PLANAPI.h"
+#include "Game/GAMELOOP.h"
 #include "Game/MATH3D.h"
 #include "Game/STREAM.h"
 
@@ -67,7 +68,22 @@ int ALUKABSS_RazTimeAtMarker(Instance *instance)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_TimeSinceSpit);
+int ALUKABSS_TimeSinceSpit(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+    AlukabssVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (AlukabssVars *)mv->extraVars;
+
+    if (mv->enemy != NULL && gameTrackerX.gameData.asmData.MorphTime == 1000)
+    {
+        return MON_GetTime(instance) - vars->time_since_spit;
+    }
+
+    vars->time_since_spit = MON_GetTime(instance);
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_ShouldAttack);
 
@@ -184,7 +200,22 @@ int ALUKABSS_RazTimeAtMarker(Instance *instance)
     return 0;
 }
 
-void ALUKABSS_TimeSinceSpit(void) {};
+int ALUKABSS_TimeSinceSpit(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+    AlukabssVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (AlukabssVars *)mv->extraVars;
+
+    if (mv->enemy != NULL && gameTrackerX.gameData.asmData.MorphTime == 1000)
+    {
+        return MON_GetTime(instance) - vars->time_since_spit;
+    }
+
+    vars->time_since_spit = MON_GetTime(instance);
+    return 0;
+}
 
 void ALUKABSS_ShouldAttack(void) {};
 
