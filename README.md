@@ -54,4 +54,4 @@ New to the PSX, decompilation as a whole, or just stuck on a function? Check out
 
 The **PS1/PS2 Decompilation** Discord server has an exclusive channel for this decompilation titled **#soul-reaver**, which is the main medium of communication for anything in relation to it: [REDACTED].
 
-Alternatively, if you aren't able to join the server for some reason, you can write me an email to frozenburnside@hotmail.com with any query you might have.
+Alternatively, if you aren't able to join the server for some reason, you can write me an email to <frozenburnside@hotmail.com> with any query you might have.
