@@ -1,9 +1,23 @@
 #include "Overlays/alukabss/alukabss.h"
+#include "Game/G2/ANMCTRLR.h"
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_SetTwist);
+void ALUKABSS_SetTwist(Instance *instance, int angle)
+{
+
+    G2SVector3 extraRot;
+
+    extraRot.y = 0;
+    extraRot.x = 0;
+    extraRot.z = angle / 2;
+
+    G2Anim_SetController_Vector(&instance->anim, 8, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
+    extraRot.z = angle - extraRot.z;
+    G2Anim_SetController_Vector(&instance->anim, 6, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_RotateToFace);
 
@@ -33,11 +47,11 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_IdleEntry);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Idle);
 
-void ALUKABSS_PursueEntry() { };
+void ALUKABSS_PursueEntry() {};
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Pursue);
 
-void ALUKABSS_CombatEntry() { };
+void ALUKABSS_CombatEntry() {};
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Combat);
 
@@ -59,7 +73,7 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Dead);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_DoNothingEntry);
 
-void ALUKABSS_DoNothing() { };
+void ALUKABSS_DoNothing() {};
 
 INCLUDE_RODATA("asm/nonmatchings/Overlays/alukabss/alukabss", D_88000000);
 
@@ -67,62 +81,75 @@ INCLUDE_RODATA("asm/nonmatchings/Overlays/alukabss/alukabss", D_88000020);
 
 #else 
 
-void ALUKABSS_SetTwist(void) { };     
+void ALUKABSS_SetTwist(Instance *instance, int angle)
+{
 
-void ALUKABSS_RotateToFace(void) { }; 
+    G2SVector3 extraRot;
 
-void ALUKABSS_RazTimeAtMarker(void) { };  
+    extraRot.y = 0;
+    extraRot.x = 0;
+    extraRot.z = angle / 2;
 
-void ALUKABSS_TimeSinceSpit(void) { };   
+    G2Anim_SetController_Vector(&instance->anim, 8, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
+    extraRot.z = angle - extraRot.z;
+    G2Anim_SetController_Vector(&instance->anim, 6, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
+}
 
-void ALUKABSS_ShouldAttack(void) { };    
 
-void ALUKABSS_InitCircle(void) { };     
+void ALUKABSS_RotateToFace(void) {};
 
-void ALUKABSS_Circle(void) { };         
+void ALUKABSS_RazTimeAtMarker(void) {};
 
-void ALUKABSS_SetUpWaterPlaneClip(void) { };
+void ALUKABSS_TimeSinceSpit(void) {};
 
-void ALUKABSS_Query(void) { };       
+void ALUKABSS_ShouldAttack(void) {};
 
-void ALUKABSS_Message(void) { };    
+void ALUKABSS_InitCircle(void) {};
 
-void ALUKABSS_Init(void) { };       
+void ALUKABSS_Circle(void) {};
 
-void ALUKABSS_CleanUp(void) { };           
+void ALUKABSS_SetUpWaterPlaneClip(void) {};
 
-void ALUKABSS_DamageEffect(void) { };    
+void ALUKABSS_Query(void) {};
 
-void ALUKABSS_IdleEntry(void) { };       
+void ALUKABSS_Message(void) {};
 
-void ALUKABSS_Idle(void) { };            
+void ALUKABSS_Init(void) {};
 
-void ALUKABSS_PursueEntry(void) { };      
+void ALUKABSS_CleanUp(void) {};
 
-void ALUKABSS_Pursue(void) { };           
+void ALUKABSS_DamageEffect(void) {};
 
-void ALUKABSS_CombatEntry(void) { };     
+void ALUKABSS_IdleEntry(void) {};
 
-void ALUKABSS_Combat(void) { };      
+void ALUKABSS_Idle(void) {};
 
-void ALUKABSS_AttackEntry(void) { };    
-    
-void ALUKABSS_Attack(void) { };             
+void ALUKABSS_PursueEntry(void) {};
 
-void ALUKABSS_LandInWaterEntry(void) { };   
+void ALUKABSS_Pursue(void) {};
 
-void ALUKABSS_LandInWater(void) { };        
+void ALUKABSS_CombatEntry(void) {};
 
-void ALUKABSS_ProjectileEntry(void) { };    
+void ALUKABSS_Combat(void) {};
 
-void ALUKABSS_Projectile(void) { };         
+void ALUKABSS_AttackEntry(void) {};
 
-void ALUKABSS_DeadEntry(void) { };       
+void ALUKABSS_Attack(void) {};
 
-void ALUKABSS_Dead(void) { };          
+void ALUKABSS_LandInWaterEntry(void) {};
 
-void ALUKABSS_DoNothingEntry(void) { };   
-  
-void ALUKABSS_DoNothing(void) { };          
+void ALUKABSS_LandInWater(void) {};
+
+void ALUKABSS_ProjectileEntry(void) {};
+
+void ALUKABSS_Projectile(void) {};
+
+void ALUKABSS_DeadEntry(void) {};
+
+void ALUKABSS_Dead(void) {};
+
+void ALUKABSS_DoNothingEntry(void) {};
+
+void ALUKABSS_DoNothing(void) {};
 
 #endif
