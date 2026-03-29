@@ -81,7 +81,7 @@ void WCBEGG_Process(Instance *instance, GameTracker *gameTracker)
 
     lastTime = time - gameTrackerX.lastLoopTime;
 
-    if ((instance->collideFunc == WCBEGG_Collide) && (instance->LinkParent == gameTrackerX.playerInstance))
+    if (instance->collideFunc == WCBEGG_Collide && instance->LinkParent == gameTrackerX.playerInstance)
     {
         instance->collideFunc = WCBEGG_ExplodeCollide;
     }
@@ -90,9 +90,9 @@ void WCBEGG_Process(Instance *instance, GameTracker *gameTracker)
 
     if (walboss != NULL)
     {
-        wa = (WalbossAttributes *)(intptr_t)((Dummy2 *)walboss->data)->unknown; // walboss->data needs parsing to the correct struct
+        wa = (WalbossAttributes *)(intptr_t)((Dummy2 *)walboss->data)->unknown; // TODO: walboss->data needs parsing to the correct struct
 
-        timeBetween = ((Dummy *)data)->unknown + (wa->timeToEggThrob * 33); // data needs parsing to the correct struct
+        timeBetween = ((Dummy *)data)->unknown + (wa->timeToEggThrob * 33); // TODO: data needs parsing to the correct struct
 
         if ((lastTime < timeBetween) && (time >= timeBetween))
         {
