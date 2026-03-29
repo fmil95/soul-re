@@ -1,5 +1,9 @@
 #include "Overlays/alukabss/alukabss.h"
 #include "Game/G2/ANMCTRLR.h"
+#include "Game/MONSTER/MONLIB.h"
+#include "Game/PLAN/PLANAPI.h"
+#include "Game/MATH3D.h"
+#include "Game/STREAM.h"
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -21,7 +25,47 @@ void ALUKABSS_SetTwist(Instance *instance, int angle)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_RotateToFace);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_RazTimeAtMarker);
+int ALUKABSS_RazTimeAtMarker(Instance *instance)
+{
+
+    Position markerPos;
+
+    int dist; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    AlukabssVars *vars; // not from debug symbols
+    AlukabssAttributes *attrs; // not from debug symbols
+    Level *level; // not from debug symbols
+    StreamUnit *streamUnit; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukabssVars *)mv->extraVars;
+    attrs = (AlukabssAttributes *)ma->tunData;
+
+    enemy = mv->enemy;
+    streamUnit = STREAM_GetStreamUnitWithID(instance->currentStreamUnitID);
+    level = streamUnit->level;
+
+    if (enemy != NULL)
+    {
+        PLANAPI_FindClosestNodePositionInUnit(streamUnit, &enemy->instance->position, &markerPos, 0, 32767, 5, 0);
+        dist = MATH3D_LengthXY(enemy->instance->position.x - markerPos.x, enemy->instance->position.y - markerPos.y);
+
+        if (vars->markerx == markerPos.x && vars->markery == markerPos.y &&
+            dist < attrs->raz_dist_from_marker && level->waterZLevel < enemy->instance->position.z)
+        {
+            return MON_GetTime(instance) - vars->raz_time_at_marker;
+        }
+
+        vars->raz_time_at_marker = MON_GetTime(instance);
+        vars->markerx = markerPos.x;
+        vars->markery = markerPos.y;
+    }
+
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_TimeSinceSpit);
 
@@ -98,7 +142,47 @@ void ALUKABSS_SetTwist(Instance *instance, int angle)
 
 void ALUKABSS_RotateToFace(void) {};
 
-void ALUKABSS_RazTimeAtMarker(void) {};
+int ALUKABSS_RazTimeAtMarker(Instance *instance)
+{
+
+    Position markerPos;
+
+    int dist; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    AlukabssVars *vars; // not from debug symbols
+    AlukabssAttributes *attrs; // not from debug symbols
+    Level *level; // not from debug symbols
+    StreamUnit *streamUnit; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukabssVars *)mv->extraVars;
+    attrs = (AlukabssAttributes *)ma->tunData;
+
+    enemy = mv->enemy;
+    streamUnit = STREAM_GetStreamUnitWithID(instance->currentStreamUnitID);
+    level = streamUnit->level;
+
+    if (enemy != NULL)
+    {
+        PLANAPI_FindClosestNodePositionInUnit(streamUnit, &enemy->instance->position, &markerPos, 0, 32767, 5, 0);
+        dist = MATH3D_LengthXY(enemy->instance->position.x - markerPos.x, enemy->instance->position.y - markerPos.y);
+
+        if (vars->markerx == markerPos.x && vars->markery == markerPos.y &&
+            dist < attrs->raz_dist_from_marker && level->waterZLevel < enemy->instance->position.z)
+        {
+            return MON_GetTime(instance) - vars->raz_time_at_marker;
+        }
+
+        vars->raz_time_at_marker = MON_GetTime(instance);
+        vars->markerx = markerPos.x;
+        vars->markery = markerPos.y;
+    }
+
+    return 0;
+}
 
 void ALUKABSS_TimeSinceSpit(void) {};
 

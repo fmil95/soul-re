@@ -13,6 +13,7 @@ int PLANAPI_AddNodeOfTypeToPool(Position *pos, int type);
 int PLANAPI_FindPathInGraphToTarget(Position *startPos, EnemyPlanData *planData, int validNodeTypes);
 void PLANAPI_InitPlanning(void *planningPool);
 void PLANAPI_UpdatePlanningDatabase(GameTracker *gameTracker, Instance *player);
+int PLANAPI_FindClosestNodePositionInUnit(StreamUnit *streamUnit, Position *target, Position *pos, int offset, int max, int type, int distanceCheck);
 
 extern PoolManagementData *poolManagementData;
 
