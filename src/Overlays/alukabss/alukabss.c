@@ -87,7 +87,29 @@ int ALUKABSS_TimeSinceSpit(Instance *instance)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_ShouldAttack);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_InitCircle);
+void ALUKABSS_InitCircle(Instance *instance)
+{
+
+    Position rootPos;
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukabssVars *vars; // not from debug symbols
+    AlukabssAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (AlukabssAttributes *)ma->tunData;
+    vars = (AlukabssVars *)mv->extraVars;
+
+    mv->speed = attrs->init_circle_speed;
+
+    rootPos.x = instance->matrix[1].t[0];
+    rootPos.y = instance->matrix[1].t[1];
+    rootPos.z = 0;
+
+    vars->last_angle = MATH3D_AngleFromPosToPos(&instance->position, &rootPos);
+    vars->accumulated_angle = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Circle);
 
@@ -219,7 +241,29 @@ int ALUKABSS_TimeSinceSpit(Instance *instance)
 
 void ALUKABSS_ShouldAttack(void) {};
 
-void ALUKABSS_InitCircle(void) {};
+void ALUKABSS_InitCircle(Instance *instance)
+{
+
+    Position rootPos;
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukabssVars *vars; // not from debug symbols
+    AlukabssAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (AlukabssAttributes *)ma->tunData;
+    vars = (AlukabssVars *)mv->extraVars;
+
+    mv->speed = attrs->init_circle_speed;
+
+    rootPos.x = instance->matrix[1].t[0];
+    rootPos.y = instance->matrix[1].t[1];
+    rootPos.z = 0;
+
+    vars->last_angle = MATH3D_AngleFromPosToPos(&instance->position, &rootPos);
+    vars->accumulated_angle = 0;
+}
 
 void ALUKABSS_Circle(void) {};
 
