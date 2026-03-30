@@ -111,7 +111,30 @@ void ALUKABSS_InitCircle(Instance *instance)
     vars->accumulated_angle = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Circle);
+void ALUKABSS_Circle(Instance *instance, GameTracker *gameTracker, int change_anim)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukabssAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (AlukabssAttributes *)ma->tunData;
+
+    instance->rotation.z = instance->rotation.z + mv->speed;
+    mv->speed += (attrs->circle_accel * gameTracker->timeMult) / 4096;
+
+    if (mv->speed >= attrs->fast_circle_speed && change_anim != 0)
+    {
+        MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, MONSTER_ANIM_WALK, 2);
+    }
+
+    if (mv->speed > attrs->max_circle_speed)
+    {
+        mv->speed = attrs->max_circle_speed;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_SetUpWaterPlaneClip);
 
@@ -265,7 +288,30 @@ void ALUKABSS_InitCircle(Instance *instance)
     vars->accumulated_angle = 0;
 }
 
-void ALUKABSS_Circle(void) {};
+void ALUKABSS_Circle(Instance *instance, GameTracker *gameTracker, int change_anim)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukabssAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (AlukabssAttributes *)ma->tunData;
+
+    instance->rotation.z = instance->rotation.z + mv->speed;
+    mv->speed += (attrs->circle_accel * gameTracker->timeMult) / 4096;
+
+    if (mv->speed >= attrs->fast_circle_speed && change_anim != 0)
+    {
+        MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, MONSTER_ANIM_WALK, 2);
+    }
+
+    if (mv->speed > attrs->max_circle_speed)
+    {
+        mv->speed = attrs->max_circle_speed;
+    }
+}
 
 void ALUKABSS_SetUpWaterPlaneClip(void) {};
 
