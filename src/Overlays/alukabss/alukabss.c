@@ -236,7 +236,24 @@ void ALUKABSS_Init(Instance *instance)
     RAZIEL_SetInteractiveMusic(0xF, 1);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_CleanUp);
+void ALUKABSS_CleanUp(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    RAZIEL_SetInteractiveMusic(15, 0);
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv != NULL && mv->extraVars != NULL)
+    {
+        MEMPACK_Free(mv->extraVars);
+    }
+
+    G2Anim_DetachControllerFromSeg(&instance->anim, 8, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 6, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    MON_CleanUp(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_DamageEffect);
 
@@ -506,7 +523,24 @@ void ALUKABSS_Init(Instance *instance)
     RAZIEL_SetInteractiveMusic(0xF, 1);
 }
 
-void ALUKABSS_CleanUp(void) {};
+void ALUKABSS_CleanUp(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    RAZIEL_SetInteractiveMusic(15, 0);
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv != NULL && mv->extraVars != NULL)
+    {
+        MEMPACK_Free(mv->extraVars);
+    }
+
+    G2Anim_DetachControllerFromSeg(&instance->anim, 8, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_DetachControllerFromSeg(&instance->anim, 6, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    MON_CleanUp(instance);
+}
 
 void ALUKABSS_DamageEffect(void) {};
 
