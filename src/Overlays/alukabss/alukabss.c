@@ -185,9 +185,15 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_DeadEntry);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Dead);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_DoNothingEntry);
+void ALUKABSS_DoNothingEntry(Instance *instance)
+{
+    MON_SwitchStateDoEntry(instance, ((MonsterVars *)instance->extraData)->previousMainState);
+}
 
-void ALUKABSS_DoNothing() {};
+void ALUKABSS_DoNothing(Instance *instance)
+{
+    (void)instance;
+};
 
 INCLUDE_RODATA("asm/nonmatchings/Overlays/alukabss/alukabss", D_88000000);
 
@@ -370,8 +376,11 @@ void ALUKABSS_DeadEntry(void) {};
 
 void ALUKABSS_Dead(void) {};
 
-void ALUKABSS_DoNothingEntry(void) {};
+void ALUKABSS_DoNothingEntry(Instance *instance)
+{
+    MON_SwitchStateDoEntry(instance, ((MonsterVars *)instance->extraData)->previousMainState);
+}
 
-void ALUKABSS_DoNothing(void) {};
+void ALUKABSS_DoNothing(Instance *instance) {};
 
 #endif
