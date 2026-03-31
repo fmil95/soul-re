@@ -5,6 +5,7 @@
 #include "Game/PLAN/PLANAPI.h"
 #include "Game/GAMELOOP.h"
 #include "Game/MATH3D.h"
+#include "Game/PHYSICS.h"
 #include "Game/STREAM.h"
 
 // this conditional is for the objdiff report
@@ -137,7 +138,39 @@ void ALUKABSS_Circle(Instance *instance, GameTracker *gameTracker, int change_an
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_SetUpWaterPlaneClip);
+void ALUKABSS_SetUpWaterPlaneClip(Instance *instance)
+{
+
+    PCollideInfo CInfo;
+    SVECTOR Old;
+    SVECTOR New;
+    long *temp; // not from debug symbols
+
+    instance->waterFace = NULL;
+    instance->waterFaceTerrain = NULL;
+
+    if (instance->matrix != NULL)
+    {
+        CInfo.oldPoint = &Old;
+        CInfo.newPoint = &New;
+
+        temp = instance->matrix[36].t;
+
+        Old.vx = temp[0];
+        Old.vy = temp[1];
+        Old.vz = temp[2];
+
+        temp = instance->matrix[5].t;
+
+        New.vx = temp[0];
+        New.vy = temp[1];
+        New.vz = temp[2];
+
+        gameTrackerX.gameFlags |= 0x8000;
+        PHYSICS_CheckLineInWorld(instance, &CInfo);
+        gameTrackerX.gameFlags &= ~0x8000;
+    }
+}
 
 uintptr_t ALUKABSS_Query(Instance *instance, unsigned long query)
 {
@@ -328,7 +361,39 @@ void ALUKABSS_Circle(Instance *instance, GameTracker *gameTracker, int change_an
     }
 }
 
-void ALUKABSS_SetUpWaterPlaneClip(void) {};
+void ALUKABSS_SetUpWaterPlaneClip(Instance *instance)
+{
+
+    PCollideInfo CInfo;
+    SVECTOR Old;
+    SVECTOR New;
+    long *temp; // not from debug symbols
+
+    instance->waterFace = NULL;
+    instance->waterFaceTerrain = NULL;
+
+    if (instance->matrix != NULL)
+    {
+        CInfo.oldPoint = &Old;
+        CInfo.newPoint = &New;
+
+        temp = instance->matrix[36].t;
+
+        Old.vx = temp[0];
+        Old.vy = temp[1];
+        Old.vz = temp[2];
+
+        temp = instance->matrix[5].t;
+
+        New.vx = temp[0];
+        New.vy = temp[1];
+        New.vz = temp[2];
+
+        gameTrackerX.gameFlags |= 0x8000;
+        PHYSICS_CheckLineInWorld(instance, &CInfo);
+        gameTrackerX.gameFlags &= ~0x8000;
+    }
+}
 
 uintptr_t ALUKABSS_Query(Instance *instance, unsigned long query)
 {
