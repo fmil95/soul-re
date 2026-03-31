@@ -1,5 +1,6 @@
 #include "Overlays/alukabss/alukabss.h"
 #include "Game/G2/ANMCTRLR.h"
+#include "Game/MONSTER/MONAPI.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/PLAN/PLANAPI.h"
 #include "Game/GAMELOOP.h"
@@ -138,7 +139,15 @@ void ALUKABSS_Circle(Instance *instance, GameTracker *gameTracker, int change_an
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_SetUpWaterPlaneClip);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Query);
+uintptr_t ALUKABSS_Query(Instance *instance, unsigned long query)
+{
+    if (query != 0)
+    {
+        return MonsterQuery(instance, query);
+    }
+
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Message);
 
@@ -315,7 +324,15 @@ void ALUKABSS_Circle(Instance *instance, GameTracker *gameTracker, int change_an
 
 void ALUKABSS_SetUpWaterPlaneClip(void) {};
 
-void ALUKABSS_Query(void) {};
+uintptr_t ALUKABSS_Query(Instance *instance, unsigned long query)
+{
+    if (query != 0)
+    {
+        return MonsterQuery(instance, query);
+    }
+
+    return 0;
+}
 
 void ALUKABSS_Message(void) {};
 
