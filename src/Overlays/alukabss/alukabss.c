@@ -2,9 +2,12 @@
 #include "Game/G2/ANMCTRLR.h"
 #include "Game/MONSTER/MONAPI.h"
 #include "Game/MONSTER/MONLIB.h"
+#include "Game/MONSTER/MONSTER.h"
 #include "Game/PLAN/PLANAPI.h"
+#include "Game/RAZIEL/RAZIEL.h"
 #include "Game/GAMELOOP.h"
 #include "Game/MATH3D.h"
+#include "Game/MEMPACK.h"
 #include "Game/PHYSICS.h"
 #include "Game/STREAM.h"
 
@@ -184,7 +187,54 @@ uintptr_t ALUKABSS_Query(Instance *instance, unsigned long query)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Message);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Init);
+void ALUKABSS_Init(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    AlukabssVars *vars; // not from debug symbols
+
+    MON_DefaultInit(instance);
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv != NULL)
+    {
+        vars = (AlukabssVars *)MEMPACK_Malloc(sizeof(AlukabssVars), MEMORY_TYPE_ALUKABSSDATA);
+
+        if (vars == NULL)
+        {
+            mv->extraVars = NULL;
+        }
+        else
+        {
+            int time; // not from debug symbols
+
+            mv->extraVars = vars;
+            vars->upper_facing = instance->rotation.z;
+            time = MON_GetTime(instance);
+            vars->time_since_spit = time;
+            vars->raz_time_at_marker = time;
+            vars->laugh_timer = 0;
+        }
+    }
+
+    G2Anim_AttachControllerToSeg(&instance->anim, 8, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_AttachControllerToSeg(&instance->anim, 6, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 8, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 6, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+
+    instance->xVel = 0;
+    instance->yVel = 0;
+    instance->zVel = 0;
+
+    instance->xAccl = 0;
+    instance->yAccl = 0;
+    instance->zAccl = 0;
+
+    mv->mvFlags |= 0x800;
+
+    MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    RAZIEL_SetInteractiveMusic(0xF, 1);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_CleanUp);
 
@@ -407,7 +457,54 @@ uintptr_t ALUKABSS_Query(Instance *instance, unsigned long query)
 
 void ALUKABSS_Message(void) {};
 
-void ALUKABSS_Init(void) {};
+void ALUKABSS_Init(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    AlukabssVars *vars; // not from debug symbols
+
+    MON_DefaultInit(instance);
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv != NULL)
+    {
+        vars = (AlukabssVars *)MEMPACK_Malloc(sizeof(AlukabssVars), MEMORY_TYPE_ALUKABSSDATA);
+
+        if (vars == NULL)
+        {
+            mv->extraVars = NULL;
+        }
+        else
+        {
+            int time; // not from debug symbols
+
+            mv->extraVars = vars;
+            vars->upper_facing = instance->rotation.z;
+            time = MON_GetTime(instance);
+            vars->time_since_spit = time;
+            vars->raz_time_at_marker = time;
+            vars->laugh_timer = 0;
+        }
+    }
+
+    G2Anim_AttachControllerToSeg(&instance->anim, 8, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_AttachControllerToSeg(&instance->anim, 6, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 8, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 6, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+
+    instance->xVel = 0;
+    instance->yVel = 0;
+    instance->zVel = 0;
+
+    instance->xAccl = 0;
+    instance->yAccl = 0;
+    instance->zAccl = 0;
+
+    mv->mvFlags |= 0x800;
+
+    MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    RAZIEL_SetInteractiveMusic(0xF, 1);
+}
 
 void ALUKABSS_CleanUp(void) {};
 
