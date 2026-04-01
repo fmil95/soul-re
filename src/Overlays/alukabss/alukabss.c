@@ -14,7 +14,7 @@
 #include "Game/SOUND.h"
 #include "Game/STREAM.h"
 
-extern burntTuneType D_88001600; // TODO: Import from .data
+burntTuneType alukabssBurntTune = {300, 2}; // no canon name in symbols
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -287,7 +287,7 @@ void ALUKABSS_DamageEffect(Instance *instance, evFXHitData *data)
                 FX_MakeSpark(instance, model, attrs->rightKneeSegment);
             }
 
-            MONSTER_VertexBurnt(instance, &D_88001600);
+            MONSTER_VertexBurnt(instance, &alukabssBurntTune);
         }
     }
     else
@@ -296,16 +296,16 @@ void ALUKABSS_DamageEffect(Instance *instance, evFXHitData *data)
         {
             if (data->amount != 0)
             {
-                MONSTER_StartVertexBurnt(instance, &data->location, &D_88001600);
+                MONSTER_StartVertexBurnt(instance, &data->location, &alukabssBurntTune);
             }
             else
             {
-                MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &D_88001600);
+                MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &alukabssBurntTune);
             }
         }
         else if (data->type == 0x10)
         {
-            MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &D_88001600);
+            MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &alukabssBurntTune);
         }
         else
         {
@@ -627,7 +627,7 @@ void ALUKABSS_DamageEffect(Instance *instance, evFXHitData *data)
                 FX_MakeSpark(instance, model, attrs->rightKneeSegment);
             }
 
-            MONSTER_VertexBurnt(instance, &D_88001600);
+            MONSTER_VertexBurnt(instance, &alukabssBurntTune);
         }
     }
     else
@@ -636,16 +636,16 @@ void ALUKABSS_DamageEffect(Instance *instance, evFXHitData *data)
         {
             if (data->amount != 0)
             {
-                MONSTER_StartVertexBurnt(instance, &data->location, &D_88001600);
+                MONSTER_StartVertexBurnt(instance, &data->location, &alukabssBurntTune);
             }
             else
             {
-                MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &D_88001600);
+                MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &alukabssBurntTune);
             }
         }
         else if (data->type == 0x10)
         {
-            MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &D_88001600);
+            MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &alukabssBurntTune);
         }
         else
         {
