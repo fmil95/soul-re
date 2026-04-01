@@ -5,11 +5,16 @@
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/PLAN/PLANAPI.h"
 #include "Game/RAZIEL/RAZIEL.h"
+#include "Game/FX.h"
 #include "Game/GAMELOOP.h"
 #include "Game/MATH3D.h"
 #include "Game/MEMPACK.h"
+#include "Game/OBTABLE.h"
 #include "Game/PHYSICS.h"
+#include "Game/SOUND.h"
 #include "Game/STREAM.h"
+
+extern burntTuneType D_88001600; // TODO: Import from .data
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -255,7 +260,60 @@ void ALUKABSS_CleanUp(Instance *instance)
     MON_CleanUp(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_DamageEffect);
+void ALUKABSS_DamageEffect(Instance *instance, evFXHitData *data)
+{
+
+    SVector localloc;
+    MonsterAttributes *attrs; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    attrs = (MonsterAttributes *)instance->data;
+    localloc = data->location;
+
+    if (data == NULL)
+    {
+        if (mv->mvFlags & 0x400000)
+        {
+            if (objectAccess[10].object != NULL)
+            {
+                Model *model; // not from debug symbols
+                model = ((Object *)objectAccess[10].object)->modelList[0];
+
+                FX_MakeSpark(instance, model, attrs->leftShoulderSegment);
+                FX_MakeSpark(instance, model, attrs->rightShoulderSegment);
+                FX_MakeSpark(instance, model, attrs->waistSegment);
+                FX_MakeSpark(instance, model, attrs->leftKneeSegment);
+                FX_MakeSpark(instance, model, attrs->rightKneeSegment);
+            }
+
+            MONSTER_VertexBurnt(instance, &D_88001600);
+        }
+    }
+    else
+    {
+        if (data->type == 0x20) // TODO: See if there's any enum for this
+        {
+            if (data->amount != 0)
+            {
+                MONSTER_StartVertexBurnt(instance, &data->location, &D_88001600);
+            }
+            else
+            {
+                MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &D_88001600);
+            }
+        }
+        else if (data->type == 0x10)
+        {
+            MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &D_88001600);
+        }
+        else
+        {
+            SOUND_Play3dSound(&instance->position, 21, 650, 80, 15500);
+            FX_MakeHitFX(&localloc);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_IdleEntry);
 
@@ -542,7 +600,60 @@ void ALUKABSS_CleanUp(Instance *instance)
     MON_CleanUp(instance);
 }
 
-void ALUKABSS_DamageEffect(void) {};
+void ALUKABSS_DamageEffect(Instance *instance, evFXHitData *data)
+{
+
+    SVector localloc;
+    MonsterAttributes *attrs; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    attrs = (MonsterAttributes *)instance->data;
+    localloc = data->location;
+
+    if (data == NULL)
+    {
+        if (mv->mvFlags & 0x400000)
+        {
+            if (objectAccess[10].object != NULL)
+            {
+                Model *model; // not from debug symbols
+                model = ((Object *)objectAccess[10].object)->modelList[0];
+
+                FX_MakeSpark(instance, model, attrs->leftShoulderSegment);
+                FX_MakeSpark(instance, model, attrs->rightShoulderSegment);
+                FX_MakeSpark(instance, model, attrs->waistSegment);
+                FX_MakeSpark(instance, model, attrs->leftKneeSegment);
+                FX_MakeSpark(instance, model, attrs->rightKneeSegment);
+            }
+
+            MONSTER_VertexBurnt(instance, &D_88001600);
+        }
+    }
+    else
+    {
+        if (data->type == 0x20)
+        {
+            if (data->amount != 0)
+            {
+                MONSTER_StartVertexBurnt(instance, &data->location, &D_88001600);
+            }
+            else
+            {
+                MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &D_88001600);
+            }
+        }
+        else if (data->type == 0x10)
+        {
+            MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &D_88001600);
+        }
+        else
+        {
+            SOUND_Play3dSound(&instance->position, 21, 650, 80, 15500);
+            FX_MakeHitFX(&localloc);
+        }
+    }
+}
 
 void ALUKABSS_IdleEntry(void) {};
 
