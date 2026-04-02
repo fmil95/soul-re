@@ -295,12 +295,12 @@ void processPeriodicSound(Position *position, int livesInOnePlane, int inSpectra
         return;
     case 3:
     case 1:
-        if ((livesInOnePlane == 0 || (inSpectral != 0 && spectralPlane != 0) || (inSpectral == 0 && spectralPlane == 0)) == 0)
+        if (livesInOnePlane && (!inSpectral || spectralPlane == 0) && (inSpectral || spectralPlane != 0))
         {
             return;
         }
 
-        if (isOkayToPlaySound(sound->flags, spectralPlane, hidden, burning) == 0)
+        if (!isOkayToPlaySound(sound->flags, spectralPlane, hidden, burning))
         {
             return;
         }
@@ -1452,8 +1452,8 @@ void SOUND_ProcessMusicLoad()
                                     strcpy(sndFileName, "\\kain2\\music\\uwtr\\uwtr.snd");
                                     strcpy(smpFileName, "\\kain2\\music\\uwtr\\uwtr.smp");
 
-                                    musicInfo.state = 3;
-                                    musicInfo.nextState = 4;
+                                    musicInfo.state = MUSIC_STATE_TRANSITION_MUSIC_LOADING;
+                                    musicInfo.nextState = MUSIC_STATE_TRANSITION_MUSIC_LOADED;
 
                                     aadLoadDynamicSoundBank(sndFileName, smpFileName, 1, 0, musicLoadReturnFunc);
                                 }
