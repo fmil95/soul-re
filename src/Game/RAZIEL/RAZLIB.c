@@ -1772,7 +1772,7 @@ void RAZIEL_SetInteractiveMusic(int modifier, int action)
     }
     else
     {
-        if ((Raziel.soundModifier & soundFlag))
+        if (Raziel.soundModifier & soundFlag)
         {
             SOUND_ResetMusicModifier(modifier);
         }

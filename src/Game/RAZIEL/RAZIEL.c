@@ -5848,13 +5848,13 @@ void ProcessInteractiveMusic(Instance *instance)
 
     level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
 
-    RAZIEL_SetInteractiveMusic(6, level->unitFlags & 0x2);
-    RAZIEL_SetInteractiveMusic(9, level->unitFlags & 0x200);
-    RAZIEL_SetInteractiveMusic(10, level->unitFlags & 0x100);
-    RAZIEL_SetInteractiveMusic(7, level->unitFlags & 0x40);
-    RAZIEL_SetInteractiveMusic(8, level->unitFlags & 0x80);
-    RAZIEL_SetInteractiveMusic(11, level->unitFlags & 0x400);
-    RAZIEL_SetInteractiveMusic(14, level->unitFlags & 0x4000);
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_OUTDOORS, level->unitFlags & 0x2);
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_GLYPH_ROOM, level->unitFlags & 0x200);
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_FORGE, level->unitFlags & 0x100);
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_DAY, level->unitFlags & 0x40);
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_NIGHT, level->unitFlags & 0x80);
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_CLAN_BATTLE, level->unitFlags & 0x400);
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_EXTRA_MUSIC, level->unitFlags & 0x4000);
 
     if ((level->unitFlags & 0x2))
     {
@@ -5862,49 +5862,49 @@ void ProcessInteractiveMusic(Instance *instance)
         {
             temp = GAMELOOP_GetTimeOfDay();
 
-            RAZIEL_SetInteractiveMusic(7, temp != 1900);
-            RAZIEL_SetInteractiveMusic(8, temp == 1900);
+            RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_DAY, temp != 1900);
+            RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_NIGHT, temp == 1900);
         }
     }
 
-    RAZIEL_SetInteractiveMusic(12, Raziel.CurrentPlane == 2);
-    RAZIEL_SetInteractiveMusic(5, Raziel.Mode & 0x40000);
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_SPECTRAL, Raziel.CurrentPlane == 2);
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_SWIMMING, Raziel.Mode & 0x40000);
 
-    if (((level->unitFlags & 0x10)) || ((Raziel.Mode & 0x2000000)))
+    if (level->unitFlags & 0x10 || Raziel.Mode & 0x2000000)
     {
         Raziel.soundModifier &= ~0x1E;
 
-        RAZIEL_SetInteractiveMusic(3, 1);
+        RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_COMBAT, 1);
         return;
     }
 
-    if (((level->unitFlags & 0x8)) || ((Raziel.Senses.Flags & 0x20)))
+    if (level->unitFlags & 0x8 || Raziel.Senses.Flags & 0x20)
     {
         Raziel.soundModifier &= ~0x1E;
 
-        RAZIEL_SetInteractiveMusic(2, 1);
+        RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_DANGER, 1);
         return;
     }
 
-    if ((level->unitFlags & 0x4))
+    if (level->unitFlags & 0x4)
     {
         Raziel.soundModifier &= ~0x1E;
 
-        RAZIEL_SetInteractiveMusic(1, 1);
+        RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_SUSPENSE, 1);
         return;
     }
 
-    if ((level->unitFlags & 0x20))
+    if (level->unitFlags & 0x20)
     {
         Raziel.soundModifier &= ~0x1E;
 
-        RAZIEL_SetInteractiveMusic(4, 1);
+        RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_PROBLEM_SOLVING, 1);
         return;
     }
 
     Raziel.soundModifier &= ~0x1E;
 
-    SOUND_SetMusicModifier(0);
+    SOUND_SetMusicModifier(SOUND_MODIFIER_NONE);
 }
 
 void ProcessTimers(Instance *instance)

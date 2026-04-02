@@ -527,7 +527,7 @@ void KAIN_Init(Instance *instance)
     }
 
     KAIN_PickUpReaver(instance);
-    RAZIEL_SetInteractiveMusic(15, 1);
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 1);
     DEBUG_DoAreaProtection();
 }
 
@@ -538,7 +538,7 @@ void KAIN_CleanUp(Instance *instance)
     KainVars *vars; // not from debug symbols
 
     mv = (MonsterVars *)instance->extraData;
-    RAZIEL_SetInteractiveMusic(0xF, 0);
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 0);
 
     if (mv != NULL)
     {
@@ -1519,7 +1519,7 @@ void KAIN_Init(Instance *instance)
     }
 
     KAIN_PickUpReaver(instance);
-    RAZIEL_SetInteractiveMusic(15, 1);
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 1);
     DEBUG_DoAreaProtection();
 }
 
@@ -1530,7 +1530,7 @@ void KAIN_CleanUp(Instance *instance)
     KainVars *vars; // not from debug symbols
 
     mv = (MonsterVars *)instance->extraData;
-    RAZIEL_SetInteractiveMusic(0xF, 0);
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 0);
 
     if (mv != NULL)
     {

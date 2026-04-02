@@ -1626,7 +1626,7 @@ void SOUND_ShutdownMusic()
         musicInfo.state == MUSIC_STATE_TRANSITION_MUSIC_LOADING ||
         musicInfo.state == MUSIC_STATE_NEW_MAIN_MUSIC_LOADING)
     {
-        musicInfo.nextState = 0;
+        musicInfo.nextState = MUSIC_STATE_IDLE;
 
         ExitCriticalSection();
 
@@ -1654,43 +1654,43 @@ void SOUND_SetMusicModifier(long modifier)
 {
     switch (modifier)
     {
-    case 0:
+    case SOUND_MODIFIER_NONE:
         SOUND_SetMusicVariable(0, 0);
         break;
-    case 1:
+    case SOUND_MODIFIER_SUSPENSE:
         SOUND_SetMusicVariable(0, 1);
         break;
-    case 2:
+    case SOUND_MODIFIER_DANGER:
         SOUND_SetMusicVariable(0, 3);
         break;
-    case 3:
+    case SOUND_MODIFIER_COMBAT:
         SOUND_SetMusicVariable(0, 4);
         break;
-    case 4:
+    case SOUND_MODIFIER_PROBLEM_SOLVING:
         SOUND_SetMusicVariable(0, 2);
         break;
-    case 5:
+    case SOUND_MODIFIER_SWIMMING:
         SOUND_SetMusicVariable(1, 1);
         break;
-    case 6:
+    case SOUND_MODIFIER_OUTDOORS:
         SOUND_SetMusicVariable(2, 1);
         break;
-    case 9:
+    case SOUND_MODIFIER_GLYPH_ROOM:
         SOUND_SetMusicVariable(125, 1);
         break;
-    case 10:
+    case SOUND_MODIFIER_FORGE:
         SOUND_SetMusicVariable(126, 1);
         break;
-    case 11:
+    case SOUND_MODIFIER_CLAN_BATTLE:
         SOUND_SetMusicVariable(124, 1);
         break;
-    case 13:
+    case SOUND_MODIFIER_PROBLEM_SOLVED:
         SOUND_SetMusicVariable(120, 1);
         break;
-    case 14:
+    case SOUND_MODIFIER_EXTRA_MUSIC:
         SOUND_SetMusicVariable(3, 1);
         break;
-    case 15:
+    case SOUND_MODIFIER_BOSS_LOADED:
         SOUND_SetMusicVariable(119, 1);
         break;
     }
@@ -1700,35 +1700,35 @@ void SOUND_ResetMusicModifier(long modifier)
 {
     switch (modifier)
     {
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-    case 4:
+    case SOUND_MODIFIER_NONE:
+    case SOUND_MODIFIER_SUSPENSE:
+    case SOUND_MODIFIER_DANGER:
+    case SOUND_MODIFIER_COMBAT:
+    case SOUND_MODIFIER_PROBLEM_SOLVING:
         SOUND_SetMusicVariable(0, 0);
         break;
-    case 5:
+    case SOUND_MODIFIER_SWIMMING:
         SOUND_SetMusicVariable(1, 0);
         break;
-    case 6:
+    case SOUND_MODIFIER_OUTDOORS:
         SOUND_SetMusicVariable(2, 0);
         break;
-    case 9:
+    case SOUND_MODIFIER_GLYPH_ROOM:
         SOUND_SetMusicVariable(125, 0);
         break;
-    case 10:
+    case SOUND_MODIFIER_FORGE:
         SOUND_SetMusicVariable(126, 0);
         break;
-    case 11:
+    case SOUND_MODIFIER_CLAN_BATTLE:
         SOUND_SetMusicVariable(124, 0);
         break;
-    case 13:
+    case SOUND_MODIFIER_PROBLEM_SOLVED:
         SOUND_SetMusicVariable(120, 0);
         break;
-    case 14:
+    case SOUND_MODIFIER_EXTRA_MUSIC:
         SOUND_SetMusicVariable(3, 0);
         break;
-    case 15:
+    case SOUND_MODIFIER_BOSS_LOADED:
         SOUND_SetMusicVariable(119, 0);
         break;
     }
