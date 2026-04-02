@@ -320,6 +320,22 @@ enum NodePlacement
     WATER_NODE = 3,
 };
 
+enum ThrowType
+{
+    THROW_TYPE_NONE = 0,
+    THROW_TYPE_TARGET = 1,
+    THROW_TYPE_POSITION = 2,
+    THROW_TYPE_DIRECTION = 3,
+    THROW_TYPE_VECTOR = 4,
+};
+
+enum SpinType
+{
+    THROW_SPIN_TYPE_NONE = 0,
+    THROW_SPIN_TYPE_SELF_ADJUSTING = 1,
+    THROW_SPIN_TYPE_VELOCITY = 2,
+};
+
 typedef enum _G2AnimControllerType_Enum {
     G2ANIM_CTRLRTYPE_DUMMY = 0,
     G2ANIM_CTRLRTYPE_FUNCTION = 1,

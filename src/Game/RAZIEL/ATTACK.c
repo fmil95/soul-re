@@ -1275,7 +1275,7 @@ void StateHandlerThrow2(CharacterState *In, int CurrentSection, intptr_t Data)
 
                 if ((Raziel.throwMode & 0x2))
                 {
-                    INSTANCE_Post(weaponInst, 0x800010, SetObjectThrowData(&Raziel.throwTarget, NULL, 4, spin_type, Raziel.throwData->velocity, Raziel.throwData->gravity, 0, 0));
+                    INSTANCE_Post(weaponInst, 0x800010, SetObjectThrowData(&Raziel.throwTarget, NULL, THROW_TYPE_VECTOR, spin_type, Raziel.throwData->velocity, Raziel.throwData->gravity, 0, 0));
                 }
                 else if ((Raziel.Senses.EngagedMask & 0x80))
                 {
@@ -1283,7 +1283,7 @@ void StateHandlerThrow2(CharacterState *In, int CurrentSection, intptr_t Data)
                     Rotation Rot;
                     MATRIX *matrix;
 
-                    INSTANCE_Post(weaponInst, 0x800010, SetObjectThrowData(Raziel.Senses.EngagedList[7].instance, NULL, 1, spin_type, (unsigned short)Raziel.throwData->velocity, Raziel.throwData->gravity, 0, 0));
+                    INSTANCE_Post(weaponInst, 0x800010, SetObjectThrowData(Raziel.Senses.EngagedList[7].instance, NULL, THROW_TYPE_TARGET, spin_type, (unsigned short)Raziel.throwData->velocity, Raziel.throwData->gravity, 0, 0));
 
                     matrix = (MATRIX *)INSTANCE_Query(Raziel.Senses.EngagedList[7].instance, queryLookatMatrix);
 
@@ -1295,7 +1295,7 @@ void StateHandlerThrow2(CharacterState *In, int CurrentSection, intptr_t Data)
                 }
                 else
                 {
-                    INSTANCE_Post(weaponInst, 0x800010, SetObjectThrowData(NULL, NULL, 0, spin_type, Raziel.throwData->velocity, 0, 0, 0));
+                    INSTANCE_Post(weaponInst, 0x800010, SetObjectThrowData(NULL, NULL, THROW_TYPE_NONE, spin_type, Raziel.throwData->velocity, 0, 0, 0));
                 }
 
                 razSetFadeEffect(In->CharacterInstance->fadeValue, 0, -PlayerData->throwFadeOutRate);

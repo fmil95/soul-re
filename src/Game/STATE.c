@@ -460,22 +460,22 @@ intptr_t SetObjectThrowData(void *target, SVector *angularVel, unsigned short ty
 
     if (target == NULL)
     {
-        Ptr->type = 0;
+        Ptr->type = THROW_TYPE_NONE;
     }
     else
     {
         switch (type)
         {
-        case 0:
+        case THROW_TYPE_NONE:
             break;
-        case 1:
+        case THROW_TYPE_TARGET:
             Ptr->data.target = (Instance *)target;
             break;
-        case 3:
+        case THROW_TYPE_DIRECTION:
             Ptr->data.direction = *(Rotation *)target;
             break;
-        case 2:
-        case 4:
+        case THROW_TYPE_POSITION:
+        case THROW_TYPE_VECTOR:
             Ptr->data.throwVector = *(Position *)target;
             break;
         }
@@ -483,14 +483,14 @@ intptr_t SetObjectThrowData(void *target, SVector *angularVel, unsigned short ty
 
     switch (spinType)
     {
-    case 0:
+    case THROW_SPIN_TYPE_NONE:
         break;
-    case 1:
+    case THROW_SPIN_TYPE_SELF_ADJUSTING:
         break;
-    case 2:
+    case THROW_SPIN_TYPE_VELOCITY:
         if (angularVel == NULL)
         {
-            Ptr->spinType = 0;
+            Ptr->spinType = THROW_SPIN_TYPE_NONE;
         }
         else
         {
