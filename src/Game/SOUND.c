@@ -295,7 +295,7 @@ void processPeriodicSound(Position *position, int livesInOnePlane, int inSpectra
         return;
     case 3:
     case 1:
-        if (((livesInOnePlane == 0) || ((inSpectral != 0) && (spectralPlane != 0)) || ((inSpectral == 0) && (spectralPlane == 0))) == 0)
+        if ((livesInOnePlane == 0 || (inSpectral != 0 && spectralPlane != 0) || (inSpectral == 0 && spectralPlane == 0)) == 0)
         {
             return;
         }
@@ -1331,7 +1331,7 @@ void musicEndCallbackFunc(long userData, int slot, int loopFlag)
         }
         else
         {
-            musicInfo.state = 0;
+            musicInfo.state = MUSIC_STATE_IDLE;
         }
     }
 }
@@ -1356,7 +1356,7 @@ void SOUND_PutMusicCommand(int cmdType, int cmdData)
 
 void SOUND_MusicInit()
 {
-    musicInfo.state = 0;
+    musicInfo.state = MUSIC_STATE_IDLE;
 
     musicInfo.errorStatus = 0;
 
@@ -1373,16 +1373,9 @@ void SOUND_MusicInit()
 
 int SOUND_IsMusicLoading()
 {
-    int temp; // not from decls.h
-
-    temp = 0;
-
-    if ((musicInfo.state == 1) || (musicInfo.state == 3) || (musicInfo.state == 7))
-    {
-        temp = 1;
-    }
-
-    return temp;
+    return (musicInfo.state == MUSIC_STATE_INITIAL_MUSIC_LOADING ||
+           musicInfo.state == MUSIC_STATE_TRANSITION_MUSIC_LOADING ||
+           musicInfo.state == MUSIC_STATE_NEW_MAIN_MUSIC_LOADING);
 }
 
 void SOUND_ProcessMusicLoad()
@@ -1395,15 +1388,15 @@ void SOUND_ProcessMusicLoad()
 
     switch (musicInfo.state)
     {
-    case 0:
+    case MUSIC_STATE_IDLE:
         if (musicInfo.numCmdsInQueue != 0)
         {
             cmd = &musicInfo.commandQueue[musicInfo.commandOut];
 
             if (cmd->type == 0)
             {
-                musicInfo.state = 11;
-                musicInfo.nextState = 13;
+                musicInfo.state = MUSIC_STATE_MAIN_MUSIC_FADEING_OUT;
+                musicInfo.nextState = MUSIC_STATE_PLANE_SHIFT_FADEOUT_DONE;
 
                 musicInfo.currentMusicPlane = cmd->data;
 
@@ -1474,8 +1467,8 @@ void SOUND_ProcessMusicLoad()
                                 {
                                     strcpy(musicInfo.currentMusicName, musicName);
 
-                                    musicInfo.state = 1;
-                                    musicInfo.nextState = 2;
+                                    musicInfo.state = MUSIC_STATE_INITIAL_MUSIC_LOADING;
+                                    musicInfo.nextState = MUSIC_STATE_INITIAL_MUSIC_LOADED;
 
                                     aadLoadDynamicSoundBank(sndFileName, smpFileName, 0, 1, musicLoadReturnFunc);
                                 }
@@ -1486,8 +1479,8 @@ void SOUND_ProcessMusicLoad()
                     {
                         musicInfo.currentMusicName[0] = 0;
 
-                        musicInfo.state = 11;
-                        musicInfo.nextState = 12;
+                        musicInfo.state = MUSIC_STATE_MAIN_MUSIC_FADEING_OUT;
+                        musicInfo.nextState = MUSIC_STATE_DUMP_MUSIC_FADEOUT_DONE;
 
                         aadStartMusicMasterVolFade(0, -1, musicFadeoutReturnFunc);
                     }
@@ -1500,19 +1493,19 @@ void SOUND_ProcessMusicLoad()
         }
 
         break;
-    case 2:
+    case MUSIC_STATE_INITIAL_MUSIC_LOADED:
         if (aadAssignDynamicSequence(0, 0, 0) == 0)
         {
             aadStartSlot(0);
         }
 
-        musicInfo.state = 0;
+        musicInfo.state = MUSIC_STATE_IDLE;
         break;
-    case 4:
+    case MUSIC_STATE_TRANSITION_MUSIC_LOADED:
         if (musicInfo.errorStatus == 0)
         {
-            musicInfo.state = 5;
-            musicInfo.nextState = 6;
+            musicInfo.state = MUSIC_STATE_WAIT_FOR_MAIN_MUSIC_END;
+            musicInfo.nextState = MUSIC_STATE_MAIN_MUSIC_ENDED;
 
             musicInfo.bankLoaded = 1;
 
@@ -1522,11 +1515,11 @@ void SOUND_ProcessMusicLoad()
         }
         else
         {
-            musicInfo.state = 0;
+            musicInfo.state = MUSIC_STATE_IDLE;
         }
 
         break;
-    case 6:
+    case MUSIC_STATE_MAIN_MUSIC_ENDED:
         if (aadMem->sramDefragInfo.status == 0)
         {
             sprintf(sndFileName, "\\kain2\\music\\%s\\%s.snd", musicInfo.currentMusicName, musicInfo.currentMusicName);
@@ -1534,16 +1527,16 @@ void SOUND_ProcessMusicLoad()
 
             aadLoadDynamicSoundBank(sndFileName, smpFileName, 0, 1, musicLoadReturnFunc);
 
-            musicInfo.state = 7;
-            musicInfo.nextState = 8;
+            musicInfo.state = MUSIC_STATE_NEW_MAIN_MUSIC_LOADING;
+            musicInfo.nextState = MUSIC_STATE_NEW_MAIN_MUSIC_LOADED;
         }
 
         break;
-    case 8:
+    case MUSIC_STATE_NEW_MAIN_MUSIC_LOADED:
         if (musicInfo.errorStatus == 0)
         {
-            musicInfo.state = 9;
-            musicInfo.nextState = 10;
+            musicInfo.state = MUSIC_STATE_WAIT_FOR_TRANSITION_END;
+            musicInfo.nextState = MUSIC_STATE_TRANSITION_ENDED;
 
             musicInfo.bankLoaded = 0;
 
@@ -1553,25 +1546,25 @@ void SOUND_ProcessMusicLoad()
         }
         else
         {
-            musicInfo.state = 0;
+            musicInfo.state = MUSIC_STATE_IDLE;
         }
 
         break;
-    case 10:
+    case MUSIC_STATE_TRANSITION_ENDED:
         aadFreeDynamicSoundBank(1);
 
-        musicInfo.state = 0;
+        musicInfo.state = MUSIC_STATE_IDLE;
         break;
-    case 12:
+    case MUSIC_STATE_DUMP_MUSIC_FADEOUT_DONE:
         aadStopAllSlots();
 
         aadFreeDynamicSoundBank(0);
 
         aadStartMusicMasterVolFade(gameTrackerX.sound.gMusicVol, 1, NULL);
 
-        musicInfo.state = 0;
+        musicInfo.state = MUSIC_STATE_IDLE;
         break;
-    case 13:
+    case MUSIC_STATE_PLANE_SHIFT_FADEOUT_DONE:
         aadStopAllSlots();
 
         aadFreeDynamicSoundBank(0);
@@ -1582,7 +1575,7 @@ void SOUND_ProcessMusicLoad()
 
         musicInfo.checkMusicDelay = 0;
 
-        musicInfo.state = 0;
+        musicInfo.state = MUSIC_STATE_IDLE;
         break;
     }
 }
@@ -1629,13 +1622,15 @@ void SOUND_ShutdownMusic()
 
     EnterCriticalSection();
 
-    if ((musicInfo.state == 1) || (musicInfo.state == 3) || (musicInfo.state == 7))
+    if (musicInfo.state == MUSIC_STATE_INITIAL_MUSIC_LOADING ||
+        musicInfo.state == MUSIC_STATE_TRANSITION_MUSIC_LOADING ||
+        musicInfo.state == MUSIC_STATE_NEW_MAIN_MUSIC_LOADING)
     {
         musicInfo.nextState = 0;
 
         ExitCriticalSection();
 
-        while (musicInfo.state != 0)
+        while (musicInfo.state != MUSIC_STATE_IDLE)
         {
             STREAM_PollLoadQueue();
         }
@@ -1650,7 +1645,7 @@ void SOUND_ShutdownMusic()
     aadFreeDynamicSoundBank(0);
     aadFreeDynamicSoundBank(1);
 
-    musicInfo.state = 0;
+    musicInfo.state = MUSIC_STATE_IDLE;
 
     aadStartMusicMasterVolFade(gameTrackerX.sound.gMusicVol, 1, NULL);
 }
