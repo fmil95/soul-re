@@ -281,6 +281,24 @@ enum DistanceType
     THREE_D_DISTANCE = 1
 };
 
+enum NodeVariant {
+    RANDOM_NODE = 0,
+    PLAYER_NODE = 1,
+    ENEMY_NODE = 2,
+    TARGET_NODE = 3,
+    PLANMKR_NODE = 4,
+    NULL_NODE = 5,
+    END_OF_SOURCE = 6,
+};
+
+enum NodePlacement
+{
+    FLOOR_NODE = 0,
+    WALL_NODE = 1,
+    CEILING_NODE = 2,
+    WATER_NODE = 3,
+};
+
 typedef enum _G2AnimControllerType_Enum {
     G2ANIM_CTRLRTYPE_DUMMY = 0,
     G2ANIM_CTRLRTYPE_FUNCTION = 1,

@@ -186,7 +186,7 @@ int PLANCOLL_FindTerrainHitFinal(PlanCollideInfo *pci, int *placement, int distB
 
         if (pcollideinfo.type == 3)
         {
-            if (placement != 0)
+            if (placement != FLOOR_NODE)
             {
                 *placement = (signed char)current->nodeType;
             }

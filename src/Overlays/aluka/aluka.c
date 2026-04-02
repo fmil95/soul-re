@@ -640,7 +640,7 @@ int ALUKA_ShouldJumpIn(Instance *instance, Instance *enemy, Level *level)
 
     nodeType = ENMYPLAN_GetNodeTypeOfNextWaypoint(((MonsterVars *)instance->extraData)->pathSlotID);
 
-    if (nodeType != 64 && ((nodeType >> 3) & 3) == 3)
+    if (nodeType != 64 && ((nodeType >> 3) & 3) == WATER_NODE)
     {
         return 1;
     }
@@ -666,7 +666,7 @@ int ALUKA_ShouldJumpOut(Instance *instance, Instance *enemy, Level *level)
 
     nodeType = ENMYPLAN_GetNodeTypeOfNextWaypoint(mv->pathSlotID);
 
-    if (nodeType != 64 && ((nodeType >> 3) & 3) == 0)
+    if (nodeType != 64 && ((nodeType >> 3) & 3) == FLOOR_NODE)
     {
         return 1;
     }
