@@ -275,6 +275,12 @@ enum MusicState
     NUM_MUSIC_STATES = 14,
 };
 
+enum DistanceType
+{
+    TWO_D_DISTANCE = 0,
+    THREE_D_DISTANCE = 1
+};
+
 typedef enum _G2AnimControllerType_Enum {
     G2ANIM_CTRLRTYPE_DUMMY = 0,
     G2ANIM_CTRLRTYPE_FUNCTION = 1,

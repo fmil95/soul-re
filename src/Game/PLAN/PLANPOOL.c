@@ -96,7 +96,7 @@ PlanningNode *PLANPOOL_GetNodeWithID(PlanningNode *planningPool, int type, int i
 
     for (i = 0; i < poolManagementData->numNodesInPool; i++)
     {
-        if ((planningPool[i].nodeType == type) && (planningPool[i].id == id) && (planningPool[i].streamUnitID == suID))
+        if (planningPool[i].nodeType == type && planningPool[i].id == id && planningPool[i].streamUnitID == suID)
         {
             return &planningPool[i];
         }
@@ -145,7 +145,7 @@ PlanningNode *PLANPOOL_GetClosestNode(Position *pos, PlanningNode *planningPool,
 
     for (i = 0; i < poolManagementData->numNodesInPool; i++)
     {
-        if (distanceType == 0)
+        if (distanceType == TWO_D_DISTANCE)
         {
             dist = MATH3D_LengthXY(pos->x - planningPool[i].pos.x, pos->y - planningPool[i].pos.y);
         }

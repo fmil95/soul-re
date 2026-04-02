@@ -19,7 +19,7 @@ long PLAN_CalcMinDistFromExistingNodes(Position *pos, PlanningNode *planningPool
 
     if (closestNode != NULL)
     {
-        if (distanceType == 0)
+        if (distanceType == TWO_D_DISTANCE)
         {
             minDist = MATH3D_LengthXY(pos->x - closestNode->pos.x, pos->y - closestNode->pos.y);
         }
@@ -180,7 +180,7 @@ void PLAN_AddRandomNode(PlanningNode *planningPool, Position *playerPos)
         pci.collidePos.x += (rand() % 24000) - 12000;
         pci.collidePos.y += (rand() % 24000) - 12000;
 
-        if ((MATH3D_LengthXYZ(playerPos->x - pci.collidePos.x, playerPos->y - pci.collidePos.y, playerPos->z - pci.collidePos.z) < 12000) && (PLAN_CalcMinDistFromExistingNodes(&pci.collidePos, planningPool, 0) > 1000))
+        if (MATH3D_LengthXYZ(playerPos->x - pci.collidePos.x, playerPos->y - pci.collidePos.y, playerPos->z - pci.collidePos.z) < 12000 && PLAN_CalcMinDistFromExistingNodes(&pci.collidePos, planningPool, TWO_D_DISTANCE) > 1000)
         {
             successFlag = 1;
             break;
