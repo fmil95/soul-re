@@ -344,6 +344,13 @@ enum SramDefragStatus
     AAD_SRAM_DEFRAG_WRITE_BLOCK = 3,
 };
 
+enum AadDynamicLoadRequestType
+{
+    AAD_DYNAMIC_SFX_LOAD_REQ = 0,
+    AAD_DYNAMIC_SFX_FREE_REQ = 1,
+    AAD_DYNAMIC_SFX_DUMMY_REQ = 2,
+};
+
 typedef enum _G2AnimControllerType_Enum {
     G2ANIM_CTRLRTYPE_DUMMY = 0,
     G2ANIM_CTRLRTYPE_FUNCTION = 1,

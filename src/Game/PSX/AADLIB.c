@@ -62,7 +62,7 @@ int aadInit(AadInitAttr *attributes, unsigned char *memoryPtr)
     {
         memset(memoryPtr, 0, size);
 
-        if ((attributes->nonBlockLoadProc == NULL) || (attributes->nonBlockBufferedLoadProc == NULL) || (attributes->memoryMallocProc == NULL))
+        if (attributes->nonBlockLoadProc == NULL || attributes->nonBlockBufferedLoadProc == NULL || attributes->memoryMallocProc == NULL)
         {
             return 0x1008;
         }
@@ -746,7 +746,7 @@ int aadLoadDynamicSfx(char *fileName, long directoryID, long flags)
     {
         loadReq = &aadMem->loadRequestQueue[aadMem->nextLoadReqIn];
 
-        loadReq->type = 0;
+        loadReq->type = AAD_DYNAMIC_SFX_LOAD_REQ;
 
         loadReq->handle = (aadMem->nextFileHandle++ & 0x3FFF) | 0x4000;
 
@@ -775,10 +775,9 @@ int aadFreeDynamicSfx(int handle)
     {
         loadReq = &aadMem->loadRequestQueue[i];
 
-        if ((loadReq->type == 0) && (loadReq->handle == handle))
+        if (loadReq->type == AAD_DYNAMIC_SFX_LOAD_REQ && loadReq->handle == handle)
         {
-            loadReq->type = 2;
-
+            loadReq->type = AAD_DYNAMIC_SFX_DUMMY_REQ;
             return 0;
         }
     }
@@ -793,7 +792,7 @@ int aadFreeDynamicSfx(int handle)
 
         aadMem->nextLoadReqOut = (aadMem->nextLoadReqOut - 1) & 0xF;
 
-        loadReq->type = 1;
+        loadReq->type = AAD_DYNAMIC_SFX_FREE_REQ;
 
         loadReq->handle = handle;
 
@@ -884,7 +883,7 @@ void aadProcessLoadQueue()
 
             switch (loadReq->type)
             {
-            case 0:
+            case AAD_DYNAMIC_SFX_LOAD_REQ:
             {
                 char areaName[12];
 
@@ -897,7 +896,7 @@ void aadProcessLoadQueue()
                     *p = 0;
                 }
 
-                if ((loadReq->flags & 0x1))
+                if (loadReq->flags & 0x1)
                 {
                     sprintf(info->snfFileName, "\\kain2\\area\\%s\\bin\\%s.snf", areaName, loadReq->fileName);
                     sprintf(info->smfFileName, "\\kain2\\area\\%s\\bin\\%s.smf", areaName, loadReq->fileName);
@@ -937,7 +936,7 @@ void aadProcessLoadQueue()
 
                 break;
             }
-            case 1:
+            case AAD_DYNAMIC_SFX_FREE_REQ:
             {
                 int i;
                 AadDynSfxSnfFileHdr *snfFile;
@@ -975,14 +974,14 @@ void aadProcessLoadQueue()
                     }
                 }
 
-                if (aadCheckSramFragmented() != 0)
+                if (aadCheckSramFragmented())
                 {
                     gDefragRequest = 1;
                 }
 
                 break;
             }
-            case 2:
+            case AAD_DYNAMIC_SFX_DUMMY_REQ:
                 break;
             }
         }
