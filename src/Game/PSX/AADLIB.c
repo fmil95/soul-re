@@ -41,7 +41,7 @@ unsigned long aadGetMemorySize(AadInitAttr *attributes)
 
 int aadInit(AadInitAttr *attributes, unsigned char *memoryPtr)
 {
-    AadSequenceSlot* slot;
+    AadSequenceSlot *slot;
     unsigned long size;
     int slotNumber;
     int i;
@@ -52,7 +52,7 @@ int aadInit(AadInitAttr *attributes, unsigned char *memoryPtr)
 
     size = aadGetMemorySize(attributes);
 
-    aadMem = (AadMemoryStruct*)memoryPtr;
+    aadMem = (AadMemoryStruct *)memoryPtr;
 
     if (aadMem == NULL)
     {
@@ -97,7 +97,7 @@ int aadInit(AadInitAttr *attributes, unsigned char *memoryPtr)
 
         for (slotNumber = 0; slotNumber < attributes->numSlots; slotNumber++)
         {
-            slot = aadMem->sequenceSlots[slotNumber] = &((AadSequenceSlot*)&aadMem[1])[slotNumber]; // TODO: doesn't look very natural, reverify
+            slot = aadMem->sequenceSlots[slotNumber] = &((AadSequenceSlot *)&aadMem[1])[slotNumber]; // TODO: doesn't look very natural, reverify
 
             slot->thisSlotNumber = slotNumber;
 
@@ -872,7 +872,7 @@ void aadProcessLoadQueue()
             }
         }
 
-        if ((aadMem->numLoadReqsQueued != 0) && (aadMem->sramDefragInfo.status == 0) && (gDefragRequest == 0))
+        if (aadMem->numLoadReqsQueued != 0 && aadMem->sramDefragInfo.status == AAD_SRAM_DEFRAG_IDLE && gDefragRequest == 0)
         {
             AadDynamicLoadRequest *loadReq;
 
@@ -890,7 +890,7 @@ void aadProcessLoadQueue()
 
                 strcpy(areaName, loadReq->fileName);
 
-                p = (char*)strpbrk(areaName, "0123456789");
+                p = (char *)strpbrk(areaName, "0123456789");
 
                 if (p != NULL)
                 {
@@ -987,11 +987,11 @@ void aadProcessLoadQueue()
             }
         }
 
-        if ((gDefragRequest != 0) && (SOUND_IsMusicLoading() == 0))
+        if (gDefragRequest != 0 && !SOUND_IsMusicLoading())
         {
             gDefragRequest = 0;
 
-            aadMem->sramDefragInfo.status = 1;
+            aadMem->sramDefragInfo.status = AAD_SRAM_DEFRAG_INIT;
         }
 
         aadProcessSramDefrag();
@@ -1005,7 +1005,7 @@ void aadLoadDynamicSfxAbort(AadDynamicSfxLoadInfo *info, int error)
 
     if (info->snfFile != NULL)
     {
-        if ((info->flags & 0x2))
+        if (info->flags & 0x2)
         {
             if (info->snfFile->prevDynSfxFile != NULL)
             {
@@ -1465,9 +1465,9 @@ void aadProcessSramDefrag()
 
     switch (aadMem->sramDefragInfo.status)
     {
-    case 0:
+    case AAD_SRAM_DEFRAG_IDLE:
         break;
-    case 1:
+    case AAD_SRAM_DEFRAG_INIT:
         firstBlockIndex = aadMem->firstSramBlockDescIndex;
 
         sramDescTbl = aadMem->sramDescriptorTbl;
@@ -1486,7 +1486,7 @@ void aadProcessSramDefrag()
 
                     firstBlockIndex = firstBlock->nextIndex;
 
-                    if ((n != 0) && (firstBlockIndex < 128))
+                    if (n != 0 && firstBlockIndex < 128)
                     {
                         firstBlock = &sramDescTbl[firstBlockIndex];
                     }
@@ -1523,7 +1523,7 @@ void aadProcessSramDefrag()
                             {
                                 aadMem->memoryFreeProc(info->fragBuffer);
                             label:
-                                info->status = 0;
+                                info->status = AAD_SRAM_DEFRAG_IDLE;
                             }
                             else
                             {
@@ -1571,7 +1571,7 @@ void aadProcessSramDefrag()
 
                                 aadMem->sfxWaveAttrTbl[info->masterListEntry].sramHandle = firstBlockIndex;
 
-                                info->status = 2;
+                                info->status = AAD_SRAM_DEFRAG_READ_BLOCK;
                             }
                         }
                     }
@@ -1580,8 +1580,8 @@ void aadProcessSramDefrag()
         }
 
         break;
-    case 2:
-        if (SpuIsTransferCompleted(0) != 0)
+    case AAD_SRAM_DEFRAG_READ_BLOCK:
+        if (SpuIsTransferCompleted(0))
         {
             if (info->moveSize <= 4096)
             {
@@ -1598,12 +1598,12 @@ void aadProcessSramDefrag()
 
             info->readSize = n;
 
-            info->status = 3;
+            info->status = AAD_SRAM_DEFRAG_WRITE_BLOCK;
         }
 
         break;
-    case 3:
-        if (SpuIsTransferCompleted(0) != 0)
+    case AAD_SRAM_DEFRAG_WRITE_BLOCK:
+        if (SpuIsTransferCompleted(0))
         {
             SpuSetTransferStartAddr(info->destSramAddr);
 
@@ -1619,7 +1619,7 @@ void aadProcessSramDefrag()
 
             if (info->moveSize != 0)
             {
-                info->status = 2;
+                info->status = AAD_SRAM_DEFRAG_READ_BLOCK;
             }
             else
             {
@@ -1627,13 +1627,13 @@ void aadProcessSramDefrag()
 
                 aadMem->sfxWaveMasterList[info->waveID] = info->masterListEntry;
 
-                if (aadCheckSramFragmented() != 0)
+                if (aadCheckSramFragmented())
                 {
-                    info->status = 1;
+                    info->status = AAD_SRAM_DEFRAG_INIT;
                 }
                 else
                 {
-                    info->status = 0;
+                    info->status = AAD_SRAM_DEFRAG_IDLE;
                 }
             }
         }

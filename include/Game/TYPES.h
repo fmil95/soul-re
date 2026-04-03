@@ -336,6 +336,14 @@ enum SpinType
     THROW_SPIN_TYPE_VELOCITY = 2,
 };
 
+enum SramDefragStatus
+{
+    AAD_SRAM_DEFRAG_IDLE = 0,
+    AAD_SRAM_DEFRAG_INIT = 1,
+    AAD_SRAM_DEFRAG_READ_BLOCK = 2,
+    AAD_SRAM_DEFRAG_WRITE_BLOCK = 3,
+};
+
 typedef enum _G2AnimControllerType_Enum {
     G2ANIM_CTRLRTYPE_DUMMY = 0,
     G2ANIM_CTRLRTYPE_FUNCTION = 1,
