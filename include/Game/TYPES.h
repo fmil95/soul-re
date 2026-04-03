@@ -351,6 +351,14 @@ enum AadDynamicLoadRequestType
     AAD_DYNAMIC_SFX_DUMMY_REQ = 2,
 };
 
+enum AadSmfLoadingState
+{
+    AAD_SMF_LOADSTATE_INIT = 0,
+    AAD_SMF_LOADSTATE_ATTRIBUTES = 1,
+    AAD_SMF_LOADSTATE_SKIP_WAVEDATA = 2,
+    AAD_SMF_LOADSTATE_LOAD_WAVEDATA = 3,
+};
+
 typedef enum _G2AnimControllerType_Enum {
     G2ANIM_CTRLRTYPE_DUMMY = 0,
     G2ANIM_CTRLRTYPE_FUNCTION = 1,

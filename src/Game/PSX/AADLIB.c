@@ -1067,7 +1067,7 @@ void aadLoadDynamicSfxReturn(void *loadedDataPtr, void *data, void *data2)
 
         info->snfFile->nextDynSfxFile = NULL;
 
-        info->smfLoadingState = 0;
+        info->smfLoadingState = AAD_SMF_LOADSTATE_INIT;
 
         info->flags |= 0x2;
 
@@ -1225,7 +1225,7 @@ void aadLoadDynamicSfxReturn2(void *loadedDataPtr, long loadedDataSize, short st
     {
         switch (info->smfLoadingState)
         {
-        case 0:
+        case AAD_SMF_LOADSTATE_INIT:
             if (((AadDynSfxSnfFileHdr *)dataPtr)->snfID != aadCreateFourCharID('a', 'S', 'M', 'F'))
             {
                 aadLoadDynamicSfxAbort(info, 4107);
@@ -1251,14 +1251,14 @@ void aadLoadDynamicSfxReturn2(void *loadedDataPtr, long loadedDataSize, short st
 
                     info->numSfxToLoad = info->snfFile->numSfxInFile;
 
-                    info->smfLoadingState = 1;
+                    info->smfLoadingState = AAD_SMF_LOADSTATE_ATTRIBUTES;
 
                     info->bytesToLoad = 24;
                 }
             }
 
             break;
-        case 1:
+        case AAD_SMF_LOADSTATE_ATTRIBUTES:
             n = info->bytesToLoad;
 
             if (bytesRemaining < n)
@@ -1282,7 +1282,7 @@ void aadLoadDynamicSfxReturn2(void *loadedDataPtr, long loadedDataSize, short st
             }
 
             break;
-        case 2:
+        case AAD_SMF_LOADSTATE_SKIP_WAVEDATA:
             n = info->bytesToLoad;
 
             if (bytesRemaining < n)
@@ -1300,7 +1300,7 @@ void aadLoadDynamicSfxReturn2(void *loadedDataPtr, long loadedDataSize, short st
             {
                 if (--info->numSfxToLoad != 0)
                 {
-                    info->smfLoadingState = 1;
+                    info->smfLoadingState = AAD_SMF_LOADSTATE_ATTRIBUTES;
 
                     info->bytesToLoad = 24;
                 }
@@ -1312,7 +1312,7 @@ void aadLoadDynamicSfxReturn2(void *loadedDataPtr, long loadedDataSize, short st
             }
 
             break;
-        case 3:
+        case AAD_SMF_LOADSTATE_LOAD_WAVEDATA:
             n = info->bytesToLoad;
 
             if (bytesRemaining < n)
@@ -1348,7 +1348,7 @@ void aadLoadDynamicSfxReturn2(void *loadedDataPtr, long loadedDataSize, short st
                 }
                 else
                 {
-                    info->smfLoadingState = 1;
+                    info->smfLoadingState = AAD_SMF_LOADSTATE_ATTRIBUTES;
 
                     info->bytesToLoad = 24;
 
