@@ -3068,6 +3068,10 @@ void StateHandlerBreakOff(CharacterState *In, int CurrentSection, intptr_t Data)
 {
 
     Message *Ptr;
+    PhysObInteractProperties *interactProp;
+    int action;
+    int condition;
+    Instance *Inst;
 
     while ((Ptr = PeekMessageQueue(&In->SectionList[CurrentSection].Event)) != NULL)
     {
@@ -3140,44 +3144,37 @@ void StateHandlerBreakOff(CharacterState *In, int CurrentSection, intptr_t Data)
                 }
             }
             break;
-        case 0x08000004:
-            goto label;
         case 0x100015:
-            if (CurrentSection == 0)
+            if (CurrentSection != 0)
             {
-
-                PhysObInteractProperties *interactProp;
-                int action;
-                int condition;
-                Instance *Inst;
-
-                StateSwitchStateCharacterData(In, &StateHandlerIdle, SetControlInitIdleData(0, 0, 3));
-
-            label:
-                interactProp = (PhysObInteractProperties *)INSTANCE_Query((Instance *)(intptr_t)In->SectionList[CurrentSection].Data2, 0x15);
-
-                if (Raziel.Senses.EngagedMask & 0x10)
-                {
-                    action = interactProp->action;
-                    condition = interactProp->conditions;
-                }
-                else
-                {
-                    action = interactProp->auxAction;
-                    condition = interactProp->auxConditions;
-                }
-
-                if (condition & 0x1FE)
-                {
-                    Inst = Raziel.soulReaver;
-                    razReaverImbue(action);
-                }
-                else
-                {
-                    Inst = In->CharacterInstance;
-                }
-                INSTANCE_Post((Instance *)(intptr_t)In->SectionList[CurrentSection].Data2, 0x800023, SetObjectBreakOffData(Inst, 0x31, 0, 0, 0, 0, (int)(short)action));
+                break;
             }
+            StateSwitchStateCharacterData(In, &StateHandlerIdle, SetControlInitIdleData(0, 0, 3));
+        case 0x08000004:
+
+            interactProp = (PhysObInteractProperties *)INSTANCE_Query((Instance *)(intptr_t)In->SectionList[CurrentSection].Data2, 0x15);
+
+            if (Raziel.Senses.EngagedMask & 0x10)
+            {
+                action = interactProp->action;
+                condition = interactProp->conditions;
+            }
+            else
+            {
+                action = interactProp->auxAction;
+                condition = interactProp->auxConditions;
+            }
+
+            if (condition & 0x1FE)
+            {
+                Inst = Raziel.soulReaver;
+                razReaverImbue(action);
+            }
+            else
+            {
+                Inst = In->CharacterInstance;
+            }
+            INSTANCE_Post((Instance *)(intptr_t)In->SectionList[CurrentSection].Data2, 0x800023, SetObjectBreakOffData(Inst, 0x31, 0, 0, 0, 0, (int)(short)action));
             break;
         case 0x08000000:
         case 0x08000001:
