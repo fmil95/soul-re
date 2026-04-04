@@ -2025,14 +2025,9 @@ int MON_DefaultPlanMovement(Instance *instance, int anim, long distance)
     int felloff;
     long length;
     MonsterAnim *manim;
-    long dist; // not from decls.h
-
-    dist = distance;
 
     mv = (MonsterVars *)instance->extraData;
-
     manim = MON_GetAnim(instance, mv->subAttr->animList, anim);
-
     length = MATH3D_LengthXYZ(instance->position.x - mv->destination.x, instance->position.y - mv->destination.y, instance->position.z - mv->destination.z);
 
     if ((signed char)mv->pathSlotID == -1)
@@ -2046,7 +2041,6 @@ int MON_DefaultPlanMovement(Instance *instance, int anim, long distance)
     }
 
     felloff = MON_GroundMoveQueueHandler(instance);
-
     rc = MONSTER_PLANMOVE_STATECHANGE;
 
     if (!(mv->mvFlags & 0x1))
@@ -2055,7 +2049,7 @@ int MON_DefaultPlanMovement(Instance *instance, int anim, long distance)
         {
             rc = MONSTER_PLANMOVE_ARRIVED;
 
-            if (length >= dist)
+            if (length >= distance)
             {
                 Position pos;
                 int planresult;
@@ -2065,57 +2059,54 @@ int MON_DefaultPlanMovement(Instance *instance, int anim, long distance)
                 if (planresult == 3)
                 {
                     rc = MONSTER_PLANMOVE_INVALID;
-                    goto label_2;
-                }
-
-                if (planresult == 0)
-                {
-                    MON_TurnToPosition(instance, &mv->destination, mv->subAttr->speedPivotTurn);
-
-                    rc = MONSTER_PLANMOVE_STILLPLANNING;
                 }
                 else
                 {
-                    if (!(mv->mvFlags & 0x20000))
-                    {
-                        mv->mvFlags |= 0x20000;
 
-                        goto label_1;
+                    if (planresult == 0)
+                    {
+                        MON_TurnToPosition(instance, &mv->destination, mv->subAttr->speedPivotTurn);
+
+                        rc = MONSTER_PLANMOVE_STILLPLANNING;
                     }
-
-                    rc = MONSTER_PLANMOVE_MOVING;
-
-                    if (instance->flags2 & 0x2)
+                    else
                     {
-                    label_1:
-                        MON_PlayAnimIfNotPlaying(instance, anim, 2);
+                        if (!(mv->mvFlags & 0x20000))
+                        {
+                            mv->mvFlags |= 0x20000;
+                            MON_PlayAnimIfNotPlaying(instance, anim, 2);
+                        }
+                        else if (instance->flags2 & 0x2)
+                        {
+                            MON_PlayAnimIfNotPlaying(instance, anim, 2);
+                        }
 
                         rc = MONSTER_PLANMOVE_MOVING;
                     }
-                }
 
-                if ((mv->mvFlags & 0x20000))
-                {
-                    short turnSpeed;
-
-                    switch (anim)
+                    if ((mv->mvFlags & 0x20000))
                     {
-                    case MONSTER_ANIM_WALK:
-                        turnSpeed = mv->subAttr->speedWalkTurn;
-                        break;
-                    case MONSTER_ANIM_RUN:
-                        turnSpeed = mv->subAttr->speedRunTurn;
-                        break;
-                    default:
-                        turnSpeed = mv->subAttr->speedPivotTurn;
-                    }
+                        short turnSpeed;
 
-                    if ((length * 3) < ((manim->velocity << 12) / turnSpeed))
-                    {
-                        turnSpeed *= 2;
-                    }
+                        switch (anim)
+                        {
+                        case MONSTER_ANIM_WALK:
+                            turnSpeed = mv->subAttr->speedWalkTurn;
+                            break;
+                        case MONSTER_ANIM_RUN:
+                            turnSpeed = mv->subAttr->speedRunTurn;
+                            break;
+                        default:
+                            turnSpeed = mv->subAttr->speedPivotTurn;
+                        }
 
-                    MON_MoveToPosition(instance, &pos, turnSpeed);
+                        if ((length * 3) < ((manim->velocity << 12) / turnSpeed))
+                        {
+                            turnSpeed *= 2;
+                        }
+
+                        MON_MoveToPosition(instance, &pos, turnSpeed);
+                    }
                 }
             }
 
@@ -2135,11 +2126,8 @@ int MON_DefaultPlanMovement(Instance *instance, int anim, long distance)
                 rc = MONSTER_PLANMOVE_MOVING;
             }
         }
-
-        return rc;
     }
 
-label_2:
     return rc;
 }
 
