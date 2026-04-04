@@ -104,11 +104,11 @@ Instance *MISSILE_Fire(Instance *instance, MonsterMissile *missiledef, void *tar
         int spin;
         SVector rotVel;
 
-        spin = 1;
+        spin = THROW_SPIN_TYPE_SELF_ADJUSTING;
 
         if (missiledef->type == 3)
         {
-            spin = 2;
+            spin = THROW_SPIN_TYPE_VELOCITY;
 
             rotVel.x = 273;
             rotVel.y = 0;
@@ -125,5 +125,5 @@ Instance *MISSILE_Fire(Instance *instance, MonsterMissile *missiledef, void *tar
 
 Instance *MISSILE_FireAtInstance(Instance *instance, MonsterMissile *missiledef, Instance *target)
 {
-    return MISSILE_Fire(instance, missiledef, target, 1);
+    return MISSILE_Fire(instance, missiledef, target, THROW_TYPE_TARGET);
 }

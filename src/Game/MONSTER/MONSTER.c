@@ -1684,7 +1684,7 @@ void MON_Flee(Instance *instance)
         return;
     }
 
-    if (MON_ValidPosition(instance) == 0)
+    if (!MON_ValidPosition(instance))
     {
         MON_SwitchState(instance, MONSTER_STATE_PURSUE);
         return;
@@ -1704,14 +1704,13 @@ void MON_PursueEntry(Instance *instance)
     mv->mvFlags |= 0x1000;
     mv->mvFlags &= ~0x10000;
 
-    if ((mv->mvFlags & 0x4))
+    if (mv->mvFlags & 0x4)
     {
         MON_PlayAnim(instance, MONSTER_ANIM_RUN, 2);
     }
     else
     {
         MON_GetPlanSlot(mv);
-
         MON_PlayCombatIdle(instance, 2);
     }
 
@@ -1832,34 +1831,34 @@ void MON_Wander(Instance *instance)
 
         switch (planresult)
         {
-        case 0:
-        case 1:
-        case 5:
-        case 6:
+        case MONSTER_PLANMOVE_MOVING:
+        case MONSTER_PLANMOVE_STILLPLANNING:
+        case MONSTER_PLANMOVE_NOTARGET:
+        case MONSTER_PLANMOVE_STATECHANGE:
             break;
-        case 4:
+        case MONSTER_PLANMOVE_ARRIVED:
             if (mv->behaviorState != 4)
             {
                 if (!(rand() & 0x3))
                 {
                     mv->generalTimer = MON_GetTime(instance) + 1000;
 
-                    state = 5;
+                    state = MONSTER_STATE_WANDER;
                 }
                 else
                 {
-                    state = 2;
+                    state = MONSTER_STATE_IDLE;
                 }
             }
             else
             {
-                state = 20;
+                state = MONSTER_STATE_HIDE;
             }
 
             break;
-        case 2:
-        case 3:
-            state = 2;
+        case MONSTER_PLANMOVE_INVALID:
+        case MONSTER_PLANMOVE_MUSTSTOP:
+            state = MONSTER_STATE_IDLE;
             break;
         }
 
@@ -1871,7 +1870,7 @@ void MON_Wander(Instance *instance)
 
     if (mv->enemy != NULL)
     {
-        if (MON_ShouldIFlee(instance) != 0)
+        if (MON_ShouldIFlee(instance))
         {
             MON_SwitchState(instance, MONSTER_STATE_FLEE);
         }

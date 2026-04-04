@@ -18,7 +18,7 @@ PlanningNode *PLANSRCH_FindNodeToExpand(PlanningNode *planningPool, PlanningNode
 
     for (currentNode = planningPool, i = 0; i < poolManagementData->numNodesInPool; currentNode++, i++)
     {
-        if ((((validNodeTypes >> currentNode->nodeType) & 0x1)) && (((currentNode->flags & 0x1)) && (!(currentNode->flags & 0x2))))
+        if (((validNodeTypes >> currentNode->nodeType) & 0x1) && ((currentNode->flags & 0x1) && (!(currentNode->flags & 0x2))))
         {
             valueForCurrentNode = currentNode->cost + MATH3D_LengthXYZ(currentNode->pos.x - goalNode->pos.x, currentNode->pos.y - goalNode->pos.y, currentNode->pos.z - goalNode->pos.z);
 

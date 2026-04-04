@@ -1696,10 +1696,9 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
 
         value = 0;
 
-        if ((instance->flags & 0x4))
+        if (instance->flags & 0x4)
         {
             value = 1;
-
             instance->flags &= ~0x4;
         }
 
@@ -1714,10 +1713,9 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
 
         value = 0;
 
-        if ((instance->flags & 0x8))
+        if (instance->flags & 0x8)
         {
             value = 1;
-
             instance->flags &= ~0x8;
         }
 
@@ -1732,10 +1730,9 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
 
         value = 0;
 
-        if ((instance->flags & 0x10))
+        if (instance->flags & 0x10)
         {
             value = 1;
-
             instance->flags &= ~0x10;
         }
 
@@ -1753,7 +1750,6 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
         if (instance->flags < 0)
         {
             value = 1;
-
             instance->flags &= ~0x80000000;
         }
 
@@ -1768,10 +1764,9 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
 
         value = 0;
 
-        if ((instance->flags2 & 0x10000))
+        if (instance->flags2 & 0x10000)
         {
             value = 1;
-
             instance->flags2 &= ~0x10000;
         }
 
@@ -1833,7 +1828,6 @@ long EVENT_TransformInstanceAttribute(PCodeStack *stack, StackType *stackObject,
     case ATTR_KAIN_ZAPSTOP:
     case ATTR_NOKEYPADINPUT:
         stackObject->data.instanceObject.attribute = item;
-
         retValue = 1;
     }
 
