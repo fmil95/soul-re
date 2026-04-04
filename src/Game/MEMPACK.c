@@ -103,7 +103,7 @@ char *MEMPACK_Malloc(unsigned long allocSize, unsigned char memType)
 
     do
     {
-        if ((newMemTracker.doingGarbageCollection == 0) && (relocatableMemory != 0))
+        if (!newMemTracker.doingGarbageCollection && relocatableMemory != 0)
         {
             MEMPACK_DoGarbageCollection();
         }
@@ -206,7 +206,7 @@ char *MEMPACK_Malloc(unsigned long allocSize, unsigned char memType)
 
 void MEMORY_MergeAddresses(MemHeader *firstAddress, MemHeader *secondAddress)
 {
-    if ((firstAddress->memStatus == 0) && (secondAddress->memStatus == 0))
+    if (firstAddress->memStatus == 0 && secondAddress->memStatus == 0)
     {
         firstAddress->memSize += secondAddress->memSize;
 

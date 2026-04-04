@@ -1684,7 +1684,7 @@ void MON_Flee(Instance *instance)
         return;
     }
 
-    if (MON_ValidPosition(instance) == 0)
+    if (!MON_ValidPosition(instance))
     {
         MON_SwitchState(instance, MONSTER_STATE_PURSUE);
         return;
@@ -1704,14 +1704,13 @@ void MON_PursueEntry(Instance *instance)
     mv->mvFlags |= 0x1000;
     mv->mvFlags &= ~0x10000;
 
-    if ((mv->mvFlags & 0x4))
+    if (mv->mvFlags & 0x4)
     {
         MON_PlayAnim(instance, MONSTER_ANIM_RUN, 2);
     }
     else
     {
         MON_GetPlanSlot(mv);
-
         MON_PlayCombatIdle(instance, 2);
     }
 

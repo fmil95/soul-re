@@ -363,7 +363,7 @@ int MON_AnimIDPlaying(Instance *instance, int index)
 
 void MON_PlayAnimIDIfNotPlaying(Instance *instance, int index, int mode)
 {
-    if (MON_AnimIDPlaying(instance, index) == 0)
+    if (!MON_AnimIDPlaying(instance, index))
     {
         MON_PlayAnimID(instance, index, mode);
     }
@@ -380,7 +380,7 @@ void MON_PlayAnimFromListIfNotPlaying(Instance *instance, char *animList, int an
 
     index = animList[animtype];
 
-    if (MON_AnimIDPlaying(instance, index) == 0)
+    if (!MON_AnimIDPlaying(instance, index))
     {
         MON_PlayAnimID(instance, index, mode);
     }
@@ -816,7 +816,7 @@ int MON_ChooseCombatMove(Instance *instance, int reason)
 
     infront = (unsigned)enemy->relativePosition.y >> 0x1F;
 
-    if ((mv->ally != NULL) && (mv->ally->distance < 0x2BC))
+    if (mv->ally != NULL && mv->ally->distance < 0x2BC)
     {
         anim = (mv->ally->relativePosition.x > 0) ? MONSTER_ANIM_JUMPRIGHT : MONSTER_ANIM_JUMPLEFT;
     }
@@ -927,9 +927,11 @@ int MON_ChooseCombatMove(Instance *instance, int reason)
                 }
 
                 ApplyMatrix(instance->matrix, &New, &OutTrans);
+
                 temp.x = instance->position.x + OutTrans.vx;
                 temp.y = instance->position.y + OutTrans.vy;
                 temp.z = instance->position.z + OutTrans.vz;
+
                 if (MATH3D_LengthXYZ(temp.x - instance->intro->position.x, temp.y - instance->intro->position.y, temp.z - instance->intro->position.z) > (mv->guardRange + 0x140))
                 {
                     zrot = (MATH3D_AngleFromPosToPos(&instance->position, &instance->intro->position) - instance->rotation.z) & 0xFFF;
@@ -2941,7 +2943,6 @@ int MON_ReachableIntro(Instance *instance, Position *pos, Position *introPos, Ro
             if (checkOrientation != 0)
             {
                 temp = (((instance->rotation.z + 2048) & 0xFFF) - angle) & 0xFFF;
-
                 temp2 = mv->subAttr->maxSpikeAngle;
 
                 if (temp <= 2048)
