@@ -184,7 +184,7 @@ int ENMYPLAN_MoveToTargetFinal(Instance *instance, Position *outputPos, int slot
 
     *outputPos = *targetPos;
 
-    if ((slotID == -1) || (slotID >= 10))
+    if (slotID == -1 || slotID >= 10)
     {
         gameTrackerX.plan_collide_override = 1;
 
@@ -354,7 +354,7 @@ int ENMYPLAN_MoveToTargetFinal(Instance *instance, Position *outputPos, int slot
 
 int ValidSlotAndState(EnemyPlanSlotData *pool, int slotID)
 {
-    if ((slotID == -1) || (slotID >= 10))
+    if (slotID == -1 || slotID >= 10)
     {
         return 0;
     }
@@ -369,7 +369,7 @@ int ENMYPLAN_GetNodeTypeOfNextWaypoint(int slotID)
 
     pool = (EnemyPlanSlotData *)gameTrackerX.enemyPlanPool;
 
-    if (ValidSlotAndState(pool, slotID) != 0)
+    if (ValidSlotAndState(pool, slotID))
     {
         planSlot = &pool[slotID];
 

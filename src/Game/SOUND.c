@@ -295,12 +295,12 @@ void processPeriodicSound(Position *position, int livesInOnePlane, int inSpectra
         return;
     case 3:
     case 1:
-        if (((livesInOnePlane == 0) || ((inSpectral != 0) && (spectralPlane != 0)) || ((inSpectral == 0) && (spectralPlane == 0))) == 0)
+        if (livesInOnePlane && (!inSpectral || spectralPlane == 0) && (inSpectral || spectralPlane != 0))
         {
             return;
         }
 
-        if (isOkayToPlaySound(sound->flags, spectralPlane, hidden, burning) == 0)
+        if (!isOkayToPlaySound(sound->flags, spectralPlane, hidden, burning))
         {
             return;
         }
@@ -1331,7 +1331,7 @@ void musicEndCallbackFunc(long userData, int slot, int loopFlag)
         }
         else
         {
-            musicInfo.state = 0;
+            musicInfo.state = MUSIC_STATE_IDLE;
         }
     }
 }
@@ -1356,7 +1356,7 @@ void SOUND_PutMusicCommand(int cmdType, int cmdData)
 
 void SOUND_MusicInit()
 {
-    musicInfo.state = 0;
+    musicInfo.state = MUSIC_STATE_IDLE;
 
     musicInfo.errorStatus = 0;
 
@@ -1373,16 +1373,9 @@ void SOUND_MusicInit()
 
 int SOUND_IsMusicLoading()
 {
-    int temp; // not from decls.h
-
-    temp = 0;
-
-    if ((musicInfo.state == 1) || (musicInfo.state == 3) || (musicInfo.state == 7))
-    {
-        temp = 1;
-    }
-
-    return temp;
+    return (musicInfo.state == MUSIC_STATE_INITIAL_MUSIC_LOADING ||
+           musicInfo.state == MUSIC_STATE_TRANSITION_MUSIC_LOADING ||
+           musicInfo.state == MUSIC_STATE_NEW_MAIN_MUSIC_LOADING);
 }
 
 void SOUND_ProcessMusicLoad()
@@ -1395,15 +1388,15 @@ void SOUND_ProcessMusicLoad()
 
     switch (musicInfo.state)
     {
-    case 0:
+    case MUSIC_STATE_IDLE:
         if (musicInfo.numCmdsInQueue != 0)
         {
             cmd = &musicInfo.commandQueue[musicInfo.commandOut];
 
             if (cmd->type == 0)
             {
-                musicInfo.state = 11;
-                musicInfo.nextState = 13;
+                musicInfo.state = MUSIC_STATE_MAIN_MUSIC_FADEING_OUT;
+                musicInfo.nextState = MUSIC_STATE_PLANE_SHIFT_FADEOUT_DONE;
 
                 musicInfo.currentMusicPlane = cmd->data;
 
@@ -1459,8 +1452,8 @@ void SOUND_ProcessMusicLoad()
                                     strcpy(sndFileName, "\\kain2\\music\\uwtr\\uwtr.snd");
                                     strcpy(smpFileName, "\\kain2\\music\\uwtr\\uwtr.smp");
 
-                                    musicInfo.state = 3;
-                                    musicInfo.nextState = 4;
+                                    musicInfo.state = MUSIC_STATE_TRANSITION_MUSIC_LOADING;
+                                    musicInfo.nextState = MUSIC_STATE_TRANSITION_MUSIC_LOADED;
 
                                     aadLoadDynamicSoundBank(sndFileName, smpFileName, 1, 0, musicLoadReturnFunc);
                                 }
@@ -1474,8 +1467,8 @@ void SOUND_ProcessMusicLoad()
                                 {
                                     strcpy(musicInfo.currentMusicName, musicName);
 
-                                    musicInfo.state = 1;
-                                    musicInfo.nextState = 2;
+                                    musicInfo.state = MUSIC_STATE_INITIAL_MUSIC_LOADING;
+                                    musicInfo.nextState = MUSIC_STATE_INITIAL_MUSIC_LOADED;
 
                                     aadLoadDynamicSoundBank(sndFileName, smpFileName, 0, 1, musicLoadReturnFunc);
                                 }
@@ -1486,8 +1479,8 @@ void SOUND_ProcessMusicLoad()
                     {
                         musicInfo.currentMusicName[0] = 0;
 
-                        musicInfo.state = 11;
-                        musicInfo.nextState = 12;
+                        musicInfo.state = MUSIC_STATE_MAIN_MUSIC_FADEING_OUT;
+                        musicInfo.nextState = MUSIC_STATE_DUMP_MUSIC_FADEOUT_DONE;
 
                         aadStartMusicMasterVolFade(0, -1, musicFadeoutReturnFunc);
                     }
@@ -1500,19 +1493,19 @@ void SOUND_ProcessMusicLoad()
         }
 
         break;
-    case 2:
+    case MUSIC_STATE_INITIAL_MUSIC_LOADED:
         if (aadAssignDynamicSequence(0, 0, 0) == 0)
         {
             aadStartSlot(0);
         }
 
-        musicInfo.state = 0;
+        musicInfo.state = MUSIC_STATE_IDLE;
         break;
-    case 4:
+    case MUSIC_STATE_TRANSITION_MUSIC_LOADED:
         if (musicInfo.errorStatus == 0)
         {
-            musicInfo.state = 5;
-            musicInfo.nextState = 6;
+            musicInfo.state = MUSIC_STATE_WAIT_FOR_MAIN_MUSIC_END;
+            musicInfo.nextState = MUSIC_STATE_MAIN_MUSIC_ENDED;
 
             musicInfo.bankLoaded = 1;
 
@@ -1522,11 +1515,11 @@ void SOUND_ProcessMusicLoad()
         }
         else
         {
-            musicInfo.state = 0;
+            musicInfo.state = MUSIC_STATE_IDLE;
         }
 
         break;
-    case 6:
+    case MUSIC_STATE_MAIN_MUSIC_ENDED:
         if (aadMem->sramDefragInfo.status == 0)
         {
             sprintf(sndFileName, "\\kain2\\music\\%s\\%s.snd", musicInfo.currentMusicName, musicInfo.currentMusicName);
@@ -1534,16 +1527,16 @@ void SOUND_ProcessMusicLoad()
 
             aadLoadDynamicSoundBank(sndFileName, smpFileName, 0, 1, musicLoadReturnFunc);
 
-            musicInfo.state = 7;
-            musicInfo.nextState = 8;
+            musicInfo.state = MUSIC_STATE_NEW_MAIN_MUSIC_LOADING;
+            musicInfo.nextState = MUSIC_STATE_NEW_MAIN_MUSIC_LOADED;
         }
 
         break;
-    case 8:
+    case MUSIC_STATE_NEW_MAIN_MUSIC_LOADED:
         if (musicInfo.errorStatus == 0)
         {
-            musicInfo.state = 9;
-            musicInfo.nextState = 10;
+            musicInfo.state = MUSIC_STATE_WAIT_FOR_TRANSITION_END;
+            musicInfo.nextState = MUSIC_STATE_TRANSITION_ENDED;
 
             musicInfo.bankLoaded = 0;
 
@@ -1553,25 +1546,25 @@ void SOUND_ProcessMusicLoad()
         }
         else
         {
-            musicInfo.state = 0;
+            musicInfo.state = MUSIC_STATE_IDLE;
         }
 
         break;
-    case 10:
+    case MUSIC_STATE_TRANSITION_ENDED:
         aadFreeDynamicSoundBank(1);
 
-        musicInfo.state = 0;
+        musicInfo.state = MUSIC_STATE_IDLE;
         break;
-    case 12:
+    case MUSIC_STATE_DUMP_MUSIC_FADEOUT_DONE:
         aadStopAllSlots();
 
         aadFreeDynamicSoundBank(0);
 
         aadStartMusicMasterVolFade(gameTrackerX.sound.gMusicVol, 1, NULL);
 
-        musicInfo.state = 0;
+        musicInfo.state = MUSIC_STATE_IDLE;
         break;
-    case 13:
+    case MUSIC_STATE_PLANE_SHIFT_FADEOUT_DONE:
         aadStopAllSlots();
 
         aadFreeDynamicSoundBank(0);
@@ -1582,7 +1575,7 @@ void SOUND_ProcessMusicLoad()
 
         musicInfo.checkMusicDelay = 0;
 
-        musicInfo.state = 0;
+        musicInfo.state = MUSIC_STATE_IDLE;
         break;
     }
 }
@@ -1629,13 +1622,15 @@ void SOUND_ShutdownMusic()
 
     EnterCriticalSection();
 
-    if ((musicInfo.state == 1) || (musicInfo.state == 3) || (musicInfo.state == 7))
+    if (musicInfo.state == MUSIC_STATE_INITIAL_MUSIC_LOADING ||
+        musicInfo.state == MUSIC_STATE_TRANSITION_MUSIC_LOADING ||
+        musicInfo.state == MUSIC_STATE_NEW_MAIN_MUSIC_LOADING)
     {
-        musicInfo.nextState = 0;
+        musicInfo.nextState = MUSIC_STATE_IDLE;
 
         ExitCriticalSection();
 
-        while (musicInfo.state != 0)
+        while (musicInfo.state != MUSIC_STATE_IDLE)
         {
             STREAM_PollLoadQueue();
         }
@@ -1650,7 +1645,7 @@ void SOUND_ShutdownMusic()
     aadFreeDynamicSoundBank(0);
     aadFreeDynamicSoundBank(1);
 
-    musicInfo.state = 0;
+    musicInfo.state = MUSIC_STATE_IDLE;
 
     aadStartMusicMasterVolFade(gameTrackerX.sound.gMusicVol, 1, NULL);
 }
@@ -1659,43 +1654,43 @@ void SOUND_SetMusicModifier(long modifier)
 {
     switch (modifier)
     {
-    case 0:
+    case SOUND_MODIFIER_NONE:
         SOUND_SetMusicVariable(0, 0);
         break;
-    case 1:
+    case SOUND_MODIFIER_SUSPENSE:
         SOUND_SetMusicVariable(0, 1);
         break;
-    case 2:
+    case SOUND_MODIFIER_DANGER:
         SOUND_SetMusicVariable(0, 3);
         break;
-    case 3:
+    case SOUND_MODIFIER_COMBAT:
         SOUND_SetMusicVariable(0, 4);
         break;
-    case 4:
+    case SOUND_MODIFIER_PROBLEM_SOLVING:
         SOUND_SetMusicVariable(0, 2);
         break;
-    case 5:
+    case SOUND_MODIFIER_SWIMMING:
         SOUND_SetMusicVariable(1, 1);
         break;
-    case 6:
+    case SOUND_MODIFIER_OUTDOORS:
         SOUND_SetMusicVariable(2, 1);
         break;
-    case 9:
+    case SOUND_MODIFIER_GLYPH_ROOM:
         SOUND_SetMusicVariable(125, 1);
         break;
-    case 10:
+    case SOUND_MODIFIER_FORGE:
         SOUND_SetMusicVariable(126, 1);
         break;
-    case 11:
+    case SOUND_MODIFIER_CLAN_BATTLE:
         SOUND_SetMusicVariable(124, 1);
         break;
-    case 13:
+    case SOUND_MODIFIER_PROBLEM_SOLVED:
         SOUND_SetMusicVariable(120, 1);
         break;
-    case 14:
+    case SOUND_MODIFIER_EXTRA_MUSIC:
         SOUND_SetMusicVariable(3, 1);
         break;
-    case 15:
+    case SOUND_MODIFIER_BOSS_LOADED:
         SOUND_SetMusicVariable(119, 1);
         break;
     }
@@ -1705,35 +1700,35 @@ void SOUND_ResetMusicModifier(long modifier)
 {
     switch (modifier)
     {
-    case 0:
-    case 1:
-    case 2:
-    case 3:
-    case 4:
+    case SOUND_MODIFIER_NONE:
+    case SOUND_MODIFIER_SUSPENSE:
+    case SOUND_MODIFIER_DANGER:
+    case SOUND_MODIFIER_COMBAT:
+    case SOUND_MODIFIER_PROBLEM_SOLVING:
         SOUND_SetMusicVariable(0, 0);
         break;
-    case 5:
+    case SOUND_MODIFIER_SWIMMING:
         SOUND_SetMusicVariable(1, 0);
         break;
-    case 6:
+    case SOUND_MODIFIER_OUTDOORS:
         SOUND_SetMusicVariable(2, 0);
         break;
-    case 9:
+    case SOUND_MODIFIER_GLYPH_ROOM:
         SOUND_SetMusicVariable(125, 0);
         break;
-    case 10:
+    case SOUND_MODIFIER_FORGE:
         SOUND_SetMusicVariable(126, 0);
         break;
-    case 11:
+    case SOUND_MODIFIER_CLAN_BATTLE:
         SOUND_SetMusicVariable(124, 0);
         break;
-    case 13:
+    case SOUND_MODIFIER_PROBLEM_SOLVED:
         SOUND_SetMusicVariable(120, 0);
         break;
-    case 14:
+    case SOUND_MODIFIER_EXTRA_MUSIC:
         SOUND_SetMusicVariable(3, 0);
         break;
-    case 15:
+    case SOUND_MODIFIER_BOSS_LOADED:
         SOUND_SetMusicVariable(119, 0);
         break;
     }

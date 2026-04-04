@@ -363,7 +363,7 @@ int MON_AnimIDPlaying(Instance *instance, int index)
 
 void MON_PlayAnimIDIfNotPlaying(Instance *instance, int index, int mode)
 {
-    if (MON_AnimIDPlaying(instance, index) == 0)
+    if (!MON_AnimIDPlaying(instance, index))
     {
         MON_PlayAnimID(instance, index, mode);
     }
@@ -380,7 +380,7 @@ void MON_PlayAnimFromListIfNotPlaying(Instance *instance, char *animList, int an
 
     index = animList[animtype];
 
-    if (MON_AnimIDPlaying(instance, index) == 0)
+    if (!MON_AnimIDPlaying(instance, index))
     {
         MON_PlayAnimID(instance, index, mode);
     }
@@ -816,7 +816,7 @@ int MON_ChooseCombatMove(Instance *instance, int reason)
 
     infront = (unsigned)enemy->relativePosition.y >> 0x1F;
 
-    if ((mv->ally != NULL) && (mv->ally->distance < 0x2BC))
+    if (mv->ally != NULL && mv->ally->distance < 0x2BC)
     {
         anim = (mv->ally->relativePosition.x > 0) ? MONSTER_ANIM_JUMPRIGHT : MONSTER_ANIM_JUMPLEFT;
     }
@@ -927,9 +927,11 @@ int MON_ChooseCombatMove(Instance *instance, int reason)
                 }
 
                 ApplyMatrix(instance->matrix, &New, &OutTrans);
+
                 temp.x = instance->position.x + OutTrans.vx;
                 temp.y = instance->position.y + OutTrans.vy;
                 temp.z = instance->position.z + OutTrans.vz;
+
                 if (MATH3D_LengthXYZ(temp.x - instance->intro->position.x, temp.y - instance->intro->position.y, temp.z - instance->intro->position.z) > (mv->guardRange + 0x140))
                 {
                     zrot = (MATH3D_AngleFromPosToPos(&instance->position, &instance->intro->position) - instance->rotation.z) & 0xFFF;
@@ -2025,37 +2027,31 @@ int MON_DefaultPlanMovement(Instance *instance, int anim, long distance)
     int felloff;
     long length;
     MonsterAnim *manim;
-    long dist; // not from decls.h
-
-    dist = distance;
 
     mv = (MonsterVars *)instance->extraData;
-
     manim = MON_GetAnim(instance, mv->subAttr->animList, anim);
-
     length = MATH3D_LengthXYZ(instance->position.x - mv->destination.x, instance->position.y - mv->destination.y, instance->position.z - mv->destination.z);
 
     if ((signed char)mv->pathSlotID == -1)
     {
-        return 3;
+        return MONSTER_PLANMOVE_MUSTSTOP;
     }
 
-    if ((!(mv->mvFlags & 0x20000)) && (MON_AnimPlaying(instance, anim) != 0))
+    if (!(mv->mvFlags & 0x20000) && MON_AnimPlaying(instance, anim))
     {
         mv->mvFlags |= 0x20000;
     }
 
     felloff = MON_GroundMoveQueueHandler(instance);
-
-    rc = 6;
+    rc = MONSTER_PLANMOVE_STATECHANGE;
 
     if (!(mv->mvFlags & 0x1))
     {
         if (felloff == 0)
         {
-            rc = 4;
+            rc = MONSTER_PLANMOVE_ARRIVED;
 
-            if (length >= dist)
+            if (length >= distance)
             {
                 Position pos;
                 int planresult;
@@ -2064,83 +2060,76 @@ int MON_DefaultPlanMovement(Instance *instance, int anim, long distance)
 
                 if (planresult == 3)
                 {
-                    rc = 2;
-
-                    goto label_2;
-                }
-
-                if (planresult == 0)
-                {
-                    MON_TurnToPosition(instance, &mv->destination, mv->subAttr->speedPivotTurn);
-
-                    rc = 1;
+                    rc = MONSTER_PLANMOVE_INVALID;
                 }
                 else
                 {
-                    if (!(mv->mvFlags & 0x20000))
-                    {
-                        mv->mvFlags |= 0x20000;
 
-                        goto label_1;
+                    if (planresult == 0)
+                    {
+                        MON_TurnToPosition(instance, &mv->destination, mv->subAttr->speedPivotTurn);
+
+                        rc = MONSTER_PLANMOVE_STILLPLANNING;
+                    }
+                    else
+                    {
+                        if (!(mv->mvFlags & 0x20000))
+                        {
+                            mv->mvFlags |= 0x20000;
+                            MON_PlayAnimIfNotPlaying(instance, anim, 2);
+                        }
+                        else if (instance->flags2 & 0x2)
+                        {
+                            MON_PlayAnimIfNotPlaying(instance, anim, 2);
+                        }
+
+                        rc = MONSTER_PLANMOVE_MOVING;
                     }
 
-                    rc = 0;
-
-                    if ((instance->flags2 & 0x2))
+                    if ((mv->mvFlags & 0x20000))
                     {
-                    label_1:
-                        MON_PlayAnimIfNotPlaying(instance, anim, 2);
+                        short turnSpeed;
 
-                        rc = 0;
+                        switch (anim)
+                        {
+                        case MONSTER_ANIM_WALK:
+                            turnSpeed = mv->subAttr->speedWalkTurn;
+                            break;
+                        case MONSTER_ANIM_RUN:
+                            turnSpeed = mv->subAttr->speedRunTurn;
+                            break;
+                        default:
+                            turnSpeed = mv->subAttr->speedPivotTurn;
+                        }
+
+                        if ((length * 3) < ((manim->velocity << 12) / turnSpeed))
+                        {
+                            turnSpeed *= 2;
+                        }
+
+                        MON_MoveToPosition(instance, &pos, turnSpeed);
                     }
-                }
-
-                if ((mv->mvFlags & 0x20000))
-                {
-                    short turnSpeed;
-
-                    switch (anim)
-                    {
-                    case 2:
-                        turnSpeed = mv->subAttr->speedWalkTurn;
-                        break;
-                    case 3:
-                        turnSpeed = mv->subAttr->speedRunTurn;
-                        break;
-                    default:
-                        turnSpeed = mv->subAttr->speedPivotTurn;
-                    }
-
-                    if ((length * 3) < ((manim->velocity << 12) / turnSpeed))
-                    {
-                        turnSpeed *= 2;
-                    }
-
-                    MON_MoveToPosition(instance, &pos, turnSpeed);
                 }
             }
 
             return rc;
         }
 
-        rc = 3;
+        rc = MONSTER_PLANMOVE_MUSTSTOP;
 
         if (!(mv->mvFlags & 0x20000))
         {
             if (MON_TurnToPosition(instance, &mv->destination, mv->subAttr->speedPivotTurn) != 0)
             {
-                rc = 3;
+                rc = MONSTER_PLANMOVE_MUSTSTOP;
             }
             else
             {
-                rc = 0;
+                rc = MONSTER_PLANMOVE_MOVING;
             }
         }
-
-        return rc;
     }
 
-label_2:
     return rc;
 }
 
@@ -2954,7 +2943,6 @@ int MON_ReachableIntro(Instance *instance, Position *pos, Position *introPos, Ro
             if (checkOrientation != 0)
             {
                 temp = (((instance->rotation.z + 2048) & 0xFFF) - angle) & 0xFFF;
-
                 temp2 = mv->subAttr->maxSpikeAngle;
 
                 if (temp <= 2048)

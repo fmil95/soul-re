@@ -234,7 +234,7 @@ void SetThrowDirection(Instance *instance, Instance *parent, evObjectThrowData *
 
     switch (throwData->type)
     {
-    case 0:
+    case THROW_TYPE_NONE:
         if (parent->LinkParent != NULL)
         {
             PhysicsSetVelFromZRot(instance, parent->LinkParent->rotation.z, throwData->speed);
@@ -246,7 +246,7 @@ void SetThrowDirection(Instance *instance, Instance *parent, evObjectThrowData *
 
         instance->zVel = throwData->zVel;
         break;
-    case 1:
+    case THROW_TYPE_TARGET:
         itarget = throwData->data.target;
 
         Data->Force = itarget;
@@ -277,7 +277,7 @@ void SetThrowDirection(Instance *instance, Instance *parent, evObjectThrowData *
         }
 
         break;
-    case 2:
+    case THROW_TYPE_POSITION:
     {
         long val;
         Position *ptarget;
@@ -292,7 +292,7 @@ void SetThrowDirection(Instance *instance, Instance *parent, evObjectThrowData *
         {
             val = ptarget->x - instance->position.x;
 
-            if ((instance->xVel != 0) && (val != 0))
+            if (instance->xVel != 0 && val != 0)
             {
                 instance->zVel = (((ptarget->z - instance->position.z) * instance->xVel) / val) - (((instance->zAccl * val) / instance->xVel) >> 1);
             }
@@ -309,10 +309,10 @@ void SetThrowDirection(Instance *instance, Instance *parent, evObjectThrowData *
 
         break;
     }
-    case 3:
+    case THROW_TYPE_DIRECTION:
         PhysicsSetVelFromRot(instance, &throwData->data.direction, throwData->speed);
         break;
-    case 4:
+    case THROW_TYPE_VECTOR:
         instance->xVel = (short)throwData->data.throwVector.x;
         instance->yVel = (short)throwData->data.throwVector.y;
         instance->zVel = (short)throwData->data.throwVector.z;
@@ -349,7 +349,7 @@ void ThrowPhysOb(Instance *instance, evObjectThrowData *throwData)
 
         if (throwData == NULL)
         {
-            throwData = (evObjectThrowData *)SetObjectThrowData(NULL, NULL, 0, 0, 384, 0, 64, -1024);
+            throwData = (evObjectThrowData *)SetObjectThrowData(NULL, NULL, THROW_TYPE_NONE, THROW_SPIN_TYPE_NONE, 384, 0, 64, -1024);
         }
 
         INSTANCE_UnlinkFromParent(instance);
@@ -360,17 +360,17 @@ void ThrowPhysOb(Instance *instance, evObjectThrowData *throwData)
 
         switch (throwData->spinType)
         {
-        case 0:
+        case THROW_SPIN_TYPE_NONE:
             Data->xRotVel = 0;
             Data->yRotVel = 0;
             Data->zRotVel = 0;
 
             Data->throwFlags &= ~0x1;
             break;
-        case 1:
+        case THROW_SPIN_TYPE_SELF_ADJUSTING:
             Data->throwFlags |= 0x1;
             break;
-        case 2:
+        case THROW_SPIN_TYPE_VELOCITY:
         {
             SVector *sv;
 

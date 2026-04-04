@@ -96,7 +96,7 @@ PlanningNode *PLANPOOL_GetNodeWithID(PlanningNode *planningPool, int type, int i
 
     for (i = 0; i < poolManagementData->numNodesInPool; i++)
     {
-        if ((planningPool[i].nodeType == type) && (planningPool[i].id == id) && (planningPool[i].streamUnitID == suID))
+        if (planningPool[i].nodeType == type && planningPool[i].id == id && planningPool[i].streamUnitID == suID)
         {
             return &planningPool[i];
         }
@@ -145,7 +145,7 @@ PlanningNode *PLANPOOL_GetClosestNode(Position *pos, PlanningNode *planningPool,
 
     for (i = 0; i < poolManagementData->numNodesInPool; i++)
     {
-        if (distanceType == 0)
+        if (distanceType == TWO_D_DISTANCE)
         {
             dist = MATH3D_LengthXY(pos->x - planningPool[i].pos.x, pos->y - planningPool[i].pos.y);
         }
@@ -212,28 +212,26 @@ int PLANPOOL_AppropriatePair(PlanningNode *node1, PlanningNode *node2)
 
     switch (plc)
     {
-    case 2:
+    case ((FLOOR_NODE << 8) | CEILING_NODE):
         res = 0;
         break;
-    case 3:
-        if (src != 1028)
+    case ((FLOOR_NODE << 8) | WATER_NODE):
+        if (src != ((PLANMKR_NODE << 8) | PLANMKR_NODE))
         {
             res = 0;
         }
 
         break;
-    case 1:
-    case 258:
-        if ((src != 1028) || (node1->pos.z >= node2->pos.z) || (node2->pos.z >= (node1->pos.z + 800)) || (MATH3D_LengthXY(node1->pos.x - node2->pos.x, node1->pos.y - node2->pos.y) > 800))
+    case ((FLOOR_NODE << 8) | WALL_NODE):
+    case ((WALL_NODE << 8) | CEILING_NODE):
+        if (src != ((PLANMKR_NODE << 8) | PLANMKR_NODE) || node1->pos.z >= node2->pos.z || node2->pos.z >= (node1->pos.z + 800) || MATH3D_LengthXY(node1->pos.x - node2->pos.x, node1->pos.y - node2->pos.y) > 800)
         {
             res = 0;
         }
 
         break;
-    case 259:
-        res = 0;
-        break;
-    case 515:
+    case ((WALL_NODE << 8) | WATER_NODE):
+    case ((CEILING_NODE<< 8) | WATER_NODE):
         res = 0;
         break;
     }

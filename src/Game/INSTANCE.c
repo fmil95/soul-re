@@ -278,27 +278,27 @@ long INSTANCE_InstanceGroupNumber(Instance *instance)
 
     result = 0;
 
-    if (((instance->object->oflags & 0x80)) && (!(instance->flags & 0x8000)))
+    if (instance->object->oflags & 0x80 && !(instance->flags & 0x8000))
     {
         result = 0x1;
     }
 
-    if (((instance->object->oflags & 0x20)) && (!(instance->flags & 0x2000)))
+    if (instance->object->oflags & 0x20 && !(instance->flags & 0x2000))
     {
         result |= 0x2;
     }
 
-    if (((instance->object->oflags & 0x40)) && (!(instance->flags & 0x4000)))
+    if (instance->object->oflags & 0x40 && !(instance->flags & 0x4000))
     {
         result |= 0x4;
     }
 
-    if (((instance->object->oflags & 0x10)) && (!(instance->flags & 0x1000)))
+    if (instance->object->oflags & 0x10 && !(instance->flags & 0x1000))
     {
         result |= 0x10;
     }
 
-    if ((instance->object->oflags & 0x1))
+    if (instance->object->oflags & 0x1)
     {
         result |= 0x8;
     }

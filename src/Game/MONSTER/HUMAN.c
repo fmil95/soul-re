@@ -112,10 +112,12 @@ void HUMAN_Init(Instance *instance)
             allegiances->enemies |= 0x1;
         }
     }
+
     if (strcmpi(instance->object->name, "vlgrb___") == 0)
     {
         mv->auxFlags |= 0x20;
     }
+
     MON_DefaultInit(instance);
     mv->soulJuice = 16384;
     mv->mvFlags |= 0x2000;
@@ -392,34 +394,33 @@ void HUMAN_Idle(Instance *instance)
     MonsterIR *enemy;
 
     mv = (MonsterVars *)instance->extraData;
-
     ma = (MonsterAttributes *)instance->data;
 
     ally = mv->ally;
-
     enemy = mv->enemy;
 
-    if ((!(mv->mvFlags & 0x4)) && (ally != NULL) && ((ally->mirFlags & 0x4)))
+    if (!(mv->mvFlags & 0x4) && ally != NULL && ally->mirFlags & 0x4)
     {
-        if ((mv->auxFlags & 0x2))
+        if (mv->auxFlags & 0x2)
         {
             MON_TurnToPosition(instance, &ally->instance->position, mv->subAttr->speedPivotTurn);
 
-            if ((instance->flags2 & 0x2))
+            if (instance->flags2 & 0x2)
             {
-                mv->auxFlags = (mv->auxFlags & ~0x2) | 0x1;
+                mv->auxFlags &= ~0x2;
+                mv->auxFlags |= 0x1;
             }
 
             MON_DefaultQueueHandler(instance);
             return;
         }
 
-        if ((mv->auxFlags & 0x1))
+        if (mv->auxFlags & 0x1)
         {
-            if ((ally->distance >= 2000) || ((enemy != NULL) && (enemy->distance < 2000)))
+            if (ally->distance >= 2000 || (enemy != NULL && enemy->distance < 2000))
             {
-                mv->auxFlags = (mv->auxFlags & ~0x1) | 0x4;
-
+                mv->auxFlags &= ~0x1;
+                mv->auxFlags |= 0x4;
                 MON_PlayAnimFromList(instance, ma->auxAnimList, 1, 1);
             }
 
@@ -427,12 +428,11 @@ void HUMAN_Idle(Instance *instance)
             return;
         }
 
-        if ((mv->auxFlags & 0x4))
+        if (mv->auxFlags & 0x4)
         {
-            if ((instance->flags2 & 0x10))
+            if (instance->flags2 & 0x10)
             {
                 mv->auxFlags &= ~0x4;
-
                 MON_PlayRandomIdle(instance, 2);
             }
 
@@ -440,12 +440,11 @@ void HUMAN_Idle(Instance *instance)
             return;
         }
 
-        if ((ally->distance < 2000) && ((enemy == NULL) || (enemy->distance >= 2000)))
+        if (ally->distance < 2000 && (enemy == NULL || enemy->distance >= 2000))
         {
             mv->auxFlags |= 0x2;
 
             MON_PlayAnimFromList(instance, ma->auxAnimList, 0, 2);
-
             MON_DefaultQueueHandler(instance);
             return;
         }
@@ -463,7 +462,7 @@ void HUMAN_Flee(Instance *instance)
 
     enemy = mv->enemy;
 
-    if ((enemy != NULL) && (enemy->distance < 640))
+    if (enemy != NULL && enemy->distance < 640)
     {
         if (!(mv->auxFlags & 0x8))
         {
@@ -475,7 +474,7 @@ void HUMAN_Flee(Instance *instance)
 
             mv->auxFlags |= 0x8;
 
-            if ((mv->auxFlags & 0x20))
+            if (mv->auxFlags & 0x20)
             {
                 SOUND_Play3dSound(&instance->position, 459, 0, 88, 3500);
             }
@@ -489,7 +488,7 @@ void HUMAN_Flee(Instance *instance)
 
         MON_DefaultQueueHandler(instance);
     }
-    else if ((mv->auxFlags & 0x8))
+    else if (mv->auxFlags & 0x8)
     {
         MON_SwitchState(instance, MONSTER_STATE_FLEE);
     }
@@ -498,7 +497,7 @@ void HUMAN_Flee(Instance *instance)
         MON_Flee(instance);
     }
 
-    if (((mv->auxFlags & 0x8)) && ((mv->mvFlags & 0x1)))
+    if (mv->auxFlags & 0x8 && mv->mvFlags & 0x1)
     {
         mv->auxFlags &= ~0x8;
     }
@@ -522,14 +521,10 @@ void HUMAN_GetAngry()
 
             allegiances = mv->subAttr->allegiances;
 
-            do
-            {
-            } while (0); // garbage code for reordering
+            do {} while (0); // garbage code for reordering
 
             allegiances->gods &= ~0x1;
-
             allegiances->allies &= ~0x1;
-
             allegiances->enemies |= 0x1;
 
             mir = MONSENSE_SetEnemy(instance, gameTrackerX.playerInstance);
@@ -553,12 +548,12 @@ int HUMAN_TypeOfHuman(Instance *instance)
 
     mv = (MonsterVars *)instance->extraData;
 
-    if ((type & 0x4000))
+    if (type & 0x4000)
     {
         return 1;
     }
 
-    if ((type & 0x2000))
+    if (type & 0x2000)
     {
         return 4;
     }
@@ -568,7 +563,7 @@ int HUMAN_TypeOfHuman(Instance *instance)
         return 0;
     }
 
-    if ((mv->auxFlags & 0x20))
+    if (mv->auxFlags & 0x20)
     {
         return 3;
     }

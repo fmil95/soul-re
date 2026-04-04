@@ -19,7 +19,7 @@ long PLAN_CalcMinDistFromExistingNodes(Position *pos, PlanningNode *planningPool
 
     if (closestNode != NULL)
     {
-        if (distanceType == 0)
+        if (distanceType == TWO_D_DISTANCE)
         {
             minDist = MATH3D_LengthXY(pos->x - closestNode->pos.x, pos->y - closestNode->pos.y);
         }
@@ -48,7 +48,7 @@ void PLAN_UpdatePlanMkrNodes(PlanningNode *planningPool, Position *playerPos)
 
     for (d = 0; d < 16; d++, streamUnit++)
     {
-        if ((streamUnit->used == 2) && (MEMPACK_MemoryValidFunc((char *)streamUnit->level) != 0))
+        if (streamUnit->used == 2 && MEMPACK_MemoryValidFunc((char *)streamUnit->level))
         {
             int numPlanMkrs;
             PlanMkr *planMkr;
@@ -71,30 +71,30 @@ void PLAN_UpdatePlanMkrNodes(PlanningNode *planningPool, Position *playerPos)
 
                     zDiff = abs(playerPos->z - planMkr->pos.z);
 
-                    if ((temp < 8000) && (zDiff < 4000))
+                    if (temp < 8000 && zDiff < 4000)
                     {
                         nodeID = planMkr->id & ~0xF000;
 
                         if (!(planMkr->id & 0x1000))
                         {
-                            if ((planMkr->id & 0x8000))
+                            if (planMkr->id & 0x8000)
                             {
-                                nodeType = 12;
+                                nodeType = (WALL_NODE << 3) | PLANMKR_NODE;
                             }
-                            else if ((planMkr->id & 0x4000))
+                            else if (planMkr->id & 0x4000)
                             {
-                                nodeType = 28;
+                                nodeType = (WATER_NODE << 3) | PLANMKR_NODE;
                             }
-                            else if ((planMkr->id & 0x2000))
+                            else if (planMkr->id & 0x2000)
                             {
-                                nodeType = 20;
+                                nodeType = (CEILING_NODE << 3) | PLANMKR_NODE;
                             }
                             else
                             {
-                                nodeType = 4;
+                                nodeType = (FLOOR_NODE << 3) | PLANMKR_NODE;
                             }
 
-                            if (PLANPOOL_GetNodeWithID(planningPool, nodeType, nodeID, suID) == 0)
+                            if (PLANPOOL_GetNodeWithID(planningPool, nodeType, nodeID, suID) == NULL)
                             {
                                 PLANPOOL_AddNodeToPool(&planMkr->pos, planningPool, (short)nodeType, (short)nodeID, streamUnit->StreamUnitID);
                             }
@@ -107,13 +107,13 @@ void PLAN_UpdatePlanMkrNodes(PlanningNode *planningPool, Position *playerPos)
 
     for (i = 0; i < poolManagementData->numNodesInPool; i++)
     {
-        if ((planningPool[i].nodeType & 0x7) == 4)
+        if ((planningPool[i].nodeType & 0x7) == PLANMKR_NODE)
         {
             temp = MATH3D_LengthXY(planningPool[i].pos.x - playerPos->x, planningPool[i].pos.y - playerPos->y);
 
             zDiff = abs(playerPos->z - planningPool[i].pos.z);
 
-            if ((temp > 10000) || (zDiff > 5000))
+            if (temp > 10000 || zDiff > 5000)
             {
                 PLANPOOL_DeleteNodeFromPool(&planningPool[i], planningPool);
             }
@@ -128,7 +128,7 @@ void PLAN_UpdatePlayerNode(PlanningNode *planningPool, Position *playerPos)
     int foundHit;
     PlanCollideInfo pci;
 
-    playerNode = PLANPOOL_GetFirstNodeOfSource(planningPool, 1);
+    playerNode = PLANPOOL_GetFirstNodeOfSource(planningPool, PLAYER_NODE);
 
     if (playerNode != NULL)
     {
@@ -138,7 +138,7 @@ void PLAN_UpdatePlayerNode(PlanningNode *planningPool, Position *playerPos)
         {
             PLANPOOL_ChangeNodePosition(playerPos, playerNode, planningPool);
 
-            playerNode->nodeType = 25;
+            playerNode->nodeType = (WATER_NODE << 3) | PLAYER_NODE;
 
             playerNode->streamUnitID = foundHit;
             return;
@@ -146,11 +146,11 @@ void PLAN_UpdatePlayerNode(PlanningNode *planningPool, Position *playerPos)
 
         COPY_SVEC(Position, &pci.collidePos, Position, playerPos);
 
-        if (PLANCOLL_FindTerrainHitFinal(&pci, &nodePlacement, 256, -640, 0, 5) != 0)
+        if (PLANCOLL_FindTerrainHitFinal(&pci, &nodePlacement, 256, -640, 0, 5))
         {
             PLANPOOL_ChangeNodePosition(&pci.collidePos, playerNode, planningPool);
 
-            playerNode->nodeType = ((nodePlacement & 0x3) << 3) | 0x1;
+            playerNode->nodeType = ((nodePlacement & 0x3) << 3) | PLAYER_NODE;
 
             playerNode->streamUnitID = pci.StreamUnitID;
         }
@@ -158,7 +158,7 @@ void PLAN_UpdatePlayerNode(PlanningNode *planningPool, Position *playerPos)
         {
             PLANPOOL_ChangeNodePosition(playerPos, playerNode, planningPool);
 
-            playerNode->nodeType = 1;
+            playerNode->nodeType = PLAYER_NODE;
 
             playerNode->streamUnitID = gameTrackerX.playerInstance->currentStreamUnitID;
         }
@@ -180,7 +180,7 @@ void PLAN_AddRandomNode(PlanningNode *planningPool, Position *playerPos)
         pci.collidePos.x += (rand() % 24000) - 12000;
         pci.collidePos.y += (rand() % 24000) - 12000;
 
-        if ((MATH3D_LengthXYZ(playerPos->x - pci.collidePos.x, playerPos->y - pci.collidePos.y, playerPos->z - pci.collidePos.z) < 12000) && (PLAN_CalcMinDistFromExistingNodes(&pci.collidePos, planningPool, 0) > 1000))
+        if (MATH3D_LengthXYZ(playerPos->x - pci.collidePos.x, playerPos->y - pci.collidePos.y, playerPos->z - pci.collidePos.z) < 12000 && PLAN_CalcMinDistFromExistingNodes(&pci.collidePos, planningPool, TWO_D_DISTANCE) > 1000)
         {
             successFlag = 1;
             break;
@@ -211,7 +211,7 @@ void PLAN_DeleteOutOfRangeNodesOfSource(PlanningNode *planningPool, Position *pl
 
     for (i = 0; i < poolManagementData->numNodesInPool; i++)
     {
-        if (((planningPool[i].nodeType & 0x7) == nodeSourceToCheck) && (removeDist < MATH3D_LengthXYZ(playerPos->x - planningPool[i].pos.x, playerPos->y - planningPool[i].pos.y, playerPos->z - planningPool[i].pos.z)))
+        if ((planningPool[i].nodeType & 0x7) == nodeSourceToCheck && removeDist < MATH3D_LengthXYZ(playerPos->x - planningPool[i].pos.x, playerPos->y - planningPool[i].pos.y, playerPos->z - planningPool[i].pos.z))
         {
             PLANPOOL_DeleteNodeFromPool(&planningPool[i], planningPool);
         }
