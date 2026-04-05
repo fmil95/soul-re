@@ -2,6 +2,7 @@
 #include "Game/G2/ANMCTRLR.h"
 #include "Game/MONSTER/MONAPI.h"
 #include "Game/MONSTER/MONLIB.h"
+#include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/PLAN/PLANAPI.h"
 #include "Game/RAZIEL/RAZIEL.h"
@@ -15,6 +16,8 @@
 #include "Game/STREAM.h"
 
 burntTuneType alukabssBurntTune = {300, 2}; // no canon name in symbols
+
+int ALUKABSS_RotateToFace(Instance *, GameTracker *, Position *); // TODO: Delete once matched
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -329,7 +332,63 @@ void ALUKABSS_IdleEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Idle);
+void ALUKABSS_Idle(Instance *instance)
+{
+
+    Intro *intro; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukabssVars *vars; // not from debug symbols
+    AlukabssAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukabssVars *)mv->extraVars;
+    attrs = (AlukabssAttributes *)ma->tunData;
+    enemy = mv->enemy;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    intro = instance->intro;
+
+    instance->xVel = 0;
+    instance->yVel = 0;
+    instance->zVel = 0;
+
+    COPY_SVEC(Position, &instance->position, Position, &intro->position);
+
+    if (mv->mvFlags & 4)
+    {
+        vars->raz_time_at_marker = vars->time_since_spit = MON_GetTime(instance);
+        MON_Idle(instance);
+    }
+    else
+    {
+        if (enemy != NULL)
+        {
+            if (ALUKABSS_RotateToFace(instance, &gameTrackerX, &enemy->instance->position) != 0 && ALUKABSS_RazTimeAtMarker(instance) > (attrs->time_since_attack * 33))
+            {
+                MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+                vars->combat_state = MONSTER_STATE_PURSUE;
+                MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 0, 1);
+            }
+            else if (mv->auxFlags & 1 && ALUKABSS_TimeSinceSpit(instance) > (attrs->time_since_spit * 33))
+            {
+                MON_SwitchState(instance, MONSTER_STATE_PROJECTILE);
+            }
+        }
+        else
+        {
+            ALUKABSS_RotateToFace(instance, &gameTrackerX, 0);
+        }
+        MON_DefaultQueueHandler(instance);
+    }
+    ALUKABSS_SetUpWaterPlaneClip(instance);
+}
 
 void ALUKABSS_PursueEntry() {};
 
@@ -386,7 +445,7 @@ void ALUKABSS_SetTwist(Instance *instance, int angle)
 }
 
 
-void ALUKABSS_RotateToFace(void) {};
+void ALUKABSS_RotateToFace(Instance *, GameTracker *, Position *) {};
 
 int ALUKABSS_RazTimeAtMarker(Instance *instance)
 {
@@ -681,7 +740,63 @@ void ALUKABSS_IdleEntry(Instance *instance)
     }
 }
 
-void ALUKABSS_Idle(void) {};
+void ALUKABSS_Idle(Instance *instance)
+{
+
+    Intro *intro; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukabssVars *vars; // not from debug symbols
+    AlukabssAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukabssVars *)mv->extraVars;
+    attrs = (AlukabssAttributes *)ma->tunData;
+    enemy = mv->enemy;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    intro = instance->intro;
+
+    instance->xVel = 0;
+    instance->yVel = 0;
+    instance->zVel = 0;
+
+    COPY_SVEC(Position, &instance->position, Position, &intro->position);
+
+    if (mv->mvFlags & 4)
+    {
+        vars->raz_time_at_marker = vars->time_since_spit = MON_GetTime(instance);
+        MON_Idle(instance);
+    }
+    else
+    {
+        if (enemy != NULL)
+        {
+            if (ALUKABSS_RotateToFace(instance, &gameTrackerX, &enemy->instance->position) != 0 && ALUKABSS_RazTimeAtMarker(instance) > (attrs->time_since_attack * 33))
+            {
+                MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+                vars->combat_state = MONSTER_STATE_PURSUE;
+                MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 0, 1);
+            }
+            else if (mv->auxFlags & 1 && ALUKABSS_TimeSinceSpit(instance) > (attrs->time_since_spit * 33))
+            {
+                MON_SwitchState(instance, MONSTER_STATE_PROJECTILE);
+            }
+        }
+        else
+        {
+            ALUKABSS_RotateToFace(instance, &gameTrackerX, 0);
+        }
+        MON_DefaultQueueHandler(instance);
+    }
+    ALUKABSS_SetUpWaterPlaneClip(instance);
+}
 
 void ALUKABSS_PursueEntry(void) {};
 
