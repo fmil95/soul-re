@@ -17,7 +17,9 @@
 
 burntTuneType alukabssBurntTune = {300, 2}; // no canon name in symbols
 
-int ALUKABSS_RotateToFace(Instance *, GameTracker *, Position *); // TODO: Delete once matched
+// TODO: Delete once matched
+int ALUKABSS_RotateToFace(Instance *, GameTracker *, Position *);
+int ALUKABSS_ShouldAttack(Instance *instance);
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -426,7 +428,67 @@ void ALUKABSS_CombatEntry(Instance *instance)
     (void)instance;
 };
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Combat);
+void ALUKABSS_Combat(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukabssVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukabssVars *)mv->extraVars;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    switch (vars->combat_state)
+    {
+    case 1:
+        if (instance->flags2 & 0x10)
+        {
+            vars->combat_state = 2;
+            MON_PlayAnimFromList(instance, ma->auxAnimList, MONSTER_ANIM_HIT2, 2);
+            ALUKABSS_InitCircle(instance);
+        }
+        break;
+    case 2:
+        if (ALUKABSS_ShouldAttack(instance))
+        {
+            vars->combat_state = 3;
+            MON_SwitchState(instance, MONSTER_STATE_ATTACK);
+        }
+        else
+        {
+            ALUKABSS_Circle(instance, &gameTrackerX, 1);
+        }
+        break;
+    case 3:
+        vars->combat_state = 4;
+        MON_PlayAnimFromList(instance, ma->auxAnimList, MONSTER_ANIM_RUN, 1);
+        break;
+    case 4:
+        if (instance->flags2 & 0x10)
+        {
+            vars->raz_time_at_marker = vars->time_since_spit = MON_GetTime(instance);
+            vars->combat_state = 0;
+            MON_PlayAnim(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+            MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        }
+        break;
+    }
+
+    instance->xVel = 0;
+    instance->yVel = 0;
+    instance->zVel = 0;
+
+    COPY_SVEC(Position, &instance->position, Position, &instance->intro->position);
+
+    MON_DefaultQueueHandler(instance);
+    ALUKABSS_SetUpWaterPlaneClip(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_AttackEntry);
 
@@ -536,7 +598,7 @@ int ALUKABSS_TimeSinceSpit(Instance *instance)
     return 0;
 }
 
-void ALUKABSS_ShouldAttack(void) {};
+int ALUKABSS_ShouldAttack(Instance *instance) {};
 
 void ALUKABSS_InitCircle(Instance *instance)
 {
@@ -858,7 +920,67 @@ void ALUKABSS_Pursue(Instance *instance)
 
 void ALUKABSS_CombatEntry(Instance *instance) {};
 
-void ALUKABSS_Combat(void) {};
+void ALUKABSS_Combat(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    AlukabssVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (AlukabssVars *)mv->extraVars;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    switch (vars->combat_state)
+    {
+    case 1:
+        if (instance->flags2 & 0x10)
+        {
+            vars->combat_state = 2;
+            MON_PlayAnimFromList(instance, ma->auxAnimList, MONSTER_ANIM_HIT2, 2);
+            ALUKABSS_InitCircle(instance);
+        }
+        break;
+    case 2:
+        if (ALUKABSS_ShouldAttack(instance))
+        {
+            vars->combat_state = 3;
+            MON_SwitchState(instance, MONSTER_STATE_ATTACK);
+        }
+        else
+        {
+            ALUKABSS_Circle(instance, &gameTrackerX, 1);
+        }
+        break;
+    case 3:
+        vars->combat_state = 4;
+        MON_PlayAnimFromList(instance, ma->auxAnimList, MONSTER_ANIM_RUN, 1);
+        break;
+    case 4:
+        if (instance->flags2 & 0x10)
+        {
+            vars->raz_time_at_marker = vars->time_since_spit = MON_GetTime(instance);
+            vars->combat_state = 0;
+            MON_PlayAnim(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+            MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        }
+        break;
+    }
+
+    instance->xVel = 0;
+    instance->yVel = 0;
+    instance->zVel = 0;
+
+    COPY_SVEC(Position, &instance->position, Position, &instance->intro->position);
+
+    MON_DefaultQueueHandler(instance);
+    ALUKABSS_SetUpWaterPlaneClip(instance);
+}
 
 void ALUKABSS_AttackEntry(void) {};
 
