@@ -390,11 +390,17 @@ void ALUKABSS_Idle(Instance *instance)
     ALUKABSS_SetUpWaterPlaneClip(instance);
 }
 
-void ALUKABSS_PursueEntry() {};
+void ALUKABSS_PursueEntry(Instance *instance)
+{
+    (void)instance;
+};
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Pursue);
 
-void ALUKABSS_CombatEntry() {};
+void ALUKABSS_CombatEntry(Instance *instance)
+{
+    (void)instance;
+};
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Combat);
 
@@ -445,7 +451,7 @@ void ALUKABSS_SetTwist(Instance *instance, int angle)
 }
 
 
-void ALUKABSS_RotateToFace(Instance *, GameTracker *, Position *) {};
+int ALUKABSS_RotateToFace(Instance *, GameTracker *, Position *) {};
 
 int ALUKABSS_RazTimeAtMarker(Instance *instance)
 {
@@ -798,11 +804,11 @@ void ALUKABSS_Idle(Instance *instance)
     ALUKABSS_SetUpWaterPlaneClip(instance);
 }
 
-void ALUKABSS_PursueEntry(void) {};
+void ALUKABSS_PursueEntry(Instance *instance) {};
 
 void ALUKABSS_Pursue(void) {};
 
-void ALUKABSS_CombatEntry(void) {};
+void ALUKABSS_CombatEntry(Instance *instance) {};
 
 void ALUKABSS_Combat(void) {};
 
