@@ -315,7 +315,19 @@ void ALUKABSS_DamageEffect(Instance *instance, evFXHitData *data)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_IdleEntry);
+void ALUKABSS_IdleEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->extraVars != NULL)
+    {
+        MON_IdleEntry(instance);
+        MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+        mv->mvFlags |= 0x800;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Idle);
 
@@ -655,7 +667,19 @@ void ALUKABSS_DamageEffect(Instance *instance, evFXHitData *data)
     }
 }
 
-void ALUKABSS_IdleEntry(void) {};
+void ALUKABSS_IdleEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->extraVars != NULL)
+    {
+        MON_IdleEntry(instance);
+        MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+        mv->mvFlags |= 0x800;
+    }
+}
 
 void ALUKABSS_Idle(void) {};
 
