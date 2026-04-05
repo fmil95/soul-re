@@ -335,7 +335,6 @@ void ALUKABSS_IdleEntry(Instance *instance)
 void ALUKABSS_Idle(Instance *instance)
 {
 
-    Intro *intro; // not from debug symbols
     MonsterIR *enemy; // not from debug symbols
     MonsterVars *mv; // not from debug symbols
     MonsterAttributes *ma; // not from debug symbols
@@ -353,13 +352,11 @@ void ALUKABSS_Idle(Instance *instance)
         return;
     }
 
-    intro = instance->intro;
-
     instance->xVel = 0;
     instance->yVel = 0;
     instance->zVel = 0;
 
-    COPY_SVEC(Position, &instance->position, Position, &intro->position);
+    COPY_SVEC(Position, &instance->position, Position, &instance->intro->position);
 
     if (mv->mvFlags & 4)
     {
@@ -395,7 +392,34 @@ void ALUKABSS_PursueEntry(Instance *instance)
     (void)instance;
 };
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Pursue);
+void ALUKABSS_Pursue(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    if (mv->extraVars != NULL)
+    {
+
+        instance->xVel = 0;
+        instance->yVel = 0;
+        instance->zVel = 0;
+
+        COPY_SVEC(Position, &instance->position, Position, &instance->intro->position);
+
+        if (mv->mvFlags & 4)
+        {
+            MON_GroundMoveQueueHandler(instance);
+        }
+        else
+        {
+            MON_SwitchState(instance, mv->previousMainState);
+            MON_DefaultQueueHandler(instance);
+        }
+
+        ALUKABSS_SetUpWaterPlaneClip(instance);
+    }
+}
 
 void ALUKABSS_CombatEntry(Instance *instance)
 {
@@ -749,7 +773,6 @@ void ALUKABSS_IdleEntry(Instance *instance)
 void ALUKABSS_Idle(Instance *instance)
 {
 
-    Intro *intro; // not from debug symbols
     MonsterIR *enemy; // not from debug symbols
     MonsterVars *mv; // not from debug symbols
     MonsterAttributes *ma; // not from debug symbols
@@ -767,13 +790,11 @@ void ALUKABSS_Idle(Instance *instance)
         return;
     }
 
-    intro = instance->intro;
-
     instance->xVel = 0;
     instance->yVel = 0;
     instance->zVel = 0;
 
-    COPY_SVEC(Position, &instance->position, Position, &intro->position);
+    COPY_SVEC(Position, &instance->position, Position, &instance->intro->position);
 
     if (mv->mvFlags & 4)
     {
@@ -806,7 +827,34 @@ void ALUKABSS_Idle(Instance *instance)
 
 void ALUKABSS_PursueEntry(Instance *instance) {};
 
-void ALUKABSS_Pursue(void) {};
+void ALUKABSS_Pursue(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    if (mv->extraVars != NULL)
+    {
+
+        instance->xVel = 0;
+        instance->yVel = 0;
+        instance->zVel = 0;
+
+        COPY_SVEC(Position, &instance->position, Position, &instance->intro->position);
+
+        if (mv->mvFlags & 4)
+        {
+            MON_GroundMoveQueueHandler(instance);
+        }
+        else
+        {
+            MON_SwitchState(instance, mv->previousMainState);
+            MON_DefaultQueueHandler(instance);
+        }
+
+        ALUKABSS_SetUpWaterPlaneClip(instance);
+    }
+}
 
 void ALUKABSS_CombatEntry(Instance *instance) {};
 
