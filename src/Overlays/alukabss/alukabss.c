@@ -545,7 +545,13 @@ void ALUKABSS_Attack(Instance *instance)
     ALUKABSS_SetUpWaterPlaneClip(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_LandInWaterEntry);
+void ALUKABSS_LandInWaterEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    mv->mvFlags |= 0x800;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_LandInWater);
 
@@ -1087,7 +1093,13 @@ void ALUKABSS_Attack(Instance *instance)
     ALUKABSS_SetUpWaterPlaneClip(instance);
 }
 
-void ALUKABSS_LandInWaterEntry(void) {};
+void ALUKABSS_LandInWaterEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    mv->mvFlags |= 0x800;
+}
 
 void ALUKABSS_LandInWater(void) {};
 
