@@ -490,7 +490,25 @@ void ALUKABSS_Combat(Instance *instance)
     ALUKABSS_SetUpWaterPlaneClip(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_AttackEntry);
+void ALUKABSS_AttackEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    if (mv->mvFlags & 4)
+    {
+        MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
+    }
+
+    mv->attackType = &ma->attackAttributesList[(int)mv->subAttr->combatAttributes->attackList[0]];
+    mv->mode = 0x200000;
+
+    MON_PlayAnimFromList(instance, mv->attackType->animList, 0, 1);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Attack);
 
@@ -982,7 +1000,25 @@ void ALUKABSS_Combat(Instance *instance)
     ALUKABSS_SetUpWaterPlaneClip(instance);
 }
 
-void ALUKABSS_AttackEntry(void) {};
+void ALUKABSS_AttackEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    if (mv->mvFlags & 4)
+    {
+        MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
+    }
+
+    mv->attackType = &ma->attackAttributesList[(int)mv->subAttr->combatAttributes->attackList[0]];
+    mv->mode = 0x200000;
+
+    MON_PlayAnimFromList(instance, mv->attackType->animList, 0, 1);
+}
 
 void ALUKABSS_Attack(void) {};
 
