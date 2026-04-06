@@ -13,6 +13,7 @@
 #include "Game/OBTABLE.h"
 #include "Game/PHYSICS.h"
 #include "Game/SOUND.h"
+#include "Game/STATE.h"
 #include "Game/STREAM.h"
 
 burntTuneType alukabssBurntTune = {300, 2}; // no canon name in symbols
@@ -510,7 +511,39 @@ void ALUKABSS_AttackEntry(Instance *instance)
     MON_PlayAnimFromList(instance, mv->attackType->animList, 0, 1);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Attack);
+void ALUKABSS_Attack(Instance *instance)
+{
+
+    MonsterAttackAttributes *attack; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    attack = mv->attackType;
+
+    if (mv->mvFlags & 4)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+    else
+    {
+        if (MON_AnimPlayingFromList(instance, attack->animList, attack->sphereOnAnim) && G2EmulationInstanceQueryPassedFrame(instance, 0, attack->sphereOnFrame))
+        {
+            MON_TurnOnWeaponSphere(instance, attack->sphereSegment);
+        }
+        else if (MON_AnimPlayingFromList(instance, attack->animList, attack->sphereOffAnim) && G2EmulationInstanceQueryPassedFrame(instance, 0, attack->sphereOffFrame))
+        {
+            MON_TurnOffWeaponSpheres(instance);
+        }
+
+        if (instance->flags2 & 0x10)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+        }
+    }
+
+    MON_DefaultQueueHandler(instance);
+    ALUKABSS_SetUpWaterPlaneClip(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_LandInWaterEntry);
 
@@ -1020,7 +1053,39 @@ void ALUKABSS_AttackEntry(Instance *instance)
     MON_PlayAnimFromList(instance, mv->attackType->animList, 0, 1);
 }
 
-void ALUKABSS_Attack(void) {};
+void ALUKABSS_Attack(Instance *instance)
+{
+
+    MonsterAttackAttributes *attack; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    attack = mv->attackType;
+
+    if (mv->mvFlags & 4)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+    else
+    {
+        if (MON_AnimPlayingFromList(instance, attack->animList, attack->sphereOnAnim) && G2EmulationInstanceQueryPassedFrame(instance, 0, attack->sphereOnFrame))
+        {
+            MON_TurnOnWeaponSphere(instance, attack->sphereSegment);
+        }
+        else if (MON_AnimPlayingFromList(instance, attack->animList, attack->sphereOffAnim) && G2EmulationInstanceQueryPassedFrame(instance, 0, attack->sphereOffFrame))
+        {
+            MON_TurnOffWeaponSpheres(instance);
+        }
+
+        if (instance->flags2 & 0x10)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+        }
+    }
+
+    MON_DefaultQueueHandler(instance);
+    ALUKABSS_SetUpWaterPlaneClip(instance);
+}
 
 void ALUKABSS_LandInWaterEntry(void) {};
 
