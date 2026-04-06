@@ -553,7 +553,36 @@ void ALUKABSS_LandInWaterEntry(Instance *instance)
     mv->mvFlags |= 0x800;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_LandInWater);
+void ALUKABSS_LandInWater(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv == NULL || mv->extraVars == NULL)
+    {
+        return;
+    }
+
+    if (mv->previousMainState == MONSTER_STATE_FALL)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+    else
+    {
+        MON_SwitchState(instance, mv->previousMainState);
+    }
+
+    instance->xVel = 0;
+    instance->yVel = 0;
+    instance->zVel = 0;
+
+    COPY_SVEC(Position, &instance->position, Position, &instance->intro->position);
+
+    MON_DefaultQueueHandler(instance);
+    ALUKABSS_SetUpWaterPlaneClip(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_ProjectileEntry);
 
@@ -1101,7 +1130,36 @@ void ALUKABSS_LandInWaterEntry(Instance *instance)
     mv->mvFlags |= 0x800;
 }
 
-void ALUKABSS_LandInWater(void) {};
+void ALUKABSS_LandInWater(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv == NULL || mv->extraVars == NULL)
+    {
+        return;
+    }
+
+    if (mv->previousMainState == MONSTER_STATE_FALL)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+    else
+    {
+        MON_SwitchState(instance, mv->previousMainState);
+    }
+
+    instance->xVel = 0;
+    instance->yVel = 0;
+    instance->zVel = 0;
+
+    COPY_SVEC(Position, &instance->position, Position, &instance->intro->position);
+
+    MON_DefaultQueueHandler(instance);
+    ALUKABSS_SetUpWaterPlaneClip(instance);
+}
 
 void ALUKABSS_ProjectileEntry(void) {};
 
