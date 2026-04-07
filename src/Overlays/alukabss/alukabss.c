@@ -1,5 +1,6 @@
 #include "Overlays/alukabss/alukabss.h"
 #include "Game/G2/ANMCTRLR.h"
+#include "Game/MONSTER/MISSILE.h"
 #include "Game/MONSTER/MONAPI.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONMSG.h"
@@ -603,7 +604,47 @@ void ALUKABSS_ProjectileEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Projectile);
+void ALUKABSS_Projectile(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterMissile *missile; // not from debug symbols
+    AlukabssVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    missile = &ma->missileList[(int)mv->subAttr->combatAttributes->missileAttack];
+
+    if (mv != NULL)
+    {
+        vars = (AlukabssVars *)mv->extraVars;
+
+        if (vars != NULL)
+        {
+            if (mv->enemy == NULL || instance->flags2 & 0x10)
+            {
+                MON_SwitchState(instance, MONSTER_STATE_IDLE);
+                vars->time_since_spit = MON_GetTime(instance);
+            }
+            else if (MON_AnimPlayingFromList(instance, missile->animList, missile->anim) && G2EmulationInstanceQueryPassedFrame(instance, 0, missile->frame))
+            {
+                MISSILE_FireAtInstance(instance, missile, mv->enemy->instance);
+            }
+
+            ALUKABSS_RotateToFace(instance, &gameTrackerX, NULL);
+
+            instance->xVel = 0;
+            instance->yVel = 0;
+            instance->zVel = 0;
+
+            COPY_SVEC(Position, &instance->position, Position, &instance->intro->position);
+
+            MON_DefaultQueueHandler(instance);
+            ALUKABSS_SetUpWaterPlaneClip(instance);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_DeadEntry);
 
@@ -1197,7 +1238,47 @@ void ALUKABSS_ProjectileEntry(Instance *instance)
     }
 }
 
-void ALUKABSS_Projectile(void) {};
+void ALUKABSS_Projectile(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterMissile *missile; // not from debug symbols
+    AlukabssVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    missile = &ma->missileList[(int)mv->subAttr->combatAttributes->missileAttack];
+
+    if (mv != NULL)
+    {
+        vars = (AlukabssVars *)mv->extraVars;
+
+        if (vars != NULL)
+        {
+            if (mv->enemy == NULL || instance->flags2 & 0x10)
+            {
+                MON_SwitchState(instance, MONSTER_STATE_IDLE);
+                vars->time_since_spit = MON_GetTime(instance);
+            }
+            else if (MON_AnimPlayingFromList(instance, missile->animList, missile->anim) && G2EmulationInstanceQueryPassedFrame(instance, 0, missile->frame))
+            {
+                MISSILE_FireAtInstance(instance, missile, mv->enemy->instance);
+            }
+
+            ALUKABSS_RotateToFace(instance, &gameTrackerX, NULL);
+
+            instance->xVel = 0;
+            instance->yVel = 0;
+            instance->zVel = 0;
+
+            COPY_SVEC(Position, &instance->position, Position, &instance->intro->position);
+
+            MON_DefaultQueueHandler(instance);
+            ALUKABSS_SetUpWaterPlaneClip(instance);
+        }
+    }
+}
 
 void ALUKABSS_DeadEntry(void) {};
 
