@@ -584,7 +584,24 @@ void ALUKABSS_LandInWater(Instance *instance)
     ALUKABSS_SetUpWaterPlaneClip(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_ProjectileEntry);
+void ALUKABSS_ProjectileEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterCombatAttributes *combat; // not from debug symbols
+    MonsterMissile *missile; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    combat = mv->subAttr->combatAttributes;
+    missile = &ma->missileList[(int)combat->missileAttack];
+
+    if (mv != NULL && mv->extraVars != NULL)
+    {
+        MON_PlayAnimFromList(instance, missile->animList, 0, 1);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Projectile);
 
@@ -1161,7 +1178,24 @@ void ALUKABSS_LandInWater(Instance *instance)
     ALUKABSS_SetUpWaterPlaneClip(instance);
 }
 
-void ALUKABSS_ProjectileEntry(void) {};
+void ALUKABSS_ProjectileEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterCombatAttributes *combat; // not from debug symbols
+    MonsterMissile *missile; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    combat = mv->subAttr->combatAttributes;
+    missile = &ma->missileList[(int)combat->missileAttack];
+
+    if (mv != NULL && mv->extraVars != NULL)
+    {
+        MON_PlayAnimFromList(instance, missile->animList, 0, 1);
+    }
+}
 
 void ALUKABSS_Projectile(void) {};
 
