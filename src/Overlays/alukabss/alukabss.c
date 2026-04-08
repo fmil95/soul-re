@@ -13,11 +13,38 @@
 #include "Game/MEMPACK.h"
 #include "Game/OBTABLE.h"
 #include "Game/PHYSICS.h"
+#include "Game/SAVEINFO.h"
 #include "Game/SOUND.h"
 #include "Game/STATE.h"
 #include "Game/STREAM.h"
 
+
+MonsterStateChoice ALUKABSS_StateChoiceTable[] = {
+    {MONSTER_STATE_PURSUE, {ALUKABSS_PursueEntry, ALUKABSS_Pursue}},
+    {MONSTER_STATE_COMBAT, {ALUKABSS_CombatEntry, ALUKABSS_Combat}},
+    {MONSTER_STATE_IDLE, {ALUKABSS_IdleEntry, ALUKABSS_Idle}},
+    {MONSTER_STATE_LANDINWATER, {ALUKABSS_LandInWaterEntry, ALUKABSS_LandInWater}},
+    {MONSTER_STATE_PROJECTILE, {ALUKABSS_ProjectileEntry, ALUKABSS_Projectile}},
+    {MONSTER_STATE_ATTACK, {ALUKABSS_AttackEntry, ALUKABSS_Attack}},
+    {MONSTER_STATE_DEAD, {ALUKABSS_DeadEntry, ALUKABSS_Dead}},
+    {MONSTER_STATE_HIT, {ALUKABSS_DoNothingEntry, ALUKABSS_DoNothing}},
+    {MONSTER_STATE_MISSILEHIT, {ALUKABSS_DoNothingEntry, ALUKABSS_DoNothing}},
+    {MONSTER_STATE_STUNNED, {ALUKABSS_DoNothingEntry, ALUKABSS_DoNothing}},
+    {-1, {NULL, NULL}},
+};
+
 burntTuneType alukabssBurntTune = {300, 2}; // no canon name in symbols
+
+const MonsterFunctionTable ALUKABSS_FunctionTable = {
+    ALUKABSS_Init,
+    ALUKABSS_CleanUp,
+    ALUKABSS_DamageEffect,
+    ALUKABSS_Query,
+    ALUKABSS_Message,
+    ALUKABSS_StateChoiceTable,
+    monVersion,
+    "Jul 14 1999"
+};
 
 // TODO: Delete once matched
 int ALUKABSS_RotateToFace(Instance *, GameTracker *, Position *);
@@ -693,10 +720,6 @@ void ALUKABSS_DoNothing(Instance *instance)
 {
     (void)instance;
 };
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/alukabss/alukabss", D_88000000);
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/alukabss/alukabss", D_88000020);
 
 #else 
 
