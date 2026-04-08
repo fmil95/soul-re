@@ -652,7 +652,37 @@ void ALUKABSS_DeadEntry(Instance *instance)
     MON_DeadEntry(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Dead);
+void ALUKABSS_Dead(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->causeOfDeath == MONSTER_CAUSEOFDEATH_FIRE && instance->perVertexColor == NULL)
+    {
+        Model *model; // not from debug symbols
+        CVECTOR *ptr; // not from debug symbols
+        int i; // not from debug symbols
+
+        model = instance->object->modelList[instance->currentModel];
+        ptr = (CVECTOR *)MEMPACK_Malloc(sizeof(CVECTOR) * model->numVertices, MEMORY_TYPE_INSTVTXCOLOR);
+        instance->perVertexColor = ptr;
+
+        for (i = model->numVertices; i != 0; i--, ptr++)
+        {
+            *(long *)ptr = 0x101010;
+        }
+    }
+
+    if (mv->mvFlags & 0x400000 && mv->effectTimer < MON_GetTime(instance))
+    {
+        mv->mvFlags &= ~0x400000;
+        FX_StopAllGlowEffects(instance, 64);
+    }
+
+    while (DeMessageQueue(&mv->messageQueue) != NULL);
+}
 
 void ALUKABSS_DoNothingEntry(Instance *instance)
 {
@@ -1290,7 +1320,37 @@ void ALUKABSS_DeadEntry(Instance *instance)
     MON_DeadEntry(instance);
 }
 
-void ALUKABSS_Dead(void) {};
+void ALUKABSS_Dead(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->causeOfDeath == MONSTER_CAUSEOFDEATH_FIRE && instance->perVertexColor == NULL)
+    {
+        Model *model; // not from debug symbols
+        CVECTOR *ptr; // not from debug symbols
+        int i; // not from debug symbols
+
+        model = instance->object->modelList[instance->currentModel];
+        ptr = (CVECTOR *)MEMPACK_Malloc(sizeof(CVECTOR) * model->numVertices, MEMORY_TYPE_INSTVTXCOLOR);
+        instance->perVertexColor = ptr;
+
+        for (i = model->numVertices; i != 0; i--, ptr++)
+        {
+            *(long *)ptr = 0x101010;
+        }
+    }
+
+    if (mv->mvFlags & 0x400000 && mv->effectTimer < MON_GetTime(instance))
+    {
+        mv->mvFlags &= ~0x400000;
+        FX_StopAllGlowEffects(instance, 64);
+    }
+
+    while (DeMessageQueue(&mv->messageQueue) != NULL);
+}
 
 void ALUKABSS_DoNothingEntry(Instance *instance)
 {
