@@ -894,7 +894,7 @@ uintptr_t ALUKABSS_Query(Instance *instance, unsigned long query)
     return 0;
 }
 
-void ALUKABSS_Message(void) {};
+void ALUKABSS_Message(Instance *instance, unsigned long message, unsigned long data) {};
 
 void ALUKABSS_Init(Instance *instance)
 {
