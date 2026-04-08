@@ -646,7 +646,11 @@ void ALUKABSS_Projectile(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_DeadEntry);
+void ALUKABSS_DeadEntry(Instance *instance)
+{
+    ((MonsterVars *)instance->extraData)->soulJuice = 0;
+    MON_DeadEntry(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/alukabss/alukabss", ALUKABSS_Dead);
 
@@ -1280,7 +1284,11 @@ void ALUKABSS_Projectile(Instance *instance)
     }
 }
 
-void ALUKABSS_DeadEntry(void) {};
+void ALUKABSS_DeadEntry(Instance *instance)
+{
+    ((MonsterVars *)instance->extraData)->soulJuice = 0;
+    MON_DeadEntry(instance);
+}
 
 void ALUKABSS_Dead(void) {};
 

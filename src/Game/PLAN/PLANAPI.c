@@ -267,7 +267,7 @@ int PLANAPI_PassThroughHit(PlanningNode *node1, PlanningNode *node2)
 
         res = (src1 << 8) | src2;
 
-        if ((res == 260) || (res == 772) || (res == 516))
+        if (res == 260 || res == 772 || res == 516)
         {
             return 1;
         }
@@ -286,21 +286,17 @@ void PLANAPI_UpdatePlanningDatabase(GameTracker *gameTracker, Instance *player)
     int pathExistsBelow;
 
     planningPool = (PlanningNode *)gameTracker->planningPool;
-
     startTime = (GetRCnt(0xF2000000) & 0xFFFF) | (gameTimer << 16);
-
     gameTrackerX.plan_collide_override = 1;
 
     switch (poolManagementData->state)
     {
     case 0:
         PLAN_AddInitialNodes(planningPool, player);
-
         poolManagementData->state = 1;
         break;
     case 1:
         PLAN_AddOrRemoveNodes(planningPool, player);
-
         poolManagementData->state = 2;
         break;
     case 2:
@@ -309,7 +305,7 @@ void PLANAPI_UpdatePlanningDatabase(GameTracker *gameTracker, Instance *player)
 
         poolManagementData->state = 1;
 
-        if ((node1 == NULL) || (node2 == NULL))
+        if (node1 == NULL || node2 == NULL)
         {
             break;
         }
@@ -380,7 +376,7 @@ void PLANAPI_UpdatePlanningDatabase(GameTracker *gameTracker, Instance *player)
             pathExistsAbove = pathExistsBelow = PLANCOLL_DoesLOSExistFinal(&node2->pos, &node1->pos, 0, PLANAPI_PassThroughHit(node2, node1), 0);
         }
 
-        if ((pathExistsAbove != 0) && (pathExistsBelow != 0))
+        if (pathExistsAbove && pathExistsBelow)
         {
             PLANPOOL_MarkTwoNodesAsConnected(node2, node1, planningPool);
         }
@@ -403,7 +399,6 @@ void PLANAPI_UpdatePlanningDatabase(GameTracker *gameTracker, Instance *player)
 int PLANAPI_NumNodesInPool(void *planningPool)
 {
     (void)planningPool;
-
     return poolManagementData->numNodesInPool;
 }
 
@@ -416,9 +411,7 @@ void PLANAPI_InitPlanMkrList(StreamUnit *streamUnit)
     PlanMkr *planMkrList;
 
     level = streamUnit->level;
-
     planMkrList = level->PlanMarkerList;
-
     numPlanMkrs = level->NumberOfPlanMarkers;
 
     if (planMkrList != NULL)
@@ -431,11 +424,11 @@ void PLANAPI_InitPlanMkrList(StreamUnit *streamUnit)
 
             if (!(planMkrList[i].id & 0x5000))
             {
-                if ((planMkrList[i].id & 0x8000))
+                if (planMkrList[i].id & 0x8000)
                 {
                     terrainFoundFlag = PLANCOLL_FindTerrainHitFinal(&pci, NULL, -256, 640, 1, 4);
                 }
-                else if ((planMkrList[i].id & 0x2000))
+                else if (planMkrList[i].id & 0x2000)
                 {
                     terrainFoundFlag = PLANCOLL_FindTerrainHitFinal(&pci, NULL, -256, 640, 5, 5);
                 }
@@ -488,11 +481,8 @@ int PLANAPI_FindNodePositionInUnit(StreamUnit *streamUnit, Position *pos, int id
     if (streamUnit != NULL)
     {
         level = streamUnit->level;
-
         planMkr = level->PlanMarkerList;
-
         numPlanMkrs = level->NumberOfPlanMarkers;
-
         id |= PLANAPI_GetFlags(type);
 
         for (i = numPlanMkrs; i != 0; planMkr++, i--)
@@ -500,7 +490,6 @@ int PLANAPI_FindNodePositionInUnit(StreamUnit *streamUnit, Position *pos, int id
             if (planMkr->id == id)
             {
                 COPY_SVEC(Position, pos, Position, &planMkr->pos);
-
                 return 1;
             }
         }
@@ -522,24 +511,18 @@ int PLANAPI_FindClosestNodePositionInUnit(StreamUnit *streamUnit, Position *targ
     int i;
 
     ptr = NULL;
-
     min_dist = 0x7FFF;
-
     level = streamUnit->level;
-
     planMkr = level->PlanMarkerList;
-
     numPlanMkrs = level->NumberOfPlanMarkers;
-
     res = 0;
-
     chk = PLANAPI_GetFlags(type);
 
     for (i = numPlanMkrs; i > 0; i--, planMkr++)
     {
-        if ((planMkr->id & chk))
+        if (planMkr->id & chk)
         {
-            if (distanceCheck == 0)
+            if (distanceCheck == TWO_D_DISTANCE)
             {
                 dist = MATH3D_LengthXY(target->x - planMkr->pos.x, target->y - planMkr->pos.y);
             }
@@ -555,9 +538,7 @@ int PLANAPI_FindClosestNodePositionInUnit(StreamUnit *streamUnit, Position *targ
                 if (dist < min_dist)
                 {
                     min_dist = dist;
-
                     ptr = &planMkr->pos;
-
                     res = 1;
                 }
             }
