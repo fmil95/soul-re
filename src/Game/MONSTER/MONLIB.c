@@ -294,31 +294,26 @@ void MON_PlayAnimID(Instance *instance, int index, int mode)
     int interpFrames;
     int alphaTable;
 
-    ma = (MonsterAttributes *)instance->data;
-
     mv = (MonsterVars *)instance->extraData;
-
+    ma = (MonsterAttributes *)instance->data;
     manim = &ma->animList[index];
-
     anim0 = *manim->index;
 
-    if ((anim0 < 0) || (anim0 >= instance->object->numAnims))
+    if (anim0 < 0 || (anim0 >= instance->object->numAnims))
     {
         anim0 = 0;
     }
 
     G2Anim_SetCallback(&instance->anim, (void *)INSTANCE_DefaultAnimCallback, instance);
 
-    if ((mv->anim != NULL) && (mv->anim->interpOut != 0))
+    if (mv->anim != NULL && mv->anim->interpOut != 0)
     {
         interpFrames = mv->anim->interpOut;
-
         alphaTable = mv->anim->alphaTableOut;
     }
     else
     {
         interpFrames = manim->interpFrames;
-
         alphaTable = manim->alphaTable;
     }
 
@@ -332,7 +327,6 @@ void MON_PlayAnimID(Instance *instance, int index, int mode)
         }
 
         G2EmulationInstanceSwitchAnimationAlpha(instance, i, anim, manim->startFrame, interpFrames, mode, alphaTable);
-
         G2EmulationInstanceSetAnimSpeed(instance, i, manim->playSpeed);
     }
 

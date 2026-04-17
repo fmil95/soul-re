@@ -169,7 +169,7 @@ void ALUKABSS_Circle(Instance *instance, GameTracker *gameTracker, int change_an
     instance->rotation.z = instance->rotation.z + mv->speed;
     mv->speed += (attrs->circle_accel * gameTracker->timeMult) / 4096;
 
-    if (mv->speed >= attrs->fast_circle_speed && change_anim != 0)
+    if (mv->speed >= attrs->fast_circle_speed && change_anim)
     {
         MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, MONSTER_ANIM_WALK, 2);
     }
@@ -245,13 +245,10 @@ void ALUKABSS_Init(Instance *instance)
         }
         else
         {
-            int time; // not from debug symbols
-
             mv->extraVars = vars;
             vars->upper_facing = instance->rotation.z;
-            time = MON_GetTime(instance);
-            vars->time_since_spit = time;
-            vars->raz_time_at_marker = time;
+            vars->time_since_spit = MON_GetTime(instance);
+            vars->raz_time_at_marker = vars->time_since_spit;
             vars->laugh_timer = 0;
         }
     }
@@ -272,7 +269,7 @@ void ALUKABSS_Init(Instance *instance)
     mv->mvFlags |= 0x800;
 
     MON_SwitchState(instance, MONSTER_STATE_IDLE);
-    RAZIEL_SetInteractiveMusic(0xF, 1);
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 1);
 }
 
 void ALUKABSS_CleanUp(Instance *instance)
@@ -280,7 +277,7 @@ void ALUKABSS_CleanUp(Instance *instance)
 
     MonsterVars *mv; // not from debug symbols
 
-    RAZIEL_SetInteractiveMusic(15, 0);
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 0);
 
     mv = (MonsterVars *)instance->extraData;
 
@@ -421,7 +418,7 @@ void ALUKABSS_Idle(Instance *instance)
 void ALUKABSS_PursueEntry(Instance *instance)
 {
     (void)instance;
-};
+}
 
 void ALUKABSS_Pursue(Instance *instance)
 {
@@ -429,6 +426,7 @@ void ALUKABSS_Pursue(Instance *instance)
     MonsterVars *mv; // not from debug symbols
 
     mv = (MonsterVars *)instance->extraData;
+
     if (mv->extraVars != NULL)
     {
 
@@ -455,7 +453,7 @@ void ALUKABSS_Pursue(Instance *instance)
 void ALUKABSS_CombatEntry(Instance *instance)
 {
     (void)instance;
-};
+}
 
 void ALUKABSS_Combat(Instance *instance)
 {
@@ -719,7 +717,7 @@ void ALUKABSS_DoNothingEntry(Instance *instance)
 void ALUKABSS_DoNothing(Instance *instance)
 {
     (void)instance;
-};
+}
 
 #else 
 
@@ -839,7 +837,7 @@ void ALUKABSS_Circle(Instance *instance, GameTracker *gameTracker, int change_an
     instance->rotation.z = instance->rotation.z + mv->speed;
     mv->speed += (attrs->circle_accel * gameTracker->timeMult) / 4096;
 
-    if (mv->speed >= attrs->fast_circle_speed && change_anim != 0)
+    if (mv->speed >= attrs->fast_circle_speed && change_anim)
     {
         MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, MONSTER_ANIM_WALK, 2);
     }
@@ -915,13 +913,10 @@ void ALUKABSS_Init(Instance *instance)
         }
         else
         {
-            int time; // not from debug symbols
-
             mv->extraVars = vars;
             vars->upper_facing = instance->rotation.z;
-            time = MON_GetTime(instance);
-            vars->time_since_spit = time;
-            vars->raz_time_at_marker = time;
+            vars->time_since_spit = MON_GetTime(instance);
+            vars->raz_time_at_marker = vars->time_since_spit;
             vars->laugh_timer = 0;
         }
     }
@@ -942,7 +937,7 @@ void ALUKABSS_Init(Instance *instance)
     mv->mvFlags |= 0x800;
 
     MON_SwitchState(instance, MONSTER_STATE_IDLE);
-    RAZIEL_SetInteractiveMusic(0xF, 1);
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 1);
 }
 
 void ALUKABSS_CleanUp(Instance *instance)
@@ -950,7 +945,7 @@ void ALUKABSS_CleanUp(Instance *instance)
 
     MonsterVars *mv; // not from debug symbols
 
-    RAZIEL_SetInteractiveMusic(15, 0);
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 0);
 
     mv = (MonsterVars *)instance->extraData;
 
