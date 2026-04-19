@@ -1,5 +1,6 @@
 #include "Overlays/roninbss/roninbss.h"
 #include "Game/FX.h"
+#include "Game/MATH3D.h"
 #include "Game/MONSTER/MONSTER.h"
 
 // this conditional is for the objdiff report
@@ -43,9 +44,26 @@ void RONINBSS_StopBand(Instance *instance, int flash)
     }
 }
 
+void RONINBSS_InitConstrict(Instance *instance, Position *target)
+{
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_InitConstrict);
+    MonsterVars *mv; // not from debug symbols
+    mv = (MonsterVars *)instance->extraData;
 
+    if (mv != NULL)
+    {
+
+        RoninbssVars *vars; // not from debug symbols
+        vars = (RoninbssVars *)mv->extraVars;
+
+        if (vars != NULL)
+        {
+            COPY_SVEC(Position, &vars->current_constrict_pos, Position, target);
+            vars->anim_state = 0;
+            COPY_SVEC(Position, &vars->last_rb_pos, Position, &instance->position);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Constrict);
 
@@ -148,8 +166,26 @@ void RONINBSS_StopBand(Instance *instance, int flash)
     }
 }
 
+void RONINBSS_InitConstrict(Instance *instance, Position *target)
+{
 
-void RONINBSS_InitConstrict(void) {};
+    MonsterVars *mv; // not from debug symbols
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv != NULL)
+    {
+
+        RoninbssVars *vars; // not from debug symbols
+        vars = (RoninbssVars *)mv->extraVars;
+
+        if (vars != NULL)
+        {
+            COPY_SVEC(Position, &vars->current_constrict_pos, Position, target);
+            vars->anim_state = 0;
+            COPY_SVEC(Position, &vars->last_rb_pos, Position, &instance->position);
+        }
+    }
+}
 
 void RONINBSS_Constrict(void) {};
 
