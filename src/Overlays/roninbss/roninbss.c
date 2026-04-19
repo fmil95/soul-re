@@ -29,7 +29,20 @@ void RONINBSS_StartBand(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_StopBand);
+void RONINBSS_StopBand(Instance *instance, int flash)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->auxFlags & 0x20)
+    {
+        FX_EndConstrict(flash, NULL);
+        mv->auxFlags &= ~0x20;
+    }
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_InitConstrict);
 
@@ -121,7 +134,20 @@ void RONINBSS_StartBand(Instance *instance)
     }
 }
 
-void RONINBSS_StopBand(void) {};
+void RONINBSS_StopBand(Instance *instance, int flash)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->auxFlags & 0x20)
+    {
+        FX_EndConstrict(flash, NULL);
+        mv->auxFlags &= ~0x20;
+    }
+}
+
 
 void RONINBSS_InitConstrict(void) {};
 
