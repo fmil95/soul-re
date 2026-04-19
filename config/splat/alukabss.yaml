@@ -50,5 +50,5 @@ segments:
     subsegments:
       - [0x000000, .rodata, Overlays/alukabss/alukabss]
       - [0x00002C, _c, Overlays/alukabss/alukabss]
-      - [0x00157C, data, Overlays/alukabss/alukabss]
+      - [0x00157C, .data, Overlays/alukabss/alukabss]
   - [0x001608]

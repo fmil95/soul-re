@@ -71,6 +71,8 @@ void MON_PetrifiedEntry(Instance *instance);
 void MON_Petrified(Instance *instance);
 void MON_MonsterGlow(Instance *instance, long color, int glowtime, int glowin, int glowfade);
 void ProcessBurntMess(Instance *instance, int vertidx, int segidx, int dist, void *cb_data);
+int MONSTER_StartVertexBurnt(Instance *instance, SVector *location, burntTuneType *burntTune);
+void MONSTER_VertexBurnt(Instance *instance, burntTuneType *burntTune);
 void MONSTER_InitVertexColors(Instance *instance, Model *model);
 void MONSTER_ProcessClosestVerts(Instance *instance, SVector *location, void (*processVert_cb)(), void *cb_data);
 void ProcessBloodyMess(Instance *instance, int vertidx, int segidx, int dist, void *cb_data);

@@ -49,4 +49,26 @@ typedef struct _AlukabssVars
     short junk;
 } AlukabssVars;
 
+void ALUKABSS_Init(Instance *instance);
+void ALUKABSS_CleanUp(Instance *instance);
+void ALUKABSS_DamageEffect(Instance *instance, evFXHitData *data);
+uintptr_t ALUKABSS_Query(Instance *instance, unsigned long query);
+void ALUKABSS_Message(Instance *instance, unsigned long message, unsigned long data);
+void ALUKABSS_PursueEntry(Instance *instance);
+void ALUKABSS_Pursue(Instance *instance);
+void ALUKABSS_CombatEntry(Instance *instance);
+void ALUKABSS_Combat(Instance *instance);
+void ALUKABSS_IdleEntry(Instance *instance);
+void ALUKABSS_Idle(Instance *instance);
+void ALUKABSS_LandInWaterEntry(Instance *instance);
+void ALUKABSS_LandInWater(Instance *instance);
+void ALUKABSS_ProjectileEntry(Instance *instance);
+void ALUKABSS_Projectile(Instance *instance);
+void ALUKABSS_AttackEntry(Instance *instance);
+void ALUKABSS_Attack(Instance *instance);
+void ALUKABSS_DeadEntry(Instance *instance);
+void ALUKABSS_Dead(Instance *instance);
+void ALUKABSS_DoNothingEntry(Instance *instance);
+void ALUKABSS_DoNothing(Instance *instance);
+
 #endif

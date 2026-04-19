@@ -634,7 +634,6 @@ void MON_DefaultMessageHandler(Instance *instance, Message *message)
         break;
     case 0x40009:
         mv->damageType = 0x2000;
-
         MON_SwitchState(instance, MONSTER_STATE_STUNNED);
         break;
     case 0x4000D:
