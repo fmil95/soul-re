@@ -5,6 +5,8 @@
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/PLAN/ENMYPLAN.h"
+#include "Game/PLAN/PLANAPI.h"
+#include "Game/STREAM.h"
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -191,7 +193,52 @@ void RONINBSS_StopSoulSuck(Instance *instance)
     mv->auxFlags &= ~2;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_FadeMove);
+void RONINBSS_FadeMove(Instance *instance, int to_what_plane)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma;// not from debug symbols
+    RoninbssAttributes *attrs;// not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (RoninbssAttributes *)ma->tunData;
+
+    if (attrs == NULL)
+    {
+        return;
+    }
+
+    switch (to_what_plane)
+    {
+    case 0:
+        mv->targetFade = 4096;
+        break;
+    case 1:
+        mv->targetFade = 0;
+        break;
+    }
+
+    mv->auxFlags &= ~0x1000;
+
+    if (!(mv->auxFlags & 4))
+    {
+        switch (to_what_plane)
+        {
+        case 0:
+            PLANAPI_FindNodePositionInUnit(STREAM_GetStreamUnitWithID(instance->currentStreamUnitID), &instance->position, attrs->stand_marker, 5);
+            MON_OnGround(instance);
+            MON_PlayAnim(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+            break;
+        case 1:
+            COPY_SVEC(Position, &instance->position, Position, &instance->intro->position);
+            MON_PlayAnimFromList(instance, ma->auxAnimList, 4, 1);
+            break;
+        }
+
+        COPY_SVEC(Rotation, &instance->rotation, Rotation, &instance->intro->rotation);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_ChooseAttack);
 
@@ -432,7 +479,52 @@ void RONINBSS_StopSoulSuck(Instance *instance)
     mv->auxFlags &= ~2;
 }
 
-void RONINBSS_FadeMove(void) {};
+void RONINBSS_FadeMove(Instance *instance, int to_what_plane)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma;// not from debug symbols
+    RoninbssAttributes *attrs;// not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (RoninbssAttributes *)ma->tunData;
+
+    if (attrs == NULL)
+    {
+        return;
+    }
+
+    switch (to_what_plane)
+    {
+    case 0:
+        mv->targetFade = 4096;
+        break;
+    case 1:
+        mv->targetFade = 0;
+        break;
+    }
+
+    mv->auxFlags &= ~0x1000;
+
+    if (!(mv->auxFlags & 4))
+    {
+        switch (to_what_plane)
+        {
+        case 0:
+            PLANAPI_FindNodePositionInUnit(STREAM_GetStreamUnitWithID(instance->currentStreamUnitID), &instance->position, attrs->stand_marker, 5);
+            MON_OnGround(instance);
+            MON_PlayAnim(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+            break;
+        case 1:
+            COPY_SVEC(Position, &instance->position, Position, &instance->intro->position);
+            MON_PlayAnimFromList(instance, ma->auxAnimList, 4, 1);
+            break;
+        }
+
+        COPY_SVEC(Rotation, &instance->rotation, Rotation, &instance->intro->rotation);
+    }
+}
 
 void RONINBSS_ChooseAttack(void) {};
 
