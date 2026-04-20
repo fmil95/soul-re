@@ -586,25 +586,25 @@ int ALUKA_SwimPlanMovement(Instance *instance, Position *target, Position *step,
     {
         switch (ENMYPLAN_MoveToTargetFinal(instance, step, mv->pathSlotID, target, 0x1E00001F))
         {
-        case 0:
+        case STILL_PLANNING:
             if (attrs->circle_start_dist < dist)
             {
-                return 2;
+                return MOVE_TO_TARGET;
             }
-            return 0;
-        case 3:
+            return STILL_PLANNING;
+        case MOVE_INVALID:
             MON_GetPlanSlot(mv);
             if (attrs->circle_start_dist >= dist)
             {
-                return 0;
+                return STILL_PLANNING;
             }
-            return 3;
+            return MOVE_INVALID;
         default:
-            return 1;
+            return MOVE_TO_WAYPOINT;
         }
     }
 
-    return 0;
+    return STILL_PLANNING;
 }
 
 
@@ -2444,25 +2444,25 @@ int ALUKA_SwimPlanMovement(Instance *instance, Position *target, Position *step,
     {
         switch (ENMYPLAN_MoveToTargetFinal(instance, step, mv->pathSlotID, target, 0x1E00001F))
         {
-        case 0:
+        case STILL_PLANNING:
             if (attrs->circle_start_dist < dist)
             {
-                return 2;
+                return MOVE_TO_TARGET;
             }
-            return 0;
-        case 3:
+            return STILL_PLANNING;
+        case MOVE_INVALID:
             MON_GetPlanSlot(mv);
             if (attrs->circle_start_dist >= dist)
             {
-                return 0;
+                return STILL_PLANNING;
             }
-            return 3;
+            return MOVE_INVALID;
         default:
-            return 1;
+            return MOVE_TO_WAYPOINT;
         }
     }
 
-    return 0;
+    return STILL_PLANNING;
 }
 
 

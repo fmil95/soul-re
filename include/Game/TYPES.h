@@ -69,6 +69,19 @@ enum SoundModifers
     SOUND_MODIFIER_MAX = 16,
 };
 
+enum FXEffectType
+{
+    FX_EFFECT_TYPE_RIBBON = 0x40,
+    FX_EFFECT_TYPE_PARTICLE = 0x1,
+    FX_EFFECT_TYPE_CUTPLANE = 0x82,
+    FX_EFFECT_TYPE_GLOW = 0x83,
+    FX_EFFECT_TYPE_BLASTRING = 0x84,
+    FX_EFFECT_TYPE_LIGHTBEAM = 0x85,
+    FX_EFFECT_TYPE_FORCEFIELD = 0x86,
+    FX_EFFECT_TYPE_LIGHTNING = 0x87,
+    FX_EFFECT_TYPE_FLASH = 0x88,
+};
+
 enum MonsterAnim
 {
     MONSTER_ANIM_HIT1 = 0,
@@ -368,6 +381,23 @@ enum MonsterPlanMove
     MONSTER_PLANMOVE_ARRIVED = 4,
     MONSTER_PLANMOVE_NOTARGET = 5,
     MONSTER_PLANMOVE_STATECHANGE = 6,
+};
+
+enum PlanState
+{
+    JUST_INITIALIZED = 0,
+    PLAN_REQUESTED_BUT_NOT_FOUND = 1,
+    FOLLOWING_PATH = 2,
+    HOMING_IN_ON_TARGET = 3,
+    NO_PATH_EXISTS = 4,
+};
+
+enum PlanResult
+{
+    STILL_PLANNING = 0,
+    MOVE_TO_WAYPOINT = 1,
+    MOVE_TO_TARGET = 2,
+    MOVE_INVALID = 3,
 };
 
 typedef enum _G2AnimControllerType_Enum {

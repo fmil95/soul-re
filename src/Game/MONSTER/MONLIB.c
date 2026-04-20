@@ -2052,14 +2052,14 @@ int MON_DefaultPlanMovement(Instance *instance, int anim, long distance)
 
                 planresult = ENMYPLAN_MoveToTargetFinal(instance, &pos, (signed char)mv->pathSlotID, &mv->destination, 0x1F);
 
-                if (planresult == 3)
+                if (planresult == MOVE_INVALID)
                 {
                     rc = MONSTER_PLANMOVE_INVALID;
                 }
                 else
                 {
 
-                    if (planresult == 0)
+                    if (planresult == STILL_PLANNING)
                     {
                         MON_TurnToPosition(instance, &mv->destination, mv->subAttr->speedPivotTurn);
 

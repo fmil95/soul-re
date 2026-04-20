@@ -46,8 +46,7 @@ int ENMYPLAN_GetInitializedPlanningWorkspaceFinal()
     if (slotID != -1)
     {
         pool[slotID].slotInUse = 1;
-
-        pool[slotID].state = 0;
+        pool[slotID].state = JUST_INITIALIZED;
     }
 
     return slotID;
@@ -63,8 +62,8 @@ void ENMYPLAN_ReleasePlanningWorkspace(int slotID)
     {
         if (slotID < 10)
         {
-            PLANAPI_DeleteNodesFromPoolByType(2);
-            PLANAPI_DeleteNodesFromPoolByType(3);
+            PLANAPI_DeleteNodesFromPoolByType(ENEMY_NODE);
+            PLANAPI_DeleteNodesFromPoolByType(TARGET_NODE);
 
             pool[slotID].slotInUse = 0;
         }
@@ -101,7 +100,7 @@ int ENMYPLAN_WayPointReached(Position *currentPos, Position *oldCurrentPos, Posi
     range[0] = MATH3D_LengthXYZ(targetPos->x - currentPos->x, targetPos->y - currentPos->y, targetPos->z - currentPos->z);
     range[1] = MATH3D_LengthXYZ(targetPos->x - oldCurrentPos->x, targetPos->y - oldCurrentPos->y, targetPos->z - oldCurrentPos->z);
 
-    if (((range[0] > range[1]) && (range[0] < 400)) || (range[0] < 50))
+    if ((range[0] > range[1] && range[0] < 400) || range[0] < 50)
     {
         return 1;
     }
@@ -113,10 +112,10 @@ int ENMYPLAN_WayPointReached(Position *currentPos, Position *oldCurrentPos, Posi
 
 void ENMYPLAN_Replan(EnemyPlanSlotData *planSlot)
 {
-    planSlot->state = 0;
+    planSlot->state = JUST_INITIALIZED;
 
-    PLANAPI_DeleteNodesFromPoolByType(2);
-    PLANAPI_DeleteNodesFromPoolByType(3);
+    PLANAPI_DeleteNodesFromPoolByType(ENEMY_NODE);
+    PLANAPI_DeleteNodesFromPoolByType(TARGET_NODE);
 }
 
 int ENMYPLAN_PathClear(Position *pos, Position *target)
@@ -187,8 +186,7 @@ int ENMYPLAN_MoveToTargetFinal(Instance *instance, Position *outputPos, int slot
     if (slotID == -1 || slotID >= 10)
     {
         gameTrackerX.plan_collide_override = 1;
-
-        return 2;
+        return MOVE_TO_TARGET;
     }
 
     planSlot = &pool[slotID];
@@ -196,45 +194,43 @@ int ENMYPLAN_MoveToTargetFinal(Instance *instance, Position *outputPos, int slot
 
     switch (planSlot->state)
     {
-    case 0:
+    case JUST_INITIALIZED:
         planSlot->startPos = instance->position;
         planSlot->goalPos = *targetPos;
 
         planSlot->timer = 0;
 
-        if (PLANAPI_AddNodeOfTypeToPool(&planSlot->goalPos, 3) != 0)
+        if (PLANAPI_AddNodeOfTypeToPool(&planSlot->goalPos, TARGET_NODE) != 0)
         {
-            PLANAPI_AddNodeOfTypeToPool(&planSlot->startPos, 2);
-
-            planSlot->state = 1;
+            PLANAPI_AddNodeOfTypeToPool(&planSlot->startPos, ENEMY_NODE);
+            planSlot->state = PLAN_REQUESTED_BUT_NOT_FOUND;
         }
 
         break;
-    case 1:
+    case PLAN_REQUESTED_BUT_NOT_FOUND:
         temp = PLANAPI_FindPathInGraphToTarget(&planSlot->startPos, planData, validNodeTypes);
 
         planSlot->timer++;
 
         if (temp != 0)
         {
-            planSlot->state = 2;
-
+            planSlot->state = FOLLOWING_PATH;
             planSlot->wayPointBeingServoedTo = 1;
         }
         else if (planSlot->timer > 100)
         {
-            planSlot->state = 4;
+            planSlot->state = NO_PATH_EXISTS;
         }
 
         break;
-    case 2:
+    case FOLLOWING_PATH:
         nextWayPointIdx = planSlot->wayPointBeingServoedTo;
         nextWayPointPos = &planData->wayPointArray[nextWayPointIdx];
 
         switch (planData->nodeSkipArray[nextWayPointIdx])
         {
         case 2:
-            if (ENMYPLAN_PathClear(&instance->position, nextWayPointPos) == 0)
+            if (!ENMYPLAN_PathClear(&instance->position, nextWayPointPos))
             {
                 if (planData->nodeSkipArray[nextWayPointIdx - 1] != 1)
                 {
@@ -265,7 +261,7 @@ int ENMYPLAN_MoveToTargetFinal(Instance *instance, Position *outputPos, int slot
             nextNextWayPointPos = &planData->wayPointArray[nextNextWayPointIdx];
             nextNextWayPointType = (planData->nodeTypeArray[nextNextWayPointIdx] >> 3) & 0x3;
 
-            while ((nextWayPointType == nextNextWayPointType) && (planData->nodeSkipArray[nextWayPointIdx] != 2) && (nextWayPointType == 0) && (ENMYPLAN_WayPointSkipped(&instance->position, nextWayPointPos, nextNextWayPointPos) != 0) && (planSlot->wayPointBeingServoedTo < (planSlot->planData.numWayPoints - 2)))
+            while (nextWayPointType == nextNextWayPointType && planData->nodeSkipArray[nextWayPointIdx] != 2 && nextWayPointType == 0 && ENMYPLAN_WayPointSkipped(&instance->position, nextWayPointPos, nextNextWayPointPos) && planSlot->wayPointBeingServoedTo < (planSlot->planData.numWayPoints - 2))
             {
                 planData->nodeSkipArray[nextWayPointIdx] = 1;
 
@@ -290,10 +286,10 @@ int ENMYPLAN_MoveToTargetFinal(Instance *instance, Position *outputPos, int slot
 
             if (planSlot->wayPointBeingServoedTo >= (planSlot->planData.numWayPoints - 1))
             {
-                planSlot->state = 3;
+                planSlot->state = HOMING_IN_ON_TARGET;
 
-                PLANAPI_DeleteNodesFromPoolByType(2);
-                PLANAPI_DeleteNodesFromPoolByType(3);
+                PLANAPI_DeleteNodesFromPoolByType(ENEMY_NODE);
+                PLANAPI_DeleteNodesFromPoolByType(TARGET_NODE);
             }
         }
 
@@ -302,8 +298,8 @@ int ENMYPLAN_MoveToTargetFinal(Instance *instance, Position *outputPos, int slot
 
         *outputPos = *nextWayPointPos;
         break;
-    case 3:
-        if (ENMYPLAN_PathClear(&instance->position, targetPos) == 0)
+    case HOMING_IN_ON_TARGET:
+        if (!ENMYPLAN_PathClear(&instance->position, targetPos))
         {
             ENMYPLAN_Replan(planSlot);
         }
@@ -332,19 +328,19 @@ int ENMYPLAN_MoveToTargetFinal(Instance *instance, Position *outputPos, int slot
 
     switch (planSlot->state)
     {
-    case 0:
-    case 1:
-        pathFound = 0;
+    case JUST_INITIALIZED:
+    case PLAN_REQUESTED_BUT_NOT_FOUND:
+        pathFound = STILL_PLANNING;
         break;
-    case 2:
-        pathFound = 1;
+    case FOLLOWING_PATH:
+        pathFound = MOVE_TO_WAYPOINT;
         break;
-    case 3:
-        pathFound = 2;
+    case HOMING_IN_ON_TARGET:
+        pathFound = MOVE_TO_TARGET;
         break;
-    case 4:
+    case NO_PATH_EXISTS:
     default:
-        pathFound = 3;
+        pathFound = MOVE_INVALID;
     }
 
     gameTrackerX.plan_collide_override = 0;
@@ -359,7 +355,7 @@ int ValidSlotAndState(EnemyPlanSlotData *pool, int slotID)
         return 0;
     }
 
-    return (pool[slotID].state == 2) || (pool[slotID].state == 3);
+    return (pool[slotID].state == FOLLOWING_PATH) || (pool[slotID].state == HOMING_IN_ON_TARGET);
 }
 
 int ENMYPLAN_GetNodeTypeOfNextWaypoint(int slotID)
@@ -386,7 +382,7 @@ int ENMYPLAN_GetPosOfNextWaypoint(int slotID, Position *pos)
 
     pool = (EnemyPlanSlotData *)gameTrackerX.enemyPlanPool;
 
-    if (ValidSlotAndState(pool, slotID) != 0)
+    if (ValidSlotAndState(pool, slotID))
     {
         planSlot = &pool[slotID];
 
@@ -412,14 +408,12 @@ void ENMYPLAN_RelocatePlanPositions(int slotID, Position *offset)
 
     numWayPoints = planSlot->planData.numWayPoints;
 
-    if (((slotID != -1) && (slotID < 10)) && (numWayPoints <= 7))
+    if (slotID != -1 && slotID < 10 && numWayPoints < 8)
     {
         for (i = numWayPoints; i > 0;)
         {
             i--;
-
             pos = &planSlot->planData.wayPointArray[i];
-
             ADD_SVEC(Position, pos, Position, pos, Position, offset);
         }
     }
