@@ -1,7 +1,10 @@
 #include "Overlays/roninbss/roninbss.h"
 #include "Game/FX.h"
+#include "Game/GAMELOOP.h"
 #include "Game/MATH3D.h"
+#include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONSTER.h"
+#include "Game/PLAN/ENMYPLAN.h"
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -65,7 +68,117 @@ void RONINBSS_InitConstrict(Instance *instance, Position *target)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Constrict);
+int RONINBSS_Constrict(Instance *instance)
+{
+
+    Position vec;
+    Position zero;
+
+    int diff; // not from debug symbols
+    int angle; // not from debug symbols
+    int rc; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    RoninbssVars *vars; // not from debug symbols
+    RoninbssAttributes *attrs; // not from debug symbols
+    int didTurn; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (RoninbssVars *)mv->extraVars;
+    attrs = (RoninbssAttributes *)ma->tunData;
+
+    memset(&zero, 0, sizeof(Position));
+    rc = 0;
+
+    switch (vars->anim_state)
+    {
+    case 0:
+        mv->mvFlags &= ~0x20000;
+        MON_PlayAnim(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+
+        SUB_SVEC(Position, &vec, Position, &instance->position, Position, &vars->current_constrict_pos);
+
+        vars->old_constrict_angle = MATH3D_AngleFromPosToPos(&zero, &vec);
+        vars->total_constrict_angle = 0;
+        vars->constrict_time = MON_GetTime(instance) + (attrs->allowed_stop_constrict_time * 33);
+        vars->anim_state++;
+        break;
+    case 1:
+        instance->rotation.z -= 0x400;
+        didTurn = MON_TurnToPosition(instance, &vars->current_constrict_pos, attrs->constrict_turn_rate);
+        instance->rotation.z += 0x400;
+        instance->rotation.z &= 0xFFF;
+
+        if (didTurn)
+        {
+            MON_PlayAnim(instance, MONSTER_ANIM_RUN, 2);
+            mv->mvFlags |= 0x20000;
+            vars->anim_state++;
+            RONINBSS_StartBand(instance);
+        }
+
+        break;
+    case 2:
+        instance->rotation.z -= 0x400;
+        MON_TurnToPosition(instance, &vars->current_constrict_pos, attrs->constrict_turn_rate);
+        instance->rotation.z += 0x400;
+        instance->rotation.z &= 0xFFF;
+
+        SUB_SVEC(Position, &vec, Position, &instance->position, Position, &vars->current_constrict_pos);
+
+        angle = MATH3D_AngleFromPosToPos(&zero, &vec);
+        diff = AngleDiff(vars->old_constrict_angle, angle);
+
+        vars->old_constrict_angle = angle;
+        vars->total_constrict_angle = vars->total_constrict_angle + diff;
+
+        if (vars->total_constrict_angle <= -0x1000)
+        {
+            instance->rotation.z -= 0x400;
+            MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 0, 1);
+            RONINBSS_StopBand(instance, 1);
+            rc = 1;
+            vars->anim_state++;
+        }
+        else if (mv->auxFlags & 0x2000 || diff >= 0)
+        {
+            if (MON_GetTime(instance) >= (unsigned long)vars->constrict_time)
+            {
+                vars->anim_state = 5;
+                RONINBSS_StopBand(instance, 0);
+                rc = 2;
+            }
+        }
+        else if (ENMYPLAN_PathClear(&vars->last_rb_pos, &instance->position))
+        {
+            vars->constrict_time += (gameTrackerX.timeMult * 33) / 4096;
+        }
+        else
+        {
+            vars->anim_state = 5;
+            RONINBSS_StopBand(instance, 0);
+            rc = 2;
+        }
+        break;
+    case 3:
+        if (instance->flags2 & 0x10)
+        {
+            mv->mvFlags &= ~0x20000;
+            vars->anim_state++;
+        }
+        break;
+    case 4:
+    case 5:
+        rc = 2;
+        break;
+    }
+
+    mv->auxFlags &= ~0x2000;
+    COPY_SVEC(Position, &vars->last_rb_pos, Position, &instance->position);
+
+    return rc;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_StopSoulSuck);
 
@@ -187,7 +300,117 @@ void RONINBSS_InitConstrict(Instance *instance, Position *target)
     }
 }
 
-void RONINBSS_Constrict(void) {};
+int RONINBSS_Constrict(Instance *instance)
+{
+
+    Position vec;
+    Position zero;
+
+    int diff; // not from debug symbols
+    int angle; // not from debug symbols
+    int rc; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    RoninbssVars *vars; // not from debug symbols
+    RoninbssAttributes *attrs; // not from debug symbols
+    int didTurn; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (RoninbssVars *)mv->extraVars;
+    attrs = (RoninbssAttributes *)ma->tunData;
+
+    memset(&zero, 0, sizeof(Position));
+    rc = 0;
+
+    switch (vars->anim_state)
+    {
+    case 0:
+        mv->mvFlags &= ~0x20000;
+        MON_PlayAnim(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+
+        SUB_SVEC(Position, &vec, Position, &instance->position, Position, &vars->current_constrict_pos);
+
+        vars->old_constrict_angle = MATH3D_AngleFromPosToPos(&zero, &vec);
+        vars->total_constrict_angle = 0;
+        vars->constrict_time = MON_GetTime(instance) + (attrs->allowed_stop_constrict_time * 33);
+        vars->anim_state++;
+        break;
+    case 1:
+        instance->rotation.z -= 0x400;
+        didTurn = MON_TurnToPosition(instance, &vars->current_constrict_pos, attrs->constrict_turn_rate);
+        instance->rotation.z += 0x400;
+        instance->rotation.z &= 0xFFF;
+
+        if (didTurn)
+        {
+            MON_PlayAnim(instance, MONSTER_ANIM_RUN, 2);
+            mv->mvFlags |= 0x20000;
+            vars->anim_state++;
+            RONINBSS_StartBand(instance);
+        }
+
+        break;
+    case 2:
+        instance->rotation.z -= 0x400;
+        MON_TurnToPosition(instance, &vars->current_constrict_pos, attrs->constrict_turn_rate);
+        instance->rotation.z += 0x400;
+        instance->rotation.z &= 0xFFF;
+
+        SUB_SVEC(Position, &vec, Position, &instance->position, Position, &vars->current_constrict_pos);
+
+        angle = MATH3D_AngleFromPosToPos(&zero, &vec);
+        diff = AngleDiff(vars->old_constrict_angle, angle);
+
+        vars->old_constrict_angle = angle;
+        vars->total_constrict_angle = vars->total_constrict_angle + diff;
+
+        if (vars->total_constrict_angle <= -0x1000)
+        {
+            instance->rotation.z -= 0x400;
+            MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 0, 1);
+            RONINBSS_StopBand(instance, 1);
+            rc = 1;
+            vars->anim_state++;
+        }
+        else if (mv->auxFlags & 0x2000 || diff >= 0)
+        {
+            if (MON_GetTime(instance) >= (unsigned long)vars->constrict_time)
+            {
+                vars->anim_state = 5;
+                RONINBSS_StopBand(instance, 0);
+                rc = 2;
+            }
+        }
+        else if (ENMYPLAN_PathClear(&vars->last_rb_pos, &instance->position))
+        {
+            vars->constrict_time += (gameTrackerX.timeMult * 33) / 4096;
+        }
+        else
+        {
+            vars->anim_state = 5;
+            RONINBSS_StopBand(instance, 0);
+            rc = 2;
+        }
+        break;
+    case 3:
+        if (instance->flags2 & 0x10)
+        {
+            mv->mvFlags &= ~0x20000;
+            vars->anim_state++;
+        }
+        break;
+    case 4:
+    case 5:
+        rc = 2;
+        break;
+    }
+
+    mv->auxFlags &= ~0x2000;
+    COPY_SVEC(Position, &vars->last_rb_pos, Position, &instance->position);
+
+    return rc;
+}
 
 void RONINBSS_StopSoulSuck(void) {};
 
