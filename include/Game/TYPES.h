@@ -383,6 +383,15 @@ enum MonsterPlanMove
     MONSTER_PLANMOVE_STATECHANGE = 6,
 };
 
+enum PlanState
+{
+    JUST_INITIALIZED = 0,
+    PLAN_REQUESTED_BUT_NOT_FOUND = 1,
+    FOLLOWING_PATH = 2,
+    HOMING_IN_ON_TARGET = 3,
+    NO_PATH_EXISTS = 4,
+};
+
 typedef enum _G2AnimControllerType_Enum {
     G2ANIM_CTRLRTYPE_DUMMY = 0,
     G2ANIM_CTRLRTYPE_FUNCTION = 1,
