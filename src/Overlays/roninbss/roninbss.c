@@ -107,9 +107,9 @@ int RONINBSS_Constrict(Instance *instance)
         vars->anim_state++;
         break;
     case 1:
-        instance->rotation.z -= 0x400;
+        instance->rotation.z -= 1024;
         didTurn = MON_TurnToPosition(instance, &vars->current_constrict_pos, attrs->constrict_turn_rate);
-        instance->rotation.z += 0x400;
+        instance->rotation.z += 1024;
         instance->rotation.z &= 0xFFF;
 
         if (didTurn)
@@ -122,9 +122,9 @@ int RONINBSS_Constrict(Instance *instance)
 
         break;
     case 2:
-        instance->rotation.z -= 0x400;
+        instance->rotation.z -= 1024;
         MON_TurnToPosition(instance, &vars->current_constrict_pos, attrs->constrict_turn_rate);
-        instance->rotation.z += 0x400;
+        instance->rotation.z += 1024;
         instance->rotation.z &= 0xFFF;
 
         SUB_SVEC(Position, &vec, Position, &instance->position, Position, &vars->current_constrict_pos);
@@ -137,7 +137,7 @@ int RONINBSS_Constrict(Instance *instance)
 
         if (vars->total_constrict_angle <= -0x1000)
         {
-            instance->rotation.z -= 0x400;
+            instance->rotation.z -= 1024;
             MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 0, 1);
             RONINBSS_StopBand(instance, 1);
             rc = 1;
@@ -240,7 +240,56 @@ void RONINBSS_FadeMove(Instance *instance, int to_what_plane)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_ChooseAttack);
+MonsterAttackAttributes *RONINBSS_ChooseAttack(Instance *instance, MonsterIR *enemy)
+{
+
+    int dist; // not from debug symbols
+    int shortestDist; // not from debug symbols
+    int i; // not from debug symbols
+    char *attackIndex; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterCombatAttributes *combatAttrs; // not from debug symbols
+    MonsterAttackAttributes *chosenAttack; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    chosenAttack = NULL;
+    combatAttrs = mv->subAttr->combatAttributes;
+    shortestDist = 99999;
+
+    if (mv->mvFlags & 4 || enemy->mirFlags & 8)
+    {
+        dist = 0;
+    }
+    else
+    {
+        dist = enemy->distance;
+    }
+
+    for (i = combatAttrs->numAttacks, attackIndex = combatAttrs->attackList; i != 0; i--, attackIndex++)
+    {
+
+        MonsterAttackAttributes *attack; // not from debug symbols
+        int effectiveRange; // not from debug symbols
+        int attackDist; // not from debug symbols
+
+        attack = &ma->attackAttributesList[(int)*attackIndex];
+        effectiveRange = attack->attackRange * mv->subAttr->scale;
+        attackDist = (effectiveRange / 4096) - dist;
+
+        if (abs(attackDist) < abs(shortestDist))
+        {
+            chosenAttack = attack;
+            shortestDist = attackDist;
+        }
+    }
+
+    mv->attackType = chosenAttack;
+    mv->attackState = 0;
+    return chosenAttack;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Collide);
 
@@ -393,9 +442,9 @@ int RONINBSS_Constrict(Instance *instance)
         vars->anim_state++;
         break;
     case 1:
-        instance->rotation.z -= 0x400;
+        instance->rotation.z -= 1024;
         didTurn = MON_TurnToPosition(instance, &vars->current_constrict_pos, attrs->constrict_turn_rate);
-        instance->rotation.z += 0x400;
+        instance->rotation.z += 1024;
         instance->rotation.z &= 0xFFF;
 
         if (didTurn)
@@ -408,9 +457,9 @@ int RONINBSS_Constrict(Instance *instance)
 
         break;
     case 2:
-        instance->rotation.z -= 0x400;
+        instance->rotation.z -= 1024;
         MON_TurnToPosition(instance, &vars->current_constrict_pos, attrs->constrict_turn_rate);
-        instance->rotation.z += 0x400;
+        instance->rotation.z += 1024;
         instance->rotation.z &= 0xFFF;
 
         SUB_SVEC(Position, &vec, Position, &instance->position, Position, &vars->current_constrict_pos);
@@ -423,7 +472,7 @@ int RONINBSS_Constrict(Instance *instance)
 
         if (vars->total_constrict_angle <= -0x1000)
         {
-            instance->rotation.z -= 0x400;
+            instance->rotation.z -= 1024;
             MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 0, 1);
             RONINBSS_StopBand(instance, 1);
             rc = 1;
@@ -526,7 +575,56 @@ void RONINBSS_FadeMove(Instance *instance, int to_what_plane)
     }
 }
 
-void RONINBSS_ChooseAttack(void) {};
+MonsterAttackAttributes *RONINBSS_ChooseAttack(Instance *instance, MonsterIR *enemy)
+{
+
+    int dist; // not from debug symbols
+    int shortestDist; // not from debug symbols
+    int i; // not from debug symbols
+    char *attackIndex; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterCombatAttributes *combatAttrs; // not from debug symbols
+    MonsterAttackAttributes *chosenAttack; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    chosenAttack = NULL;
+    combatAttrs = mv->subAttr->combatAttributes;
+    shortestDist = 99999;
+
+    if (mv->mvFlags & 4 || enemy->mirFlags & 8)
+    {
+        dist = 0;
+    }
+    else
+    {
+        dist = enemy->distance;
+    }
+
+    for (i = combatAttrs->numAttacks, attackIndex = combatAttrs->attackList; i != 0; i--, attackIndex++)
+    {
+
+        MonsterAttackAttributes *attack; // not from debug symbols
+        int effectiveRange; // not from debug symbols
+        int attackDist; // not from debug symbols
+
+        attack = &ma->attackAttributesList[(int)*attackIndex];
+        effectiveRange = attack->attackRange * mv->subAttr->scale;
+        attackDist = (effectiveRange / 4096) - dist;
+
+        if (abs(attackDist) < abs(shortestDist))
+        {
+            chosenAttack = attack;
+            shortestDist = attackDist;
+        }
+    }
+
+    mv->attackType = chosenAttack;
+    mv->attackState = 0;
+    return chosenAttack;
+}
 
 void RONINBSS_Collide(void) {};
 
