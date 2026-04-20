@@ -249,7 +249,7 @@ FXParticle *FX_GetParticle(Instance *instance, short startSegment)
 
     if (particle != NULL)
     {
-        particle->effectType = 1;
+        particle->effectType = FX_EFFECT_TYPE_PARTICLE;
 
         particle->continue_process = FX_ContinueParticle;
 
@@ -589,14 +589,14 @@ void FX_Relocate(struct _SVector *offset)
                 currentRibbon->vertexPool[i].vz += offset->z;
             }
         }
-        else if (currentEffect->effectType == 0x84)
+        else if (currentEffect->effectType == FX_EFFECT_TYPE_BLASTRING)
         {
-            ((struct _GenericLightningParams *)currentEffect)->end_offset.x += offset->x;
-            ((struct _GenericLightningParams *)currentEffect)->end_offset.y += offset->y;
-            ((struct _GenericLightningParams *)currentEffect)->end_offset.z += offset->z;
+            ((GenericLightningParams *)currentEffect)->end_offset.x += offset->x;
+            ((GenericLightningParams *)currentEffect)->end_offset.y += offset->y;
+            ((GenericLightningParams *)currentEffect)->end_offset.z += offset->z;
         }
 
-        currentEffect = (struct _FXGeneralEffect *)currentEffect->next;
+        currentEffect = (FXGeneralEffect *)currentEffect->next;
     }
 }
 
@@ -622,23 +622,23 @@ void FX_RelocateFXPointers(struct Object *oldObject, struct Object *newObject, l
 
     offset = (intptr_t)newObject - (intptr_t)oldObject;
 
-    FX_UpdateTexturePointers((struct _FX_PRIM *)fxTracker->usedPrimList.next, oldObject, (int)sizeOfObject, (int)offset);
-    FX_UpdateTexturePointers((struct _FX_PRIM *)fxTracker->usedPrimListSprite.next, oldObject, (int)sizeOfObject, (int)offset);
+    FX_UpdateTexturePointers((FX_PRIM *)fxTracker->usedPrimList.next, oldObject, (int)sizeOfObject, (int)offset);
+    FX_UpdateTexturePointers((FX_PRIM *)fxTracker->usedPrimListSprite.next, oldObject, (int)sizeOfObject, (int)offset);
 
     currentEffect = FX_GeneralEffectTracker;
 
     while (currentEffect != NULL)
     {
-        if (currentEffect->effectType == 1)
+        if (currentEffect->effectType == FX_EFFECT_TYPE_PARTICLE)
         {
-            particle = (struct _FXParticle *)currentEffect;
+            particle = (FXParticle *)currentEffect;
             if (particle->texture != NULL && IN_BOUNDS(particle->texture, oldObject, (intptr_t)oldObject + sizeOfObject))
             {
-                particle->texture = (struct TextureMT3 *)OFFSET_DATA(particle->texture, offset);
+                particle->texture = (TextureMT3 *)OFFSET_DATA(particle->texture, offset);
             }
         }
 
-        currentEffect = (struct _FXGeneralEffect *)currentEffect->next;
+        currentEffect = (FXGeneralEffect *)currentEffect->next;
     }
 }
 
@@ -3496,7 +3496,7 @@ void FX_DoInstancePowerRing(Instance *instance, long atuTime, long *color, long 
 
     if (ring == NULL) { return; }
 
-    ring->effectType = 0x82;
+    ring->effectType = FX_EFFECT_TYPE_CUTPLANE;
     ring->continue_process = &FX_UpdateInstanceSplitRing;
     ring->diffTime = 0;
     ring->instance = instance;
@@ -3504,7 +3504,7 @@ void FX_DoInstancePowerRing(Instance *instance, long atuTime, long *color, long 
     ring->colorArray = NULL;
     ring->colorBlendLife = 0;
     ring->numColors = numColors;
-    ring->lifeTime = (atuTime * 0x3E8) / 1200;
+    ring->lifeTime = (atuTime * 1000) / 1200;
 
     if (numColors < 2)
     {
@@ -3638,7 +3638,7 @@ FXGlowEffect *FX_DoInstanceOneSegmentGlow(Instance *instance, long segment, long
 
     if (glowEffect != NULL)
     {
-        glowEffect->effectType = 131;
+        glowEffect->effectType = FX_EFFECT_TYPE_GLOW;
 
         glowEffect->continue_process = FX_UpdateGlowEffect;
 
@@ -3759,7 +3759,7 @@ void FX_StopAllGlowEffects(Instance *instance, int fadeout_time)
     {
         previousEffect = currentEffect->next;
 
-        if ((currentEffect->effectType == 131) && (currentEffect->instance == instance))
+        if (currentEffect->effectType == FX_EFFECT_TYPE_GLOW && currentEffect->instance == instance)
         {
             if (temp != 0)
             {
@@ -3791,7 +3791,7 @@ void FX_StopGlowEffect(FXGlowEffect *glowEffect, int fadeout_time)
             {
                 previousEffect = currentEffect->next;
 
-                if ((currentEffect->effectType == 131) && ((FXGlowEffect *)currentEffect == glowEffect))
+                if (currentEffect->effectType == FX_EFFECT_TYPE_GLOW && (FXGlowEffect *)currentEffect == glowEffect)
                 {
                     FX_DeleteGeneralEffect(currentEffect);
                 }
@@ -3873,13 +3873,13 @@ void FX_DrawAllGeneralEffects(MATRIX *wcTransform, VertexPool *vertexPool, PrimP
 
     for (currentEffect = FX_GeneralEffectTracker; currentEffect != NULL; currentEffect = currentEffect->next)
     {
-        if ((currentEffect->effectType & 0x80))
+        if (currentEffect->effectType & 0x80)
         {
             instance = currentEffect->instance;
 
-            if ((instance == NULL) || ((!(instance->flags & 0x800)) && (!(instance->flags2 & 0x4000000))))
+            if (instance == NULL || (!(instance->flags & 0x800) && !(instance->flags2 & 0x4000000)))
             {
-                if (currentEffect->effectType == 131)
+                if (currentEffect->effectType == FX_EFFECT_TYPE_GLOW)
                 {
                     FXGlowEffect *currentGlow;
 
@@ -3897,27 +3897,27 @@ void FX_DrawAllGeneralEffects(MATRIX *wcTransform, VertexPool *vertexPool, PrimP
 
                     PIPE3D_DoGlow(instance, wcTransform, vertexPool, primPool, ot, currentGlow);
                 }
-                else if (currentEffect->effectType == 130)
+                else if (currentEffect->effectType == FX_EFFECT_TYPE_CUTPLANE)
                 {
                     PIPE3D_HalvePlaneGetRingPoints(instance, wcTransform, vertexPool, primPool, ot, (FXHalvePlane *)currentEffect);
                 }
-                else if (currentEffect->effectType == 132)
+                else if (currentEffect->effectType == FX_EFFECT_TYPE_BLASTRING)
                 {
                     FX_DrawBlastring(wcTransform, (FXBlastringEffect *)currentEffect);
                 }
-                else if (currentEffect->effectType == 133)
+                else if (currentEffect->effectType == FX_EFFECT_TYPE_LIGHTBEAM)
                 {
                     FX_LightHouse(wcTransform, ot, currentEffect->instance, ((FXLightBeam *)currentEffect)->startSeg, ((FXLightBeam *)currentEffect)->endSeg, 32, ((FXLightBeam *)currentEffect)->color);
                 }
-                else if (currentEffect->effectType == 134)
+                else if (currentEffect->effectType == FX_EFFECT_TYPE_FORCEFIELD)
                 {
                     FX_DrawFField(wcTransform, (FXForceFieldEffect *)currentEffect);
                 }
-                else if (currentEffect->effectType == 135)
+                else if (currentEffect->effectType == FX_EFFECT_TYPE_LIGHTNING)
                 {
                     FX_DrawLightning((FXLightning *)currentEffect, wcTransform, ot);
                 }
-                else if (currentEffect->effectType == 136)
+                else if (currentEffect->effectType == FX_EFFECT_TYPE_FLASH)
                 {
                     FX_DrawFlash((FXFlash *)currentEffect);
                 }
@@ -4010,7 +4010,7 @@ FXBlastringEffect *FX_DoBlastRing(Instance *instance, SVector *position, MATRIX 
 
         blast->instance = instance;
 
-        blast->effectType = 132;
+        blast->effectType = FX_EFFECT_TYPE_BLASTRING;
 
         if (pred_offset != 0)
         {
@@ -4493,7 +4493,7 @@ FXLightning *FX_CreateLightning(Instance *instance, int lifeTime, int deg, int d
 
         zap->end_instance = zap->instance = instance;
 
-        zap->effectType = 135;
+        zap->effectType = FX_EFFECT_TYPE_LIGHTNING;
         zap->type = 0;
 
         zap->lifeTime = lifeTime;
@@ -4763,7 +4763,7 @@ FXFlash *FX_StartGenericFlash(Instance *instance, int num)
     {
         flash->continue_process = FX_ContinueFlash;
 
-        flash->effectType = 136;
+        flash->effectType = FX_EFFECT_TYPE_FLASH;
 
         flash->instance = instance;
 
@@ -4841,7 +4841,7 @@ void FX_StartLightbeam(Instance *instance, int startSeg, int endSeg, int color_n
 
         if (beam != NULL)
         {
-            beam->effectType = 133;
+            beam->effectType = FX_EFFECT_TYPE_LIGHTBEAM;
 
             beam->instance = instance;
 
@@ -5079,7 +5079,7 @@ void FX_EndInstanceParticleEffects(Instance *instance)
     {
         nextEffect = (FXGeneralEffect *)currentEffect->next;
 
-        if ((currentEffect->instance == instance) && (currentEffect->effectType == 1))
+        if (currentEffect->instance == instance && currentEffect->effectType == FX_EFFECT_TYPE_PARTICLE)
         {
             FX_DeleteGeneralEffect(currentEffect);
         }
@@ -5779,7 +5779,7 @@ FXForceFieldEffect *FX_StartFField(Instance *instance, int size, Position *offse
 
     if (field != NULL)
     {
-        field->effectType = 134;
+        field->effectType = FX_EFFECT_TYPE_FORCEFIELD;
         field->instance = instance;
         field->type = 0;
         field->lifeTime = -1;
@@ -5811,7 +5811,7 @@ void FX_EndFField(Instance *instance)
 
     while (currentEffect != NULL)
     {
-        if ((currentEffect->instance == instance) && (currentEffect->effectType == 134))
+        if (currentEffect->instance == instance && currentEffect->effectType == FX_EFFECT_TYPE_FORCEFIELD)
         {
             forceField = (FXForceFieldEffect *)currentEffect;
 
