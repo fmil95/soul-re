@@ -180,7 +180,16 @@ int RONINBSS_Constrict(Instance *instance)
     return rc;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_StopSoulSuck);
+void RONINBSS_StopSoulSuck(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    RONINBSS_StopBand(instance, 0);
+    mv->auxFlags &= ~1;
+    mv->auxFlags &= ~2;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_FadeMove);
 
@@ -412,7 +421,16 @@ int RONINBSS_Constrict(Instance *instance)
     return rc;
 }
 
-void RONINBSS_StopSoulSuck(void) {};
+void RONINBSS_StopSoulSuck(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    RONINBSS_StopBand(instance, 0);
+    mv->auxFlags &= ~1;
+    mv->auxFlags &= ~2;
+}
 
 void RONINBSS_FadeMove(void) {};
 
