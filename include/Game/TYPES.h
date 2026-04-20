@@ -392,6 +392,14 @@ enum PlanState
     NO_PATH_EXISTS = 4,
 };
 
+enum PlanResult
+{
+    STILL_PLANNING = 0,
+    MOVE_TO_WAYPOINT = 1,
+    MOVE_TO_TARGET = 2,
+    MOVE_INVALID = 3,
+};
+
 typedef enum _G2AnimControllerType_Enum {
     G2ANIM_CTRLRTYPE_DUMMY = 0,
     G2ANIM_CTRLRTYPE_FUNCTION = 1,

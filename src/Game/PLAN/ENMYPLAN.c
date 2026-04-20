@@ -100,7 +100,7 @@ int ENMYPLAN_WayPointReached(Position *currentPos, Position *oldCurrentPos, Posi
     range[0] = MATH3D_LengthXYZ(targetPos->x - currentPos->x, targetPos->y - currentPos->y, targetPos->z - currentPos->z);
     range[1] = MATH3D_LengthXYZ(targetPos->x - oldCurrentPos->x, targetPos->y - oldCurrentPos->y, targetPos->z - oldCurrentPos->z);
 
-    if (((range[0] > range[1]) && (range[0] < 400)) || (range[0] < 50))
+    if ((range[0] > range[1] && range[0] < 400) || range[0] < 50)
     {
         return 1;
     }
@@ -186,8 +186,7 @@ int ENMYPLAN_MoveToTargetFinal(Instance *instance, Position *outputPos, int slot
     if (slotID == -1 || slotID >= 10)
     {
         gameTrackerX.plan_collide_override = 1;
-
-        return 2;
+        return MOVE_TO_TARGET;
     }
 
     planSlot = &pool[slotID];
@@ -331,17 +330,17 @@ int ENMYPLAN_MoveToTargetFinal(Instance *instance, Position *outputPos, int slot
     {
     case JUST_INITIALIZED:
     case PLAN_REQUESTED_BUT_NOT_FOUND:
-        pathFound = 0;
+        pathFound = STILL_PLANNING;
         break;
     case FOLLOWING_PATH:
-        pathFound = 1;
+        pathFound = MOVE_TO_WAYPOINT;
         break;
     case HOMING_IN_ON_TARGET:
-        pathFound = 2;
+        pathFound = MOVE_TO_TARGET;
         break;
     case NO_PATH_EXISTS:
     default:
-        pathFound = 3;
+        pathFound = MOVE_INVALID;
     }
 
     gameTrackerX.plan_collide_override = 0;
