@@ -1,7 +1,9 @@
 #include "Overlays/roninbss/roninbss.h"
 #include "Game/FX.h"
 #include "Game/GAMELOOP.h"
+#include "Game/INSTANCE.h"
 #include "Game/MATH3D.h"
+#include "Game/MONSTER/MONAPI.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/PLAN/ENMYPLAN.h"
@@ -291,7 +293,49 @@ MonsterAttackAttributes *RONINBSS_ChooseAttack(Instance *instance, MonsterIR *en
     return chosenAttack;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Collide);
+void RONINBSS_Collide(Instance *instance, GameTracker *gameTracker)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    RoninbssAttributes *attrs; // not from debug symbols
+    CollideInfo *collideInfo; // not from debug symbols
+    HSphere *prim0; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (RoninbssAttributes *)ma->tunData;
+    collideInfo = (CollideInfo *)instance->collideInfo;
+    prim0 = (HSphere *)collideInfo->prim0;
+
+    if (attrs != NULL)
+    {
+        if (prim0->id == 9)
+        {
+            if ((unsigned char)collideInfo->type1 == 1 && ((HSphere *)collideInfo->prim1)->id == 8)
+            {
+
+                Instance *collideInst; // not from debug symbols
+                collideInst = collideInfo->inst1;
+
+                if (INSTANCE_Query(collideInst, queryWhatAmI) == 1)
+                {
+                    INSTANCE_Post(gameTrackerX.playerInstance, 0x40005, (attrs->raz_hit_stumble_time * 4096) / 30);
+                    RONINBSS_InitConstrict(instance, &collideInst->position);
+                    mv->auxFlags |= 1;
+                }
+            }
+        }
+        else
+        {
+            if ((unsigned char)collideInfo->type1 == 2 || (unsigned char)collideInfo->type1 == 3 || (unsigned char)collideInfo->type1 == 5)
+            {
+                mv->auxFlags |= 0x2000;
+            }
+        }
+    }
+    MonsterCollide(instance, gameTracker);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Message);
 
@@ -626,7 +670,49 @@ MonsterAttackAttributes *RONINBSS_ChooseAttack(Instance *instance, MonsterIR *en
     return chosenAttack;
 }
 
-void RONINBSS_Collide(void) {};
+void RONINBSS_Collide(Instance *instance, GameTracker *gameTracker)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    RoninbssAttributes *attrs; // not from debug symbols
+    CollideInfo *collideInfo; // not from debug symbols
+    HSphere *prim0; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (RoninbssAttributes *)ma->tunData;
+    collideInfo = (CollideInfo *)instance->collideInfo;
+    prim0 = (HSphere *)collideInfo->prim0;
+
+    if (attrs != NULL)
+    {
+        if (prim0->id == 9)
+        {
+            if ((unsigned char)collideInfo->type1 == 1 && ((HSphere *)collideInfo->prim1)->id == 8)
+            {
+
+                Instance *collideInst; // not from debug symbols
+                collideInst = collideInfo->inst1;
+
+                if (INSTANCE_Query(collideInst, queryWhatAmI) == 1)
+                {
+                    INSTANCE_Post(gameTrackerX.playerInstance, 0x40005, (attrs->raz_hit_stumble_time * 4096) / 30);
+                    RONINBSS_InitConstrict(instance, &collideInst->position);
+                    mv->auxFlags |= 1;
+                }
+            }
+        }
+        else
+        {
+            if ((unsigned char)collideInfo->type1 == 2 || (unsigned char)collideInfo->type1 == 3 || (unsigned char)collideInfo->type1 == 5)
+            {
+                mv->auxFlags |= 0x2000;
+            }
+        }
+    }
+    MonsterCollide(instance, gameTracker);
+}
 
 void RONINBSS_Message(void) {};
 
