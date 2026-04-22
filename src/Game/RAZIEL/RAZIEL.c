@@ -4465,7 +4465,7 @@ void DefaultStateHandler(CharacterState *In, int CurrentSection, intptr_t Data)
 
             break;
         case 0x4000011:
-            if ((((Raziel.Abilities & 0x2)) && (Raziel.Senses.heldClass != 0x3) && (Raziel.CurrentPlane == 1)) && (CurrentSection == 0) && ((razSideMoveSpiderCheck(In->CharacterInstance, -128) == 0) && (razSideMoveSpiderCheck(In->CharacterInstance, 128) == 0)))
+            if (Raziel.Abilities & 0x2 && Raziel.Senses.heldClass != 0x3 && Raziel.CurrentPlane == 1 && CurrentSection == 0 && razSideMoveSpiderCheck(In->CharacterInstance, -128) == 0 && razSideMoveSpiderCheck(In->CharacterInstance, 128) == 0)
             {
                 StateSwitchStateCharacterDataDefault(In, StateHandlerWallGrab, 0);
             }

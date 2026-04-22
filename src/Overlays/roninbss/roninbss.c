@@ -8,7 +8,10 @@
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/PLAN/ENMYPLAN.h"
 #include "Game/PLAN/PLANAPI.h"
+#include "Game/STATE.h"
 #include "Game/STREAM.h"
+
+void RONINBSS_DamageEffect(Instance *instance, evFXHitData *data);
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -337,7 +340,119 @@ void RONINBSS_Collide(Instance *instance, GameTracker *gameTracker)
     MonsterCollide(instance, gameTracker);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Message);
+void RONINBSS_Message(Instance *instance, unsigned long message, unsigned long data)
+{
+
+    int time; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    RoninbssVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv == NULL)
+    {
+        return;
+    }
+
+    vars = (RoninbssVars *)mv->extraVars;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    switch (message)
+    {
+    case 0x100008:
+        ADD_SVEC(Position, &vars->current_constrict_pos, Position, &vars->current_constrict_pos, Position, (Position *)data);
+        ADD_SVEC(Position, &vars->last_rb_pos, Position, &vars->last_rb_pos, Position, (Position *)data);
+        MonsterMessage(instance, message, data);
+        break;
+    case 0x1000023:
+        if (data != 0x1000)
+        {
+            break;
+        }
+
+        time = MON_GetTime(instance);
+
+        if (vars->hit_timer < time)
+        {
+            vars->hit_timer = time + 4950;
+            MonsterMessage(instance, 0x0100001F, SetMonsterHitData(gameTrackerX.playerInstance, instance, 4096, 0, 0));
+        }
+        break;
+    case 0x1000000:
+    case 0x100001F:
+    case 0x1000021:
+        time = MON_GetTime(instance);
+
+        if (vars->hit_timer < time)
+        {
+            ((evMonsterHitData *)data)->power = 4096;
+            vars->hit_timer = time + 4950;
+            MonsterMessage(instance, message, data);
+        }
+        break;
+    case 0x1000020:
+        RONINBSS_StopSoulSuck(instance);
+        vars->to_what_plane = data;
+        vars->faded_state = 0;
+        mv->auxFlags |= 0x1100;
+        MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
+        break;
+    case 0x100007:
+        mv->auxFlags = ((MonsterSaveInfo *)((evControlSaveDataData *)data)->data)->mvFlags & 0x44;
+
+        if (mv->auxFlags & 4)
+        {
+            mv->validUnits[0] = 0;
+            STREAM_NoMonsters();
+        }
+        break;
+    case 0x1000017:
+        switch (data)
+        {
+        case 1:
+            mv->auxFlags |= 8;
+            break;
+        case 2:
+            mv->auxFlags &= ~0x8;
+            mv->auxFlags |= 0x10;
+            vars->anim_state = 0;
+            break;
+        case 3:
+            mv->auxFlags |= 0x40;
+            mv->auxFlags &= ~0x80;
+            MON_SwitchStateDoEntry(instance, MONSTER_STATE_PURSUE);
+            break;
+        case 0:
+            RONINBSS_StopSoulSuck(instance);
+            mv->damageType = 0x20;
+            MON_SwitchStateDoEntry(instance, MONSTER_STATE_GENERALDEATH);
+            RONINBSS_DamageEffect(instance, (evFXHitData *)SetFXHitData(0, 0, 0, 0x20));
+            break;
+        case 4:
+            mv->validUnits[0] = 0;
+            mv->auxFlags |= 4;
+            STREAM_NoMonsters();
+            break;
+        case 5:
+            mv->auxFlags |= 0x200;
+            break;
+        }
+    case 0x80001:
+    case 0x80002:
+    case 0x80003:
+    case 0x80004:
+    case 0x80005:
+    case 0x80006:
+    case 0x40009:
+        break;
+    default:
+        MonsterMessage(instance, message, data);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Query);
 
@@ -714,7 +829,119 @@ void RONINBSS_Collide(Instance *instance, GameTracker *gameTracker)
     MonsterCollide(instance, gameTracker);
 }
 
-void RONINBSS_Message(void) {};
+void RONINBSS_Message(Instance *instance, unsigned long message, unsigned long data)
+{
+
+    int time; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    RoninbssVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv == NULL)
+    {
+        return;
+    }
+
+    vars = (RoninbssVars *)mv->extraVars;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    switch (message)
+    {
+    case 0x100008:
+        ADD_SVEC(Position, &vars->current_constrict_pos, Position, &vars->current_constrict_pos, Position, (Position *)data);
+        ADD_SVEC(Position, &vars->last_rb_pos, Position, &vars->last_rb_pos, Position, (Position *)data);
+        MonsterMessage(instance, message, data);
+        break;
+    case 0x1000023:
+        if (data != 0x1000)
+        {
+            break;
+        }
+
+        time = MON_GetTime(instance);
+
+        if (vars->hit_timer < time)
+        {
+            vars->hit_timer = time + 4950;
+            MonsterMessage(instance, 0x0100001F, SetMonsterHitData(gameTrackerX.playerInstance, instance, 4096, 0, 0));
+        }
+        break;
+    case 0x1000000:
+    case 0x100001F:
+    case 0x1000021:
+        time = MON_GetTime(instance);
+
+        if (vars->hit_timer < time)
+        {
+            ((evMonsterHitData *)data)->power = 4096;
+            vars->hit_timer = time + 4950;
+            MonsterMessage(instance, message, data);
+        }
+        break;
+    case 0x1000020:
+        RONINBSS_StopSoulSuck(instance);
+        vars->to_what_plane = data;
+        vars->faded_state = 0;
+        mv->auxFlags |= 0x1100;
+        MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
+        break;
+    case 0x100007:
+        mv->auxFlags = ((MonsterSaveInfo *)((evControlSaveDataData *)data)->data)->mvFlags & 0x44;
+
+        if (mv->auxFlags & 4)
+        {
+            mv->validUnits[0] = 0;
+            STREAM_NoMonsters();
+        }
+        break;
+    case 0x1000017:
+        switch (data)
+        {
+        case 1:
+            mv->auxFlags |= 8;
+            break;
+        case 2:
+            mv->auxFlags &= ~0x8;
+            mv->auxFlags |= 0x10;
+            vars->anim_state = 0;
+            break;
+        case 3:
+            mv->auxFlags |= 0x40;
+            mv->auxFlags &= ~0x80;
+            MON_SwitchStateDoEntry(instance, MONSTER_STATE_PURSUE);
+            break;
+        case 0:
+            RONINBSS_StopSoulSuck(instance);
+            mv->damageType = 0x20;
+            MON_SwitchStateDoEntry(instance, MONSTER_STATE_GENERALDEATH);
+            RONINBSS_DamageEffect(instance, (evFXHitData *)SetFXHitData(0, 0, 0, 0x20));
+            break;
+        case 4:
+            mv->validUnits[0] = 0;
+            mv->auxFlags |= 4;
+            STREAM_NoMonsters();
+            break;
+        case 5:
+            mv->auxFlags |= 0x200;
+            break;
+        }
+    case 0x80001:
+    case 0x80002:
+    case 0x80003:
+    case 0x80004:
+    case 0x80005:
+    case 0x80006:
+    case 0x40009:
+        break;
+    default:
+        MonsterMessage(instance, message, data);
+    }
+}
 
 void RONINBSS_Query(void) {};
 
@@ -722,7 +949,7 @@ void RONINBSS_Init(void) {};
 
 void RONINBSS_CleanUp(void) {};
 
-void RONINBSS_DamageEffect(void) {};
+void RONINBSS_DamageEffect(Instance *instance, evFXHitData *data) {};
 
 void RONINBSS_FindClosestMarkerInUnit(void) {};
 
