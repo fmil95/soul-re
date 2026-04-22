@@ -454,7 +454,55 @@ void RONINBSS_Message(Instance *instance, unsigned long message, unsigned long d
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Query);
+uintptr_t RONINBSS_Query(Instance *instance, unsigned long query)
+{
+
+    uintptr_t ret; // not from debug symbols
+    RoninbssSaveInfo *saveInfo; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    switch (query)
+    {
+    case queryHitState:
+        ret = 0x01000000;
+
+        if (!(mv->auxFlags & 4))
+        {
+            ret = 0x40000000;
+        }
+        break;
+    case queryLookatMatrix:
+        ret = (uintptr_t)&instance->matrix[2];
+        break;
+    case querySaveData:
+        if (mv == NULL)
+        {
+            ret = 0;
+            break;
+        }
+
+        saveInfo = (RoninbssSaveInfo *)CIRC_Alloc(sizeof(RoninbssSaveInfo));
+        saveInfo->forRoninbss = mv->auxFlags & 4;
+        ret = SetControlSaveDataData(sizeof(RoninbssSaveInfo), saveInfo);
+        break;
+    case querySpecialInfo:
+        if (mv->auxFlags & 4)
+        {
+            ret = 1;
+        }
+        else
+        {
+            ret = 0;
+        }
+        break;
+    default:
+        ret = MonsterQuery(instance, query);
+        break;
+    }
+
+    return ret;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Init);
 
@@ -943,7 +991,55 @@ void RONINBSS_Message(Instance *instance, unsigned long message, unsigned long d
     }
 }
 
-void RONINBSS_Query(void) {};
+uintptr_t RONINBSS_Query(Instance *instance, unsigned long query)
+{
+
+    uintptr_t ret; // not from debug symbols
+    RoninbssSaveInfo *saveInfo; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    switch (query)
+    {
+    case queryHitState:
+        ret = 0x01000000;
+
+        if (!(mv->auxFlags & 4))
+        {
+            ret = 0x40000000;
+        }
+        break;
+    case queryLookatMatrix:
+        ret = (uintptr_t)&instance->matrix[2];
+        break;
+    case querySaveData:
+        if (mv == NULL)
+        {
+            ret = 0;
+            break;
+        }
+
+        saveInfo = (RoninbssSaveInfo *)CIRC_Alloc(sizeof(RoninbssSaveInfo));
+        saveInfo->forRoninbss = mv->auxFlags & 4;
+        ret = SetControlSaveDataData(sizeof(RoninbssSaveInfo), saveInfo);
+        break;
+    case querySpecialInfo:
+        if (mv->auxFlags & 4)
+        {
+            ret = 1;
+        }
+        else
+        {
+            ret = 0;
+        }
+        break;
+    default:
+        ret = MonsterQuery(instance, query);
+        break;
+    }
+
+    return ret;
+}
 
 void RONINBSS_Init(void) {};
 

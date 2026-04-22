@@ -79,4 +79,11 @@ typedef struct _RoninbssVars
     int armstomp_time;
 } RoninbssVars;
 
+// size: 0x4
+typedef struct _RoninbssSaveInfo
+{
+    // offset: 0x0000
+    int forRoninbss;
+} RoninbssSaveInfo;
+
 #endif
