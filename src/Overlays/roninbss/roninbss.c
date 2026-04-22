@@ -543,7 +543,7 @@ void RONINBSS_Init(Instance *instance)
 
     data = &gameTrackerX.gameData.asmData;
 
-    if (*(int *)&data->MorphTime == 1000 || (data->MorphType == 1 && data->MorphTime != 1000)) // double-check
+    if ((data->MorphTime == 1000 && data->MorphType == 0) || (data->MorphType == 1 && data->MorphTime != 1000))
     {
         RONINBSS_FadeMove(instance, 1);
     }
@@ -1193,7 +1193,7 @@ void RONINBSS_Init(Instance *instance)
 
     data = &gameTrackerX.gameData.asmData;
 
-    if (*(int *)&data->MorphTime == 1000 || (data->MorphType == 1 && data->MorphTime != 1000)) // double-check
+    if ((data->MorphTime == 1000 && data->MorphType == 0) || (data->MorphType == 1 && data->MorphTime != 1000))
     {
         RONINBSS_FadeMove(instance, 1);
     }
