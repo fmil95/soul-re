@@ -554,7 +554,22 @@ void RONINBSS_Init(Instance *instance)
     RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 1);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_CleanUp);
+void RONINBSS_CleanUp(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 0);
+    STREAM_YesMonsters();
+
+    if (mv != NULL && mv->extraVars != NULL)
+    {
+        MEMPACK_Free(mv->extraVars);
+    }
+
+    MON_CleanUp(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_DamageEffect);
 
@@ -1137,7 +1152,22 @@ void RONINBSS_Init(Instance *instance)
     RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 1);
 }
 
-void RONINBSS_CleanUp(void) {};
+void RONINBSS_CleanUp(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 0);
+    STREAM_YesMonsters();
+
+    if (mv != NULL && mv->extraVars != NULL)
+    {
+        MEMPACK_Free(mv->extraVars);
+    }
+
+    MON_CleanUp(instance);
+}
 
 void RONINBSS_DamageEffect(Instance *instance, evFXHitData *data) {};
 
