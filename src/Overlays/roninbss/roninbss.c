@@ -4,14 +4,18 @@
 #include "Game/INSTANCE.h"
 #include "Game/MATH3D.h"
 #include "Game/MEMPACK.h"
+#include "Game/OBTABLE.h"
 #include "Game/MONSTER/MONAPI.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/PLAN/ENMYPLAN.h"
 #include "Game/PLAN/PLANAPI.h"
 #include "Game/RAZIEL/RAZIEL.h"
+#include "Game/SOUND.h"
 #include "Game/STATE.h"
 #include "Game/STREAM.h"
+
+burntTuneType roninbssBurntTune = {300, 2}; // no canon name in symbols
 
 void RONINBSS_DamageEffect(Instance *instance, evFXHitData *data);
 
@@ -571,7 +575,59 @@ void RONINBSS_CleanUp(Instance *instance)
     MON_CleanUp(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_DamageEffect);
+void RONINBSS_DamageEffect(Instance *instance, evFXHitData *data)
+{
+
+    SVector localloc;
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    if (data == NULL)
+    {
+        if (mv->mvFlags & 0x400000)
+        {
+            if (objectAccess[10].object != NULL)
+            {
+                Model *model; // not from debug symbols
+
+                model = ((Object *)objectAccess[10].object)->modelList[0];
+                FX_MakeSpark(instance, model, ma->leftShoulderSegment);
+                FX_MakeSpark(instance, model, ma->rightShoulderSegment);
+                FX_MakeSpark(instance, model, ma->waistSegment);
+                FX_MakeSpark(instance, model, ma->leftKneeSegment);
+                FX_MakeSpark(instance, model, ma->rightKneeSegment);
+            }
+            MONSTER_VertexBurnt(instance, &roninbssBurntTune);
+        }
+        return;
+    }
+
+    localloc = data->location;
+
+    if (data->type == 0x20)
+    {
+        if (data->amount != 0)
+        {
+            MONSTER_StartVertexBurnt(instance, &data->location, &roninbssBurntTune);
+        }
+        else
+        {
+            MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &roninbssBurntTune);
+        }
+    }
+    else if (data->type == 0x10)
+    {
+        MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &roninbssBurntTune);
+    }
+    else
+    {
+        SOUND_Play3dSound(&instance->position, 21, 650, 80, 15500);
+        FX_MakeHitFX(&localloc);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_FindClosestMarkerInUnit);
 
@@ -1169,7 +1225,59 @@ void RONINBSS_CleanUp(Instance *instance)
     MON_CleanUp(instance);
 }
 
-void RONINBSS_DamageEffect(Instance *instance, evFXHitData *data) {};
+void RONINBSS_DamageEffect(Instance *instance, evFXHitData *data)
+{
+
+    SVector localloc;
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    if (data == NULL)
+    {
+        if (mv->mvFlags & 0x400000)
+        {
+            if (objectAccess[10].object != NULL)
+            {
+                Model *model; // not from debug symbols
+
+                model = ((Object *)objectAccess[10].object)->modelList[0];
+                FX_MakeSpark(instance, model, ma->leftShoulderSegment);
+                FX_MakeSpark(instance, model, ma->rightShoulderSegment);
+                FX_MakeSpark(instance, model, ma->waistSegment);
+                FX_MakeSpark(instance, model, ma->leftKneeSegment);
+                FX_MakeSpark(instance, model, ma->rightKneeSegment);
+            }
+            MONSTER_VertexBurnt(instance, &roninbssBurntTune);
+        }
+        return;
+    }
+
+    localloc = data->location;
+
+    if (data->type == 0x20)
+    {
+        if (data->amount != 0)
+        {
+            MONSTER_StartVertexBurnt(instance, &data->location, &roninbssBurntTune);
+        }
+        else
+        {
+            MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &roninbssBurntTune);
+        }
+    }
+    else if (data->type == 0x10)
+    {
+        MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &roninbssBurntTune);
+    }
+    else
+    {
+        SOUND_Play3dSound(&instance->position, 21, 650, 80, 15500);
+        FX_MakeHitFX(&localloc);
+    }
+}
 
 void RONINBSS_FindClosestMarkerInUnit(void) {};
 
