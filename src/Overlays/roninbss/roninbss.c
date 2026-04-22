@@ -3,11 +3,13 @@
 #include "Game/GAMELOOP.h"
 #include "Game/INSTANCE.h"
 #include "Game/MATH3D.h"
+#include "Game/MEMPACK.h"
 #include "Game/MONSTER/MONAPI.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/PLAN/ENMYPLAN.h"
 #include "Game/PLAN/PLANAPI.h"
+#include "Game/RAZIEL/RAZIEL.h"
 #include "Game/STATE.h"
 #include "Game/STREAM.h"
 
@@ -504,7 +506,53 @@ uintptr_t RONINBSS_Query(Instance *instance, unsigned long query)
     return ret;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Init);
+void RONINBSS_Init(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    GameTrackerASMData *data; // not from debug symbols
+
+    MON_DefaultInit(instance);
+    mv = (MonsterVars *)instance->extraData;
+    instance->collideFunc = &RONINBSS_Collide;
+
+    if (mv != NULL)
+    {
+        RoninbssVars *vars; // not from debug symbols
+
+        vars = (RoninbssVars *)MEMPACK_Malloc(sizeof(RoninbssVars), MEMORY_TYPE_RONINBSSDATA);
+
+        if (vars == NULL)
+        {
+            mv->extraVars = NULL;
+        }
+        else
+        {
+            mv->extraVars = vars;
+            vars->stumble_time = 0;
+            vars->hit_timer = 0;
+        }
+    }
+
+    mv->validUnits[0] = instance->currentStreamUnitID;
+    mv->validUnits[1] = 0;
+
+    data = &gameTrackerX.gameData.asmData;
+
+    if (*(int *)&data->MorphTime == 1000 || (data->MorphType == 1 && data->MorphTime != 1000)) // double-check
+    {
+        RONINBSS_FadeMove(instance, 1);
+    }
+    else
+    {
+        RONINBSS_FadeMove(instance, 0);
+    }
+
+    mv->auxFlags |= 0x20000000;
+    MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    instance->flags2 |= 4;
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 1);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_CleanUp);
 
@@ -1041,7 +1089,53 @@ uintptr_t RONINBSS_Query(Instance *instance, unsigned long query)
     return ret;
 }
 
-void RONINBSS_Init(void) {};
+void RONINBSS_Init(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    GameTrackerASMData *data; // not from debug symbols
+
+    MON_DefaultInit(instance);
+    mv = (MonsterVars *)instance->extraData;
+    instance->collideFunc = &RONINBSS_Collide;
+
+    if (mv != NULL)
+    {
+        RoninbssVars *vars; // not from debug symbols
+
+        vars = (RoninbssVars *)MEMPACK_Malloc(sizeof(RoninbssVars), MEMORY_TYPE_RONINBSSDATA);
+
+        if (vars == NULL)
+        {
+            mv->extraVars = NULL;
+        }
+        else
+        {
+            mv->extraVars = vars;
+            vars->stumble_time = 0;
+            vars->hit_timer = 0;
+        }
+    }
+
+    mv->validUnits[0] = instance->currentStreamUnitID;
+    mv->validUnits[1] = 0;
+
+    data = &gameTrackerX.gameData.asmData;
+
+    if (*(int *)&data->MorphTime == 1000 || (data->MorphType == 1 && data->MorphTime != 1000)) // double-check
+    {
+        RONINBSS_FadeMove(instance, 1);
+    }
+    else
+    {
+        RONINBSS_FadeMove(instance, 0);
+    }
+
+    mv->auxFlags |= 0x20000000;
+    MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    instance->flags2 |= 4;
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 1);
+}
 
 void RONINBSS_CleanUp(void) {};
 
