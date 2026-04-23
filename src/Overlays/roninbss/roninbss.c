@@ -629,7 +629,63 @@ void RONINBSS_DamageEffect(Instance *instance, evFXHitData *data)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_FindClosestMarkerInUnit);
+int RONINBSS_FindClosestMarkerInUnit(Instance *instance, StreamUnit *su)
+{
+
+    PlanMkr *planMkr; // not from debug symbols
+    int dist; // not from debug symbols
+    int closest; // not from debug symbols
+    int i; // not from debug symbols
+    int rc; // not from debug symbols
+    Level *level; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    RoninbssVars *vars; // not from debug symbols
+
+    closest = 0x7FFFFFFF;
+    rc = 0;
+    mv = (MonsterVars *)instance->extraData;
+    vars = (RoninbssVars *)mv->extraVars;
+
+    if (su != NULL)
+    {
+
+        level = su->level;
+        planMkr = level->PlanMarkerList;
+        vars->current_marker_id = -1;
+        i = level->NumberOfPlanMarkers;
+
+        for (; i > 0; i--, planMkr++)
+        {
+            if (!((planMkr->id & 0x8000) | (planMkr->id & 0x4000) | (planMkr->id & 0x2000) | (planMkr->id & 0x1000)))
+            {
+                closest = MATH3D_LengthXY(planMkr->pos.x - instance->position.x, planMkr->pos.y - instance->position.y);
+                vars->current_marker_id = planMkr->id;
+
+                rc = 1;
+                i++;
+                planMkr++;
+                break;
+            }
+
+        }
+
+        for (; i > 0; i--, planMkr++)
+        {
+            if (!((planMkr->id & 0x8000) | (planMkr->id & 0x4000) | (planMkr->id & 0x2000) | (planMkr->id & 0x1000)))
+            {
+                dist = MATH3D_LengthXY(planMkr->pos.x - instance->position.x, planMkr->pos.y - instance->position.y);
+
+                if (dist < closest)
+                {
+                    closest = dist;
+                    vars->current_marker_id = planMkr->id;
+                }
+            }
+        }
+    }
+
+    return rc;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_GetNextMarkerInSeries);
 
@@ -1279,7 +1335,63 @@ void RONINBSS_DamageEffect(Instance *instance, evFXHitData *data)
     }
 }
 
-void RONINBSS_FindClosestMarkerInUnit(void) {};
+int RONINBSS_FindClosestMarkerInUnit(Instance *instance, StreamUnit *su)
+{
+
+    PlanMkr *planMkr; // not from debug symbols
+    int dist; // not from debug symbols
+    int closest; // not from debug symbols
+    int i; // not from debug symbols
+    int rc; // not from debug symbols
+    Level *level; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    RoninbssVars *vars; // not from debug symbols
+
+    closest = 0x7FFFFFFF;
+    rc = 0;
+    mv = (MonsterVars *)instance->extraData;
+    vars = (RoninbssVars *)mv->extraVars;
+
+    if (su != NULL)
+    {
+
+        level = su->level;
+        planMkr = level->PlanMarkerList;
+        vars->current_marker_id = -1;
+        i = level->NumberOfPlanMarkers;
+
+        for (; i > 0; i--, planMkr++)
+        {
+            if (!((planMkr->id & 0x8000) | (planMkr->id & 0x4000) | (planMkr->id & 0x2000) | (planMkr->id & 0x1000)))
+            {
+                closest = MATH3D_LengthXY(planMkr->pos.x - instance->position.x, planMkr->pos.y - instance->position.y);
+                vars->current_marker_id = planMkr->id;
+
+                rc = 1;
+                i++;
+                planMkr++;
+                break;
+            }
+
+        }
+
+        for (; i > 0; i--, planMkr++)
+        {
+            if (!((planMkr->id & 0x8000) | (planMkr->id & 0x4000) | (planMkr->id & 0x2000) | (planMkr->id & 0x1000)))
+            {
+                dist = MATH3D_LengthXY(planMkr->pos.x - instance->position.x, planMkr->pos.y - instance->position.y);
+
+                if (dist < closest)
+                {
+                    closest = dist;
+                    vars->current_marker_id = planMkr->id;
+                }
+            }
+        }
+    }
+
+    return rc;
+}
 
 void RONINBSS_GetNextMarkerInSeries(void) {};
 
