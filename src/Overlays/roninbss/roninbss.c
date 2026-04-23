@@ -689,7 +689,31 @@ int RONINBSS_FindClosestMarkerInUnit(Instance *instance, StreamUnit *su)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_GetNextMarkerInSeries);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_FindValve);
+Instance *RONINBSS_FindValve(Instance *instance)
+{
+
+    MonsterAttributes *ma; // not from debug symbols
+    RoninbssAttributes *attrs; // not from debug symbols
+
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (RoninbssAttributes *)ma->tunData;
+
+    if (attrs != NULL)
+    {
+
+        Instance *inst; // not from debug symbols
+
+        for (inst = gameTrackerX.instanceList->first; inst != NULL; inst = inst->next)
+        {
+            if (((int *)inst->object->name)[0] == ((int *)attrs->valve_name)[0] && ((int *)inst->object->name)[1] == ((int *)attrs->valve_name)[1])
+            {
+                return inst;
+            }
+        }
+    }
+
+    return NULL;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_IdleEntry);
 
@@ -1395,7 +1419,31 @@ int RONINBSS_FindClosestMarkerInUnit(Instance *instance, StreamUnit *su)
 
 void RONINBSS_GetNextMarkerInSeries(void) {};
 
-void RONINBSS_FindValve(void) {};
+Instance *RONINBSS_FindValve(Instance *instance)
+{
+
+    MonsterAttributes *ma; // not from debug symbols
+    RoninbssAttributes *attrs; // not from debug symbols
+
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (RoninbssAttributes *)ma->tunData;
+
+    if (attrs != NULL)
+    {
+
+        Instance *inst; // not from debug symbols
+
+        for (inst = gameTrackerX.instanceList->first; inst != NULL; inst = inst->next)
+        {
+            if (((int *)inst->object->name)[0] == ((int *)attrs->valve_name)[0] && ((int *)inst->object->name)[1] == ((int *)attrs->valve_name)[1])
+            {
+                return inst;
+            }
+        }
+    }
+
+    return NULL;
+}
 
 void RONINBSS_IdleEntry(void) {};
 
