@@ -715,7 +715,40 @@ Instance *RONINBSS_FindValve(Instance *instance)
     return NULL;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_IdleEntry);
+void RONINBSS_IdleEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->extraVars != NULL)
+    {
+
+        if (mv->mvFlags & 4)
+        {
+            MON_IdleEntry(instance);
+            return;
+        }
+
+        mv->mvFlags &= ~0x20000;
+
+        if (mv->auxFlags & 4)
+        {
+            MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+            return;
+        }
+
+        if (gameTrackerX.gameData.asmData.MorphType == 1 && (gameTrackerX.gameData.asmData.MorphTime == 1000 || mv->auxFlags & 0x100))
+        {
+            MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+        }
+        else
+        {
+            MON_PlayAnimFromListIfNotPlaying(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 4, 1);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Idle);
 
@@ -1445,7 +1478,40 @@ Instance *RONINBSS_FindValve(Instance *instance)
     return NULL;
 }
 
-void RONINBSS_IdleEntry(void) {};
+void RONINBSS_IdleEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->extraVars != NULL)
+    {
+
+        if (mv->mvFlags & 4)
+        {
+            MON_IdleEntry(instance);
+            return;
+        }
+
+        mv->mvFlags &= ~0x20000;
+
+        if (mv->auxFlags & 4)
+        {
+            MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+            return;
+        }
+
+        if (gameTrackerX.gameData.asmData.MorphType == 1 && (gameTrackerX.gameData.asmData.MorphTime == 1000 || mv->auxFlags & 0x100))
+        {
+            MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+        }
+        else
+        {
+            MON_PlayAnimFromListIfNotPlaying(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 4, 1);
+        }
+    }
+}
 
 void RONINBSS_Idle(void) {};
 
