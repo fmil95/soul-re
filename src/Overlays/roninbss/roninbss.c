@@ -789,7 +789,7 @@ void RONINBSS_Idle(Instance *instance)
     }
     else if (mv->auxFlags & 4 || (gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 1 && mv->auxFlags & 0x200))
     {
-        MON_SwitchState(instance, 5);
+        MON_SwitchState(instance, MONSTER_STATE_WANDER);
     }
     else
     {
@@ -827,7 +827,25 @@ void RONINBSS_Idle(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_WanderEntry);
+void RONINBSS_WanderEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->extraVars != NULL)
+    {
+        if (mv->mvFlags & 4)
+        {
+            MON_WanderEntry(instance);
+        }
+        else
+        {
+            RONINBSS_FindClosestMarkerInUnit(instance, STREAM_GetStreamUnitWithID(instance->currentStreamUnitID));
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Wander);
 
@@ -1626,7 +1644,7 @@ void RONINBSS_Idle(Instance *instance)
     }
     else if (mv->auxFlags & 4 || (gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 1 && mv->auxFlags & 0x200))
     {
-        MON_SwitchState(instance, 5);
+        MON_SwitchState(instance, MONSTER_STATE_WANDER);
     }
     else
     {
@@ -1664,7 +1682,25 @@ void RONINBSS_Idle(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-void RONINBSS_WanderEntry(void) {};
+void RONINBSS_WanderEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->extraVars != NULL)
+    {
+        if (mv->mvFlags & 4)
+        {
+            MON_WanderEntry(instance);
+        }
+        else
+        {
+            RONINBSS_FindClosestMarkerInUnit(instance, STREAM_GetStreamUnitWithID(instance->currentStreamUnitID));
+        }
+    }
+}
 
 void RONINBSS_Wander(void) {};
 
