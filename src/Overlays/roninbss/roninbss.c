@@ -7,6 +7,7 @@
 #include "Game/OBTABLE.h"
 #include "Game/MONSTER/MONAPI.h"
 #include "Game/MONSTER/MONLIB.h"
+#include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/PLAN/ENMYPLAN.h"
 #include "Game/PLAN/PLANAPI.h"
@@ -750,7 +751,81 @@ void RONINBSS_IdleEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Idle);
+void RONINBSS_Idle(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    RoninbssVars *vars; // not from debug symbols
+    RoninbssAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (RoninbssVars *)mv->extraVars;
+    attrs = (RoninbssAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_Idle(instance);
+        return;
+    }
+
+    if (mv->auxFlags & 0x100)
+    {
+        if (instance->fadeValue == 4096 && mv->auxFlags & 0x1000)
+        {
+            RONINBSS_FadeMove(instance, vars->to_what_plane);
+        }
+
+        if (gameTrackerX.gameData.asmData.MorphTime == 1000)
+        {
+            mv->auxFlags &= ~0x100;
+        }
+    }
+    else if (mv->auxFlags & 4 || (gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 1 && mv->auxFlags & 0x200))
+    {
+        MON_SwitchState(instance, 5);
+    }
+    else
+    {
+        if (mv->auxFlags & 8)
+        {
+            MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 5, 1);
+            mv->auxFlags &= ~8;
+        }
+        else if (mv->auxFlags & 0x10)
+        {
+            switch (vars->anim_state)
+            {
+            case 0:
+                MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 6, 1);
+                vars->anim_state++;
+                break;
+            case 1:
+                if (instance->flags2 & 0x10)
+                {
+                    MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 7, 1);
+                    vars->anim_state++;
+                }
+                break;
+            case 2:
+                if (instance->flags2 & 0x10)
+                {
+                    mv->validUnits[0] = 0;
+                    mv->auxFlags |= 4;
+                }
+                break;
+            }
+        }
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_WanderEntry);
 
@@ -1513,7 +1588,81 @@ void RONINBSS_IdleEntry(Instance *instance)
     }
 }
 
-void RONINBSS_Idle(void) {};
+void RONINBSS_Idle(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    RoninbssVars *vars; // not from debug symbols
+    RoninbssAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (RoninbssVars *)mv->extraVars;
+    attrs = (RoninbssAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_Idle(instance);
+        return;
+    }
+
+    if (mv->auxFlags & 0x100)
+    {
+        if (instance->fadeValue == 4096 && mv->auxFlags & 0x1000)
+        {
+            RONINBSS_FadeMove(instance, vars->to_what_plane);
+        }
+
+        if (gameTrackerX.gameData.asmData.MorphTime == 1000)
+        {
+            mv->auxFlags &= ~0x100;
+        }
+    }
+    else if (mv->auxFlags & 4 || (gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 1 && mv->auxFlags & 0x200))
+    {
+        MON_SwitchState(instance, 5);
+    }
+    else
+    {
+        if (mv->auxFlags & 8)
+        {
+            MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 5, 1);
+            mv->auxFlags &= ~8;
+        }
+        else if (mv->auxFlags & 0x10)
+        {
+            switch (vars->anim_state)
+            {
+            case 0:
+                MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 6, 1);
+                vars->anim_state++;
+                break;
+            case 1:
+                if (instance->flags2 & 0x10)
+                {
+                    MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 7, 1);
+                    vars->anim_state++;
+                }
+                break;
+            case 2:
+                if (instance->flags2 & 0x10)
+                {
+                    mv->validUnits[0] = 0;
+                    mv->auxFlags |= 4;
+                }
+                break;
+            }
+        }
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 void RONINBSS_WanderEntry(void) {};
 
