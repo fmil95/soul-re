@@ -193,6 +193,14 @@ enum AttackResult
     MONSTER_ATTACKRESULT_ALLYINWAY = 7,
 };
 
+
+enum MarkerType
+{
+    NO_MARKER = 0,
+    CLOSE_SEEK = 1,
+    FAR_SEEK = 2,
+};
+
 enum InstanceQueryType
 {
     queryHitState = 0,
