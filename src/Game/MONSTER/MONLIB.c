@@ -567,18 +567,18 @@ int MON_ShouldIAttack(Instance *instance, MonsterIR *enemy, MonsterAttackAttribu
     ei = enemy->instance;
     mv = (MonsterVars *)instance->extraData;
 
-    if (MON_ShouldIAttackInstance(instance, ei) == 0)
+    if (!MON_ShouldIAttackInstance(instance, ei))
     {
-        return 0;
+        return MONSTER_ATTACKRESULT_FAIL;
     }
 
     if (attack == NULL)
     {
-        rv = 0;
+        rv = MONSTER_ATTACKRESULT_FAIL;
     }
     else if (ei == gameTrackerX.playerInstance && MON_CheckConditions(instance, enemy, attack->attackProbability) == 0)
     {
-        rv = 0;
+        rv = MONSTER_ATTACKRESULT_FAIL;
     }
     else
     {
@@ -588,36 +588,36 @@ int MON_ShouldIAttack(Instance *instance, MonsterIR *enemy, MonsterAttackAttribu
 
         if (enemy->mirFlags & 0x08)
         {
-            rv = abs(distance) < 0x3E8 ? 1 : 5;
+            rv = abs(distance) < 1000 ? MONSTER_ATTACKRESULT_SUCCESS : MONSTER_ATTACKRESULT_TOOFAR;
         }
-        else if (distance < -0x96)
+        else if (distance < -150)
         {
-            rv = 5;
+            rv = MONSTER_ATTACKRESULT_TOOFAR;
         }
-        else if (distance > 0x96)
+        else if (distance > 150)
         {
-            rv = 4;
+            rv = MONSTER_ATTACKRESULT_TOOCLOSE;
         }
         else if (enemy->relativePosition.y > 0 || abs(enemy->relativePosition.x) > -enemy->relativePosition.y)
         {
-            rv = 6;
+            rv = MONSTER_ATTACKRESULT_NOTFACING;
         }
-        else if ((enemy->mirFlags & 0x20) ==0)
+        else if (!(enemy->mirFlags & 0x20))
         {
-            rv = 3;
+            rv = MONSTER_ATTACKRESULT_CANTSEE;
         }
-        else if (!(mv->ally == NULL || (INSTANCE_Query(mv->ally->instance, 0xA) & 0x200000) == 0))
+        else if (mv->ally != NULL && INSTANCE_Query(mv->ally->instance, queryMode) & 0x200000)
         {
-            rv = 7;
+            rv = MONSTER_ATTACKRESULT_ALLYINWAY;
         }
         else if (mv->auxFlags & 0x20000000 || MONSENSE_GetDistanceInDirection(instance, MATH3D_AngleFromPosToPos(&instance->position, &ei->position)) > enemy->distance)
         {
-            rv = 1;
+            rv = MONSTER_ATTACKRESULT_SUCCESS;
             enemy->mirConditions = 0;
         }
         else
         {
-            rv = 0;
+            rv = MONSTER_ATTACKRESULT_FAIL;
         }
     }
 
@@ -814,14 +814,14 @@ int MON_ChooseCombatMove(Instance *instance, int reason)
     {
         anim = (mv->ally->relativePosition.x > 0) ? MONSTER_ANIM_JUMPRIGHT : MONSTER_ANIM_JUMPLEFT;
     }
-    else if (reason == 4)
+    else if (reason == MONSTER_ATTACKRESULT_TOOCLOSE)
     {
         goto label;
     }
     else
     {
         anim = MONSTER_ANIM_JUMPFORWARD;
-        if (reason != 5)
+        if (reason != MONSTER_ATTACKRESULT_TOOFAR)
         {
             if (abs(enemy->relativePosition.y) < subAttr->combatAttributes->preferredCombatRange)
             {
