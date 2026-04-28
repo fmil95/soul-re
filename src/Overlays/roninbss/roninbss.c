@@ -862,7 +862,10 @@ void RONINBSS_AttackEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Attack);
+void RONINBSS_Attack(Instance *instance)
+{
+    MON_Attack(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_CombatEntry);
 
@@ -1728,7 +1731,10 @@ void RONINBSS_AttackEntry(Instance *instance)
     }
 }
 
-void RONINBSS_Attack(void) {};
+void RONINBSS_Attack(Instance *instance)
+{
+    MON_Attack(instance);
+}
 
 void RONINBSS_CombatEntry(void) {};
 
