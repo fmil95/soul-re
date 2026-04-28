@@ -883,7 +883,134 @@ void RONINBSS_CombatEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Combat);
+void RONINBSS_Combat(Instance *instance)
+{
+
+    int delta; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    RoninbssVars *vars; // not from debug symbols
+    RoninbssAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+    vars = (RoninbssVars *)mv->extraVars;
+    attrs = (RoninbssAttributes *)((MonsterAttributes *)instance->data)->tunData;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (mv->auxFlags & 1)
+    {
+        switch (RONINBSS_Constrict(instance))
+        {
+        case 1:
+            if (MATH3D_LengthXY(vars->current_constrict_pos.x - gameTrackerX.playerInstance->position.x, vars->current_constrict_pos.y - gameTrackerX.playerInstance->position.y) < 320)
+            {
+                INSTANCE_Post(gameTrackerX.playerInstance, 0x1000000, SetMonsterHitData(instance, 0, attrs->initialDrain * 256, 0, 0));
+            }
+            break;
+        case 2:
+        case 3:
+            switch (mv->attackState)
+            {
+            case 0:
+                mv->mvFlags &= ~0x20000;
+                MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 1, 1);
+                mv->attackState++;
+                break;
+            case 1:
+                if (enemy != NULL)
+                {
+                    MON_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedRunTurn);
+                }
+
+                if (instance->flags2 & 0x10)
+                {
+                    mv->attackState++;
+                    MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 2, 2);
+                }
+                break;
+            case 2:
+                if (enemy == NULL)
+                {
+                    mv->auxFlags &= ~1;
+                    break;
+                }
+
+                delta = MATH3D_LengthXYZ(gameTrackerX.playerInstance->position.x - instance->position.x, gameTrackerX.playerInstance->position.y - instance->position.y, gameTrackerX.playerInstance->position.z - instance->position.z);
+
+                if (!(enemy->mirFlags & 0x20) || attrs->soul_suck_range < delta)
+                {
+                    mv->auxFlags &= ~1;
+                    break;
+                }
+
+                MON_TurnToPosition(instance, &gameTrackerX.playerInstance->position, 0x1000);
+                INSTANCE_Post(gameTrackerX.playerInstance, 0x40006, attrs->constrictDrain * 256);
+                MON_DoDrainEffects(instance, gameTrackerX.playerInstance);
+                break;
+            }
+        }
+    }
+    else
+    {
+        if (enemy == NULL || mv->mvFlags & 4)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        }
+        else
+        {
+
+            MonsterCombatAttributes *combat; // not from debug symbols
+
+            combat = mv->subAttr->combatAttributes;
+            mv->lookAtPos = &enemy->instance->position;
+
+            if (enemy->distance < combat->combatRange)
+            {
+                if (ENMYPLAN_PathClear(&vars->last_rb_pos, &instance->position))
+                {
+
+                    int reason; // not from debug symbols
+
+                    reason = MON_ShouldIAttack(instance, enemy, RONINBSS_ChooseAttack(instance, enemy));
+
+                    if (reason == MONSTER_ATTACKRESULT_TOOCLOSE || reason == MONSTER_ATTACKRESULT_TOOFAR)
+                    {
+                        mv->mvFlags |= 0x20000;
+                        MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_WALK, 2);
+                    }
+                    else if (reason == MONSTER_ATTACKRESULT_SUCCESS)
+                    {
+                        MON_SwitchState(instance, MONSTER_STATE_ATTACK);
+                    }
+                    else
+                    {
+                        mv->mvFlags &= ~0x20000;
+                        MON_PlayCombatIdle(instance, 2);
+                    }
+                }
+                else
+                {
+                    mv->mvFlags &= ~0x20000;
+                    MON_PlayCombatIdle(instance, 2);
+                }
+
+                MON_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn);
+            }
+            else
+            {
+                MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+            }
+        }
+    }
+
+    MON_DefaultQueueHandler(instance);
+    COPY_SVEC(Position, &vars->last_rb_pos, Position, &instance->position);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_HitEntry);
 
@@ -1766,7 +1893,134 @@ void RONINBSS_CombatEntry(Instance *instance)
     }
 }
 
-void RONINBSS_Combat(void) {};
+void RONINBSS_Combat(Instance *instance)
+{
+
+    int delta; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    RoninbssVars *vars; // not from debug symbols
+    RoninbssAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+    vars = (RoninbssVars *)mv->extraVars;
+    attrs = (RoninbssAttributes *)((MonsterAttributes *)instance->data)->tunData;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (mv->auxFlags & 1)
+    {
+        switch (RONINBSS_Constrict(instance))
+        {
+        case 1:
+            if (MATH3D_LengthXY(vars->current_constrict_pos.x - gameTrackerX.playerInstance->position.x, vars->current_constrict_pos.y - gameTrackerX.playerInstance->position.y) < 320)
+            {
+                INSTANCE_Post(gameTrackerX.playerInstance, 0x1000000, SetMonsterHitData(instance, 0, attrs->initialDrain * 256, 0, 0));
+            }
+            break;
+        case 2:
+        case 3:
+            switch (mv->attackState)
+            {
+            case 0:
+                mv->mvFlags &= ~0x20000;
+                MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 1, 1);
+                mv->attackState++;
+                break;
+            case 1:
+                if (enemy != NULL)
+                {
+                    MON_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedRunTurn);
+                }
+
+                if (instance->flags2 & 0x10)
+                {
+                    mv->attackState++;
+                    MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 2, 2);
+                }
+                break;
+            case 2:
+                if (enemy == NULL)
+                {
+                    mv->auxFlags &= ~1;
+                    break;
+                }
+
+                delta = MATH3D_LengthXYZ(gameTrackerX.playerInstance->position.x - instance->position.x, gameTrackerX.playerInstance->position.y - instance->position.y, gameTrackerX.playerInstance->position.z - instance->position.z);
+
+                if (!(enemy->mirFlags & 0x20) || attrs->soul_suck_range < delta)
+                {
+                    mv->auxFlags &= ~1;
+                    break;
+                }
+
+                MON_TurnToPosition(instance, &gameTrackerX.playerInstance->position, 0x1000);
+                INSTANCE_Post(gameTrackerX.playerInstance, 0x40006, attrs->constrictDrain * 256);
+                MON_DoDrainEffects(instance, gameTrackerX.playerInstance);
+                break;
+            }
+        }
+    }
+    else
+    {
+        if (enemy == NULL || mv->mvFlags & 4)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        }
+        else
+        {
+
+            MonsterCombatAttributes *combat; // not from debug symbols
+
+            combat = mv->subAttr->combatAttributes;
+            mv->lookAtPos = &enemy->instance->position;
+
+            if (enemy->distance < combat->combatRange)
+            {
+                if (ENMYPLAN_PathClear(&vars->last_rb_pos, &instance->position))
+                {
+
+                    int reason; // not from debug symbols
+
+                    reason = MON_ShouldIAttack(instance, enemy, RONINBSS_ChooseAttack(instance, enemy));
+
+                    if (reason == MONSTER_ATTACKRESULT_TOOCLOSE || reason == MONSTER_ATTACKRESULT_TOOFAR)
+                    {
+                        mv->mvFlags |= 0x20000;
+                        MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_WALK, 2);
+                    }
+                    else if (reason == MONSTER_ATTACKRESULT_SUCCESS)
+                    {
+                        MON_SwitchState(instance, MONSTER_STATE_ATTACK);
+                    }
+                    else
+                    {
+                        mv->mvFlags &= ~0x20000;
+                        MON_PlayCombatIdle(instance, 2);
+                    }
+                }
+                else
+                {
+                    mv->mvFlags &= ~0x20000;
+                    MON_PlayCombatIdle(instance, 2);
+                }
+
+                MON_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn);
+            }
+            else
+            {
+                MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+            }
+        }
+    }
+
+    MON_DefaultQueueHandler(instance);
+    COPY_SVEC(Position, &vars->last_rb_pos, Position, &instance->position);
+}
 
 void RONINBSS_HitEntry(void) {};
 
