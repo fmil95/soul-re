@@ -103,7 +103,7 @@ void VWRAITH_PursueEntry(Instance *instance)
 
     mv = (MonsterVars *)instance->extraData;
 
-    if (VWRAITH_ShouldISwoop(instance) != 0)
+    if (VWRAITH_ShouldISwoop(instance) != MONSTER_ATTACKRESULT_FAIL)
     {
         mv->auxFlags |= 2;
     }
@@ -134,7 +134,7 @@ void VWRAITH_Pursue(Instance *instance)
 
     if (!(mv->auxFlags & 0x2))
     {
-        if (VWRAITH_ShouldISwoop(instance) != 0)
+        if (VWRAITH_ShouldISwoop(instance) != MONSTER_ATTACKRESULT_FAIL)
         {
             MON_SwitchState(instance, MONSTER_STATE_PURSUE);
             return;

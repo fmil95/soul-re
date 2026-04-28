@@ -1411,11 +1411,11 @@ void MON_Combat(Instance *instance)
                     reason = MON_ShouldIAttack(instance, enemy, MON_ChooseAttack(instance, enemy));
                 }
 
-                if (reason == 1)
+                if (reason == MONSTER_ATTACKRESULT_SUCCESS)
                 {
                     MON_SwitchState(instance, MONSTER_STATE_ATTACK);
                 }
-                else if (reason == 2)
+                else if (reason == MONSTER_ATTACKRESULT_MISSILESUCCESS)
                 {
                     MON_SwitchState(instance, MONSTER_STATE_PROJECTILE);
                 }
