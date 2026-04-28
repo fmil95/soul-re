@@ -849,7 +849,18 @@ void RONINBSS_WanderEntry(Instance *instance)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Wander);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_AttackEntry);
+void RONINBSS_AttackEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    MON_AttackEntry(instance);
+
+    if (mv->auxFlags & 1)
+    {
+        mv->auxFlags &= ~1;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Attack);
 
@@ -1704,7 +1715,18 @@ void RONINBSS_WanderEntry(Instance *instance)
 
 void RONINBSS_Wander(void) {};
 
-void RONINBSS_AttackEntry(void) {};
+void RONINBSS_AttackEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    MON_AttackEntry(instance);
+
+    if (mv->auxFlags & 1)
+    {
+        mv->auxFlags &= ~1;
+    }
+}
 
 void RONINBSS_Attack(void) {};
 
