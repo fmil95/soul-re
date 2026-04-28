@@ -867,7 +867,21 @@ void RONINBSS_Attack(Instance *instance)
     MON_Attack(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_CombatEntry);
+void RONINBSS_CombatEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+    RoninbssVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (RoninbssVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        MON_CombatEntry(instance);
+        mv->attackState = 0;
+        COPY_SVEC(Position, &vars->last_rb_pos, Position, &instance->position);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Combat);
 
@@ -1736,7 +1750,21 @@ void RONINBSS_Attack(Instance *instance)
     MON_Attack(instance);
 }
 
-void RONINBSS_CombatEntry(void) {};
+void RONINBSS_CombatEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+    RoninbssVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (RoninbssVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        MON_CombatEntry(instance);
+        mv->attackState = 0;
+        COPY_SVEC(Position, &vars->last_rb_pos, Position, &instance->position);
+    }
+}
 
 void RONINBSS_Combat(void) {};
 
