@@ -1058,7 +1058,15 @@ void RONINBSS_HitEntry(Instance *instance)
     MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Hit);
+void RONINBSS_Hit(Instance *instance)
+{
+    if (instance->flags2 & 0x10)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_FallEntry);
 
@@ -2112,7 +2120,15 @@ void RONINBSS_HitEntry(Instance *instance)
     MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
 }
 
-void RONINBSS_Hit(void) {};
+void RONINBSS_Hit(Instance *instance)
+{
+    if (instance->flags2 & 0x10)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 void RONINBSS_FallEntry(void) {};
 
