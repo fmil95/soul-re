@@ -1012,7 +1012,51 @@ void RONINBSS_Combat(Instance *instance)
     COPY_SVEC(Position, &vars->last_rb_pos, Position, &instance->position);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_HitEntry);
+void RONINBSS_HitEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+
+    RONINBSS_StopSoulSuck(instance);
+
+    mv->mvFlags &= ~0x20000;
+
+    if (mv->auxFlags & 4 || (gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 1))
+    {
+
+        short temp; // not from debug symbols
+
+        if (mv->auxFlags & 0x40)
+        {
+            MON_SwitchStateDoEntry(instance, MONSTER_STATE_PURSUE);
+            return;
+        }
+
+        mv->enemy->mirConditions |= 0x400;
+        mv->enemy->mirFlags &= ~0x1000;
+
+        temp = ((instance->rotation.z - MATH3D_AngleFromPosToPos(&instance->position, &enemy->instance->position)) + 1024) & 0xFFF;
+
+        if (temp < 2048)
+        {
+            MON_TurnToPosition(instance, &enemy->instance->position, 4096);
+            MON_PlayAnim(instance, MONSTER_ANIM_HIT1, 1);
+        }
+        else
+        {
+            MON_PlayAnim(instance, MONSTER_ANIM_HIT2, 1);
+        }
+
+        mv->mode = 0x8000;
+        return;
+    }
+
+    MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Hit);
 
@@ -2022,7 +2066,51 @@ void RONINBSS_Combat(Instance *instance)
     COPY_SVEC(Position, &vars->last_rb_pos, Position, &instance->position);
 }
 
-void RONINBSS_HitEntry(void) {};
+void RONINBSS_HitEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+
+    RONINBSS_StopSoulSuck(instance);
+
+    mv->mvFlags &= ~0x20000;
+
+    if (mv->auxFlags & 4 || (gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 1))
+    {
+
+        short temp; // not from debug symbols
+
+        if (mv->auxFlags & 0x40)
+        {
+            MON_SwitchStateDoEntry(instance, MONSTER_STATE_PURSUE);
+            return;
+        }
+
+        mv->enemy->mirConditions |= 0x400;
+        mv->enemy->mirFlags &= ~0x1000;
+
+        temp = ((instance->rotation.z - MATH3D_AngleFromPosToPos(&instance->position, &enemy->instance->position)) + 1024) & 0xFFF;
+
+        if (temp < 2048)
+        {
+            MON_TurnToPosition(instance, &enemy->instance->position, 4096);
+            MON_PlayAnim(instance, MONSTER_ANIM_HIT1, 1);
+        }
+        else
+        {
+            MON_PlayAnim(instance, MONSTER_ANIM_HIT2, 1);
+        }
+
+        mv->mode = 0x8000;
+        return;
+    }
+
+    MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
+}
 
 void RONINBSS_Hit(void) {};
 
