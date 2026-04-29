@@ -1068,7 +1068,24 @@ void RONINBSS_Hit(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_FallEntry);
+void RONINBSS_FallEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    RONINBSS_StopSoulSuck(instance);
+
+    if (!(mv->mvFlags & 4))
+    {
+        MON_FallEntry(instance);
+    }
+    else
+    {
+        MON_OnGround(instance);
+        MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Fall);
 
@@ -2130,7 +2147,24 @@ void RONINBSS_Hit(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-void RONINBSS_FallEntry(void) {};
+void RONINBSS_FallEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    RONINBSS_StopSoulSuck(instance);
+
+    if (!(mv->mvFlags & 4))
+    {
+        MON_FallEntry(instance);
+    }
+    else
+    {
+        MON_OnGround(instance);
+        MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
+    }
+}
 
 void RONINBSS_Fall(void) {};
 
