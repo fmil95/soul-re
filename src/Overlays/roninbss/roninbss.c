@@ -1087,7 +1087,11 @@ void RONINBSS_FallEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Fall);
+void RONINBSS_Fall(Instance *instance)
+{
+    MON_Fall(instance);
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_PursueEntry);
 
@@ -2166,7 +2170,11 @@ void RONINBSS_FallEntry(Instance *instance)
     }
 }
 
-void RONINBSS_Fall(void) {};
+void RONINBSS_Fall(Instance *instance)
+{
+    MON_Fall(instance);
+}
+
 
 void RONINBSS_PursueEntry(void) {};
 
