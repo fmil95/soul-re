@@ -1093,7 +1093,27 @@ void RONINBSS_Fall(Instance *instance)
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_PursueEntry);
+void RONINBSS_PursueEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    RONINBSS_StopSoulSuck(instance);
+
+    if (mv->auxFlags & 4)
+    {
+        MON_PursueEntry(instance);
+    }
+    else if ((gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 1) && mv->auxFlags & 0x200)
+    {
+        MON_PursueEntry(instance);
+    }
+    else
+    {
+        MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Pursue);
 
@@ -2176,7 +2196,27 @@ void RONINBSS_Fall(Instance *instance)
 }
 
 
-void RONINBSS_PursueEntry(void) {};
+void RONINBSS_PursueEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    RONINBSS_StopSoulSuck(instance);
+
+    if (mv->auxFlags & 4)
+    {
+        MON_PursueEntry(instance);
+    }
+    else if ((gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 1) && mv->auxFlags & 0x200)
+    {
+        MON_PursueEntry(instance);
+    }
+    else
+    {
+        MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
+    }
+}
 
 void RONINBSS_Pursue(void) {};
 
