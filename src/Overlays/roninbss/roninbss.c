@@ -1132,7 +1132,15 @@ void RONINBSS_DoNothing(Instance *instance)
     (void)instance;
 };
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_DeadEntry);
+void RONINBSS_DeadEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    mv->soulJuice = 0;
+    MON_DeadEntry(instance);
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Dead);
 
@@ -2240,7 +2248,15 @@ void RONINBSS_DoNothingEntry(Instance *instance)
 
 void RONINBSS_DoNothing(Instance *instance) {};
 
-void RONINBSS_DeadEntry(void) {};
+void RONINBSS_DeadEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    mv->soulJuice = 0;
+    MON_DeadEntry(instance);
+}
+
 
 void RONINBSS_Dead(void) {};
 
