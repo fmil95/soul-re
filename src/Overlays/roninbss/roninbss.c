@@ -1142,7 +1142,37 @@ void RONINBSS_DeadEntry(Instance *instance)
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Dead);
+void RONINBSS_Dead(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->causeOfDeath == MONSTER_CAUSEOFDEATH_FIRE && instance->perVertexColor == NULL)
+    {
+
+        CVECTOR *ptr; // not from debug symbols
+        Model *model; // not from debug symbols
+        int i; // not from debug symbols
+
+        model = instance->object->modelList[instance->currentModel];
+        instance->perVertexColor = (CVECTOR *)MEMPACK_Malloc(model->numVertices * sizeof(CVECTOR), MEMORY_TYPE_INSTVTXCOLOR);
+
+        for (ptr = instance->perVertexColor, i = model->numVertices; i != 0; i--, ptr++)
+        {
+            *(long *)ptr = 0x101010;
+        }
+    }
+
+    if (mv->mvFlags & 0x400000 && mv->effectTimer < MON_GetTime(instance))
+    {
+        mv->mvFlags &= ~0x400000;
+        FX_StopAllGlowEffects(instance, 64);
+    }
+
+    while (DeMessageQueue(&mv->messageQueue) != NULL);
+}
 
 #else
 
@@ -2258,6 +2288,36 @@ void RONINBSS_DeadEntry(Instance *instance)
 }
 
 
-void RONINBSS_Dead(void) {};
+void RONINBSS_Dead(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->causeOfDeath == MONSTER_CAUSEOFDEATH_FIRE && instance->perVertexColor == NULL)
+    {
+
+        CVECTOR *ptr; // not from debug symbols
+        Model *model; // not from debug symbols
+        int i; // not from debug symbols
+
+        model = instance->object->modelList[instance->currentModel];
+        instance->perVertexColor = (CVECTOR *)MEMPACK_Malloc(model->numVertices * sizeof(CVECTOR), MEMORY_TYPE_INSTVTXCOLOR);
+
+        for (ptr = instance->perVertexColor, i = model->numVertices; i != 0; i--, ptr++)
+        {
+            *(long *)ptr = 0x101010;
+        }
+    }
+
+    if (mv->mvFlags & 0x400000 && mv->effectTimer < MON_GetTime(instance))
+    {
+        mv->mvFlags &= ~0x400000;
+        FX_StopAllGlowEffects(instance, 64);
+    }
+
+    while (DeMessageQueue(&mv->messageQueue) != NULL);
+}
 
 #endif
