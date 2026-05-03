@@ -2018,7 +2018,7 @@ void RONINBSS_WanderEntry(Instance *instance)
     }
 }
 
-void RONINBSS_Wander(void) {};
+void RONINBSS_Wander(Instance *instance) {};
 
 void RONINBSS_AttackEntry(Instance *instance)
 {
