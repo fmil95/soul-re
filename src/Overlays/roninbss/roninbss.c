@@ -12,20 +12,42 @@
 #include "Game/PLAN/ENMYPLAN.h"
 #include "Game/PLAN/PLANAPI.h"
 #include "Game/RAZIEL/RAZIEL.h"
+#include "Game/SAVEINFO.h"
 #include "Game/SOUND.h"
 #include "Game/STATE.h"
 #include "Game/STREAM.h"
 
+MonsterStateChoice RONINBSS_StateChoiceTable[] = {
+    {MONSTER_STATE_PURSUE, {RONINBSS_PursueEntry, RONINBSS_Pursue}},
+    {MONSTER_STATE_HIT, {RONINBSS_HitEntry, RONINBSS_Hit}},
+    {MONSTER_STATE_COMBAT, {RONINBSS_CombatEntry, RONINBSS_Combat}},
+    {MONSTER_STATE_MISSILEHIT, {RONINBSS_HitEntry, RONINBSS_Hit}},
+    {MONSTER_STATE_IDLE, {RONINBSS_IdleEntry, RONINBSS_Idle}},
+    {MONSTER_STATE_WANDER, {RONINBSS_WanderEntry, RONINBSS_Wander}},
+    {MONSTER_STATE_ATTACK, {RONINBSS_AttackEntry, RONINBSS_Attack}},
+    {MONSTER_STATE_FALL, {RONINBSS_FallEntry, RONINBSS_Fall}},
+    {MONSTER_STATE_SURPRISED, {RONINBSS_DoNothingEntry, RONINBSS_DoNothing}},
+    {MONSTER_STATE_NOTICE, {RONINBSS_DoNothingEntry, RONINBSS_DoNothing}},
+    {MONSTER_STATE_STUNNED, {RONINBSS_DoNothingEntry, RONINBSS_DoNothing}},
+    {MONSTER_STATE_DEAD, {RONINBSS_DeadEntry, RONINBSS_Dead}},
+    {-1, {NULL, NULL}}
+};
+
 burntTuneType roninbssBurntTune = {300, 2}; // no canon name in symbols
 
-void RONINBSS_DamageEffect(Instance *instance, evFXHitData *data);
+const MonsterFunctionTable RONINBSS_FunctionTable = {
+    RONINBSS_Init,
+    RONINBSS_CleanUp,
+    RONINBSS_DamageEffect,
+    RONINBSS_Query,
+    RONINBSS_Message,
+    RONINBSS_StateChoiceTable,
+    monVersion,
+    "Jul 14 1999"
+};
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/roninbss/roninbss", D_88000000);
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/roninbss/roninbss", D_88000020);
 
 void RONINBSS_StartBand(Instance *instance)
 {
@@ -2264,7 +2286,7 @@ void RONINBSS_PursueEntry(Instance *instance)
     }
 }
 
-void RONINBSS_Pursue(void) {};
+void RONINBSS_Pursue(Instance *instance) {};
 
 void RONINBSS_DoNothingEntry(Instance *instance)
 {

@@ -50,6 +50,5 @@ segments:
     subsegments:
       - [0x000000, .rodata, Overlays/roninbss/roninbss]
       - [0x000060, _c, Overlays/roninbss/roninbss]
-      - [0x002800, data, Overlays/roninbss/roninbss]
-      - [0x00289C, .data, Overlays/roninbss/roninbss]
+      - [0x002890, .data, Overlays/roninbss/roninbss]
   - [0x0028A4]
