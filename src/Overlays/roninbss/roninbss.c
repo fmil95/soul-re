@@ -1117,7 +1117,15 @@ void RONINBSS_PursueEntry(Instance *instance)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Pursue);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_DoNothingEntry);
+void RONINBSS_DoNothingEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    RONINBSS_StopSoulSuck(instance);
+    MON_SwitchStateDoEntry(instance, mv->previousMainState);
+}
+
 
 void RONINBSS_DoNothing(Instance *instance)
 {
@@ -2220,7 +2228,15 @@ void RONINBSS_PursueEntry(Instance *instance)
 
 void RONINBSS_Pursue(void) {};
 
-void RONINBSS_DoNothingEntry(void) {};
+void RONINBSS_DoNothingEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    RONINBSS_StopSoulSuck(instance);
+    MON_SwitchStateDoEntry(instance, mv->previousMainState);
+}
+
 
 void RONINBSS_DoNothing(Instance *instance) {};
 
