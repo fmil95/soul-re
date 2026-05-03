@@ -35,6 +35,13 @@ MonsterStateChoice RONINBSS_StateChoiceTable[] = {
 
 burntTuneType roninbssBurntTune = {300, 2}; // no canon name in symbols
 
+/*
+Not used by code, solely for matching.
+The roninbss module has an extra 2 null bytes at the end of its data segment.
+Module length is 0x28A4 bytes, but without this the compiled module has a length of 0x28A2 bytes.
+*/
+char padding[2];
+
 const MonsterFunctionTable RONINBSS_FunctionTable = {
     RONINBSS_Init,
     RONINBSS_CleanUp,
