@@ -3171,7 +3171,7 @@ void MON_ProcessSpecialFade(Instance *instance)
     {
         if ((instance->currentMainState != MONSTER_STATE_DEAD) && (instance->currentMainState != MONSTER_STATE_GENERALDEATH))
         {
-            if ((*(int *)&gameTrackerX.gameData.asmData.MorphTime == 1000) || ((gameTrackerX.gameData.asmData.MorphType == 1) && (gameTrackerX.gameData.asmData.MorphTime != 1000))) // double-check
+            if ((gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 0) || (gameTrackerX.gameData.asmData.MorphType == 1 && gameTrackerX.gameData.asmData.MorphTime != 1000))
             {
                 targetFadeValue = mv->targetFade;
 
