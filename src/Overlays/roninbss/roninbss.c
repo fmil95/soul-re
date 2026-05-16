@@ -710,7 +710,54 @@ int RONINBSS_FindClosestMarkerInUnit(Instance *instance, StreamUnit *su)
     return rc;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_GetNextMarkerInSeries);
+int RONINBSS_GetNextMarkerInSeries(Instance *instance, StreamUnit *su, Position *markerPos)
+{
+
+    int temp; // not from debug symbols
+    int dist; // not from debug symbols
+    RoninbssVars *vars; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (RoninbssVars *)mv->extraVars;
+
+    if (su == 0 || vars->current_marker_id == -1)
+    {
+        return NO_MARKER;
+    }
+
+    if (PLANAPI_FindNodePositionInUnit(su, markerPos, vars->current_marker_id, 4) != 0)
+    {
+
+        dist = MATH3D_LengthXY(markerPos->x - instance->position.x, markerPos->y - instance->position.y);
+
+        if (dist > 100)
+        {
+            return FAR_SEEK;
+        }
+
+        if (dist > 50)
+        {
+            return CLOSE_SEEK;
+        }
+
+        temp = vars->current_marker_id - 1;
+
+        if (temp <= 0)
+        {
+            return NO_MARKER;
+        }
+
+        vars->current_marker_id = temp;
+
+        if (PLANAPI_FindNodePositionInUnit(su, markerPos, temp, 4) != 0)
+        {
+            return FAR_SEEK;
+        }
+    }
+
+    return NO_MARKER;
+}
 
 Instance *RONINBSS_FindValve(Instance *instance)
 {
@@ -1859,7 +1906,54 @@ int RONINBSS_FindClosestMarkerInUnit(Instance *instance, StreamUnit *su)
     return rc;
 }
 
-void RONINBSS_GetNextMarkerInSeries(void) {};
+int RONINBSS_GetNextMarkerInSeries(Instance *instance, StreamUnit *su, Position *markerPos)
+{
+
+    int temp; // not from debug symbols
+    int dist; // not from debug symbols
+    RoninbssVars *vars; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (RoninbssVars *)mv->extraVars;
+
+    if (su == 0 || vars->current_marker_id == -1)
+    {
+        return NO_MARKER;
+    }
+
+    if (PLANAPI_FindNodePositionInUnit(su, markerPos, vars->current_marker_id, 4) != 0)
+    {
+
+        dist = MATH3D_LengthXY(markerPos->x - instance->position.x, markerPos->y - instance->position.y);
+
+        if (dist > 100)
+        {
+            return FAR_SEEK;
+        }
+
+        if (dist > 50)
+        {
+            return CLOSE_SEEK;
+        }
+
+        temp = vars->current_marker_id - 1;
+
+        if (temp <= 0)
+        {
+            return NO_MARKER;
+        }
+
+        vars->current_marker_id = temp;
+
+        if (PLANAPI_FindNodePositionInUnit(su, markerPos, temp, 4) != 0)
+        {
+            return FAR_SEEK;
+        }
+    }
+
+    return NO_MARKER;
+}
 
 Instance *RONINBSS_FindValve(Instance *instance)
 {
