@@ -186,16 +186,16 @@ int PhysicsCheckLinkedMove(Instance *instance, intptr_t Data, short Mode)
                 moved = 1;
             }
 
-            if ((moved != 0) || (rotated != 0))
+            if (moved || rotated)
             {
                 TransposeMatrix(current, &work);
 
-                if (rotated != 0)
+                if (rotated)
                 {
                     MulMatrix0(&work, instance->matrix, &instance->relativeMatrix);
                 }
 
-                if (moved != 0)
+                if (moved)
                 {
                     delta.vx = ix - oldPosX;
                     delta.vy = iy - oldPosY;
@@ -224,12 +224,12 @@ int PhysicsCheckLinkedMove(Instance *instance, intptr_t Data, short Mode)
             ptr->rotDelta.z = (newRot.z - instance->oldRotation.z);
         }
 
-        if ((Mode & 0x4))
+        if (Mode & 0x4)
         {
             PhysicsDefaultLinkedMoveResponse(instance, ptr, (((unsigned)(Mode & 0xFFFF) >> 3) ^ 1) & 0x1);
         }
 
-        if ((Mode & 0x2))
+        if (Mode & 0x2)
         {
             INSTANCE_Post(instance, 0x4010008, Data);
         }

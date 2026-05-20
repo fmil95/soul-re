@@ -459,7 +459,7 @@ void RONINBSS_Message(Instance *instance, unsigned long message, unsigned long d
             RONINBSS_StopSoulSuck(instance);
             mv->damageType = 0x20;
             MON_SwitchStateDoEntry(instance, MONSTER_STATE_GENERALDEATH);
-            RONINBSS_DamageEffect(instance, (evFXHitData *)SetFXHitData(0, 0, 0, 0x20));
+            RONINBSS_DamageEffect(instance, (evFXHitData *)SetFXHitData(0, 0, 0, 32));
             break;
         case 4:
             mv->validUnits[0] = 0;
@@ -494,7 +494,7 @@ uintptr_t RONINBSS_Query(Instance *instance, unsigned long query)
     switch (query)
     {
     case queryHitState:
-        ret = 0x01000000;
+        ret = 0x1000000;
 
         if (!(mv->auxFlags & 4))
         {
@@ -630,7 +630,7 @@ void RONINBSS_DamageEffect(Instance *instance, evFXHitData *data)
 
     localloc = data->location;
 
-    if (data->type == 0x20)
+    if (data->type == 32)
     {
         if (data->amount != 0)
         {
@@ -641,7 +641,7 @@ void RONINBSS_DamageEffect(Instance *instance, evFXHitData *data)
             MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &roninbssBurntTune);
         }
     }
-    else if (data->type == 0x10)
+    else if (data->type == 16)
     {
         MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &roninbssBurntTune);
     }
@@ -721,7 +721,7 @@ int RONINBSS_GetNextMarkerInSeries(Instance *instance, StreamUnit *su, Position 
     mv = (MonsterVars *)instance->extraData;
     vars = (RoninbssVars *)mv->extraVars;
 
-    if (su == 0 || vars->current_marker_id == -1)
+    if (su == NULL || vars->current_marker_id == -1)
     {
         return NO_MARKER;
     }
@@ -1655,7 +1655,7 @@ void RONINBSS_Message(Instance *instance, unsigned long message, unsigned long d
             RONINBSS_StopSoulSuck(instance);
             mv->damageType = 0x20;
             MON_SwitchStateDoEntry(instance, MONSTER_STATE_GENERALDEATH);
-            RONINBSS_DamageEffect(instance, (evFXHitData *)SetFXHitData(0, 0, 0, 0x20));
+            RONINBSS_DamageEffect(instance, (evFXHitData *)SetFXHitData(0, 0, 0, 32));
             break;
         case 4:
             mv->validUnits[0] = 0;
@@ -1690,7 +1690,7 @@ uintptr_t RONINBSS_Query(Instance *instance, unsigned long query)
     switch (query)
     {
     case queryHitState:
-        ret = 0x01000000;
+        ret = 0x1000000;
 
         if (!(mv->auxFlags & 4))
         {
@@ -1826,7 +1826,7 @@ void RONINBSS_DamageEffect(Instance *instance, evFXHitData *data)
 
     localloc = data->location;
 
-    if (data->type == 0x20)
+    if (data->type == 32)
     {
         if (data->amount != 0)
         {
@@ -1837,7 +1837,7 @@ void RONINBSS_DamageEffect(Instance *instance, evFXHitData *data)
             MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &roninbssBurntTune);
         }
     }
-    else if (data->type == 0x10)
+    else if (data->type == 16)
     {
         MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &roninbssBurntTune);
     }
@@ -1917,7 +1917,7 @@ int RONINBSS_GetNextMarkerInSeries(Instance *instance, StreamUnit *su, Position 
     mv = (MonsterVars *)instance->extraData;
     vars = (RoninbssVars *)mv->extraVars;
 
-    if (su == 0 || vars->current_marker_id == -1)
+    if (su == NULL || vars->current_marker_id == -1)
     {
         return NO_MARKER;
     }
