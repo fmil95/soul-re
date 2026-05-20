@@ -1,4 +1,4 @@
-pycparser
+pycparser==2.23
 pynacl
 toml
 colorama
