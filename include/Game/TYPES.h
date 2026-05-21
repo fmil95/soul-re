@@ -469,6 +469,12 @@ enum SaveSize
     SAVE_DATABYTES = 24576,
 };
 
+enum MaxVolume
+{
+    MAX_RAW_VOLUME = 127,
+    MAX_COOKED_VOLUME = 10,
+};
+
 typedef enum language_t
 {
     language_english = 0,

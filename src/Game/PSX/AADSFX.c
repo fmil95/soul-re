@@ -260,7 +260,7 @@ void sfxCmdPlayTone(AadSfxCommand *sfxCmd)
 
                 voice->program = toneAtr->parentProgram;
 
-                voice->volume = 127;
+                voice->volume = MAX_RAW_VOLUME;
 
                 voice->updateVol = sfxCmd->dataByte[0];
 

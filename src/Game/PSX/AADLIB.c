@@ -104,7 +104,7 @@ int aadInit(AadInitAttr *attributes, unsigned char *memoryPtr)
             slot->sequenceNumberAssigned = 255;
 
             slot->slotID = slotNumber * 16;
-            slot->slotVolume = 127;
+            slot->slotVolume = MAX_RAW_VOLUME;
             slot->slotPan = 63;
 
             slot->masterVolPtr = &aadMem->musicMasterVol;
@@ -113,7 +113,7 @@ int aadInit(AadInitAttr *attributes, unsigned char *memoryPtr)
             {
                 slot->currentProgram[i] = 255;
 
-                slot->volume[i] = 127;
+                slot->volume[i] = MAX_RAW_VOLUME;
 
                 slot->panPosition[i] = 63;
 
@@ -126,14 +126,14 @@ int aadInit(AadInitAttr *attributes, unsigned char *memoryPtr)
 
         aadMem->sfxSlot.handleCounter = 12345;
 
-        aadMem->sfxSlot.sfxVolume = 127;
+        aadMem->sfxSlot.sfxVolume = MAX_RAW_VOLUME;
 
         aadMem->numSlots = attributes->numSlots & 0xFF;
 
         aadMem->updateMode = attributes->updateMode & 0xFF;
 
-        aadMem->sfxMasterVol = 127;
-        aadMem->musicMasterVol = 127;
+        aadMem->sfxMasterVol = MAX_RAW_VOLUME;
+        aadMem->musicMasterVol = MAX_RAW_VOLUME;
 
         aadMem->endSequenceCallback = NULL;
         aadMem->controller11Callback = NULL;
@@ -1694,7 +1694,7 @@ void aadInitSequenceSlot(AadSequenceSlot *slot)
         slot->currentDynamicBank[i] = slot->sequenceAssignedDynamicBank;
         slot->currentProgram[i] = 255;
 
-        slot->volume[i] = 127;
+        slot->volume[i] = MAX_RAW_VOLUME;
 
         slot->panPosition[i] = 63;
 

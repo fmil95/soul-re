@@ -168,7 +168,7 @@ void menudefs_reset_hack_attract_mode()
 
 void check_hack_attract()
 {
-    if ((hack_attract > 0) && ((unsigned int)(hack_attract + 2000) < gameTrackerX.vblCount))
+    if (hack_attract > 0 && ((unsigned int)(hack_attract + 2000) < gameTrackerX.vblCount))
     {
         hack_attract = 1;
 
@@ -201,14 +201,14 @@ int get_volume(void *gt, sfx_t sfx)
         raw = 3;
     }
 
-    return (raw * 10) / 127;
+    return (raw * MAX_COOKED_VOLUME) / MAX_RAW_VOLUME;
 }
 
 void set_volume(sfx_t sfx, int cooked)
 {
     int raw;
 
-    raw = ((cooked * 127) + 9) / 10;
+    raw = ((cooked * MAX_RAW_VOLUME) + (MAX_COOKED_VOLUME - 1)) / MAX_COOKED_VOLUME;
 
     switch (sfx)
     {
@@ -242,7 +242,7 @@ int do_sound_adjust(void *gt, long sfxparam, menu_ctrl_t ctrl)
 
         return 1;
     case menu_ctrl_right:
-        if (volume < 10)
+        if (volume < MAX_COOKED_VOLUME)
         {
             set_volume((sfx_t)sfxparam, volume + 1);
         }
