@@ -916,7 +916,85 @@ void RONINBSS_WanderEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Wander);
+void RONINBSS_Wander(Instance *instance)
+{
+
+    Position localloc;
+    RoninbssAttributes *attrs; // not from debug symbols
+    StreamUnit *su; // not from debug symbols
+    RoninbssVars *vars; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    Instance *enemyInst; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    int temp; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (RoninbssVars *)mv->extraVars;
+    attrs = (RoninbssAttributes *)ma->tunData;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_Wander(instance);
+        return;
+    }
+
+    enemy = mv->enemy;
+    temp = 1;
+
+    if (enemy != NULL && (mv->auxFlags & 4 || MON_ValidUnit(instance, enemy->instance->currentStreamUnitID)))
+    {
+        enemyInst = mv->enemy->instance;
+        if (MATH3D_LengthXYZ(enemyInst->position.x - instance->position.x, enemyInst->position.y - instance->position.y, enemyInst->position.z - instance->position.z) < attrs->resume_chase_range)
+        {
+            temp = 0;
+            MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+        }
+    }
+
+    if (!temp)
+    {
+        MON_DefaultQueueHandler(instance);
+        return;
+    }
+
+    su = STREAM_GetStreamUnitWithID(instance->currentStreamUnitID);
+
+    if (instance->currentStreamUnitID != vars->markerStreamUnitID)
+    {
+        RONINBSS_FindClosestMarkerInUnit(instance, su);
+        vars->markerStreamUnitID = instance->currentStreamUnitID;
+    }
+
+    temp = RONINBSS_GetNextMarkerInSeries(instance, su, &localloc);
+
+    switch (temp)
+    {
+    case NO_MARKER:
+        AngleMoveToward(&instance->rotation.z, instance->intro->rotation.z, mv->subAttr->speedRunTurn);
+        mv->mvFlags &= ~0x20000;
+        MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+        break;
+    case CLOSE_SEEK:
+        if (MON_TurnToPosition(instance, &localloc, mv->subAttr->speedRunTurn) == 0)
+        {
+            MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+            break;
+        }
+    case FAR_SEEK:
+        MON_TurnToPosition(instance, &localloc, mv->subAttr->speedRunTurn);
+        MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_WALK, 2);
+        break;
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 void RONINBSS_AttackEntry(Instance *instance)
 {
@@ -2112,7 +2190,85 @@ void RONINBSS_WanderEntry(Instance *instance)
     }
 }
 
-void RONINBSS_Wander(Instance *instance) {};
+void RONINBSS_Wander(Instance *instance)
+{
+
+    Position localloc;
+    RoninbssAttributes *attrs; // not from debug symbols
+    StreamUnit *su; // not from debug symbols
+    RoninbssVars *vars; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    Instance *enemyInst; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    int temp; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (RoninbssVars *)mv->extraVars;
+    attrs = (RoninbssAttributes *)ma->tunData;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_Wander(instance);
+        return;
+    }
+
+    enemy = mv->enemy;
+    temp = 1;
+
+    if (enemy != NULL && (mv->auxFlags & 4 || MON_ValidUnit(instance, enemy->instance->currentStreamUnitID)))
+    {
+        enemyInst = mv->enemy->instance;
+        if (MATH3D_LengthXYZ(enemyInst->position.x - instance->position.x, enemyInst->position.y - instance->position.y, enemyInst->position.z - instance->position.z) < attrs->resume_chase_range)
+        {
+            temp = 0;
+            MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+        }
+    }
+
+    if (!temp)
+    {
+        MON_DefaultQueueHandler(instance);
+        return;
+    }
+
+    su = STREAM_GetStreamUnitWithID(instance->currentStreamUnitID);
+
+    if (instance->currentStreamUnitID != vars->markerStreamUnitID)
+    {
+        RONINBSS_FindClosestMarkerInUnit(instance, su);
+        vars->markerStreamUnitID = instance->currentStreamUnitID;
+    }
+
+    temp = RONINBSS_GetNextMarkerInSeries(instance, su, &localloc);
+
+    switch (temp)
+    {
+    case NO_MARKER:
+        AngleMoveToward(&instance->rotation.z, instance->intro->rotation.z, mv->subAttr->speedRunTurn);
+        mv->mvFlags &= ~0x20000;
+        MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+        break;
+    case CLOSE_SEEK:
+        if (MON_TurnToPosition(instance, &localloc, mv->subAttr->speedRunTurn) == 0)
+        {
+            MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
+            break;
+        }
+    case FAR_SEEK:
+        MON_TurnToPosition(instance, &localloc, mv->subAttr->speedRunTurn);
+        MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_WALK, 2);
+        break;
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 void RONINBSS_AttackEntry(Instance *instance)
 {
