@@ -2341,7 +2341,7 @@ long EVENT_TransformSavedEventAttribute(PCodeStack *stack, StackType *stackObjec
 
             if (temp != NULL)
             {
-                if (temp->savedID == 2)
+                if (temp->savedID == SAVED_ID_EVENT)
                 {
                     stack->topOfStack--;
 
@@ -5721,15 +5721,15 @@ void EVENT_SaveEventsFromLevel(long levelID, Level *level)
 
             SAVE_DeleteSavedEvent(levelID, eventInstance->eventNumber);
 
-            if (saveEvent != 0)
+            if (saveEvent)
             {
-                if (useBigSave != 0)
+                if (useBigSave)
                 {
                     SavedEvent *savedEvent;
 
-                    savedEvent = (SavedEvent *)SAVE_GetSavedBlock(2, 0);
+                    savedEvent = (SavedEvent *)SAVE_GetSavedBlock(SAVED_ID_EVENT, 0);
 
-                    savedEvent->savedID = 2;
+                    savedEvent->savedID = SAVED_ID_EVENT;
                     savedEvent->areaID = levelID;
 
                     savedEvent->eventNumber = eventInstance->eventNumber;
@@ -5743,9 +5743,9 @@ void EVENT_SaveEventsFromLevel(long levelID, Level *level)
                 {
                     SavedEventSmallVars *savedEvent;
 
-                    savedEvent = (SavedEventSmallVars *)SAVE_GetSavedBlock(9, 0);
+                    savedEvent = (SavedEventSmallVars *)SAVE_GetSavedBlock(SAVED_ID_EVENT_SMALL_VARS, 0);
 
-                    savedEvent->savedID = 9;
+                    savedEvent->savedID = SAVED_ID_EVENT_SMALL_VARS;
                     savedEvent->areaID = levelID;
 
                     savedEvent->eventNumber = eventInstance->eventNumber;
@@ -5781,7 +5781,7 @@ void EVENT_LoadEventsForLevel(long levelID, Level *level)
 
                 eventInstance = NULL;
 
-                if (savedEvent->savedID == 2)
+                if (savedEvent->savedID == SAVED_ID_EVENT)
                 {
                     eventNumber = ((SavedEvent *)savedEvent)->eventNumber;
                 }
@@ -5801,7 +5801,7 @@ void EVENT_LoadEventsForLevel(long levelID, Level *level)
 
                 if (eventInstance != NULL)
                 {
-                    if (savedEvent->savedID == 2)
+                    if (savedEvent->savedID == SAVED_ID_EVENT)
                     {
                         for (d = 0; d < 5; d++)
                         {
@@ -5827,11 +5827,11 @@ SavedBasic *EVENT_CreateSaveEvent(long levelID, long eventNumber)
     long d;
     char *temp; // not from decls.h
 
-    savedEvent = (SavedEventSmallVars *)SAVE_GetSavedBlock(9, 0);
+    savedEvent = (SavedEventSmallVars *)SAVE_GetSavedBlock(SAVED_ID_EVENT_SMALL_VARS, 0);
 
     if (savedEvent != NULL)
     {
-        savedEvent->savedID = 9;
+        savedEvent->savedID = SAVED_ID_EVENT_SMALL_VARS;
         savedEvent->areaID = levelID;
 
         savedEvent->eventNumber = eventNumber;
