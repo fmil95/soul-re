@@ -605,7 +605,7 @@ Instance *INSTANCE_IntroduceInstance(Intro *intro, short streamUnitID)
         {
             object = objectTracker->object;
 
-            if ((objectTracker->objectStatus == 2) && ((attachedUniqueID == 0) || (attachInst = INSTANCE_Find(attachedUniqueID), (attachInst != NULL))) && ((!(object->oflags2 & 0x10000000)) || (OBTABLE_InitAnimPointers(objectTracker), (!(object->oflags2 & 0x10000000)))))
+            if (objectTracker->objectStatus == OBJECTTRACKER_USED && (attachedUniqueID == 0 || (attachInst = INSTANCE_Find(attachedUniqueID), attachInst != NULL)) && (!(object->oflags2 & 0x10000000) || (OBTABLE_InitAnimPointers(objectTracker), (!(object->oflags2 & 0x10000000)))))
             {
                 SavedIntroSmall *savedIntroSmall;
                 MultiSpline *spline;
@@ -1725,7 +1725,7 @@ Instance *INSTANCE_IntroduceSavedInstance(SavedIntro *savedIntro, StreamUnit *st
             Object *object;
             object = objectTracker->object;
 
-            if (objectTracker->objectStatus == 2 && (savedIntro->attachedUniqueID == 0 || (attachInst = INSTANCE_Find(savedIntro->attachedUniqueID), attachInst != NULL)))
+            if (objectTracker->objectStatus == OBJECTTRACKER_USED && (savedIntro->attachedUniqueID == 0 || (attachInst = INSTANCE_Find(savedIntro->attachedUniqueID), attachInst != NULL)))
             {
                 if (!(object->oflags2 & 0x10000000) || (OBTABLE_InitAnimPointers(objectTracker), !(object->oflags2 & 0x10000000)))
                 {
@@ -1902,7 +1902,7 @@ Instance *INSTANCE_IntroduceSavedInstanceWithIntro(SavedIntroWithIntro *savedInt
             Object *object;
             object = objectTracker->object;
 
-            if (objectTracker->objectStatus == 2 && (savedIntro->attachedUniqueID == 0 || ((attachInst = INSTANCE_Find(savedIntro->attachedUniqueID), attachInst != NULL) && attachInst->matrix != NULL)))
+            if (objectTracker->objectStatus == OBJECTTRACKER_USED && (savedIntro->attachedUniqueID == 0 || ((attachInst = INSTANCE_Find(savedIntro->attachedUniqueID), attachInst != NULL) && attachInst->matrix != NULL)))
             {
                 if (!(object->oflags2 & 0x10000000) || (OBTABLE_InitAnimPointers(objectTracker), !(object->oflags2 & 0x10000000)))
                 {

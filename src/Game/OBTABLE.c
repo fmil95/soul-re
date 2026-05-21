@@ -196,7 +196,7 @@ Object *OBTABLE_FindObject(char *objectName)
 
     for (i = 48; i != 0; i--, otr++)
     {
-        if (otr->objectStatus != 0)
+        if (otr->objectStatus != OBJECTTRACKER_UNUSED)
         {
             object = otr->object;
 
@@ -307,7 +307,7 @@ void OBTABLE_InitAnimPointers(ObjectTracker *objectTracker)
                         otr->objectsUsing[j] = objectIndex;
                     }
 
-                    if (otr->objectStatus == 2)
+                    if (otr->objectStatus == OBJECTTRACKER_USED)
                     {
                         *keyPtr = ownerOb->animList[oi->animID];
                     }

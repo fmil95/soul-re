@@ -170,7 +170,7 @@ void GAMELOOP_InitGameTracker()
 
     for (i = 0; i < 48; i++)
     {
-        gameTrackerX.GlobalObjects[i].objectStatus = 0;
+        gameTrackerX.GlobalObjects[i].objectStatus = OBJECTTRACKER_UNUSED;
     }
 
     gameTrackerX.gameData.asmData.MorphTime = 1000;
