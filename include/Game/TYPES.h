@@ -462,6 +462,13 @@ enum ObjectTrackerStatus
     OBJECTTRACKER_LOADING_VRAM = 4,
 };
 
+enum SaveSize
+{
+    SAVE_BLOCKS = 3,
+    SAVE_BYTES = 24576,
+    SAVE_DATABYTES = 24576,
+};
+
 typedef enum language_t
 {
     language_english = 0,

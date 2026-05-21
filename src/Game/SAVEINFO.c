@@ -70,9 +70,9 @@ void SAVE_ClearMemory(GameTracker *gameTracker)
     savedInfoTracker.InfoStart = &buffer[the_header_size];
     savedInfoTracker.InfoEnd = &buffer[the_header_size];
 
-    savedInfoTracker.EndOfMemory = &buffer[24576];
+    savedInfoTracker.EndOfMemory = &buffer[SAVE_DATABYTES];
 
-    memset(&savedInfoTracker.MemoryCardBuffer[the_header_size], 0, 24576 - the_header_size);
+    memset(&savedInfoTracker.MemoryCardBuffer[the_header_size], 0, SAVE_DATABYTES - the_header_size);
 
     numbufferedIntros = 0;
 
@@ -91,13 +91,12 @@ void SAVE_Init(GameTracker *gt)
 {
     void *buffer;
 
-    buffer = MEMPACK_Malloc(24576, MEMORY_TYPE_SAVEINFO);
+    buffer = MEMPACK_Malloc(SAVE_BYTES, MEMORY_TYPE_SAVEINFO);
 
     if (DoMainMenu)
     {
         gt->memcard = &gMemcard;
-
-        the_header_size = memcard_initialize(&gMemcard, gt, 3, buffer, 24576);
+        the_header_size = memcard_initialize(&gMemcard, gt, SAVE_BLOCKS, buffer, SAVE_DATABYTES);
     }
     else
     {
@@ -149,7 +148,7 @@ void *SAVE_GetSavedBlock(long saveType, long extraSize)
         }
         else if (SAVE_PurgeAMemoryBlock() == 0)
         {
-            DEBUG_FatalError("ran out of saved memory. needed %d, used %d.\nincrease from %d\n", sizeOfSave, savedInfoTracker.EndOfMemory - savedInfoTracker.InfoEnd, 24576);
+            DEBUG_FatalError("ran out of saved memory. needed %d, used %d.\nincrease from %d\n", sizeOfSave, savedInfoTracker.EndOfMemory - savedInfoTracker.InfoEnd, SAVE_DATABYTES);
 
             done = 1;
         }
