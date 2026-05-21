@@ -866,7 +866,7 @@ int MainG2(void *appData)
 
                     RemoveAllObjects(gameTracker);
 
-                    while (aadGetNumLoadsQueued() != 0 || aadMem->sramDefragInfo.status != 0)
+                    while (aadGetNumLoadsQueued() != 0 || aadMem->sramDefragInfo.status != AAD_SRAM_DEFRAG_IDLE)
                     {
                         SOUND_UpdateSound();
 
