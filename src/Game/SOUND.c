@@ -714,12 +714,12 @@ void SOUND_SetInstanceSoundVolume(SoundInstance *soundInst, long volumeChangeAmt
         {
             time = abs(time);
 
-            if ((volumeChangeAmt > 0) && ((channel->volume + volumeChangeAmt) >= 128))
+            if ((volumeChangeAmt > 0) && ((channel->volume + volumeChangeAmt) > MAX_RAW_VOLUME))
             {
-                volumeChangeAmt = 127 - channel->volume;
+                volumeChangeAmt = MAX_RAW_VOLUME - channel->volume;
             }
 
-            if ((volumeChangeAmt < 0) && ((channel->volume + volumeChangeAmt) < 0))
+            if (volumeChangeAmt < 0 && (channel->volume + volumeChangeAmt) < 0)
             {
                 volumeChangeAmt = -channel->volume;
             }
@@ -953,9 +953,9 @@ unsigned long SOUND_Play3dSound(Position *position, int sfxToneID, int pitch, in
 
                 qpos = angle & 0x3FF;
 
-                if (volume >= 128)
+                if (volume > MAX_RAW_VOLUME)
                 {
-                    volume = 127;
+                    volume = MAX_RAW_VOLUME;
                 }
 
                 switch (quadrant)
@@ -1044,9 +1044,9 @@ unsigned long SOUND_Update3dSound(Position *position, unsigned long handle, int 
 
             qpos = angle & 0x3FF;
 
-            if (volume >= 128)
+            if (volume > MAX_RAW_VOLUME)
             {
-                volume = 127;
+                volume = MAX_RAW_VOLUME;
             }
 
             switch (quadrant)
@@ -1108,8 +1108,8 @@ void SOUND_Init()
 
     gameTrackerX.sound.gMasterVol = 16383;
 
-    SOUND_SetMusicVolume(127);
-    SOUND_SetSfxVolume(127);
+    SOUND_SetMusicVolume(MAX_RAW_VOLUME);
+    SOUND_SetSfxVolume(MAX_RAW_VOLUME);
     SOUND_SetVoiceVolume(80);
 
     gameTrackerX.sound.gSfxOn = 1;
