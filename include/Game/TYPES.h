@@ -438,6 +438,15 @@ typedef enum _G2AnimControllerType_Enum {
     G2ANIM_CTRLRTYPE_COUNT = 101,
 } G2AnimControllerType;
 
+enum ObjectTrackerStatus
+{
+    OBJECTTRACKER_UNUSED = 0,
+    OBJECTTRACKER_LOADING = 1,
+    OBJECTTRACKER_USED = 2,
+    OBJECTTRACKER_DUMP = 3,
+    OBJECTTRACKER_LOADING_VRAM = 4,
+};
+
 typedef enum language_t
 {
     language_english = 0,
