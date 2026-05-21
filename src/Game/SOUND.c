@@ -1409,7 +1409,7 @@ void SOUND_ProcessMusicLoad()
         }
         else if (musicInfo.checkMusicDelay == 0)
         {
-            if (aadMem->sramDefragInfo.status == 0)
+            if (aadMem->sramDefragInfo.status == AAD_SRAM_DEFRAG_IDLE)
             {
                 musicInfo.checkMusicDelay = 30;
 
@@ -1520,7 +1520,7 @@ void SOUND_ProcessMusicLoad()
 
         break;
     case MUSIC_STATE_MAIN_MUSIC_ENDED:
-        if (aadMem->sramDefragInfo.status == 0)
+        if (aadMem->sramDefragInfo.status == AAD_SRAM_DEFRAG_IDLE)
         {
             sprintf(sndFileName, "\\kain2\\music\\%s\\%s.snd", musicInfo.currentMusicName, musicInfo.currentMusicName);
             sprintf(smpFileName, "\\kain2\\music\\%s\\%s.smp", musicInfo.currentMusicName, musicInfo.currentMusicName);
