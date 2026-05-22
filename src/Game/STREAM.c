@@ -142,7 +142,7 @@ int FindObjectName(char *name)
 
     for (i = 0; i < 48; i++, otr++)
     {
-        if ((otr->objectStatus != 0) && (strcmpi(otr->name, name) == 0))
+        if ((otr->objectStatus != OBJECTTRACKER_UNUSED) && (strcmpi(otr->name, name) == 0))
         {
             return i;
         }
@@ -160,7 +160,7 @@ ObjectTracker *FindObjectInTracker(Object *object)
 
     for (i = 0; i < 48; i++, otr++)
     {
-        if ((otr->objectStatus != 0) && (otr->object == object))
+        if ((otr->objectStatus != OBJECTTRACKER_UNUSED) && (otr->object == object))
         {
             return otr;
         }
@@ -221,7 +221,7 @@ void STREAM_LoadObjectReturn(void *loadData, void *data, void *data2)
 
         object->sfxFileHandle = 0;
 
-        if (LOAD_DoesFileExist(objDsfxFileName) != 0)
+        if (LOAD_DoesFileExist(objDsfxFileName))
         {
             object->sfxFileHandle = aadLoadDynamicSfx(objectTracker->name, 0, 0);
         }
@@ -229,11 +229,11 @@ void STREAM_LoadObjectReturn(void *loadData, void *data, void *data2)
 
     if (objectTracker->vramBlock == NULL)
     {
-        objectTracker->objectStatus = 2;
+        objectTracker->objectStatus = OBJECTTRACKER_USED;
     }
     else
     {
-        objectTracker->objectStatus = 4;
+        objectTracker->objectStatus = OBJECTTRACKER_LOADING_VRAM;
     }
 }
 
@@ -311,7 +311,7 @@ void STREAM_DumpSomeMonsters()
 
     for (i = 0; i < 48; i++, otr++)
     {
-        if (((otr->objectStatus == 2) && (otr->object != NULL)) && (STREAM_IsSpecialMonster((char *)otr) != 0))
+        if (((otr->objectStatus == OBJECTTRACKER_USED) && (otr->object != NULL)) && (STREAM_IsSpecialMonster((char *)otr) != 0))
         {
             STREAM_DumpMonster(otr);
         }
@@ -392,7 +392,7 @@ int InsertGlobalObject(char *name, GameTracker *gameTracker)
 
         for (i = 0; i < 48; i++, otr++)
         {
-            if ((otr->objectStatus != 0) && (strcmpi(otr->name, name) == 0))
+            if ((otr->objectStatus != OBJECTTRACKER_UNUSED) && (strcmpi(otr->name, name) == 0))
             {
                 break;
             }
@@ -404,7 +404,7 @@ int InsertGlobalObject(char *name, GameTracker *gameTracker)
 
             for (i = 0; i < 48; i++, otr++)
             {
-                if (otr->objectStatus == 0)
+                if (otr->objectStatus == OBJECTTRACKER_UNUSED)
                 {
                     break;
                 }
@@ -425,7 +425,7 @@ int InsertGlobalObject(char *name, GameTracker *gameTracker)
 
             strcpy(otr->name, name);
 
-            otr->objectStatus = 1;
+            otr->objectStatus = OBJECTTRACKER_LOADING;
 
             LOAD_NonBlockingBinaryLoad(string, (void *)STREAM_LoadObjectReturn, (void *)otr, NULL, (void **)&otr->object, 1);
 
@@ -527,7 +527,7 @@ void STREAM_StreamLoadObjectAbort(void *loadData, void *data, void *data2)
         MEMPACK_Free((char *)loadData);
     }
 
-    objectTracker->objectStatus = 0;
+    objectTracker->objectStatus = OBJECTTRACKER_UNUSED;
 }
 
 void STREAM_DumpLoadingObjects()
@@ -539,7 +539,7 @@ void STREAM_DumpLoadingObjects()
 
     for (i = 0; i < 48; i++, tracker++)
     {
-        if (tracker->objectStatus == 1)
+        if (tracker->objectStatus == OBJECTTRACKER_LOADING)
         {
             STREAM_DumpObject(tracker);
         }
@@ -553,7 +553,7 @@ void STREAM_DumpObject(ObjectTracker *objectTracker)
 
     object = objectTracker->object;
 
-    if (objectTracker->objectStatus == 1)
+    if (objectTracker->objectStatus == OBJECTTRACKER_LOADING)
     {
         sprintf(dramName, "\\kain2\\object\\%s\\%s.drm", objectTracker->name, objectTracker->name);
 
@@ -577,17 +577,17 @@ void STREAM_DumpObject(ObjectTracker *objectTracker)
 
             MEMPACK_Free((char *)object);
 
-            objectTracker->objectStatus = 0;
+            objectTracker->objectStatus = OBJECTTRACKER_UNUSED;
         }
 
         if (object == NULL)
         {
-            objectTracker->objectStatus = 0;
+            objectTracker->objectStatus = OBJECTTRACKER_UNUSED;
         }
     }
     else
     {
-        objectTracker->objectStatus = 0;
+        objectTracker->objectStatus = OBJECTTRACKER_UNUSED;
     }
 }
 
@@ -626,13 +626,13 @@ void STREAM_RemoveAllObjectsNotInUse()
     {
         Object *object;
 
-        if (tracker->objectStatus == 2)
+        if (tracker->objectStatus == OBJECTTRACKER_USED)
         {
             object = tracker->object;
 
             if ((!(object->oflags & 0x2000000)) && (STREAM_IsObjectInAnyUnit(tracker) == 0) && (STREAM_IsAnInstanceUsingObject(object) == 0))
             {
-                tracker->objectStatus = 3;
+                tracker->objectStatus = OBJECTTRACKER_DUMP;
             }
         }
     }
@@ -643,15 +643,15 @@ void STREAM_RemoveAllObjectsNotInUse()
 
         for (tracker = trackerList, i = 0; i < 48; i++, tracker++)
         {
-            if (tracker->objectStatus == 3)
+            if (tracker->objectStatus == OBJECTTRACKER_DUMP)
             {
                 int j;
 
                 for (j = 0; j < (char)tracker->numObjectsUsing; j++)
                 {
-                    if (trackerList[(int)tracker->objectsUsing[j]].objectStatus != 3)
+                    if (trackerList[(int)tracker->objectsUsing[j]].objectStatus != OBJECTTRACKER_DUMP)
                     {
-                        tracker->objectStatus = 2;
+                        tracker->objectStatus = OBJECTTRACKER_USED;
 
                         abort = 0;
                         break;
@@ -663,14 +663,14 @@ void STREAM_RemoveAllObjectsNotInUse()
 
     for (tracker = trackerList, i = 0; i < 48; i++, tracker++)
     {
-        if (tracker->objectStatus == 3)
+        if (tracker->objectStatus == OBJECTTRACKER_DUMP)
         {
             int j;
             ObjectTracker *otr;
 
             for (otr = trackerList, j = 0; j < 48; j++, otr++)
             {
-                if ((otr->objectStatus == 1) || (otr->objectStatus == 2) || (otr->objectStatus == 4))
+                if (otr->objectStatus == OBJECTTRACKER_LOADING || otr->objectStatus == OBJECTTRACKER_USED || otr->objectStatus == OBJECTTRACKER_LOADING_VRAM)
                 {
                     int k;
 
@@ -699,7 +699,7 @@ void STREAM_RemoveAllObjectsNotInUse()
 
     for (tracker = trackerList, i = 0; i < 48; i++, tracker++)
     {
-        if ((tracker->objectStatus == 1) && (STREAM_IsObjectInAnyUnit(tracker) == 0) && ((char)tracker->numObjectsUsing == 0))
+        if (tracker->objectStatus == OBJECTTRACKER_LOADING && (STREAM_IsObjectInAnyUnit(tracker) == 0) && ((char)tracker->numObjectsUsing == 0))
         {
             STREAM_DumpObject(tracker);
         }
@@ -713,7 +713,7 @@ void RemoveAllObjects(GameTracker *gameTracker)
 
     for (i = 0, tracker = &gameTracker->GlobalObjects[i]; i < 48; i++, tracker++)
     {
-        if (tracker->objectStatus != 0)
+        if (tracker->objectStatus != OBJECTTRACKER_UNUSED)
         {
             STREAM_DumpObject(tracker);
         }
@@ -4416,12 +4416,12 @@ int STREAM_TryAndDumpNonResident(ObjectTracker *otr)
     Instance *instance;
     Instance *next;
 
-    if ((otr->objectStatus != 2) || ((otr->object->oflags & 0x2000000)))
+    if (otr->objectStatus != OBJECTTRACKER_USED || ((otr->object->oflags & 0x2000000)))
     {
         return 0;
     }
 
-    if (STREAM_IsObjectInAnyUnit(otr) != 0)
+    if (STREAM_IsObjectInAnyUnit(otr))
     {
         return 0;
     }
@@ -4457,5 +4457,5 @@ int STREAM_TryAndDumpNonResident(ObjectTracker *otr)
 
     STREAM_RemoveAllObjectsNotInUse();
 
-    return otr->objectStatus == 0;
+    return otr->objectStatus == OBJECTTRACKER_UNUSED;
 }

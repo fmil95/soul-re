@@ -70,34 +70,33 @@ void SAVE_ClearMemory(GameTracker *gameTracker)
     savedInfoTracker.InfoStart = &buffer[the_header_size];
     savedInfoTracker.InfoEnd = &buffer[the_header_size];
 
-    savedInfoTracker.EndOfMemory = &buffer[24576];
+    savedInfoTracker.EndOfMemory = &buffer[SAVE_DATABYTES];
 
-    memset(&savedInfoTracker.MemoryCardBuffer[the_header_size], 0, 24576 - the_header_size);
+    memset(&savedInfoTracker.MemoryCardBuffer[the_header_size], 0, SAVE_DATABYTES - the_header_size);
 
     numbufferedIntros = 0;
 
     memset(bufferSavedIntroArray, 0, sizeof(bufferSavedIntroArray));
 
-    GlobalSave = (GlobalSaveTracker *)SAVE_GetSavedBlock(6, 0);
+    GlobalSave = (GlobalSaveTracker *)SAVE_GetSavedBlock(SAVED_ID_GLOBAL_SAVE, 0);
 
     GlobalSave->CurrentBirthID = 8192;
 
     GlobalSave->humanOpinionOfRaziel = 0;
 
-    SAVE_GetSavedBlock(4, 0);
+    SAVE_GetSavedBlock(SAVED_ID_DEAD_DEAD_BITS, 0);
 }
 
 void SAVE_Init(GameTracker *gt)
 {
     void *buffer;
 
-    buffer = MEMPACK_Malloc(24576, MEMORY_TYPE_SAVEINFO);
+    buffer = MEMPACK_Malloc(SAVE_BYTES, MEMORY_TYPE_SAVEINFO);
 
-    if (DoMainMenu != 0)
+    if (DoMainMenu)
     {
         gt->memcard = &gMemcard;
-
-        the_header_size = memcard_initialize(&gMemcard, gt, 3, buffer, 24576);
+        the_header_size = memcard_initialize(&gMemcard, gt, SAVE_BLOCKS, buffer, SAVE_DATABYTES);
     }
     else
     {
@@ -117,7 +116,7 @@ void *SAVE_GetSavedBlock(long saveType, long extraSize)
 
     savedInfo = NULL;
 
-    if (saveType >= 10)
+    if (saveType >= SAVED_ID_MAX_IDS)
     {
         DEBUG_FatalError("illegal save type %d\n", saveType);
     }
@@ -149,11 +148,11 @@ void *SAVE_GetSavedBlock(long saveType, long extraSize)
         }
         else if (SAVE_PurgeAMemoryBlock() == 0)
         {
-            DEBUG_FatalError("ran out of saved memory. needed %d, used %d.\nincrease from %d\n", sizeOfSave, savedInfoTracker.EndOfMemory - savedInfoTracker.InfoEnd, 24576);
+            DEBUG_FatalError("ran out of saved memory. needed %d, used %d.\nincrease from %d\n", sizeOfSave, savedInfoTracker.EndOfMemory - savedInfoTracker.InfoEnd, SAVE_DATABYTES);
 
             done = 1;
         }
-    } while (done == 0);
+    } while (!done);
 
     return savedInfo;
 }
@@ -167,8 +166,8 @@ long SAVE_PurgeAMemoryBlock()
 
     for (curSave = (SavedBasic *)savedInfoTracker.InfoStart; (uintptr_t)curSave < (uintptr_t)savedInfoTracker.InfoEnd; curSave += curSave->shiftedSaveSize << 1)
     {
-        if (((curSave->savedID == 1) && (((SavedIntro *)curSave)->flags2 & 0x100))
-        || ((curSave->savedID == 7) && (((SavedIntroWithIntro *)curSave)->flags2 & 0x100)))
+        if ((curSave->savedID == SAVED_ID_INSTANCE && ((SavedIntro *)curSave)->flags2 & 0x100)
+        || (curSave->savedID == SAVED_ID_INSTANCE_WITH_INTRO && ((SavedIntroWithIntro *)curSave)->flags2 & 0x100))
         {
             SAVE_DeleteBlock(curSave);
 
@@ -185,19 +184,19 @@ long SAVE_SaveableInstance(Instance *instance)
     long result;
     int temp, temp2; // not from decls.h
 
-    result = 0;
+    result = SAVED_ID_NONE;
 
     temp2 = instance->flags2;
 
-    if ((!(temp2 & 0x20000)) && (instance->object != NULL))
+    if (!(temp2 & 0x20000) && instance->object != NULL)
     {
         if (((instance->object->oflags2 & 0x80000)) || (instance == gameTrackerX.playerInstance))
         {
-            result = 1;
+            result = SAVED_ID_INSTANCE;
         }
         else if ((instance->object->oflags2 & 0x40000))
         {
-            result = 1;
+            result = SAVED_ID_INSTANCE;
 
             if ((instance->object->oflags & result))
             {
@@ -208,18 +207,18 @@ long SAVE_SaveableInstance(Instance *instance)
         }
         else if (!(instance->flags & 0x100000))
         {
-            result = 3;
+            result = SAVED_ID_LEVEL;
         }
     }
 
-    if ((instance->object->oflags2 & 0x100000))
+    if (instance->object->oflags2 & 0x100000)
     {
-        result = 0;
+        result = SAVED_ID_NONE;
     }
 
-    if ((result == 1) && (instance->currentStreamUnitID == instance->birthStreamUnitID) && (instance->introUniqueID < 8192))
+    if (result == SAVED_ID_INSTANCE && instance->currentStreamUnitID == instance->birthStreamUnitID && instance->introUniqueID < 8192)
     {
-        result = 2;
+        result = SAVED_ID_EVENT;
     }
 
     return result;
@@ -233,7 +232,7 @@ SavedIntro *SAVE_UpdateSavedIntro(Instance *instance, Level *level, SavedIntro *
     if (savedIntro)
     {
         memcpy(savedIntro->name, instance->introName, 8);
-        savedIntro->savedID = 1;
+        savedIntro->savedID = SAVED_ID_INSTANCE;
         savedIntro->introUniqueID = (short)instance->introUniqueID;
         savedIntro->streamUnitID = (short)instance->currentStreamUnitID;
         savedIntro->birthUnitID = (short)instance->birthStreamUnitID;
@@ -258,9 +257,9 @@ SavedIntroWithIntro *SAVE_UpdateSavedIntroWithIntro(Instance *instance, Level *l
 
     levelOffset = &level->terrain->BSPTreeArray->globalOffset;
 
-    if ((savedIntro != NULL) && (instance->intro != NULL))
+    if (savedIntro != NULL && instance->intro != NULL)
     {
-        savedIntro->savedID = 7;
+        savedIntro->savedID = SAVED_ID_INSTANCE_WITH_INTRO;
 
         savedIntro->introOffset = instance->intro - level->introList;
 
@@ -294,8 +293,8 @@ SavedBasic *SAVE_GetSavedEvent(long areaID, long eventNumber)
 
     for (curSave = (SavedBasic *)savedInfoTracker.InfoStart; (uintptr_t)curSave < (uintptr_t)savedInfoTracker.InfoEnd; curSave += curSave->shiftedSaveSize << 1)
     {
-        if (((curSave->savedID == 2) && (((SavedEvent *)curSave)->areaID == areaID) && (((SavedEvent *)curSave)->eventNumber == eventNumber))
-        || ((curSave->savedID == 9) && (((SavedEventSmallVars *)curSave)->areaID == areaID) && ((unsigned char)((SavedEventSmallVars *)curSave)->eventNumber == eventNumber)))
+        if ((curSave->savedID == SAVED_ID_EVENT && ((SavedEvent *)curSave)->areaID == areaID && ((SavedEvent *)curSave)->eventNumber == eventNumber)
+        || (curSave->savedID == SAVED_ID_EVENT_SMALL_VARS && ((SavedEventSmallVars *)curSave)->areaID == areaID && (unsigned char)((SavedEventSmallVars *)curSave)->eventNumber == eventNumber))
         {
             return curSave;
         }
@@ -329,8 +328,8 @@ SavedBasic *SAVE_GetSavedNextEvent(long areaID, SavedBasic *curSave)
 
     for (; (uintptr_t)curSave < (uintptr_t)savedInfoTracker.InfoEnd; curSave += curSave->shiftedSaveSize << 1)
     {
-        if (((curSave->savedID == 2) && (((SavedEvent *)curSave)->areaID == areaID))
-        || ((curSave->savedID == 9) && (((SavedEventSmallVars *)curSave)->areaID == areaID)))
+        if ((curSave->savedID == SAVED_ID_EVENT && ((SavedEvent *)curSave)->areaID == areaID)
+        || (curSave->savedID == SAVED_ID_EVENT_SMALL_VARS && ((SavedEventSmallVars *)curSave)->areaID == areaID))
         {
             return curSave;
         }
@@ -385,7 +384,7 @@ void SAVE_IntroduceBufferIntros()
         {
             int deleted;
 
-            if (bufferSavedIntroArray[i]->savedID == 1)
+            if (bufferSavedIntroArray[i]->savedID == SAVED_ID_INSTANCE)
             {
                 SavedIntro *temp; // not from decls.h
 
@@ -449,16 +448,16 @@ void SAVE_IntroForStreamID(StreamUnit *streamUnit)
     {
         deleted = 0;
 
-        if ((saveIntro->savedID == 1) && (((SavedIntro *)saveIntro)->streamUnitID == streamID))
+        if (saveIntro->savedID == SAVED_ID_INSTANCE && ((SavedIntro *)saveIntro)->streamUnitID == streamID)
         {
             INSTANCE_IntroduceSavedInstance((SavedIntro *)saveIntro, streamUnit, &deleted);
         }
-        else if ((saveIntro->savedID == 7) && (((SavedIntroWithIntro *)saveIntro)->birthUnitID == streamID))
+        else if (saveIntro->savedID == SAVED_ID_INSTANCE_WITH_INTRO && ((SavedIntroWithIntro *)saveIntro)->birthUnitID == streamID)
         {
             INSTANCE_IntroduceSavedInstanceWithIntro((SavedIntroWithIntro *)saveIntro, streamUnit, &deleted);
         }
 
-        if (deleted == 0)
+        if (!deleted)
         {
             saveIntro += saveIntro->shiftedSaveSize << 1;
         }
@@ -476,8 +475,8 @@ long SAVE_HasSavedIntro(Intro *intro, long currentStreamID)
 
     for (saveIntro = (SavedIntro *)savedInfoTracker.InfoStart; (uintptr_t)saveIntro < (uintptr_t)savedInfoTracker.InfoEnd; saveIntro = (SavedIntro *)((char *)saveIntro + (saveIntro->shiftedSaveSize << 2)))
     {
-        if (((saveIntro->savedID == 1) && (saveIntro->introUniqueID == intro->UniqueID))
-        || ((saveIntro->savedID == 7) && (((SavedIntroWithIntro *)saveIntro)->introUniqueID == intro->UniqueID)))
+        if ((saveIntro->savedID == SAVED_ID_INSTANCE && saveIntro->introUniqueID == intro->UniqueID)
+        || (saveIntro->savedID == SAVED_ID_INSTANCE_WITH_INTRO && ((SavedIntroWithIntro *)saveIntro)->introUniqueID == intro->UniqueID))
         {
             result = 1;
             break;
@@ -493,7 +492,7 @@ SavedLevel *SAVE_HasSavedLevel(long areaID)
 
     for (savedLevel = (SavedLevel *)savedInfoTracker.InfoStart; (uintptr_t)savedLevel < (uintptr_t)savedInfoTracker.InfoEnd; savedLevel = (SavedLevel *)((char *)savedLevel + (savedLevel->shiftedSaveSize << 2)))
     {
-        if ((savedLevel->savedID == 3) && (savedLevel->areaID == areaID))
+        if (savedLevel->savedID == SAVED_ID_LEVEL && savedLevel->areaID == areaID)
         {
             return savedLevel;
         }
@@ -576,13 +575,13 @@ SavedLevel *SAVE_CreatedSavedLevel(long areaID, Level *level)
         {
             savedLevel = SAVE_HasSavedLevel(areaID);
 
-            if ((savedLevel != NULL) || (savedLevel = SAVE_GetSavedBlock(3, numBSPTrees * 8), savedLevel != NULL))
+            if (savedLevel != NULL || (savedLevel = SAVE_GetSavedBlock(SAVED_ID_LEVEL, numBSPTrees * 8), savedLevel != NULL))
             {
                 slevel = (ActualSavedLevel *)savedLevel;
 
                 slevel->areaID = areaID;
 
-                if ((level->waterZLevel != -32767) && (level->waterZLevel != 32767))
+                if (level->waterZLevel != -32767 && level->waterZLevel != 32767)
                 {
                     slevel->waterZ = level->waterZLevel - Zoffset;
                 }
@@ -672,7 +671,7 @@ void SAVE_Instance(Instance *instance, Level *level)
 
     saveType = SAVE_SaveableInstance(instance);
 
-    if (saveType != 0)
+    if (saveType != SAVED_ID_NONE)
     {
         if ((instance->flags2 & 0x4))
         {
@@ -682,7 +681,7 @@ void SAVE_Instance(Instance *instance, Level *level)
 
             if (extraData != NULL)
             {
-                savedSmallIntro = (SavedIntroSmall *)SAVE_GetSavedBlock(5, extraData->length);
+                savedSmallIntro = (SavedIntroSmall *)SAVE_GetSavedBlock(SAVED_ID_SMALL_INSTANCE, extraData->length);
 
                 if (savedSmallIntro != NULL)
                 {
@@ -692,7 +691,7 @@ void SAVE_Instance(Instance *instance, Level *level)
                 }
             }
         }
-        else if (saveType == 1)
+        else if (saveType == SAVED_ID_INSTANCE)
         {
             SAVE_DeleteInstance(instance);
 
@@ -703,14 +702,14 @@ void SAVE_Instance(Instance *instance, Level *level)
                 extraSize = extraData->length;
             }
 
-            savedIntro = (SavedIntro *)SAVE_GetSavedBlock(1, extraSize);
+            savedIntro = (SavedIntro *)SAVE_GetSavedBlock(SAVED_ID_INSTANCE, extraSize);
 
             if (savedIntro != NULL)
             {
                 SAVE_UpdateSavedIntro(instance, level, savedIntro, extraData);
             }
         }
-        else if (saveType == 2)
+        else if (saveType == SAVED_ID_EVENT)
         {
             SAVE_DeleteInstance(instance);
 
@@ -721,18 +720,18 @@ void SAVE_Instance(Instance *instance, Level *level)
                 extraSize = extraData->length;
             }
 
-            savedIntroWithIntro = (SavedIntroWithIntro *)SAVE_GetSavedBlock(7, extraSize);
+            savedIntroWithIntro = (SavedIntroWithIntro *)SAVE_GetSavedBlock(SAVED_ID_INSTANCE_WITH_INTRO, extraSize);
 
             if (savedIntroWithIntro != NULL)
             {
                 SAVE_UpdateSavedIntroWithIntro(instance, level, savedIntroWithIntro, extraData);
             }
         }
-        else if (saveType == 3)
+        else if (saveType == SAVED_ID_LEVEL)
         {
             SAVE_DeleteInstance(instance);
 
-            savedIntroSpline = (SavedIntroSpline *)SAVE_GetSavedBlock(8, 0);
+            savedIntroSpline = (SavedIntroSpline *)SAVE_GetSavedBlock(SAVED_ID_INSTANCE_SPLINE, 0);
 
             if (savedIntroSpline != NULL)
             {
@@ -752,7 +751,7 @@ void SAVE_Instance(Instance *instance, Level *level)
                         instance->splineFlags |= 0x100;
                     }
 
-                    savedIntroSpline->savedID = 8;
+                    savedIntroSpline->savedID = SAVED_ID_INSTANCE_SPLINE;
 
                     savedIntroSpline->introUniqueID = (short)instance->introUniqueID;
 
@@ -774,10 +773,10 @@ void SAVE_DeleteInstance(Instance *instance)
 
     for (saveIntro = (SavedBasic *)savedInfoTracker.InfoStart; (uintptr_t)saveIntro < (uintptr_t)savedInfoTracker.InfoEnd; saveIntro += saveIntro->shiftedSaveSize << 1)
     {
-        if (((saveIntro->savedID == 1) && (((SavedIntro *)saveIntro)->introUniqueID == instance->introUniqueID)) ||
-        ((saveIntro->savedID == 7) && (((SavedIntroWithIntro *)saveIntro)->introUniqueID == instance->introUniqueID)) ||
-        ((saveIntro->savedID == 5) && (((SavedIntroSmall *)saveIntro)->introUniqueID == instance->introUniqueID)) ||
-        ((saveIntro->savedID == 8) && (((SavedIntroSpline *)saveIntro)->introUniqueID == instance->introUniqueID)))
+        if ((saveIntro->savedID == SAVED_ID_INSTANCE && ((SavedIntro *)saveIntro)->introUniqueID == instance->introUniqueID) ||
+        (saveIntro->savedID == SAVED_ID_INSTANCE_WITH_INTRO && ((SavedIntroWithIntro *)saveIntro)->introUniqueID == instance->introUniqueID) ||
+        (saveIntro->savedID == SAVED_ID_SMALL_INSTANCE && ((SavedIntroSmall *)saveIntro)->introUniqueID == instance->introUniqueID) ||
+        (saveIntro->savedID == SAVED_ID_INSTANCE_SPLINE && ((SavedIntroSpline *)saveIntro)->introUniqueID == instance->introUniqueID))
         {
             SAVE_DeleteBlock(saveIntro);
             break;
@@ -798,7 +797,7 @@ void SAVE_SetDeadDeadBit(int uniqueID, long set)
     {
         for (saveIntro = (SavedIntro *)savedInfoTracker.InfoStart; (uintptr_t)saveIntro < (uintptr_t)savedInfoTracker.InfoEnd; saveIntro = (SavedIntro *)((char *)saveIntro + (saveIntro->shiftedSaveSize << 2)))
         {
-            if (saveIntro->savedID == 4)
+            if (saveIntro->savedID == SAVED_ID_DEAD_DEAD_BITS)
             {
                 deadDeadBits = (SavedDeadDeadBits *)saveIntro;
                 break;
@@ -834,7 +833,7 @@ void SAVE_RestoreGlobalSavePointer()
 
     for (saveIntro = (SavedBasic *)savedInfoTracker.InfoStart; (uintptr_t)saveIntro < (uintptr_t)savedInfoTracker.InfoEnd; saveIntro += saveIntro->shiftedSaveSize << 1)
     {
-        if (saveIntro->savedID == 6)
+        if (saveIntro->savedID == SAVED_ID_GLOBAL_SAVE)
         {
             GlobalSave = (GlobalSaveTracker *)saveIntro;
             break;
@@ -858,7 +857,7 @@ long SAVE_IsUniqueIDDeadDead(long uniqueID)
     {
         for (saveIntro = (SavedIntro *)savedInfoTracker.InfoStart; (uintptr_t)saveIntro < (uintptr_t)savedInfoTracker.InfoEnd; saveIntro = (SavedIntro *)((char *)saveIntro + (saveIntro->shiftedSaveSize << 2)))
         {
-            if (saveIntro->savedID == 4)
+            if (saveIntro->savedID == SAVED_ID_DEAD_DEAD_BITS)
             {
                 deadDeadBits = (SavedDeadDeadBits *)saveIntro;
                 break;
@@ -909,7 +908,7 @@ SavedIntroSmall *SAVE_GetSavedSmallIntro(Instance *instance)
 
     for (curSave = (SavedBasic *)savedInfoTracker.InfoStart; (uintptr_t)curSave < (uintptr_t)savedInfoTracker.InfoEnd; curSave += curSave->shiftedSaveSize << 1)
     {
-        if ((curSave->savedID == 5) && (((SavedIntroSmall *)curSave)->introUniqueID == instance->introUniqueID))
+        if (curSave->savedID == SAVED_ID_SMALL_INSTANCE && ((SavedIntroSmall *)curSave)->introUniqueID == instance->introUniqueID)
         {
             return (SavedIntroSmall *)curSave;
         }
@@ -924,7 +923,7 @@ SavedIntroSpline *SAVE_GetIntroSpline(Instance *instance)
 
     for (curSave = (SavedBasic *)savedInfoTracker.InfoStart; (uintptr_t)curSave < (uintptr_t)savedInfoTracker.InfoEnd; curSave += curSave->shiftedSaveSize << 1)
     {
-        if ((curSave->savedID == 8) && (((SavedIntroSpline *)curSave)->introUniqueID == instance->introUniqueID))
+        if (curSave->savedID == SAVED_ID_INSTANCE_SPLINE && ((SavedIntroSpline *)curSave)->introUniqueID == instance->introUniqueID)
         {
             return (SavedIntroSpline *)curSave;
         }

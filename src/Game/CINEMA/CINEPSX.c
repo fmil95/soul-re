@@ -61,7 +61,7 @@ int CINE_Load()
 
     tracker = STREAM_GetObjectTracker("cinemax");
 
-    for (; (attempts < 400) && (tracker->objectStatus != 2); attempts++)
+    for (; attempts < 400 && tracker->objectStatus != OBJECTTRACKER_USED; attempts++)
     {
         STREAM_PollLoadQueue();
 

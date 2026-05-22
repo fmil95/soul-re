@@ -69,6 +69,21 @@ enum SoundModifers
     SOUND_MODIFIER_MAX = 16,
 };
 
+enum SavedIDEnums
+{
+    SAVED_ID_NONE = 0,
+    SAVED_ID_INSTANCE = 1,
+    SAVED_ID_EVENT = 2,
+    SAVED_ID_LEVEL = 3,
+    SAVED_ID_DEAD_DEAD_BITS = 4,
+    SAVED_ID_SMALL_INSTANCE = 5,
+    SAVED_ID_GLOBAL_SAVE = 6,
+    SAVED_ID_INSTANCE_WITH_INTRO = 7,
+    SAVED_ID_INSTANCE_SPLINE = 8,
+    SAVED_ID_EVENT_SMALL_VARS = 9,
+    SAVED_ID_MAX_IDS = 10,
+};
+
 enum FXEffectType
 {
     FX_EFFECT_TYPE_RIBBON = 0x40,
@@ -437,6 +452,28 @@ typedef enum _G2AnimControllerType_Enum {
     G2ANIM_CTRLRTYPE_ADD_WORLDTRANS = 100,
     G2ANIM_CTRLRTYPE_COUNT = 101,
 } G2AnimControllerType;
+
+enum ObjectTrackerStatus
+{
+    OBJECTTRACKER_UNUSED = 0,
+    OBJECTTRACKER_LOADING = 1,
+    OBJECTTRACKER_USED = 2,
+    OBJECTTRACKER_DUMP = 3,
+    OBJECTTRACKER_LOADING_VRAM = 4,
+};
+
+enum SaveSize
+{
+    SAVE_BLOCKS = 3,
+    SAVE_BYTES = 24576,
+    SAVE_DATABYTES = 24576,
+};
+
+enum MaxVolume
+{
+    MAX_RAW_VOLUME = 127,
+    MAX_COOKED_VOLUME = 10,
+};
 
 typedef enum language_t
 {

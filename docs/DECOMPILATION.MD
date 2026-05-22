@@ -532,8 +532,18 @@ The main effort of this project is to reverse engineer the functions that were _
 
 The permuter is a tool that will continuously create small permutations of your current source code with the goal of achieving a better match. This is immensely helpful if you have a function mostly matched, but are stuck on some odd instruction ordering or register usage.
 
-Using the permuter is simple, just copy the link to your decomp scratch and run the following terminal command:
+Using the permuter is simple. You can either:
+
+- Pass the URL of the scratch:
 
 ```bash
-python tools/scripts/permuter.py <LINK TO YOUR SCRATCH>
+python tools/scripts/permuter.py https://decomp.me/myScratch
 ```
+
+- Pass the path of the exported scratch:
+
+```bash
+python tools/scripts/permuter.py path/to/my/scratch/folder
+```
+
+The second method can be used in the event of CloudFlare issues or if the decomp API is otherwise unreachable. To export your scratch manually, simply click the 'Export' button while on your decomp.me scratch, unzip the downloaded file, and enter the path to the unzipped folder as the argument to the permuter.

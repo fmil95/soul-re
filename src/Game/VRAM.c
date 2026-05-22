@@ -834,9 +834,9 @@ void VRAM_TransferBufferToVram(void *dataPtr, long dataSize, short status, void 
             }
         }
 
-        if ((status == 1) && (data2 != NULL) && (((ObjectTracker *)data2)->objectStatus == 4))
+        if (status == 1 && data2 != NULL && ((ObjectTracker *)data2)->objectStatus == OBJECTTRACKER_LOADING_VRAM)
         {
-            ((ObjectTracker *)data2)->objectStatus = 2;
+            ((ObjectTracker *)data2)->objectStatus = OBJECTTRACKER_USED;
         }
     }
 
