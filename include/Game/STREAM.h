@@ -82,6 +82,8 @@ void STREAM_UpdateLevelPointer(Level *oldLevel, Level *newLevel, long sizeOfLeve
 void STREAM_InitLoader(char *bigFileName, char *voiceFileName);
 void STREAM_Init();
 int STREAM_PollLoadQueue();
+void STREAM_NoMonsters();
+void STREAM_YesMonsters();
 void RemoveAllObjects(GameTracker *gameTracker);
 
 #endif

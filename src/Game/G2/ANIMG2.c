@@ -396,7 +396,7 @@ G2Bool G2Anim_SegmentHasActiveChannels(G2Anim *anim, int segNumber, unsigned sho
 
     segFlagBits = 0;
 
-    if ((activeChanBits & 0x1))
+    if (activeChanBits & 0x1)
     {
         dataFlagBits = segChanFlagStream[0];
         dataFlagBits = (segChanFlagStream[1] << 8) | dataFlagBits;
@@ -406,7 +406,7 @@ G2Bool G2Anim_SegmentHasActiveChannels(G2Anim *anim, int segNumber, unsigned sho
         segChanFlagStream += flagBytesPerSeg;
     }
 
-    if ((activeChanBits & 0x2))
+    if (activeChanBits & 0x2)
     {
         dataFlagBits = segChanFlagStream[0];
         dataFlagBits = (segChanFlagStream[1] << 8) | dataFlagBits;
@@ -416,7 +416,7 @@ G2Bool G2Anim_SegmentHasActiveChannels(G2Anim *anim, int segNumber, unsigned sho
         segChanFlagStream += flagBytesPerSeg;
     }
 
-    if ((activeChanBits & 0x4))
+    if (activeChanBits & 0x4)
     {
         dataFlagBits = segChanFlagStream[0];
         dataFlagBits = (segChanFlagStream[1] << 8) | dataFlagBits;
@@ -447,7 +447,7 @@ void G2Anim_GetSegChannelValue(G2Anim *anim, int segIndex, unsigned short *value
 
     while (channelMask != 0)
     {
-        if ((channelMask & 0x1))
+        if (channelMask & 0x1)
         {
             *valueTable++ = *chanFinalValue;
         }
@@ -1301,21 +1301,21 @@ void _G2AnimSection_InitStatus(G2AnimSection *section, G2Anim *anim)
     scaleKfInfo.stream = NULL;
     transKfInfo.stream = NULL;
 
-    if ((activeChanBits & 0x1))
+    if (activeChanBits & 0x1)
     {
         wombat(segKeyList, flagBitOffset, &rotKfInfo);
 
         flagBitOffset += bitsPerFlagType;
     }
 
-    if ((activeChanBits & 0x2))
+    if (activeChanBits & 0x2)
     {
         wombat(segKeyList, flagBitOffset, &scaleKfInfo);
 
         flagBitOffset += bitsPerFlagType;
     }
 
-    if ((activeChanBits & 0x4))
+    if (activeChanBits & 0x4)
     {
         wombat(segKeyList, flagBitOffset, &transKfInfo);
     }

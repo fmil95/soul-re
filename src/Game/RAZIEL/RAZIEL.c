@@ -4465,7 +4465,7 @@ void DefaultStateHandler(CharacterState *In, int CurrentSection, intptr_t Data)
 
             break;
         case 0x4000011:
-            if ((((Raziel.Abilities & 0x2)) && (Raziel.Senses.heldClass != 0x3) && (Raziel.CurrentPlane == 1)) && (CurrentSection == 0) && ((razSideMoveSpiderCheck(In->CharacterInstance, -128) == 0) && (razSideMoveSpiderCheck(In->CharacterInstance, 128) == 0)))
+            if (Raziel.Abilities & 0x2 && Raziel.Senses.heldClass != 0x3 && Raziel.CurrentPlane == 1 && CurrentSection == 0 && razSideMoveSpiderCheck(In->CharacterInstance, -128) == 0 && razSideMoveSpiderCheck(In->CharacterInstance, 128) == 0)
             {
                 StateSwitchStateCharacterDataDefault(In, StateHandlerWallGrab, 0);
             }
@@ -4578,13 +4578,13 @@ long RazielAnimCallback(G2Anim *anim, int sectionID, G2AnimCallbackMsg message, 
 
     switch (message)
     {
-    case 1:
+    case G2ANIM_MSG_DONE:
         EnMessageQueueData(&pSection->Event, 0x8000000, animSection->keylistID);
         break;
-    case 2:
+    case G2ANIM_MSG_LOOPPOINT:
         EnMessageQueueData(&pSection->Event, 0x8000001, animSection->keylistID);
         break;
-    case 4:
+    case G2ANIM_MSG_SEGCTRLR_INTERPDONE:
     {
         evAnimationControllerDoneData *ControllerData;
 
@@ -4605,15 +4605,14 @@ long RazielAnimCallback(G2Anim *anim, int sectionID, G2AnimCallbackMsg message, 
 
         break;
     }
-    case 3:
+    case G2ANIM_MSG_SECTION_INTERPDONE:
         EnMessageQueueData(&pSection->Event, 0x8000003, animSection->keylistID);
         break;
-    case 5:
+    case G2ANIM_MSG_SWALARMSET:
         animSection->swAlarmTable = NULL;
-
         EnMessageQueueData(&pSection->Event, 0x8000004, 0);
         break;
-    case 6:
+    case G2ANIM_MSG_PLAYEFFECT:
         if (messageDataA == 2)
         {
             AlarmData *data;

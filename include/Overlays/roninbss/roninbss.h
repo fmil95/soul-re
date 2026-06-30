@@ -79,4 +79,35 @@ typedef struct _RoninbssVars
     int armstomp_time;
 } RoninbssVars;
 
+// size: 0x4
+typedef struct _RoninbssSaveInfo
+{
+    // offset: 0x0000
+    int forRoninbss;
+} RoninbssSaveInfo;
+
+void RONINBSS_Init(Instance *instance);
+void RONINBSS_CleanUp(Instance *instance);
+void RONINBSS_DamageEffect(Instance *instance, evFXHitData *data);
+uintptr_t RONINBSS_Query(Instance *instance, unsigned long query);
+void RONINBSS_Message(Instance *instance, unsigned long message, unsigned long data);
+void RONINBSS_PursueEntry(Instance *instance);
+void RONINBSS_Pursue(Instance *instance);
+void RONINBSS_HitEntry(Instance *instance);
+void RONINBSS_Hit(Instance *instance);
+void RONINBSS_CombatEntry(Instance *instance);
+void RONINBSS_Combat(Instance *instance);
+void RONINBSS_IdleEntry(Instance *instance);
+void RONINBSS_Idle(Instance *instance);
+void RONINBSS_WanderEntry(Instance *instance);
+void RONINBSS_Wander(Instance *instance);
+void RONINBSS_AttackEntry(Instance *instance);
+void RONINBSS_Attack(Instance *instance);
+void RONINBSS_FallEntry(Instance *instance);
+void RONINBSS_Fall(Instance *instance);
+void RONINBSS_DoNothingEntry(Instance *instance);
+void RONINBSS_DoNothing(Instance *instance);
+void RONINBSS_DeadEntry(Instance *instance);
+void RONINBSS_Dead(Instance *instance);
+
 #endif

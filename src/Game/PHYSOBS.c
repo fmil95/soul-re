@@ -2884,7 +2884,7 @@ long PhysobAnimCallback(G2Anim *anim, int sectionID, G2AnimCallbackMsg message, 
     PhysObData *Data;
     Instance *temp; // not from decls.h
 
-    if (message == 1)
+    if (message == G2ANIM_MSG_DONE)
     {
         temp = (Instance *)data;
 

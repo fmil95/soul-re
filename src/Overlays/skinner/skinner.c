@@ -308,7 +308,7 @@ void SKINNER_Pursue(Instance *instance)
         }
     }
 
-    while (DeMessageQueue(&mv->messageQueue) != NULL) {};
+    while (DeMessageQueue(&mv->messageQueue) != NULL);
 }
 
 void SKINNER_HideEntry(Instance *instance)

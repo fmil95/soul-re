@@ -406,15 +406,14 @@ long MON_AnimCallback(G2Anim *anim, int sectionID, G2AnimCallbackMsg message, lo
 
     switch (message)
     {
-    case 1:
+    case G2ANIM_MSG_DONE:
         instance->flags2 |= 0x10;
-
         mv->mvFlags &= ~0x4000000;
         break;
-    case 2:
+    case G2ANIM_MSG_LOOPPOINT:
         instance->flags2 |= 0x2;
         break;
-    case 4:
+    case G2ANIM_MSG_SEGCTRLR_INTERPDONE:
         break;
     default:
         INSTANCE_DefaultAnimCallback(anim, sectionID, message, messageDataA, messageDataB, instance);
@@ -3171,7 +3170,7 @@ void MON_ProcessSpecialFade(Instance *instance)
     {
         if ((instance->currentMainState != MONSTER_STATE_DEAD) && (instance->currentMainState != MONSTER_STATE_GENERALDEATH))
         {
-            if ((*(int *)&gameTrackerX.gameData.asmData.MorphTime == 1000) || ((gameTrackerX.gameData.asmData.MorphType == 1) && (gameTrackerX.gameData.asmData.MorphTime != 1000))) // double-check
+            if ((gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 0) || (gameTrackerX.gameData.asmData.MorphType == 1 && gameTrackerX.gameData.asmData.MorphTime != 1000))
             {
                 targetFadeValue = mv->targetFade;
 

@@ -14,6 +14,7 @@ void MON_PlayRandomIdle(Instance *instance, int mode);
 void MON_TurnOnBodySpheres(Instance *instance);
 void MON_PlayAnimFromList(Instance *instance, char *animList, int animtype, int mode);
 void MON_PlayAnimIfNotPlaying(Instance *instance, enum MonsterAnim animtype, int mode);
+void MON_PlayAnimFromListIfNotPlaying(Instance *instance, char *animList, int animtype, int mode);
 void MON_SwitchState(Instance *instance, enum MonsterState state);
 int MON_TurnToPosition(Instance *instance, Position *position, short turnspeed);
 void MON_KillMonster(Instance *instance);
