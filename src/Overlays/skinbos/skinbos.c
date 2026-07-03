@@ -1,11 +1,32 @@
 #include "Overlays/skinbos/skinbos.h"
+#include "Game/MATH3D.h"
 
-/* double-check that SKINBOS_CheckInsideMasher and SKINBOS_ShouldEscapeJail aren't swapped */
+// TODO: double-check that SKINBOS_CheckInsideMasher and SKINBOS_ShouldEscapeJail aren't swapped
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Turn);
+int SKINBOS_Turn(Instance *instance, Position *target, int limit)
+{
+
+    int angle; // not from debug symbols
+
+    if (((MATH3D_AngleFromPosToPos(&instance->position, target) - instance->rotation.z) & 0xFFF) > 2048)
+    {
+        angle = ((MATH3D_AngleFromPosToPos(&instance->position, target) - instance->rotation.z) & 0xFFF) - 4096;
+    }
+    else
+    {
+        angle = (MATH3D_AngleFromPosToPos(&instance->position, target) - instance->rotation.z) & 0xFFF;
+    }
+
+    if (limit >= angle)
+    {
+        return (angle < -limit) * 2;
+    }
+
+    return 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_GateDrop);
 
@@ -69,7 +90,7 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Combat);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_LandOnFeetEntry);
 
-void SKINBOS_LandOnFeet(void) { };
+void SKINBOS_LandOnFeet(void) {};
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_AttackEntry);
 
@@ -87,78 +108,98 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_StunnedEntry);
 
 #else
 
-void SKINBOS_Turn(void) { };  
+int SKINBOS_Turn(Instance *instance, Position *target, int limit)
+{
 
-void SKINBOS_GateDrop(void) { };      
+    int angle; // not from debug symbols
 
-void SKINBOS_CheckPointInsideMasher(void) { };  
+    if (((MATH3D_AngleFromPosToPos(&instance->position, target) - instance->rotation.z) & 0xFFF) > 2048)
+    {
+        angle = ((MATH3D_AngleFromPosToPos(&instance->position, target) - instance->rotation.z) & 0xFFF) - 4096;
+    }
+    else
+    {
+        angle = (MATH3D_AngleFromPosToPos(&instance->position, target) - instance->rotation.z) & 0xFFF;
+    }
 
-void SKINBOS_CheckInsideMasher(void) { };       
+    if (limit >= angle)
+    {
+        return (angle < -limit) * 2;
+    }
 
-void SKINBOS_DoPhaseFade(void) { };     
+    return 1;
+}
 
-void SKINBOS_HandleOneShotAnims(void) { };    
+void SKINBOS_GateDrop(void) {};
 
-void SKINBOS_DoPhasingOutInit(void) { };    
+void SKINBOS_CheckPointInsideMasher(void) {};
 
-void SKINBOS_CheckPhaseIn(void) { };     
+void SKINBOS_CheckInsideMasher(void) {};
 
-void SKINBOS_ShouldEscapeJail(void) { };     
+void SKINBOS_DoPhaseFade(void) {};
 
-void SKINBOS_ProcessGateHitBlood(void) { };     
+void SKINBOS_HandleOneShotAnims(void) {};
 
-void SKINBOS_StartVertexBlood(void) { };    
+void SKINBOS_DoPhasingOutInit(void) {};
 
-void SKINBOS_Collide(void) { };       
+void SKINBOS_CheckPhaseIn(void) {};
 
-void SKINBOS_DamageEffect(void) { };      
+void SKINBOS_ShouldEscapeJail(void) {};
 
-void SKINBOS_Message(void) { };       
+void SKINBOS_ProcessGateHitBlood(void) {};
 
-void SKINBOS_Query(void) { };            
+void SKINBOS_StartVertexBlood(void) {};
 
-void SKINBOS_Init(void) { };           
+void SKINBOS_Collide(void) {};
 
-void SKINBOS_CleanUp(void) { };        
+void SKINBOS_DamageEffect(void) {};
 
-void SKINBOS_IdleEntry(void) { };      
+void SKINBOS_Message(void) {};
 
-void SKINBOS_Idle(void) { };          
+void SKINBOS_Query(void) {};
 
-void SKINBOS_FindRandomNodeInUnit(void) { };    
+void SKINBOS_Init(void) {};
 
-void SKINBOS_WanderEntry(void) { };          
+void SKINBOS_CleanUp(void) {};
 
-void SKINBOS_Wander(void) { };           
+void SKINBOS_IdleEntry(void) {};
 
-void SKINBOS_PursueEntry(void) { };      
+void SKINBOS_Idle(void) {};
 
-void SKINBOS_Pursue(void) { };     
+void SKINBOS_FindRandomNodeInUnit(void) {};
 
-void SKINBOS_HitEntry(void) { };    
+void SKINBOS_WanderEntry(void) {};
 
-void SKINBOS_Hit(void) { };        
+void SKINBOS_Wander(void) {};
 
-void SKINBOS_CombatEntry(void) { };     
+void SKINBOS_PursueEntry(void) {};
 
-void SKINBOS_Combat(void) { };          
+void SKINBOS_Pursue(void) {};
 
-void SKINBOS_LandOnFeetEntry(void) { };   
+void SKINBOS_HitEntry(void) {};
 
-void SKINBOS_LandOnFeet(void) { };     
+void SKINBOS_Hit(void) {};
 
-void SKINBOS_AttackEntry(void) { };    
+void SKINBOS_CombatEntry(void) {};
 
-void SKINBOS_Attack(void) { };       
+void SKINBOS_Combat(void) {};
 
-void SKINBOS_DeadEntry(void) { };     
+void SKINBOS_LandOnFeetEntry(void) {};
 
-void SKINBOS_Dead(void) { };          
+void SKINBOS_LandOnFeet(void) {};
 
-void SKINBOS_FleeEntry(void) { };     
+void SKINBOS_AttackEntry(void) {};
 
-void SKINBOS_Flee(void) { };        
+void SKINBOS_Attack(void) {};
 
-void SKINBOS_StunnedEntry(void) { };      
+void SKINBOS_DeadEntry(void) {};
+
+void SKINBOS_Dead(void) {};
+
+void SKINBOS_FleeEntry(void) {};
+
+void SKINBOS_Flee(void) {};
+
+void SKINBOS_StunnedEntry(void) {};
 
 #endif
