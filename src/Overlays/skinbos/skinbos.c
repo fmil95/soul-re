@@ -1,5 +1,7 @@
 #include "Overlays/skinbos/skinbos.h"
 #include "Game/MATH3D.h"
+#include "Game/PLAN/PLANAPI.h"
+#include "Game/STREAM.h"
 
 // TODO: double-check that SKINBOS_CheckInsideMasher and SKINBOS_ShouldEscapeJail aren't swapped
 
@@ -30,7 +32,32 @@ int SKINBOS_Turn(Instance *instance, Position *target, int limit)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_GateDrop);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_CheckPointInsideMasher);
+int SKINBOS_CheckPointInsideMasher(Instance *instance, Position *position, int which_border)
+{
+    Position center;
+    Position radius;
+    int radialDist; // not from debug symbols
+    int pointDist; // not from debug symbols
+    int markerID; // not from debug symbols
+    StreamUnit *su; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    SkinbosAttributes *attrs; // not from debug symbols
+
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (SkinbosAttributes *)ma->tunData;
+
+    su = STREAM_GetStreamUnitWithID(instance->currentStreamUnitID);
+    PLANAPI_FindNodePositionInUnit(su, &center, attrs->masher_center_marker, 5);
+
+    markerID = which_border == 0 ? attrs->masher_radius_marker_inner : attrs->masher_radius_marker_outer;
+    PLANAPI_FindNodePositionInUnit(su, &radius, markerID, 5);
+
+
+    radialDist = MATH3D_LengthXYZ(center.x - radius.x, center.y - radius.y, center.z - radius.z);
+    pointDist = MATH3D_LengthXYZ(center.x - position->x, center.y - position->y, center.z - position->z);
+    return pointDist < radialDist;
+
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_CheckInsideMasher);
 
@@ -132,7 +159,32 @@ int SKINBOS_Turn(Instance *instance, Position *target, int limit)
 
 void SKINBOS_GateDrop(void) {};
 
-void SKINBOS_CheckPointInsideMasher(void) {};
+int SKINBOS_CheckPointInsideMasher(Instance *instance, Position *position, int which_border)
+{
+    Position center;
+    Position radius;
+    int radialDist; // not from debug symbols
+    int pointDist; // not from debug symbols
+    int markerID; // not from debug symbols
+    StreamUnit *su; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    SkinbosAttributes *attrs; // not from debug symbols
+
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (SkinbosAttributes *)ma->tunData;
+
+    su = STREAM_GetStreamUnitWithID(instance->currentStreamUnitID);
+    PLANAPI_FindNodePositionInUnit(su, &center, attrs->masher_center_marker, 5);
+
+    markerID = which_border == 0 ? attrs->masher_radius_marker_inner : attrs->masher_radius_marker_outer;
+    PLANAPI_FindNodePositionInUnit(su, &radius, markerID, 5);
+
+
+    radialDist = MATH3D_LengthXYZ(center.x - radius.x, center.y - radius.y, center.z - radius.z);
+    pointDist = MATH3D_LengthXYZ(center.x - position->x, center.y - position->y, center.z - position->z);
+    return pointDist < radialDist;
+
+}
 
 void SKINBOS_CheckInsideMasher(void) {};
 
