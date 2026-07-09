@@ -59,7 +59,21 @@ int SKINBOS_CheckPointInsideMasher(Instance *instance, Position *position, int w
 
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_CheckInsideMasher);
+void SKINBOS_CheckInsideMasher(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (SKINBOS_CheckPointInsideMasher(instance, &instance->position, 0))
+    {
+        mv->auxFlags |= 8;
+    }
+    else
+    {
+        mv->auxFlags &= ~8;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_DoPhaseFade);
 
@@ -186,7 +200,21 @@ int SKINBOS_CheckPointInsideMasher(Instance *instance, Position *position, int w
 
 }
 
-void SKINBOS_CheckInsideMasher(void) {};
+void SKINBOS_CheckInsideMasher(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (SKINBOS_CheckPointInsideMasher(instance, &instance->position, 0))
+    {
+        mv->auxFlags |= 8;
+    }
+    else
+    {
+        mv->auxFlags &= ~8;
+    }
+}
 
 void SKINBOS_DoPhaseFade(void) {};
 
