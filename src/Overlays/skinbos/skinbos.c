@@ -2,8 +2,11 @@
 #include "Game/MATH3D.h"
 #include "Game/PLAN/PLANAPI.h"
 #include "Game/STREAM.h"
+#include "Game/MONSTER/MONLIB.h"
 
 // TODO: double-check that SKINBOS_CheckInsideMasher and SKINBOS_ShouldEscapeJail aren't swapped
+
+void SKINBOS_DoPhaseFade(Instance *instance, int limit); // TODO: Remove once matched
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -83,7 +86,39 @@ INCLUDE_RODATA("asm/nonmatchings/Overlays/skinbos/skinbos", D_88000020);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_HandleOneShotAnims);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_DoPhasingOutInit);
+void SKINBOS_DoPhasingOutInit(Instance *instance, SVector *normal, SVector *point)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+
+    if (vars->num_hits >= ((SkinbosAttributes *)((MonsterAttributes *)instance->data)->tunData)->max_allowed_damage && mv->auxFlags & 8 && vars->anim_state != 12)
+    {
+        MON_PlayAnim(instance, 1, 1);
+        vars->anim_state = 12;
+        mv->mvFlags &= ~0x20000;
+        vars->last_hit_timer = MON_GetTime(instance) + 6930;
+        MON_GetPlanSlot(mv);
+    }
+
+    if (vars->phase_level == 0 && vars->anim_state == 0)
+    {
+
+        MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 9, 1);
+
+        if (normal != NULL && point != NULL)
+        {
+            COPY_SVEC(SVector, &vars->normal, SVector, normal);
+            COPY_SVEC(SVector, &vars->point, SVector, point);
+        }
+
+        vars->anim_state = 10;
+        mv->mvFlags &= ~0x20000;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_CheckPhaseIn);
 
@@ -220,7 +255,39 @@ void SKINBOS_DoPhaseFade(void) {};
 
 void SKINBOS_HandleOneShotAnims(void) {};
 
-void SKINBOS_DoPhasingOutInit(void) {};
+void SKINBOS_DoPhasingOutInit(Instance *instance, SVector *normal, SVector *point)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+
+    if (vars->num_hits >= ((SkinbosAttributes *)((MonsterAttributes *)instance->data)->tunData)->max_allowed_damage && mv->auxFlags & 8 && vars->anim_state != 12)
+    {
+        MON_PlayAnim(instance, 1, 1);
+        vars->anim_state = 12;
+        mv->mvFlags &= ~0x20000;
+        vars->last_hit_timer = MON_GetTime(instance) + 6930;
+        MON_GetPlanSlot(mv);
+    }
+
+    if (vars->phase_level == 0 && vars->anim_state == 0)
+    {
+
+        MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 9, 1);
+
+        if (normal != NULL && point != NULL)
+        {
+            COPY_SVEC(SVector, &vars->normal, SVector, normal);
+            COPY_SVEC(SVector, &vars->point, SVector, point);
+        }
+
+        vars->anim_state = 10;
+        mv->mvFlags &= ~0x20000;
+    }
+}
 
 void SKINBOS_CheckPhaseIn(void) {};
 
