@@ -90,12 +90,16 @@ void SKINBOS_DoPhasingOutInit(Instance *instance, SVector *normal, SVector *poin
 {
 
     MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
     SkinbosVars *vars; // not from debug symbols
+    SkinbosAttributes *attrs; // not from debug symbols
 
     mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
     vars = (SkinbosVars *)mv->extraVars;
+    attrs = (SkinbosAttributes *)ma->tunData;
 
-    if (vars->num_hits >= ((SkinbosAttributes *)((MonsterAttributes *)instance->data)->tunData)->max_allowed_damage && mv->auxFlags & 8 && vars->anim_state != 12)
+    if (vars->num_hits >= attrs->max_allowed_damage && mv->auxFlags & 8 && vars->anim_state != 12)
     {
         MON_PlayAnim(instance, 1, 1);
         vars->anim_state = 12;
@@ -251,7 +255,7 @@ void SKINBOS_CheckInsideMasher(Instance *instance)
     }
 }
 
-void SKINBOS_DoPhaseFade(void) {};
+void SKINBOS_DoPhaseFade(Instance *instance, int limit) {};
 
 void SKINBOS_HandleOneShotAnims(void) {};
 
@@ -259,12 +263,16 @@ void SKINBOS_DoPhasingOutInit(Instance *instance, SVector *normal, SVector *poin
 {
 
     MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
     SkinbosVars *vars; // not from debug symbols
+    SkinbosAttributes *attrs; // not from debug symbols
 
     mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
     vars = (SkinbosVars *)mv->extraVars;
+    attrs = (SkinbosAttributes *)ma->tunData;
 
-    if (vars->num_hits >= ((SkinbosAttributes *)((MonsterAttributes *)instance->data)->tunData)->max_allowed_damage && mv->auxFlags & 8 && vars->anim_state != 12)
+    if (vars->num_hits >= attrs->max_allowed_damage && mv->auxFlags & 8 && vars->anim_state != 12)
     {
         MON_PlayAnim(instance, 1, 1);
         vars->anim_state = 12;
