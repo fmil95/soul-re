@@ -124,7 +124,24 @@ void SKINBOS_DoPhasingOutInit(Instance *instance, SVector *normal, SVector *poin
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_CheckPhaseIn);
+void SKINBOS_CheckPhaseIn(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+
+    if (!(mv->auxFlags & 4) && vars->phase_level == 7 && MON_GetTime(instance) >= (unsigned long)vars->phase_hit_timer)
+    {
+        MON_PlayCombatIdle(instance, 2);
+        vars->anim_state = 11;
+        mv->mvFlags &= ~0x20000;
+    }
+
+    mv->auxFlags &= ~4;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_ShouldEscapeJail);
 
@@ -297,7 +314,24 @@ void SKINBOS_DoPhasingOutInit(Instance *instance, SVector *normal, SVector *poin
     }
 }
 
-void SKINBOS_CheckPhaseIn(void) {};
+void SKINBOS_CheckPhaseIn(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+
+    if (!(mv->auxFlags & 4) && vars->phase_level == 7 && MON_GetTime(instance) >= (unsigned long)vars->phase_hit_timer)
+    {
+        MON_PlayCombatIdle(instance, 2);
+        vars->anim_state = 11;
+        mv->mvFlags &= ~0x20000;
+    }
+
+    mv->auxFlags &= ~4;
+}
 
 void SKINBOS_ShouldEscapeJail(void) {};
 
