@@ -159,7 +159,47 @@ int SKINBOS_ShouldEscapeJail(Instance *instance)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_ProcessGateHitBlood);
+void SKINBOS_ProcessGateHitBlood(Instance *instance, int vertidx, int segidx, int dist, void *cb_data)
+{
+
+    int range; // not from debug symbols
+    int scl; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+    CVECTOR *cv; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+
+        range = vars->num_hits * 200;
+
+        if (dist < ((bloodyMessType *)cb_data)->closestdist)
+        {
+            ((bloodyMessType *)cb_data)->closestvert = vertidx;
+            ((bloodyMessType *)cb_data)->closestdist = dist;
+            ((bloodyMessType *)cb_data)->closestseg = segidx;
+        }
+
+        if (dist < range)
+        {
+
+            cv = &instance->perVertexColor[vertidx];
+
+            scl = (2 * (range - dist) * ((bloodyMessType *)cb_data)->bloodIntensity) / range;
+            scl = MIN(scl, 256);
+
+            cv->r = ~(((255 - mv->subAttr->bruiseRed) * scl) >> 8);
+            cv->g = ~(((255 - mv->subAttr->bruiseGreen) * scl) >> 8);
+            cv->b = ~(((255 - mv->subAttr->bruiseBlue) * scl) >> 8);
+            cv->cd = 1;
+
+            ((bloodyMessType *)cb_data)->bloodiedAVert = 1;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_StartVertexBlood);
 
@@ -362,7 +402,47 @@ int SKINBOS_ShouldEscapeJail(Instance *instance)
     return 0;
 }
 
-void SKINBOS_ProcessGateHitBlood(void) {};
+void SKINBOS_ProcessGateHitBlood(Instance *instance, int vertidx, int segidx, int dist, void *cb_data)
+{
+
+    int range; // not from debug symbols
+    int scl; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+    CVECTOR *cv; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+
+        range = vars->num_hits * 200;
+
+        if (dist < ((bloodyMessType *)cb_data)->closestdist)
+        {
+            ((bloodyMessType *)cb_data)->closestvert = vertidx;
+            ((bloodyMessType *)cb_data)->closestdist = dist;
+            ((bloodyMessType *)cb_data)->closestseg = segidx;
+        }
+
+        if (dist < range)
+        {
+
+            cv = &instance->perVertexColor[vertidx];
+
+            scl = (2 * (range - dist) * ((bloodyMessType *)cb_data)->bloodIntensity) / range;
+            scl = MIN(scl, 256);
+
+            cv->r = ~(((255 - mv->subAttr->bruiseRed) * scl) >> 8);
+            cv->g = ~(((255 - mv->subAttr->bruiseGreen) * scl) >> 8);
+            cv->b = ~(((255 - mv->subAttr->bruiseBlue) * scl) >> 8);
+            cv->cd = 1;
+
+            ((bloodyMessType *)cb_data)->bloodiedAVert = 1;
+        }
+    }
+}
 
 void SKINBOS_StartVertexBlood(void) {};
 
