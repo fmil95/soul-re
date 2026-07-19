@@ -4,6 +4,7 @@
 #include "Game/PLAN/PLANAPI.h"
 #include "Game/STREAM.h"
 #include "Game/MONSTER/MONLIB.h"
+#include "Game/MONSTER/MONSTER.h"
 
 // TODO: double-check that SKINBOS_CheckInsideMasher and SKINBOS_ShouldEscapeJail aren't swapped
 
@@ -201,7 +202,47 @@ void SKINBOS_ProcessGateHitBlood(Instance *instance, int vertidx, int segidx, in
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_StartVertexBlood);
+int SKINBOS_StartVertexBlood(Instance *instance)
+{
+
+    bloodyMessType bmt; // not from debug symbols
+    Position pos;
+    MonsterVars *mv; // not from debug symbols
+    Model *model; // not from debug symbols
+
+
+    mv = (MonsterVars *)instance->extraData;
+    model = instance->object->modelList[instance->currentModel];
+
+    if (mv->extraVars == NULL)
+    {
+        return -1;
+    }
+
+    if (instance->perVertexColor == NULL)
+    {
+        MONSTER_InitVertexColors(instance, model);
+
+        if (instance->perVertexColor == NULL)
+        {
+            return -1;
+        }
+    }
+
+    pos.x = instance->position.x;
+    pos.y = instance->position.y;
+    pos.z = instance->position.z + 640;
+
+    bmt.closestvert = -1;
+    bmt.closestdist = 65536;
+    bmt.closestseg = -1;
+    bmt.bloodiedAVert = 0;
+    bmt.bloodIntensity = 256;
+
+    MONSTER_ProcessClosestVerts(instance, (SVector *)&pos, SKINBOS_ProcessGateHitBlood, &bmt);
+
+    return bmt.closestvert;
+}
 
 INCLUDE_RODATA("asm/nonmatchings/Overlays/skinbos/skinbos", D_88000060);
 
@@ -444,7 +485,47 @@ void SKINBOS_ProcessGateHitBlood(Instance *instance, int vertidx, int segidx, in
     }
 }
 
-void SKINBOS_StartVertexBlood(void) {};
+int SKINBOS_StartVertexBlood(Instance *instance)
+{
+
+    bloodyMessType bmt; // not from debug symbols
+    Position pos;
+    MonsterVars *mv; // not from debug symbols
+    Model *model; // not from debug symbols
+
+
+    mv = (MonsterVars *)instance->extraData;
+    model = instance->object->modelList[instance->currentModel];
+
+    if (mv->extraVars == NULL)
+    {
+        return -1;
+    }
+
+    if (instance->perVertexColor == NULL)
+    {
+        MONSTER_InitVertexColors(instance, model);
+
+        if (instance->perVertexColor == NULL)
+        {
+            return -1;
+        }
+    }
+
+    pos.x = instance->position.x;
+    pos.y = instance->position.y;
+    pos.z = instance->position.z + 640;
+
+    bmt.closestvert = -1;
+    bmt.closestdist = 65536;
+    bmt.closestseg = -1;
+    bmt.bloodiedAVert = 0;
+    bmt.bloodIntensity = 256;
+
+    MONSTER_ProcessClosestVerts(instance, (SVector *)&pos, SKINBOS_ProcessGateHitBlood, &bmt);
+
+    return bmt.closestvert;
+}
 
 void SKINBOS_Collide(void) {};
 
