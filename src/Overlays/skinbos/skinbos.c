@@ -1,4 +1,5 @@
 #include "Overlays/skinbos/skinbos.h"
+#include "Game/GAMELOOP.h"
 #include "Game/MATH3D.h"
 #include "Game/PLAN/PLANAPI.h"
 #include "Game/STREAM.h"
@@ -143,7 +144,20 @@ void SKINBOS_CheckPhaseIn(Instance *instance)
     mv->auxFlags &= ~4;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_ShouldEscapeJail);
+int SKINBOS_ShouldEscapeJail(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->auxFlags & 8 && !SKINBOS_CheckPointInsideMasher(instance, &gameTrackerX.playerInstance->position, 0))
+    {
+        return 1;
+    }
+
+    return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_ProcessGateHitBlood);
 
@@ -333,7 +347,20 @@ void SKINBOS_CheckPhaseIn(Instance *instance)
     mv->auxFlags &= ~4;
 }
 
-void SKINBOS_ShouldEscapeJail(void) {};
+int SKINBOS_ShouldEscapeJail(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv->auxFlags & 8 && !SKINBOS_CheckPointInsideMasher(instance, &gameTrackerX.playerInstance->position, 0))
+    {
+        return 1;
+    }
+
+    return 0;
+}
 
 void SKINBOS_ProcessGateHitBlood(void) {};
 
