@@ -668,6 +668,8 @@ int SKINBOS_StartVertexBlood(Instance *instance)
     return bmt.closestvert;
 }
 
+const char D_88000060[] = "skgate__"; // TODO: Remove once rest of rodata is brought in
+
 void SKINBOS_Collide(Instance *instance, GameTracker *gameTracker)
 {
     int isTargetAnimState; // not from debug symbols
