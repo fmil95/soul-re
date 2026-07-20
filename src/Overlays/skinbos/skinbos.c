@@ -1,8 +1,10 @@
 #include "Overlays/skinbos/skinbos.h"
 #include "Game/COLLIDE.h"
+#include "Game/FX.h"
 #include "Game/GAMELOOP.h"
 #include "Game/MATH3D.h"
 #include "Game/PLAN/PLANAPI.h"
+#include "Game/SOUND.h"
 #include "Game/STATE.h"
 #include "Game/STREAM.h"
 #include "Game/MONSTER/MONAPI.h"
@@ -389,7 +391,17 @@ void SKINBOS_Collide(Instance *instance, GameTracker *gameTracker)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_DamageEffect);
+void SKINBOS_DamageEffect(Instance *instance, evFXHitData *data)
+{
+    SVector localloc;
+
+    if (data != NULL)
+    {
+        localloc = data->location;
+        FX_MakeHitFX(&localloc);
+        SOUND_Play3dSound(&instance->position, 21, 650, 80, 15500);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Message);
 
@@ -809,7 +821,17 @@ void SKINBOS_Collide(Instance *instance, GameTracker *gameTracker)
     }
 }
 
-void SKINBOS_DamageEffect(void) {};
+void SKINBOS_DamageEffect(Instance *instance, evFXHitData *data)
+{
+    SVector localloc;
+
+    if (data != NULL)
+    {
+        localloc = data->location;
+        FX_MakeHitFX(&localloc);
+        SOUND_Play3dSound(&instance->position, 21, 650, 80, 15500);
+    }
+}
 
 void SKINBOS_Message(void) {};
 
