@@ -1,10 +1,14 @@
 #include "Overlays/skinbos/skinbos.h"
+#include "Game/COLLIDE.h"
 #include "Game/GAMELOOP.h"
 #include "Game/MATH3D.h"
 #include "Game/PLAN/PLANAPI.h"
+#include "Game/STATE.h"
 #include "Game/STREAM.h"
+#include "Game/MONSTER/MONAPI.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONSTER.h"
+#include "Game/PSX/SUPPORT.h"
 
 // TODO: double-check that SKINBOS_CheckInsideMasher and SKINBOS_ShouldEscapeJail aren't swapped
 
@@ -244,9 +248,146 @@ int SKINBOS_StartVertexBlood(Instance *instance)
     return bmt.closestvert;
 }
 
-INCLUDE_RODATA("asm/nonmatchings/Overlays/skinbos/skinbos", D_88000060);
+const char D_88000060[] = "skgate__"; // TODO: Remove once rest of rodata is brought in
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Collide);
+void SKINBOS_Collide(Instance *instance, GameTracker *gameTracker)
+{
+    int isTargetAnimState; // not from debug symbols
+    int didCollide; // not from debug symbols
+    int faceFlags; // not from debug symbols
+    CollideInfo *collideInfo; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+    HSphere *hsphere; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    (void)gameTracker;
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+    collideInfo = instance->collideInfo;
+    hsphere = (HSphere *)collideInfo->prim0;
+    isTargetAnimState = vars->anim_state > 5 && vars->anim_state < 10;
+    didCollide = 0;
+
+    if (vars == NULL)
+    {
+        MonsterCollide(instance, &gameTrackerX);
+    }
+
+    if (collideInfo->type1 == 1)
+    {
+        collideInfo->offset.x = 0;
+        collideInfo->offset.y = 0;
+        collideInfo->offset.z = 0;
+    }
+
+    if ((vars->phase_level > 0 || isTargetAnimState) && hsphere->id != 9)
+    {
+        if (instance->data == NULL)
+        {
+            return;
+        }
+
+        switch (collideInfo->type1)
+        {
+        case 4:
+            break;
+        case 1:
+        {
+            evMonsterHitObjectData *data; // not from debug symbols
+
+            data = (evMonsterHitObjectData *)CIRC_Alloc(sizeof(evMonsterHitObjectData));
+            data->instance = (Instance *)collideInfo->inst1;
+            data->hitType = 1;
+            didCollide = 1;
+            break;
+        }
+        case 2:
+        {
+            evMonsterHitObjectData *data; // not from debug symbols
+
+            data = (evMonsterHitObjectData *)CIRC_Alloc(sizeof(evMonsterHitObjectData));
+            data->instance = (Instance *)collideInfo->inst1;
+            data->hitType = 2;
+            didCollide = 1;
+            break;
+        }
+        case 5:
+        {
+            evMonsterHitObjectData *data; // not from debug symbols
+
+            data = (evMonsterHitObjectData *)CIRC_Alloc(sizeof(evMonsterHitObjectData));
+            data->instance = (Instance *)collideInfo->inst1;
+            data->hitType = 5;
+
+            if (strcmpi(data->instance->object->name, D_88000060) != 0)
+            {
+                didCollide = 1;
+            }
+            else
+            {
+                mv->auxFlags |= 4;
+            }
+            break;
+        }
+        case 3:
+        {
+            Level *level; // not from debug symbols
+            Terrain *terrain; // not from debug symbols
+            TFace *tface; // not from debug symbols
+            evMonsterHitTerrainData *data; // not from debug symbols
+
+            data = (evMonsterHitTerrainData *)CIRC_Alloc(sizeof(evMonsterHitTerrainData));
+            tface = (TFace *)collideInfo->prim1;
+
+            if (tface->textoff != 0xFFFF)
+            {
+                level = (Level *)collideInfo->level;
+                terrain = level->terrain;
+                faceFlags = ((TextureFT3 *)((char *)terrain->StartTextureList + tface->textoff))->attr;
+            }
+            else
+            {
+                faceFlags = 0;
+            }
+
+            data->faceFlags = faceFlags;
+            COLLIDE_FindCollisionFaceNormal(collideInfo, &data->normal);
+            data->tface = (TFace *)collideInfo->prim1;
+
+            if (!(data->faceFlags & 0x1000))
+            {
+                if (!isTargetAnimState)
+                {
+                    didCollide = 1;
+                    if (COLLIDE_FindCollisionFaceNormal(collideInfo, &data->normal))
+                    {
+                        collideInfo->offset.x += data->normal.x >> 10;
+                        collideInfo->offset.y += data->normal.y >> 10;
+                    }
+                }
+            }
+            else
+            {
+                mv->auxFlags |= 4;
+            }
+            break;
+        }
+        }
+
+        if (didCollide)
+        {
+            mv->mvFlags |= 8;
+            instance->position.x += collideInfo->offset.x;
+            instance->position.y += collideInfo->offset.y;
+            COLLIDE_UpdateAllTransforms(instance, (SVECTOR *)&collideInfo->offset);
+        }
+    }
+    else
+    {
+        MonsterCollide(instance, &gameTrackerX);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_DamageEffect);
 
@@ -527,7 +668,144 @@ int SKINBOS_StartVertexBlood(Instance *instance)
     return bmt.closestvert;
 }
 
-void SKINBOS_Collide(void) {};
+void SKINBOS_Collide(Instance *instance, GameTracker *gameTracker)
+{
+    int isTargetAnimState; // not from debug symbols
+    int didCollide; // not from debug symbols
+    int faceFlags; // not from debug symbols
+    CollideInfo *collideInfo; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+    HSphere *hsphere; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    (void)gameTracker;
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+    collideInfo = instance->collideInfo;
+    hsphere = (HSphere *)collideInfo->prim0;
+    isTargetAnimState = vars->anim_state > 5 && vars->anim_state < 10;
+    didCollide = 0;
+
+    if (vars == NULL)
+    {
+        MonsterCollide(instance, &gameTrackerX);
+    }
+
+    if (collideInfo->type1 == 1)
+    {
+        collideInfo->offset.x = 0;
+        collideInfo->offset.y = 0;
+        collideInfo->offset.z = 0;
+    }
+
+    if ((vars->phase_level > 0 || isTargetAnimState) && hsphere->id != 9)
+    {
+        if (instance->data == NULL)
+        {
+            return;
+        }
+
+        switch (collideInfo->type1)
+        {
+        case 4:
+            break;
+        case 1:
+        {
+            evMonsterHitObjectData *data; // not from debug symbols
+
+            data = (evMonsterHitObjectData *)CIRC_Alloc(sizeof(evMonsterHitObjectData));
+            data->instance = (Instance *)collideInfo->inst1;
+            data->hitType = 1;
+            didCollide = 1;
+            break;
+        }
+        case 2:
+        {
+            evMonsterHitObjectData *data; // not from debug symbols
+
+            data = (evMonsterHitObjectData *)CIRC_Alloc(sizeof(evMonsterHitObjectData));
+            data->instance = (Instance *)collideInfo->inst1;
+            data->hitType = 2;
+            didCollide = 1;
+            break;
+        }
+        case 5:
+        {
+            evMonsterHitObjectData *data; // not from debug symbols
+
+            data = (evMonsterHitObjectData *)CIRC_Alloc(sizeof(evMonsterHitObjectData));
+            data->instance = (Instance *)collideInfo->inst1;
+            data->hitType = 5;
+
+            if (strcmpi(data->instance->object->name, D_88000060) != 0)
+            {
+                didCollide = 1;
+            }
+            else
+            {
+                mv->auxFlags |= 4;
+            }
+            break;
+        }
+        case 3:
+        {
+            Level *level; // not from debug symbols
+            Terrain *terrain; // not from debug symbols
+            TFace *tface; // not from debug symbols
+            evMonsterHitTerrainData *data; // not from debug symbols
+
+            data = (evMonsterHitTerrainData *)CIRC_Alloc(sizeof(evMonsterHitTerrainData));
+            tface = (TFace *)collideInfo->prim1;
+
+            if (tface->textoff != 0xFFFF)
+            {
+                level = (Level *)collideInfo->level;
+                terrain = level->terrain;
+                faceFlags = ((TextureFT3 *)((char *)terrain->StartTextureList + tface->textoff))->attr;
+            }
+            else
+            {
+                faceFlags = 0;
+            }
+
+            data->faceFlags = faceFlags;
+            COLLIDE_FindCollisionFaceNormal(collideInfo, &data->normal);
+            data->tface = (TFace *)collideInfo->prim1;
+
+            if (!(data->faceFlags & 0x1000))
+            {
+                if (!isTargetAnimState)
+                {
+                    didCollide = 1;
+                    if (COLLIDE_FindCollisionFaceNormal(collideInfo, &data->normal))
+                    {
+                        collideInfo->offset.x += data->normal.x >> 10;
+                        collideInfo->offset.y += data->normal.y >> 10;
+                    }
+                }
+            }
+            else
+            {
+                mv->auxFlags |= 4;
+            }
+            break;
+        }
+        }
+
+        if (didCollide)
+        {
+            mv->mvFlags |= 8;
+            instance->position.x += collideInfo->offset.x;
+            instance->position.y += collideInfo->offset.y;
+            COLLIDE_UpdateAllTransforms(instance, (SVECTOR *)&collideInfo->offset);
+        }
+    }
+    else
+    {
+        MonsterCollide(instance, &gameTrackerX);
+    }
+}
 
 void SKINBOS_DamageEffect(void) {};
 
