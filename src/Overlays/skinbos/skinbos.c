@@ -17,8 +17,6 @@
 
 // TODO: double-check that SKINBOS_CheckInsideMasher and SKINBOS_ShouldEscapeJail aren't swapped
 
-void SKINBOS_DoPhaseFade(Instance *instance, int limit); // TODO: Remove once matched
-
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
 
@@ -89,7 +87,128 @@ void SKINBOS_CheckInsideMasher(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_DoPhaseFade);
+void SKINBOS_DoPhaseFade(Instance *instance, int limit)
+{
+
+    int chance; // not from debug symbols
+    int lowerBound; // not from debug symbols
+    int upperBound; // not from debug symbols
+    int phaseLevel; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+    SkinbosAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (SkinbosVars *)mv->extraVars;
+    attrs = (SkinbosAttributes *)ma->tunData;
+    phaseLevel = vars->phase_level;
+
+    switch (vars->num_hits)
+    {
+    case 0:
+        upperBound = 15291;
+        lowerBound = 0;
+        break;
+    case 1:
+        upperBound = ((attrs->low_backstep + 7) * 32767) / 30;
+        lowerBound = (attrs->low_backstep * 32767) / 30;
+        break;
+    case 2:
+        upperBound = ((attrs->mid_backstep + 7) * 32767) / 60;
+        lowerBound = (attrs->mid_backstep * 32767) / 60;
+        break;
+    default:
+        upperBound = ((attrs->high_backstep + 7) * 32767) / 90;
+        lowerBound = (attrs->high_backstep * 32767) / 90;
+        break;
+    }
+
+    if (limit == 0)
+    {
+        // XOR swap
+        upperBound = upperBound ^ lowerBound;
+        lowerBound = upperBound ^ lowerBound;
+        upperBound = upperBound ^ lowerBound;
+    }
+
+    chance = rand();
+
+    if (chance < upperBound)
+    {
+        phaseLevel++;
+    }
+    else
+    {
+
+        chance = 32767 - chance;
+
+        if (chance < lowerBound)
+        {
+            phaseLevel--;
+
+            if (phaseLevel >= 0)
+            {
+                vars->phase_level = phaseLevel;
+            }
+        }
+    }
+
+    if (phaseLevel > 7)
+    {
+        phaseLevel = 7;
+    }
+    else if (phaseLevel < 0)
+    {
+        phaseLevel = 0;
+    }
+
+    vars->phase_level = phaseLevel;
+
+    if ((gameTrackerX.gameData.asmData.MorphTime > 500 && gameTrackerX.gameData.asmData.MorphType == 1) || (gameTrackerX.gameData.asmData.MorphTime < 500 && gameTrackerX.gameData.asmData.MorphType == 0))
+    {
+        mv->targetFade = ((attrs->max_fadeout * phaseLevel) / 7) + (4096 - attrs->max_fadeout);
+
+        if (phaseLevel == 7)
+        {
+            instance->flags &= ~0x1000;
+        }
+        else
+        {
+            instance->flags |= 0x1000;
+        }
+    }
+    else
+    {
+        mv->targetFade = (attrs->max_fadeout * phaseLevel) / 7;
+
+        if (phaseLevel == 0)
+        {
+            instance->flags &= ~0x1000;
+        }
+        else
+        {
+            instance->flags |= 0x1000;
+        }
+    }
+
+    if (phaseLevel == limit)
+    {
+        vars->anim_state = 0;
+
+        if (limit == 7)
+        {
+            FX_StartPassthruFX(instance, &vars->normal, &vars->point);
+            vars->phase_hit_timer = MON_GetTime(instance) + (attrs->min_phase_time * 33);
+        }
+        else
+        {
+            FX_EndPassthruFX(instance);
+            SKINBOS_CheckInsideMasher(instance);
+        }
+    }
+}
 
 INCLUDE_RODATA("asm/nonmatchings/Overlays/skinbos/skinbos", D_88000000);
 
@@ -620,7 +739,128 @@ void SKINBOS_CheckInsideMasher(Instance *instance)
     }
 }
 
-void SKINBOS_DoPhaseFade(Instance *instance, int limit) {};
+void SKINBOS_DoPhaseFade(Instance *instance, int limit)
+{
+
+    int chance; // not from debug symbols
+    int lowerBound; // not from debug symbols
+    int upperBound; // not from debug symbols
+    int phaseLevel; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+    SkinbosAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (SkinbosVars *)mv->extraVars;
+    attrs = (SkinbosAttributes *)ma->tunData;
+    phaseLevel = vars->phase_level;
+
+    switch (vars->num_hits)
+    {
+    case 0:
+        upperBound = 15291;
+        lowerBound = 0;
+        break;
+    case 1:
+        upperBound = ((attrs->low_backstep + 7) * 32767) / 30;
+        lowerBound = (attrs->low_backstep * 32767) / 30;
+        break;
+    case 2:
+        upperBound = ((attrs->mid_backstep + 7) * 32767) / 60;
+        lowerBound = (attrs->mid_backstep * 32767) / 60;
+        break;
+    default:
+        upperBound = ((attrs->high_backstep + 7) * 32767) / 90;
+        lowerBound = (attrs->high_backstep * 32767) / 90;
+        break;
+    }
+
+    if (limit == 0)
+    {
+        // XOR swap
+        upperBound = upperBound ^ lowerBound;
+        lowerBound = upperBound ^ lowerBound;
+        upperBound = upperBound ^ lowerBound;
+    }
+
+    chance = rand();
+
+    if (chance < upperBound)
+    {
+        phaseLevel++;
+    }
+    else
+    {
+
+        chance = 32767 - chance;
+
+        if (chance < lowerBound)
+        {
+            phaseLevel--;
+
+            if (phaseLevel >= 0)
+            {
+                vars->phase_level = phaseLevel;
+            }
+        }
+    }
+
+    if (phaseLevel > 7)
+    {
+        phaseLevel = 7;
+    }
+    else if (phaseLevel < 0)
+    {
+        phaseLevel = 0;
+    }
+
+    vars->phase_level = phaseLevel;
+
+    if ((gameTrackerX.gameData.asmData.MorphTime > 500 && gameTrackerX.gameData.asmData.MorphType == 1) || (gameTrackerX.gameData.asmData.MorphTime < 500 && gameTrackerX.gameData.asmData.MorphType == 0))
+    {
+        mv->targetFade = ((attrs->max_fadeout * phaseLevel) / 7) + (4096 - attrs->max_fadeout);
+
+        if (phaseLevel == 7)
+        {
+            instance->flags &= ~0x1000;
+        }
+        else
+        {
+            instance->flags |= 0x1000;
+        }
+    }
+    else
+    {
+        mv->targetFade = (attrs->max_fadeout * phaseLevel) / 7;
+
+        if (phaseLevel == 0)
+        {
+            instance->flags &= ~0x1000;
+        }
+        else
+        {
+            instance->flags |= 0x1000;
+        }
+    }
+
+    if (phaseLevel == limit)
+    {
+        vars->anim_state = 0;
+
+        if (limit == 7)
+        {
+            FX_StartPassthruFX(instance, &vars->normal, &vars->point);
+            vars->phase_hit_timer = MON_GetTime(instance) + (attrs->min_phase_time * 33);
+        }
+        else
+        {
+            FX_EndPassthruFX(instance);
+            SKINBOS_CheckInsideMasher(instance);
+        }
+    }
+}
 
 void SKINBOS_HandleOneShotAnims(void) {};
 
