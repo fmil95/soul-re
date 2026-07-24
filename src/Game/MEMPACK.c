@@ -98,21 +98,20 @@ char *MEMPACK_Malloc(unsigned long allocSize, unsigned char memType)
     long topOffset;
 
     relocatableMemory = MEMPACK_RelocatableType(memType);
-
     allocSize = ((allocSize + 11) / 4) << 2;
 
     do
     {
-        if (!newMemTracker.doingGarbageCollection && relocatableMemory != 0)
+        if (!newMemTracker.doingGarbageCollection && relocatableMemory)
         {
             MEMPACK_DoGarbageCollection();
         }
 
-        if (relocatableMemory != 0)
+        if (relocatableMemory)
         {
             bestAddress = MEMPACK_GetSmallestBlockTopBottom(allocSize);
         }
-        else if (relocatableMemory == 0)
+        else
         {
             bestAddress = MEMPACK_GetSmallestBlockBottomTop(allocSize);
         }
@@ -131,7 +130,6 @@ char *MEMPACK_Malloc(unsigned long allocSize, unsigned char memType)
                 }
 
                 MEMPACK_ReportMemory2();
-
                 DEBUG_FatalError("Trying to fit memory size %d Type = %d\nAvailable memory : used = %d, free = %d\n", allocSize, memType, newMemTracker.currentMemoryUsed, newMemTracker.totalMemory - newMemTracker.currentMemoryUsed);
                 break;
             }
@@ -151,7 +149,7 @@ char *MEMPACK_Malloc(unsigned long allocSize, unsigned char memType)
 
     if (allocSize != bestAddress->memSize)
     {
-        if (relocatableMemory != 0)
+        if (relocatableMemory)
         {
             address = (MemHeader *)((char *)bestAddress + allocSize);
 
@@ -353,7 +351,7 @@ void MEMPACK_ReportMemory()
 
         while ((char *)address != newMemTracker.lastMemoryAddress)
         {
-            if ((address->memStatus != 0) && (address->memType == i) && (firstTime != 0))
+            if (address->memStatus != 0 && address->memType == i && firstTime != 0)
             {
                 firstTime = 0;
             }
@@ -365,19 +363,19 @@ void MEMPACK_ReportMemory()
 
 void MEMPACK_SetMemoryBeingStreamed(char *address)
 {
-    address[-6] = 2;
+    ((MemHeader *)(address - sizeof(MemHeader)))->memStatus = 2;
 }
 
 void MEMPACK_SetMemoryDoneStreamed(char *address)
 {
-    address[-6] = 1;
+    ((MemHeader *)(address - sizeof(MemHeader)))->memStatus = 1;
 }
 
 long MEMPACK_MemoryValidFunc(char *address)
 {
-    if ((address != (char *)0xFAFBFCFD) && (address != NULL))
+    if (address != (char *)0xFAFBFCFD && address != NULL)
     {
-        return address[-6] == 1;
+        return ((MemHeader *)(address - sizeof(MemHeader)))->memStatus == 1;
     }
 
     return 0;
@@ -399,7 +397,7 @@ char *MEMPACK_GarbageCollectMalloc(unsigned long *allocSize, unsigned char memTy
 
         if (bestAddress == NULL)
         {
-            if (memType != 16)
+            if (memType != MEMORY_TYPE_REARRANGE_VRAM)
             {
                 MEMPACK_ReportMemory();
 
@@ -513,7 +511,7 @@ void MEMPACK_DoGarbageCollection()
 
     newMemTracker.doingGarbageCollection = 1;
 
-    while (done == 0)
+    while (!done)
     {
         relocateAddress = newMemTracker.rootNode;
 

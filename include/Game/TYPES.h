@@ -48,7 +48,7 @@ enum MATH3D_AXIS
     AXIS_NEG_Z = 5,
 };
 
-enum SoundModifers
+enum SoundModifers // NOTE: This typo is from the debug symbols
 {
     SOUND_MODIFIER_NONE = 0,
     SOUND_MODIFIER_SUSPENSE = 1,
