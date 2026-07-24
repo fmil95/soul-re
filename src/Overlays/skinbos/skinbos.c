@@ -405,7 +405,56 @@ void SKINBOS_DamageEffect(Instance *instance, evFXHitData *data)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Message);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Query);
+uintptr_t SKINBOS_Query(Instance *instance, unsigned long query)
+{
+
+    uintptr_t ret; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+    SkinbosAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (SkinbosVars *)mv->extraVars;
+    attrs = (SkinbosAttributes *)ma->tunData;
+
+    if (vars == NULL)
+    {
+        return MonsterQuery(instance, query);
+    }
+
+    switch (query)
+    {
+    case 0:
+        ret = 0;
+        break;
+    case 30:
+        ret = 0;
+
+        if (mv->auxFlags & 8 && vars->num_hits >= attrs->max_allowed_damage)
+        {
+            ret = vars->phase_level == 0;
+        }
+
+        if (vars->gate_drop_pos == 3)
+        {
+            ret |= 2;
+        }
+
+        if (mv->auxFlags & 0x20)
+        {
+            ret = ret | 8;
+        }
+
+        break;
+    default:
+        ret = MonsterQuery(instance, query);
+        break;
+    }
+
+    return ret;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Init);
 
@@ -835,7 +884,56 @@ void SKINBOS_DamageEffect(Instance *instance, evFXHitData *data)
 
 void SKINBOS_Message(void) {};
 
-void SKINBOS_Query(void) {};
+uintptr_t SKINBOS_Query(Instance *instance, unsigned long query)
+{
+
+    uintptr_t ret; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+    SkinbosAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (SkinbosVars *)mv->extraVars;
+    attrs = (SkinbosAttributes *)ma->tunData;
+
+    if (vars == NULL)
+    {
+        return MonsterQuery(instance, query);
+    }
+
+    switch (query)
+    {
+    case 0:
+        ret = 0;
+        break;
+    case 30:
+        ret = 0;
+
+        if (mv->auxFlags & 8 && vars->num_hits >= attrs->max_allowed_damage)
+        {
+            ret = vars->phase_level == 0;
+        }
+
+        if (vars->gate_drop_pos == 3)
+        {
+            ret |= 2;
+        }
+
+        if (mv->auxFlags & 0x20)
+        {
+            ret = ret | 8;
+        }
+
+        break;
+    default:
+        ret = MonsterQuery(instance, query);
+        break;
+    }
+
+    return ret;
+}
 
 void SKINBOS_Init(void) {};
 
