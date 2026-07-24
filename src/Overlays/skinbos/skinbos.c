@@ -1,9 +1,12 @@
 #include "Overlays/skinbos/skinbos.h"
 #include "Game/COLLIDE.h"
+#include "Game/DEBUG.h"
 #include "Game/FX.h"
 #include "Game/GAMELOOP.h"
 #include "Game/MATH3D.h"
+#include "Game/MEMPACK.h"
 #include "Game/PLAN/PLANAPI.h"
+#include "Game/RAZIEL/RAZIEL.h"
 #include "Game/SOUND.h"
 #include "Game/STATE.h"
 #include "Game/STREAM.h"
@@ -456,7 +459,39 @@ uintptr_t SKINBOS_Query(Instance *instance, unsigned long query)
     return ret;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Init);
+void SKINBOS_Init(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+
+    MON_DefaultInit(instance);
+    mv = (MonsterVars *)instance->extraData;
+    instance->collideFunc = SKINBOS_Collide;
+
+    if (mv != NULL)
+    {
+        vars = (SkinbosVars *)MEMPACK_Malloc(sizeof(SkinbosVars), MEMORY_TYPE_SKINBOSDATA);
+
+        if (vars == NULL)
+        {
+            mv->extraVars = NULL;
+        }
+        else
+        {
+            mv->extraVars = vars;
+            vars->num_hits = 0;
+            vars->phase_level = 0;
+            vars->anim_state = 0;
+            vars->last_hit_timer = 0;
+        }
+    }
+
+    mv->auxFlags |= 0x20000000;
+    gameTrackerX.gameFlags |= 0x80000000;
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 1);
+    DEBUG_DoAreaProtection();
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_CleanUp);
 
@@ -935,7 +970,39 @@ uintptr_t SKINBOS_Query(Instance *instance, unsigned long query)
     return ret;
 }
 
-void SKINBOS_Init(void) {};
+void SKINBOS_Init(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+
+    MON_DefaultInit(instance);
+    mv = (MonsterVars *)instance->extraData;
+    instance->collideFunc = SKINBOS_Collide;
+
+    if (mv != NULL)
+    {
+        vars = (SkinbosVars *)MEMPACK_Malloc(sizeof(SkinbosVars), MEMORY_TYPE_SKINBOSDATA);
+
+        if (vars == NULL)
+        {
+            mv->extraVars = NULL;
+        }
+        else
+        {
+            mv->extraVars = vars;
+            vars->num_hits = 0;
+            vars->phase_level = 0;
+            vars->anim_state = 0;
+            vars->last_hit_timer = 0;
+        }
+    }
+
+    mv->auxFlags |= 0x20000000;
+    gameTrackerX.gameFlags |= 0x80000000;
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 1);
+    DEBUG_DoAreaProtection();
+}
 
 void SKINBOS_CleanUp(void) {};
 
