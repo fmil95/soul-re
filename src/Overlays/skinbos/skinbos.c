@@ -493,7 +493,23 @@ void SKINBOS_Init(Instance *instance)
     DEBUG_DoAreaProtection();
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_CleanUp);
+void SKINBOS_CleanUp(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 0);
+    gameTrackerX.gameFlags &= ~0x80000000;
+
+    if (mv != NULL && mv->extraVars != NULL)
+    {
+        MEMPACK_Free(mv->extraVars);
+    }
+
+    MON_CleanUp(instance);
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_IdleEntry);
 
@@ -1004,7 +1020,23 @@ void SKINBOS_Init(Instance *instance)
     DEBUG_DoAreaProtection();
 }
 
-void SKINBOS_CleanUp(void) {};
+void SKINBOS_CleanUp(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 0);
+    gameTrackerX.gameFlags &= ~0x80000000;
+
+    if (mv != NULL && mv->extraVars != NULL)
+    {
+        MEMPACK_Free(mv->extraVars);
+    }
+
+    MON_CleanUp(instance);
+}
+
 
 void SKINBOS_IdleEntry(void) {};
 
