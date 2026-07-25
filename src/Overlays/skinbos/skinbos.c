@@ -783,7 +783,20 @@ void SKINBOS_FindRandomNodeInUnit(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_WanderEntry);
+void SKINBOS_WanderEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    MON_WanderEntry(instance);
+
+    if (!(mv->mvFlags & 4))
+    {
+        SKINBOS_FindRandomNodeInUnit(instance);
+        mv->mvFlags |= 0x40000;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Wander);
 
@@ -1575,7 +1588,20 @@ void SKINBOS_FindRandomNodeInUnit(Instance *instance)
     }
 }
 
-void SKINBOS_WanderEntry(void) {};
+void SKINBOS_WanderEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    MON_WanderEntry(instance);
+
+    if (!(mv->mvFlags & 4))
+    {
+        SKINBOS_FindRandomNodeInUnit(instance);
+        mv->mvFlags |= 0x40000;
+    }
+}
 
 void SKINBOS_Wander(void) {};
 
