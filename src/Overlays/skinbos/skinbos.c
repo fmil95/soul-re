@@ -12,6 +12,7 @@
 #include "Game/STREAM.h"
 #include "Game/MONSTER/MONAPI.h"
 #include "Game/MONSTER/MONLIB.h"
+#include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/PSX/SUPPORT.h"
 
@@ -738,7 +739,49 @@ void SKINBOS_Idle(Instance *instance)
     MON_Idle(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_FindRandomNodeInUnit);
+void SKINBOS_FindRandomNodeInUnit(Instance *instance)
+{
+
+    int i; // not from debug symbols
+    int counter; // not from debug symbols
+    PlanMkr *planMkr; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    Level *level; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
+
+    if (level == NULL)
+    {
+        return;
+    }
+
+    counter = 0;
+
+    for (i = level->NumberOfPlanMarkers, planMkr = level->PlanMarkerList; i > 0; i--, planMkr++)
+    {
+        if (!((planMkr->id & 0x8000) | (planMkr->id & 0x4000) | (planMkr->id & 0x2000) | (planMkr->id & 0x1000)))
+        {
+            counter++;
+        }
+    }
+
+    counter = rand() % counter;
+
+    for (i = level->NumberOfPlanMarkers, planMkr = level->PlanMarkerList; i > 0; i--, planMkr++)
+    {
+        if (!((planMkr->id & 0x8000) | (planMkr->id & 0x4000) | (planMkr->id & 0x2000) | (planMkr->id & 0x1000)))
+        {
+            counter--;
+
+            if (counter <= 0)
+            {
+                COPY_SVEC(Position, &mv->destination, Position, &planMkr->pos);
+                break;
+            }
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_WanderEntry);
 
@@ -1488,7 +1531,49 @@ void SKINBOS_Idle(Instance *instance)
     MON_Idle(instance);
 }
 
-void SKINBOS_FindRandomNodeInUnit(void) {};
+void SKINBOS_FindRandomNodeInUnit(Instance *instance)
+{
+
+    int i; // not from debug symbols
+    int counter; // not from debug symbols
+    PlanMkr *planMkr; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    Level *level; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
+
+    if (level == NULL)
+    {
+        return;
+    }
+
+    counter = 0;
+
+    for (i = level->NumberOfPlanMarkers, planMkr = level->PlanMarkerList; i > 0; i--, planMkr++)
+    {
+        if (!((planMkr->id & 0x8000) | (planMkr->id & 0x4000) | (planMkr->id & 0x2000) | (planMkr->id & 0x1000)))
+        {
+            counter++;
+        }
+    }
+
+    counter = rand() % counter;
+
+    for (i = level->NumberOfPlanMarkers, planMkr = level->PlanMarkerList; i > 0; i--, planMkr++)
+    {
+        if (!((planMkr->id & 0x8000) | (planMkr->id & 0x4000) | (planMkr->id & 0x2000) | (planMkr->id & 0x1000)))
+        {
+            counter--;
+
+            if (counter <= 0)
+            {
+                COPY_SVEC(Position, &mv->destination, Position, &planMkr->pos);
+                break;
+            }
+        }
+    }
+}
 
 void SKINBOS_WanderEntry(void) {};
 
