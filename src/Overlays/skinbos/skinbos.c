@@ -966,7 +966,7 @@ void SKINBOS_DoPhaseFade(Instance *instance, int limit)
     }
 }
 
-void SKINBOS_HandleOneShotAnims(void) {};
+int SKINBOS_HandleOneShotAnims(Instance *instance) {};
 
 void SKINBOS_DoPhasingOutInit(Instance *instance, SVector *normal, SVector *point)
 {
