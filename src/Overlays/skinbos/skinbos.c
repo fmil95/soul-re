@@ -629,8 +629,37 @@ void SKINBOS_CleanUp(Instance *instance)
     MON_CleanUp(instance);
 }
 
+void SKINBOS_IdleEntry(Instance *instance)
+{
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_IdleEntry);
+    MonsterVars *mv; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+
+        mv->mvFlags &= ~0x1000;
+        mv->mvFlags &= ~0x40000;
+        mv->mode = 1;
+
+        if (mv->mvFlags & 4)
+        {
+            MON_PlayAnimID(instance, (signed char)((MonsterAttributes *)instance->data)->idleList[0].anim, 2);
+            vars->anim_state = 0;
+            return;
+        }
+
+        if (vars->anim_state != 10 && vars->anim_state != 11)
+        {
+            vars->anim_state = 0;
+        }
+
+        MON_PlayCombatIdle(instance, 2);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Idle);
 
@@ -1277,8 +1306,37 @@ void SKINBOS_CleanUp(Instance *instance)
     MON_CleanUp(instance);
 }
 
+void SKINBOS_IdleEntry(Instance *instance)
+{
 
-void SKINBOS_IdleEntry(void) {};
+    MonsterVars *mv; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+
+        mv->mvFlags &= ~0x1000;
+        mv->mvFlags &= ~0x40000;
+        mv->mode = 1;
+
+        if (mv->mvFlags & 4)
+        {
+            MON_PlayAnimID(instance, (signed char)((MonsterAttributes *)instance->data)->idleList[0].anim, 2);
+            vars->anim_state = 0;
+            return;
+        }
+
+        if (vars->anim_state != 10 && vars->anim_state != 11)
+        {
+            vars->anim_state = 0;
+        }
+
+        MON_PlayCombatIdle(instance, 2);
+    }
+}
 
 void SKINBOS_Idle(void) {};
 
