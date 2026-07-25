@@ -17,6 +17,8 @@
 
 // TODO: double-check that SKINBOS_CheckInsideMasher and SKINBOS_ShouldEscapeJail aren't swapped
 
+int SKINBOS_HandleOneShotAnims(Instance *instance); // TODO: Delete once matched
+
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
 
@@ -661,7 +663,80 @@ void SKINBOS_IdleEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Idle);
+void SKINBOS_Idle(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+    SkinbosAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (SkinbosVars *)mv->extraVars;
+    attrs = (SkinbosAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        vars->phase_level = 0;
+
+        if (gameTrackerX.gameData.asmData.MorphType == 0)
+        {
+            mv->targetFade = 0;
+        }
+        else
+        {
+            mv->targetFade = 0x1000;
+        }
+
+        vars->anim_state = 0;
+        MON_Idle(instance);
+        return;
+    }
+
+    if (mv->auxFlags & 0x40)
+    {
+        if (instance->fadeValue == 0x1000)
+        {
+            if (gameTrackerX.gameData.asmData.MorphTime < 1000 && gameTrackerX.gameData.asmData.MorphType == 0)
+            {
+                mv->targetFade = ((attrs->max_fadeout * vars->phase_level) / 7) + (0x1000 - attrs->max_fadeout);
+            }
+            else
+            {
+                mv->targetFade = (attrs->max_fadeout * vars->phase_level) / 7;
+            }
+
+            mv->auxFlags &= ~0x40;
+        }
+        else
+        {
+            if (gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 1)
+            {
+                mv->targetFade = ((attrs->max_fadeout * vars->phase_level) / 7) + (0x1000 - attrs->max_fadeout);
+                mv->auxFlags &= ~0x40;
+            }
+            else if (gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 0)
+            {
+                mv->targetFade = (attrs->max_fadeout * vars->phase_level) / 7;
+                mv->auxFlags &= ~0x40;
+            }
+        }
+    }
+
+    if (SKINBOS_HandleOneShotAnims(instance) != 0 || mv->auxFlags & 0x40)
+    {
+        MON_DefaultQueueHandler(instance);
+        return;
+    }
+
+    MON_Idle(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_FindRandomNodeInUnit);
 
@@ -1338,7 +1413,80 @@ void SKINBOS_IdleEntry(Instance *instance)
     }
 }
 
-void SKINBOS_Idle(void) {};
+void SKINBOS_Idle(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+    SkinbosAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (SkinbosVars *)mv->extraVars;
+    attrs = (SkinbosAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        vars->phase_level = 0;
+
+        if (gameTrackerX.gameData.asmData.MorphType == 0)
+        {
+            mv->targetFade = 0;
+        }
+        else
+        {
+            mv->targetFade = 0x1000;
+        }
+
+        vars->anim_state = 0;
+        MON_Idle(instance);
+        return;
+    }
+
+    if (mv->auxFlags & 0x40)
+    {
+        if (instance->fadeValue == 0x1000)
+        {
+            if (gameTrackerX.gameData.asmData.MorphTime < 1000 && gameTrackerX.gameData.asmData.MorphType == 0)
+            {
+                mv->targetFade = ((attrs->max_fadeout * vars->phase_level) / 7) + (0x1000 - attrs->max_fadeout);
+            }
+            else
+            {
+                mv->targetFade = (attrs->max_fadeout * vars->phase_level) / 7;
+            }
+
+            mv->auxFlags &= ~0x40;
+        }
+        else
+        {
+            if (gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 1)
+            {
+                mv->targetFade = ((attrs->max_fadeout * vars->phase_level) / 7) + (0x1000 - attrs->max_fadeout);
+                mv->auxFlags &= ~0x40;
+            }
+            else if (gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 0)
+            {
+                mv->targetFade = (attrs->max_fadeout * vars->phase_level) / 7;
+                mv->auxFlags &= ~0x40;
+            }
+        }
+    }
+
+    if (SKINBOS_HandleOneShotAnims(instance) != 0 || mv->auxFlags & 0x40)
+    {
+        MON_DefaultQueueHandler(instance);
+        return;
+    }
+
+    MON_Idle(instance);
+}
 
 void SKINBOS_FindRandomNodeInUnit(void) {};
 
