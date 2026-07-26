@@ -1157,7 +1157,39 @@ void SKINBOS_LandOnFeet(Instance *instance)
     (void)instance;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_AttackEntry);
+void SKINBOS_AttackEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (gameTrackerX.gameData.asmData.MorphTime == 1000)
+    {
+        if (gameTrackerX.gameData.asmData.MorphType == 1)
+        {
+            vars->anim_state = 10;
+        }
+        else
+        {
+            vars->anim_state = 0;
+        }
+
+        MON_AttackEntry(instance);
+        mv->mvFlags &= ~0x20000;
+    }
+    else
+    {
+        MON_SwitchStateDoEntry(instance, MONSTER_STATE_COMBAT);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Attack);
 
@@ -2302,7 +2334,39 @@ void SKINBOS_LandOnFeet(Instance *instance)
     (void)instance;
 }
 
-void SKINBOS_AttackEntry(void) {};
+void SKINBOS_AttackEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (gameTrackerX.gameData.asmData.MorphTime == 1000)
+    {
+        if (gameTrackerX.gameData.asmData.MorphType == 1)
+        {
+            vars->anim_state = 10;
+        }
+        else
+        {
+            vars->anim_state = 0;
+        }
+
+        MON_AttackEntry(instance);
+        mv->mvFlags &= ~0x20000;
+    }
+    else
+    {
+        MON_SwitchStateDoEntry(instance, MONSTER_STATE_COMBAT);
+    }
+}
 
 void SKINBOS_Attack(void) {};
 
