@@ -800,7 +800,11 @@ void SKINBOS_WanderEntry(Instance *instance)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Wander);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_PursueEntry);
+void SKINBOS_PursueEntry(Instance *instance)
+{
+    MON_PursueEntry(instance);
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Pursue);
 
@@ -1605,7 +1609,11 @@ void SKINBOS_WanderEntry(Instance *instance)
 
 void SKINBOS_Wander(void) {};
 
-void SKINBOS_PursueEntry(void) {};
+void SKINBOS_PursueEntry(Instance *instance)
+{
+    MON_PursueEntry(instance);
+}
+
 
 void SKINBOS_Pursue(void) {};
 
