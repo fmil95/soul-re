@@ -818,7 +818,10 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Combat);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_LandOnFeetEntry);
 
-void SKINBOS_LandOnFeet(void) {};
+void SKINBOS_LandOnFeet(Instance *instance)
+{
+    (void)instance;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_AttackEntry);
 
@@ -1627,7 +1630,10 @@ void SKINBOS_Combat(void) {};
 
 void SKINBOS_LandOnFeetEntry(void) {};
 
-void SKINBOS_LandOnFeet(void) {};
+void SKINBOS_LandOnFeet(Instance *instance)
+{
+    (void)instance;
+}
 
 void SKINBOS_AttackEntry(void) {};
 
