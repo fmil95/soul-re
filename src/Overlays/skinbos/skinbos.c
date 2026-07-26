@@ -1018,7 +1018,35 @@ void SKINBOS_HitEntry(Instance *instance)
     mv->mode = 0x8000;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Hit);
+void SKINBOS_Hit(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        if (vars->anim_state == 10 || vars->anim_state == 11)
+        {
+            SKINBOS_HandleOneShotAnims(instance);
+        }
+        else
+        {
+            vars->anim_state = 0;
+        }
+
+        if (instance->flags2 & 0x10)
+        {
+            MON_PlayCombatIdle(instance, 2);
+            MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+        }
+
+        MON_DefaultQueueHandler(instance);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_CombatEntry);
 
@@ -2037,7 +2065,35 @@ void SKINBOS_HitEntry(Instance *instance)
     mv->mode = 0x8000;
 }
 
-void SKINBOS_Hit(void) {};
+void SKINBOS_Hit(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        if (vars->anim_state == 10 || vars->anim_state == 11)
+        {
+            SKINBOS_HandleOneShotAnims(instance);
+        }
+        else
+        {
+            vars->anim_state = 0;
+        }
+
+        if (instance->flags2 & 0x10)
+        {
+            MON_PlayCombatIdle(instance, 2);
+            MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+        }
+
+        MON_DefaultQueueHandler(instance);
+    }
+}
 
 void SKINBOS_CombatEntry(void) {};
 
