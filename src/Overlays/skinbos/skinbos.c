@@ -981,7 +981,42 @@ void SKINBOS_Pursue(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_HitEntry);
+void SKINBOS_HitEntry(Instance *instance)
+{
+
+    MonsterIR *enemy; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+
+    if (mv->extraVars == NULL)
+    {
+        return;
+    }
+
+    if (enemy != NULL)
+    {
+        enemy->mirConditions |= 0x400;
+        enemy->mirFlags &= ~0x1000;
+
+        if ((((instance->rotation.z - MATH3D_AngleFromPosToPos(&instance->position, &enemy->instance->position)) + 1024) & 0xFFF) < 2048)
+        {
+            MON_TurnToPosition(instance, &enemy->instance->position, 4096);
+            MON_PlayAnim(instance, MONSTER_ANIM_HIT1, 1);
+        }
+        else
+        {
+            MON_PlayAnim(instance, MONSTER_ANIM_HIT2, 1);
+        }
+    }
+    else
+    {
+        MON_PlayAnim(instance, MONSTER_ANIM_HIT1, 1);
+    }
+
+    mv->mode = 0x8000;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Hit);
 
@@ -1965,7 +2000,42 @@ void SKINBOS_Pursue(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-void SKINBOS_HitEntry(void) {};
+void SKINBOS_HitEntry(Instance *instance)
+{
+
+    MonsterIR *enemy; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+
+    if (mv->extraVars == NULL)
+    {
+        return;
+    }
+
+    if (enemy != NULL)
+    {
+        enemy->mirConditions |= 0x400;
+        enemy->mirFlags &= ~0x1000;
+
+        if ((((instance->rotation.z - MATH3D_AngleFromPosToPos(&instance->position, &enemy->instance->position)) + 1024) & 0xFFF) < 2048)
+        {
+            MON_TurnToPosition(instance, &enemy->instance->position, 4096);
+            MON_PlayAnim(instance, MONSTER_ANIM_HIT1, 1);
+        }
+        else
+        {
+            MON_PlayAnim(instance, MONSTER_ANIM_HIT2, 1);
+        }
+    }
+    else
+    {
+        MON_PlayAnim(instance, MONSTER_ANIM_HIT1, 1);
+    }
+
+    mv->mode = 0x8000;
+}
 
 void SKINBOS_Hit(void) {};
 
