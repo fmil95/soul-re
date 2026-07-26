@@ -5,6 +5,7 @@
 #include "Game/GAMELOOP.h"
 #include "Game/MATH3D.h"
 #include "Game/MEMPACK.h"
+#include "Game/PLAN/ENMYPLAN.h"
 #include "Game/PLAN/PLANAPI.h"
 #include "Game/RAZIEL/RAZIEL.h"
 #include "Game/SOUND.h"
@@ -806,7 +807,179 @@ void SKINBOS_PursueEntry(Instance *instance)
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Pursue);
+void SKINBOS_Pursue(Instance *instance)
+{
+
+    Position pos;
+    int anim; // not from debug symbols
+    int range; // not from debug symbols
+    int result; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+    MonsterCombatAttributes *combat; // not from debug symbols
+    SkinbosAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (SkinbosVars *)mv->extraVars;
+    enemy = mv->enemy;
+    attrs = (SkinbosAttributes *)ma->tunData;
+    combat = mv->subAttr->combatAttributes;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        vars->phase_level = 0;
+
+        if (gameTrackerX.gameData.asmData.MorphType == 0)
+        {
+            mv->targetFade = 0;
+        }
+        else
+        {
+            mv->targetFade = 4096;
+        }
+
+        vars->anim_state = 0;
+        MON_Pursue(instance);
+        return;
+    }
+
+    if (SKINBOS_HandleOneShotAnims(instance) == 0)
+    {
+        if (SKINBOS_ShouldEscapeJail(instance) && !SKINBOS_CheckPointInsideMasher(instance, &gameTrackerX.playerInstance->position, 1))
+        {
+            MON_SwitchState(instance, MONSTER_STATE_FLEE);
+        }
+        else if (mv->auxFlags & 1)
+        {
+            switch (vars->gate_drop_pos)
+            {
+
+            case 1:
+                MON_PlayAnim(instance, MONSTER_ANIM_STANCE_HEALTHY, 1);
+                vars->stop_timer = MON_GetTime(instance) + 1980;
+                vars->anim_state = 3;
+                mv->mvFlags &= ~0x20000;
+                break;
+            case 2:
+                break;
+            case 3:
+                MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 6, 1);
+                vars->anim_state = 6;
+                mv->mvFlags &= ~0x20000;
+
+                if (vars->num_hits < attrs->max_allowed_damage)
+                {
+                    vars->num_hits++;
+                }
+
+                SKINBOS_StartVertexBlood(instance);
+                break;
+            }
+
+            mv->auxFlags &= ~1;
+
+        }
+        else if (enemy == NULL)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        }
+        else
+        {
+
+            mv->destination = enemy->instance->position;
+            mv->lookAtPos = &mv->destination;
+            range = combat->combatRange;
+
+            if (MATH3D_LengthXY(instance->position.x - mv->destination.x, instance->position.y - mv->destination.y) < range && abs(instance->position.z - mv->destination.z) < 90 && enemy->mirFlags & 0x20)
+            {
+                MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+            }
+            else
+            {
+
+                if (enemy->distance < range + MON_GetAnim(instance, mv->subAttr->animList, MONSTER_ANIM_WALK)->distance)
+                {
+                    anim = MONSTER_ANIM_WALK;
+                }
+                else
+                {
+                    anim = MONSTER_ANIM_RUN;
+                }
+
+                result = ENMYPLAN_MoveToTargetFinal(instance, &pos, (signed char)mv->pathSlotID, &mv->destination, 0x1F);
+
+                if (result == MOVE_TO_WAYPOINT || result == MOVE_TO_TARGET)
+                {
+
+                    result = SKINBOS_Turn(instance, &pos, 1365);
+
+                    switch (result)
+                    {
+                    case 1:
+                        MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 1, 1);
+                        vars->anim_state = result;
+                        mv->mvFlags &= ~0x20000;
+                        break;
+                    case 2:
+                        MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 0, 1);
+                        vars->anim_state = result;
+                        mv->mvFlags &= ~0x20000;
+                        break;
+                    case 0:
+                    default:
+
+                        MON_TurnToPosition(instance, &pos, mv->subAttr->speedPivotTurn);
+                        result = SKINBOS_Turn(instance, &pos, 0);
+
+                        switch (result)
+                        {
+                        case 1:
+                            MON_PlayAnimFromListIfNotPlaying(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 3, 2);
+                            vars->anim_state = 0;
+                            mv->mvFlags &= ~0x20000;
+                            break;
+                        case 2:
+                            MON_PlayAnimFromListIfNotPlaying(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 2, 2);
+                            vars->anim_state = 0;
+                            mv->mvFlags &= ~0x20000;
+                            break;
+                        case 0:
+                            if (!(mv->mvFlags & 0x20000))
+                            {
+                                mv->mvFlags |= 0x20000;
+                                MON_PlayAnimIfNotPlaying(instance, anim, 2);
+                                vars->anim_state = 0;
+                            }
+                            break;
+                        }
+                        break;
+                    }
+                }
+                else
+                {
+                    if (result == MOVE_INVALID)
+                    {
+                        MON_GetPlanSlot(mv);
+                    }
+
+                    MON_PlayCombatIdle(instance, 2);
+                    mv->mvFlags &= ~0x20000;
+                }
+            }
+        }
+    }
+
+    SKINBOS_CheckPhaseIn(instance);
+    MON_DefaultQueueHandler(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_HitEntry);
 
@@ -1618,7 +1791,179 @@ void SKINBOS_PursueEntry(Instance *instance)
 }
 
 
-void SKINBOS_Pursue(void) {};
+void SKINBOS_Pursue(Instance *instance)
+{
+
+    Position pos;
+    int anim; // not from debug symbols
+    int range; // not from debug symbols
+    int result; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+    MonsterCombatAttributes *combat; // not from debug symbols
+    SkinbosAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (SkinbosVars *)mv->extraVars;
+    enemy = mv->enemy;
+    attrs = (SkinbosAttributes *)ma->tunData;
+    combat = mv->subAttr->combatAttributes;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        vars->phase_level = 0;
+
+        if (gameTrackerX.gameData.asmData.MorphType == 0)
+        {
+            mv->targetFade = 0;
+        }
+        else
+        {
+            mv->targetFade = 4096;
+        }
+
+        vars->anim_state = 0;
+        MON_Pursue(instance);
+        return;
+    }
+
+    if (SKINBOS_HandleOneShotAnims(instance) == 0)
+    {
+        if (SKINBOS_ShouldEscapeJail(instance) && !SKINBOS_CheckPointInsideMasher(instance, &gameTrackerX.playerInstance->position, 1))
+        {
+            MON_SwitchState(instance, MONSTER_STATE_FLEE);
+        }
+        else if (mv->auxFlags & 1)
+        {
+            switch (vars->gate_drop_pos)
+            {
+
+            case 1:
+                MON_PlayAnim(instance, MONSTER_ANIM_STANCE_HEALTHY, 1);
+                vars->stop_timer = MON_GetTime(instance) + 1980;
+                vars->anim_state = 3;
+                mv->mvFlags &= ~0x20000;
+                break;
+            case 2:
+                break;
+            case 3:
+                MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 6, 1);
+                vars->anim_state = 6;
+                mv->mvFlags &= ~0x20000;
+
+                if (vars->num_hits < attrs->max_allowed_damage)
+                {
+                    vars->num_hits++;
+                }
+
+                SKINBOS_StartVertexBlood(instance);
+                break;
+            }
+
+            mv->auxFlags &= ~1;
+
+        }
+        else if (enemy == NULL)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        }
+        else
+        {
+
+            mv->destination = enemy->instance->position;
+            mv->lookAtPos = &mv->destination;
+            range = combat->combatRange;
+
+            if (MATH3D_LengthXY(instance->position.x - mv->destination.x, instance->position.y - mv->destination.y) < range && abs(instance->position.z - mv->destination.z) < 90 && enemy->mirFlags & 0x20)
+            {
+                MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+            }
+            else
+            {
+
+                if (enemy->distance < range + MON_GetAnim(instance, mv->subAttr->animList, MONSTER_ANIM_WALK)->distance)
+                {
+                    anim = MONSTER_ANIM_WALK;
+                }
+                else
+                {
+                    anim = MONSTER_ANIM_RUN;
+                }
+
+                result = ENMYPLAN_MoveToTargetFinal(instance, &pos, (signed char)mv->pathSlotID, &mv->destination, 0x1F);
+
+                if (result == MOVE_TO_WAYPOINT || result == MOVE_TO_TARGET)
+                {
+
+                    result = SKINBOS_Turn(instance, &pos, 1365);
+
+                    switch (result)
+                    {
+                    case 1:
+                        MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 1, 1);
+                        vars->anim_state = result;
+                        mv->mvFlags &= ~0x20000;
+                        break;
+                    case 2:
+                        MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 0, 1);
+                        vars->anim_state = result;
+                        mv->mvFlags &= ~0x20000;
+                        break;
+                    case 0:
+                    default:
+
+                        MON_TurnToPosition(instance, &pos, mv->subAttr->speedPivotTurn);
+                        result = SKINBOS_Turn(instance, &pos, 0);
+
+                        switch (result)
+                        {
+                        case 1:
+                            MON_PlayAnimFromListIfNotPlaying(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 3, 2);
+                            vars->anim_state = 0;
+                            mv->mvFlags &= ~0x20000;
+                            break;
+                        case 2:
+                            MON_PlayAnimFromListIfNotPlaying(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 2, 2);
+                            vars->anim_state = 0;
+                            mv->mvFlags &= ~0x20000;
+                            break;
+                        case 0:
+                            if (!(mv->mvFlags & 0x20000))
+                            {
+                                mv->mvFlags |= 0x20000;
+                                MON_PlayAnimIfNotPlaying(instance, anim, 2);
+                                vars->anim_state = 0;
+                            }
+                            break;
+                        }
+                        break;
+                    }
+                }
+                else
+                {
+                    if (result == MOVE_INVALID)
+                    {
+                        MON_GetPlanSlot(mv);
+                    }
+
+                    MON_PlayCombatIdle(instance, 2);
+                    mv->mvFlags &= ~0x20000;
+                }
+            }
+        }
+    }
+
+    SKINBOS_CheckPhaseIn(instance);
+    MON_DefaultQueueHandler(instance);
+}
 
 void SKINBOS_HitEntry(void) {};
 
