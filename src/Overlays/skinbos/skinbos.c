@@ -131,7 +131,6 @@ void SKINBOS_DoPhaseFade(Instance *instance, int limit)
 
     if (limit == 0)
     {
-        // XOR swap
         upperBound = upperBound ^ lowerBound;
         lowerBound = upperBound ^ lowerBound;
         upperBound = upperBound ^ lowerBound;
@@ -1145,7 +1144,13 @@ void SKINBOS_Combat(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_LandOnFeetEntry);
+void SKINBOS_LandOnFeetEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    MON_SwitchStateDoEntry(instance, (signed char)mv->previousMainState);
+}
 
 void SKINBOS_LandOnFeet(Instance *instance)
 {
@@ -1275,7 +1280,6 @@ void SKINBOS_DoPhaseFade(Instance *instance, int limit)
 
     if (limit == 0)
     {
-        // XOR swap
         upperBound = upperBound ^ lowerBound;
         lowerBound = upperBound ^ lowerBound;
         upperBound = upperBound ^ lowerBound;
@@ -2285,7 +2289,13 @@ void SKINBOS_Combat(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-void SKINBOS_LandOnFeetEntry(void) {};
+void SKINBOS_LandOnFeetEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    MON_SwitchStateDoEntry(instance, (signed char)mv->previousMainState);
+}
 
 void SKINBOS_LandOnFeet(Instance *instance)
 {
