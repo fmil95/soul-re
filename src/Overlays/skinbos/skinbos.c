@@ -1048,7 +1048,10 @@ void SKINBOS_Hit(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_CombatEntry);
+void SKINBOS_CombatEntry(Instance *instance)
+{
+    MON_CombatEntry(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Combat);
 
@@ -2095,7 +2098,10 @@ void SKINBOS_Hit(Instance *instance)
     }
 }
 
-void SKINBOS_CombatEntry(void) {};
+void SKINBOS_CombatEntry(Instance *instance)
+{
+    MON_CombatEntry(instance);
+}
 
 void SKINBOS_Combat(void) {};
 
