@@ -1053,7 +1053,97 @@ void SKINBOS_CombatEntry(Instance *instance)
     MON_CombatEntry(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Combat);
+void SKINBOS_Combat(Instance *instance)
+{
+
+    int turnResult; // not from debug symbols
+    int reason; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    MonsterCombatAttributes *combat; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+    enemy = mv->enemy;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+
+    if (SKINBOS_HandleOneShotAnims(instance) == 0)
+    {
+        if (SKINBOS_ShouldEscapeJail(instance) && !SKINBOS_CheckPointInsideMasher(instance, &gameTrackerX.playerInstance->position, 1))
+        {
+            MON_SwitchState(instance, MONSTER_STATE_FLEE);
+        }
+        else if (enemy == NULL)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        }
+        else
+        {
+
+            combat = mv->subAttr->combatAttributes;
+            mv->lookAtPos = &enemy->instance->position;
+
+            if (enemy->distance < combat->combatRange && enemy->mirFlags & 0x20)
+            {
+
+                reason = MON_ShouldIAttack(instance, enemy, MON_ChooseAttack(instance, enemy));
+
+                if (reason == MONSTER_ATTACKRESULT_TOOCLOSE || reason == MONSTER_ATTACKRESULT_TOOFAR)
+                {
+                    mv->mvFlags |= 0x20000;
+                    MON_PlayAnimIfNotPlaying(instance, 2, 2);
+                    vars->anim_state = 0;
+                }
+                else
+                {
+
+                    turnResult = SKINBOS_Turn(instance, &enemy->instance->position, 5);
+                    MON_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn);
+                    switch (turnResult)
+                    {
+                    case 1:
+                        MON_PlayAnimFromListIfNotPlaying(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 3, 2);
+                        vars->anim_state = 0;
+                        mv->mvFlags &= ~0x20000;
+                        break;
+                    case 2:
+                        MON_PlayAnimFromListIfNotPlaying(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 2, 2);
+                        vars->anim_state = 0;
+                        mv->mvFlags &= ~0x20000;
+                        break;
+                    case 0:
+                        if (vars->phase_level != 0 || reason != MONSTER_ATTACKRESULT_SUCCESS)
+                        {
+                            MON_PlayCombatIdle(instance, 2);
+                            vars->anim_state = 0;
+                            mv->mvFlags &= ~0x20000;
+                            break;
+                        }
+
+                        MON_SwitchState(instance, MONSTER_STATE_ATTACK);
+                    }
+                }
+            }
+            else
+            {
+                MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+            }
+        }
+    }
+
+    SKINBOS_CheckPhaseIn(instance);
+    MON_DefaultQueueHandler(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_LandOnFeetEntry);
 
@@ -2103,7 +2193,97 @@ void SKINBOS_CombatEntry(Instance *instance)
     MON_CombatEntry(instance);
 }
 
-void SKINBOS_Combat(void) {};
+void SKINBOS_Combat(Instance *instance)
+{
+
+    int turnResult; // not from debug symbols
+    int reason; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    MonsterCombatAttributes *combat; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+    enemy = mv->enemy;
+
+    if (vars == NULL)
+    {
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+
+    if (SKINBOS_HandleOneShotAnims(instance) == 0)
+    {
+        if (SKINBOS_ShouldEscapeJail(instance) && !SKINBOS_CheckPointInsideMasher(instance, &gameTrackerX.playerInstance->position, 1))
+        {
+            MON_SwitchState(instance, MONSTER_STATE_FLEE);
+        }
+        else if (enemy == NULL)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        }
+        else
+        {
+
+            combat = mv->subAttr->combatAttributes;
+            mv->lookAtPos = &enemy->instance->position;
+
+            if (enemy->distance < combat->combatRange && enemy->mirFlags & 0x20)
+            {
+
+                reason = MON_ShouldIAttack(instance, enemy, MON_ChooseAttack(instance, enemy));
+
+                if (reason == MONSTER_ATTACKRESULT_TOOCLOSE || reason == MONSTER_ATTACKRESULT_TOOFAR)
+                {
+                    mv->mvFlags |= 0x20000;
+                    MON_PlayAnimIfNotPlaying(instance, 2, 2);
+                    vars->anim_state = 0;
+                }
+                else
+                {
+
+                    turnResult = SKINBOS_Turn(instance, &enemy->instance->position, 5);
+                    MON_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn);
+                    switch (turnResult)
+                    {
+                    case 1:
+                        MON_PlayAnimFromListIfNotPlaying(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 3, 2);
+                        vars->anim_state = 0;
+                        mv->mvFlags &= ~0x20000;
+                        break;
+                    case 2:
+                        MON_PlayAnimFromListIfNotPlaying(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 2, 2);
+                        vars->anim_state = 0;
+                        mv->mvFlags &= ~0x20000;
+                        break;
+                    case 0:
+                        if (vars->phase_level != 0 || reason != MONSTER_ATTACKRESULT_SUCCESS)
+                        {
+                            MON_PlayCombatIdle(instance, 2);
+                            vars->anim_state = 0;
+                            mv->mvFlags &= ~0x20000;
+                            break;
+                        }
+
+                        MON_SwitchState(instance, MONSTER_STATE_ATTACK);
+                    }
+                }
+            }
+            else
+            {
+                MON_SwitchState(instance, MONSTER_STATE_PURSUE);
+            }
+        }
+    }
+
+    SKINBOS_CheckPhaseIn(instance);
+    MON_DefaultQueueHandler(instance);
+}
 
 void SKINBOS_LandOnFeetEntry(void) {};
 

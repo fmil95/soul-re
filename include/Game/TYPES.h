@@ -208,7 +208,6 @@ enum AttackResult
     MONSTER_ATTACKRESULT_ALLYINWAY = 7,
 };
 
-
 enum MarkerType
 {
     NO_MARKER = 0,
