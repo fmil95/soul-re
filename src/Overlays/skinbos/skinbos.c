@@ -1231,7 +1231,15 @@ void SKINBOS_Attack(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_DeadEntry);
+void SKINBOS_DeadEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    mv->soulJuice = 0;
+    MON_DeadEntry(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Dead);
 
@@ -2445,7 +2453,15 @@ void SKINBOS_Attack(Instance *instance)
     }
 }
 
-void SKINBOS_DeadEntry(void) {};
+void SKINBOS_DeadEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    mv->soulJuice = 0;
+    MON_DeadEntry(instance);
+}
 
 void SKINBOS_Dead(void) {};
 
