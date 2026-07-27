@@ -1276,7 +1276,106 @@ void SKINBOS_FleeEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Flee);
+void SKINBOS_Flee(Instance *instance)
+{
+
+    int angleDiff;
+    SkinbosVars *vars;
+    MonsterVars *mv;
+    MonsterAttributes *ma;
+    SkinbosAttributes *attrs;
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (SkinbosVars *)mv->extraVars;
+    attrs = (SkinbosAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return;
+    }
+
+    if (SKINBOS_HandleOneShotAnims(instance) == 0)
+    {
+        if (!(mv->mvFlags & 0x20000))
+        {
+            if (vars->target_angle >= 4096)
+            {
+                vars->target_angle = (instance->rotation.z + (rand() % 1024)) & 0xFFF;
+            }
+
+            angleDiff = (vars->target_angle - instance->rotation.z) & 0xFFF;
+
+            if (angleDiff <= 2048)
+            {
+                if (angleDiff > 682)
+                {
+                    goto label;
+                }
+                goto label_1;
+            }
+            if ((angleDiff - 4096) > 682)
+            {
+            label:
+                MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 1, 1);
+                vars->anim_state = 1;
+                mv->mvFlags &= ~0x20000;
+            }
+            else
+            {
+            label_1:
+
+                angleDiff = (vars->target_angle - instance->rotation.z) & 0xFFF;
+
+                if (angleDiff <= 2048)
+                {
+                    if (angleDiff < -682)
+                    {
+                        goto label_2;
+                    }
+                    else
+                    {
+                        goto label_3;
+                    }
+                }
+                else if ((angleDiff - 4096) < -682)
+                {
+                label_2:
+                    MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 0, 1);
+                    vars->anim_state = 2;
+                    mv->mvFlags &= ~0x20000;
+                }
+                else
+                {
+                label_3:
+                    AngleMoveToward(&instance->rotation.z, vars->target_angle, (mv->subAttr->speedPivotTurn * gameTrackerX.timeMult * 16) / 65536);
+                }
+            }
+
+            if (vars->num_hits < attrs->max_allowed_damage || vars->target_angle == instance->rotation.z)
+            {
+                vars->target_angle = 4096;
+                MON_PlayAnim(instance, MONSTER_ANIM_RUN, 2);
+                vars->anim_state = 0;
+                mv->mvFlags |= 0x20000;
+            }
+        }
+        else
+        {
+            if (!(mv->auxFlags & 8))
+            {
+                MON_SwitchState(instance, MONSTER_STATE_IDLE);
+            }
+            else if (SKINBOS_CheckPointInsideMasher(instance, &gameTrackerX.playerInstance->position, 1) != 0)
+            {
+                MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+            }
+        }
+    }
+
+    SKINBOS_CheckPhaseIn(instance);
+    MON_DefaultQueueHandler(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_StunnedEntry);
 
@@ -2529,7 +2628,106 @@ void SKINBOS_FleeEntry(Instance *instance)
     }
 }
 
-void SKINBOS_Flee(void) {};
+void SKINBOS_Flee(Instance *instance)
+{
+
+    int angleDiff;
+    SkinbosVars *vars;
+    MonsterVars *mv;
+    MonsterAttributes *ma;
+    SkinbosAttributes *attrs;
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (SkinbosVars *)mv->extraVars;
+    attrs = (SkinbosAttributes *)ma->tunData;
+
+    if (vars == NULL || attrs == NULL)
+    {
+        return;
+    }
+
+    if (SKINBOS_HandleOneShotAnims(instance) == 0)
+    {
+        if (!(mv->mvFlags & 0x20000))
+        {
+            if (vars->target_angle >= 4096)
+            {
+                vars->target_angle = (instance->rotation.z + (rand() % 1024)) & 0xFFF;
+            }
+
+            angleDiff = (vars->target_angle - instance->rotation.z) & 0xFFF;
+
+            if (angleDiff <= 2048)
+            {
+                if (angleDiff > 682)
+                {
+                    goto label;
+                }
+                goto label_1;
+            }
+            if ((angleDiff - 4096) > 682)
+            {
+            label:
+                MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 1, 1);
+                vars->anim_state = 1;
+                mv->mvFlags &= ~0x20000;
+            }
+            else
+            {
+            label_1:
+
+                angleDiff = (vars->target_angle - instance->rotation.z) & 0xFFF;
+
+                if (angleDiff <= 2048)
+                {
+                    if (angleDiff < -682)
+                    {
+                        goto label_2;
+                    }
+                    else
+                    {
+                        goto label_3;
+                    }
+                }
+                else if ((angleDiff - 4096) < -682)
+                {
+                label_2:
+                    MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 0, 1);
+                    vars->anim_state = 2;
+                    mv->mvFlags &= ~0x20000;
+                }
+                else
+                {
+                label_3:
+                    AngleMoveToward(&instance->rotation.z, vars->target_angle, (mv->subAttr->speedPivotTurn * gameTrackerX.timeMult * 16) / 65536);
+                }
+            }
+
+            if (vars->num_hits < attrs->max_allowed_damage || vars->target_angle == instance->rotation.z)
+            {
+                vars->target_angle = 4096;
+                MON_PlayAnim(instance, MONSTER_ANIM_RUN, 2);
+                vars->anim_state = 0;
+                mv->mvFlags |= 0x20000;
+            }
+        }
+        else
+        {
+            if (!(mv->auxFlags & 8))
+            {
+                MON_SwitchState(instance, MONSTER_STATE_IDLE);
+            }
+            else if (SKINBOS_CheckPointInsideMasher(instance, &gameTrackerX.playerInstance->position, 1) != 0)
+            {
+                MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+            }
+        }
+    }
+
+    SKINBOS_CheckPhaseIn(instance);
+    MON_DefaultQueueHandler(instance);
+}
 
 void SKINBOS_StunnedEntry(void) {};
 
