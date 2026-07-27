@@ -3,6 +3,7 @@
 #include "Game/DEBUG.h"
 #include "Game/FX.h"
 #include "Game/GAMELOOP.h"
+#include "Game/GAMEPAD.h"
 #include "Game/MATH3D.h"
 #include "Game/MEMPACK.h"
 #include "Game/PLAN/ENMYPLAN.h"
@@ -1191,7 +1192,44 @@ void SKINBOS_AttackEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Attack);
+void SKINBOS_Attack(Instance *instance)
+{
+
+    MonsterAttackAttributes *attack; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+
+        SKINBOS_HandleOneShotAnims(instance);
+        MON_Attack(instance);
+
+        if (mv->mvFlags & 4)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        }
+
+        attack = mv->attackType;
+
+        if ((signed char)attack->sphereSegment == 8 && G2EmulationInstanceQueryPassedFrame(instance, 0, (signed char)attack->sphereOnFrame))
+        {
+            GAMEPAD_Shock1(96, 40960);
+        }
+
+        mv->auxFlags &= ~4;
+
+        if (instance->currentMainState != MONSTER_STATE_ATTACK && vars->phase_level == 7)
+        {
+            MON_PlayCombatIdle(instance, 2);
+            vars->anim_state = 11;
+            mv->mvFlags &= ~0x20000;
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_DeadEntry);
 
@@ -2368,7 +2406,44 @@ void SKINBOS_AttackEntry(Instance *instance)
     }
 }
 
-void SKINBOS_Attack(void) {};
+void SKINBOS_Attack(Instance *instance)
+{
+
+    MonsterAttackAttributes *attack; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+
+        SKINBOS_HandleOneShotAnims(instance);
+        MON_Attack(instance);
+
+        if (mv->mvFlags & 4)
+        {
+            MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        }
+
+        attack = mv->attackType;
+
+        if ((signed char)attack->sphereSegment == 8 && G2EmulationInstanceQueryPassedFrame(instance, 0, (signed char)attack->sphereOnFrame))
+        {
+            GAMEPAD_Shock1(96, 40960);
+        }
+
+        mv->auxFlags &= ~4;
+
+        if (instance->currentMainState != MONSTER_STATE_ATTACK && vars->phase_level == 7)
+        {
+            MON_PlayCombatIdle(instance, 2);
+            vars->anim_state = 11;
+            mv->mvFlags &= ~0x20000;
+        }
+    }
+}
 
 void SKINBOS_DeadEntry(void) {};
 
