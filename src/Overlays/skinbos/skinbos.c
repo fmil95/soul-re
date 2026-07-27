@@ -1258,7 +1258,23 @@ void SKINBOS_Dead(Instance *instance)
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_FleeEntry);
+void SKINBOS_FleeEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        vars->target_angle = 4096;
+        MON_PlayAnim(instance, MONSTER_ANIM_RUN, 2);
+        vars->anim_state = 0;
+        mv->mvFlags |= 0x20000;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Flee);
 
@@ -2495,7 +2511,23 @@ void SKINBOS_Dead(Instance *instance)
 }
 
 
-void SKINBOS_FleeEntry(void) {};
+void SKINBOS_FleeEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (SkinbosVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        vars->target_angle = 4096;
+        MON_PlayAnim(instance, MONSTER_ANIM_RUN, 2);
+        vars->anim_state = 0;
+        mv->mvFlags |= 0x20000;
+    }
+}
 
 void SKINBOS_Flee(void) {};
 
