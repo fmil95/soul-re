@@ -1241,7 +1241,22 @@ void SKINBOS_DeadEntry(Instance *instance)
     MON_DeadEntry(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_Dead);
+void SKINBOS_Dead(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (instance->flags2 & 0x10)
+    {
+        mv->causeOfDeath = MONSTER_CAUSEOFDEATH_STONE;
+        MON_KillMonster(instance);
+    }
+
+    while (DeMessageQueue(&mv->messageQueue) != NULL);
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_FleeEntry);
 
@@ -2463,7 +2478,22 @@ void SKINBOS_DeadEntry(Instance *instance)
     MON_DeadEntry(instance);
 }
 
-void SKINBOS_Dead(void) {};
+void SKINBOS_Dead(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (instance->flags2 & 0x10)
+    {
+        mv->causeOfDeath = MONSTER_CAUSEOFDEATH_STONE;
+        MON_KillMonster(instance);
+    }
+
+    while (DeMessageQueue(&mv->messageQueue) != NULL);
+}
+
 
 void SKINBOS_FleeEntry(void) {};
 
