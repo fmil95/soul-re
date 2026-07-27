@@ -1279,11 +1279,11 @@ void SKINBOS_FleeEntry(Instance *instance)
 void SKINBOS_Flee(Instance *instance)
 {
 
-    int angleDiff;
-    SkinbosVars *vars;
-    MonsterVars *mv;
-    MonsterAttributes *ma;
-    SkinbosAttributes *attrs;
+    int angleDiff; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    SkinbosAttributes *attrs; // not from debug symbols
 
     mv = (MonsterVars *)instance->extraData;
     ma = (MonsterAttributes *)instance->data;
@@ -1377,7 +1377,22 @@ void SKINBOS_Flee(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_StunnedEntry);
+void SKINBOS_StunnedEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    instance->xAccl = 0;
+    instance->yAccl = 0;
+    instance->zAccl = 0;
+    instance->xVel = 0;
+    instance->yVel = 0;
+    instance->zVel = 0;
+    instance->checkMask &= ~0x20;
+    MON_SwitchStateDoEntry(instance, (signed char)mv->previousMainState);
+}
 
 #else
 
@@ -2631,11 +2646,11 @@ void SKINBOS_FleeEntry(Instance *instance)
 void SKINBOS_Flee(Instance *instance)
 {
 
-    int angleDiff;
-    SkinbosVars *vars;
-    MonsterVars *mv;
-    MonsterAttributes *ma;
-    SkinbosAttributes *attrs;
+    int angleDiff; // not from debug symbols
+    SkinbosVars *vars; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    SkinbosAttributes *attrs; // not from debug symbols
 
     mv = (MonsterVars *)instance->extraData;
     ma = (MonsterAttributes *)instance->data;
@@ -2729,6 +2744,21 @@ void SKINBOS_Flee(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-void SKINBOS_StunnedEntry(void) {};
+void SKINBOS_StunnedEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    instance->xAccl = 0;
+    instance->yAccl = 0;
+    instance->zAccl = 0;
+    instance->xVel = 0;
+    instance->yVel = 0;
+    instance->zVel = 0;
+    instance->checkMask &= ~0x20;
+    MON_SwitchStateDoEntry(instance, (signed char)mv->previousMainState);
+}
 
 #endif
