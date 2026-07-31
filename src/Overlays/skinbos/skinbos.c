@@ -1394,6 +1394,11 @@ void SKINBOS_StunnedEntry(Instance *instance)
     MON_SwitchStateDoEntry(instance, (signed char)mv->previousMainState);
 }
 
+void SKINBOS_Stunned(Instance *instance)
+{
+    (void)instance;
+}
+
 #else
 
 int SKINBOS_Turn(Instance *instance, Position *target, int limit)
@@ -2759,6 +2764,11 @@ void SKINBOS_StunnedEntry(Instance *instance)
     instance->zVel = 0;
     instance->checkMask &= ~0x20;
     MON_SwitchStateDoEntry(instance, (signed char)mv->previousMainState);
+}
+
+void SKINBOS_Stunned(Instance *instance)
+{
+    (void)instance;
 }
 
 #endif

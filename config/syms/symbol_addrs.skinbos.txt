@@ -35,3 +35,4 @@ SKINBOS_Dead                                          = 0x88002A18; // type:func
 SKINBOS_FleeEntry                                     = 0x88002A60; // type:func
 SKINBOS_Flee                                          = 0x88002AC0; // type:func
 SKINBOS_StunnedEntry                                  = 0x88002D38; // type:func
+SKINBOS_Stunned                                       = 0x88002D88; // type:func
