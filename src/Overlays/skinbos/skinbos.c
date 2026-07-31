@@ -9,6 +9,7 @@
 #include "Game/PLAN/ENMYPLAN.h"
 #include "Game/PLAN/PLANAPI.h"
 #include "Game/RAZIEL/RAZIEL.h"
+#include "Game/SAVEINFO.h"
 #include "Game/SOUND.h"
 #include "Game/STATE.h"
 #include "Game/STREAM.h"
@@ -21,6 +22,35 @@
 // TODO: double-check that SKINBOS_CheckInsideMasher and SKINBOS_ShouldEscapeJail aren't swapped
 
 int SKINBOS_HandleOneShotAnims(Instance *instance); // TODO: Delete once matched
+
+// burntTuneType skinbosBurntTune = {2, 300}; // no canon name in symbols
+
+MonsterStateChoice SKINBOS_StateChoiceTable[] = {
+    {2, {SKINBOS_IdleEntry, SKINBOS_Idle}},
+    {5, {SKINBOS_WanderEntry, SKINBOS_Wander}},
+    {1, {SKINBOS_PursueEntry, SKINBOS_Pursue}},
+    {8, {SKINBOS_HitEntry, SKINBOS_Hit}},
+    {0xD, {SKINBOS_CombatEntry, SKINBOS_Combat}},
+    {3, {SKINBOS_HitEntry, SKINBOS_Hit}},
+    {9, {SKINBOS_LandOnFeetEntry, SKINBOS_LandOnFeet}},
+    {6, {SKINBOS_AttackEntry, SKINBOS_Attack}},
+    {0x17, {SKINBOS_DeadEntry, SKINBOS_Dead}},
+    {0x13, {SKINBOS_FleeEntry, SKINBOS_Flee}},
+    {0xF, {SKINBOS_StunnedEntry, SKINBOS_Stunned}},
+    {-1, {NULL, NULL}}
+};
+
+
+const MonsterFunctionTable SKINBOS_FunctionTable = {
+    SKINBOS_Init,
+    SKINBOS_CleanUp,
+    SKINBOS_DamageEffect,
+    SKINBOS_Query,
+    SKINBOS_Message,
+    SKINBOS_StateChoiceTable,
+    monVersion,
+    "Jul 14 1999"
+};
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -213,10 +243,6 @@ void SKINBOS_DoPhaseFade(Instance *instance, int limit)
         }
     }
 }
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/skinbos/skinbos", D_88000000);
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/skinbos/skinbos", D_88000020);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/skinbos/skinbos", SKINBOS_HandleOneShotAnims);
 
