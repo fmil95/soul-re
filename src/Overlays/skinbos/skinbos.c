@@ -23,23 +23,20 @@
 
 int SKINBOS_HandleOneShotAnims(Instance *instance); // TODO: Delete once matched
 
-// burntTuneType skinbosBurntTune = {2, 300}; // no canon name in symbols
-
 MonsterStateChoice SKINBOS_StateChoiceTable[] = {
-    {2, {SKINBOS_IdleEntry, SKINBOS_Idle}},
-    {5, {SKINBOS_WanderEntry, SKINBOS_Wander}},
-    {1, {SKINBOS_PursueEntry, SKINBOS_Pursue}},
-    {8, {SKINBOS_HitEntry, SKINBOS_Hit}},
-    {0xD, {SKINBOS_CombatEntry, SKINBOS_Combat}},
-    {3, {SKINBOS_HitEntry, SKINBOS_Hit}},
-    {9, {SKINBOS_LandOnFeetEntry, SKINBOS_LandOnFeet}},
-    {6, {SKINBOS_AttackEntry, SKINBOS_Attack}},
-    {0x17, {SKINBOS_DeadEntry, SKINBOS_Dead}},
-    {0x13, {SKINBOS_FleeEntry, SKINBOS_Flee}},
-    {0xF, {SKINBOS_StunnedEntry, SKINBOS_Stunned}},
+    {MONSTER_STATE_IDLE, {SKINBOS_IdleEntry, SKINBOS_Idle}},
+    {MONSTER_STATE_WANDER, {SKINBOS_WanderEntry, SKINBOS_Wander}},
+    {MONSTER_STATE_PURSUE, {SKINBOS_PursueEntry, SKINBOS_Pursue}},
+    {MONSTER_STATE_HIT, {SKINBOS_HitEntry, SKINBOS_Hit}},
+    {MONSTER_STATE_COMBAT, {SKINBOS_CombatEntry, SKINBOS_Combat}},
+    {MONSTER_STATE_MISSILEHIT, {SKINBOS_HitEntry, SKINBOS_Hit}},
+    {MONSTER_STATE_STUNNED, {SKINBOS_LandOnFeetEntry, SKINBOS_LandOnFeet}},
+    {MONSTER_STATE_ATTACK, {SKINBOS_AttackEntry, SKINBOS_Attack}},
+    {MONSTER_STATE_DEAD, {SKINBOS_DeadEntry, SKINBOS_Dead}},
+    {MONSTER_STATE_FLEE, {SKINBOS_FleeEntry, SKINBOS_Flee}},
+    {MONSTER_STATE_LANDONFEET, {SKINBOS_StunnedEntry, SKINBOS_Stunned}},
     {-1, {NULL, NULL}}
 };
-
 
 const MonsterFunctionTable SKINBOS_FunctionTable = {
     SKINBOS_Init,
