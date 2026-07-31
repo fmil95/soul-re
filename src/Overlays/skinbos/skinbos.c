@@ -2197,7 +2197,7 @@ void SKINBOS_WanderEntry(Instance *instance)
     }
 }
 
-void SKINBOS_Wander(void) {};
+void SKINBOS_Wander(Instance *instance) {};
 
 void SKINBOS_PursueEntry(Instance *instance)
 {
