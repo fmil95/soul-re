@@ -1449,7 +1449,7 @@ int SKINBOS_Turn(Instance *instance, Position *target, int limit)
     return 1;
 }
 
-void SKINBOS_GateDrop(void) {};
+int SKINBOS_GateDrop(Instance *instance) {};
 
 int SKINBOS_CheckPointInsideMasher(Instance *instance, Position *position, int which_border)
 {
@@ -1927,7 +1927,7 @@ void SKINBOS_DamageEffect(Instance *instance, evFXHitData *data)
     }
 }
 
-void SKINBOS_Message(void) {};
+void SKINBOS_Message(Instance *instance, unsigned long message, unsigned long data) {};
 
 uintptr_t SKINBOS_Query(Instance *instance, unsigned long query)
 {
