@@ -19,8 +19,6 @@
 #include "Game/MONSTER/MONSTER.h"
 #include "Game/PSX/SUPPORT.h"
 
-// TODO: double-check that SKINBOS_CheckInsideMasher and SKINBOS_ShouldEscapeJail aren't swapped
-
 int SKINBOS_HandleOneShotAnims(Instance *instance); // TODO: Delete once matched
 
 MonsterStateChoice SKINBOS_StateChoiceTable[] = {
@@ -30,11 +28,11 @@ MonsterStateChoice SKINBOS_StateChoiceTable[] = {
     {MONSTER_STATE_HIT, {SKINBOS_HitEntry, SKINBOS_Hit}},
     {MONSTER_STATE_COMBAT, {SKINBOS_CombatEntry, SKINBOS_Combat}},
     {MONSTER_STATE_MISSILEHIT, {SKINBOS_HitEntry, SKINBOS_Hit}},
-    {MONSTER_STATE_STUNNED, {SKINBOS_LandOnFeetEntry, SKINBOS_LandOnFeet}},
+    {MONSTER_STATE_STUNNED, {SKINBOS_StunnedEntry, SKINBOS_Stunned}},
     {MONSTER_STATE_ATTACK, {SKINBOS_AttackEntry, SKINBOS_Attack}},
     {MONSTER_STATE_DEAD, {SKINBOS_DeadEntry, SKINBOS_Dead}},
     {MONSTER_STATE_FLEE, {SKINBOS_FleeEntry, SKINBOS_Flee}},
-    {MONSTER_STATE_LANDONFEET, {SKINBOS_StunnedEntry, SKINBOS_Stunned}},
+    {MONSTER_STATE_LANDONFEET, {SKINBOS_LandOnFeetEntry, SKINBOS_LandOnFeet}},
     {-1, {NULL, NULL}}
 };
 
@@ -1168,7 +1166,7 @@ void SKINBOS_Combat(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-void SKINBOS_LandOnFeetEntry(Instance *instance)
+void SKINBOS_StunnedEntry(Instance *instance)
 {
     MonsterVars *mv; // not from debug symbols
 
@@ -1176,7 +1174,7 @@ void SKINBOS_LandOnFeetEntry(Instance *instance)
     MON_SwitchStateDoEntry(instance, (signed char)mv->previousMainState);
 }
 
-void SKINBOS_LandOnFeet(Instance *instance)
+void SKINBOS_Stunned(Instance *instance)
 {
     (void)instance;
 }
@@ -1400,7 +1398,7 @@ void SKINBOS_Flee(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-void SKINBOS_StunnedEntry(Instance *instance)
+void SKINBOS_LandOnFeetEntry(Instance *instance)
 {
 
     MonsterVars *mv; // not from debug symbols
@@ -1417,7 +1415,7 @@ void SKINBOS_StunnedEntry(Instance *instance)
     MON_SwitchStateDoEntry(instance, (signed char)mv->previousMainState);
 }
 
-void SKINBOS_Stunned(Instance *instance)
+void SKINBOS_LandOnFeet(Instance *instance)
 {
     (void)instance;
 }
@@ -2540,7 +2538,7 @@ void SKINBOS_Combat(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-void SKINBOS_LandOnFeetEntry(Instance *instance)
+void SKINBOS_StunnedEntry(Instance *instance)
 {
     MonsterVars *mv; // not from debug symbols
 
@@ -2548,7 +2546,7 @@ void SKINBOS_LandOnFeetEntry(Instance *instance)
     MON_SwitchStateDoEntry(instance, (signed char)mv->previousMainState);
 }
 
-void SKINBOS_LandOnFeet(Instance *instance)
+void SKINBOS_Stunned(Instance *instance)
 {
     (void)instance;
 }
@@ -2772,7 +2770,7 @@ void SKINBOS_Flee(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-void SKINBOS_StunnedEntry(Instance *instance)
+void SKINBOS_LandOnFeetEntry(Instance *instance)
 {
 
     MonsterVars *mv; // not from debug symbols
@@ -2789,7 +2787,7 @@ void SKINBOS_StunnedEntry(Instance *instance)
     MON_SwitchStateDoEntry(instance, (signed char)mv->previousMainState);
 }
 
-void SKINBOS_Stunned(Instance *instance)
+void SKINBOS_LandOnFeet(Instance *instance)
 {
     (void)instance;
 }
