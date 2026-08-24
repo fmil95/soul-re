@@ -79,4 +79,30 @@ typedef struct _SkinbosVars
     SVector point;
 } SkinbosVars;
 
+void SKINBOS_Init(Instance *instance);
+void SKINBOS_CleanUp(Instance *instance);
+void SKINBOS_DamageEffect(Instance *instance, evFXHitData *data);
+uintptr_t SKINBOS_Query(Instance *instance, unsigned long query);
+void SKINBOS_Message(Instance *instance, unsigned long message, unsigned long data);
+void SKINBOS_IdleEntry(Instance *instance);
+void SKINBOS_Idle(Instance *instance);
+void SKINBOS_WanderEntry(Instance *instance);
+void SKINBOS_Wander(Instance *instance);
+void SKINBOS_PursueEntry(Instance *instance);
+void SKINBOS_Pursue(Instance *instance);
+void SKINBOS_HitEntry(Instance *instance);
+void SKINBOS_Hit(Instance *instance);
+void SKINBOS_CombatEntry(Instance *instance);
+void SKINBOS_Combat(Instance *instance);
+void SKINBOS_LandOnFeetEntry(Instance *instance);
+void SKINBOS_LandOnFeet(Instance *instance);
+void SKINBOS_AttackEntry(Instance *instance);
+void SKINBOS_Attack(Instance *instance);
+void SKINBOS_DeadEntry(Instance *instance);
+void SKINBOS_Dead(Instance *instance);
+void SKINBOS_FleeEntry(Instance *instance);
+void SKINBOS_Flee(Instance *instance);
+void SKINBOS_StunnedEntry(Instance *instance);
+void SKINBOS_Stunned(Instance *instance);
+
 #endif
