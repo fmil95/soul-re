@@ -94,7 +94,6 @@ int SKINBOS_CheckPointInsideMasher(Instance *instance, Position *position, int w
     markerID = which_border == 0 ? attrs->masher_radius_marker_inner : attrs->masher_radius_marker_outer;
     PLANAPI_FindNodePositionInUnit(su, &radius, markerID, 5);
 
-
     radialDist = MATH3D_LengthXYZ(center.x - radius.x, center.y - radius.y, center.z - radius.z);
     pointDist = MATH3D_LengthXYZ(center.x - position->x, center.y - position->y, center.z - position->z);
     return pointDist < radialDist;
@@ -1465,7 +1464,6 @@ int SKINBOS_CheckPointInsideMasher(Instance *instance, Position *position, int w
 
     markerID = which_border == 0 ? attrs->masher_radius_marker_inner : attrs->masher_radius_marker_outer;
     PLANAPI_FindNodePositionInUnit(su, &radius, markerID, 5);
-
 
     radialDist = MATH3D_LengthXYZ(center.x - radius.x, center.y - radius.y, center.z - radius.z);
     pointDist = MATH3D_LengthXYZ(center.x - position->x, center.y - position->y, center.z - position->z);
