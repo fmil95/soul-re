@@ -3065,7 +3065,7 @@ int MON_SetVelocityTowardsImpalingObject(Instance *instance, int checkOrientatio
 
     level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
 
-    if (!(((Dummy6 *)instance->data)->unknown & 0x8)) // TODO: find the suitable parsing here, could be instanceID
+    if (!(((MonsterAttributes *)instance->data)->whatAmI & 8))
     {
         usePrim = MON_FindSphereForTerrain(instance);
 

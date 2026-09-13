@@ -2103,12 +2103,12 @@ void MON_GeneralDeathEntry(Instance *instance)
     case 32:
         mv->causeOfDeath = MONSTER_CAUSEOFDEATH_FIRE;
     case 64:
-        if ((mv != NULL) && (mv->mvFlags != 0)) // garbage code for reordering
+        if (mv != NULL && mv->mvFlags != 0) // garbage code for reordering
         {
             temp = -temp;
         }
 
-        if ((ma->whatAmI & 0x8))
+        if (ma->whatAmI & 0x8)
         {
             MON_PlayAnim(instance, MONSTER_ANIM_FALLOVER, 1);
         }

@@ -314,7 +314,33 @@ void WALBOSB_Init(Instance *instance)
     DEBUG_DoAreaProtection();
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_CleanUp);
+void WALBOSB_CleanUp(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    G2Anim_DetachControllerFromSeg(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+
+    if (mv != NULL)
+    {
+        vars = (WalbosbVars *)mv->extraVars;
+
+        if (vars != NULL)
+        {
+            if (vars->autofaceInst != NULL)
+            {
+                INSTANCE_KillInstance(vars->autofaceInst);
+            }
+
+            MEMPACK_Free((char *)vars);
+        }
+    }
+
+    MON_CleanUp(instance);
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_IdleEntry);
 
@@ -666,7 +692,33 @@ void WALBOSB_Init(Instance *instance)
     DEBUG_DoAreaProtection();
 }
 
-void WALBOSB_CleanUp(void) {};
+void WALBOSB_CleanUp(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    G2Anim_DetachControllerFromSeg(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+
+    if (mv != NULL)
+    {
+        vars = (WalbosbVars *)mv->extraVars;
+
+        if (vars != NULL)
+        {
+            if (vars->autofaceInst != NULL)
+            {
+                INSTANCE_KillInstance(vars->autofaceInst);
+            }
+
+            MEMPACK_Free((char *)vars);
+        }
+    }
+
+    MON_CleanUp(instance);
+}
+
 
 void WALBOSB_IdleEntry(void) {};
 
