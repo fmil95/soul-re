@@ -342,7 +342,35 @@ void WALBOSB_CleanUp(Instance *instance)
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_IdleEntry);
+void WALBOSB_IdleEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        if (!(mv->mvFlags & 4))
+        {
+            if (mv->auxFlags & 2)
+            {
+                mv->attackState = 0;
+                MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 0, 1);
+            }
+            else
+            {
+                MON_PlayRandomIdle(instance, 2);
+            }
+        }
+        else
+        {
+            MON_IdleEntry(instance);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_HandleFade);
 
@@ -720,7 +748,35 @@ void WALBOSB_CleanUp(Instance *instance)
 }
 
 
-void WALBOSB_IdleEntry(void) {};
+void WALBOSB_IdleEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        if (!(mv->mvFlags & 4))
+        {
+            if (mv->auxFlags & 2)
+            {
+                mv->attackState = 0;
+                MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 0, 1);
+            }
+            else
+            {
+                MON_PlayRandomIdle(instance, 2);
+            }
+        }
+        else
+        {
+            MON_IdleEntry(instance);
+        }
+    }
+}
 
 void WALBOSB_HandleFade(void) {};
 
