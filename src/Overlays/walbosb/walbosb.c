@@ -22,7 +22,25 @@ void func_88000068(Instance *instance, short arg1)
     instance->rotation.z = (z + arg1) & 0xFFF;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000088);
+void func_88000088(Instance *instance, short arg1)
+{
+
+    G2SVector3 rot; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        vars->pitch = arg1;
+        rot.x = arg1;
+        rot.y = 0;
+        rot.z = 0;
+        G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &rot);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_880000D8);
 
@@ -525,7 +543,25 @@ void func_88000068(Instance *instance, short arg1)
     instance->rotation.z = (z + arg1) & 0xFFF;
 }
 
-void func_88000088(void) {}
+void func_88000088(Instance *instance, short arg1)
+{
+
+    G2SVector3 rot; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        vars->pitch = arg1;
+        rot.x = arg1;
+        rot.y = 0;
+        rot.z = 0;
+        G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &rot);
+    }
+}
 
 void func_880000D8(void) {}
 
