@@ -14,6 +14,28 @@
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
 
+INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000068);
+
+INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000088);
+
+INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_880000D8);
+
+INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000140);
+
+INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000204);
+
+INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000324);
+
+INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000390);
+
+INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000488);
+
+INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000508);
+
+INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_880005A0);
+
+INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_880006DC);
+
 void WALBOSB_WalbossMessage(int message)
 {
     Instance *inst; // not from debug symbols
@@ -487,29 +509,29 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_DeadEntry);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Dead);
 
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000068);
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000088);
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_880000D8);
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000140);
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000204);
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000324);
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000390);
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000488);
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000508);
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_880005A0);
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_880006DC);
-
 #else 
+
+void func_88000068(void) {}
+
+void func_88000088(void) {}
+
+void func_880000D8(void) {}
+
+void func_88000140(void) {}
+
+void func_88000204(void) {}
+
+void func_88000324(void) {}
+
+void func_88000390(void) {}
+
+void func_88000488(void) {}
+
+void func_88000508(void) {}
+
+void func_880005A0(void) {}
+
+void func_880006DC(void) {}
 
 void WALBOSB_WalbossMessage(int message)
 {
