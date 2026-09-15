@@ -53,7 +53,43 @@ void func_880000D8(Instance *instance, int arg1, int arg2)
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000140);
+void func_88000140(Instance *instance, int arg1, int arg2)
+{
+
+    G2SVector3 rot; // not from debug symbols
+    int pitch; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+    WalbosbAttributes *attrs; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+
+    pitch = arg1;
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (WalbosbVars *)mv->extraVars;
+    attrs = (WalbosbAttributes *)ma->tunData;
+
+    if (attrs != NULL && vars != NULL)
+    {
+
+        if (pitch < -attrs->maxPitchAngle)
+        {
+            pitch = -attrs->maxPitchAngle & 0xFFF;
+        }
+        else if (attrs->maxPitchAngle < pitch)
+        {
+            pitch = attrs->maxPitchAngle;
+        }
+
+        AngleMoveToward(&vars->pitch, pitch, (gameTrackerX.timeMult * arg2 * 16) >> 16);
+
+        rot.x = vars->pitch;
+        rot.y = 0;
+        rot.z = 0;
+
+        G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &rot);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000204);
 
@@ -583,7 +619,43 @@ void func_880000D8(Instance *instance, int arg1, int arg2)
 }
 
 
-void func_88000140(void) {}
+void func_88000140(Instance *instance, int arg1, int arg2)
+{
+
+    G2SVector3 rot; // not from debug symbols
+    int pitch; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+    WalbosbAttributes *attrs; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+
+    pitch = arg1;
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (WalbosbVars *)mv->extraVars;
+    attrs = (WalbosbAttributes *)ma->tunData;
+
+    if (attrs != NULL && vars != NULL)
+    {
+
+        if (pitch < -attrs->maxPitchAngle)
+        {
+            pitch = -attrs->maxPitchAngle & 0xFFF;
+        }
+        else if (attrs->maxPitchAngle < pitch)
+        {
+            pitch = attrs->maxPitchAngle;
+        }
+
+        AngleMoveToward(&vars->pitch, pitch, (gameTrackerX.timeMult * arg2 * 16) >> 16);
+
+        rot.x = vars->pitch;
+        rot.y = 0;
+        rot.z = 0;
+
+        G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &rot);
+    }
+}
 
 void func_88000204(void) {}
 
