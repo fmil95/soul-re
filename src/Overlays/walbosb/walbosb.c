@@ -42,7 +42,16 @@ void func_88000088(Instance *instance, short arg1)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_880000D8);
+void func_880000D8(Instance *instance, int arg1, int arg2)
+{
+    int z; // not from debug symbols
+
+    z = (instance->intro->rotation.z << 16) >> 16; // Garbage shifts to force signed load
+
+    AngleMoveToward(&instance->rotation.z, (z + arg1) & 0xFFF, (gameTrackerX.timeMult * arg2 * 16) >> 16);
+    instance->rotation.z &= 0xFFF;
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000140);
 
@@ -563,7 +572,16 @@ void func_88000088(Instance *instance, short arg1)
     }
 }
 
-void func_880000D8(void) {}
+void func_880000D8(Instance *instance, int arg1, int arg2)
+{
+    int z; // not from debug symbols
+
+    z = (instance->intro->rotation.z << 16) >> 16; // Garbage shifts to force signed load
+
+    AngleMoveToward(&instance->rotation.z, (z + arg1) & 0xFFF, (gameTrackerX.timeMult * arg2 * 16) >> 16);
+    instance->rotation.z &= 0xFFF;
+}
+
 
 void func_88000140(void) {}
 
