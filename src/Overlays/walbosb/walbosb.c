@@ -14,7 +14,13 @@
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000068);
+void func_88000068(Instance *instance, short arg1)
+{
+    short z; // not from debug symbols
+
+    z = (instance->intro->rotation.z << 16) >> 16; // Garbage shifts to force a signed load
+    instance->rotation.z = (z + arg1) & 0xFFF;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000088);
 
@@ -511,7 +517,13 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Dead);
 
 #else 
 
-void func_88000068(void) {}
+void func_88000068(Instance *instance, short arg1)
+{
+    short z; // not from debug symbols
+
+    z = (instance->intro->rotation.z << 16) >> 16; // Garbage shifts to force a signed load
+    instance->rotation.z = (z + arg1) & 0xFFF;
+}
 
 void func_88000088(void) {}
 
