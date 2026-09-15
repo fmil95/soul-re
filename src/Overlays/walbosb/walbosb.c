@@ -372,7 +372,94 @@ void WALBOSB_IdleEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_HandleFade);
+int WALBOSB_HandleFade(Instance *instance)
+{
+
+    int fade; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+
+    switch (vars->tauntState)
+    {
+    case 0:
+        if (gameTrackerX.gameData.asmData.MorphTime == 1000)
+        {
+            if (gameTrackerX.gameData.asmData.MorphType == 1)
+            {
+                vars->tauntTimer = MON_GetTime(instance) + 1980;
+                vars->tauntState++;
+                break;
+            }
+            return 0;
+        }
+        break;
+    case 1:
+        if (MON_GetTime(instance) >= (unsigned long)vars->tauntTimer)
+        {
+            vars->tauntState++;
+        }
+        break;
+    case 2:
+        if (mv->targetFade == 4096)
+        {
+            vars->tauntTimer = MON_GetTime(instance) + 1980;
+            vars->tauntState++;
+            break;
+        }
+
+        fade = ((MON_GetTime(instance) - vars->tauntTimer) * 4096) / 990;
+
+        if (fade >= 4096)
+        {
+            mv->targetFade = 4096;
+        }
+        else
+        {
+            mv->targetFade = fade;
+        }
+
+        break;
+    case 3:
+        if (MON_GetTime(instance) >= (unsigned long)vars->tauntTimer)
+        {
+            vars->tauntTimer = MON_GetTime(instance);
+            vars->tauntState++;
+        }
+        break;
+    case 4:
+        if (mv->targetFade == 0)
+        {
+            vars->tauntTimer = MON_GetTime(instance) + 9900;
+            vars->tauntState = 5;
+        }
+        else
+        {
+            fade = ((990 - ((int)MON_GetTime(instance) - vars->tauntTimer)) * 4096) / 990;
+            if (fade <= 0)
+            {
+                mv->targetFade = 0;
+            }
+            else
+            {
+                mv->targetFade = fade;
+            }
+        }
+        break;
+    case 5:
+        if (MON_GetTime(instance) >= (unsigned long)vars->tauntTimer || (gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 0))
+        {
+            vars->tauntState = 0;
+        }
+        break;
+    default:
+        break;
+    }
+
+    return 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Idle);
 
@@ -778,7 +865,94 @@ void WALBOSB_IdleEntry(Instance *instance)
     }
 }
 
-void WALBOSB_HandleFade(void) {};
+int WALBOSB_HandleFade(Instance *instance)
+{
+
+    int fade; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+
+    switch (vars->tauntState)
+    {
+    case 0:
+        if (gameTrackerX.gameData.asmData.MorphTime == 1000)
+        {
+            if (gameTrackerX.gameData.asmData.MorphType == 1)
+            {
+                vars->tauntTimer = MON_GetTime(instance) + 1980;
+                vars->tauntState++;
+                break;
+            }
+            return 0;
+        }
+        break;
+    case 1:
+        if (MON_GetTime(instance) >= (unsigned long)vars->tauntTimer)
+        {
+            vars->tauntState++;
+        }
+        break;
+    case 2:
+        if (mv->targetFade == 4096)
+        {
+            vars->tauntTimer = MON_GetTime(instance) + 1980;
+            vars->tauntState++;
+            break;
+        }
+
+        fade = ((MON_GetTime(instance) - vars->tauntTimer) * 4096) / 990;
+
+        if (fade >= 4096)
+        {
+            mv->targetFade = 4096;
+        }
+        else
+        {
+            mv->targetFade = fade;
+        }
+
+        break;
+    case 3:
+        if (MON_GetTime(instance) >= (unsigned long)vars->tauntTimer)
+        {
+            vars->tauntTimer = MON_GetTime(instance);
+            vars->tauntState++;
+        }
+        break;
+    case 4:
+        if (mv->targetFade == 0)
+        {
+            vars->tauntTimer = MON_GetTime(instance) + 9900;
+            vars->tauntState = 5;
+        }
+        else
+        {
+            fade = ((990 - ((int)MON_GetTime(instance) - vars->tauntTimer)) * 4096) / 990;
+            if (fade <= 0)
+            {
+                mv->targetFade = 0;
+            }
+            else
+            {
+                mv->targetFade = fade;
+            }
+        }
+        break;
+    case 5:
+        if (MON_GetTime(instance) >= (unsigned long)vars->tauntTimer || (gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 0))
+        {
+            vars->tauntState = 0;
+        }
+        break;
+    default:
+        break;
+    }
+
+    return 1;
+}
 
 void WALBOSB_Idle(void) {};
 
