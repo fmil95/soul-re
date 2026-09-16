@@ -9,6 +9,7 @@
 #include "Game/SOUND.h"
 #include "Game/MONSTER/MONAPI.h"
 #include "Game/MONSTER/MONLIB.h"
+#include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSTER.h"
 
 // this conditional is for the objdiff report
@@ -552,7 +553,57 @@ int WALBOSB_HandleFade(Instance *instance)
     return 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Idle);
+void WALBOSB_Idle(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+
+    if (mv->extraVars != NULL)
+    {
+        if (!(mv->mvFlags & 4))
+        {
+
+            func_880000D8(instance, 0, mv->subAttr->speedPivotTurn);
+            func_88000140(instance, 0, mv->subAttr->speedPivotTurn);
+
+            if (WALBOSB_HandleFade(instance) == 0)
+            {
+                if (mv->auxFlags & 2)
+                {
+                    if (instance->flags2 & 0x10)
+                    {
+                        instance->flags2 &= ~0x10;
+                        mv->attackState++;
+
+                        if ((signed char)mv->attackState >= 7)
+                        {
+                            mv->attackState = 0;
+                        }
+
+                        MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, (signed char)mv->attackState, 1);
+                    }
+                }
+                else if (enemy != NULL && enemy->distance < mv->subAttr->combatAttributes->combatRange)
+                {
+                    MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+                }
+            }
+
+            MON_IdleQueueHandler(instance);
+        }
+        else
+        {
+
+            func_88000068(instance, 0);
+            func_88000088(instance, 0);
+            MON_Idle(instance);
+        }
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_CombatEntry);
 
@@ -1114,7 +1165,57 @@ int WALBOSB_HandleFade(Instance *instance)
     return 1;
 }
 
-void WALBOSB_Idle(void) {};
+void WALBOSB_Idle(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+
+    if (mv->extraVars != NULL)
+    {
+        if (!(mv->mvFlags & 4))
+        {
+
+            func_880000D8(instance, 0, mv->subAttr->speedPivotTurn);
+            func_88000140(instance, 0, mv->subAttr->speedPivotTurn);
+
+            if (WALBOSB_HandleFade(instance) == 0)
+            {
+                if (mv->auxFlags & 2)
+                {
+                    if (instance->flags2 & 0x10)
+                    {
+                        instance->flags2 &= ~0x10;
+                        mv->attackState++;
+
+                        if ((signed char)mv->attackState >= 7)
+                        {
+                            mv->attackState = 0;
+                        }
+
+                        MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, (signed char)mv->attackState, 1);
+                    }
+                }
+                else if (enemy != NULL && enemy->distance < mv->subAttr->combatAttributes->combatRange)
+                {
+                    MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+                }
+            }
+
+            MON_IdleQueueHandler(instance);
+        }
+        else
+        {
+
+            func_88000068(instance, 0);
+            func_88000088(instance, 0);
+            MON_Idle(instance);
+        }
+    }
+}
 
 void WALBOSB_CombatEntry(void) {};
 
