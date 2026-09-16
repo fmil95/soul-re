@@ -623,7 +623,12 @@ void WALBOSB_Idle(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_CombatEntry);
+void WALBOSB_CombatEntry(Instance *instance)
+{
+    MON_CombatEntry(instance);
+    MON_PlayCombatIdle(instance, 2);
+    WALBOSB_ResetSetAutofacePos(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Combat);
 
