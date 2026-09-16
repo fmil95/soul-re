@@ -94,7 +94,25 @@ void func_88000140(Instance *instance, int arg1, int arg2)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000204);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000324);
+void func_88000324(Instance *instance, Position *arg1, int arg2, int arg3)
+{
+
+    int elevation; // not from debug symbols
+
+    elevation = MATH3D_ElevationFromPosToPos(&instance->position, arg1);
+
+    if (arg3 != 0)
+    {
+        elevation -= 1024;
+    }
+    else
+    {
+        elevation = 1024 - elevation;
+    }
+
+    func_88000140(instance, elevation + 128, arg2);
+}
+
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000390);
 
@@ -710,7 +728,25 @@ void func_88000140(Instance *instance, int arg1, int arg2)
 
 void func_88000204(void) {}
 
-void func_88000324(void) {}
+void func_88000324(Instance *instance, Position *arg1, int arg2, int arg3)
+{
+
+    int elevation; // not from debug symbols
+
+    elevation = MATH3D_ElevationFromPosToPos(&instance->position, arg1);
+
+    if (arg3 != 0)
+    {
+        elevation -= 1024;
+    }
+    else
+    {
+        elevation = 1024 - elevation;
+    }
+
+    func_88000140(instance, elevation + 128, arg2);
+}
+
 
 void func_88000390(void) {}
 
