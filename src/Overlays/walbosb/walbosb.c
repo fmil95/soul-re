@@ -118,7 +118,36 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000390);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000488);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000508);
+int func_88000508(Instance *instance)
+{
+
+    Instance *inst; // not from debug symbols
+    int numAborted; // not from debug symbols
+
+    (void)instance;
+
+    numAborted = 0;
+
+    for (inst = gameTrackerX.instanceList->first; inst != NULL; inst = inst->next)
+    {
+        if (INSTANCE_Query(inst, queryWhatAmI) == 0x410002)
+        {
+
+            MonsterVars *mv; // not from debug symbols
+            WalbosbVars *vars; // not from debug symbols
+
+            mv = (MonsterVars *)inst->extraData;
+            vars = (WalbosbVars *)mv->extraVars;
+
+            if (vars != NULL)
+            {
+                numAborted += vars->abortedAttacks;
+            }
+        }
+    }
+
+    return numAborted;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_880005A0);
 
@@ -757,7 +786,36 @@ void func_88000390(void) {}
 
 void func_88000488(void) {}
 
-void func_88000508(void) {}
+int func_88000508(Instance *instance)
+{
+
+    Instance *inst; // not from debug symbols
+    int numAborted; // not from debug symbols
+
+    (void)instance;
+
+    numAborted = 0;
+
+    for (inst = gameTrackerX.instanceList->first; inst != NULL; inst = inst->next)
+    {
+        if (INSTANCE_Query(inst, queryWhatAmI) == 0x410002)
+        {
+
+            MonsterVars *mv; // not from debug symbols
+            WalbosbVars *vars; // not from debug symbols
+
+            mv = (MonsterVars *)inst->extraData;
+            vars = (WalbosbVars *)mv->extraVars;
+
+            if (vars != NULL)
+            {
+                numAborted += vars->abortedAttacks;
+            }
+        }
+    }
+
+    return numAborted;
+}
 
 void func_880005A0(void) {}
 
