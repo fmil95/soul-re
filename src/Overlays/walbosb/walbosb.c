@@ -12,6 +12,11 @@
 #include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSTER.h"
 
+// TODO: Delete once matched
+int WALBOSB_ChooseAttack(Instance *instance, MonsterIR *enemy);
+int WALBOSB_ShouldIAttack(Instance *instance, MonsterIR *enemy, int attack);
+int WALBOSB_TurnToPosition(Instance *instance, Position *target, int speed);
+
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
 
@@ -682,7 +687,40 @@ void WALBOSB_CombatEntry(Instance *instance)
     WALBOSB_ResetSetAutofacePos(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Combat);
+void WALBOSB_Combat(Instance *instance)
+{
+
+    MonsterIR *enemy; // not from debug symbols
+    int turnResult; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+
+    if (mv->mvFlags & 4 || enemy == NULL)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+    else
+    {
+        turnResult = WALBOSB_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn) & 1;
+        WALBOSB_InterpPitch(instance, 0, mv->subAttr->speedPivotTurn);
+
+        if (enemy->distance < mv->subAttr->combatAttributes->combatRange)
+        {
+            if (WALBOSB_ShouldIAttack(instance, enemy, WALBOSB_ChooseAttack(instance, enemy)) == 1 && turnResult != 0)
+            {
+                MON_SwitchState(instance, MONSTER_STATE_ATTACK);
+            }
+        }
+        else
+        {
+            MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        }
+    }
+
+    MON_IdleQueueHandler(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_AttackEntry);
 
@@ -783,7 +821,7 @@ void WALBOSB_InterpPitch(Instance *instance, int pitch, int speed)
     }
 }
 
-void WALBOSB_TurnToPosition(Instance *instance, Position *target, int speed) {}
+int WALBOSB_TurnToPosition(Instance *instance, Position *target, int speed) {}
 
 void WALBOSB_ElevateToPosition(Instance *instance, Position *target, int speed, int behind)
 {
@@ -864,7 +902,7 @@ int WALBOSB_AbortedAttacks(Instance *instance)
     return numAborted;
 }
 
-void WALBOSB_ShouldIAttack(Instance *instance, MonsterIR *enemy, int attack) {}
+int WALBOSB_ShouldIAttack(Instance *instance, MonsterIR *enemy, int attack) {}
 
 int WALBOSB_ChooseAttack(Instance *instance, MonsterIR *enemy) {}
 
@@ -1363,9 +1401,47 @@ void WALBOSB_Idle(Instance *instance)
     }
 }
 
-void WALBOSB_CombatEntry(void) {};
+void WALBOSB_CombatEntry(Instance *instance)
+{
+    MON_CombatEntry(instance);
+    MON_PlayCombatIdle(instance, 2);
+    WALBOSB_ResetSetAutofacePos(instance);
+}
 
-void WALBOSB_Combat(void) {};
+void WALBOSB_Combat(Instance *instance)
+{
+
+    MonsterIR *enemy; // not from debug symbols
+    int turnResult; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+
+    if (mv->mvFlags & 4 || enemy == NULL)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+    else
+    {
+        turnResult = WALBOSB_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn) & 1;
+        WALBOSB_InterpPitch(instance, 0, mv->subAttr->speedPivotTurn);
+
+        if (enemy->distance < mv->subAttr->combatAttributes->combatRange)
+        {
+            if (WALBOSB_ShouldIAttack(instance, enemy, WALBOSB_ChooseAttack(instance, enemy)) == 1 && turnResult != 0)
+            {
+                MON_SwitchState(instance, MONSTER_STATE_ATTACK);
+            }
+        }
+        else
+        {
+            MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        }
+    }
+
+    MON_IdleQueueHandler(instance);
+}
 
 void WALBOSB_AttackEntry(void) {};
 
