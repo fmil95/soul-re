@@ -722,7 +722,39 @@ void WALBOSB_Combat(Instance *instance)
     MON_IdleQueueHandler(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_AttackEntry);
+void WALBOSB_AttackEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    WalbosbAttributes *attrs; // not from debug symbols
+    MonsterAttackAttributes *attack; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (WalbosbAttributes *)ma->tunData;
+    attack = mv->attackType;
+
+    if (ma != NULL)
+    {
+
+        mv->mode = 0x200000;
+
+        switch ((signed char)mv->attackType->numAnims)
+        {
+        case 2:
+            mv->generalTimer = MON_GetTime(instance) + (attrs->lengthOfTense * 33);
+            break;
+        case 4:
+            mv->generalTimer = MON_GetTime(instance) + (attrs->lengthOfStrikeTrack * 33);
+            SOUND_Play3dSound(&instance->position, 377, -200, 90, 15500);
+            break;
+
+        }
+
+        MON_PlayAnimFromList(instance, attack->animList, 0, 2);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Attack);
 
@@ -1443,7 +1475,39 @@ void WALBOSB_Combat(Instance *instance)
     MON_IdleQueueHandler(instance);
 }
 
-void WALBOSB_AttackEntry(void) {};
+void WALBOSB_AttackEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    WalbosbAttributes *attrs; // not from debug symbols
+    MonsterAttackAttributes *attack; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (WalbosbAttributes *)ma->tunData;
+    attack = mv->attackType;
+
+    if (ma != NULL)
+    {
+
+        mv->mode = 0x200000;
+
+        switch ((signed char)mv->attackType->numAnims)
+        {
+        case 2:
+            mv->generalTimer = MON_GetTime(instance) + (attrs->lengthOfTense * 33);
+            break;
+        case 4:
+            mv->generalTimer = MON_GetTime(instance) + (attrs->lengthOfStrikeTrack * 33);
+            SOUND_Play3dSound(&instance->position, 377, -200, 90, 15500);
+            break;
+
+        }
+
+        MON_PlayAnimFromList(instance, attack->animList, 0, 2);
+    }
+}
 
 void WALBOSB_Attack(void) {};
 
