@@ -15,18 +15,18 @@
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
 
-void func_88000068(Instance *instance, short arg1)
+void WALBOSB_SetYaw(Instance *instance, int yaw)
 {
     short z; // not from debug symbols
 
     z = (instance->intro->rotation.z << 16) >> 16; // Garbage shifts to force a signed load
-    instance->rotation.z = (z + arg1) & 0xFFF;
+    instance->rotation.z = (z + yaw) & 0xFFF;
 }
 
-void func_88000088(Instance *instance, short arg1)
+void WALBOSB_SetPitch(Instance *instance, int pitch)
 {
 
-    G2SVector3 rot; // not from debug symbols
+    G2SVector3 extraRot;
     MonsterVars *mv; // not from debug symbols
     WalbosbVars *vars; // not from debug symbols
 
@@ -35,36 +35,35 @@ void func_88000088(Instance *instance, short arg1)
 
     if (vars != NULL)
     {
-        vars->pitch = arg1;
-        rot.x = arg1;
-        rot.y = 0;
-        rot.z = 0;
-        G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &rot);
+        vars->pitch = pitch;
+        extraRot.x = pitch;
+        extraRot.y = 0;
+        extraRot.z = 0;
+        G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
     }
 }
 
-void func_880000D8(Instance *instance, int arg1, int arg2)
+void WALBOSB_InterpYaw(Instance *instance, int yaw, int speed)
 {
     int z; // not from debug symbols
 
     z = (instance->intro->rotation.z << 16) >> 16; // Garbage shifts to force signed load
 
-    AngleMoveToward(&instance->rotation.z, (z + arg1) & 0xFFF, (gameTrackerX.timeMult * arg2 * 16) >> 16);
+    AngleMoveToward(&instance->rotation.z, (z + yaw) & 0xFFF, (gameTrackerX.timeMult * speed * 16) >> 16);
     instance->rotation.z &= 0xFFF;
 }
 
-
-void func_88000140(Instance *instance, int arg1, int arg2)
+void WALBOSB_InterpPitch(Instance *instance, int pitch, int speed)
 {
 
-    G2SVector3 rot; // not from debug symbols
-    int pitch; // not from debug symbols
+    G2SVector3 extraRot;
+    int newPitch; // not from debug symbols
     WalbosbVars *vars; // not from debug symbols
     WalbosbAttributes *attrs; // not from debug symbols
     MonsterVars *mv; // not from debug symbols
     MonsterAttributes *ma; // not from debug symbols
 
-    pitch = arg1;
+    newPitch = pitch;
     mv = (MonsterVars *)instance->extraData;
     ma = (MonsterAttributes *)instance->data;
     vars = (WalbosbVars *)mv->extraVars;
@@ -73,35 +72,35 @@ void func_88000140(Instance *instance, int arg1, int arg2)
     if (attrs != NULL && vars != NULL)
     {
 
-        if (pitch < -attrs->maxPitchAngle)
+        if (newPitch < -attrs->maxPitchAngle)
         {
-            pitch = -attrs->maxPitchAngle & 0xFFF;
+            newPitch = -attrs->maxPitchAngle & 0xFFF;
         }
-        else if (attrs->maxPitchAngle < pitch)
+        else if (attrs->maxPitchAngle < newPitch)
         {
-            pitch = attrs->maxPitchAngle;
+            newPitch = attrs->maxPitchAngle;
         }
 
-        AngleMoveToward(&vars->pitch, pitch, (gameTrackerX.timeMult * arg2 * 16) >> 16);
+        AngleMoveToward(&vars->pitch, newPitch, (gameTrackerX.timeMult * speed * 16) >> 16);
 
-        rot.x = vars->pitch;
-        rot.y = 0;
-        rot.z = 0;
+        extraRot.x = vars->pitch;
+        extraRot.y = 0;
+        extraRot.z = 0;
 
-        G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &rot);
+        G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000204);
+INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_TurnToPosition);
 
-void func_88000324(Instance *instance, Position *arg1, int arg2, int arg3)
+void WALBOSB_ElevateToPosition(Instance *instance, Position *target, int speed, int behind)
 {
 
     int elevation; // not from debug symbols
 
-    elevation = MATH3D_ElevationFromPosToPos(&instance->position, arg1);
+    elevation = MATH3D_ElevationFromPosToPos(&instance->position, target);
 
-    if (arg3 != 0)
+    if (behind != 0)
     {
         elevation -= 1024;
     }
@@ -110,13 +109,13 @@ void func_88000324(Instance *instance, Position *arg1, int arg2, int arg3)
         elevation = 1024 - elevation;
     }
 
-    func_88000140(instance, elevation + 128, arg2);
+    WALBOSB_InterpPitch(instance, elevation + 128, speed);
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000390);
+INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_OtherAttackingLegs);
 
-void func_88000488(Instance *instance)
+void WALBOSB_ResetAbortedAttacks(Instance *instance)
 {
 
     Instance *inst; // not from debug symbols
@@ -142,7 +141,7 @@ void func_88000488(Instance *instance)
     }
 }
 
-int func_88000508(Instance *instance)
+int WALBOSB_AbortedAttacks(Instance *instance)
 {
 
     Instance *inst; // not from debug symbols
@@ -173,9 +172,9 @@ int func_88000508(Instance *instance)
     return numAborted;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_880005A0);
+INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_ShouldIAttack);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", func_880006DC);
+INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_ChooseAttack);
 
 void WALBOSB_WalbossMessage(int message)
 {
@@ -638,8 +637,8 @@ void WALBOSB_Idle(Instance *instance)
         if (!(mv->mvFlags & 4))
         {
 
-            func_880000D8(instance, 0, mv->subAttr->speedPivotTurn);
-            func_88000140(instance, 0, mv->subAttr->speedPivotTurn);
+            WALBOSB_InterpYaw(instance, 0, mv->subAttr->speedPivotTurn);
+            WALBOSB_InterpPitch(instance, 0, mv->subAttr->speedPivotTurn);
 
             if (WALBOSB_HandleFade(instance) == 0)
             {
@@ -669,8 +668,8 @@ void WALBOSB_Idle(Instance *instance)
         else
         {
 
-            func_88000068(instance, 0);
-            func_88000088(instance, 0);
+            WALBOSB_SetYaw(instance, 0);
+            WALBOSB_SetPitch(instance, 0);
             MON_Idle(instance);
         }
     }
@@ -707,18 +706,18 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Dead);
 
 #else 
 
-void func_88000068(Instance *instance, short arg1)
+void WALBOSB_SetYaw(Instance *instance, int yaw)
 {
     short z; // not from debug symbols
 
     z = (instance->intro->rotation.z << 16) >> 16; // Garbage shifts to force a signed load
-    instance->rotation.z = (z + arg1) & 0xFFF;
+    instance->rotation.z = (z + yaw) & 0xFFF;
 }
 
-void func_88000088(Instance *instance, short arg1)
+void WALBOSB_SetPitch(Instance *instance, int pitch)
 {
 
-    G2SVector3 rot; // not from debug symbols
+    G2SVector3 extraRot;
     MonsterVars *mv; // not from debug symbols
     WalbosbVars *vars; // not from debug symbols
 
@@ -727,36 +726,36 @@ void func_88000088(Instance *instance, short arg1)
 
     if (vars != NULL)
     {
-        vars->pitch = arg1;
-        rot.x = arg1;
-        rot.y = 0;
-        rot.z = 0;
-        G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &rot);
+        vars->pitch = pitch;
+        extraRot.x = pitch;
+        extraRot.y = 0;
+        extraRot.z = 0;
+        G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
     }
 }
 
-void func_880000D8(Instance *instance, int arg1, int arg2)
+void WALBOSB_InterpYaw(Instance *instance, int yaw, int speed)
 {
     int z; // not from debug symbols
 
     z = (instance->intro->rotation.z << 16) >> 16; // Garbage shifts to force signed load
 
-    AngleMoveToward(&instance->rotation.z, (z + arg1) & 0xFFF, (gameTrackerX.timeMult * arg2 * 16) >> 16);
+    AngleMoveToward(&instance->rotation.z, (z + yaw) & 0xFFF, (gameTrackerX.timeMult * speed * 16) >> 16);
     instance->rotation.z &= 0xFFF;
 }
 
 
-void func_88000140(Instance *instance, int arg1, int arg2)
+void WALBOSB_InterpPitch(Instance *instance, int pitch, int speed)
 {
 
-    G2SVector3 rot; // not from debug symbols
-    int pitch; // not from debug symbols
+    G2SVector3 extraRot;
+    int newPitch; // not from debug symbols
     WalbosbVars *vars; // not from debug symbols
     WalbosbAttributes *attrs; // not from debug symbols
     MonsterVars *mv; // not from debug symbols
     MonsterAttributes *ma; // not from debug symbols
 
-    pitch = arg1;
+    newPitch = pitch;
     mv = (MonsterVars *)instance->extraData;
     ma = (MonsterAttributes *)instance->data;
     vars = (WalbosbVars *)mv->extraVars;
@@ -765,35 +764,35 @@ void func_88000140(Instance *instance, int arg1, int arg2)
     if (attrs != NULL && vars != NULL)
     {
 
-        if (pitch < -attrs->maxPitchAngle)
+        if (newPitch < -attrs->maxPitchAngle)
         {
-            pitch = -attrs->maxPitchAngle & 0xFFF;
+            newPitch = -attrs->maxPitchAngle & 0xFFF;
         }
-        else if (attrs->maxPitchAngle < pitch)
+        else if (attrs->maxPitchAngle < newPitch)
         {
-            pitch = attrs->maxPitchAngle;
+            newPitch = attrs->maxPitchAngle;
         }
 
-        AngleMoveToward(&vars->pitch, pitch, (gameTrackerX.timeMult * arg2 * 16) >> 16);
+        AngleMoveToward(&vars->pitch, newPitch, (gameTrackerX.timeMult * speed * 16) >> 16);
 
-        rot.x = vars->pitch;
-        rot.y = 0;
-        rot.z = 0;
+        extraRot.x = vars->pitch;
+        extraRot.y = 0;
+        extraRot.z = 0;
 
-        G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &rot);
+        G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
     }
 }
 
-void func_88000204(void) {}
+void WALBOSB_TurnToPosition(Instance *instance, Position *target, int speed) {}
 
-void func_88000324(Instance *instance, Position *arg1, int arg2, int arg3)
+void WALBOSB_ElevateToPosition(Instance *instance, Position *target, int speed, int behind)
 {
 
     int elevation; // not from debug symbols
 
-    elevation = MATH3D_ElevationFromPosToPos(&instance->position, arg1);
+    elevation = MATH3D_ElevationFromPosToPos(&instance->position, target);
 
-    if (arg3 != 0)
+    if (behind != 0)
     {
         elevation -= 1024;
     }
@@ -802,13 +801,13 @@ void func_88000324(Instance *instance, Position *arg1, int arg2, int arg3)
         elevation = 1024 - elevation;
     }
 
-    func_88000140(instance, elevation + 128, arg2);
+    WALBOSB_InterpPitch(instance, elevation + 128, speed);
 }
 
 
-void func_88000390(void) {}
+int WALBOSB_OtherAttackingLegs(Instance *) {}
 
-void func_88000488(Instance *instance)
+void WALBOSB_ResetAbortedAttacks(Instance *instance)
 {
 
     Instance *inst; // not from debug symbols
@@ -834,7 +833,7 @@ void func_88000488(Instance *instance)
     }
 }
 
-int func_88000508(Instance *instance)
+int WALBOSB_AbortedAttacks(Instance *instance)
 {
 
     Instance *inst; // not from debug symbols
@@ -865,9 +864,9 @@ int func_88000508(Instance *instance)
     return numAborted;
 }
 
-void func_880005A0(void) {}
+void WALBOSB_ShouldIAttack(Instance *instance, MonsterIR *enemy, int attack) {}
 
-void func_880006DC(void) {}
+int WALBOSB_ChooseAttack(Instance *instance, MonsterIR *enemy) {}
 
 void WALBOSB_WalbossMessage(int message)
 {
@@ -1326,8 +1325,8 @@ void WALBOSB_Idle(Instance *instance)
         if (!(mv->mvFlags & 4))
         {
 
-            func_880000D8(instance, 0, mv->subAttr->speedPivotTurn);
-            func_88000140(instance, 0, mv->subAttr->speedPivotTurn);
+            WALBOSB_InterpYaw(instance, 0, mv->subAttr->speedPivotTurn);
+            WALBOSB_InterpPitch(instance, 0, mv->subAttr->speedPivotTurn);
 
             if (WALBOSB_HandleFade(instance) == 0)
             {
@@ -1357,8 +1356,8 @@ void WALBOSB_Idle(Instance *instance)
         else
         {
 
-            func_88000068(instance, 0);
-            func_88000088(instance, 0);
+            WALBOSB_SetYaw(instance, 0);
+            WALBOSB_SetPitch(instance, 0);
             MON_Idle(instance);
         }
     }
