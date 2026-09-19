@@ -1,7 +1,9 @@
 #include "Overlays/walbosb/walbosb.h"
 #include "Game/DEBUG.h"
+#include "Game/FX.h"
 #include "Game/GAMELOOP.h"
 #include "Game/G2/ANMCTRLR.h"
+#include "Game/G2/ANMG2ILF.h"
 #include "Game/INSTANCE.h"
 #include "Game/MATH3D.h"
 #include "Game/MEMPACK.h"
@@ -1027,7 +1029,15 @@ void WALBOSB_GeneralDeath(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_DeadEntry);
+void WALBOSB_DeadEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    mv->soulJuice = 0;
+
+    MON_DeadEntry(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Dead);
 
@@ -2035,7 +2045,15 @@ void WALBOSB_GeneralDeath(Instance *instance)
     }
 }
 
-void WALBOSB_DeadEntry(void) {};
+void WALBOSB_DeadEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    mv->soulJuice = 0;
+
+    MON_DeadEntry(instance);
+}
 
 void WALBOSB_Dead(void) {};
 
