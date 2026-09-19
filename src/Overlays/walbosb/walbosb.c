@@ -7,6 +7,7 @@
 #include "Game/MEMPACK.h"
 #include "Game/OBTABLE.h"
 #include "Game/SOUND.h"
+#include "Game/STATE.h"
 #include "Game/MONSTER/MONAPI.h"
 #include "Game/MONSTER/MONLIB.h"
 #include "Game/MONSTER/MONMSG.h"
@@ -16,6 +17,7 @@
 int WALBOSB_ChooseAttack(Instance *instance, MonsterIR *enemy);
 int WALBOSB_ShouldIAttack(Instance *instance, MonsterIR *enemy, int attack);
 int WALBOSB_TurnToPosition(Instance *instance, Position *target, int speed);
+int WALBOSB_OtherAttackingLegs(Instance *);
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -756,7 +758,146 @@ void WALBOSB_AttackEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Attack);
+void WALBOSB_Attack(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterAttackAttributes *attack; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+    WalbosbAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (WalbosbVars *)mv->extraVars;
+    enemy = mv->enemy;
+    attrs = (WalbosbAttributes *)ma->tunData;
+    attack = mv->attackType;
+
+    if (attrs == NULL || vars == NULL)
+    {
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+    else if (enemy == NULL)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+    }
+    else
+    {
+        if (MON_AnimPlayingFromList(instance, attack->animList, (signed char)attack->sphereOnAnim) && G2EmulationInstanceQueryPassedFrame(instance, 0, (signed char)attack->sphereOnFrame))
+        {
+            MON_TurnOnWeaponSpheres(instance);
+        }
+        else if (MON_AnimPlayingFromList(instance, attack->animList, (signed char)attack->sphereOffAnim) && G2EmulationInstanceQueryPassedFrame(instance, 0, (signed char)attack->sphereOffFrame) && mv->mvFlags & 0x4000)
+        {
+            MON_TurnOffWeaponSpheres(instance);
+
+            if (enemy != NULL)
+            {
+                enemy->mirConditions |= 0x200;
+            }
+        }
+
+        switch ((signed char)mv->attackType->numAnims)
+        {
+        case 2:
+            switch ((signed char)mv->attackState)
+            {
+            case 0:
+                if (MON_GetTime(instance) < (unsigned long)mv->generalTimer)
+                {
+                    WALBOSB_ElevateToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn, WALBOSB_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn) & 2);
+
+                    if (WALBOSB_AbortedAttacks(instance) < attrs->allowedAbortedAttacks && WALBOSB_OtherAttackingLegs(instance))
+                    {
+                        vars->abortedAttacks++;
+                        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+                    }
+                }
+                else
+                {
+                    WALBOSB_ResetAbortedAttacks(instance);
+                    mv->attackState++;
+                    mv->generalTimer = MON_GetTime(instance) + (attrs->lengthOfStrikeWait * 33);
+                }
+                break;
+            case 1:
+                if (MON_GetTime(instance) >= (unsigned long)mv->generalTimer)
+                {
+                    MON_PlayAnimFromList(instance, attack->animList, (signed char)mv->attackState, 1);
+                    mv->attackState++;
+                }
+                break;
+            case 2:
+                if (instance->flags2 & 0x10)
+                {
+                    instance->flags2 &= ~0x10;
+                    mv->attackState++;
+                    MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+                }
+                break;
+            }
+            break;
+        case 4:
+            switch ((signed char)mv->attackState)
+            {
+            case 0:
+                WALBOSB_ElevateToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn, WALBOSB_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn) & 2);
+
+                if (MON_GetTime(instance) < (unsigned long)mv->generalTimer)
+                {
+                    if (WALBOSB_AbortedAttacks(instance) < attrs->allowedAbortedAttacks && WALBOSB_OtherAttackingLegs(instance))
+                    {
+                        vars->abortedAttacks++;
+                        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+                    }
+                }
+                else
+                {
+                    WALBOSB_ResetAbortedAttacks(instance);
+                    mv->attackState++;
+                    MON_PlayAnimFromList(instance, attack->animList, (signed char)mv->attackState, 1);
+                }
+                break;
+            case 1:
+                if (instance->flags2 & 0x10)
+                {
+                    instance->flags2 &= ~0x10;
+                    mv->attackState++;
+                    MON_PlayAnimFromList(instance, attack->animList, (signed char)mv->attackState, 2);
+                    mv->generalTimer = MON_GetTime(instance) + (attrs->lengthOfStuck * 33);
+                    WALBOSB_SetAutofacePos(instance);
+                }
+                break;
+            case 2:
+                if (MON_GetTime(instance) >= (unsigned long)mv->generalTimer)
+                {
+                    WALBOSB_ResetSetAutofacePos(instance);
+                    mv->attackState++;
+                    MON_PlayAnimFromList(instance, attack->animList, (signed char)mv->attackState, 1);
+                }
+                break;
+            case 3:
+                if (instance->flags2 & 0x10)
+                {
+                    instance->flags2 &= ~0x10;
+                    mv->attackState++;
+                    MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+                }
+                break;
+            }
+            break;
+        }
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_HitEntry);
 
@@ -1509,7 +1650,146 @@ void WALBOSB_AttackEntry(Instance *instance)
     }
 }
 
-void WALBOSB_Attack(void) {};
+void WALBOSB_Attack(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterAttackAttributes *attack; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+    WalbosbAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (WalbosbVars *)mv->extraVars;
+    enemy = mv->enemy;
+    attrs = (WalbosbAttributes *)ma->tunData;
+    attack = mv->attackType;
+
+    if (attrs == NULL || vars == NULL)
+    {
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+    else if (enemy == NULL)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+    }
+    else
+    {
+        if (MON_AnimPlayingFromList(instance, attack->animList, (signed char)attack->sphereOnAnim) && G2EmulationInstanceQueryPassedFrame(instance, 0, (signed char)attack->sphereOnFrame))
+        {
+            MON_TurnOnWeaponSpheres(instance);
+        }
+        else if (MON_AnimPlayingFromList(instance, attack->animList, (signed char)attack->sphereOffAnim) && G2EmulationInstanceQueryPassedFrame(instance, 0, (signed char)attack->sphereOffFrame) && mv->mvFlags & 0x4000)
+        {
+            MON_TurnOffWeaponSpheres(instance);
+
+            if (enemy != NULL)
+            {
+                enemy->mirConditions |= 0x200;
+            }
+        }
+
+        switch ((signed char)mv->attackType->numAnims)
+        {
+        case 2:
+            switch ((signed char)mv->attackState)
+            {
+            case 0:
+                if (MON_GetTime(instance) < (unsigned long)mv->generalTimer)
+                {
+                    WALBOSB_ElevateToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn, WALBOSB_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn) & 2);
+
+                    if (WALBOSB_AbortedAttacks(instance) < attrs->allowedAbortedAttacks && WALBOSB_OtherAttackingLegs(instance))
+                    {
+                        vars->abortedAttacks++;
+                        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+                    }
+                }
+                else
+                {
+                    WALBOSB_ResetAbortedAttacks(instance);
+                    mv->attackState++;
+                    mv->generalTimer = MON_GetTime(instance) + (attrs->lengthOfStrikeWait * 33);
+                }
+                break;
+            case 1:
+                if (MON_GetTime(instance) >= (unsigned long)mv->generalTimer)
+                {
+                    MON_PlayAnimFromList(instance, attack->animList, (signed char)mv->attackState, 1);
+                    mv->attackState++;
+                }
+                break;
+            case 2:
+                if (instance->flags2 & 0x10)
+                {
+                    instance->flags2 &= ~0x10;
+                    mv->attackState++;
+                    MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+                }
+                break;
+            }
+            break;
+        case 4:
+            switch ((signed char)mv->attackState)
+            {
+            case 0:
+                WALBOSB_ElevateToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn, WALBOSB_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn) & 2);
+
+                if (MON_GetTime(instance) < (unsigned long)mv->generalTimer)
+                {
+                    if (WALBOSB_AbortedAttacks(instance) < attrs->allowedAbortedAttacks && WALBOSB_OtherAttackingLegs(instance))
+                    {
+                        vars->abortedAttacks++;
+                        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+                    }
+                }
+                else
+                {
+                    WALBOSB_ResetAbortedAttacks(instance);
+                    mv->attackState++;
+                    MON_PlayAnimFromList(instance, attack->animList, (signed char)mv->attackState, 1);
+                }
+                break;
+            case 1:
+                if (instance->flags2 & 0x10)
+                {
+                    instance->flags2 &= ~0x10;
+                    mv->attackState++;
+                    MON_PlayAnimFromList(instance, attack->animList, (signed char)mv->attackState, 2);
+                    mv->generalTimer = MON_GetTime(instance) + (attrs->lengthOfStuck * 33);
+                    WALBOSB_SetAutofacePos(instance);
+                }
+                break;
+            case 2:
+                if (MON_GetTime(instance) >= (unsigned long)mv->generalTimer)
+                {
+                    WALBOSB_ResetSetAutofacePos(instance);
+                    mv->attackState++;
+                    MON_PlayAnimFromList(instance, attack->animList, (signed char)mv->attackState, 1);
+                }
+                break;
+            case 3:
+                if (instance->flags2 & 0x10)
+                {
+                    instance->flags2 &= ~0x10;
+                    mv->attackState++;
+                    MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+                }
+                break;
+            }
+            break;
+        }
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 void WALBOSB_HitEntry(void) {};
 
