@@ -957,7 +957,13 @@ void WALBOSB_Hit(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_DoNothingEntry);
+void WALBOSB_DoNothingEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    MON_SwitchStateDoEntry(instance, (signed char)mv->previousMainState);
+}
 
 void WALBOSB_DoNothing(Instance *instance)
 {
@@ -1906,7 +1912,13 @@ void WALBOSB_Hit(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-void WALBOSB_DoNothingEntry(void) {};
+void WALBOSB_DoNothingEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    MON_SwitchStateDoEntry(instance, (signed char)mv->previousMainState);
+}
 
 void WALBOSB_DoNothing(Instance *instance)
 {
