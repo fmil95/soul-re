@@ -959,7 +959,10 @@ void WALBOSB_Hit(Instance *instance)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_DoNothingEntry);
 
-void WALBOSB_DoNothing() {};
+void WALBOSB_DoNothing(Instance *instance)
+{
+    (void)instance;
+};
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_GeneralDeathEntry);
 
@@ -1905,7 +1908,10 @@ void WALBOSB_Hit(Instance *instance)
 
 void WALBOSB_DoNothingEntry(void) {};
 
-void WALBOSB_DoNothing(void) {};
+void WALBOSB_DoNothing(Instance *instance)
+{
+    (void)instance;
+};
 
 void WALBOSB_GeneralDeathEntry(void) {};
 
