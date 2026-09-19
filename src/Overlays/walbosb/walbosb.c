@@ -1039,7 +1039,21 @@ void WALBOSB_DeadEntry(Instance *instance)
     MON_DeadEntry(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Dead);
+void WALBOSB_Dead(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (!(mv->auxFlags & 4))
+    {
+        instance->flags |= 0x800;
+    }
+
+    while (DeMessageQueue(&mv->messageQueue) != NULL);
+
+}
 
 #else 
 
@@ -2055,6 +2069,20 @@ void WALBOSB_DeadEntry(Instance *instance)
     MON_DeadEntry(instance);
 }
 
-void WALBOSB_Dead(void) {};
+void WALBOSB_Dead(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (!(mv->auxFlags & 4))
+    {
+        instance->flags |= 0x800;
+    }
+
+    while (DeMessageQueue(&mv->messageQueue) != NULL);
+
+}
 
 #endif
