@@ -19,7 +19,6 @@
 int WALBOSB_ChooseAttack(Instance *instance, MonsterIR *enemy);
 int WALBOSB_ShouldIAttack(Instance *instance, MonsterIR *enemy, int attack);
 int WALBOSB_TurnToPosition(Instance *instance, Position *target, int speed);
-int WALBOSB_OtherAttackingLegs(Instance *);
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -122,7 +121,54 @@ void WALBOSB_ElevateToPosition(Instance *instance, Position *target, int speed, 
 }
 
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_OtherAttackingLegs);
+int WALBOSB_OtherAttackingLegs(Instance *instance)
+{
+
+    Instance *inst; // not from debug symbols
+    int distance; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    InstanceList *instanceList; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    instanceList = gameTrackerX.instanceList;
+
+    if (mv->enemy == NULL)
+    {
+        return 1;
+    }
+
+    distance = mv->enemy->distance;
+
+    for (inst = instanceList->first; inst != NULL; inst = inst->next)
+    {
+
+        MonsterVars *enemyMv;
+
+        if (INSTANCE_Query(inst, queryWhatAmI) != 0x410002)
+        {
+            continue;
+        }
+
+        if (inst->currentMainState == MONSTER_STATE_DEAD || inst->currentMainState == MONSTER_STATE_GENERALDEATH)
+        {
+            continue;
+        }
+
+        if (inst == instance)
+        {
+            continue;
+        }
+
+        enemyMv = (MonsterVars *)inst->extraData;
+
+        if (enemyMv->enemy != NULL && enemyMv->enemy->distance < distance)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
 
 void WALBOSB_ResetAbortedAttacks(Instance *instance)
 {
@@ -1155,8 +1201,54 @@ void WALBOSB_ElevateToPosition(Instance *instance, Position *target, int speed, 
     WALBOSB_InterpPitch(instance, elevation + 128, speed);
 }
 
+int WALBOSB_OtherAttackingLegs(Instance *instance)
+{
 
-int WALBOSB_OtherAttackingLegs(Instance *) {}
+    Instance *inst; // not from debug symbols
+    int distance; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    InstanceList *instanceList; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    instanceList = gameTrackerX.instanceList;
+
+    if (mv->enemy == NULL)
+    {
+        return 1;
+    }
+
+    distance = mv->enemy->distance;
+
+    for (inst = instanceList->first; inst != NULL; inst = inst->next)
+    {
+
+        MonsterVars *enemyMv;
+
+        if (INSTANCE_Query(inst, queryWhatAmI) != 0x410002)
+        {
+            continue;
+        }
+
+        if (inst->currentMainState == MONSTER_STATE_DEAD || inst->currentMainState == MONSTER_STATE_GENERALDEATH)
+        {
+            continue;
+        }
+
+        if (inst == instance)
+        {
+            continue;
+        }
+
+        enemyMv = (MonsterVars *)inst->extraData;
+
+        if (enemyMv->enemy != NULL && enemyMv->enemy->distance < distance)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
 
 void WALBOSB_ResetAbortedAttacks(Instance *instance)
 {
