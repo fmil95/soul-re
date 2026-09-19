@@ -16,9 +16,7 @@
 #include "Game/MONSTER/MONSTER.h"
 
 // TODO: Delete once matched
-int WALBOSB_ChooseAttack(Instance *instance, MonsterIR *enemy);
 int WALBOSB_ShouldIAttack(Instance *instance, MonsterIR *enemy, int attack);
-int WALBOSB_TurnToPosition(Instance *instance, Position *target, int speed);
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -99,7 +97,64 @@ void WALBOSB_InterpPitch(Instance *instance, int pitch, int speed)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_TurnToPosition);
+int WALBOSB_TurnToPosition(Instance *instance, Position *target, int speed)
+{
+
+    MonsterAttributes *ma; // not from debug symbols
+    WalbosbAttributes *attrs; // not from debug symbols
+    int angle; // not from debug symbols
+    int temp; // not from debug symbols
+    int rc; // not from debug symbols
+
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (WalbosbAttributes *)ma->tunData;
+    rc = 0;
+
+    if (attrs != NULL)
+    {
+
+        angle = MATH3D_AngleFromPosToPos(&instance->position, target);
+        temp = ((angle + 2048) - instance->intro->rotation.z) & 0xFFF;
+
+        if (temp > 2048)
+        {
+            temp -= 4096;
+        }
+
+        angle = temp;
+
+        if (attrs->maxYawAngle < abs(angle))
+        {
+
+            temp = (angle + 2048) & 0xFFF;
+
+            if (temp > 2048)
+            {
+                temp -= 4096;
+            }
+
+            angle = temp;
+
+            if (attrs->maxYawAngle < abs(angle))
+            {
+                angle = 0;
+            }
+            else
+            {
+                rc = 2;
+            }
+        }
+
+        WALBOSB_InterpYaw(instance, angle, speed);
+
+        if (instance->rotation.z == ((angle + instance->intro->rotation.z) & 0xFFF))
+        {
+            rc |= 1;
+        }
+    }
+
+    return rc;
+}
 
 void WALBOSB_ElevateToPosition(Instance *instance, Position *target, int speed, int behind)
 {
@@ -1220,7 +1275,64 @@ void WALBOSB_InterpPitch(Instance *instance, int pitch, int speed)
     }
 }
 
-int WALBOSB_TurnToPosition(Instance *instance, Position *target, int speed) {}
+int WALBOSB_TurnToPosition(Instance *instance, Position *target, int speed)
+{
+
+    MonsterAttributes *ma; // not from debug symbols
+    WalbosbAttributes *attrs; // not from debug symbols
+    int angle; // not from debug symbols
+    int temp; // not from debug symbols
+    int rc; // not from debug symbols
+
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (WalbosbAttributes *)ma->tunData;
+    rc = 0;
+
+    if (attrs != NULL)
+    {
+
+        angle = MATH3D_AngleFromPosToPos(&instance->position, target);
+        temp = ((angle + 2048) - instance->intro->rotation.z) & 0xFFF;
+
+        if (temp > 2048)
+        {
+            temp -= 4096;
+        }
+
+        angle = temp;
+
+        if (attrs->maxYawAngle < abs(angle))
+        {
+
+            temp = (angle + 2048) & 0xFFF;
+
+            if (temp > 2048)
+            {
+                temp -= 4096;
+            }
+
+            angle = temp;
+
+            if (attrs->maxYawAngle < abs(angle))
+            {
+                angle = 0;
+            }
+            else
+            {
+                rc = 2;
+            }
+        }
+
+        WALBOSB_InterpYaw(instance, angle, speed);
+
+        if (instance->rotation.z == ((angle + instance->intro->rotation.z) & 0xFFF))
+        {
+            rc |= 1;
+        }
+    }
+
+    return rc;
+}
 
 void WALBOSB_ElevateToPosition(Instance *instance, Position *target, int speed, int behind)
 {
