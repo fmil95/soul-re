@@ -229,7 +229,47 @@ int WALBOSB_AbortedAttacks(Instance *instance)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_ShouldIAttack);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_ChooseAttack);
+int WALBOSB_ChooseAttack(Instance *instance, MonsterIR *enemy)
+{
+
+    int i; // not from debug symbols
+    int shortestDist; // not from debug symbols
+    int attackIndex; // not from debug symbols
+    int numAttacks; // not from debug symbols
+    int distance; // not from debug symbols
+    char *attackListPtr; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterCombatAttributes *combat; // not from debug symbols
+
+    shortestDist = 99999;
+    attackIndex = -1;
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    combat = mv->subAttr->combatAttributes;
+    numAttacks = (signed char)combat->numAttacks;
+    distance = enemy->distance;
+
+    for (i = 0, attackListPtr = combat->attackList; i < numAttacks; i++, attackListPtr++)
+    {
+
+        int attackDist; // not from debug symbols
+        MonsterAttackAttributes *attack; // not from debug symbols
+
+        attack = &ma->attackAttributesList[(signed char)*attackListPtr];
+        attackDist = ((attack->attackRange * mv->subAttr->scale) / 4096) - distance;
+
+        if (abs(attackDist) < abs(shortestDist))
+        {
+            attackIndex = i;
+            shortestDist = attackDist;
+        }
+    }
+
+    mv->attackState = 0;
+    return attackIndex;
+}
 
 void WALBOSB_WalbossMessage(int message)
 {
@@ -1309,7 +1349,47 @@ int WALBOSB_AbortedAttacks(Instance *instance)
 
 int WALBOSB_ShouldIAttack(Instance *instance, MonsterIR *enemy, int attack) {}
 
-int WALBOSB_ChooseAttack(Instance *instance, MonsterIR *enemy) {}
+int WALBOSB_ChooseAttack(Instance *instance, MonsterIR *enemy)
+{
+
+    int i; // not from debug symbols
+    int shortestDist; // not from debug symbols
+    int attackIndex; // not from debug symbols
+    int numAttacks; // not from debug symbols
+    int distance; // not from debug symbols
+    char *attackListPtr; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterCombatAttributes *combat; // not from debug symbols
+
+    shortestDist = 99999;
+    attackIndex = -1;
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    combat = mv->subAttr->combatAttributes;
+    numAttacks = (signed char)combat->numAttacks;
+    distance = enemy->distance;
+
+    for (i = 0, attackListPtr = combat->attackList; i < numAttacks; i++, attackListPtr++)
+    {
+
+        int attackDist; // not from debug symbols
+        MonsterAttackAttributes *attack; // not from debug symbols
+
+        attack = &ma->attackAttributesList[(signed char)*attackListPtr];
+        attackDist = ((attack->attackRange * mv->subAttr->scale) / 4096) - distance;
+
+        if (abs(attackDist) < abs(shortestDist))
+        {
+            attackIndex = i;
+            shortestDist = attackDist;
+        }
+    }
+
+    mv->attackState = 0;
+    return attackIndex;
+}
 
 void WALBOSB_WalbossMessage(int message)
 {
