@@ -943,7 +943,19 @@ void WALBOSB_HitEntry(Instance *instance)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Hit);
+void WALBOSB_Hit(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (!(mv->auxFlags & 1) && !(mv->mvFlags & 0x4000000))
+    {
+        MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_DoNothingEntry);
 
@@ -1877,7 +1889,19 @@ void WALBOSB_HitEntry(Instance *instance)
     }
 }
 
-void WALBOSB_Hit(void) {};
+void WALBOSB_Hit(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (!(mv->auxFlags & 1) && !(mv->mvFlags & 0x4000000))
+    {
+        MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
 
 void WALBOSB_DoNothingEntry(void) {};
 
