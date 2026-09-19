@@ -990,7 +990,42 @@ void WALBOSB_GeneralDeathEntry(Instance *instance)
     instance->yVel = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_GeneralDeath);
+void WALBOSB_GeneralDeath(Instance *instance)
+{
+
+    FXSplinter *shatterList; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+
+        MonsterAttributes *ma; // not from debug symbols
+
+        ma = (MonsterAttributes *)instance->data;
+        shatterList = ma->shatterList;
+
+        if (vars->autofaceInst != NULL)
+        {
+            INSTANCE_KillInstance(vars->autofaceInst);
+            vars->autofaceInst = NULL;
+        }
+
+        if (!(mv->auxFlags & 4))
+        {
+            instance->flags2 |= 0x1000;
+            instance->flags |= 0x800;
+            _FX_BuildSplinters(instance, NULL, NULL, NULL, shatterList, gFXT, NULL, NULL, 8);
+        }
+
+        mv->mvFlags &= ~0x10;
+        G2Anim_SetNoLooping(&instance->anim);
+        MON_SwitchState(instance, MONSTER_STATE_DEAD);
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_DeadEntry);
 
@@ -1963,7 +1998,42 @@ void WALBOSB_GeneralDeathEntry(Instance *instance)
     instance->yVel = 0;
 }
 
-void WALBOSB_GeneralDeath(void) {};
+void WALBOSB_GeneralDeath(Instance *instance)
+{
+
+    FXSplinter *shatterList; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+
+        MonsterAttributes *ma; // not from debug symbols
+
+        ma = (MonsterAttributes *)instance->data;
+        shatterList = ma->shatterList;
+
+        if (vars->autofaceInst != NULL)
+        {
+            INSTANCE_KillInstance(vars->autofaceInst);
+            vars->autofaceInst = NULL;
+        }
+
+        if (!(mv->auxFlags & 4))
+        {
+            instance->flags2 |= 0x1000;
+            instance->flags |= 0x800;
+            _FX_BuildSplinters(instance, NULL, NULL, NULL, shatterList, gFXT, NULL, NULL, 8);
+        }
+
+        mv->mvFlags &= ~0x10;
+        G2Anim_SetNoLooping(&instance->anim);
+        MON_SwitchState(instance, MONSTER_STATE_DEAD);
+    }
+}
 
 void WALBOSB_DeadEntry(void) {};
 
