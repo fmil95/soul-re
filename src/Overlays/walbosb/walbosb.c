@@ -970,7 +970,25 @@ void WALBOSB_DoNothing(Instance *instance)
     (void)instance;
 };
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_GeneralDeathEntry);
+void WALBOSB_GeneralDeathEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    WALBOSB_WalbossMessage(3);
+
+    instance->flags2 |= 0x80;
+    mv->mvFlags |= 0x200000;
+    mv->mvFlags |= 0x2000;
+    mv->mvFlags &= ~0x10;
+
+    instance->xAccl = 0;
+    instance->yAccl = 0;
+    instance->xVel = 0;
+    instance->yVel = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_GeneralDeath);
 
@@ -1925,7 +1943,25 @@ void WALBOSB_DoNothing(Instance *instance)
     (void)instance;
 };
 
-void WALBOSB_GeneralDeathEntry(void) {};
+void WALBOSB_GeneralDeathEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    WALBOSB_WalbossMessage(3);
+
+    instance->flags2 |= 0x80;
+    mv->mvFlags |= 0x200000;
+    mv->mvFlags |= 0x2000;
+    mv->mvFlags &= ~0x10;
+
+    instance->xAccl = 0;
+    instance->yAccl = 0;
+    instance->xVel = 0;
+    instance->yVel = 0;
+}
 
 void WALBOSB_GeneralDeath(void) {};
 
