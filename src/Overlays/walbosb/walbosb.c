@@ -899,7 +899,49 @@ void WALBOSB_Attack(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_HitEntry);
+void WALBOSB_HitEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+
+    if (mv->extraVars != NULL)
+    {
+        if (mv->auxFlags & 1)
+        {
+            MON_PlayAnim(instance, MONSTER_ANIM_HIT1, 2);
+        }
+        else if (WALBOSB_HandleFade(instance))
+        {
+            MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
+        }
+        else
+        {
+            short angle; // not from debug symbols
+
+            mv->enemy->mirConditions |= 0x400;
+
+            angle = ((instance->rotation.z - MATH3D_AngleFromPosToPos(&instance->position, &enemy->instance->position)) + 1024) & 0xFFF;
+
+            if (angle < 2048)
+            {
+                MON_PlayAnim(instance, MONSTER_ANIM_HIT1, 1);
+            }
+            else
+            {
+                MON_PlayAnim(instance, MONSTER_ANIM_HIT2, 1);
+            }
+
+            WALBOSB_WalbossMessage(1);
+        }
+
+        WALBOSB_ResetSetAutofacePos(instance);
+        mv->mode = 0x8000;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Hit);
 
@@ -1791,7 +1833,49 @@ void WALBOSB_Attack(Instance *instance)
     MON_DefaultQueueHandler(instance);
 }
 
-void WALBOSB_HitEntry(void) {};
+void WALBOSB_HitEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+
+    if (mv->extraVars != NULL)
+    {
+        if (mv->auxFlags & 1)
+        {
+            MON_PlayAnim(instance, MONSTER_ANIM_HIT1, 2);
+        }
+        else if (WALBOSB_HandleFade(instance))
+        {
+            MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
+        }
+        else
+        {
+            short angle; // not from debug symbols
+
+            mv->enemy->mirConditions |= 0x400;
+
+            angle = ((instance->rotation.z - MATH3D_AngleFromPosToPos(&instance->position, &enemy->instance->position)) + 1024) & 0xFFF;
+
+            if (angle < 2048)
+            {
+                MON_PlayAnim(instance, MONSTER_ANIM_HIT1, 1);
+            }
+            else
+            {
+                MON_PlayAnim(instance, MONSTER_ANIM_HIT2, 1);
+            }
+
+            WALBOSB_WalbossMessage(1);
+        }
+
+        WALBOSB_ResetSetAutofacePos(instance);
+        mv->mode = 0x8000;
+    }
+}
 
 void WALBOSB_Hit(void) {};
 
