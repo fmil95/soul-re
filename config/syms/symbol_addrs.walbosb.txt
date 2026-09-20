@@ -33,3 +33,4 @@ WALBOSB_GeneralDeathEntry                             = 0x88001B34; // type:func
 WALBOSB_GeneralDeath                                  = 0x88001BA0; // type:func
 WALBOSB_DeadEntry                                     = 0x88001C94; // type:func
 WALBOSB_Dead                                          = 0x88001CB8; // type:func
+WALBOSB_StateChoiceTable                              = 0x88001D10; // type:s32 size:156

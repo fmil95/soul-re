@@ -15,6 +15,22 @@
 #include "Game/MONSTER/MONMSG.h"
 #include "Game/MONSTER/MONSTER.h"
 
+MonsterStateChoice WALBOSB_StateChoiceTable[] = {
+    {MONSTER_STATE_IDLE,{WALBOSB_IdleEntry, WALBOSB_Idle}},
+    {MONSTER_STATE_COMBAT,{WALBOSB_CombatEntry, WALBOSB_Combat}},
+    {MONSTER_STATE_ATTACK,{WALBOSB_AttackEntry, WALBOSB_Attack}},
+    {MONSTER_STATE_HIT,{WALBOSB_HitEntry, WALBOSB_Hit}},
+    {MONSTER_STATE_MISSILEHIT,{WALBOSB_HitEntry, WALBOSB_Hit}},
+    {MONSTER_STATE_STUNNED,{WALBOSB_DoNothingEntry, WALBOSB_DoNothing}},
+    {MONSTER_STATE_PARRY,{WALBOSB_DoNothingEntry, WALBOSB_DoNothing}},
+    {MONSTER_STATE_FALL,{WALBOSB_DoNothingEntry, WALBOSB_DoNothing}},
+    {MONSTER_STATE_NOTICE,{WALBOSB_DoNothingEntry, WALBOSB_DoNothing}},
+    {MONSTER_STATE_SURPRISED,{WALBOSB_DoNothingEntry, WALBOSB_DoNothing}},
+    {MONSTER_STATE_GENERALDEATH,{WALBOSB_GeneralDeathEntry, WALBOSB_GeneralDeath}},
+    {MONSTER_STATE_DEAD,{WALBOSB_DeadEntry, WALBOSB_Dead}},
+    {-1,{NULL, NULL}},
+};
+
 // TODO: Delete once matched
 int WALBOSB_ShouldIAttack(Instance *instance, MonsterIR *enemy, int attack);
 

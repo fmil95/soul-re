@@ -42,4 +42,29 @@ typedef struct _walbosbAttributes {
     char attackDeltas[3];
 } WalbosbAttributes;
 
+void WALBOSB_IdleEntry(Instance *instance);
+void WALBOSB_Idle(Instance *instance);
+void WALBOSB_CombatEntry(Instance *instance);
+void WALBOSB_Combat(Instance *instance);
+void WALBOSB_AttackEntry(Instance *instance);
+void WALBOSB_Attack(Instance *instance);
+void WALBOSB_HitEntry(Instance *instance);
+void WALBOSB_Hit(Instance *instance);
+void WALBOSB_HitEntry(Instance *instance);
+void WALBOSB_Hit(Instance *instance);
+void WALBOSB_DoNothingEntry(Instance *instance);
+void WALBOSB_DoNothing(Instance *instance);
+void WALBOSB_DoNothingEntry(Instance *instance);
+void WALBOSB_DoNothing(Instance *instance);
+void WALBOSB_DoNothingEntry(Instance *instance);
+void WALBOSB_DoNothing(Instance *instance);
+void WALBOSB_DoNothingEntry(Instance *instance);
+void WALBOSB_DoNothing(Instance *instance);
+void WALBOSB_DoNothingEntry(Instance *instance);
+void WALBOSB_DoNothing(Instance *instance);
+void WALBOSB_GeneralDeathEntry(Instance *instance);
+void WALBOSB_GeneralDeath(Instance *instance);
+void WALBOSB_DeadEntry(Instance *instance);
+void WALBOSB_Dead(Instance *instance);
+
 #endif
