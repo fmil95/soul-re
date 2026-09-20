@@ -66,5 +66,9 @@ void WALBOSB_GeneralDeathEntry(Instance *instance);
 void WALBOSB_GeneralDeath(Instance *instance);
 void WALBOSB_DeadEntry(Instance *instance);
 void WALBOSB_Dead(Instance *instance);
+void WALBOSB_Init(Instance *instance);
+void WALBOSB_CleanUp(Instance *instance);
+uintptr_t WALBOSB_Query(Instance *instance, unsigned long query);
+void WALBOSB_Message(Instance *instance, unsigned long message, unsigned long data);
 
 #endif

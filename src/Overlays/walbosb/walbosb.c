@@ -8,6 +8,7 @@
 #include "Game/MATH3D.h"
 #include "Game/MEMPACK.h"
 #include "Game/OBTABLE.h"
+#include "Game/SAVEINFO.h"
 #include "Game/SOUND.h"
 #include "Game/STATE.h"
 #include "Game/MONSTER/MONAPI.h"
@@ -29,6 +30,17 @@ MonsterStateChoice WALBOSB_StateChoiceTable[] = {
     {MONSTER_STATE_GENERALDEATH,{WALBOSB_GeneralDeathEntry, WALBOSB_GeneralDeath}},
     {MONSTER_STATE_DEAD,{WALBOSB_DeadEntry, WALBOSB_Dead}},
     {-1,{NULL, NULL}},
+};
+
+const MonsterFunctionTable WALBOSB_FunctionTable = {
+    WALBOSB_Init,
+    WALBOSB_CleanUp,
+    NULL,
+    WALBOSB_Query,
+    WALBOSB_Message,
+    WALBOSB_StateChoiceTable,
+    monVersion,
+    "Jul 14 1999"
 };
 
 // TODO: Delete once matched
@@ -355,10 +367,6 @@ void WALBOSB_WalbossMessage(int message)
         }
     }
 }
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", D_88000000);
-
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", D_88000020);
 
 void WALBOSB_AutofaceMarker(Instance *instance)
 {
