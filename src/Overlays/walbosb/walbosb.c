@@ -814,7 +814,7 @@ void WALBOSB_Idle(Instance *instance)
             WALBOSB_InterpYaw(instance, 0, mv->subAttr->speedPivotTurn);
             WALBOSB_InterpPitch(instance, 0, mv->subAttr->speedPivotTurn);
 
-            if (WALBOSB_HandleFade(instance) == 0)
+            if (!WALBOSB_HandleFade(instance))
             {
                 if (mv->auxFlags & 2)
                 {
@@ -1987,7 +1987,7 @@ void WALBOSB_Idle(Instance *instance)
             WALBOSB_InterpYaw(instance, 0, mv->subAttr->speedPivotTurn);
             WALBOSB_InterpPitch(instance, 0, mv->subAttr->speedPivotTurn);
 
-            if (WALBOSB_HandleFade(instance) == 0)
+            if (!WALBOSB_HandleFade(instance))
             {
                 if (mv->auxFlags & 2)
                 {
