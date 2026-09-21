@@ -20,7 +20,7 @@ typedef struct _WalbosbVars
     Instance *autofaceInst;
 } WalbosbVars;
 
-// size: 0x14
+// size: 0x1C
 typedef struct _walbosbAttributes {
     // offset: 0x0000
     short maxYawAngle;
@@ -39,7 +39,12 @@ typedef struct _walbosbAttributes {
     // offset: 0x000E
     short junk;
     // offset: 0x0010
-    char attackDeltas[3];
+    struct {
+        // offset: 0x0000
+        short plusDelta;
+        // offset: 0x0002
+        short minusDelta;
+    } attackDeltas[3];
 } WalbosbAttributes;
 
 void WALBOSB_IdleEntry(Instance *instance);
