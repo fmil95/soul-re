@@ -573,7 +573,7 @@ uintptr_t MonsterQuery(Instance *instance, unsigned long query)
     case queryBlockSave:
         ret = 0;
 
-        if ((instance->currentMainState == MONSTER_STATE_THROWN) || (instance->currentMainState == MONSTER_STATE_IMPACT) || (instance->currentMainState == MONSTER_STATE_FALL) || (instance->currentMainState == MONSTER_STATE_GRABBED))
+        if (instance->currentMainState == MONSTER_STATE_THROWN || instance->currentMainState == MONSTER_STATE_IMPACT || instance->currentMainState == MONSTER_STATE_FALL || instance->currentMainState == MONSTER_STATE_GRABBED)
         {
             ret = 1;
         }

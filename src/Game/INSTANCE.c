@@ -138,8 +138,8 @@ void INSTANCE_DeactivateFarInstances(GameTracker *gameTracker)
             return;
         }
 
-        if ((instance->flags2 & 0x80) || (instance->object->oflags & 0x10000) || (INSTANCE_Query(instance, 0x23) != 0) ||
-            (INSTANCE_Query(instance, 0x2F) != 0) || (instance->LinkParent != NULL) || (instance->matrix == NULL))
+        if (instance->flags2 & 0x80 || instance->object->oflags & 0x10000 || INSTANCE_Query(instance, queryMessageQueue) != 0 ||
+            INSTANCE_Query(instance, queryBlockSave) != 0 || instance->LinkParent != NULL || instance->matrix == NULL)
         {
             if ((instance->flags2 & 1) != 0)
             {
@@ -929,11 +929,11 @@ void INSTANCE_ProcessFunctions(InstanceList *instanceList)
             {
                 hidden = instance->flags & 0x800;
 
-                if ((INSTANCE_Query(instance, queryPhysicalAbility) & 0x20))
+                if (INSTANCE_Query(instance, queryPhysicalAbility) & 0x20)
                 {
                     burning = (unsigned int)burning < ((INSTANCE_Query(instance, queryPhysicalMode) & 0x10000));
                 }
-                else if (((instance->object->oflags2 & 0x80000)) && ((((PhysObData *)instance->extraData)->Mode & 0x400000)))
+                else if (instance->object->oflags2 & 0x80000 && ((PhysObData *)instance->extraData)->Mode & 0x400000)
                 {
                     burning = 1;
                 }
@@ -941,7 +941,7 @@ void INSTANCE_ProcessFunctions(InstanceList *instanceList)
                 SOUND_ProcessInstanceSounds(instance->object->soundData, instance->soundInstanceTbl, &instance->position, instance->object->oflags2 & 0x2000000, instance->flags2 & 0x8000000, hidden, burning, &instance->flags2);
             }
 
-            if (((instance->intro == NULL) || (!(instance->intro->flags & 0x100))) && ((gameTrackerX.gameMode != 6) || ((instance->object->oflags & 0x20000))) && ((!(gameTrackerX.streamFlags & 0x100000)) || ((instance->object->oflags & 0x40000))) && (!(instance->flags2 & 0x10000000)))
+            if ((instance->intro == NULL || !(instance->intro->flags & 0x100)) && (gameTrackerX.gameMode != 6 || instance->object->oflags & 0x20000) && (!(gameTrackerX.streamFlags & 0x100000) || instance->object->oflags & 0x40000) && !(instance->flags2 & 0x10000000))
             {
                 instance->oldPos.x = instance->position.x;
                 instance->oldPos.y = instance->position.y;
@@ -958,14 +958,14 @@ void INSTANCE_ProcessFunctions(InstanceList *instanceList)
 
                     multi = SCRIPT_GetMultiSpline(instance, NULL, NULL);
 
-                    if ((multi != NULL) && ((instance->flags & 0x2000000)))
+                    if (multi != NULL && instance->flags & 0x2000000)
                     {
                         long endOfSpline;
                         short direction;
 
-                        direction = ((instance->flags & 0x1000000)) ? -1 : 1;
+                        direction = (instance->flags & 0x1000000) ? -1 : 1;
 
-                        if ((instance->object->oflags & 0x10000000))
+                        if (instance->object->oflags & 0x10000000)
                         {
                             instance->flags |= 0x400;
 
@@ -995,9 +995,9 @@ void INSTANCE_ProcessFunctions(InstanceList *instanceList)
 
                             maxFrames = SCRIPTCountFramesInSpline(instance);
 
-                            if ((instance->splineFlags & 0x1))
+                            if (instance->splineFlags & 0x1)
                             {
-                                if ((gameTrackerX.debugFlags2 & 0x400000))
+                                if (gameTrackerX.debugFlags2 & 0x400000)
                                 {
                                     printf("Spline %s%ld playto %d preveFram=%ld frame=%ld endOfSpline=%ld, maxFrames=%ld\n", instance->introName, instance->introNum, instance->targetFrame, prevFrame, frame, endOfSpline, maxFrames);
                                 }
@@ -1009,7 +1009,7 @@ void INSTANCE_ProcessFunctions(InstanceList *instanceList)
                                         prevFrame = maxFrames;
                                     }
 
-                                    if ((((instance->targetFrame <= frame) && (instance->targetFrame >= prevFrame)) || ((prevFrame > frame) && (instance->targetFrame <= frame) && ((instance->targetFrame + maxFrames) >= prevFrame))))
+                                    if ((instance->targetFrame <= frame && instance->targetFrame >= prevFrame) || (prevFrame > frame && instance->targetFrame <= frame && (instance->targetFrame + maxFrames) >= prevFrame))
                                     {
                                         instance->flags &= ~0x2000000;
 
@@ -1020,7 +1020,7 @@ void INSTANCE_ProcessFunctions(InstanceList *instanceList)
                                         instance->splineFlags &= ~0x1;
                                     }
                                 }
-                                else if ((instance->targetFrame >= frame) && ((instance->targetFrame <= prevFrame) || ((prevFrame < frame) && (instance->targetFrame <= (prevFrame + maxFrames)))))
+                                else if (instance->targetFrame >= frame && (instance->targetFrame <= prevFrame || (prevFrame < frame && instance->targetFrame <= (prevFrame + maxFrames))))
                                 {
                                     instance->flags &= ~0x2000000;
 
@@ -1032,18 +1032,18 @@ void INSTANCE_ProcessFunctions(InstanceList *instanceList)
                                 }
                             }
 
-                            if ((instance->splineFlags & 0x2))
+                            if (instance->splineFlags & 0x2)
                             {
-                                if ((gameTrackerX.debugFlags2 & 0x400000))
+                                if (gameTrackerX.debugFlags2 & 0x400000)
                                 {
                                     FONT_Print("Spline %s%d : clip(%d,%d) prevFrame=%d, frame=%d\n", instance->introName, instance->introNum, instance->clipBeg, instance->clipEnd, prevFrame, frame);
                                 }
 
                                 if (direction == 1)
                                 {
-                                    if (((instance->clipEnd >= prevFrame) && (instance->clipEnd <= frame)) || (instance->clipBeg > frame))
+                                    if ((instance->clipEnd >= prevFrame && instance->clipEnd <= frame) || instance->clipBeg > frame)
                                     {
-                                        if (((multi->positional->flags & 0x4)) || ((multi->positional->flags & 0x2)))
+                                        if (multi->positional->flags & 0x4 || multi->positional->flags & 0x2)
                                         {
                                             SCRIPT_InstanceSplineSet(instance, instance->clipBeg, NULL, NULL, NULL);
                                         }
@@ -1057,89 +1057,84 @@ void INSTANCE_ProcessFunctions(InstanceList *instanceList)
                                 }
                                 else
                                 {
-                                    if (((instance->clipBeg <= prevFrame) && (instance->clipBeg >= frame)) || (instance->clipEnd < frame))
+                                    if ((instance->clipBeg <= prevFrame && instance->clipBeg >= frame) || instance->clipEnd < frame)
                                     {
-                                        if (((multi->positional->flags & 0x4)) || ((multi->positional->flags & 0x2)))
+                                        if (multi->positional->flags & 0x4 || multi->positional->flags & 0x2)
                                         {
                                             SCRIPT_InstanceSplineSet(instance, instance->clipEnd, NULL, NULL, NULL);
                                         }
                                         else
                                         {
                                             SCRIPT_InstanceSplineSet(instance, instance->clipBeg, NULL, NULL, NULL);
-
                                             endOfSpline = 1;
                                         }
                                     }
                                 }
                             }
                         }
-                        else if ((gameTrackerX.debugFlags2 & 0x400000))
+                        else if (gameTrackerX.debugFlags2 & 0x400000)
                         {
                             FONT_Print("Spline %s%d prevFrame=%d, frame=%d\n", instance->introName, instance->introNum, prevFrame, INSTANCE_GetSplineFrameNumber(instance, multi));
                         }
 
                         if (endOfSpline > 0)
                         {
-                            if ((instance->object->oflags & 0x10000000))
+                            if (instance->object->oflags & 0x10000000)
                             {
                                 instance->flags &= ~0x400;
                                 instance->flags &= ~0x2000000;
-
                                 instance->flags |= 0x100000;
                             }
 
-                            if ((instance->object->oflags & 0x2000))
+                            if (instance->object->oflags & 0x2000)
                             {
                                 instance->flags |= 0x100000;
-
                                 INSTANCE_KillInstance(instance);
-
                                 instance = instance->next;
                                 continue;
                             }
                             else
                             {
-                                if ((instance->object->oflags & 0x1000))
+                                if (instance->object->oflags & 0x1000)
                                 {
                                     instance->flags &= ~0x2000000;
 
-                                    if ((instance->object->oflags & 0x800000))
+                                    if (instance->object->oflags & 0x800000)
                                     {
                                         SCRIPT_InstanceSplineInit(instance);
                                     }
                                 }
-                                else if ((instance->object->oflags & 0x1000000))
+                                else if (instance->object->oflags & 0x1000000)
                                 {
                                     instance->flags &= ~0x2000000;
                                 }
 
                                 if (multi->positional != NULL)
                                 {
-                                    if ((!(multi->positional->flags & 0x4)) && (!(instance->object->oflags & 0x800000)))
+                                    if (!(multi->positional->flags & 0x4) && !(instance->object->oflags & 0x800000))
                                     {
                                         instance->flags ^= 0x1000000;
                                     }
                                 }
                                 else if (multi->rotational != NULL)
                                 {
-                                    if ((!(multi->rotational->flags & 0x4)) && (!(instance->object->oflags & 0x800000)))
+                                    if (!(multi->rotational->flags & 0x4) && !(instance->object->oflags & 0x800000))
                                     {
                                         instance->flags ^= 0x1000000;
                                     }
                                 }
 
-                                if (((instance->object->oflags & 0x200000)) && (instance->introData != NULL))
+                                if (instance->object->oflags & 0x200000 && instance->introData != NULL)
                                 {
                                     Signal *temp; // not from decls.h
 
-                                    temp = instance->introData;
+                                    temp = (Signal *)instance->introData;
 
                                     if (temp->id != 0)
                                     {
                                         SIGNAL_HandleSignal(instance, (Signal *)(temp->id + 8), 0); // TODO: find the union from the Signal struct that would logically fit in here
                                     }
                                 }
-
                             }
                         }
                     }
@@ -1147,7 +1142,7 @@ void INSTANCE_ProcessFunctions(InstanceList *instanceList)
 
                 if (instance->processFunc != NULL)
                 {
-                    if ((instance->flags2 & 0x1))
+                    if (instance->flags2 & 0x1)
                     {
                         INSTANCE_DeactivatedProcess(instance, &gameTrackerX);
                     }
@@ -1533,7 +1528,7 @@ void INSTANCE_Broadcast(Instance *sender, long whatAmIMask, int Message, intptr_
 
     while (instance != NULL)
     {
-        if ((instance != sender) && ((INSTANCE_Query(instance, queryWhatAmI) & whatAmIMask)) && (INSTANCE_InPlane(instance, plane) != 0))
+        if (instance != sender && INSTANCE_Query(instance, queryWhatAmI) & whatAmIMask && INSTANCE_InPlane(instance, plane))
         {
             INSTANCE_Post(instance, Message, Data);
         }
@@ -1617,7 +1612,7 @@ Instance *INSTANCE_FindWithName(long areaID, char *instanceName, Instance *start
         {
             next = instance->next;
 
-            if ((instance->birthStreamUnitID != areaID) || (strcmpi(instance->introName, instanceName) != 0))
+            if (instance->birthStreamUnitID != areaID || strcmpi(instance->introName, instanceName) != 0)
             {
                 instance = next;
             }
@@ -2060,7 +2055,7 @@ void INSTANCE_SpatialRelationships(InstanceList *instanceList)
 
             for (checkee = instanceList->first; checkee != NULL; checkee = checkee->next)
             {
-                if ((checkee != instance) && (!(checkee->flags2 & 0x10000000)) && (!(checkee->flags & 0x20)) && ((INSTANCE_Query(checkee, queryWhatAmI) & checkMask)))
+                if (checkee != instance && !(checkee->flags2 & 0x10000000) && !(checkee->flags & 0x20) && INSTANCE_Query(checkee, queryWhatAmI) & checkMask)
                 {
                     mat = (MATRIX *)INSTANCE_Query(checkee, queryIDMatrix);
 
@@ -2069,7 +2064,7 @@ void INSTANCE_SpatialRelationships(InstanceList *instanceList)
                         mat = checkee->matrix;
                     }
 
-                    if ((mat != NULL) && (INSTANCE_SetStatsData(instance, checkee, (Vector *)&mat->t[0], &data, &invMatrix) != 0))
+                    if (mat != NULL && INSTANCE_SetStatsData(instance, checkee, (Vector *)&mat->t[0], &data, &invMatrix) != 0)
                     {
                         INSTANCE_Post(instance, 0x200001, (intptr_t)&data);
                     }

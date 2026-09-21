@@ -37,6 +37,7 @@ void MON_ProcessSpecialFade(Instance *instance);
 void MON_ChangeBehavior(Instance *instance, int behavior);
 void MON_ProcessIntro(Instance *instance);
 void MON_TurnOnAllSpheres(Instance *instance);
+void MON_SphereWorldPos(MATRIX *mat, HSphere *sphere, Position *ret);
 void MON_AnimInit(Instance *instance);
 int MON_ValidUnit(Instance *instance, unsigned long unitId);
 int MON_ValidPosition(Instance *instance);

@@ -163,6 +163,8 @@ $(BUILD_DIR)/src/Game/EVENT.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/MONSTER/MONMSG.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/MENU/MENUFACE.c.o: CFLAGS += -funsigned-char
 $(BUILD_DIR)/src/Game/RAZIEL/RAZIEL.c.o: CFLAGS += -funsigned-char
+$(BUILD_DIR)/src/Overlays/walbosb/walbosb.c.o: CFLAGS += -funsigned-char
+
 
 $(BUILD_DIR)/src/Overlays/cinemax/cinemax.c.o: CFLAGS += -G0
 $(BUILD_DIR)/src/Overlays/mcardx/mcardx.c.o: CFLAGS += -G0

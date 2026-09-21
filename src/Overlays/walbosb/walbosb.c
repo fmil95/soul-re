@@ -1,130 +1,2396 @@
 #include "Overlays/walbosb/walbosb.h"
+#include "Game/DEBUG.h"
+#include "Game/FX.h"
+#include "Game/GAMELOOP.h"
+#include "Game/G2/ANMCTRLR.h"
+#include "Game/G2/ANMG2ILF.h"
+#include "Game/INSTANCE.h"
+#include "Game/MATH3D.h"
+#include "Game/MEMPACK.h"
+#include "Game/OBTABLE.h"
+#include "Game/SAVEINFO.h"
+#include "Game/SOUND.h"
+#include "Game/STATE.h"
+#include "Game/MONSTER/MONAPI.h"
+#include "Game/MONSTER/MONLIB.h"
+#include "Game/MONSTER/MONMSG.h"
+#include "Game/MONSTER/MONSTER.h"
+
+MonsterStateChoice WALBOSB_StateChoiceTable[] = {
+    {MONSTER_STATE_IDLE,{WALBOSB_IdleEntry, WALBOSB_Idle}},
+    {MONSTER_STATE_COMBAT,{WALBOSB_CombatEntry, WALBOSB_Combat}},
+    {MONSTER_STATE_ATTACK,{WALBOSB_AttackEntry, WALBOSB_Attack}},
+    {MONSTER_STATE_HIT,{WALBOSB_HitEntry, WALBOSB_Hit}},
+    {MONSTER_STATE_MISSILEHIT,{WALBOSB_HitEntry, WALBOSB_Hit}},
+    {MONSTER_STATE_STUNNED,{WALBOSB_DoNothingEntry, WALBOSB_DoNothing}},
+    {MONSTER_STATE_PARRY,{WALBOSB_DoNothingEntry, WALBOSB_DoNothing}},
+    {MONSTER_STATE_FALL,{WALBOSB_DoNothingEntry, WALBOSB_DoNothing}},
+    {MONSTER_STATE_NOTICE,{WALBOSB_DoNothingEntry, WALBOSB_DoNothing}},
+    {MONSTER_STATE_SURPRISED,{WALBOSB_DoNothingEntry, WALBOSB_DoNothing}},
+    {MONSTER_STATE_GENERALDEATH,{WALBOSB_GeneralDeathEntry, WALBOSB_GeneralDeath}},
+    {MONSTER_STATE_DEAD,{WALBOSB_DeadEntry, WALBOSB_Dead}},
+    {-1,{NULL, NULL}},
+};
+
+const MonsterFunctionTable WALBOSB_FunctionTable = {
+    WALBOSB_Init,
+    WALBOSB_CleanUp,
+    NULL,
+    WALBOSB_Query,
+    WALBOSB_Message,
+    WALBOSB_StateChoiceTable,
+    monVersion,
+    "Jul 14 1999"
+};
+
+// TODO: Delete once matched
+int WALBOSB_ShouldIAttack(Instance *instance, MonsterIR *enemy, int attack);
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_WalbossMessage);
+void WALBOSB_SetYaw(Instance *instance, int yaw)
+{
+    short z; // not from debug symbols
 
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", D_88000000);
+    z = (instance->intro->rotation.z << 16) >> 16; // Garbage shifts to force a signed load
+    instance->rotation.z = (z + yaw) & 0xFFF;
+}
 
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", D_88000020);
+void WALBOSB_SetPitch(Instance *instance, int pitch)
+{
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_AutofaceMarker);
+    G2SVector3 extraRot;
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_SetAutofacePos);
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_ResetSetAutofacePos);
+    if (vars != NULL)
+    {
+        vars->pitch = pitch;
+        extraRot.x = pitch;
+        extraRot.y = 0;
+        extraRot.z = 0;
+        G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Collide);
+void WALBOSB_InterpYaw(Instance *instance, int yaw, int speed)
+{
+    int z; // not from debug symbols
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Query);
+    z = (instance->intro->rotation.z << 16) >> 16; // Garbage shifts to force signed load
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Message);
+    AngleMoveToward(&instance->rotation.z, (z + yaw) & 0xFFF, (gameTrackerX.timeMult * speed * 16) >> 16);
+    instance->rotation.z &= 0xFFF;
+}
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Init);
+void WALBOSB_InterpPitch(Instance *instance, int pitch, int speed)
+{
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_CleanUp);
+    G2SVector3 extraRot;
+    int newPitch; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+    WalbosbAttributes *attrs; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_IdleEntry);
+    newPitch = pitch;
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (WalbosbVars *)mv->extraVars;
+    attrs = (WalbosbAttributes *)ma->tunData;
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_HandleFade);
+    if (attrs != NULL && vars != NULL)
+    {
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Idle);
+        if (newPitch < -attrs->maxPitchAngle)
+        {
+            newPitch = -attrs->maxPitchAngle & 0xFFF;
+        }
+        else if (attrs->maxPitchAngle < newPitch)
+        {
+            newPitch = attrs->maxPitchAngle;
+        }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_CombatEntry);
+        AngleMoveToward(&vars->pitch, newPitch, (gameTrackerX.timeMult * speed * 16) >> 16);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Combat);
+        extraRot.x = vars->pitch;
+        extraRot.y = 0;
+        extraRot.z = 0;
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_AttackEntry);
+        G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
+    }
+}
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Attack);
+int WALBOSB_TurnToPosition(Instance *instance, Position *target, int speed)
+{
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_HitEntry);
+    MonsterAttributes *ma; // not from debug symbols
+    WalbosbAttributes *attrs; // not from debug symbols
+    int angle; // not from debug symbols
+    int temp; // not from debug symbols
+    int rc; // not from debug symbols
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Hit);
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (WalbosbAttributes *)ma->tunData;
+    rc = 0;
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_DoNothingEntry);
+    if (attrs != NULL)
+    {
 
-void WALBOSB_DoNothing() { };
+        angle = MATH3D_AngleFromPosToPos(&instance->position, target);
+        temp = ((angle + 2048) - instance->intro->rotation.z) & 0xFFF;
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_GeneralDeathEntry);
+        if (temp > 2048)
+        {
+            temp -= 4096;
+        }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_GeneralDeath);
+        angle = temp;
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_DeadEntry);
+        if (attrs->maxYawAngle < abs(angle))
+        {
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_Dead);
+            temp = (angle + 2048) & 0xFFF;
 
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000068);
+            if (temp > 2048)
+            {
+                temp -= 4096;
+            }
 
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000088);
+            angle = temp;
 
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_880000D8);
+            if (attrs->maxYawAngle < abs(angle))
+            {
+                angle = 0;
+            }
+            else
+            {
+                rc = 2;
+            }
+        }
 
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000140);
+        WALBOSB_InterpYaw(instance, angle, speed);
 
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000204);
+        if (instance->rotation.z == ((angle + instance->intro->rotation.z) & 0xFFF))
+        {
+            rc |= 1;
+        }
+    }
 
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000324);
+    return rc;
+}
 
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000390);
+void WALBOSB_ElevateToPosition(Instance *instance, Position *target, int speed, int behind)
+{
 
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000488);
+    int elevation; // not from debug symbols
 
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_88000508);
+    elevation = MATH3D_ElevationFromPosToPos(&instance->position, target);
 
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_880005A0);
+    if (behind != 0)
+    {
+        elevation -= 1024;
+    }
+    else
+    {
+        elevation = 1024 - elevation;
+    }
 
-INCLUDE_RODATA("asm/nonmatchings/Overlays/walbosb/walbosb", func_880006DC);
+    WALBOSB_InterpPitch(instance, elevation + 128, speed);
+}
+
+
+int WALBOSB_OtherAttackingLegs(Instance *instance)
+{
+
+    Instance *inst; // not from debug symbols
+    int distance; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    InstanceList *instanceList; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    instanceList = gameTrackerX.instanceList;
+
+    if (mv->enemy == NULL)
+    {
+        return 1;
+    }
+
+    distance = mv->enemy->distance;
+
+    for (inst = instanceList->first; inst != NULL; inst = inst->next)
+    {
+
+        MonsterVars *enemyMv;
+
+        if (INSTANCE_Query(inst, queryWhatAmI) != 0x410002)
+        {
+            continue;
+        }
+
+        if (inst->currentMainState == MONSTER_STATE_DEAD || inst->currentMainState == MONSTER_STATE_GENERALDEATH)
+        {
+            continue;
+        }
+
+        if (inst == instance)
+        {
+            continue;
+        }
+
+        enemyMv = (MonsterVars *)inst->extraData;
+
+        if (enemyMv->enemy != NULL && enemyMv->enemy->distance < distance)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+void WALBOSB_ResetAbortedAttacks(Instance *instance)
+{
+
+    Instance *inst; // not from debug symbols
+
+    (void)instance;
+
+    for (inst = gameTrackerX.instanceList->first; inst != NULL; inst = inst->next)
+    {
+        if (INSTANCE_Query(inst, queryWhatAmI) == 0x410002)
+        {
+
+            MonsterVars *mv; // not from debug symbols
+            WalbosbVars *vars; // not from debug symbols
+
+            mv = (MonsterVars *)inst->extraData;
+            vars = (WalbosbVars *)mv->extraVars;
+
+            if (vars != NULL)
+            {
+                vars->abortedAttacks = 0;
+            }
+        }
+    }
+}
+
+int WALBOSB_AbortedAttacks(Instance *instance)
+{
+
+    Instance *inst; // not from debug symbols
+    int numAborted; // not from debug symbols
+
+    (void)instance;
+
+    numAborted = 0;
+
+    for (inst = gameTrackerX.instanceList->first; inst != NULL; inst = inst->next)
+    {
+        if (INSTANCE_Query(inst, queryWhatAmI) == 0x410002)
+        {
+
+            MonsterVars *mv; // not from debug symbols
+            WalbosbVars *vars; // not from debug symbols
+
+            mv = (MonsterVars *)inst->extraData;
+            vars = (WalbosbVars *)mv->extraVars;
+
+            if (vars != NULL)
+            {
+                numAborted += vars->abortedAttacks;
+            }
+        }
+    }
+
+    return numAborted;
+}
+
+INCLUDE_ASM("asm/nonmatchings/Overlays/walbosb/walbosb", WALBOSB_ShouldIAttack);
+
+int WALBOSB_ChooseAttack(Instance *instance, MonsterIR *enemy)
+{
+
+    int i; // not from debug symbols
+    int shortestDist; // not from debug symbols
+    int attackIndex; // not from debug symbols
+    int numAttacks; // not from debug symbols
+    int distance; // not from debug symbols
+    char *attackListPtr; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterCombatAttributes *combat; // not from debug symbols
+
+    shortestDist = 99999;
+    attackIndex = -1;
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    combat = mv->subAttr->combatAttributes;
+    numAttacks = (signed char)combat->numAttacks;
+    distance = enemy->distance;
+
+    for (i = 0, attackListPtr = combat->attackList; i < numAttacks; i++, attackListPtr++)
+    {
+
+        int attackDist; // not from debug symbols
+        MonsterAttackAttributes *attack; // not from debug symbols
+
+        attack = &ma->attackAttributesList[(signed char)*attackListPtr];
+        attackDist = ((attack->attackRange * mv->subAttr->scale) / 4096) - distance;
+
+        if (abs(attackDist) < abs(shortestDist))
+        {
+            attackIndex = i;
+            shortestDist = attackDist;
+        }
+    }
+
+    mv->attackState = 0;
+    return attackIndex;
+}
+
+void WALBOSB_WalbossMessage(int message)
+{
+    Instance *inst; // not from debug symbols
+
+    for (inst = gameTrackerX.instanceList->first; inst != NULL; inst = inst->next)
+    {
+        if (INSTANCE_Query(inst, queryWhatAmI) == 0x10102)
+        {
+            INSTANCE_Post(inst, 0x01000017, message);
+            break;
+        }
+    }
+}
+
+void WALBOSB_AutofaceMarker(Instance *instance)
+{
+
+    Instance *inst; // not from debug symbols
+    Object *object; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        object = OBTABLE_FindObject("autoface");
+
+        if (object != NULL)
+        {
+            inst = INSTANCE_BirthObject(instance, object, 0);
+
+            if (inst != NULL)
+            {
+                inst->flags |= 0x800;
+                inst->flags2 &= ~0x20;
+                vars->autofaceInst = inst;
+            }
+        }
+    }
+}
+
+void WALBOSB_SetAutofacePos(Instance *instance)
+{
+
+    HModel *model; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+    model = &instance->hModelList[instance->currentModel];
+
+    if (vars != NULL && vars->autofaceInst != NULL)
+    {
+
+        int i; // not from debug symbols
+        int dist; // not from debug symbols
+        int minDist; // not from debug symbols
+        HPrim *hPrim; // not from debug symbols
+
+        minDist = 999999;
+
+        for (i = model->numHPrims, hPrim = &model->hPrimList[0]; i != 0; i--, hPrim++)
+        {
+            if (hPrim->type == 1)
+            {
+
+                HSphere *hSphere; // not from debug symbols
+                hSphere = hPrim->data.hsphere;
+
+                if (hSphere->id == 8)
+                {
+
+                    Position pos;
+
+                    MON_SphereWorldPos(&instance->matrix[hPrim->segment], hSphere, &pos);
+                    dist = MATH3D_LengthXYZ(pos.x - gameTrackerX.playerInstance->position.x, pos.y - gameTrackerX.playerInstance->position.y, pos.z - gameTrackerX.playerInstance->position.z);
+
+                    if (dist < minDist)
+                    {
+                        minDist = dist;
+                        COPY_SVEC(Position, &vars->autofaceInst->position, Position, &pos);
+                    }
+                }
+            }
+        }
+
+        vars->autofaceInst->flags2 |= 0x20;
+    }
+}
+
+void WALBOSB_ResetSetAutofacePos(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+
+    if (vars != NULL && vars->autofaceInst != NULL)
+    {
+        vars->autofaceInst->flags2 &= ~0x20;
+        COPY_SVEC(Position, &vars->autofaceInst->position, Position, &instance->position);
+    }
+}
+
+
+void WALBOSB_Collide(Instance *instance, GameTracker *gameTracker)
+{
+
+    CollideInfo *collideInfo; // not from debug symbols
+    HSphere *hSphere; // not from debug symbols
+
+    collideInfo = (CollideInfo *)instance->collideInfo;
+    hSphere = (HSphere *)collideInfo->prim0;
+
+    if (collideInfo->type0 != 1 || hSphere->id != 9)
+    {
+        MonsterCollide(instance, gameTracker);
+    }
+    else
+    {
+
+        Instance *collideInst; // not from debug symbols
+        collideInst = (Instance *)collideInfo->inst1;
+
+        if (collideInst == NULL)
+        {
+            MonsterCollide(instance, gameTracker);
+        }
+        else
+        {
+
+            uintptr_t queryResult; // not from debug symbols
+            queryResult = INSTANCE_Query(collideInst, queryWhatAmI);
+
+            if (queryResult != 0x10102 && queryResult != 0x410002)
+            {
+                MonsterCollide(instance, gameTracker);
+            }
+        }
+    }
+}
+
+uintptr_t WALBOSB_Query(Instance *instance, unsigned long query)
+{
+    if (query != 0)
+    {
+        return MonsterQuery(instance, query);
+    }
+
+    return 0;
+}
+
+void WALBOSB_Message(Instance *instance, unsigned long message, unsigned long data)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    switch (message)
+    {
+    case 0x400000:
+        if (data != 0)
+        {
+            SOUND_Play3dSound(&instance->position, 21, 650, 80, 15500);
+        }
+        MonsterMessage(instance, message, data);
+        break;
+    case 0x100001F:
+    case 0x1000021:
+        ((evMonsterHitData *)data)->power = 4096;
+        MonsterMessage(instance, message, data);
+        break;
+    case 0x1000020:
+        if (!(mv->mvFlags & 4))
+        {
+            if (instance->currentMainState != MONSTER_STATE_DEAD && instance->currentMainState != MONSTER_STATE_GENERALDEATH)
+            {
+                MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
+                break;
+            }
+        }
+        break;
+    case 0x1000017:
+        switch (data)
+        {
+        case 0:
+            if (instance->currentMainState != MONSTER_STATE_GENERALDEATH && instance->currentMainState != MONSTER_STATE_DEAD)
+            {
+                mv->auxFlags |= 4;
+                MON_SwitchStateDoEntry(instance, MONSTER_STATE_DEAD);
+            }
+            break;
+        case 1:
+            if (instance->currentMainState != MONSTER_STATE_GENERALDEATH && instance->currentMainState != MONSTER_STATE_DEAD)
+            {
+                mv->auxFlags |= 1;
+                MON_SwitchStateDoEntry(instance, MONSTER_STATE_HIT);
+            }
+            break;
+        case 2:
+            if (instance->currentMainState != MONSTER_STATE_GENERALDEATH && instance->currentMainState != MONSTER_STATE_DEAD)
+            {
+                mv->auxFlags &= ~1;
+                MON_SwitchStateDoEntry(instance, MONSTER_STATE_COMBAT);
+            }
+            break;
+        case 3:
+            if (!(mv->auxFlags & 2))
+            {
+                mv->auxFlags |= 2;
+                MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
+            }
+            else
+            {
+                mv->auxFlags &= ~2;
+            }
+            break;
+        case 4:
+            mv->auxFlags &= ~2;
+            break;
+        default:
+            break;
+        }
+        break;
+    case 0x40009:
+    case 0x80001:
+    case 0x80002:
+    case 0x80003:
+    case 0x80004:
+    case 0x80005:
+    case 0x80006:
+        break;
+    default:
+        MonsterMessage(instance, message, data);
+    }
+}
+
+void WALBOSB_Init(Instance *instance)
+{
+
+    WalbosbVars *vars; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+
+    MON_DefaultInit(instance);
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv != NULL)
+    {
+        vars = (WalbosbVars *)MEMPACK_Malloc(sizeof(WalbosbVars), MEMORY_TYPE_WALBOSBDATA);
+
+        if (vars == NULL)
+        {
+            mv->extraVars = NULL;
+        }
+        else
+        {
+            mv->extraVars = vars;
+            vars->pitch = 0;
+            vars->tauntState = 0;
+            vars->abortedAttacks = 0;
+            WALBOSB_AutofaceMarker(instance);
+            WALBOSB_SetAutofacePos(instance);
+        }
+    }
+
+    G2Anim_AttachControllerToSeg(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+
+    instance->xVel = 0;
+    instance->yVel = 0;
+    instance->zVel = 0;
+
+    mv->mvFlags |= 0x800;
+
+    MON_SwitchState(instance, MONSTER_STATE_IDLE);
+
+    ma = (MonsterAttributes *)instance->data;
+    MON_PlayAnimFromList(instance, ma->auxAnimList, 0, 1);
+
+    mv->auxFlags |= 0x20000000;
+    mv->mvFlags |= 0x2000;
+    instance->collideFunc = WALBOSB_Collide;
+    mv->soulJuice = 0;
+    mv->targetFade = 0;
+
+    DEBUG_DoAreaProtection();
+}
+
+void WALBOSB_CleanUp(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    G2Anim_DetachControllerFromSeg(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+
+    if (mv != NULL)
+    {
+        vars = (WalbosbVars *)mv->extraVars;
+
+        if (vars != NULL)
+        {
+            if (vars->autofaceInst != NULL)
+            {
+                INSTANCE_KillInstance(vars->autofaceInst);
+            }
+
+            MEMPACK_Free((char *)vars);
+        }
+    }
+
+    MON_CleanUp(instance);
+}
+
+
+void WALBOSB_IdleEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        if (!(mv->mvFlags & 4))
+        {
+            if (mv->auxFlags & 2)
+            {
+                mv->attackState = 0;
+                MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 0, 1);
+            }
+            else
+            {
+                MON_PlayRandomIdle(instance, 2);
+            }
+        }
+        else
+        {
+            MON_IdleEntry(instance);
+        }
+    }
+}
+
+int WALBOSB_HandleFade(Instance *instance)
+{
+
+    int fade; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+
+    switch (vars->tauntState)
+    {
+    case 0:
+        if (gameTrackerX.gameData.asmData.MorphTime == 1000)
+        {
+            if (gameTrackerX.gameData.asmData.MorphType == 1)
+            {
+                vars->tauntTimer = MON_GetTime(instance) + 1980;
+                vars->tauntState++;
+                break;
+            }
+            return 0;
+        }
+        break;
+    case 1:
+        if (MON_GetTime(instance) >= (unsigned long)vars->tauntTimer)
+        {
+            vars->tauntState++;
+        }
+        break;
+    case 2:
+        if (mv->targetFade == 4096)
+        {
+            vars->tauntTimer = MON_GetTime(instance) + 1980;
+            vars->tauntState++;
+            break;
+        }
+
+        fade = ((MON_GetTime(instance) - vars->tauntTimer) * 4096) / 990;
+
+        if (fade >= 4096)
+        {
+            mv->targetFade = 4096;
+        }
+        else
+        {
+            mv->targetFade = fade;
+        }
+
+        break;
+    case 3:
+        if (MON_GetTime(instance) >= (unsigned long)vars->tauntTimer)
+        {
+            vars->tauntTimer = MON_GetTime(instance);
+            vars->tauntState++;
+        }
+        break;
+    case 4:
+        if (mv->targetFade == 0)
+        {
+            vars->tauntTimer = MON_GetTime(instance) + 9900;
+            vars->tauntState = 5;
+        }
+        else
+        {
+            fade = ((990 - ((int)MON_GetTime(instance) - vars->tauntTimer)) * 4096) / 990;
+            if (fade <= 0)
+            {
+                mv->targetFade = 0;
+            }
+            else
+            {
+                mv->targetFade = fade;
+            }
+        }
+        break;
+    case 5:
+        if (MON_GetTime(instance) >= (unsigned long)vars->tauntTimer || (gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 0))
+        {
+            vars->tauntState = 0;
+        }
+        break;
+    default:
+        break;
+    }
+
+    return 1;
+}
+
+void WALBOSB_Idle(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+
+    if (mv->extraVars != NULL)
+    {
+        if (!(mv->mvFlags & 4))
+        {
+
+            WALBOSB_InterpYaw(instance, 0, mv->subAttr->speedPivotTurn);
+            WALBOSB_InterpPitch(instance, 0, mv->subAttr->speedPivotTurn);
+
+            if (!WALBOSB_HandleFade(instance))
+            {
+                if (mv->auxFlags & 2)
+                {
+                    if (instance->flags2 & 0x10)
+                    {
+                        instance->flags2 &= ~0x10;
+                        mv->attackState++;
+
+                        if ((signed char)mv->attackState >= 7)
+                        {
+                            mv->attackState = 0;
+                        }
+
+                        MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, (signed char)mv->attackState, 1);
+                    }
+                }
+                else if (enemy != NULL && enemy->distance < mv->subAttr->combatAttributes->combatRange)
+                {
+                    MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+                }
+            }
+
+            MON_IdleQueueHandler(instance);
+        }
+        else
+        {
+
+            WALBOSB_SetYaw(instance, 0);
+            WALBOSB_SetPitch(instance, 0);
+            MON_Idle(instance);
+        }
+    }
+}
+
+void WALBOSB_CombatEntry(Instance *instance)
+{
+    MON_CombatEntry(instance);
+    MON_PlayCombatIdle(instance, 2);
+    WALBOSB_ResetSetAutofacePos(instance);
+}
+
+void WALBOSB_Combat(Instance *instance)
+{
+
+    MonsterIR *enemy; // not from debug symbols
+    int turnResult; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+
+    if (mv->mvFlags & 4 || enemy == NULL)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+    else
+    {
+        turnResult = WALBOSB_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn) & 1;
+        WALBOSB_InterpPitch(instance, 0, mv->subAttr->speedPivotTurn);
+
+        if (enemy->distance < mv->subAttr->combatAttributes->combatRange)
+        {
+            if (WALBOSB_ShouldIAttack(instance, enemy, WALBOSB_ChooseAttack(instance, enemy)) == 1 && turnResult != 0)
+            {
+                MON_SwitchState(instance, MONSTER_STATE_ATTACK);
+            }
+        }
+        else
+        {
+            MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        }
+    }
+
+    MON_IdleQueueHandler(instance);
+}
+
+void WALBOSB_AttackEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    WalbosbAttributes *attrs; // not from debug symbols
+    MonsterAttackAttributes *attack; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (WalbosbAttributes *)ma->tunData;
+    attack = mv->attackType;
+
+    if (ma != NULL)
+    {
+
+        mv->mode = 0x200000;
+
+        switch ((signed char)mv->attackType->numAnims)
+        {
+        case 2:
+            mv->generalTimer = MON_GetTime(instance) + (attrs->lengthOfTense * 33);
+            break;
+        case 4:
+            mv->generalTimer = MON_GetTime(instance) + (attrs->lengthOfStrikeTrack * 33);
+            SOUND_Play3dSound(&instance->position, 377, -200, 90, 15500);
+            break;
+
+        }
+
+        MON_PlayAnimFromList(instance, attack->animList, 0, 2);
+    }
+}
+
+void WALBOSB_Attack(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterAttackAttributes *attack; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+    WalbosbAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (WalbosbVars *)mv->extraVars;
+    enemy = mv->enemy;
+    attrs = (WalbosbAttributes *)ma->tunData;
+    attack = mv->attackType;
+
+    if (attrs == NULL || vars == NULL)
+    {
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+    else if (enemy == NULL)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+    }
+    else
+    {
+        if (MON_AnimPlayingFromList(instance, attack->animList, (signed char)attack->sphereOnAnim) && G2EmulationInstanceQueryPassedFrame(instance, 0, (signed char)attack->sphereOnFrame))
+        {
+            MON_TurnOnWeaponSpheres(instance);
+        }
+        else if (MON_AnimPlayingFromList(instance, attack->animList, (signed char)attack->sphereOffAnim) && G2EmulationInstanceQueryPassedFrame(instance, 0, (signed char)attack->sphereOffFrame) && mv->mvFlags & 0x4000)
+        {
+            MON_TurnOffWeaponSpheres(instance);
+
+            if (enemy != NULL)
+            {
+                enemy->mirConditions |= 0x200;
+            }
+        }
+
+        switch ((signed char)mv->attackType->numAnims)
+        {
+        case 2:
+            switch ((signed char)mv->attackState)
+            {
+            case 0:
+                if (MON_GetTime(instance) < (unsigned long)mv->generalTimer)
+                {
+                    WALBOSB_ElevateToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn, WALBOSB_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn) & 2);
+
+                    if (WALBOSB_AbortedAttacks(instance) < attrs->allowedAbortedAttacks && WALBOSB_OtherAttackingLegs(instance))
+                    {
+                        vars->abortedAttacks++;
+                        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+                    }
+                }
+                else
+                {
+                    WALBOSB_ResetAbortedAttacks(instance);
+                    mv->attackState++;
+                    mv->generalTimer = MON_GetTime(instance) + (attrs->lengthOfStrikeWait * 33);
+                }
+                break;
+            case 1:
+                if (MON_GetTime(instance) >= (unsigned long)mv->generalTimer)
+                {
+                    MON_PlayAnimFromList(instance, attack->animList, (signed char)mv->attackState, 1);
+                    mv->attackState++;
+                }
+                break;
+            case 2:
+                if (instance->flags2 & 0x10)
+                {
+                    instance->flags2 &= ~0x10;
+                    mv->attackState++;
+                    MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+                }
+                break;
+            }
+            break;
+        case 4:
+            switch ((signed char)mv->attackState)
+            {
+            case 0:
+                WALBOSB_ElevateToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn, WALBOSB_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn) & 2);
+
+                if (MON_GetTime(instance) < (unsigned long)mv->generalTimer)
+                {
+                    if (WALBOSB_AbortedAttacks(instance) < attrs->allowedAbortedAttacks && WALBOSB_OtherAttackingLegs(instance))
+                    {
+                        vars->abortedAttacks++;
+                        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+                    }
+                }
+                else
+                {
+                    WALBOSB_ResetAbortedAttacks(instance);
+                    mv->attackState++;
+                    MON_PlayAnimFromList(instance, attack->animList, (signed char)mv->attackState, 1);
+                }
+                break;
+            case 1:
+                if (instance->flags2 & 0x10)
+                {
+                    instance->flags2 &= ~0x10;
+                    mv->attackState++;
+                    MON_PlayAnimFromList(instance, attack->animList, (signed char)mv->attackState, 2);
+                    mv->generalTimer = MON_GetTime(instance) + (attrs->lengthOfStuck * 33);
+                    WALBOSB_SetAutofacePos(instance);
+                }
+                break;
+            case 2:
+                if (MON_GetTime(instance) >= (unsigned long)mv->generalTimer)
+                {
+                    WALBOSB_ResetSetAutofacePos(instance);
+                    mv->attackState++;
+                    MON_PlayAnimFromList(instance, attack->animList, (signed char)mv->attackState, 1);
+                }
+                break;
+            case 3:
+                if (instance->flags2 & 0x10)
+                {
+                    instance->flags2 &= ~0x10;
+                    mv->attackState++;
+                    MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+                }
+                break;
+            }
+            break;
+        }
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
+
+void WALBOSB_HitEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+
+    if (mv->extraVars != NULL)
+    {
+        if (mv->auxFlags & 1)
+        {
+            MON_PlayAnim(instance, MONSTER_ANIM_HIT1, 2);
+        }
+        else if (WALBOSB_HandleFade(instance))
+        {
+            MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
+        }
+        else
+        {
+            short angle; // not from debug symbols
+
+            mv->enemy->mirConditions |= 0x400;
+
+            angle = ((instance->rotation.z - MATH3D_AngleFromPosToPos(&instance->position, &enemy->instance->position)) + 1024) & 0xFFF;
+
+            if (angle < 2048)
+            {
+                MON_PlayAnim(instance, MONSTER_ANIM_HIT1, 1);
+            }
+            else
+            {
+                MON_PlayAnim(instance, MONSTER_ANIM_HIT2, 1);
+            }
+
+            WALBOSB_WalbossMessage(1);
+        }
+
+        WALBOSB_ResetSetAutofacePos(instance);
+        mv->mode = 0x8000;
+    }
+}
+
+void WALBOSB_Hit(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (!(mv->auxFlags & 1) && !(mv->mvFlags & 0x4000000))
+    {
+        MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
+
+void WALBOSB_DoNothingEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    MON_SwitchStateDoEntry(instance, (signed char)mv->previousMainState);
+}
+
+void WALBOSB_DoNothing(Instance *instance)
+{
+    (void)instance;
+};
+
+void WALBOSB_GeneralDeathEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    WALBOSB_WalbossMessage(3);
+
+    instance->flags2 |= 0x80;
+    mv->mvFlags |= 0x200000;
+    mv->mvFlags |= 0x2000;
+    mv->mvFlags &= ~0x10;
+
+    instance->xAccl = 0;
+    instance->yAccl = 0;
+    instance->xVel = 0;
+    instance->yVel = 0;
+}
+
+void WALBOSB_GeneralDeath(Instance *instance)
+{
+
+    FXSplinter *shatterList; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+
+        MonsterAttributes *ma; // not from debug symbols
+
+        ma = (MonsterAttributes *)instance->data;
+        shatterList = ma->shatterList;
+
+        if (vars->autofaceInst != NULL)
+        {
+            INSTANCE_KillInstance(vars->autofaceInst);
+            vars->autofaceInst = NULL;
+        }
+
+        if (!(mv->auxFlags & 4))
+        {
+            instance->flags2 |= 0x1000;
+            instance->flags |= 0x800;
+            _FX_BuildSplinters(instance, NULL, NULL, NULL, shatterList, gFXT, NULL, NULL, 8);
+        }
+
+        mv->mvFlags &= ~0x10;
+        G2Anim_SetNoLooping(&instance->anim);
+        MON_SwitchState(instance, MONSTER_STATE_DEAD);
+    }
+}
+
+void WALBOSB_DeadEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    mv->soulJuice = 0;
+
+    MON_DeadEntry(instance);
+}
+
+void WALBOSB_Dead(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (!(mv->auxFlags & 4))
+    {
+        instance->flags |= 0x800;
+    }
+
+    while (DeMessageQueue(&mv->messageQueue) != NULL);
+
+}
 
 #else 
 
-void WALBOSB_WalbossMessage(void) { };     
+void WALBOSB_SetYaw(Instance *instance, int yaw)
+{
+    short z; // not from debug symbols
 
-void WALBOSB_AutofaceMarker(void) { };    
+    z = (instance->intro->rotation.z << 16) >> 16; // Garbage shifts to force a signed load
+    instance->rotation.z = (z + yaw) & 0xFFF;
+}
 
-void WALBOSB_SetAutofacePos(void) { };    
+void WALBOSB_SetPitch(Instance *instance, int pitch)
+{
 
-void WALBOSB_ResetSetAutofacePos(void) { };
+    G2SVector3 extraRot;
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
 
-void WALBOSB_Collide(void) { };    
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
 
-void WALBOSB_Query(void) { };   
+    if (vars != NULL)
+    {
+        vars->pitch = pitch;
+        extraRot.x = pitch;
+        extraRot.y = 0;
+        extraRot.z = 0;
+        G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
+    }
+}
 
-void WALBOSB_Message(void) { };   
+void WALBOSB_InterpYaw(Instance *instance, int yaw, int speed)
+{
+    int z; // not from debug symbols
 
-void WALBOSB_Init(void) { };      
+    z = (instance->intro->rotation.z << 16) >> 16; // Garbage shifts to force signed load
 
-void WALBOSB_CleanUp(void) { };     
+    AngleMoveToward(&instance->rotation.z, (z + yaw) & 0xFFF, (gameTrackerX.timeMult * speed * 16) >> 16);
+    instance->rotation.z &= 0xFFF;
+}
 
-void WALBOSB_IdleEntry(void) { };    
 
-void WALBOSB_HandleFade(void) { };   
+void WALBOSB_InterpPitch(Instance *instance, int pitch, int speed)
+{
 
-void WALBOSB_Idle(void) { };         
+    G2SVector3 extraRot;
+    int newPitch; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+    WalbosbAttributes *attrs; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
 
-void WALBOSB_CombatEntry(void) { };    
+    newPitch = pitch;
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (WalbosbVars *)mv->extraVars;
+    attrs = (WalbosbAttributes *)ma->tunData;
 
-void WALBOSB_Combat(void) { };        
+    if (attrs != NULL && vars != NULL)
+    {
 
-void WALBOSB_AttackEntry(void) { };      
+        if (newPitch < -attrs->maxPitchAngle)
+        {
+            newPitch = -attrs->maxPitchAngle & 0xFFF;
+        }
+        else if (attrs->maxPitchAngle < newPitch)
+        {
+            newPitch = attrs->maxPitchAngle;
+        }
 
-void WALBOSB_Attack(void) { };       
+        AngleMoveToward(&vars->pitch, newPitch, (gameTrackerX.timeMult * speed * 16) >> 16);
 
-void WALBOSB_HitEntry(void) { };         
+        extraRot.x = vars->pitch;
+        extraRot.y = 0;
+        extraRot.z = 0;
 
-void WALBOSB_Hit(void) { };             
+        G2Anim_SetController_Vector(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT, &extraRot);
+    }
+}
 
-void WALBOSB_DoNothingEntry(void) { };     
+int WALBOSB_TurnToPosition(Instance *instance, Position *target, int speed)
+{
 
-void WALBOSB_DoNothing(void) { };          
+    MonsterAttributes *ma; // not from debug symbols
+    WalbosbAttributes *attrs; // not from debug symbols
+    int angle; // not from debug symbols
+    int temp; // not from debug symbols
+    int rc; // not from debug symbols
 
-void WALBOSB_GeneralDeathEntry(void) { };  
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (WalbosbAttributes *)ma->tunData;
+    rc = 0;
 
-void WALBOSB_GeneralDeath(void) { };    
+    if (attrs != NULL)
+    {
 
-void WALBOSB_DeadEntry(void) { };     
+        angle = MATH3D_AngleFromPosToPos(&instance->position, target);
+        temp = ((angle + 2048) - instance->intro->rotation.z) & 0xFFF;
 
-void WALBOSB_Dead(void) { };               
+        if (temp > 2048)
+        {
+            temp -= 4096;
+        }
+
+        angle = temp;
+
+        if (attrs->maxYawAngle < abs(angle))
+        {
+
+            temp = (angle + 2048) & 0xFFF;
+
+            if (temp > 2048)
+            {
+                temp -= 4096;
+            }
+
+            angle = temp;
+
+            if (attrs->maxYawAngle < abs(angle))
+            {
+                angle = 0;
+            }
+            else
+            {
+                rc = 2;
+            }
+        }
+
+        WALBOSB_InterpYaw(instance, angle, speed);
+
+        if (instance->rotation.z == ((angle + instance->intro->rotation.z) & 0xFFF))
+        {
+            rc |= 1;
+        }
+    }
+
+    return rc;
+}
+
+void WALBOSB_ElevateToPosition(Instance *instance, Position *target, int speed, int behind)
+{
+
+    int elevation; // not from debug symbols
+
+    elevation = MATH3D_ElevationFromPosToPos(&instance->position, target);
+
+    if (behind != 0)
+    {
+        elevation -= 1024;
+    }
+    else
+    {
+        elevation = 1024 - elevation;
+    }
+
+    WALBOSB_InterpPitch(instance, elevation + 128, speed);
+}
+
+int WALBOSB_OtherAttackingLegs(Instance *instance)
+{
+
+    Instance *inst; // not from debug symbols
+    int distance; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    InstanceList *instanceList; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    instanceList = gameTrackerX.instanceList;
+
+    if (mv->enemy == NULL)
+    {
+        return 1;
+    }
+
+    distance = mv->enemy->distance;
+
+    for (inst = instanceList->first; inst != NULL; inst = inst->next)
+    {
+
+        MonsterVars *enemyMv;
+
+        if (INSTANCE_Query(inst, queryWhatAmI) != 0x410002)
+        {
+            continue;
+        }
+
+        if (inst->currentMainState == MONSTER_STATE_DEAD || inst->currentMainState == MONSTER_STATE_GENERALDEATH)
+        {
+            continue;
+        }
+
+        if (inst == instance)
+        {
+            continue;
+        }
+
+        enemyMv = (MonsterVars *)inst->extraData;
+
+        if (enemyMv->enemy != NULL && enemyMv->enemy->distance < distance)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+void WALBOSB_ResetAbortedAttacks(Instance *instance)
+{
+
+    Instance *inst; // not from debug symbols
+
+    (void)instance;
+
+    for (inst = gameTrackerX.instanceList->first; inst != NULL; inst = inst->next)
+    {
+        if (INSTANCE_Query(inst, queryWhatAmI) == 0x410002)
+        {
+
+            MonsterVars *mv; // not from debug symbols
+            WalbosbVars *vars; // not from debug symbols
+
+            mv = (MonsterVars *)inst->extraData;
+            vars = (WalbosbVars *)mv->extraVars;
+
+            if (vars != NULL)
+            {
+                vars->abortedAttacks = 0;
+            }
+        }
+    }
+}
+
+int WALBOSB_AbortedAttacks(Instance *instance)
+{
+
+    Instance *inst; // not from debug symbols
+    int numAborted; // not from debug symbols
+
+    (void)instance;
+
+    numAborted = 0;
+
+    for (inst = gameTrackerX.instanceList->first; inst != NULL; inst = inst->next)
+    {
+        if (INSTANCE_Query(inst, queryWhatAmI) == 0x410002)
+        {
+
+            MonsterVars *mv; // not from debug symbols
+            WalbosbVars *vars; // not from debug symbols
+
+            mv = (MonsterVars *)inst->extraData;
+            vars = (WalbosbVars *)mv->extraVars;
+
+            if (vars != NULL)
+            {
+                numAborted += vars->abortedAttacks;
+            }
+        }
+    }
+
+    return numAborted;
+}
+
+int WALBOSB_ShouldIAttack(Instance *instance, MonsterIR *enemy, int attack) {}
+
+int WALBOSB_ChooseAttack(Instance *instance, MonsterIR *enemy)
+{
+
+    int i; // not from debug symbols
+    int shortestDist; // not from debug symbols
+    int attackIndex; // not from debug symbols
+    int numAttacks; // not from debug symbols
+    int distance; // not from debug symbols
+    char *attackListPtr; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterCombatAttributes *combat; // not from debug symbols
+
+    shortestDist = 99999;
+    attackIndex = -1;
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    combat = mv->subAttr->combatAttributes;
+    numAttacks = (signed char)combat->numAttacks;
+    distance = enemy->distance;
+
+    for (i = 0, attackListPtr = combat->attackList; i < numAttacks; i++, attackListPtr++)
+    {
+
+        int attackDist; // not from debug symbols
+        MonsterAttackAttributes *attack; // not from debug symbols
+
+        attack = &ma->attackAttributesList[(signed char)*attackListPtr];
+        attackDist = ((attack->attackRange * mv->subAttr->scale) / 4096) - distance;
+
+        if (abs(attackDist) < abs(shortestDist))
+        {
+            attackIndex = i;
+            shortestDist = attackDist;
+        }
+    }
+
+    mv->attackState = 0;
+    return attackIndex;
+}
+
+void WALBOSB_WalbossMessage(int message)
+{
+    Instance *inst; // not from debug symbols
+
+    for (inst = gameTrackerX.instanceList->first; inst != NULL; inst = inst->next)
+    {
+        if (INSTANCE_Query(inst, queryWhatAmI) == 0x10102)
+        {
+            INSTANCE_Post(inst, 0x01000017, message);
+            break;
+        }
+    }
+}
+
+void WALBOSB_AutofaceMarker(Instance *instance)
+{
+
+    Instance *inst; // not from debug symbols
+    Object *object; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        object = OBTABLE_FindObject("autoface");
+
+        if (object != NULL)
+        {
+            inst = INSTANCE_BirthObject(instance, object, 0);
+
+            if (inst != NULL)
+            {
+                inst->flags |= 0x800;
+                inst->flags2 &= ~0x20;
+                vars->autofaceInst = inst;
+            }
+        }
+    }
+}
+
+void WALBOSB_SetAutofacePos(Instance *instance)
+{
+
+    HModel *model; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+    model = &instance->hModelList[instance->currentModel];
+
+    if (vars != NULL && vars->autofaceInst != NULL)
+    {
+
+        int i; // not from debug symbols
+        int dist; // not from debug symbols
+        int minDist; // not from debug symbols
+        HPrim *hPrim; // not from debug symbols
+
+        minDist = 999999;
+
+        for (i = model->numHPrims, hPrim = &model->hPrimList[0]; i != 0; i--, hPrim++)
+        {
+            if (hPrim->type == 1)
+            {
+
+                HSphere *hSphere; // not from debug symbols
+                hSphere = hPrim->data.hsphere;
+
+                if (hSphere->id == 8)
+                {
+
+                    Position pos;
+
+                    MON_SphereWorldPos(&instance->matrix[hPrim->segment], hSphere, &pos);
+                    dist = MATH3D_LengthXYZ(pos.x - gameTrackerX.playerInstance->position.x, pos.y - gameTrackerX.playerInstance->position.y, pos.z - gameTrackerX.playerInstance->position.z);
+
+                    if (dist < minDist)
+                    {
+                        minDist = dist;
+                        COPY_SVEC(Position, &vars->autofaceInst->position, Position, &pos);
+                    }
+                }
+            }
+        }
+
+        vars->autofaceInst->flags2 |= 0x20;
+    }
+}
+
+void WALBOSB_ResetSetAutofacePos(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+
+    if (vars != NULL && vars->autofaceInst != NULL)
+    {
+        vars->autofaceInst->flags2 &= ~0x20;
+        COPY_SVEC(Position, &vars->autofaceInst->position, Position, &instance->position);
+    }
+}
+
+
+void WALBOSB_Collide(Instance *instance, GameTracker *gameTracker)
+{
+
+    CollideInfo *collideInfo; // not from debug symbols
+    HSphere *hSphere; // not from debug symbols
+
+    collideInfo = (CollideInfo *)instance->collideInfo;
+    hSphere = (HSphere *)collideInfo->prim0;
+
+    if (collideInfo->type0 != 1 || hSphere->id != 9)
+    {
+        MonsterCollide(instance, gameTracker);
+    }
+    else
+    {
+
+        Instance *collideInst; // not from debug symbols
+        collideInst = (Instance *)collideInfo->inst1;
+
+        if (collideInst == NULL)
+        {
+            MonsterCollide(instance, gameTracker);
+        }
+        else
+        {
+
+            uintptr_t queryResult; // not from debug symbols
+            queryResult = INSTANCE_Query(collideInst, queryWhatAmI);
+
+            if (queryResult != 0x10102 && queryResult != 0x410002)
+            {
+                MonsterCollide(instance, gameTracker);
+            }
+        }
+    }
+}
+
+uintptr_t WALBOSB_Query(Instance *instance, unsigned long query)
+{
+    if (query != 0)
+    {
+        return MonsterQuery(instance, query);
+    }
+
+    return 0;
+}
+
+void WALBOSB_Message(Instance *instance, unsigned long message, unsigned long data)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    switch (message)
+    {
+    case 0x400000:
+        if (data != 0)
+        {
+            SOUND_Play3dSound(&instance->position, 21, 650, 80, 15500);
+        }
+        MonsterMessage(instance, message, data);
+        break;
+    case 0x100001F:
+    case 0x1000021:
+        ((evMonsterHitData *)data)->power = 4096;
+        MonsterMessage(instance, message, data);
+        break;
+    case 0x1000020:
+        if (!(mv->mvFlags & 4))
+        {
+            if (instance->currentMainState != MONSTER_STATE_DEAD && instance->currentMainState != MONSTER_STATE_GENERALDEATH)
+            {
+                MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
+                break;
+            }
+        }
+        break;
+    case 0x1000017:
+        switch (data)
+        {
+        case 0:
+            if (instance->currentMainState != MONSTER_STATE_GENERALDEATH && instance->currentMainState != MONSTER_STATE_DEAD)
+            {
+                mv->auxFlags |= 4;
+                MON_SwitchStateDoEntry(instance, MONSTER_STATE_DEAD);
+            }
+            break;
+        case 1:
+            if (instance->currentMainState != MONSTER_STATE_GENERALDEATH && instance->currentMainState != MONSTER_STATE_DEAD)
+            {
+                mv->auxFlags |= 1;
+                MON_SwitchStateDoEntry(instance, MONSTER_STATE_HIT);
+            }
+            break;
+        case 2:
+            if (instance->currentMainState != MONSTER_STATE_GENERALDEATH && instance->currentMainState != MONSTER_STATE_DEAD)
+            {
+                mv->auxFlags &= ~1;
+                MON_SwitchStateDoEntry(instance, MONSTER_STATE_COMBAT);
+            }
+            break;
+        case 3:
+            if (!(mv->auxFlags & 2))
+            {
+                mv->auxFlags |= 2;
+                MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
+            }
+            else
+            {
+                mv->auxFlags &= ~2;
+            }
+            break;
+        case 4:
+            mv->auxFlags &= ~2;
+            break;
+        default:
+            break;
+        }
+        break;
+    case 0x40009:
+    case 0x80001:
+    case 0x80002:
+    case 0x80003:
+    case 0x80004:
+    case 0x80005:
+    case 0x80006:
+        break;
+    default:
+        MonsterMessage(instance, message, data);
+    }
+}
+
+void WALBOSB_Init(Instance *instance)
+{
+
+    WalbosbVars *vars; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+
+    MON_DefaultInit(instance);
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (mv != NULL)
+    {
+        vars = (WalbosbVars *)MEMPACK_Malloc(sizeof(WalbosbVars), MEMORY_TYPE_WALBOSBDATA);
+
+        if (vars == NULL)
+        {
+            mv->extraVars = NULL;
+        }
+        else
+        {
+            mv->extraVars = vars;
+            vars->pitch = 0;
+            vars->tauntState = 0;
+            vars->abortedAttacks = 0;
+            WALBOSB_AutofaceMarker(instance);
+            WALBOSB_SetAutofacePos(instance);
+        }
+    }
+
+    G2Anim_AttachControllerToSeg(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+    G2Anim_EnableController(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+
+    instance->xVel = 0;
+    instance->yVel = 0;
+    instance->zVel = 0;
+
+    mv->mvFlags |= 0x800;
+
+    MON_SwitchState(instance, MONSTER_STATE_IDLE);
+
+    ma = (MonsterAttributes *)instance->data;
+    MON_PlayAnimFromList(instance, ma->auxAnimList, 0, 1);
+
+    mv->auxFlags |= 0x20000000;
+    mv->mvFlags |= 0x2000;
+    instance->collideFunc = WALBOSB_Collide;
+    mv->soulJuice = 0;
+    mv->targetFade = 0;
+
+    DEBUG_DoAreaProtection();
+}
+
+void WALBOSB_CleanUp(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    G2Anim_DetachControllerFromSeg(&instance->anim, 0, G2ANIM_CTRLRTYPE_ADD_LOCALROT);
+
+    if (mv != NULL)
+    {
+        vars = (WalbosbVars *)mv->extraVars;
+
+        if (vars != NULL)
+        {
+            if (vars->autofaceInst != NULL)
+            {
+                INSTANCE_KillInstance(vars->autofaceInst);
+            }
+
+            MEMPACK_Free((char *)vars);
+        }
+    }
+
+    MON_CleanUp(instance);
+}
+
+
+void WALBOSB_IdleEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+        if (!(mv->mvFlags & 4))
+        {
+            if (mv->auxFlags & 2)
+            {
+                mv->attackState = 0;
+                MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 0, 1);
+            }
+            else
+            {
+                MON_PlayRandomIdle(instance, 2);
+            }
+        }
+        else
+        {
+            MON_IdleEntry(instance);
+        }
+    }
+}
+
+int WALBOSB_HandleFade(Instance *instance)
+{
+
+    int fade; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+
+    switch (vars->tauntState)
+    {
+    case 0:
+        if (gameTrackerX.gameData.asmData.MorphTime == 1000)
+        {
+            if (gameTrackerX.gameData.asmData.MorphType == 1)
+            {
+                vars->tauntTimer = MON_GetTime(instance) + 1980;
+                vars->tauntState++;
+                break;
+            }
+            return 0;
+        }
+        break;
+    case 1:
+        if (MON_GetTime(instance) >= (unsigned long)vars->tauntTimer)
+        {
+            vars->tauntState++;
+        }
+        break;
+    case 2:
+        if (mv->targetFade == 4096)
+        {
+            vars->tauntTimer = MON_GetTime(instance) + 1980;
+            vars->tauntState++;
+            break;
+        }
+
+        fade = ((MON_GetTime(instance) - vars->tauntTimer) * 4096) / 990;
+
+        if (fade >= 4096)
+        {
+            mv->targetFade = 4096;
+        }
+        else
+        {
+            mv->targetFade = fade;
+        }
+
+        break;
+    case 3:
+        if (MON_GetTime(instance) >= (unsigned long)vars->tauntTimer)
+        {
+            vars->tauntTimer = MON_GetTime(instance);
+            vars->tauntState++;
+        }
+        break;
+    case 4:
+        if (mv->targetFade == 0)
+        {
+            vars->tauntTimer = MON_GetTime(instance) + 9900;
+            vars->tauntState = 5;
+        }
+        else
+        {
+            fade = ((990 - ((int)MON_GetTime(instance) - vars->tauntTimer)) * 4096) / 990;
+            if (fade <= 0)
+            {
+                mv->targetFade = 0;
+            }
+            else
+            {
+                mv->targetFade = fade;
+            }
+        }
+        break;
+    case 5:
+        if (MON_GetTime(instance) >= (unsigned long)vars->tauntTimer || (gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 0))
+        {
+            vars->tauntState = 0;
+        }
+        break;
+    default:
+        break;
+    }
+
+    return 1;
+}
+
+void WALBOSB_Idle(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+
+    if (mv->extraVars != NULL)
+    {
+        if (!(mv->mvFlags & 4))
+        {
+
+            WALBOSB_InterpYaw(instance, 0, mv->subAttr->speedPivotTurn);
+            WALBOSB_InterpPitch(instance, 0, mv->subAttr->speedPivotTurn);
+
+            if (!WALBOSB_HandleFade(instance))
+            {
+                if (mv->auxFlags & 2)
+                {
+                    if (instance->flags2 & 0x10)
+                    {
+                        instance->flags2 &= ~0x10;
+                        mv->attackState++;
+
+                        if ((signed char)mv->attackState >= 7)
+                        {
+                            mv->attackState = 0;
+                        }
+
+                        MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, (signed char)mv->attackState, 1);
+                    }
+                }
+                else if (enemy != NULL && enemy->distance < mv->subAttr->combatAttributes->combatRange)
+                {
+                    MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+                }
+            }
+
+            MON_IdleQueueHandler(instance);
+        }
+        else
+        {
+
+            WALBOSB_SetYaw(instance, 0);
+            WALBOSB_SetPitch(instance, 0);
+            MON_Idle(instance);
+        }
+    }
+}
+
+void WALBOSB_CombatEntry(Instance *instance)
+{
+    MON_CombatEntry(instance);
+    MON_PlayCombatIdle(instance, 2);
+    WALBOSB_ResetSetAutofacePos(instance);
+}
+
+void WALBOSB_Combat(Instance *instance)
+{
+
+    MonsterIR *enemy; // not from debug symbols
+    int turnResult; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+
+    if (mv->mvFlags & 4 || enemy == NULL)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+    else
+    {
+        turnResult = WALBOSB_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn) & 1;
+        WALBOSB_InterpPitch(instance, 0, mv->subAttr->speedPivotTurn);
+
+        if (enemy->distance < mv->subAttr->combatAttributes->combatRange)
+        {
+            if (WALBOSB_ShouldIAttack(instance, enemy, WALBOSB_ChooseAttack(instance, enemy)) == 1 && turnResult != 0)
+            {
+                MON_SwitchState(instance, MONSTER_STATE_ATTACK);
+            }
+        }
+        else
+        {
+            MON_SwitchState(instance, MONSTER_STATE_IDLE);
+        }
+    }
+
+    MON_IdleQueueHandler(instance);
+}
+
+void WALBOSB_AttackEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    WalbosbAttributes *attrs; // not from debug symbols
+    MonsterAttackAttributes *attack; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    attrs = (WalbosbAttributes *)ma->tunData;
+    attack = mv->attackType;
+
+    if (ma != NULL)
+    {
+
+        mv->mode = 0x200000;
+
+        switch ((signed char)mv->attackType->numAnims)
+        {
+        case 2:
+            mv->generalTimer = MON_GetTime(instance) + (attrs->lengthOfTense * 33);
+            break;
+        case 4:
+            mv->generalTimer = MON_GetTime(instance) + (attrs->lengthOfStrikeTrack * 33);
+            SOUND_Play3dSound(&instance->position, 377, -200, 90, 15500);
+            break;
+
+        }
+
+        MON_PlayAnimFromList(instance, attack->animList, 0, 2);
+    }
+}
+
+void WALBOSB_Attack(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterAttributes *ma; // not from debug symbols
+    MonsterAttackAttributes *attack; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+    WalbosbAttributes *attrs; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+    vars = (WalbosbVars *)mv->extraVars;
+    enemy = mv->enemy;
+    attrs = (WalbosbAttributes *)ma->tunData;
+    attack = mv->attackType;
+
+    if (attrs == NULL || vars == NULL)
+    {
+        return;
+    }
+
+    if (mv->mvFlags & 4)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+    else if (enemy == NULL)
+    {
+        MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+    }
+    else
+    {
+        if (MON_AnimPlayingFromList(instance, attack->animList, (signed char)attack->sphereOnAnim) && G2EmulationInstanceQueryPassedFrame(instance, 0, (signed char)attack->sphereOnFrame))
+        {
+            MON_TurnOnWeaponSpheres(instance);
+        }
+        else if (MON_AnimPlayingFromList(instance, attack->animList, (signed char)attack->sphereOffAnim) && G2EmulationInstanceQueryPassedFrame(instance, 0, (signed char)attack->sphereOffFrame) && mv->mvFlags & 0x4000)
+        {
+            MON_TurnOffWeaponSpheres(instance);
+
+            if (enemy != NULL)
+            {
+                enemy->mirConditions |= 0x200;
+            }
+        }
+
+        switch ((signed char)mv->attackType->numAnims)
+        {
+        case 2:
+            switch ((signed char)mv->attackState)
+            {
+            case 0:
+                if (MON_GetTime(instance) < (unsigned long)mv->generalTimer)
+                {
+                    WALBOSB_ElevateToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn, WALBOSB_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn) & 2);
+
+                    if (WALBOSB_AbortedAttacks(instance) < attrs->allowedAbortedAttacks && WALBOSB_OtherAttackingLegs(instance))
+                    {
+                        vars->abortedAttacks++;
+                        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+                    }
+                }
+                else
+                {
+                    WALBOSB_ResetAbortedAttacks(instance);
+                    mv->attackState++;
+                    mv->generalTimer = MON_GetTime(instance) + (attrs->lengthOfStrikeWait * 33);
+                }
+                break;
+            case 1:
+                if (MON_GetTime(instance) >= (unsigned long)mv->generalTimer)
+                {
+                    MON_PlayAnimFromList(instance, attack->animList, (signed char)mv->attackState, 1);
+                    mv->attackState++;
+                }
+                break;
+            case 2:
+                if (instance->flags2 & 0x10)
+                {
+                    instance->flags2 &= ~0x10;
+                    mv->attackState++;
+                    MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+                }
+                break;
+            }
+            break;
+        case 4:
+            switch ((signed char)mv->attackState)
+            {
+            case 0:
+                WALBOSB_ElevateToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn, WALBOSB_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn) & 2);
+
+                if (MON_GetTime(instance) < (unsigned long)mv->generalTimer)
+                {
+                    if (WALBOSB_AbortedAttacks(instance) < attrs->allowedAbortedAttacks && WALBOSB_OtherAttackingLegs(instance))
+                    {
+                        vars->abortedAttacks++;
+                        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+                    }
+                }
+                else
+                {
+                    WALBOSB_ResetAbortedAttacks(instance);
+                    mv->attackState++;
+                    MON_PlayAnimFromList(instance, attack->animList, (signed char)mv->attackState, 1);
+                }
+                break;
+            case 1:
+                if (instance->flags2 & 0x10)
+                {
+                    instance->flags2 &= ~0x10;
+                    mv->attackState++;
+                    MON_PlayAnimFromList(instance, attack->animList, (signed char)mv->attackState, 2);
+                    mv->generalTimer = MON_GetTime(instance) + (attrs->lengthOfStuck * 33);
+                    WALBOSB_SetAutofacePos(instance);
+                }
+                break;
+            case 2:
+                if (MON_GetTime(instance) >= (unsigned long)mv->generalTimer)
+                {
+                    WALBOSB_ResetSetAutofacePos(instance);
+                    mv->attackState++;
+                    MON_PlayAnimFromList(instance, attack->animList, (signed char)mv->attackState, 1);
+                }
+                break;
+            case 3:
+                if (instance->flags2 & 0x10)
+                {
+                    instance->flags2 &= ~0x10;
+                    mv->attackState++;
+                    MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+                }
+                break;
+            }
+            break;
+        }
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
+
+void WALBOSB_HitEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+    MonsterIR *enemy; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    enemy = mv->enemy;
+
+    if (mv->extraVars != NULL)
+    {
+        if (mv->auxFlags & 1)
+        {
+            MON_PlayAnim(instance, MONSTER_ANIM_HIT1, 2);
+        }
+        else if (WALBOSB_HandleFade(instance))
+        {
+            MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
+        }
+        else
+        {
+            short angle; // not from debug symbols
+
+            mv->enemy->mirConditions |= 0x400;
+
+            angle = ((instance->rotation.z - MATH3D_AngleFromPosToPos(&instance->position, &enemy->instance->position)) + 1024) & 0xFFF;
+
+            if (angle < 2048)
+            {
+                MON_PlayAnim(instance, MONSTER_ANIM_HIT1, 1);
+            }
+            else
+            {
+                MON_PlayAnim(instance, MONSTER_ANIM_HIT2, 1);
+            }
+
+            WALBOSB_WalbossMessage(1);
+        }
+
+        WALBOSB_ResetSetAutofacePos(instance);
+        mv->mode = 0x8000;
+    }
+}
+
+void WALBOSB_Hit(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (!(mv->auxFlags & 1) && !(mv->mvFlags & 0x4000000))
+    {
+        MON_SwitchState(instance, MONSTER_STATE_COMBAT);
+    }
+
+    MON_DefaultQueueHandler(instance);
+}
+
+void WALBOSB_DoNothingEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    MON_SwitchStateDoEntry(instance, (signed char)mv->previousMainState);
+}
+
+void WALBOSB_DoNothing(Instance *instance)
+{
+    (void)instance;
+};
+
+void WALBOSB_GeneralDeathEntry(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    WALBOSB_WalbossMessage(3);
+
+    instance->flags2 |= 0x80;
+    mv->mvFlags |= 0x200000;
+    mv->mvFlags |= 0x2000;
+    mv->mvFlags &= ~0x10;
+
+    instance->xAccl = 0;
+    instance->yAccl = 0;
+    instance->xVel = 0;
+    instance->yVel = 0;
+}
+
+void WALBOSB_GeneralDeath(Instance *instance)
+{
+
+    FXSplinter *shatterList; // not from debug symbols
+    MonsterVars *mv; // not from debug symbols
+    WalbosbVars *vars; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (WalbosbVars *)mv->extraVars;
+
+    if (vars != NULL)
+    {
+
+        MonsterAttributes *ma; // not from debug symbols
+
+        ma = (MonsterAttributes *)instance->data;
+        shatterList = ma->shatterList;
+
+        if (vars->autofaceInst != NULL)
+        {
+            INSTANCE_KillInstance(vars->autofaceInst);
+            vars->autofaceInst = NULL;
+        }
+
+        if (!(mv->auxFlags & 4))
+        {
+            instance->flags2 |= 0x1000;
+            instance->flags |= 0x800;
+            _FX_BuildSplinters(instance, NULL, NULL, NULL, shatterList, gFXT, NULL, NULL, 8);
+        }
+
+        mv->mvFlags &= ~0x10;
+        G2Anim_SetNoLooping(&instance->anim);
+        MON_SwitchState(instance, MONSTER_STATE_DEAD);
+    }
+}
+
+void WALBOSB_DeadEntry(Instance *instance)
+{
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+    mv->soulJuice = 0;
+
+    MON_DeadEntry(instance);
+}
+
+void WALBOSB_Dead(Instance *instance)
+{
+
+    MonsterVars *mv; // not from debug symbols
+
+    mv = (MonsterVars *)instance->extraData;
+
+    if (!(mv->auxFlags & 4))
+    {
+        instance->flags |= 0x800;
+    }
+
+    while (DeMessageQueue(&mv->messageQueue) != NULL);
+
+}
 
 #endif
