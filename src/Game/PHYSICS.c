@@ -26,15 +26,11 @@ void SetNoPtCollideInFamily(Instance *instance)
 {
     Instance *child;
 
-    child = instance->LinkChild;
-
     instance->flags |= 0x40;
 
-    while (child != NULL)
+    for (child = instance->LinkChild; child != NULL; child = child->LinkSibling)
     {
         SetNoPtCollideInFamily(child);
-
-        child = child->LinkSibling;
     }
 }
 
@@ -42,15 +38,11 @@ void ResetNoPtCollideInFamily(Instance *instance)
 {
     Instance *child;
 
-    child = instance->LinkChild;
-
     instance->flags &= ~0x40;
 
-    while (child != NULL)
+    for (child = instance->LinkChild; child != NULL; child = child->LinkSibling)
     {
         ResetNoPtCollideInFamily(child);
-
-        child = child->LinkSibling;
     }
 }
 
