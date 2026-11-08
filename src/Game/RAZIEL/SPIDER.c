@@ -397,7 +397,7 @@ void StateHandlerWallDismount(CharacterState *In, int CurrentSection, intptr_t D
         case 0x8000000:
             G2EmulationSwitchAnimation(In, CurrentSection, 36, 0, 4, 1);
             
-            StateSwitchStateData(In, CurrentSection, &StateHandlerFall, 0);
+            StateSwitchStateData(In, CurrentSection, StateHandlerFall, 0);
             break;
         case 0x80000001:
             EnMessageQueueData(&In->SectionList[CurrentSection].Defer, 0x80000001, 0);
