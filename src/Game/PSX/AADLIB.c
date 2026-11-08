@@ -1095,7 +1095,138 @@ void aadLoadDynamicSfxReturn(void *loadedDataPtr, void *data, void *data2)
     }
 }
 
+// near match, but has $t3 and $t4 registers swapped
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadWaveMalloc);
+#else 
+int aadWaveMalloc(unsigned short waveID, unsigned long waveSize)
+{
+	AadNewSramBlockDesc *sramDesc;
+    AadNewSramBlockDesc *bestFit; 
+    AadNewSramBlockDesc *next; 
+    AadNewSramBlockDesc *sramDescTbl; 
+    unsigned long safeWaveSize; 
+    int i; 
+    int sramDescIndex; 
+    int bestFitIndex; 
+
+	waveSize >>= 3;
+    
+	safeWaveSize = waveSize & ~(0x1 | 0x2 | 0x4); 
+
+	if ((waveSize & 0x7))
+	{
+		safeWaveSize += 8;
+	}
+
+	bestFit      = NULL;
+	bestFitIndex = 255;
+    
+	sramDescIndex = aadMem->firstSramBlockDescIndex;
+	sramDescTbl   = aadMem->sramDescriptorTbl;
+    
+	sramDesc = &sramDescTbl[sramDescIndex];
+
+	for (i = 128; sramDesc != NULL; )
+	{
+		if (--i == -1)
+		{
+			i++;
+			break;
+		}
+
+		if ((!(sramDesc->waveID & 0x4000) && (sramDesc->size >= safeWaveSize)) && ((bestFit == NULL) || (sramDesc->size < bestFit->size)))
+		{
+            bestFitIndex = sramDescIndex;
+            bestFit      = sramDesc;
+		}
+
+        if (((signed char)sramDesc->nextIndex >= 0) && (sramDesc->nextIndex != sramDescIndex))
+        {
+            sramDescIndex = sramDesc->nextIndex;
+        
+            sramDesc = &sramDescTbl[sramDescIndex];
+        }
+        else
+        {
+            sramDesc = NULL;
+        }
+	}
+
+	if (bestFit != NULL)
+	{
+		bestFit->waveID = waveID | 0xC000;
+
+		if (waveSize < bestFit->size)
+		{
+			if ((signed char)bestFit->nextIndex >= 0)
+			{
+				next = &sramDescTbl[bestFit->nextIndex];
+
+				if (!(next->waveID & 0x4000))
+				{
+					next->address -= bestFit->size - waveSize;
+                    next->size    += bestFit->size - waveSize;
+
+					bestFit->size = waveSize;
+
+					return bestFitIndex;
+				}
+			}
+
+			sramDescIndex = aadMem->nextSramDescIndex;
+
+			sramDesc = &sramDescTbl[sramDescIndex];
+
+            i = sramDescIndex;
+
+            if (sramDesc->waveID & 0x8000)
+            {
+                int temp; // not from decls.h
+
+                temp = sramDescIndex;
+
+                for (; sramDesc->waveID & 0x8000; sramDesc = &sramDescTbl[i])
+                {
+                    i = (i + 1) & 0x7F;
+    
+                    if (i == temp)
+                    {
+                        return 255;
+                    }
+                    else
+                    {
+                        sramDescIndex = i;
+                    }
+                }
+            }
+
+			aadMem->nextSramDescIndex = (aadMem->nextSramDescIndex + 8) & 0x7F;
+
+			sramDesc->waveID = 32768;
+			
+            sramDesc->address = bestFit->address + waveSize;
+            sramDesc->size    = bestFit->size    - waveSize;
+			
+            sramDesc->prevIndex = bestFitIndex;
+			sramDesc->nextIndex = bestFit->nextIndex;
+
+			if ((signed char)sramDesc->nextIndex >= 0)
+			{
+				sramDescTbl[sramDesc->nextIndex].prevIndex = sramDescIndex;
+			}
+
+			bestFit->size = waveSize;
+            
+			bestFit->nextIndex = sramDescIndex;
+		}
+        
+		return bestFitIndex;
+	}
+
+	return 255;
+}
+#endif
 
 unsigned long aadGetSramBlockAddr(int handle)
 {
