@@ -817,7 +817,71 @@ void aadRelocateMusicMemoryBegin()
     aadMem->flags |= 0x2;
 }
 
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadRelocateMusicMemoryEnd);
+#else 
+void aadRelocateMusicMemoryEnd(void *oldAddress, int offset)
+{
+	int bank; 
+
+	for (bank = 0; bank < 2; bank++)
+	{
+		if ((unsigned char*)oldAddress == aadMem->dynamicSoundBankData[bank])
+		{
+            int slotNumber;        
+            int i;                    
+            AadSoundBankHdr *bankHdr; 
+            
+			aadMem->dynamicSoundBankData[bank] = (unsigned char*)((char*)aadMem->dynamicSoundBankData[bank] + offset);
+			aadMem->dynamicProgramAtr[bank]    = (AadProgramAtr*)((char*)aadMem->dynamicProgramAtr[bank] + offset);
+			aadMem->dynamicToneAtr[bank]       = (AadToneAtr*)((char*)aadMem->dynamicToneAtr[bank] + offset);
+            
+			bankHdr = aadMem->dynamicSoundBankHdr[bank];
+            bankHdr = (AadSoundBankHdr*)((char*)bankHdr + offset);
+            
+			aadMem->dynamicSoundBankHdr[bank]       = bankHdr;
+			aadMem->dynamicWaveAddr[bank]           = (unsigned long*)((char*)aadMem->dynamicWaveAddr[bank] + offset);
+			aadMem->dynamicSequenceAddressTbl[bank] = (unsigned char**)((char*)aadMem->dynamicSequenceAddressTbl[bank] + offset);
+
+			for (i = 0; i < bankHdr->numSequences; i++)
+			{
+				aadMem->dynamicSequenceAddressTbl[bank][i] += offset;
+			}
+
+			aadMem->dynamicSequenceLabelOffsetTbl[bank] = (unsigned long*)((char*)aadMem->dynamicSequenceLabelOffsetTbl[bank] + offset);
+
+			for (slotNumber = 0; slotNumber < aadMem->numSlots; slotNumber++)
+			{
+                AadSequenceSlot *slot; 
+                
+				slot = aadMem->sequenceSlots[slotNumber];
+
+				if ((slot->sequenceNumberAssigned != 255) && (slot->sequenceAssignedDynamicBank == bank))
+				{
+                    int track; 
+                    
+					for (track = 0; track < 16; track++)
+					{
+						if (slot->sequencePosition[track] != NULL)
+						{
+							slot->sequencePosition[track] += offset;
+
+							for (i = 0; i < slot->loopCurrentNestLevel[track]; i++)
+							{
+								slot->loopSequencePosition[i][track] += offset;
+							}
+						}
+					}
+				}
+			}
+
+			break;
+		}
+	}
+
+	aadMem->flags &= ~0x2;
+}
+#endif
 
 void aadRelocateSfxMemory(void *oldAddress, int offset)
 {
