@@ -130,7 +130,11 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000700);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_8800076C);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000790);
+void func_88000790(mcpsx_t *mcpsx, mcpsx_func_t func)
+{
+    mcpsx->state.func = func;
+    mcpsx->state.sync = sync_func;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880007A0);
 
