@@ -3,6 +3,12 @@
 
 #include "common.h"
 
+// forces the 0 == 0 check in COLLIDE_FindCollisionFaceNormal and also COLLIDE_PointAndHFace
+#define gte_disabled(r0) asm ( \
+    "move %0, $zero" \
+    : "=r"(r0) \
+)
+
 TFace *COLLIDE_PointAndTerrainFunc(Terrain *terrain, PCollideInfo *pCollideInfo, int Flags, short *Backface_Flag, long ignoreAttr, long acceptAttr, LCollideInfo *lcolinfo);
 int COLLIDE_PointInTriangle(SVector *v0, SVector *v1, SVector *v2, SVector *point, SVector *normal);
 int COLLIDE_PointInTriangle2DPub(short *v0, short *v1, short *v2, short *point);

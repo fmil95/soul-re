@@ -1,15 +1,18 @@
 # Adapted from https://github.com/Vatuu/silent-hill-decomp/tree/master
 
-from pathlib import Path
-from argparse import ArgumentParser
-from dataclasses import dataclass, asdict
-import logging
-import yaml
 import json
+import logging
+from argparse import ArgumentParser
+from dataclasses import asdict, dataclass
+from pathlib import Path
+
+import yaml
+
 
 @dataclass
 class UnitMetadata:
     progress_categories: list[str]
+
 
 @dataclass
 class Unit:
@@ -18,10 +21,12 @@ class Unit:
     target_path: str
     metadata: UnitMetadata
 
+
 @dataclass
 class ProgressCategory:
     id: str
     name: str
+
 
 @dataclass
 class Config:
@@ -35,11 +40,17 @@ class Config:
 
 def _create_config():
     parser = ArgumentParser()
-    parser.add_argument("config", type = Path)
+    parser.add_argument("config", type=Path)
     args = parser.parse_args()
 
-    if not args.config.exists() or args.config.is_dir() or args.config.suffix != ".yaml":
-        raise ValueError(f"The given path {args.objects} is not pointing towards a valid config.")
+    if (
+        not args.config.exists()
+        or args.config.is_dir()
+        or args.config.suffix != ".yaml"
+    ):
+        raise ValueError(
+            f"The given path {args.objects} is not pointing towards a valid config."
+        )
 
     with open(args.config) as stream:
         try:
@@ -47,21 +58,36 @@ def _create_config():
         except yaml.YAMLError as exc:
             raise exc
 
-EXCLUDED_SUFFIXES = (
-    ".data.s.o",
-    ".rodata.s.o",
-    ".sdata.s.o",
-    ".bss.s.o",
-    ".comm.s.o",
-)
+
+def _glob_matches_recursive(path: Path, glob: str) -> bool:
+
+    if glob.endswith("/**") and not glob.startswith("**/"):
+        while glob.endswith("/**"):
+            glob = glob[:-3]
+
+        trimmed_glob = Path(glob)
+
+        return path == trimmed_glob or trimmed_glob in path.parents
+
+    return path.match(glob)
+
 
 def _collect_objects(path: Path, config) -> list[Path]:
-    ignored = config["ignored_files"]
-    return [
-        p for p in path.rglob("*.o")
-        if not p.name.endswith(EXCLUDED_SUFFIXES)
-        and not any(ignored_file in str(p) for ignored_file in ignored)
-    ]
+    excluded = config.get("exclude", [])
+
+    objs = []
+
+    for file in path.rglob("*.o"):
+        if any(
+            _glob_matches_recursive(file.relative_to(path), exclusion)
+            for exclusion in excluded
+        ):
+            continue
+
+        objs.append(file)
+
+    return objs
+
 
 def _determine_categories(path: Path, config) -> tuple[UnitMetadata, str]:
     if path.name.endswith(".s.o"):
@@ -76,20 +102,26 @@ def _determine_categories(path: Path, config) -> tuple[UnitMetadata, str]:
                 categories.append(category["id"])
     return (UnitMetadata(categories), str(modified_path))
 
+
 def _get_base_path(path: Path) -> Path:
     name = "expected/src/" + path.removesuffix(".s.o").removesuffix(".c.o")
     c_path = name + ".c.o"
     hasm_path = name + ".hasm.s.o"
-    if Path(c_path).exists(): return c_path
-    if Path(hasm_path).exists(): return hasm_path
+    if Path(c_path).exists():
+        return c_path
+    if Path(hasm_path).exists():
+        return hasm_path
     return None
 
+
 def main():
-    logging.basicConfig(level = logging.INFO)
+    logging.basicConfig(level=logging.INFO)
     config = _create_config()
 
-    expected_objects = _collect_objects(Path(config["expected_paths"]["asm"]), config) + _collect_objects(Path(config["expected_paths"]["src"]), config)
-    
+    expected_objects = _collect_objects(
+        Path(config["expected_paths"]["asm"]), config
+    ) + _collect_objects(Path(config["expected_paths"]["src"]), config)
+
     logging.info(f"Accounting for {len(expected_objects)} objects.")
     units_dict = {}
     for file in expected_objects:
@@ -98,19 +130,21 @@ def main():
         base_path = _get_base_path(processed_path[1])
         if unit_name not in units_dict:
             units_dict[unit_name] = Unit(
-                unit_name,
-                base_path,
-                str(file),
-                processed_path[0]
+                unit_name, base_path, str(file), processed_path[0]
             )
     units = list(units_dict.values())
-    
+
     categories = []
     for category in config["categories"]:
         categories.append(ProgressCategory(category["id"], category["name"]))
-    
+
     with (Path(config["output"])).open("w") as json_file:
-        json.dump(asdict(Config(True, False, "make", ["progress"], units, categories)), json_file, indent=2)
+        json.dump(
+            asdict(Config(True, False, "make", ["progress"], units, categories)),
+            json_file,
+            indent=2,
+        )
+
 
 if __name__ == "__main__":
     main()

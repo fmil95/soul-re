@@ -10,7 +10,7 @@ VERBOSE          ?= 0
 BUILD_DIR        ?= build
 CONFIG_DIR       := config
 GAME_DIR         := game
-LD_DIR	         := $(GAME_DIR)/ld
+LD_DIR           := $(GAME_DIR)/ld
 TOOLS_DIR        := tools
 BIGFILE_DIR      := $(GAME_DIR)/bigfile
 OBJDIFF_DIR      := $(TOOLS_DIR)/objdiff
@@ -93,11 +93,11 @@ CFLAGS_CHECK   := -fsyntax-only -fno-builtin -std=gnu90
 CHECK_WARNINGS := -Wall -Wextra
 
 ifeq ($(NON_MATCHING),1)
-CPPFLAGS += -DNON_MATCHING
+	CPPFLAGS += -DNON_MATCHING
 endif
 
 ifeq ($(SKIP_ASM),1)
-CPPFLAGS := $(CPPFLAGS) -DSKIP_ASM
+	CPPFLAGS := $(CPPFLAGS) -DSKIP_ASM
 endif
 
 ### Sources ###
@@ -109,6 +109,7 @@ ASM_OBJS := $(ASM_OBJS:%=$(BUILD_DIR)/%)
 # Object files
 OBJECTS := $(shell grep -E 'BUILD_PATH.+\.o' $(LD_DIR)/$(LD_SCRIPT) -o)
 OBJECTS := $(OBJECTS:BUILD_PATH/%=$(BUILD_DIR)/%)
+
 ifeq ($(SKIP_ASM),1)
 OBJECTS += $(ASM_OBJS)
 endif
@@ -321,11 +322,7 @@ endif
 .SECONDARY:
 
 ### Make Settings ###
-
 .PHONY: all clean distclean overlays setup split
 
 # Remove built-in implicit rules to improve performance
 MAKEFLAGS += --no-builtin-rules
-
-# Print target for debugging
-print-% : ; $(info $* is a $(flavor $*) variable set to [$($*)]) @true

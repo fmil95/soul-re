@@ -40,6 +40,16 @@ static SVector *collide_normal0;
 
 static SVector *collide_normal1;
 
+// not sure what the code is actually testing for on the functions that have the 0 == 0 compare, but we're guessing it's checking the COP2 logic is on
+static inline int gteIsDisabled() 
+{
+    int i;
+    
+    gte_disabled(i);
+    
+    return i;
+}
+
 int COLLIDE_PointInTriangle(SVector *v0, SVector *v1, SVector *v2, SVector *point, SVector *normal)
 {
     Triangle2D *triangle;
@@ -418,7 +428,79 @@ long COLLIDE_WithinXYBounds(SVector* point, HBox* hbox)
     return ((point->x >= hbox->minX) && (point->x <= hbox->maxX)) && ((point->y >= hbox->minY) && (point->y <= hbox->maxY));
 }
 
+// near match, but has a misplaced addiu instruction
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/COLLIDE", COLLIDE_LineWithBoxFace);
+#else
+void COLLIDE_LineWithBoxFace(short startDist, long lineDist, short planeDist, SVector *start, Vector *line, HBox *hbox, long (*collideBoundFunc)(), SVector *normal)
+{
+    SVector point; 
+    volatile long t; // might not be volatile
+    {
+    SVector *point_;  // added an underscore to avoid shadowing a parameter
+    SVector *normal_; // idem
+    SVector *point0; 
+    SVector *normal0; 
+    SVector *point1; 
+    SVector *normal1; 
+    long temp; // not from decls.h
+
+    if (lineDist == 0) 
+    {
+        return;
+    }
+        
+    lineDist = -((startDist - planeDist) << 12) / lineDist;
+
+    if ((lineDist < 0) || (lineDist > 4096)) 
+    {
+        return;
+    }
+
+    t = lineDist;
+        
+    do { } while (0); // garbage code for reordering
+        
+    point.x = start->x + ((line->x * lineDist) >> 12);
+    point.y = start->y + ((line->y * lineDist) >> 12);
+    point.z = start->z + ((line->z * lineDist) >> 12);
+        
+    if (collideBoundFunc(&point, hbox) != 0)
+    {
+        temp = t;
+        
+        do { } while (0); // garbage code for reordering
+        
+        point_  = &point;
+        normal_ = normal;
+        
+        point0  = collide_point0; 
+        normal0 = collide_normal0; 
+        
+        point1  = collide_point1;
+        normal1 = collide_normal1; 
+        
+        if (temp < collide_t0) 
+        {
+            COPY_SVEC(SVector,  point1, SVector, point0);
+            COPY_SVEC(SVector, normal1, SVector, normal0);
+            COPY_SVEC(SVector,  point0, SVector, point_);
+            COPY_SVEC(SVector, normal0, SVector, normal_);
+                
+            collide_t1 = collide_t0;
+            collide_t0 = temp;
+        }
+        else if (temp < collide_t1) 
+        {
+            COPY_SVEC(SVector,  point1, SVector, point_);
+            COPY_SVEC(SVector, normal1, SVector, normal_);
+            
+            collide_t1 = temp;
+        }
+    }
+    }
+}
+#endif
 
 long COLLIDE_IntersectLineAndBox(SVector *point0, SVector *normal0, SVector *point1, SVector *normal1, SVector *end, SVector *start, HBox *hbox)
 {
@@ -2812,7 +2894,68 @@ void COLLIDE_SegmentCollisionOff(Instance *instance, int segment)
     }
 }
 
+// would match, but has an extra nop
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/COLLIDE", COLLIDE_FindCollisionFaceNormal);
+#else
+long COLLIDE_FindCollisionFaceNormal(CollideInfo *collideInfo, Normal *normal)
+{
+    long valid_normal;
+    
+    valid_normal = 0;
+    
+    if (collideInfo->type1 == 1)
+    {
+        // ???
+    }
+    else if (collideInfo->type1 == 3) 
+    {
+        TFace *tface;
+        
+        tface = collideInfo->prim1;
+        
+        if ((tface->textoff == 0xFFFF) || !(((TextureFT3*)(((uintptr_t)((Level*)collideInfo->level)->terrain->StartTextureList) + tface->textoff))->attr & 0x2000)) 
+        {
+            COLLIDE_GetNormal(tface->normal, (short*)((Level*)collideInfo->level)->terrain->normalList, (SVector*)normal);
+            
+            valid_normal = 1;
+        }
+    } 
+    else 
+    {
+        SVECTOR *lNormal; 
+        Instance *inst1;
+        TFace *tface; // not from decls.h
+        int gteGood;  // not from decls.h  
+       
+        if ((collideInfo->type1 == 2) && (gteGood = !gteIsDisabled(), tface = collideInfo->prim1, gteGood != 0)) 
+        {
+            inst1 = collideInfo->inst1;
+            
+            COLLIDE_GetNormal(tface->normal, (short*)inst1->object->modelList[inst1->currentModel]->normalList, (SVector*)&lNormal);
+            
+            ApplyMatrixSV(inst1->matrix, (SVECTOR*)&lNormal, (SVECTOR*)normal); 
+            
+            valid_normal = 1;
+        }
+        else 
+        {
+            Instance *inst1; 
+            
+            if ((collideInfo->type0 == 1) && (collideInfo->type1 == 5)) 
+            {
+                inst1 = collideInfo->inst1;
+                
+                ApplyMatrixSV(inst1->matrix, &collideInfo->point0, (SVECTOR*)normal);
+                
+                valid_normal = 1;
+            }
+        }
+    }
+    
+    return valid_normal;
+}
+#endif
 
 short *COLLIDE_GetBSPTreeFlag(CollideInfo *collideInfo)
 {
