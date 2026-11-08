@@ -34,6 +34,16 @@ static AadDynamicSfxLoadInfo *smfInfo;
 
 int gSramFullAlarm;
 
+int gSramTotalUsed;
+
+int gSramTotalFree;
+
+int gSramUsedBlocks;
+
+int gSramLargestFree;
+
+int gSramFreeBlocks;
+
 unsigned long aadGetMemorySize(AadInitAttr *attributes)
 {
     return (1488 * attributes->numSlots) + 7304;
@@ -1191,7 +1201,80 @@ void aadFreeSingleDynSfx(int sfxID)
     }
 }
 
+// near match, but has $t0 and $a3 registers swapped
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", setSramFullAlarm);
+#else 
+void setSramFullAlarm()
+{ 
+	AadNewSramBlockDesc *sramDescTbl; 
+    AadNewSramBlockDesc *sramDesc;  
+    long totalUsed;                      
+    long totalFree;                         
+    long largestFree;                     
+    long numFreeBlocks;                      
+    long numUsedBlocks;                     
+    int i;                                   
+
+	totalUsed = 0;
+	totalFree = 0;
+    
+	largestFree = 0;
+    
+	numFreeBlocks = 0;
+	numUsedBlocks = 0;
+
+	sramDescTbl = aadMem->sramDescriptorTbl;
+
+	sramDesc = sramDescTbl + aadMem->firstSramBlockDescIndex;
+
+	i = 128;
+    
+	while (sramDesc != NULL)
+	{
+		if (sramDesc->waveID & 0x4000)
+		{
+			numUsedBlocks++;
+			totalUsed += sramDesc->size;
+		}
+		else
+		{
+			numFreeBlocks++;
+			totalFree += sramDesc->size;
+			
+			if (largestFree < sramDesc->size)
+			{
+				largestFree = sramDesc->size;
+			}
+		}
+
+		if ((signed char)sramDesc->nextIndex >= 0)
+		{
+			sramDesc = sramDescTbl + sramDesc->nextIndex;
+		}
+		else
+		{
+			sramDesc = NULL;
+		}
+
+		if (--i == 0) 
+        {
+			break;
+        }
+	}
+
+	gSramFullAlarm = 1;
+    
+	gSramTotalUsed = totalUsed << 3;
+	gSramTotalFree = totalFree << 3;
+    
+	gSramUsedBlocks = numUsedBlocks;
+    
+	gSramLargestFree = largestFree << 3;
+    
+	gSramFreeBlocks = numFreeBlocks;
+}
+#endif
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadLoadSingleDynSfx);
 
