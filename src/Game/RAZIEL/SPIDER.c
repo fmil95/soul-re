@@ -362,4 +362,60 @@ void StateHandlerWallIdle(CharacterState *In, int CurrentSection, intptr_t Data)
     }
 }
 
+// it is equivalent, but doesn't match because the function has some debug code involving the Frame local that is hard to replicate due to -O2
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", StateHandlerWallDismount);
+#else 
+void StateHandlerWallDismount(CharacterState *In, int CurrentSection, intptr_t Data) 
+{
+    Message *Ptr; 
+    //int Frame;    
+
+    while ((Ptr = PeekMessageQueue(&In->SectionList[CurrentSection].Event)) != NULL) 
+    {
+        switch (Ptr->ID)
+        {  
+        case 0x100001:
+            if (CurrentSection == 0) 
+            {
+                ControlFlag = 8;
+                
+                PhysicsMode = 0;
+                
+                G2Anim_InterpDisableController(&In->CharacterInstance->anim, 1,  38, 300);
+                G2Anim_InterpDisableController(&In->CharacterInstance->anim, 0,  14, 300);
+                G2Anim_InterpDisableController(&In->CharacterInstance->anim, 0,   8, 300);
+                G2Anim_InterpDisableController(&In->CharacterInstance->anim, 14, 14, 300);
+                G2Anim_InterpDisableController(&In->CharacterInstance->anim, 50, 76, 300);
+                G2Anim_InterpDisableController(&In->CharacterInstance->anim, 58, 76, 300);
+            }
+        case 0x100004:
+            razReaverBladeOn();
+            
+            In->CharacterInstance->flags2 |= 0x40;
+            break;
+        case 0x8000000:
+            G2EmulationSwitchAnimation(In, CurrentSection, 36, 0, 4, 1);
+            
+            StateSwitchStateData(In, CurrentSection, &StateHandlerFall, 0);
+            break;
+        case 0x80000001:
+            EnMessageQueueData(&In->SectionList[CurrentSection].Defer, 0x80000001, 0);
+            break;
+        case 0x80000008:
+        case 0x80000000:
+        case 0x80000020:
+        case 0x4010008:
+        case 0x1000001:
+        case 0x4000001:
+        case 0x4020000:
+            break;
+        default:
+            DefaultStateHandler(In, CurrentSection, Data);
+            break;
+        }
+
+        DeMessageQueue(&In->SectionList[CurrentSection].Event);
+    }
+}
+#endif
