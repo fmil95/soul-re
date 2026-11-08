@@ -79,7 +79,20 @@ segments:
       - [0x002C24, .rodata, Game/CINEMA/CINEPSX]
       - [0x002C8C, .rodata, Game/MCARD/MEMCARD]
       - [0x002CAC, .rodata, Game/MCARD/MCASSERT]
-      - [0x002CD4, rodata, LIBS]
+      - [0x002CD4, rodata, lib/libetc/intr]
+      - [0x002D44, rodata, lib/libgpu/sys]
+      - [0x002F64, rodata, lib/libetc/vsync]
+      - [0x002F74, rodata, lib/libpad/pdent4]
+      - [0x002F94, rodata, lib/libcd/s_010]
+      - [0x002FA4, rodata, lib/libcd/event]
+      - [0x002FC4, rodata, lib/libcd/iso9660]
+      - [0x0031B4, rodata, lib/libc2/puts]
+      - [0x0031C4, rodata, lib/libspu/s_sca]
+      - [0x003204, rodata, lib/libcd/c_011]
+      - [0x003224, rodata, lib/libetc/intr_dma]
+      - [0x003254, rodata, lib/libcd/bios_1]
+      - [0x0034B4, rodata, lib/libcd/cdr_1]
+      - [0x003554, rodata, lib/libspu/spu]
 
       - [0x003554, _c, Game/PLAYER]
       - [0x0036B8, _c, Game/DEBUG]
@@ -169,7 +182,132 @@ segments:
       - [0x0A99B0, _c, Game/MENU/MENUFACE]
       - [0x0A9D9C, _c, Game/MCARD/MEMCARD]
       - [0x0AA238, _c, Game/MCARD/MCASSERT]
-      - [0x0AA27C, asm, LIBS]
+      - [0x0AA27C, asm, lib/libetc/intr]
+      - [0x0AA8F4, asm, lib/libc2/strncmp]
+      - [0x0AA974, asm, lib/libgpu/sys]
+      - [0x0AD068, asm, lib/libgte/mtx_05]
+      - [0x0AD0B8, asm, lib/libc2/memset]
+      - [0x0AD0E8, asm, lib/libc2/rand]
+      - [0x0AD128, asm, lib/libgte/mtx_12]
+      - [0x0AD148, asm, lib/libgte/mtx_09]
+      - [0x0AD178, asm, lib/libetc/vsync]
+      - [0x0AD388, asm, lib/libgpu/e04]
+      - [0x0AD3C8, asm, lib/uncategorized/checkagain]
+      - [0x0AD428, asm, lib/libgte/reg13]
+      - [0x0AD438, asm, lib/libgte/mtx_06]
+      - [0x0AD498, asm, lib/libgte/ratan]
+      - [0x0AD618, asm, lib/libgte/msc06_3]
+      - [0x0AD6A0, asm, lib/libgte/msc06_6]
+      - [0x0AD720, asm, lib/libgte/fog_02]
+      - [0x0AD830, asm, lib/libc2/strchr]
+      - [0x0AD870, asm, lib/libc2/strcpy]
+      - [0x0AD8C0, asm, lib/libgte/mtx_004]
+      - [0x0ADA20, asm, lib/libgte/fgo_00]
+      - [0x0ADA60, asm, lib/libgte/smp_04]
+      - [0x0ADA90, asm, lib/libgpu/p17]
+      - [0x0ADAB0, asm, lib/libc2/strlen]
+      - [0x0ADAF0, asm, lib/libgte/reg11]
+      - [0x0ADB10, asm, lib/libapi/counter]
+      - [0x0ADC48, asm, lib/libpad/pddirini]
+      - [0x0AE2A8, asm, lib/libpad/pdmaiini]
+      - [0x0AE2E8, asm, lib/libpad/pdent2]
+      - [0x0AE3B4, asm, lib/libpad/pdent3]
+      - [0x0AE4AC, asm, lib/libpad/pdent4]
+      - [0x0AE580, asm, lib/libpad/pdcmd2]
+      - [0x0AE5B8, asm, lib/libpad/pdcmd1]
+      - [0x0AE60C, asm, lib/libc2/strcmp]
+      - [0x0AE67C, asm, lib/libgte/mtx_10]
+      - [0x0AE6AC, asm, lib/libgte/reg10]
+      - [0x0AE6CC, asm, lib/libgte/mtx_11]
+      - [0x0AE6FC, asm, lib/libgte/mtx_000]
+      - [0x0AE80C, asm, lib/libcd/s_003]
+      - [0x0AE81C, asm, lib/libcd/s_004]
+      - [0x0AE82C, asm, lib/libcd/s_006]
+      - [0x0AE838, asm, lib/libcd/s_007]
+      - [0x0AE8A4, asm, lib/libcd/s_008]
+      - [0x0AE8C4, asm, lib/libcd/s_009]
+      - [0x0AE8D8, asm, lib/libcd/s_012]
+      - [0x0AE8F8, asm, lib/libcd/s_013]
+      - [0x0AE918, asm, lib/libcd/s_014]
+      - [0x0AE92C, asm, lib/libcd/s_015]
+      - [0x0AE940, asm, lib/libcd/s_016]
+      - [0x0AECFC, asm, lib/libcd/s_021]
+      - [0x0AED1C, asm, lib/libcd/s_022]
+      - [0x0AED3C, asm, lib/libcd/s_023]
+      - [0x0AED60, asm, lib/libcd/s_024]
+      - [0x0AED84, asm, lib/libcd/event]
+      - [0x0AEED4, asm, lib/libcd/iso9660]
+      - [0x0AF844, asm, lib/libapi/a37]
+      - [0x0AF854, asm, lib/libcd/s_002]
+      - [0x0AF958, asm, lib/libcd/sys]
+      - [0x0AF9E4, asm, lib/libspu/s_itc]
+      - [0x0AFA94, asm, lib/libapi/a36]
+      - [0x0AFAA4, asm, lib/libgte/reg12]
+      - [0x0AFAC4, asm, lib/libgte/msc00]
+      - [0x0AFB54, asm, lib/libapi/a12]
+      - [0x0AFB64, asm, lib/libapi/a08]
+      - [0x0AFB74, asm, lib/libapi/a13]
+      - [0x0AFB84, asm, lib/libgpu/e03]
+      - [0x0AFC44, asm, lib/libapi/a09]
+      - [0x0AFC54, asm, lib/libgte/mtx_04]
+      - [0x0AFD64, asm, lib/libgte/mtx_003]
+      - [0x0AFEC4, asm, lib/libgte/mtx_07]
+      - [0x0AFEF4, asm, lib/libgpu/p00]
+      - [0x0AFF34, asm, lib/libgte/mtx_006]
+      - [0x0B0084, asm, lib/libc2/strpbrk]
+      - [0x0B00F4, asm, lib/libc2/strncpy]
+      - [0x0B0164, asm, lib/libspu/s_stsa]
+      - [0x0B01C4, asm, lib/libspu/s_w]
+      - [0x0B0224, asm, lib/libspu/s_srmd]
+      - [0x0B0254, asm, lib/libspu/s_gvp]
+      - [0x0B0274, asm, lib/libspu/s_svp]
+      - [0x0B02E4, asm, lib/libspu/s_sccm]
+      - [0x0B0324, asm, lib/libspu/s_sk]
+      - [0x0B04E4, asm, lib/libspu/sr_gaks]
+      - [0x0B0570, asm, lib/libspu/s_crwa]
+      - [0x0B0710, asm, lib/libspu/s_scmv]
+      - [0x0B0730, asm, lib/libspu/s_r]
+      - [0x0B0790, asm, lib/libspu/s_stc]
+      - [0x0B07C0, asm, lib/libspu/s_srv]
+      - [0x0B07F0, asm, lib/libspu/s_sr]
+      - [0x0B08C0, asm, lib/libspu/s_i]
+      - [0x0B08E0, asm, lib/libspu/s_q]
+      - [0x0B0970, asm, lib/libspu/s_srmt]
+      - [0x0B0B40, asm, lib/libspu/s_svv]
+      - [0x0B0BC0, asm, lib/libspu/s_svsa]
+      - [0x0B0C40, asm, lib/libspu/s_svada]
+      - [0x0B0D80, asm, lib/libc2/memcmp]
+      - [0x0B0DD0, asm, lib/libgpu/break]
+      - [0x0B0E64, asm, lib/libc2/puts]
+      - [0x0B0EC4, asm, lib/libgpu/p40]
+      - [0x0B0EF4, asm, lib/libc2/memmove]
+      - [0x0B0F64, asm, lib/libai/c57]
+      - [0x0B0F74, asm, lib/libspu/s_sca]
+      - [0x0B12F4, asm, lib/libc2/strtok]
+      - [0x0B1414, asm, lib/libcd/c_011]
+      - [0x0B1F04, asm, lib/libcd/c_002]
+      - [0x0B1F64, asm, lib/libcd/c_003]
+      - [0x0B1FE4, asm, lib/libcd/cdread2]
+      - [0x0B2094, asm, lib/libspu/s_gca]
+      - [0x0B23A4, asm, lib/libcd/c_005]
+      - [0x0B2434, asm, lib/libcd/c_010]
+      - [0x0B2454, asm, lib/libcd/cdrom]
+      - [0x0B2484, asm, lib/libcd/c_009]
+      - [0x0B2544, asm, lib/libcd/c_004]
+      - [0x0B2634, asm, lib/libcd/c_007]
+      - [0x0B26E4, asm, lib/libc2/setjmp] # EXE omits `longjmp`
+      - [0x0B2730, asm, lib/libetc/intr_vb]
+      - [0x0B2850, asm, lib/libetc/intr_dma]
+      - [0x0B2AF0, asm, lib/libapi/c114]
+      - [0x0B2B10, asm, lib/libapi/a23]
+      - [0x0B2B20, asm, lib/libapi/a91]
+      - [0x0B2B30, asm, lib/libapi/l10]
+      - [0x0B2B40, asm, lib/libapi/a24]
+      - [0x0B2B50, asm, lib/libapi/c73]
+      - [0x0B2B60, asm, lib/libetc/vmode] # EXE omits `SetVideoMode`
+      - [0x0B2B7C, asm, lib/libgte/reg03_14]
+      - [0x0B2B88, asm, lib/libgte/reg03_15]
+      - [0x0B2B94, asm, lib/LIBS]
 
       - [0x0B8890, .data, Game/DEBUG]
       - [0x0BA7C0, .data, Game/FONT]
@@ -193,7 +331,33 @@ segments:
       - [0x0BD074, .data, Game/CINEMA/CINEPSX]
       - [0x0BD07C, .data, Game/MENU/MENUUTIL]
       - [0x0BD0AC, .data, Game/MENU/MENUDEFS]
-      - [0x0BD0BC, data, LIBS]
+      - [0x0BD0BC, data, lib/libetc/intr]
+      - [0x0BE1BC, data, lib/libgpu/sys]
+      - [0x0BE36C, data, lib/libetc/vsync]
+      - [0x0BE37C, data, lib/libgte/ratan]
+      - [0x0BEB8C, data, lib/libapi/counter]
+      - [0x0BEBAC, data, lib/libpad/pdmaiini]
+      - [0x0BEBBC, data, lib/libcd/s_016]
+      - [0x0BEC3C, data, lib/libcd/event]
+      - [0x0BEC4C, data, lib/libcd/iso9660]
+      - [0x0BEC5C, data, lib/libgte/msc00]
+      - [0x0BEC6C, data, lib/libgte/mtx_006]
+      - [0x0BEF7C, data, lib/libgpu/break]
+      - [0x0BEF9C, data, lib/libc2/puts]
+      - [0x0BEFAC, data, lib/libc2/strtok]
+      - [0x0BEFBC, data, lib/libcd/c_011]
+      - [0x0BF00C, data, lib/libcd/c_002]
+      - [0x0BF01C, data, lib/libcd/c_003]
+      - [0x0BF02C, data, lib/libcd/c_005]
+      - [0x0BF03C, data, lib/libcd/c_010]
+      - [0x0BF04C, data, lib/libcd/cdrom]
+      - [0x0BF05C, data, lib/libcd/c_009]
+      - [0x0BF06C, data, lib/libcd/c_004]
+      - [0x0BF07C, data, lib/libcd/c_007]
+      - [0x0BF08C, data, lib/libetc/intr_vb]
+      - [0x0BF0BC, data, lib/libetc/intr_dma]
+      - [0x0BF0EC, data, lib/libetc/vmode]
+      - [0x0BF0FC, data, lib/LIBS]
 
       - [0x0BFD9C, .sdata, Game/DEBUG]
       - [0x0C0BA0, .sdata, Game/CAMERA]
@@ -254,32 +418,32 @@ segments:
       - [0x0C2750, .sdata, Game/MENU/MENUDEFS]
       - [0x0C2804, .sdata, Game/MENU/MENUFACE]
 
-      - {start: 0x0C28AC, type: sbss, vram: 0x800D20AC, name: Game/DEBUG}
+      - {start: 0x0C28AC, type:  sbss, vram: 0x800D20AC, name: Game/DEBUG}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D20FC, name: Game/CAMERA}
-      - {start: 0x0C28AC, type: comm, vram: 0x800D2228, name: Game/CAMERA}
+      - {start: 0x0C28AC, type:  comm, vram: 0x800D2228, name: Game/CAMERA}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D26F8, name: Game/COLLIDE}
-      - {start: 0x0C28AC, type: sbss, vram: 0x800D271C, name: Game/DRAW}
+      - {start: 0x0C28AC, type:  sbss, vram: 0x800D271C, name: Game/DRAW}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D277C, name: Game/FONT}
-      - {start: 0x0C28AC, type: comm, vram: 0x800D297C, name: Game/FONT}
-      - {start: 0x0C28AC, type: sbss, vram: 0x800D2FA4, name: Game/GAMELOOP}
-      - {start: 0x0C28AC, type: sbss, vram: 0x800D2FF8, name: Game/GAMEPAD}
-      - {start: 0x0C28AC, type: comm, vram: 0x800D3060, name: Game/GAMEPAD}
+      - {start: 0x0C28AC, type:  comm, vram: 0x800D297C, name: Game/FONT}
+      - {start: 0x0C28AC, type:  sbss, vram: 0x800D2FA4, name: Game/GAMELOOP}
+      - {start: 0x0C28AC, type:  sbss, vram: 0x800D2FF8, name: Game/GAMEPAD}
+      - {start: 0x0C28AC, type:  comm, vram: 0x800D3060, name: Game/GAMEPAD}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D310C, name: Game/LIGHT3D}
-      - {start: 0x0C28AC, type: sbss, vram: 0x800D311C, name: Game/LOAD3D}
+      - {start: 0x0C28AC, type:  sbss, vram: 0x800D311C, name: Game/LOAD3D}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D31D0, name: Game/PSX/MAIN}
-      - {start: 0x0C28AC, type: comm, vram: 0x800D31D4, name: Game/PSX/MAIN}
+      - {start: 0x0C28AC, type:  comm, vram: 0x800D31D4, name: Game/PSX/MAIN}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D3664, name: Game/GENERIC}
-      - {start: 0x0C28AC, type: sbss, vram: 0x800D3670, name: Game/SOUND}
+      - {start: 0x0C28AC, type:  sbss, vram: 0x800D3670, name: Game/SOUND}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D3910, name: Game/SPLINE}
-      - {start: 0x0C28AC, type: sbss, vram: 0x800D3948, name: Game/FX}
+      - {start: 0x0C28AC, type:  sbss, vram: 0x800D3948, name: Game/FX}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D3C88, name: Game/MEMPACK}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D3C9C, name: Game/PSX/AADLIB}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D3CAC, name: Game/STREAM}
-      - {start: 0x0C28AC, type: comm, vram: 0x800D3CB0, name: Game/STREAM}
+      - {start: 0x0C28AC, type:  comm, vram: 0x800D3CB0, name: Game/STREAM}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D40D8, name: Game/STRMLOAD}
-      - {start: 0x0C28AC, type: sbss, vram: 0x800D40E8, name: Game/EVENT}
+      - {start: 0x0C28AC, type:  sbss, vram: 0x800D40E8, name: Game/EVENT}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D47E0, name: Game/STATE}
-      - {start: 0x0C28AC, type: comm, vram: 0x800D57E0, name: Game/VRAM}
+      - {start: 0x0C28AC, type:  comm, vram: 0x800D57E0, name: Game/VRAM}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D61E4, name: Game/PHYSICS}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D626C, name: Game/REAVER}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D6270, name: Game/GLYPH}
@@ -288,7 +452,7 @@ segments:
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D6B30, name: Game/PSX/PSX_G2/MAINVM}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D6B38, name: Game/PLAN/PLANAPI}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D6B88, name: Game/RAZIEL/CONTROL}
-      - {start: 0x0C28AC, type: sbss, vram: 0x800D6BB8, name: Game/RAZIEL/RAZIEL}
+      - {start: 0x0C28AC, type:  sbss, vram: 0x800D6BB8, name: Game/RAZIEL/RAZIEL}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D7364, name: Game/UNDRWRLD}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D7374, name: Game/SAVEINFO}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D7484, name: Game/ENTRYPOINT}
@@ -299,6 +463,6 @@ segments:
 
       - {start: 0x0C28AC, type: .bss, vram: 0x800D75BC, name: Game/SOUND}
       - {start: 0x0C28AC, type: .bss, vram: 0x800DA984, name: Game/STRMLOAD}
-      - {start: 0x0C28AC, type: bss, vram: 0x800DBB04, name: LIBS}
+      - {start: 0x0C28AC, type:  bss, vram: 0x800DBB04, name: lib/LIBS}
       
   - [0x0C28AC]
