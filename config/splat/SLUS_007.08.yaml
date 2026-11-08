@@ -90,7 +90,9 @@ segments:
       - [0x0031C4, rodata, lib/libspu/s_sca]
       - [0x003204, rodata, lib/libcd/c_011]
       - [0x003224, rodata, lib/libetc/intr_dma]
-      - [0x003254, rodata, lib/LIBS]
+      - [0x003254, rodata, lib/libcd/bios_1]
+      - [0x0034B4, rodata, lib/libcd/cdr_1]
+      - [0x003554, rodata, lib/libspu/spu]
 
       - [0x003554, _c, Game/PLAYER]
       - [0x0036B8, _c, Game/DEBUG]
