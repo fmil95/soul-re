@@ -209,7 +209,14 @@ void func_88000EF8(mcard_t *mcard)
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000F04);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000F10);
+void func_88000F10(mcard_t *mcard, char *filename, int nblocks, void *buffer, int nbytes)
+{
+    mcard->state.fsm = fsmcard_create;
+    mcard->params.filename = filename;
+    mcard->params.nblocks = nblocks;
+    mcard->params.buffer = buffer;
+    mcard->params.nbytes = nbytes;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000F30);
 
@@ -526,7 +533,14 @@ void func_88000EF8(mcard_t *mcard)
 
 void func_88000F04(void) {};
 
-void func_88000F10(void) {};
+void func_88000F10(mcard_t *mcard, char *filename, int nblocks, void *buffer, int nbytes)
+{
+    mcard->state.fsm = fsmcard_create;
+    mcard->params.filename = filename;
+    mcard->params.nblocks = nblocks;
+    mcard->params.buffer = buffer;
+    mcard->params.nbytes = nbytes;
+}
 
 void func_88000F30(void) {};
 
