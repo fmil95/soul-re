@@ -33,7 +33,6 @@ void GAMELOOP_ResetGameStates();
 GameTracker *GAMELOOP_GetGT(); 
 
 GameTracker gameTrackerX;
-GameTracker *gameTracker;
 FXTracker *gFXT;
 extern long playerCameraMode;
 extern long cameraMode;

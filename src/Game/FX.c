@@ -72,9 +72,6 @@ static long Spiral_Current = 0;
 
 static long Spiral_Max = 100000;
 
-/* cnt */
-static int D_800D1068 = 0;
-
 STATIC FX_PRIM *FX_LastUsedPrim;
 
 STATIC DVECTOR Spiral_Array[65];
@@ -5248,10 +5245,6 @@ void FX_CalcSpiral(int degchange)
     Spiral_Glow_Y = (miny + maxy) / 2;
 }
 
-// Matches 100% on decomp.me but differs on this project
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Spiral);
-#else
 void FX_Spiral(PrimPool *primPool, unsigned long **ot)
 {
     POLY_2G4 *poly;
@@ -5259,12 +5252,12 @@ void FX_Spiral(PrimPool *primPool, unsigned long **ot)
     long offp;
     long offm;
     int n;
-    //DR_TPAGE *drtpage; // unused
+    DR_TPAGE *drtpage;
     int health;
     int health_mod;
     long no_color;
     long color;
-    STATIC short cnt = 0;
+    static short cnt = 0;
     int current_cnt;
     int max64;
     long SPIRAL_COLOR;
@@ -5403,20 +5396,20 @@ void FX_Spiral(PrimPool *primPool, unsigned long **ot)
             *(int *)&ot[1] = (intptr_t)poly & 0xFFFFFF;
         }
 
-        // setDrawTPage(poly, 1, 1, 32);
+        drtpage = (DR_TPAGE *)poly;
 
-        ((unsigned long *)poly)[1] = _get_mode(1, 1, 32);
+        // setDrawTPage(drtpage, 1, 1, 32);
+        drtpage->code[0] = _get_mode(1, 1, 32);
 
-        // addPrim(poly, ot[1]);
+        // addPrim(ot[1], drtpage);
+        drtpage->tag = getaddr(&ot[1]) | 0x1000000;
+        ot[1] = (unsigned long *)((intptr_t)drtpage & 0xFFFFFF);
 
-        *(int *)poly = getaddr(&ot[1]) | 0x1000000;
-        *(int *)&ot[1] = (intptr_t)poly & 0xFFFFFF;
-
-        primPool->nextPrim = (unsigned long *)((char *)poly + 8);
+        primPool->nextPrim = (unsigned long *)(drtpage + 1);
 
         if ((Spiral_Number != 0) || (Spiral_Current == Spiral_Max))
         {
-            STATIC short deg;
+            static short deg = 0;
             Vector f1;
 
             f1.x = Spiral_Glow_X;
@@ -5428,7 +5421,6 @@ void FX_Spiral(PrimPool *primPool, unsigned long **ot)
         }
     }
 }
-#endif
 
 void FX_Health_Spiral(int number, int current_health, int max_health)
 {

@@ -429,7 +429,7 @@ segments:
       - {start: 0x0C28AC, type:  sbss, vram: 0x800D2FF8, name: Game/GAMEPAD}
       - {start: 0x0C28AC, type:  comm, vram: 0x800D3060, name: Game/GAMEPAD}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D310C, name: Game/LIGHT3D}
-      - {start: 0x0C28AC, type:  sbss, vram: 0x800D311C, name: Game/LOAD3D}
+      - {start: 0x0C28AC, type: .sbss, vram: 0x800D311C, name: Game/LOAD3D}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D31D0, name: Game/PSX/MAIN}
       - {start: 0x0C28AC, type:  comm, vram: 0x800D31D4, name: Game/PSX/MAIN}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D3664, name: Game/GENERIC}
@@ -452,7 +452,7 @@ segments:
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D6B30, name: Game/PSX/PSX_G2/MAINVM}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D6B38, name: Game/PLAN/PLANAPI}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D6B88, name: Game/RAZIEL/CONTROL}
-      - {start: 0x0C28AC, type:  sbss, vram: 0x800D6BB8, name: Game/RAZIEL/RAZIEL}
+      - {start: 0x0C28AC, type: .sbss, vram: 0x800D6BB8, name: Game/RAZIEL/RAZIEL}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D7364, name: Game/UNDRWRLD}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D7374, name: Game/SAVEINFO}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D7484, name: Game/ENTRYPOINT}

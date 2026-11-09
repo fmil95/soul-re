@@ -30,33 +30,33 @@
 #include "Game/PSX/MAIN.h"
 
 /*.sbss*/
-STATIC Player Raziel;
+static Player Raziel;
 
-STATIC RazielData *PlayerData;
+static RazielData *PlayerData;
 
-STATIC G2AnimInterpInfo razInterpInfo[3];
+static G2AnimInterpInfo razInterpInfo[3];
 
-STATIC FitPoint constrictData[32];
+static FitPoint constrictData[32];
 
-STATIC MATRIX TempMat; /*unused*/
+static MATRIX TempMat; /*unused*/
 
-STATIC GameTracker *gameTracker;
+static GameTracker *gameTracker;
 
-STATIC long *PadData;
+static long *PadData;
 
-STATIC G2SVector3 ExtraRotData;
+static G2SVector3 ExtraRotData;
 
-STATIC G2SVector3 *ExtraRot;
+static G2SVector3 *ExtraRot;
 
-STATIC Force ExternalForces[4];
+static Force ExternalForces[4];
 
-STATIC int PhysicsMode;
+static int PhysicsMode;
 
-STATIC EngagedInstance EngagedList[15];
+static EngagedInstance EngagedList[15];
 
-STATIC Normal Norm;
+static Normal Norm;
 
-STATIC int LastRC;
+static int LastRC;
 
 STATIC int AutoFaceAngle;
 
@@ -5294,16 +5294,12 @@ void RazielPost(Instance *instance, unsigned long Message, uintptr_t Data)
     }
 }
 
-// Matches 100% on decomp.me but differs on this project
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", SetStates);
-#else
 int SetStates(Instance *instance, GameTracker *GT, long *controlCommand, int AnalogLength)
 {
     int i;
     int Event;
     int Data1;
-    STATIC unsigned long LastTime;
+    static unsigned long LastTime;
     Message *Ptr;
 
     (void)AnalogLength;
@@ -5536,7 +5532,6 @@ int SetStates(Instance *instance, GameTracker *GT, long *controlCommand, int Ana
 
     return 1;
 }
-#endif
 
 void ProcessConstrict()
 {
