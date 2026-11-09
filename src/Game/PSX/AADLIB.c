@@ -1396,10 +1396,6 @@ void aadFreeSingleDynSfx(int sfxID)
     }
 }
 
-// near match, but has $t0 and $a3 registers swapped
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", setSramFullAlarm);
-#else 
 void setSramFullAlarm()
 { 
 	AadNewSramBlockDesc *sramDescTbl; 
@@ -1459,17 +1455,16 @@ void setSramFullAlarm()
 	}
 
 	gSramFullAlarm = 1;
-    
+
+	gSramUsedBlocks = numUsedBlocks;
+
 	gSramTotalUsed = totalUsed << 3;
 	gSramTotalFree = totalFree << 3;
-    
-	gSramUsedBlocks = numUsedBlocks;
-    
+
 	gSramLargestFree = largestFree << 3;
-    
+
 	gSramFreeBlocks = numFreeBlocks;
 }
-#endif
 
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadLoadSingleDynSfx);
 

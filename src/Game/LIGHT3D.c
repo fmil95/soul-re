@@ -377,8 +377,8 @@ void LIGHT_CalcLightValue(TFace* tface, Instance* instance, Terrain* terrain)
         vertex1 = (short*)&terrain->vertexList[tface->face.v1];
         vertex2 = (short*)&terrain->vertexList[tface->face.v2];
         
-        position[0] = instance->position.x - bsp->globalOffset.x;
-        position[1] = instance->position.y - bsp->globalOffset.y;
+        position[0] = instance->position.x       - bsp->globalOffset.x;
+        position[1] = instance->position.y       - bsp->globalOffset.y;
         position[2] = instance->shadowPosition.z - bsp->globalOffset.z;
 
         minor = COLLIDE_GetNormal(tface->normal, (short*)terrain->normalList, &normal);
@@ -391,6 +391,7 @@ void LIGHT_CalcLightValue(TFace* tface, Instance* instance, Terrain* terrain)
         {
             major -= 3;
         }
+
         if (minor > 2) 
         {
             minor -= 3;
