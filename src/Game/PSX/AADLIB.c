@@ -15,15 +15,6 @@ AadMemoryStruct *aadMem = NULL;
 
 static int gDefragRequest = 0;
 
-static char D_800D1178[] = "0123456789";
-
-static char D_800D1184[] = "\\kain2\\area\\%s\\bin\\%s.snf";
-static char D_800D11A0[] = "\\kain2\\area\\%s\\bin\\%s.smf";
-static char D_800D11BC[] = "\\kain2\\sfx\\object\\%s\\%s.snf";
-static char D_800D11D8[] = "\\kain2\\sfx\\object\\%s\\%s.smf";
-
-static unsigned long aadReverbModeSize[10] = {0x00000000, 0x000026C0, 0x00001F40, 0x00004840, 0x00006FE0, 0x00000ADE0, 0x0000F6C0, 0x00018040, 0x00018040, 0x00003C00};
-
 static unsigned long __hblankEvent;
 
 static unsigned char *smfDataPtr;
@@ -923,10 +914,6 @@ void aadPurgeLoadQueue()
     aadMem->numLoadReqsQueued = 0;
 }
 
-// Matches 100% on decomp.me but differs on this project
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadProcessLoadQueue);
-#else
 void aadProcessLoadQueue()
 {
     AadDynamicSfxLoadInfo *info;
@@ -1070,7 +1057,6 @@ void aadProcessLoadQueue()
         aadProcessSramDefrag();
     }
 }
-#endif
 
 void aadLoadDynamicSfxAbort(AadDynamicSfxLoadInfo *info, int error)
 {
@@ -2026,6 +2012,8 @@ int aadGetReverbMode()
 {
     return 3;
 }
+
+static unsigned long aadReverbModeSize[10] = {0x00000000, 0x000026C0, 0x00001F40, 0x00004840, 0x00006FE0, 0x00000ADE0, 0x0000F6C0, 0x00018040, 0x00018040, 0x00003C00};
 
 unsigned long aadGetReverbSize()
 {
