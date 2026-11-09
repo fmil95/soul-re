@@ -18,13 +18,19 @@ unsigned char dualshock_motors[] = {0, 0};
 unsigned char dualshock_align[] = {0x00, 0x01, 0xFF, 0xFF, 0xFF, 0xFF};
 
 //.sbss
-STATIC long overrideData[5][2];
+static short lastPad[2] __asm__("lastPad.24"); // belongs to GAMEPAD_Commands
 
-STATIC long overrideCommand[5][2];
+static int ignoreFind;
+
+static long dualshock0_time;
+
+static long dualshock1_time;
+
+static long overrideData[5][2];
+
+static long overrideCommand[5][2];
 
 int gamePadControllerOut;
-
-STATIC int ignoreFind;
 
 unsigned short psxData[2];
 
@@ -39,10 +45,6 @@ ControllerPacket gpbuffer2;
 unsigned char controllerType[2];
 
 long gDummyCommand[2][2];
-
-STATIC long dualshock0_time;
-
-STATIC long dualshock1_time;
 
 INCLUDE_ASM("asm/nonmatchings/Game/GAMEPAD", GAMEPAD_Commands);
 

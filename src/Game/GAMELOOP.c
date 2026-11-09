@@ -44,33 +44,33 @@ long playerCameraMode = 0xD;
 
 Object *fontsObject = NULL;
 
-STATIC short pause_redraw_flag;
+static unsigned long **gOt[2];
 
-STATIC PrimPool *primPool[2];
+static PrimPool *primPool[2];
 
-STATIC InstanceList *instanceList;
+static PolytopeList *gPolytopeList;
 
-STATIC InstancePool *instancePool;
+static InstanceList *instanceList;
 
-STATIC void *planningPool;
+static InstancePool *instancePool;
 
-STATIC void *enemyPlanPool;
+static VertexPool *gVertexPool;
+
+static LightInfo *gLightInfo;
+
+static void *enemyPlanPool;
+
+static void *planningPool;
+
+static ObjectTracker *GlobalObjects;
+
+static short pause_redraw_flag;
+
+static void *pause_redraw_prim;
 
 FXTracker *fxTracker;
 
-STATIC void *pause_redraw_prim;
-
-STATIC VertexPool *gVertexPool;
-
-STATIC ObjectTracker *GlobalObjects;
-
-STATIC LightInfo *gLightInfo;
-
-STATIC unsigned long **gOt[2];
-
 char *primBase;
-
-STATIC PolytopeList *gPolytopeList;
 
 FXTracker *gFXT;
 

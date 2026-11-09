@@ -72,29 +72,29 @@ static long Spiral_Current = 0;
 
 static long Spiral_Max = 100000;
 
-STATIC FX_PRIM *FX_LastUsedPrim;
+static Position FX_ConstrictPosition;
 
-STATIC DVECTOR Spiral_Array[65];
+static Position *FX_ConstrictPositionPtr;
 
-STATIC DVECTOR Spiral_OffsetP[64];
+static FX_PRIM *FX_LastUsedPrim;
 
-STATIC DVECTOR Spiral_OffsetM[64];
+static short FX_Frames;
 
-STATIC int Spiral_Glow_X;
+static short FX_TimeCount;
 
-STATIC int Spiral_Glow_Y;
+static DVECTOR Spiral_Array[65];
 
-STATIC int Spiral_Glow_Size;
+static DVECTOR Spiral_OffsetP[64];
 
-STATIC int Spiral_Mod;
+static DVECTOR Spiral_OffsetM[64];
 
-STATIC Position FX_ConstrictPosition;
+static int Spiral_Glow_X;
 
-STATIC Position *FX_ConstrictPositionPtr;
+static int Spiral_Glow_Y;
 
-STATIC short FX_Frames;
+static int Spiral_Glow_Size;
 
-STATIC short FX_TimeCount;
+static int Spiral_Mod;
 
 static inline long FX_GetColor(ObjectEffect *effect, int i)
 {

@@ -7,7 +7,40 @@
 #include "Game/MONSTER/MONAPI.h"
 #include "Game/PSX/MAIN.h"
 
-ObjectFunc objectFunc[8924 + 8];
+ObjectAccess objectAccess[/*28*/] = 
+{
+    { "hud_____", NULL },
+    { "flame___", NULL },
+    { "fonts___", NULL },
+    { "waterfx_", NULL },
+    { "dbgfont_", NULL },
+    { "cammode_", NULL },
+    { "introfx_", NULL },
+    { "mapicon_", NULL },
+    { "paths___", NULL },
+    { "soul____", NULL },
+    { "particle", NULL },
+    { "knife___", NULL },
+    { "stick___", NULL },
+    { "xbow____", NULL },
+    { "fthrow__", NULL },
+    { "moregg__", NULL },
+    { "wcegg___", NULL },
+    { "eggsac__", NULL },
+    { "mound___", NULL },
+    { "force___", NULL },
+    { "glphicon", NULL },
+    { "healthu_", NULL },
+    { "sreavr__", NULL },
+    { "wrpface_", NULL },
+    { "healths_", NULL },
+    { "eaggot__", NULL },
+    { "eaggots_", NULL },
+    { NULL,       NULL },
+};
+
+// redeclared as extern and without array dim so that it isn't accessed by $gp
+extern ObjectFunc objectFunc[/*8*/];
 
 void OBTABLE_InstanceInit(Instance *instance)
 {
