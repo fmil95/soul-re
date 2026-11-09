@@ -40,16 +40,6 @@ static SVector *collide_normal0;
 
 static SVector *collide_normal1;
 
-// not sure what the code is actually testing for on the functions that have the 0 == 0 compare, but we're guessing it's checking the COP2 logic is on
-static inline int gteIsDisabled() 
-{
-    int i;
-    
-    gte_disabled(i);
-    
-    return i;
-}
-
 int COLLIDE_PointInTriangle(SVector *v0, SVector *v1, SVector *v2, SVector *point, SVector *normal)
 {
     Triangle2D *triangle;
@@ -2894,21 +2884,17 @@ void COLLIDE_SegmentCollisionOff(Instance *instance, int segment)
     }
 }
 
-// would match, but has an extra nop
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/COLLIDE", COLLIDE_FindCollisionFaceNormal);
-#else
 long COLLIDE_FindCollisionFaceNormal(CollideInfo *collideInfo, Normal *normal)
 {
     long valid_normal;
     
     valid_normal = 0;
     
-    if (collideInfo->type1 == 1)
+    if ((unsigned char)collideInfo->type1 == 1)
     {
         // ???
     }
-    else if (collideInfo->type1 == 3) 
+    else if ((unsigned char)collideInfo->type1 == 3)
     {
         TFace *tface;
         
@@ -2926,9 +2912,8 @@ long COLLIDE_FindCollisionFaceNormal(CollideInfo *collideInfo, Normal *normal)
         SVECTOR *lNormal; 
         Instance *inst1;
         TFace *tface; // not from decls.h
-        int gteGood;  // not from decls.h  
        
-        if ((collideInfo->type1 == 2) && (gteGood = !gteIsDisabled(), tface = collideInfo->prim1, gteGood != 0)) 
+        if (((unsigned char)collideInfo->type1 == 2) && (tface = collideInfo->prim1, ((unsigned char)collideInfo->type1 >> 8) == 0))
         {
             inst1 = collideInfo->inst1;
             
@@ -2955,7 +2940,6 @@ long COLLIDE_FindCollisionFaceNormal(CollideInfo *collideInfo, Normal *normal)
     
     return valid_normal;
 }
-#endif
 
 short *COLLIDE_GetBSPTreeFlag(CollideInfo *collideInfo)
 {
