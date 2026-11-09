@@ -362,14 +362,12 @@ void StateHandlerWallIdle(CharacterState *In, int CurrentSection, intptr_t Data)
     }
 }
 
-// it is equivalent, but doesn't match because the function has some debug code involving the Frame local that is hard to replicate due to -O2
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", StateHandlerWallDismount);
-#else 
 void StateHandlerWallDismount(CharacterState *In, int CurrentSection, intptr_t Data) 
 {
     Message *Ptr; 
-    //int Frame;    
+    int Frame; 
+    
+    Frame = 0;
 
     while ((Ptr = PeekMessageQueue(&In->SectionList[CurrentSection].Event)) != NULL) 
     {
@@ -416,6 +414,11 @@ void StateHandlerWallDismount(CharacterState *In, int CurrentSection, intptr_t D
         }
 
         DeMessageQueue(&In->SectionList[CurrentSection].Event);
+
+        // this check wasn't successfully optimized out from what it seems
+        if (((unsigned char)Frame >> 8) != 0)
+        {
+            Frame = In->SectionList[CurrentSection].Data1 + In->SectionList[CurrentSection].Data2;
+        } 
     }
 }
-#endif
