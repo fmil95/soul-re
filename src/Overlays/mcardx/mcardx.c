@@ -202,7 +202,10 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000C68);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000C8C);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000EF8);
+void func_88000EF8(mcard_t *mcard)
+{
+    mcard->state.fsm = fsmcard_format;
+};
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000F04);
 
@@ -444,7 +447,11 @@ void func_88000700(void) {};
 
 void func_8800076C(void) {};
 
-void func_88000790(void) {};
+void func_88000790(mcpsx_t *mcpsx, mcpsx_func_t func)
+{
+    mcpsx->state.func = func;
+    mcpsx->state.sync = sync_func;
+}
 
 void func_880007A0(void) {};
 
@@ -510,9 +517,12 @@ void func_88000C34(void) {};
 
 void func_88000C68(void) {};
 
-void func_88000C8C(void) {};
+mcard_status_t func_88000C8C(mcard_t *mcard)) {};
 
-void func_88000EF8(void) {};
+void func_88000EF8(mcard_t *mcard)
+{
+    mcard->state.fsm = fsmcard_format;
+};
 
 void func_88000F04(void) {};
 
@@ -550,7 +560,18 @@ int func_880013DC(mcmenu_t *mcmenu, int index, int arg2) {};
 
 int func_88001D50(mcmenu_t *mcmenu, int index) {};
 
-int func_88001DBC(mcmenu_t *mcmenu, int index) {};
+int func_88001DBC(mcmenu_t *mcmenu, int index)
+{
+    GameTracker *gt;
+
+    gt = GAMELOOP_GetGT();
+
+    gt->gameFlags |= 0x20000000;
+
+    do_check_controller(gt);
+
+    return func_880013DC(mcmenu, index, 0);
+}
 
 void func_88001E14(void) {};
 
