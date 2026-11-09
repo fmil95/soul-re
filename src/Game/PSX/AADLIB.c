@@ -808,12 +808,10 @@ void aadRelocateMusicMemoryBegin()
     aadMem->flags |= 0x2;
 }
 
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadRelocateMusicMemoryEnd);
-#else 
 void aadRelocateMusicMemoryEnd(void *oldAddress, int offset)
 {
 	int bank; 
+    AadSoundBankHdr *temp; // not from decls.h
 
 	for (bank = 0; bank < 2; bank++)
 	{
@@ -834,7 +832,9 @@ void aadRelocateMusicMemoryEnd(void *oldAddress, int offset)
 			aadMem->dynamicWaveAddr[bank]           = (unsigned long*)((char*)aadMem->dynamicWaveAddr[bank] + offset);
 			aadMem->dynamicSequenceAddressTbl[bank] = (unsigned char**)((char*)aadMem->dynamicSequenceAddressTbl[bank] + offset);
 
-			for (i = 0; i < bankHdr->numSequences; i++)
+			temp = bankHdr;
+
+			for (i = 0; i < temp->numSequences; i++)
 			{
 				aadMem->dynamicSequenceAddressTbl[bank][i] += offset;
 			}
@@ -872,7 +872,6 @@ void aadRelocateMusicMemoryEnd(void *oldAddress, int offset)
 
 	aadMem->flags &= ~0x2;
 }
-#endif
 
 void aadRelocateSfxMemory(void *oldAddress, int offset)
 {
