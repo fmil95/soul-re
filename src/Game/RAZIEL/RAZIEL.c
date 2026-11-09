@@ -5307,6 +5307,7 @@ int SetStates(Instance *instance, GameTracker *GT, long *controlCommand, int Ana
     Data1 = 0;
 
     LastTime = (GetRCnt(0xF2000000) & 0xFFFF) | (gameTimer << 16);
+    (void)LastTime;
 
     PadData = controlCommand;
 
