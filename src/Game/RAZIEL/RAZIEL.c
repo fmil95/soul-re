@@ -6656,7 +6656,70 @@ void RazielInit(Instance *instance, GameTracker *gameTracker)
     InitStates(instance);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/RAZIEL/RAZIEL", RazielCollide);
+void RazielCollide(Instance *instance, GameTracker *gameTracker)
+{
+    CollideInfo *collideInfo;
+
+    (void)gameTracker;
+
+    collideInfo = (CollideInfo *)instance->collideInfo;
+
+    if (GetCollisionType(instance) == 1)
+    {
+        return;
+    }
+
+    if (collideInfo->type1 != 1)
+    {
+        if (((collideInfo->type0 == 4) || (collideInfo->type0 == 1)) && (((collideInfo->type1 == 3) && !(((TFace *)collideInfo->prim1)->attr & 0x8)) || ((collideInfo->type1 == 5) && (((TFace *)collideInfo->prim1)->face.v0 & 0x2000)) || (collideInfo->type1 == 2)))
+        {
+            SVECTOR *offset;
+
+            offset = (SVECTOR *)&((CollideInfo *)instance->collideInfo)->offset;
+
+            if ((collideInfo->flags & 0x2) || (collideInfo->flags & 0x8))
+            {
+                instance->offset.x += offset->vx;
+                instance->offset.y += offset->vy;
+                instance->offset.z += offset->vz;
+
+                instance->position.x += offset->vx;
+                instance->position.y += offset->vy;
+                instance->position.z += offset->vz;
+
+                COLLIDE_UpdateAllTransforms(instance, (SVECTOR *)&collideInfo->offset);
+            }
+            else
+            {
+                instance->position.x += offset->vx;
+                instance->position.y += offset->vy;
+                instance->position.z += offset->vz;
+
+                COLLIDE_UpdateAllTransforms(instance, (SVECTOR *)&collideInfo->offset);
+
+                Raziel.collisionEdgeOffset.x += offset->vx;
+                Raziel.collisionEdgeOffset.y += offset->vy;
+                Raziel.collisionEdgeOffset.z += offset->vz;
+            }
+        }
+    }
+    else if (*(unsigned int *)&((TFace *)collideInfo->prim1)->face.v0 & 0x2000)
+    {
+        SVECTOR *offset;
+
+        offset = (SVECTOR *)&((CollideInfo *)instance->collideInfo)->offset;
+
+        offset->vz = 0;
+
+        instance->offset.x += offset->vx;
+        instance->offset.y += offset->vy;
+
+        instance->position.x += offset->vx;
+        instance->position.y += offset->vy;
+
+        COLLIDE_UpdateAllTransforms(instance, (SVECTOR *)&collideInfo->offset);
+    }
+}
 
 void RAZIEL_TurnHead(Instance *instance, short *rotx, short *rotz, GameTracker *gameTracker)
 {
