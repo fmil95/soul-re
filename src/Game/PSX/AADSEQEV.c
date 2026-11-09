@@ -1,5 +1,6 @@
 #include "Game/PSX/AADLIB.h"
 #include "Game/PSX/AADSEQEV.h"
+#include "Game/PSX/AADSFX.h"
 #include "Game/PSX/AADSQCMD.h"
 #include "Game/PSX/AADVOICE.h"
 #include "Game/MATH3D.h"
@@ -310,13 +311,13 @@ void midiNoteOn(AadSeqEvent *event, AadSequenceSlot *slot)
 
                             if (((&toneAtrTbl[t])->pitchBendMax != 0) && (slot->pitchWheel[channel] != 8192))
                             {
-                                aadPlayTonePitchBend(&toneAtrTbl[t], waveStartAddr, progAtr, transposedNote, event->dataByte[1], slot->volume[channel], slot->panPosition[channel], slot->slotVolume, slot->masterVolPtr[0], voice, slot->pitchWheel[channel]);
+                                aadPlayTonePitchBend(&toneAtrTbl[t], waveStartAddr, progAtr, transposedNote, event->dataByte[1], slot->volume[channel], slot->panPosition[channel], slot->slotVolume, *slot->masterVolPtr, voice, slot->pitchWheel[channel]);
 
                                 voice->handle = 0;
                             }
                             else
                             {
-                                aadPlayTone(&toneAtrTbl[t], waveStartAddr, progAtr, transposedNote, event->dataByte[1], slot->volume[channel], slot->panPosition[channel], slot->slotVolume, slot->masterVolPtr[0], voice, 0);
+                                aadPlayTone(&toneAtrTbl[t], waveStartAddr, progAtr, transposedNote, event->dataByte[1], slot->volume[channel], slot->panPosition[channel], slot->slotVolume, *slot->masterVolPtr, voice, 0);
 
                                 voice->handle = 0;
                             }
@@ -534,7 +535,7 @@ void aadUpdateSlotVolPan(AadSequenceSlot *slot)
             {
                 unsigned long masterVolumeSquared;
 
-                masterVolumeSquared = ((slot->masterVolPtr[0] + 1) * (slot->masterVolPtr[0] + 1)) - 1;
+                masterVolumeSquared = ((*slot->masterVolPtr + 1) * (*slot->masterVolPtr + 1)) - 1;
 
                 newVoiceVol.left  = (newVoiceVol.left  * masterVolumeSquared) >> 14;
                 newVoiceVol.right = (newVoiceVol.right * masterVolumeSquared) >> 14;
