@@ -563,7 +563,63 @@ TFace *COLLIDE_PointAndTerrain(Terrain *terrain, PCollideInfo *pcollideInfo, LCo
 
 INCLUDE_ASM("asm/nonmatchings/Game/COLLIDE", COLLIDE_PointAndTerrainFunc);
 
-INCLUDE_ASM("asm/nonmatchings/Game/COLLIDE", COLLIDE_PointAndHFace);
+int COLLIDE_PointAndHFace(SVector *newPos, SVector *oldPos, HFace *hface, Model *model, SVector *hfNormal)
+{
+    MATRIX *posMatrix; 
+    SVector *normal; 
+    Vector *dpv; 
+    SVector *planePoint; 
+    SVector *vertex0;
+    SVector *vertex1;
+    
+    posMatrix = ((MATRIX*)getScratchAddr(16));
+
+    normal = ((SVector *)getScratchAddr(29));
+
+    dpv = ((Vector *)getScratchAddr(32));
+
+    planePoint = ((SVector *)getScratchAddr(36));
+
+    if (((unsigned char)hface->normal >> 8) != 0) 
+    {
+        return (unsigned char)hface->normal >> 8;
+    }
+
+    COLLIDE_GetNormal(hface->normal, (short*)model->normalList, ((SVector *)getScratchAddr(29)));
+
+    vertex0 = (SVector *)&model->vertexList[hface->v0].vertex;
+    vertex1 = (SVector *)&model->vertexList[hface->v1].vertex;
+
+    SUB_SVEC(SVector, (SVector*)posMatrix->m[0], SVector, newPos, SVector, vertex0);
+    SUB_SVEC(SVector, (SVector*)posMatrix->m[1], SVector, oldPos, SVector, vertex0);
+
+    COPY_SVEC(SVector, (SVector*)posMatrix->m[2], SVector, vertex0);
+    
+    SetRotMatrix(posMatrix);
+    
+    gte_ldv0(normal);
+    gte_nrtv0();
+    gte_stlvnl(dpv);
+    
+    if (((dpv->x < 0) && (dpv->x < dpv->y)) && (dpv->y >= 0))
+    {
+        COLLIDE_IntersectLineAndPlane_S(planePoint, (Position*)oldPos, (Position*)newPos, normal, dpv->z);
+        
+        if (COLLIDE_PointInTriangle(vertex0, vertex1, (SVector*)&model->vertexList[hface->v2], planePoint, normal) != 0)
+        {
+            *(unsigned int*)&newPos->x = *(unsigned int*)&planePoint->x; 
+            *(unsigned int*)&newPos->z = *(unsigned int*)&planePoint->z;
+            
+            hfNormal->x = normal->x;
+            hfNormal->y = normal->y;
+            hfNormal->z = normal->z;
+            
+            return 1;
+        }
+    }
+
+    return 0;
+}
 
 void COLLIDE_PointAndInstance(PCollideInfo *pcollideInfo, Instance *instance)
 {
