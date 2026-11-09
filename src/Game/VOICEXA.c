@@ -387,19 +387,19 @@ void VOICEXA_Resume()
 
 void VOICEXA_Tick()
 {
-    int val;
 	XAVoiceTracker* vt;
+    int temp; // not from decls.h
 
-    val = 3;
-    
 	vt = &voiceTracker;
+
+    temp = 3;
 
 	if (gameTrackerX.debugFlags & 0x80000)
 	{
 		processVoiceCommands(vt);
 		processCdCommands(vt);
 
-		if (((vt->cdCmdsQueued == 0) && (vt->voiceCmdsQueued == 0)) && (vt->voiceStatus < val))
+		if (((vt->cdCmdsQueued == 0) && (vt->voiceCmdsQueued == 0)) && (vt->voiceStatus < temp))
 		{
             if (vt->voiceStatus == 0)
             {

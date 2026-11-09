@@ -3,8 +3,10 @@
 
 #include "common.h"
 
-void StateHandlerSwim(CharacterState *In, int CurrentSection, intptr_t Data);
-void StateHandlerSwimTread(CharacterState *In, int CurrentSection, intptr_t Data);
+void StateHandlerInitSwim(CharacterState *In, int CurrentSection, intptr_t Data);
 void StateHandlerSwimCoil(CharacterState *In, int CurrentSection, intptr_t Data);
+void StateHandlerSwimTread(CharacterState *In, int CurrentSection, intptr_t Data);
+void StateHandlerSwimDiveIn(CharacterState *In, int CurrentSection, intptr_t Data);
+void StateHandlerSwim(CharacterState *In, int CurrentSection, intptr_t Data);
 
 #endif
