@@ -24,4 +24,8 @@ void sfxCmdSetVoiceAttr(AadSfxCommand *sfxCmd);
 void sfxCmdSetVoiceKeyOn(AadSfxCommand *sfxCmd);
 void sfxCmdSetVoiceKeyOff(AadSfxCommand *sfxCmd);
 
+extern unsigned short aadPitchTable[85];
+
+extern unsigned long aadStepsPerCent[85];
+
 #endif
