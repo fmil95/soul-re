@@ -385,7 +385,63 @@ void VOICEXA_Resume()
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/VOICEXA", VOICEXA_Tick);
+void VOICEXA_Tick()
+{
+    int val;
+	XAVoiceTracker* vt;
+
+    val = 3;
+    
+	vt = &voiceTracker;
+
+	if (gameTrackerX.debugFlags & 0x80000)
+	{
+		processVoiceCommands(vt);
+		processCdCommands(vt);
+
+		if (((vt->cdCmdsQueued == 0) && (vt->voiceCmdsQueued == 0)) && (vt->voiceStatus < val))
+		{
+            if (vt->voiceStatus == 0)
+            {
+                // the redundant voiceStatus check is needed for a match
+                if (((char)vt->voiceStatus == 0) && (vt->reqsQueued != 0))
+                {
+                    putVoiceCommand(vt, 0, 1, vt->requestQueue[vt->reqOut]);
+                
+                    vt->reqsQueued--;
+    
+                    if (++vt->reqOut == 4)
+                    {
+                        vt->reqOut = 0;
+                    }
+                }
+            }
+            else
+            {
+                CdControlB(CdlGetlocL, NULL, voiceTracker.cdResult);
+                    
+                if (vt->cdResult[3] & 0x2)
+                {
+                    vt->voiceStatus = 2;
+                    
+                    vt->currentPos.track = 0;
+    
+                    voiceTracker.currentPos.minute = vt->cdResult[0];
+                        
+                    vt->currentPos.second = vt->cdResult[1];
+                    vt->currentPos.sector = vt->cdResult[2];
+
+                    vt->currentSector = CdPosToInt(&vt->currentPos) - 150;
+    
+                    if (vt->currentSector >= (vt->endSector - 8))
+                    {
+                        putVoiceCommand(vt, 1, 0, 0);
+                    }
+                }
+            }
+		}
+	}
+}
 
 int VOICEXA_IsPlaying()
 {
