@@ -1144,10 +1144,6 @@ void aadLoadDynamicSfxReturn(void *loadedDataPtr, void *data, void *data2)
     }
 }
 
-// near match, but has $t3 and $t4 registers swapped
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadWaveMalloc);
-#else 
 int aadWaveMalloc(unsigned short waveID, unsigned long waveSize)
 {
 	AadNewSramBlockDesc *sramDesc;
@@ -1163,7 +1159,7 @@ int aadWaveMalloc(unsigned short waveID, unsigned long waveSize)
     
 	safeWaveSize = waveSize & ~(0x1 | 0x2 | 0x4); 
 
-	if ((waveSize & 0x7))
+	if ((bestFitIndex = waveSize) & 0x7) // this line is devious 
 	{
 		safeWaveSize += 8;
 	}
@@ -1178,9 +1174,8 @@ int aadWaveMalloc(unsigned short waveID, unsigned long waveSize)
 
 	for (i = 128; sramDesc != NULL; )
 	{
-		if (--i == -1)
+		if (i-- == 0)
 		{
-			i++;
 			break;
 		}
 
@@ -1275,7 +1270,6 @@ int aadWaveMalloc(unsigned short waveID, unsigned long waveSize)
 
 	return 255;
 }
-#endif
 
 unsigned long aadGetSramBlockAddr(int handle)
 {
