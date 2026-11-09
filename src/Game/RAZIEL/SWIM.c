@@ -282,12 +282,9 @@ void StateHandlerSwimTread(CharacterState *In, int CurrentSection, intptr_t Data
         switch (Ptr->ID) 
         {
         case 0x100001:
-            if (!(Raziel.Mode & 0x40000)) 
+            if (!(Raziel.Mode & 0x40000) && (CurrentSection == 0)) 
             {
-                if (CurrentSection == 0) 
-                {
-                    CAMERA_ChangeToUnderWater(&theCamera, In->CharacterInstance);
-                }
+                CAMERA_ChangeToUnderWater(&theCamera, In->CharacterInstance);
             } 
                 
             if (CurrentSection == 0) 
@@ -307,12 +304,9 @@ void StateHandlerSwimTread(CharacterState *In, int CurrentSection, intptr_t Data
             G2EmulationSwitchAnimation(In, CurrentSection, 61, 0, 9, 2);
             break;
         case 0x100004:
-            if (!(Raziel.Mode & 0x40000)) 
+            if (!(Raziel.Mode & 0x40000) && (CurrentSection == 0)) 
             {
-                if (CurrentSection == 0) 
-                {
-                    CAMERA_ChangeToOutOfWater(&theCamera, In->CharacterInstance);
-                }
+                CAMERA_ChangeToOutOfWater(&theCamera, In->CharacterInstance);
             } 
                 
             if (CurrentSection == 0) 
@@ -337,13 +331,13 @@ void StateHandlerSwimTread(CharacterState *In, int CurrentSection, intptr_t Data
                     {
                         razSetSwimVelocity(In->CharacterInstance, 0, PlayerData->SwimPhysicsSurfKickDecel);
                         
-                        G2EmulationSwitchAnimation(In, CurrentSection, 61, 0, 0xF, 2);
+                        G2EmulationSwitchAnimation(In, CurrentSection, 61, 0, 15, 2);
                         break;
                     }
                     
                     G2EmulationSwitchAnimation(In, CurrentSection, 62, 0, 3, 2);
                     
-                    Raziel.passedMask &= ~1;
+                    Raziel.passedMask &= ~0x1;
                     break;
                 } 
                 else
@@ -362,7 +356,7 @@ void StateHandlerSwimTread(CharacterState *In, int CurrentSection, intptr_t Data
                     razSetSwimVelocity(In->CharacterInstance, 0, PlayerData->SwimPhysicsSurfAccelerationOut);
                 }
                 
-                G2EmulationSwitchAnimation(In, CurrentSection, 0x3D, 0, 0xF, 2);
+                G2EmulationSwitchAnimation(In, CurrentSection, 61, 0, 15, 2);
                 break;
             }
             

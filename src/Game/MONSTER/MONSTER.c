@@ -2628,7 +2628,103 @@ int MONSTER_StartVertexBlood(Instance *instance, SVector *location, int amount)
     return -1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MONSTER_VertexBlood);
+void MONSTER_VertexBlood(Instance *instance, int vert, int amount)
+{
+    int i;          
+    Model *model;            
+
+    model = instance->object->modelList[instance->currentModel];
+
+    if (instance->perVertexColor != NULL)
+    {
+        CVECTOR *c;
+
+        c = &instance->perVertexColor[vert];
+
+        if (amount == 0)
+        {
+            MEMPACK_Free((char *)instance->perVertexColor);
+
+            instance->perVertexColor = NULL;
+        }
+        else
+        {
+            MonsterVars *mv; 
+            int current;     
+            int wanted;      
+            int col; 
+
+            mv = (MonsterVars *)instance->extraData;
+
+            if ((c->g <= c->r) && (c->g < c->b))
+            {
+                current = c->g;
+                wanted  = mv->subAttr->bruiseGreen;
+            }
+            else if ((c->g <= c->r) || (c->r >= c->b))
+            {
+                current = c->b;
+                wanted  = mv->subAttr->bruiseBlue;
+            }
+            else
+            {
+                current = c->r;
+                wanted  = mv->subAttr->bruiseRed;
+            }
+
+            wanted = ((256 - amount) * (0xFF - wanted)) >> 8;
+
+            if ((c->cd == 1) && (current < wanted))
+            {
+                c = instance->perVertexColor;
+
+                for (i = model->numVertices; i != 0; i--, c++)
+                {
+                    if (c->cd == 1)
+                    {
+                        col = c->r + 8;
+
+                        if (col >= 256)
+                        {
+                            c->r = 0xFF;
+                        }
+                        else
+                        {
+                            c->r = col;
+                        }
+
+                        col = c->g + 8;
+
+                        if (col >= 256)
+                        {
+                            c->g = 0xFF;
+                        }
+                        else
+                        {
+                            c->g = col;
+                        }
+
+                        col = c->b + 8;
+
+                        if (col >= 256)
+                        {
+                            c->b = 0xFF;
+                        }
+                        else
+                        {
+                            c->b = col;
+                        }
+
+                        if ((*(long *)c & 0xFFFFFF) == 0xFFFFFF)
+                        {
+                            c->cd = 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
 
 void ProcessBurntMess(Instance *instance, int vertidx, int segidx, int dist, void *cb_data)
 {
