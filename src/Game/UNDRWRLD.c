@@ -125,7 +125,52 @@ void UNDERWORLD_DoUV(unsigned char *uv, UW_ScreenXY *p0, int tx)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/UNDRWRLD", UNDERWORLD_Poly);
+POLY_GT3 *UNDERWORLD_Poly(POLY_GT3 *last, UW_ScreenXY *p0, UW_ScreenXY *p1, UW_ScreenXY *p2, int drawY)
+{
+    int tx; 
+    POLY_GT3* poly; 
+    int col; 
+
+    poly = &last[1];
+
+    if (p0->sx < p1->sx)
+    {
+        tx = MIN(p0->sx, p2->sx);
+        tx &= ~0x3F;
+
+        setPolyGT3(poly);
+    } 
+    else 
+    {
+        tx = MIN(p1->sx, p2->sx);
+        tx &= ~0x3F;
+
+        setPolyGT3(poly);
+    }
+
+    // setXY3(poly, p0->dx, p0->dy, p1->dx, p1->dy, p2->dx, p2->dy);
+    *(int*)&poly->x0 = *(int*)&p0->dx;
+    *(int*)&poly->x1 = *(int*)&p1->dx;
+    *(int*)&poly->x2 = *(int*)&p2->dx;
+    
+    UNDERWORLD_DoUV(&poly->u0, p0, tx);
+    UNDERWORLD_DoUV(&poly->u1, p1, tx);
+    UNDERWORLD_DoUV(&poly->u2, p2, tx);
+
+    poly->tpage = GetTPage(2, 1, tx, drawY);
+    
+    col = 16;
+
+    setRGB0(poly, col, col, col);
+    setRGB1(poly, col, col, col);
+    setRGB2(poly, col, col, col);
+
+    setSemiTrans(poly, 1);
+
+    setaddr(poly, last);
+
+    return poly;
+}
 
 void UNDERWORLD_DisplayFrame(long *primStart, long drawY)
 {

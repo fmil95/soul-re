@@ -591,6 +591,10 @@ typedef struct
 #define setWH(p, _w, _h) \
     (p)->w = _w, (p)->h = _h
 
+#define setSemiTrans(p, abe) \
+	((abe)?setcode(p, getcode(p)|0x02):setcode(p, getcode(p)&~0x02))
+    
+#define setPolyGT3(p)	setlen(p, 9),  setcode(p, 0x34)
 #define setPolyF4(p) setlen(p, 5), setcode(p, 0x28)
 #define setPolyG4(p) setlen(p, 8), setcode(p, 0x38)
 
