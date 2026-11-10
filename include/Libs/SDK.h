@@ -324,6 +324,54 @@
     : : "r"(r0), "r"(r1), "r"(r2)       \
     : "memory")
 
+#define gte_strgb3(r0, r1, r2) __asm__( \
+    "swc2    $20, 0(%0);"              \
+    "swc2    $21, 0(%1);"              \
+    "swc2    $22, 0(%2)"               \
+    : : "r"(r0), "r"(r1), "r"(r2)      \
+    : "memory")
+
+#define gte_stv0(r0) __asm__( \
+    "swc2    $0, 0(%0);"      \
+    "swc2    $1, 4(%0)"       \
+    : : "r"(r0)               \
+    : "memory")
+
+#define gte_stv1(r0) __asm__( \
+    "swc2    $2, 0(%0);"      \
+    "swc2    $3, 4(%0)"       \
+    : : "r"(r0)               \
+    : "memory")
+
+#define gte_stv2(r0) __asm__( \
+    "swc2    $4, 0(%0);"      \
+    "swc2    $5, 4(%0)"       \
+    : : "r"(r0)               \
+    : "memory")
+
+#define gte_ldbv(r0) __asm__( \
+    "lbu    $12, 0(%0);"      \
+    "lbu    $13, 1(%0);"      \
+    "mtc2    $12, $9;"        \
+    "mtc2    $13, $10"        \
+    : : "r"(r0)               \
+    : "$12", "$13")
+
+#define gte_stbv(r0) __asm__( \
+    "mfc2    $12, $9;"        \
+    "mfc2    $13, $10;"       \
+    "sb    $12, 0(%0);"       \
+    "sb    $13, 1(%0)"        \
+    : : "r"(r0)               \
+    : "$12", "$13", "memory")
+
+#define gte_ldrgb3(r0, r1, r2) __asm__( \
+    "lwc2    $20, 0(%0);"              \
+    "lwc2    $21, 0(%1);"              \
+    "lwc2    $22, 0(%2);"              \
+    "lwc2    $6, 0(%2)"                \
+    : : "r"(r0), "r"(r1), "r"(r2))
+
 #define gte_ldcv(r0) __asm__( \
     "lbu    $12, 0(%0);"      \
     "lbu    $13, 1(%0);"      \
@@ -487,6 +535,12 @@ typedef struct
      ((dfe) ? 0x0400 : 0) | ((tpage) & 0x9ff))
 
 #define getaddr(p) (u_long)(((P_TAG *)(p))->addr)
+
+#define getlen(p) (u_char)(((P_TAG *)(p))->len)
+
+#define isendprim(p) ((((P_TAG *)(p))->addr) == 0xFFFFFF)
+
+#define termPrim(p) setaddr(p, 0xFFFFFFFF)
 
 #define setDrawTPage(p, dfe, dtd, tpage) \
     setlen(p, 1),                        \

@@ -7,4 +7,6 @@ void VM_UpdateMorph(Level *level, int initFlg);
 void VM_Tick(long time);
 void VM_VMObjectSetTable(Level *level, VMObject *vmobject, int table);
 
+extern Normal gNormalList[244];
+
 #endif
