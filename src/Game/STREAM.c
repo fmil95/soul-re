@@ -3650,7 +3650,118 @@ void CalcVert(VECTOR *v, VECTOR *v1, VECTOR *v2, int dist1, int dist2, int k, in
     v->vz = (((v2->vz - v1->vz) >> 12) * (dist2 / diff)) + v2->vz;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/STREAM", AddClippedTri);
+int AddClippedTri(SVECTOR *iv, RECT *cliprect, int *minz)
+{
+    int clip0; 
+    int clip1; 
+    int i;
+    int j; 
+    int k;
+    int l; 
+    int l_1; 
+    int numvert; 
+    int newnumvert;
+    VECTOR v0[16]; 
+    VECTOR v1[16]; 
+    VECTOR *src;
+    VECTOR *dst; 
+    VECTOR *tmp; 
+
+    *minz = 0xFFFF;
+
+    src = v0;
+    dst = v1;
+
+    for (i = 0; i < 3; i++)
+    {
+        src[i].vx = iv[i].vx << 16;
+        src[i].vy = iv[i].vy << 16;
+        src[i].vz = iv[i].vz << 16;
+    }
+
+    numvert = 3;
+
+    for (i = 0; i < 5; i++)
+    {
+        j = i;
+
+        if (i >= 3)
+        {
+            j = i - 3;
+            k = 1;
+        }
+        else
+        {
+            k = 0;
+        }
+
+        clip0 = GetPlaneDist(k, j, i, src);
+
+        l_1 = 1;
+
+        newnumvert = 0;
+
+        for (l = 0; l < numvert; l++, l_1++)
+        {
+            if (l_1 >= numvert)
+            {
+                l_1 = 0;
+            }
+
+            clip1 = GetPlaneDist(k, j, i, &src[l_1]);
+
+            if ((clip0 > 0) && (clip1 <= 0))
+            {
+                dst[newnumvert] = src[l];
+
+                newnumvert++;
+
+                CalcVert(&dst[newnumvert], &src[l_1], &src[l], clip1, clip0, k, j);
+
+                newnumvert++;
+            }
+            else if ((clip0 <= 0) && (clip1 > 0))
+            {
+                CalcVert(&dst[newnumvert], &src[l], &src[l_1], clip0, clip1, k, j);
+
+                newnumvert++;
+            }
+            else if (clip0 > 0)
+            {
+                dst[newnumvert] = src[l];
+
+                newnumvert++;
+            }
+
+            clip0 = clip1;
+        }
+
+        tmp = dst;
+        dst = src;
+        src = tmp;
+
+        numvert = newnumvert;
+
+        if (numvert < 3)
+        {
+            return numvert != 0;
+        }
+    }
+
+    for (i = 0; i < numvert; i++)
+    {
+        int z; 
+
+        z = AddVertex(&src[i], cliprect);
+
+        if (z < *minz)
+        {
+            *minz = z;
+        }
+    }
+
+    return 1;
+}
 
 int STREAM_GetClipRect(StreamUnitPortal *portal, RECT *rect)
 {
