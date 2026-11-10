@@ -58,6 +58,7 @@ PYTHON         := python3
 SPLAT          := splat split $(EXE_YAML)
 DIFF           := diff
 MASPSX         := $(PYTHON) tools/maspsx/maspsx.py --use-comm-section --aspsx-version=2.81 -G4096
+COMM_TO_SBSS   := $(PYTHON) tools/scripts/comm_to_sbss.py
 CROSS          := mips-linux-gnu-
 AS             := $(CROSS)as -EL
 LD             := $(CROSS)ld -EL
@@ -180,6 +181,18 @@ $(BUILD_DIR)/src/Overlays/walbosb/walbosb.c.o: CFLAGS += -G0
 $(BUILD_DIR)/src/Overlays/alukabss/alukabss.c.o: CFLAGS += -G0
 $(BUILD_DIR)/src/Overlays/roninbss/roninbss.c.o: CFLAGS += -G0
 
+$(BUILD_DIR)/src/Game/DEBUG.c.o: COMM_SBSS := debugSoundMenu:0x18 debugOrgFogNear debugOrgFogRed debugOrgFogGrn debugOrgFogBlu debugOrgFogFar statsMenu debugRazielFlags1 debugRazielFlags2 debugRazielFlags3
+$(BUILD_DIR)/src/Game/CAMERA.c.o: COMM_SBSS := theCamera campoint_hw campoint_hh CameraCenterDelay
+$(BUILD_DIR)/src/Game/DRAW.c.o: COMM_SBSS := draw_stack modelDQP shadow_vertices
+$(BUILD_DIR)/src/Game/FONT.c.o: COMM_SBSS := FONT_vramBlock SpecialFogClut fontTracker
+$(BUILD_DIR)/src/Game/GAMELOOP.c.o: COMM_SBSS := gFXT InStreamUnit RENDER_currentStreamUnitID hackOT StackSave fxTracker primBase
+$(BUILD_DIR)/src/Game/GAMEPAD.c.o: COMM_SBSS := controllerType psxData gpbuffer1 readGPBuffer1 gpbuffer2 readGPBuffer2 gDummyCommand gamePadControllerOut
+$(BUILD_DIR)/src/Game/PSX/MAIN.c.o: COMM_SBSS := BexitLine disp devstation draw BmenuLines __timerEvent clearRect mainMenuTimeOut gameTrackerX mainTrackerX PauseButtons sbsp_lightInfo
+$(BUILD_DIR)/src/Game/SOUND.c.o: COMM_SBSS := gSramLargestFree soundEffectChannelTbl gSramFreeBlocks gSramUsedBlocks gSramTotalUsed gSramTotalFree musicInfo soundBuffer
+$(BUILD_DIR)/src/Game/STREAM.c.o: COMM_SBSS := WarpGateLoadInfo MORPH_SavedLevel MORPH_Component MORPH_Track StreamTracker MORPH_SavedFace
+$(BUILD_DIR)/src/Game/EVENT.c.o: COMM_SBSS := WaitingToLoadSound eventListNumInstances MoviePlayed MovieToPlay ResetSignalArray WaitingToLoadSFX WaitingForVoiceNumber gHintSystem eventListArray
+$(BUILD_DIR)/src/Game/VRAM.c.o: COMM_SBSS := vramBlockList M_TrackClutUpdate numOfBlocksUsed TerrainVramBlock usedVramBlocks openVramBlocks
+
 $(BUILD_DIR)/src/Overlays/aluka/aluka.c.o: CFLAGS += -fsigned-char
 $(BUILD_DIR)/src/Overlays/alukabss/alukabss.c.o: CFLAGS += -fsigned-char
 $(BUILD_DIR)/src/Overlays/kain/kain.c.o: CFLAGS += -fsigned-char
@@ -254,7 +267,7 @@ $(BUILD_DIR)/%.c.o: %.c
 ifeq ($(CHECK),1)
 	@$(CC_HOST) $(CFLAGS_CHECK) $(CHECK_WARNINGS) $(CPPFLAGS) -UTARGET_PSX $<
 endif
-	$(V)$(CPP) $(CPPFLAGS) -ffreestanding -MMD -MP -MT $@ -MF $@.d $< | $(CC) $(CFLAGS) | $(MASPSX) $(if $(findstring Overlays,$@),--expand-div,) | $(AS) $(ASFLAGS) -o $@
+	$(V)$(CPP) $(CPPFLAGS) -ffreestanding -MMD -MP -MT $@ -MF $@.d $< | $(CC) $(CFLAGS) | $(MASPSX) $(if $(findstring Overlays,$@),--expand-div,) $(if $(COMM_SBSS),| $(COMM_TO_SBSS) $(COMM_SBSS),) | $(AS) $(ASFLAGS) -o $@
 
 # Compile .s files
 $(BUILD_DIR)/%.s.o: %.s

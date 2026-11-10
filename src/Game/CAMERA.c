@@ -61,6 +61,12 @@ static short Camera_lookHeight;
 
 static short Camera_lookDist;
 
+long campoint_hw;
+
+long campoint_hh;
+
+int CameraCenterDelay;
+
 static inline int GetSecondCheckFlag(Camera *camera)
 {
     if ((camera->flags & 0x10000))

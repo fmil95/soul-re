@@ -36,6 +36,14 @@ DebugMenuLine mainMenu[8924 + 8];
 
 unsigned long __timerEvent;
 
+ButtonTexture BexitLine[2];
+
+ButtonTexture BmenuLines[3][2];
+
+ButtonTexture PauseButtons[4][2];
+
+LightInfo *sbsp_lightInfo;
+
 long gTimerEnabled;
 
 static char D_800D099C[] = "CD ERROR: file %s not in bigfile\n"; /* unused */

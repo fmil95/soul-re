@@ -76,6 +76,8 @@ FXTracker *gFXT;
 
 int InStreamUnit;
 
+short RENDER_currentStreamUnitID;
+
 unsigned long **hackOT;
 
 unsigned long StackSave;

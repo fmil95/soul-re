@@ -11,6 +11,10 @@
 #include "Game/MENU/MENU.h"
 #include "Game/FX.h"
 
+unsigned char *draw_stack;
+
+long modelDQP;
+
 SVECTOR shadow_vertices[11];
 
 void fDRAW_SPLIT_INTPL_XYZ(SVector *newVertex, SVector *pvb, SVector *pvc)
