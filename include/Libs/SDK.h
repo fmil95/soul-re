@@ -469,6 +469,12 @@
         : : "r"(r0) \
     )
 
+#define gte_nncds() __asm__ ( \
+        "nop;" \
+        "nop;" \
+        ".word 0x4AE80413" \
+    )
+
 #define gte_strgb(r0) __asm__ ( \
         "swc2    $22, 0(%0)" \
         : : "r"(r0) \

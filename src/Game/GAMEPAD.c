@@ -18,8 +18,6 @@ unsigned char dualshock_motors[] = {0, 0};
 unsigned char dualshock_align[] = {0x00, 0x01, 0xFF, 0xFF, 0xFF, 0xFF};
 
 //.sbss
-static short lastPad[2] __asm__("lastPad.24"); // belongs to GAMEPAD_Commands
-
 static int ignoreFind;
 
 static long dualshock0_time;
@@ -46,7 +44,142 @@ unsigned char controllerType[2];
 
 long gDummyCommand[2][2];
 
-INCLUDE_ASM("asm/nonmatchings/Game/GAMEPAD", GAMEPAD_Commands);
+void GAMEPAD_Commands(long (*command)[5], long (*data)[5], long pad)
+{
+	long analogX;   
+    long analogY;   
+    static short lastPad[2];  
+
+	command[pad][2] = command[pad][0] & ~data[pad][0];
+
+	analogX = data[pad][3];
+	analogY = data[pad][4];
+
+	if (data[pad][0] & 0x1)
+	{
+		analogY = -128;
+	}
+	else if (data[pad][0] & 0x2)
+	{
+		analogY = 128;
+	}
+
+	if (data[pad][0] & 0x4)
+	{
+		analogX = -128;
+	}
+	else if (data[pad][0] & 0x8)
+	{
+		analogX = 128;
+	}
+
+	if (analogY < -55)
+	{
+		data[pad][0] |= 0x1;
+	}
+	else if (analogY > 55)
+	{
+		data[pad][0] |= 0x2;
+	}
+
+	if (analogX < -55)
+	{
+		data[pad][0] |= 0x4;
+	}
+	else if (analogX > 55)
+	{
+		data[pad][0] |= 0x8;
+	}
+
+	data[pad][1] = ~lastPad[pad] & data[pad][0];
+
+	lastPad[pad] = (short)data[pad][0];
+
+	command[pad][3] = analogX;
+	command[pad][4] = analogY;
+
+	if (gameTrackerX.gameFlags & 0x10)
+	{
+		command[pad][1] = ~command[pad][0] & gameTrackerX.overrideData[pad][0];
+		command[pad][0] = gameTrackerX.overrideData[pad][0];
+
+		data[pad][3] = gameTrackerX.overrideData[pad][3];
+		data[pad][4] = gameTrackerX.overrideData[pad][4];
+
+		if (gameTrackerX.overrideData[pad][0] & 0x1)
+		{
+			data[pad][4] = -128;
+		}
+		else if (gameTrackerX.overrideData[pad][0] & 0x2)
+		{
+			data[pad][4] = 128;
+		}
+
+		if (gameTrackerX.overrideData[pad][0] & 0x4)
+		{
+			data[pad][3] = -128;
+		}
+		else if (gameTrackerX.overrideData[pad][0] & 0x8)
+		{
+			data[pad][3] = 128;
+		}
+	}
+	else if (gameTrackerX.gameFlags & 0x1)
+	{
+        memset(gameTrackerX.controlCommand, 0, sizeof(gameTrackerX.controlCommand));
+        memset(gameTrackerX.controlData,    0, sizeof(gameTrackerX.controlData));
+
+        return;
+	}
+    else
+    {
+        analogX = 0;
+        analogY = 0;
+
+        command[pad][1] = ~command[pad][0] & data[pad][0];
+        command[pad][0] = data[pad][0];
+
+        if (data[pad][0] & 0x1)
+        {
+            analogY = -128;
+        }
+        else if (data[pad][0] & 0x2)
+        {
+            analogY = 128;
+        }
+
+        if (data[pad][0] & 0x4)
+        {
+            analogX = -128;
+        }
+        else if (data[pad][0] & 0x8)
+        {
+            analogX = 128;
+        }
+
+        if ((analogX != 0) || (analogY != 0))
+        {
+            data[pad][3] = analogX;
+            data[pad][4] = analogY;
+        }
+    }
+
+	if (((!(gameTrackerX.debugFlags & 0x40000)) && (gameTrackerX.debugFlags2 & 0x2000000)) && ((data[pad][0] & 0x300) == 0x300))
+	{
+        command[pad][0] &= ~0x400;
+        command[pad][0] &= ~0x800;
+
+        command[pad][0] |= 0x40000000;
+
+        if (command[pad][1] & 0xC00)
+        {
+            command[pad][1] |= 0x40000000;
+        }
+
+        command[pad][1] &= ~0x400;
+        command[pad][1] &= ~0x800;
+	}
+}
 
 int GAMEPAD_ControllerIsDualShock()
 {
