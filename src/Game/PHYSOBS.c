@@ -3974,7 +3974,185 @@ int PHYSOB_MoveTowardsAlign(Instance *instance, SVector *orgVec, SVector *endVec
     return theta < 20;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PHYSOBS", PHYSOB_ReAlignFalling);
+int PHYSOB_ReAlignFalling(Instance *instance, int zEndOff)
+{
+    Model *model; 
+    int i; 
+    Position seg0; 
+    Position segn; 
+    Position start0; 
+    Position startn; 
+    int startFlg; 
+    short zOff;
+
+    zOff = -32000;
+
+    model = instance->object->modelList[instance->currentModel];
+
+    startFlg = 0;
+
+    for (i = 0; i < model->numSegments; i++)
+    {
+        PCollideInfo pcollideInfo; 
+        Position newPos; 
+        Position oldPos; 
+        short x;
+        short y;
+        MATRIX *mat; 
+
+        x = 0;
+        y = 0;
+
+        if ((model->segmentList[i].hInfo == NULL) && (i != 0))
+        {
+            continue;
+        }
+
+        mat = &instance->matrix[i];
+
+        oldPos.x = mat->t[0];
+        oldPos.y = mat->t[1];
+        oldPos.z = mat->t[2];
+
+        newPos.x = oldPos.x;
+        newPos.y = oldPos.y;
+        newPos.z = oldPos.z + zEndOff;
+
+        oldPos.z += 300;
+
+        if (startFlg != 0)
+        {
+            short ax; 
+            short ay; 
+
+            x = oldPos.x - start0.x;
+            y = oldPos.y - start0.y;
+
+            ax = abs(x);
+            ay = abs(y);
+
+            if ((ax < 100) && (ay < 100))
+            {
+                if ((ax == 0) && (ay == 0))
+                {
+                    x = 64;
+                    y = 0;
+                }
+                else if ((ax < 20) && (ay < 20))
+                {
+                    x <<= 4;
+                    y <<= 4;
+                }
+                else
+                {
+                    x <<= 2;
+                    y <<= 2;
+                }
+
+                oldPos.x += x;
+                newPos.x += x;
+                
+                oldPos.y += y;
+                newPos.y += y;
+            }
+            else
+            {
+                x = y = 0;
+            }
+        }
+
+        pcollideInfo.newPoint = (SVECTOR *)&newPos;
+        pcollideInfo.oldPoint = (SVECTOR *)&oldPos;
+
+        PHYSICS_CheckLineInWorld(instance, &pcollideInfo);
+
+        if (pcollideInfo.type != 0)
+        {
+            zOff = ((short)(newPos.z - instance->matrix[i].t[2]) < zOff) ? zOff : newPos.z - instance->matrix[i].t[2];
+
+            if (startFlg == 0)
+            {
+                seg0   = newPos;
+                start0 = oldPos;
+                
+                segn   = newPos;
+                startn = oldPos;
+
+                startFlg = 1;
+            }
+            else
+            {
+                segn   = newPos;
+                startn = oldPos;
+
+                startn.x -= x;
+                startn.y -= y;
+            }
+        }
+    }
+
+    if (startFlg == 0)
+    {
+        return 1;
+    }
+
+    instance->zAccl = 0;
+    instance->zVel  = 0;
+
+    instance->position.z = instance->matrix->t[2] + zOff;
+
+    SUB_SVEC(Position, &startn, Position, &startn, Position, &start0);
+    SUB_SVEC(Position, &segn,   Position, &segn,   Position, &seg0);
+
+    if (((startn.x == segn.x) && (startn.y == segn.y) && (startn.z == segn.z)) && (zOff == 0))
+    {
+        return 1;
+    }
+
+    for (i = 1; i < model->numSegments; i++)
+    {
+        PCollideInfo pcollideInfo; 
+        Position newPos; 
+        Position oldPos; 
+        Position deltaPos; 
+        MATRIX *mat; 
+
+        (void)deltaPos;
+
+        if ((model->segmentList[i].hInfo == NULL) && (i != 0))
+        {
+            continue;
+        }
+
+        mat = &instance->oldMatrix[i];
+
+        oldPos.x = mat->t[0];
+        oldPos.y = mat->t[1];
+        oldPos.z = mat->t[2];
+
+        mat = &instance->matrix[i];
+
+        newPos.x = mat->t[0];
+        newPos.y = mat->t[1];
+        newPos.z = mat->t[2];
+
+        pcollideInfo.newPoint = (SVECTOR *)&newPos;
+        pcollideInfo.oldPoint = (SVECTOR *)&oldPos;
+
+        PHYSICS_CheckLineInWorld(instance, &pcollideInfo);
+
+        if (pcollideInfo.type != 0)
+        {
+            instance->rotation = instance->oldRotation;
+
+            return 1;
+        }
+    }
+
+    startFlg = PHYSOB_MoveTowardsAlign(instance, (SVector *)&startn, (SVector *)&segn);
+
+    return !zOff && (startFlg != 0);
+}
 
 void DropPhysOb(Instance *instance, int flags)
 {
