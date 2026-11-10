@@ -1556,7 +1556,66 @@ void GAMELOOP_Set_Pause_Redraw()
     pause_redraw_flag = 1;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/GAMELOOP", SaveOT);
+void SaveOT()
+{
+    P_TAG *tag;  
+    P_TAG *last;  
+    P_TAG *lastlast;  
+
+    last     = NULL;
+    lastlast = NULL;
+
+    DrawSync(0);
+
+    tag = (P_TAG *)&gameTrackerX.drawOT[3071];
+
+    while ((getlen(tag) == 0) && (isendprim(tag) == 0))
+    {
+        tag = (P_TAG *)nextPrim(tag);
+    }
+
+    if (isendprim(tag) != 0)
+    {
+        gameTrackerX.savedOTStart = NULL;
+        return;
+    }
+
+    gameTrackerX.savedOTStart = tag;
+
+    while (isendprim(tag) == 0)
+    {
+        while ((getlen(tag) != 0) && (isendprim(tag) == 0))
+        {
+            lastlast = last;
+            last     = tag;
+
+            tag = (P_TAG *)nextPrim(tag);
+        }
+
+        if (isendprim(tag) != 0)
+        {
+            break;
+        }
+
+        while ((getlen(tag) == 0) && (isendprim(tag) == 0))
+        {
+            tag = (P_TAG *)nextPrim(tag);
+        }
+
+        setaddr(last, tag);
+    }
+
+    if ((isendprim(tag) != 0) && (lastlast != NULL))
+    {
+        gameTrackerX.savedOTEnd = lastlast;
+
+        termPrim(lastlast);
+    }
+    else
+    {
+        gameTrackerX.savedOTEnd = tag;
+    }
+}
 
 void ResetDrawPage()
 {

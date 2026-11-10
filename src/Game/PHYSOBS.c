@@ -4051,7 +4051,7 @@ int PHYSOB_ReAlignFalling(Instance *instance, int zEndOff)
 
                 oldPos.x += x;
                 newPos.x += x;
-                
+
                 oldPos.y += y;
                 newPos.y += y;
             }
@@ -4151,7 +4151,7 @@ int PHYSOB_ReAlignFalling(Instance *instance, int zEndOff)
 
     startFlg = PHYSOB_MoveTowardsAlign(instance, (SVector *)&startn, (SVector *)&segn);
 
-    return !zOff && (startFlg != 0);
+    return (zOff == 0) && (startFlg != 0);
 }
 
 void DropPhysOb(Instance *instance, int flags)
