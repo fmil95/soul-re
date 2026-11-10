@@ -469,6 +469,12 @@
         : : "r"(r0) \
     )
 
+#define gte_nnccs() __asm__ ( \
+        "nop;" \
+        "nop;" \
+        ".word 0x4B08041B" \
+    )
+
 #define gte_nncds() __asm__ ( \
         "nop;" \
         "nop;" \

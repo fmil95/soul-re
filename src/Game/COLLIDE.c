@@ -40,6 +40,38 @@ static SVector *collide_normal0;
 
 static SVector *collide_normal1;
 
+static inline void COLLIDE_InsertPoint(SVector *point, SVector *normal, long *t)
+{
+    SVector *point0;
+    SVector *normal0;
+    SVector *point1;
+    SVector *normal1;
+
+    point0  = collide_point0;
+    normal0 = collide_normal0;
+
+    point1  = collide_point1;
+    normal1 = collide_normal1;
+
+    if (*t < collide_t0)
+    {
+        COPY_SVEC(SVector, point1,  SVector, point0);
+        COPY_SVEC(SVector, normal1, SVector, normal0);
+        COPY_SVEC(SVector, point0,  SVector, point);
+        COPY_SVEC(SVector, normal0, SVector, normal);
+
+        collide_t1 = collide_t0;
+        collide_t0 = *t;
+    }
+    else if (*t < collide_t1)
+    {
+        COPY_SVEC(SVector, point1,  SVector, point);
+        COPY_SVEC(SVector, normal1, SVector, normal);
+
+        collide_t1 = *t;
+    }
+}
+
 int COLLIDE_PointInTriangle(SVector *v0, SVector *v1, SVector *v2, SVector *point, SVector *normal)
 {
     Triangle2D *triangle;
@@ -418,79 +450,34 @@ long COLLIDE_WithinXYBounds(SVector* point, HBox* hbox)
     return ((point->x >= hbox->minX) && (point->x <= hbox->maxX)) && ((point->y >= hbox->minY) && (point->y <= hbox->maxY));
 }
 
-// near match, but has a misplaced addiu instruction
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/COLLIDE", COLLIDE_LineWithBoxFace);
-#else
 void COLLIDE_LineWithBoxFace(short startDist, long lineDist, short planeDist, SVector *start, Vector *line, HBox *hbox, long (*collideBoundFunc)(), SVector *normal)
 {
-    SVector point; 
-    volatile long t; // might not be volatile
-    {
-    SVector *point_;  // added an underscore to avoid shadowing a parameter
-    SVector *normal_; // idem
-    SVector *point0; 
-    SVector *normal0; 
-    SVector *point1; 
-    SVector *normal1; 
-    long temp; // not from decls.h
+    SVector point;
+    long t;
 
-    if (lineDist == 0) 
+    if (lineDist == 0)
     {
         return;
     }
-        
+
     lineDist = -((startDist - planeDist) << 12) / lineDist;
 
-    if ((lineDist < 0) || (lineDist > 4096)) 
+    t = lineDist;
+
+    if ((lineDist < 0) || (lineDist > 4096))
     {
         return;
     }
 
-    t = lineDist;
-        
-    do { } while (0); // garbage code for reordering
-        
     point.x = start->x + ((line->x * lineDist) >> 12);
     point.y = start->y + ((line->y * lineDist) >> 12);
     point.z = start->z + ((line->z * lineDist) >> 12);
-        
+
     if (collideBoundFunc(&point, hbox) != 0)
     {
-        temp = t;
-        
-        do { } while (0); // garbage code for reordering
-        
-        point_  = &point;
-        normal_ = normal;
-        
-        point0  = collide_point0; 
-        normal0 = collide_normal0; 
-        
-        point1  = collide_point1;
-        normal1 = collide_normal1; 
-        
-        if (temp < collide_t0) 
-        {
-            COPY_SVEC(SVector,  point1, SVector, point0);
-            COPY_SVEC(SVector, normal1, SVector, normal0);
-            COPY_SVEC(SVector,  point0, SVector, point_);
-            COPY_SVEC(SVector, normal0, SVector, normal_);
-                
-            collide_t1 = collide_t0;
-            collide_t0 = temp;
-        }
-        else if (temp < collide_t1) 
-        {
-            COPY_SVEC(SVector,  point1, SVector, point_);
-            COPY_SVEC(SVector, normal1, SVector, normal_);
-            
-            collide_t1 = temp;
-        }
-    }
+        COLLIDE_InsertPoint(&point, normal, &t);
     }
 }
-#endif
 
 long COLLIDE_IntersectLineAndBox(SVector *point0, SVector *normal0, SVector *point1, SVector *normal1, SVector *end, SVector *start, HBox *hbox)
 {
