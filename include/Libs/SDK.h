@@ -552,7 +552,7 @@ typedef struct
 
 #define isendprim(p) ((((P_TAG *)(p))->addr) == 0xFFFFFF)
 
-#define termPrim(p) setaddr(p, 0xFFFFFFFF)
+#define termPrim(p) setaddr(p, 0xFFFFFF)
 
 #define setDrawTPage(p, dfe, dtd, tpage) \
     setlen(p, 1),                        \
@@ -736,6 +736,7 @@ int checkagain();
 void PopMatrix();
 void SetTransMatrix(MATRIX *m);
 void SetRotMatrix(MATRIX *m);
+u_short GetTPage(int tp, int abr, int x, int y);
 void PushMatrix();
 MATRIX *CompMatrix(MATRIX *m0, MATRIX *m1, MATRIX *m2);
 MATRIX *TransMatrix(MATRIX *m, VECTOR *v);

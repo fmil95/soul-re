@@ -57,7 +57,7 @@ LD_MAP       := $(BUILD_DIR)/$(TARGET).map
 PYTHON         := python3
 SPLAT          := splat split $(EXE_YAML)
 DIFF           := diff
-MASPSX         := $(PYTHON) tools/maspsx/maspsx.py --use-comm-section --aspsx-version=2.81 -G4096
+MASPSX         := $(PYTHON) tools/maspsx/maspsx.py --use-comm-section --max-comm-alignment 4 --aspsx-version=2.81 -G4096
 COMM_TO_SBSS   := $(PYTHON) tools/scripts/comm_to_sbss.py
 CROSS          := mips-linux-gnu-
 AS             := $(CROSS)as -EL

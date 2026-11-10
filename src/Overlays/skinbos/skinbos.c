@@ -468,7 +468,7 @@ void SKINBOS_Collide(Instance *instance, GameTracker *gameTracker)
             data->instance = (Instance *)collideInfo->inst1;
             data->hitType = 5;
 
-            if (strcmpi(data->instance->object->name, D_88000060) != 0)
+            if (strcmpi(data->instance->object->name, (char *)D_88000060) != 0)
             {
                 didCollide = 1;
             }
@@ -1839,7 +1839,7 @@ void SKINBOS_Collide(Instance *instance, GameTracker *gameTracker)
             data->instance = (Instance *)collideInfo->inst1;
             data->hitType = 5;
 
-            if (strcmpi(data->instance->object->name, D_88000060) != 0)
+            if (strcmpi(data->instance->object->name, (char *)D_88000060) != 0)
             {
                 didCollide = 1;
             }
