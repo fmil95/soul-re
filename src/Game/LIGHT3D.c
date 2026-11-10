@@ -340,10 +340,6 @@ void LIGHT_GetAmbient(struct _ColorType *color, struct _Instance *instance)
     color->r = lightval;
 }
 
-// close match, has regalloc diffs at the bottom of the target assembly
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/LIGHT3D", LIGHT_CalcLightValue);
-#else
 void LIGHT_CalcLightValue(TFace* tface, Instance* instance, Terrain* terrain) 
 {
     ColorType color; 
@@ -539,9 +535,9 @@ void LIGHT_CalcLightValue(TFace* tface, Instance* instance, Terrain* terrain)
             pos.y = abs(pos.y);
             pos.z = abs(pos.z);
             
-            tdist = MAX(pos.x, MAX(pos.y, pos.z));
+            tdist = (pos.x > ((pos.y > pos.z) ? pos.y : pos.z)) ? pos.x : ((pos.y > pos.z) ? pos.y : pos.z);
             
-            if ((tdist < li->radius) && (tdist < dist)) 
+            if ((tdist < tli->radius) && (tdist < dist)) 
             {
                 dist = tdist;   
                 
@@ -553,16 +549,53 @@ void LIGHT_CalcLightValue(TFace* tface, Instance* instance, Terrain* terrain)
     if (li != NULL)
     {
         dist = li->radius - dist;
-        
-        color.r = (unsigned char)MIN(MAX(color.r + ((dist * li->r) >> 12), 0), 255);
-        color.g = (unsigned char)MIN(MAX(color.g + ((dist * li->g) >> 12), 0), 255);
-        color.b = (unsigned char)MIN(MAX(color.b + ((dist * li->b) >> 12), 0), 255);
+
+        i = color.r + ((dist * li->r) >> 12);
+
+        if (i < 0)
+        {
+            i = 0;
+        }
+
+        if (i > 255)
+        {
+            i = 255;
+        }
+
+        color.r = i;
+
+        i = color.g + ((dist * li->g) >> 12);
+
+        if (i < 0)
+        {
+            i = 0;
+        }
+
+        if (i > 255)
+        {
+            i = 255;
+        }
+
+        color.g = i;
+
+        i = color.b + ((dist * li->b) >> 12);
+
+        if (i < 0)
+        {
+            i = 0;
+        }
+
+        if (i > 255)
+        {
+            i = 255;
+        }
+
+        color.b = i;
     }
     
     LoadAverageCol((unsigned char*)&color, (unsigned char*)&instance->light_color, fadespeed, 4096 - fadespeed, (unsigned char*)&instance->light_color);
     }
 }
-#endif
 
 void LIGHT_SetAmbientInstance(Instance *instance, Level *level)
 {
