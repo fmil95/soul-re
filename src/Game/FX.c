@@ -457,7 +457,57 @@ void _FX_SetupLighting(struct _Instance *instance)
     SetLightMatrix(&lm);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_DoLighting);
+extern Normal gNormalList[]; // TODO: should work via including the VM header, but...
+
+long _FX_DoLighting(MFace *mface)
+{
+    long modelDQP;
+    long color; 
+    TextureMT3 *texture; 
+
+    modelDQP = 0;
+
+    if (mface->flags & 0x2)
+    {
+        texture = (TextureMT3 *)mface->color;
+
+        if (mface->flags & 0x8)
+        {
+            color = texture->color;
+        }
+        else
+        {
+            gte_ldv0(&gNormalList[mface->normal]);
+            gte_SetRGBcd(&texture->color);
+            gte_lddp(modelDQP);
+            gte_nncds();
+            gte_strgb(&color);
+        }
+
+        color &= 0xFFFFFF;
+        color |= 0x24000000 | (texture->color & 0x3000000);
+    }
+    else
+    {
+        if (mface->flags & 0x8)
+        {
+            color = mface->color;
+        }
+        else
+        {
+            gte_ldv0(&gNormalList[mface->normal]);
+            gte_SetRGBcd(&mface->color);
+            gte_lddp(modelDQP);
+            gte_nncds();
+            gte_strgb(&color);
+        }
+
+        color &= 0xFFFFFF;
+        color |= 0x20000000 | (mface->color & 0x3000000);
+    }
+
+    return color;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_BuildSegmentedSplinters);
 
@@ -6001,7 +6051,7 @@ void FX_DrawRing2(MATRIX *wcTransform, SVector *position, MATRIX *matrix, int ra
 
             tx &= ~0x3F;
 
-            if (tx < -63)
+            if (tx <= -64)
             {
                 poly->tpage = getTPage(2, 0, 0, dispYPos);
             }
