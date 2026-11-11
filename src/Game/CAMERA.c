@@ -1471,7 +1471,7 @@ void CriticalDampValue(long dampMode, short *sourceVal, short targetVal, short *
         case 0:
             *accl = ((short)(targetVal - *sourceVal) >> 2) - *vel;
             *vel += *accl;
-            
+
             *sourceVal += *vel;
             break;
         case 1:
@@ -1531,7 +1531,164 @@ void CriticalDampValue(long dampMode, short *sourceVal, short targetVal, short *
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/CAMERA", CriticalDampPosition);
+void CriticalDampPosition(long dampMode, Position *position, Position *targetPos, SVector *vel, SVector *accl, int smooth)
+{
+    long length;    
+    Vector vector;   
+    SVector svector; 
+    short maxVel;    
+    int shift;       
+
+    if ((short)smooth != 0)
+    {
+        maxVel = smooth;
+
+        if (maxVel < 0)
+        {
+            maxVel = -4096 / maxVel;
+        }
+
+        switch (dampMode)
+        {
+        case 0:
+            SUB_LVEC(Vector, &vector, Position, targetPos, Position, position);
+
+            accl->x = (vector.x >> 2) - vel->x;
+            accl->y = (vector.y >> 2) - vel->y;
+            accl->z = (vector.z >> 2) - vel->z;
+
+            vel->x += accl->x;
+            vel->y += accl->y;
+            vel->z += accl->z;
+
+            position->x += vel->x;
+            position->y += vel->y;
+            position->z += vel->z;
+            break;
+        case 1:
+        case 5:
+            if (dampMode == 5)
+            {
+                shift = 1;
+            }
+            else
+            {
+                shift = 2;
+            }
+
+            SUB_LVEC(Vector, &vector, Position, targetPos, Position, position);
+
+            accl->x = (vector.x >> shift) - vel->x;
+            accl->y = (vector.y >> shift) - vel->y;
+            accl->z = (vector.z >> shift) - vel->z;
+
+            vel->x += accl->x;
+            vel->y += accl->y;
+            vel->z += accl->z;
+
+            length = CAMERA_LengthSVector(vel);
+
+            if (maxVel < length)
+            {
+                vel->x = (vel->x * maxVel) / length;
+                vel->y = (vel->y * maxVel) / length;
+                vel->z = (vel->z * maxVel) / length;
+
+                if (gameTrackerX.timeMult != 4096)
+                {
+                    position->x += (vel->x * gameTrackerX.timeMult) / 4096;
+                    position->y += (vel->y * gameTrackerX.timeMult) / 4096;
+                    position->z += (vel->z * gameTrackerX.timeMult) / 4096;
+                }
+                else
+                {
+                    position->x += vel->x;
+                    position->y += vel->y;
+                    position->z += vel->z;
+                }
+            }
+            else
+            {
+                position->x += vel->x;
+                position->y += vel->y;
+                position->z += vel->z;
+            }
+
+            break;
+        case 3:
+            SUB_SVEC(SVector, &svector, Position, targetPos, Position, position);
+
+            length = CAMERA_LengthSVector(&svector);
+
+            if (length < maxVel)
+            {
+                COPY_SVEC(Position, position, Position, targetPos);
+            }
+            else
+            {
+                svector.x = (svector.x * maxVel) / length;
+                svector.y = (svector.y * maxVel) / length;
+                svector.z = (svector.z * maxVel) / length;
+
+                ADD_SVEC(Position, position, Position, position, SVector, &svector);
+            }
+
+            break;
+        case 4:
+            SUB_SVEC(SVector, &svector, Position, targetPos, Position, position);
+
+            accl->x = (svector.x >> 2) - vel->x;
+            accl->y = (svector.y >> 2) - vel->y;
+            accl->z = (svector.z >> 2) - vel->z;
+
+            accl->x = (svector.x > 0) ? ((accl->x < 0) ? 0 : accl->x) : ((accl->x > 0) ? 0 : accl->x);
+            accl->y = (svector.y > 0) ? ((accl->y < 0) ? 0 : accl->y) : ((accl->y > 0) ? 0 : accl->y);
+            accl->z = (svector.z > 0) ? ((accl->z < 0) ? 0 : accl->z) : ((accl->z > 0) ? 0 : accl->z);
+
+            vel->x += accl->x;
+            vel->y += accl->y;
+            vel->z += accl->z;
+
+            length = CAMERA_LengthSVector(vel);
+
+            if (CAMERA_LengthSVector(&svector) < length)
+            {
+                COPY_SVEC(Position, position, Position, targetPos);
+            }
+            else if (length < maxVel)
+            {
+                position->x += vel->x;
+                position->y += vel->y;
+                position->z += vel->z;
+            }
+            else
+            {
+                vel->x = (vel->x * maxVel) / length;
+                vel->y = (vel->y * maxVel) / length;
+                vel->z = (vel->z * maxVel) / length;
+
+                if (gameTrackerX.timeMult != 4096)
+                {
+                    position->x += (vel->x * gameTrackerX.timeMult) / 4096;
+                    position->y += (vel->y * gameTrackerX.timeMult) / 4096;
+                    position->z += (vel->z * gameTrackerX.timeMult) / 4096;
+                }
+                else
+                {
+                    position->x += vel->x;
+                    position->y += vel->y;
+                    position->z += vel->z;
+                }
+            }
+
+            break;
+        }
+    }
+    else
+    {
+        COPY_SVEC(Position, position, Position, targetPos);
+    }
+}
 
 void CriticalDampAngle(long dampMode, short *currentVal, short target, short *vel, short *accl, int smooth)
 {
