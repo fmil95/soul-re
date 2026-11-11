@@ -5869,7 +5869,6 @@ void FX_DrawRing(MATRIX *wcTransform, SVector *position, MATRIX *matrix, int rad
                 sz0 = sz2;
             }
             
-            
             if (sz0 > 0) 
             {
                 sz0 /= 4;
@@ -5918,7 +5917,144 @@ void fx_setTex(DVECTOR *x, unsigned char *uv, int tx, int offset)
     x->vy += offset;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawRing2);
+void FX_DrawRing2(MATRIX *wcTransform, SVector *position, MATRIX *matrix, int radius, int radius2, int radius3, int z1, int z2, int z3, long offset, int sortInWorld)
+{
+    int n;  
+    POLY_FT4 *poly;  
+    unsigned long **drawot; 
+    SVector points[3]; 
+    long sxy[3];  
+    long degrees; 
+    long sz0;  
+    long sz1;  
+    long sz2; 
+    long startz; 
+    short tx; 
+    long dispYPos; 
+    int num_faces; 
+    int deg_change;
+
+    degrees = 0;
+
+    num_faces = 32;
+
+    drawot = gameTrackerX.drawOT;
+
+    if (radius < 120)
+    {
+        num_faces = 8;
+    }
+
+    poly = (POLY_FT4 *)gameTrackerX.primPool->nextPrim;
+
+    if ((unsigned long *)&poly[num_faces] < gameTrackerX.primPool->lastPrim)
+    {
+        PushMatrix();
+
+        SetRotMatrix(wcTransform);
+        SetTransMatrix(wcTransform);
+
+        startz = fx_get_startz(position);
+
+        SetRotMatrix(matrix);
+
+        points[0].z = z1;
+        points[1].z = z2;
+        points[2].z = z3;
+
+        dispYPos = (gameTrackerX.gameData.asmData.dispPage ^ 1) << 8;
+
+        fx_calc_points(points, degrees, radius, radius2, radius3);
+
+        gte_stsxy3(&sxy[0], &sxy[1], &sxy[2]);
+
+        deg_change = 4096 / num_faces;
+
+        for (n = 0; n < num_faces; n++)
+        {
+            degrees += deg_change;
+
+            fx_calc_points(points, degrees, radius, radius2, radius3);
+
+            *(long *)&poly->r0 = 0x2DC0C0C0;
+
+            *(long *)&poly->x0 = sxy[2];
+            *(long *)&poly->x2 = sxy[0];
+
+            tx = (*(short *)&sxy[2] < *(short *)&sxy[0]) ? *(short *)&sxy[2] : *(short *)&sxy[0];
+
+            gte_stsxy3(&sxy[0], &sxy[1], &sxy[2]);
+            gte_stsz3(&sz0, &sz1, &sz2);
+
+            *(long *)&poly->x1 = sxy[2];
+            *(long *)&poly->x3 = sxy[0];
+
+            if (*(short *)&sxy[2] < tx)
+            {
+                tx = *(short *)&sxy[2];
+            }
+
+            if (*(short *)&sxy[0] < tx)
+            {
+                tx = *(short *)&sxy[0];
+            }
+
+            tx &= ~0x3F;
+
+            if (tx < -63)
+            {
+                poly->tpage = getTPage(2, 0, 0, dispYPos);
+            }
+            else if (tx < 0)
+            {
+                poly->tpage = getTPage(2, 0, tx + 1024, dispYPos);
+            }
+            else
+            {
+                poly->tpage = getTPage(2, 0, tx, dispYPos);
+            }
+
+            fx_setTex((DVECTOR *)&poly->x0, &poly->u0, tx, offset);
+            fx_setTex((DVECTOR *)&poly->x1, &poly->u1, tx, offset);
+            fx_setTex((DVECTOR *)&poly->x2, &poly->u2, tx, offset);
+            fx_setTex((DVECTOR *)&poly->x3, &poly->u3, tx, offset);
+
+            if (sz2 < sz0)
+            {
+                sz0 = sz2;
+            }
+
+            sz0 /= 4;
+
+            if (sz0 > 0)
+            {
+                if (sortInWorld == 0)
+                {
+                    if (startz >= sz0)
+                    {
+                        sz0 = 1;
+                    }
+                    else
+                    {
+                        sz0 = startz + 16;
+                    }
+                }
+
+                if (((sz0 - 1) >= 0) && ((sz0 - 1) <= 3070))
+                {
+                    // addPrim(drawot[sz0], poly);
+                    
+                    poly->tag = getaddr(&drawot[sz0]) | 0x9000000;
+                    drawot[sz0] = (unsigned long *)((intptr_t)poly++ & 0xFFFFFF);
+                }
+            }
+        }
+
+        gameTrackerX.primPool->nextPrim = (unsigned long *)poly;
+
+        PopMatrix();
+    }
+}
 
 void FX_DrawFField(MATRIX *wcTransform, FXForceFieldEffect *field)
 {
