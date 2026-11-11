@@ -122,6 +122,7 @@
 long MATH3D_LengthXY(long x, long y);
 long MATH3D_FastSqrt0(long square);
 long MATH3D_LengthXYZ(long x, long y, long z);
+void MATH3D_CrossProduct(SVector *t, SVector *r, SVector *s);
 unsigned long MATH3D_SquareLength(long x, long y, long z);
 short AngleDiff(short current, short destination);
 void MATH3D_SetUnityMatrix(MATRIX *mat);
@@ -139,5 +140,6 @@ void MATH3D_RotateAxisToVector(MATRIX *dest, MATRIX *src, SVector *vec, enum MAT
 long MATH3D_DistanceBetweenPositions(Position *pos1, Position *pos2);
 int MATH3D_veclen2(int ix, int iy);
 short MATH3D_AngleBetweenVectors(SVector *vector1, SVector *vector2);
+void MATH3D_RotMatAboutVec(SVector *vec, MATRIX *mat, short angle);
 
 #endif

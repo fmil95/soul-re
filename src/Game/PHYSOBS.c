@@ -3832,7 +3832,7 @@ int PHYSOB_CheckThrownLineCollision(Instance *instance, Instance *parent)
         SVector delta; 
         long dp; 
 
-        line.x = rsin(parent->rotation.z);
+        line.x =  rsin(parent->rotation.z);
         line.y = -rcos(parent->rotation.z);
         line.z = 0;
 
@@ -3975,7 +3975,183 @@ int PHYSOB_CheckThrownLineCollision(Instance *instance, Instance *parent)
     return 2;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PHYSOBS", PHYSOB_CheckDroppedLineCollision);
+int PHYSOB_CheckDroppedLineCollision(Instance *instance, Instance *parent)
+{
+    PCollideInfo pcollideInfo; 
+    Position parentPos; 
+    Position newPos; 
+    Position oldPos; 
+    SVector offset; 
+    Position basePos; 
+    int seg; 
+    int collided; 
+
+    if (parent == NULL)
+    {
+        return 0;
+    }
+
+    parentPos = parent->position;
+
+    if (instance->matrix == NULL)
+    {
+        return 0;
+    }
+
+    collided = 0;
+    
+    seg = 0;
+
+    instance->position.x = instance->matrix->t[0];
+    instance->position.y = instance->matrix->t[1];
+    instance->position.z = instance->matrix->t[2];
+
+    do
+    {
+        MATRIX *mat; 
+
+        mat = &instance->matrix[seg];
+
+        oldPos.x = parentPos.x;
+        oldPos.y = parentPos.y;
+        oldPos.z = mat->t[2] + 100;
+
+        newPos.x = mat->t[0];
+        newPos.y = mat->t[1];
+        newPos.z = mat->t[2];
+
+        // TODO: replace this scoped block with a macro
+        {
+            short _x0;
+            short _y0; 
+            short _z0; 
+            short _x1;
+            short _y1; 
+            short _z1; 
+            SVector *_v; 
+            Position *_v0; 
+            Position *_v1; 
+
+            _v = &offset;
+            _v0 = &newPos;
+            _v1 = &oldPos;
+
+            _x0 = _v0->x;
+            _y0 = _v0->y;
+            _z0 = _v0->z;
+
+            _x1 = _v1->x;
+            _y1 = _v1->y;
+            _z1 = _v1->z;
+
+            _x0 -= _x1;
+            _y0 -= _y1;
+            _z0 -= _z1;
+
+            _v->x = _x0;
+            _v->y = _y0;
+            _v->z = _z0;
+        }
+
+        offset.x = (offset.x * 6000) / 4096;
+        offset.y = (offset.y * 6000) / 4096;
+        offset.z = (offset.z * 6000) / 4096;
+
+        ADD_SVEC(Position, &newPos, SVector, &offset, Position, &oldPos);
+
+        basePos = newPos;
+
+        (void)basePos;
+
+        pcollideInfo.newPoint = (SVECTOR *)&newPos;
+        pcollideInfo.oldPoint = (SVECTOR *)&oldPos;
+
+        SetNoPtCollideInFamily(parent);
+
+        PHYSICS_CheckLineInWorld(instance, &pcollideInfo);
+
+        ResetNoPtCollideInFamily(parent);
+
+        if ((pcollideInfo.type != 0) && (pcollideInfo.wNormal.vz <= 3800))
+        {
+            collided = 1;
+        }
+
+        seg += 2;
+    } while ((seg < 3) && (collided == 0));
+
+    if (collided != 0)
+    {
+        SVector origin; 
+        SVector node2; 
+        SVector orgDir; 
+        SVector newDir; 
+        SVector axis; 
+        short angle; 
+        MATRIX mat; 
+        G2EulerAngles ea; 
+
+        origin.x = instance->matrix->t[0];
+        origin.y = instance->matrix->t[1];
+        origin.z = instance->matrix->t[2];
+
+        node2.x = instance->matrix[2].t[0];
+        node2.y = instance->matrix[2].t[1];
+        node2.z = instance->matrix[2].t[2];
+
+        SUB_SVEC(SVector, &orgDir, SVector, &node2, SVector, &origin);
+
+        MATH3D_Normalize((Normal *)&orgDir);
+
+        newDir.x = 10;
+        newDir.y = 0;
+        newDir.z = 4096;
+
+        angle = MATH3D_AngleBetweenVectors(&newDir, &orgDir);
+
+        MATH3D_CrossProduct(&axis, &orgDir, &newDir);
+
+        mat = *instance->matrix;
+
+        MATH3D_RotMatAboutVec(&axis, &mat, angle);
+
+        G2EulerAngles_FromMatrix(&ea, (G2Matrix *)&mat, 0);
+
+        instance->rotation.x = ea.x;
+        instance->rotation.y = ea.y;
+        instance->rotation.z = ea.z;
+
+        instance->position = parent->position;
+
+        {
+            SVector delta; 
+            int i; 
+            Model *model;
+            MATRIX *m; 
+
+            m = instance->matrix;
+
+            model = instance->object->modelList[instance->currentModel];
+
+            delta.x = instance->position.x - m->t[0];
+            delta.y = instance->position.y - m->t[1];
+            delta.z = instance->position.z - (short)(m->t[2] - 20);
+
+            for (i = 0; i < model->numSegments; i++)
+            {
+                m = &instance->matrix[i];
+
+                m->t[0] += delta.x;
+                m->t[1] += delta.y;
+                m->t[2] += delta.z;
+            }
+        }
+    }
+
+    instance->position.z += 20;
+
+    return 1;
+}
 
 int PHYSOB_CheckDirectedLineCollision(Instance *instance, int xoffset, int yoffset, int startZOffset)
 {
