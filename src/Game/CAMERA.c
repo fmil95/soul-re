@@ -3425,7 +3425,129 @@ void CAMERA_SplineGetNearestPoint2(Camera *camera, Spline *spline, SVector *poin
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/CAMERA", CAMERA_SplineGetNearestPoint);
+void CAMERA_SplineGetNearestPoint(Spline *spline, SVector *point, int *currkey, SVector *ret_dpoint)
+{
+    SVector dpoint;       
+    SVector dpoint2;     
+    SVector dpoint3;     
+    SVector point0;       
+    SVector point1;      
+    SVector point2;     
+    SVector point3;      
+    int current_keyframe; 
+    int dist;            
+    int ret;            
+    int ret2;            
+    int ret3;            
+    SplineKey *key;     
+    int circular_spline;  
+    int prev_key;         
+    int next_key;        
+
+    current_keyframe = *currkey;
+
+    key = spline->key;
+
+    if (current_keyframe > (spline->numkeys - 2))
+    {
+        current_keyframe = spline->numkeys - 2;
+
+        *currkey = current_keyframe;
+    }
+
+    if ((abs_diff(key->point.x, key[spline->numkeys - 1].point.x) < 5) && (abs_diff(key->point.y, key[spline->numkeys - 1].point.y) < 5) && (abs_diff(key->point.z, key[spline->numkeys - 1].point.z) < 5))
+    {
+        circular_spline = 1;
+    }
+    else
+    {
+        circular_spline = 0;
+    }
+
+    COPY_SVEC(SVector, &point1, vecS, &key[current_keyframe].point);
+    COPY_SVEC(SVector, &point2, vecS, &key[current_keyframe + 1].point);
+
+    ret = COLLIDE_NearestPointOnLine_S(&dpoint, (SVECTOR *)&point1, (SVECTOR *)&point2, (Position *)point);
+
+    dist = CAMERA_GetDistSq(&dpoint, point);
+
+    if (current_keyframe < (spline->numkeys - 2))
+    {
+        next_key = current_keyframe + 1;
+    }
+    else if (circular_spline != 0)
+    {
+        next_key = 0;
+    }
+    else
+    {
+        next_key = -1;
+    }
+
+    if (current_keyframe > 0)
+    {
+        prev_key = current_keyframe - 1;
+    }
+    else if (circular_spline != 0)
+    {
+        prev_key = spline->numkeys - 2;
+    }
+    else
+    {
+        prev_key = -1;
+    }
+
+    if (next_key != -1)
+    {
+        COPY_SVEC(SVector, &point3, vecS, &key[next_key + 1].point);
+
+        ret2 = COLLIDE_NearestPointOnLine_S(&dpoint2, (SVECTOR *)&point2, (SVECTOR *)&point3, (Position *)point);
+
+        if (ret >= 4096)
+        {
+            *currkey    = next_key;
+            *ret_dpoint = dpoint2;
+            return;
+        }
+    }
+    else
+    {
+        ret2 = -1;
+    }
+
+    if (prev_key != -1)
+    {
+        COPY_SVEC(SVector, &point0, vecS, &key[prev_key].point);
+
+        ret3 = COLLIDE_NearestPointOnLine_S(&dpoint3, (SVECTOR *)&point0, (SVECTOR *)&point1, (Position *)point);
+
+        if (ret <= 0)
+        {
+            *currkey    = prev_key;
+            *ret_dpoint = dpoint3;
+            return;
+        }
+    }
+    else
+    {
+        ret3 = -1;
+    }
+
+    if (((ret2 > 0) && (ret2 < 4096)) && (CAMERA_GetDistSq(&dpoint2, point) < dist))
+    {
+        *currkey    = next_key;
+        *ret_dpoint = dpoint2;
+    }
+    else if (((ret3 > 0) && (ret3 < 4096)) && (CAMERA_GetDistSq(&dpoint3, point) < dist))
+    {
+        *currkey    = prev_key;
+        *ret_dpoint = dpoint3;
+    }
+    else
+    {
+        *ret_dpoint = dpoint;
+    }
+}
 
 void CAMERA_SplineHelpMove(Camera *camera)
 {
