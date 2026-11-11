@@ -2658,7 +2658,7 @@ void FX_ContinueRibbon(FXRibbon *ribbon, FXTracker *fxTracker)
                 Quad[0] = ribbon->vertexPool[i];
                 Quad[1] = ribbon->vertexPool[i3];
                 Quad[2] = ribbon->vertexPool[i3 + 1];
-                Quad[3] = ribbon->vertexPool[i + 1];
+                Quad[3] = ribbon->vertexPool[i  + 1];
 
                 for (d = 0; d < 4096; d += 4096)
                 {
@@ -3591,7 +3591,244 @@ void FX_MakeSpark(Instance *instance, Model *model, int segment)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueParticle);
+void FX_ContinueParticle(FXParticle *currentParticle, FXTracker *fxTracker)
+{
+    FX_PRIM *fxPrim; 
+    VECTOR movement; 
+    int i; 
+    int num;  
+    MATRIX *swTransform;  
+    MATRIX *swOldTransform;  
+    long birthRadius;  
+    Instance *instance; 
+    int InstanceFade;
+    unsigned long black;  
+
+    black = 0;
+
+    num = currentParticle->numberBirthParticles;
+
+    if (num < 0)
+    {
+        num = (rand() % -num) == 0;
+    }
+
+    instance = currentParticle->instance;
+
+    if ((!(instance->flags & 0x800) && !(instance->flags2 & 0x4000000) && (instance->flags & 0x200)) && ((instance->matrix != NULL) && (instance->oldMatrix != NULL)) && (num > 0))
+    {
+        swTransform    = &instance->matrix[(int)currentParticle->startSegment];
+        swOldTransform = &instance->oldMatrix[(int)currentParticle->startSegment];
+
+        birthRadius = currentParticle->birthRadius;
+
+        if (currentParticle->type == 1)
+        {
+            movement.vx = (birthRadius << 12) / 128;
+            movement.vy = (birthRadius << 12) / 128;
+            movement.vz = (birthRadius << 12) / 128;
+        }
+        else
+        {
+            if ((currentParticle->type == 2) || (currentParticle->type == 3))
+            {
+                swOldTransform = &instance->matrix[(int)currentParticle->endSegment];
+            }
+
+            movement.vx = (((swOldTransform->t[0] - swTransform->t[0]) + birthRadius) << 12) / 128;
+            movement.vy = (((swOldTransform->t[1] - swTransform->t[1]) + birthRadius) << 12) / 128;
+            movement.vz = (((swOldTransform->t[2] - swTransform->t[2]) + birthRadius) << 12) / 128;
+        }
+
+        if (instance == gameTrackerX.playerInstance)
+        {
+            InstanceFade = 0;
+        }
+        else if (gameTrackerX.gameData.asmData.MorphTime != 1000)
+        {
+            InstanceFade = INSTANCE_GetFadeValue(instance);
+        }
+        else
+        {
+            InstanceFade = instance->fadeValue;
+        }
+
+        birthRadius /= 2;
+
+        for (i = 0; i < num; i++)
+        {
+            fxPrim = FX_GetPrim(gFXT);
+
+            if (fxPrim != NULL)
+            {
+                fxPrim->position.x = ((currentParticle->offset.x + swTransform->t[0]) + ((movement.vx * (rand() & 0x7F)) >> 12)) - birthRadius;
+                fxPrim->position.y = ((currentParticle->offset.y + swTransform->t[1]) + ((movement.vy * (rand() & 0x7F)) >> 12)) - birthRadius;
+                fxPrim->position.z = ((currentParticle->offset.z + swTransform->t[2]) + ((movement.vz * (rand() & 0x7F)) >> 12)) - birthRadius;
+
+                switch (currentParticle->z_undulate)
+                {
+                case 0:
+                    break;
+                case 1:
+                    fxPrim->position.z += 20 + ((rcos(gameTrackerX.frameCount * 128) * 40) / 4096);
+                    break;
+                case 2:
+                    fxPrim->position.z += 10 + ((rcos(gameTrackerX.frameCount * 256) * 20) / 4096);
+                    break;
+                case 3:
+                    fxPrim->position.z += 8  + ((rcos(gameTrackerX.frameCount * 256) * 15) / 4096);
+                    break;
+                case 4:
+                    fxPrim->position.z += 4  +  (rcos(gameTrackerX.frameCount * 256)       / 512);
+                    break;
+                }
+
+                if (currentParticle->type == 3)
+                {
+                    fxPrim->duo.phys.xVel = (swTransform->t[0] - fxPrim->position.x) / currentParticle->primLifeTime;
+                    fxPrim->duo.phys.yVel = (swTransform->t[1] - fxPrim->position.y) / currentParticle->primLifeTime;
+                    fxPrim->duo.phys.zVel = (swTransform->t[2] - fxPrim->position.z) / currentParticle->primLifeTime;
+                }
+                else if (currentParticle->flag_bits & 0x2)
+                {
+                    fxPrim->duo.phys.xVel = currentParticle->direction.x;
+                    fxPrim->duo.phys.yVel = currentParticle->direction.y;
+                    fxPrim->duo.phys.zVel = currentParticle->direction.z;
+                }
+                else
+                {
+                    fxPrim->duo.phys.xVel = (((rand() & 0x1FF) - 255) * currentParticle->direction.x) / 4096;
+                    fxPrim->duo.phys.yVel = (((rand() & 0x1FF) - 255) * currentParticle->direction.y) / 4096;
+                    fxPrim->duo.phys.zVel = (((rand() & 0x1FF) - 255) * currentParticle->direction.z) / 4096;
+                }
+
+                fxPrim->duo.phys.xAccl = currentParticle->acceleration.x;
+                fxPrim->duo.phys.yAccl = currentParticle->acceleration.y;
+                fxPrim->duo.phys.zAccl = currentParticle->acceleration.z;
+
+                fxPrim->v0.x = fxPrim->v0.z = currentParticle->size;
+                fxPrim->v0.y = 4096;
+
+                fxPrim->timeToLive = currentParticle->primLifeTime;
+
+                fxPrim->flags = 0xC0008;
+
+                fxPrim->startColor = currentParticle->startColor;
+
+                if ((currentParticle->flag_bits & 0x1) && ((gameTrackerX.gameData.asmData.MorphType == 1) || (gameTrackerX.gameData.asmData.MorphTime != 1000)))
+                {
+                    int tmp_blue;  
+                    CVECTOR *ptr;  
+
+                    ptr = (CVECTOR *)&fxPrim->startColor;
+
+                    tmp_blue = ptr->b;
+
+                    ptr->b = ptr->r;
+                    ptr->r = tmp_blue;
+
+                    if (gameTrackerX.gameData.asmData.MorphTime != 1000)
+                    {
+                        int fade; 
+
+                        fade = FX_GetMorphFadeVal();
+
+                        LoadAverageCol((unsigned char *)&currentParticle->startColor, (unsigned char *)ptr, 4096 - fade, fade, (unsigned char *)ptr);
+                    }
+                }
+
+                fxPrim->endColor = currentParticle->endColor;
+
+                fxPrim->fadeValue[0] = fxPrim->fadeValue[1] = fxPrim->fadeValue[2] = fxPrim->fadeValue[3] = InstanceFade;
+
+                if (InstanceFade == 0)
+                {
+                    fxPrim->fadeStep = 4096                  / currentParticle->primLifeTime;
+                }
+                else
+                {
+                    fxPrim->fadeStep = (4096 - InstanceFade) / currentParticle->primLifeTime;
+
+                    LoadAverageCol((unsigned char *)&fxPrim->startColor, (unsigned char *)&black, 4096 - InstanceFade, InstanceFade, (unsigned char *)&fxPrim->startColor);
+                    LoadAverageCol((unsigned char *)&fxPrim->endColor,   (unsigned char *)&black, 4096 - InstanceFade, InstanceFade, (unsigned char *)&fxPrim->endColor);
+                }
+
+                if (currentParticle->texture != NULL)
+                {
+                    fxPrim->flags |= 0x1;
+
+                    fxPrim->texture = currentParticle->texture;
+
+                    fxPrim->color = (fxPrim->startColor & 0x3FFFFFF) | 0x2C000000;
+                }
+                else
+                {
+                    fxPrim->color = (fxPrim->startColor & 0x3FFFFFF) | 0x20000000;
+                }
+
+                if (currentParticle->scaleSpeed != 0)
+                {
+                    fxPrim->flags |= 0x2000;
+
+                    fxPrim->v0.y  = currentParticle->startScale;
+                    fxPrim->work3 = currentParticle->scaleSpeed;
+                }
+
+                if (currentParticle->type == 1)
+                {
+                    fxPrim->matrix = (FX_MATRIX *)instance;
+                    
+                    fxPrim->work0 = currentParticle->startSegment;
+
+                    fxPrim->flags |= 0x8000000;
+                }
+
+                if (currentParticle->fxprim_process != NULL)
+                {
+                    fxPrim->process = currentParticle->fxprim_process;
+                }
+                else
+                {
+                    fxPrim->process = FX_StandardFXPrimProcess;
+                }
+
+                if (currentParticle->fxprim_modify_process != NULL)
+                {
+                    ((void (*)())currentParticle->fxprim_modify_process)(fxPrim, instance, currentParticle, fxTracker);
+                }
+
+                if (currentParticle->type == 3)
+                {
+                    fxPrim->flags = 0x1090000;
+
+                    fxPrim->v0.x = fxPrim->position.x;
+                    fxPrim->v0.y = fxPrim->position.y;
+                    fxPrim->v0.z = fxPrim->position.z;
+
+                    fxPrim->v1.x = fxPrim->position.x + fxPrim->duo.phys.xVel;
+                    fxPrim->v1.y = fxPrim->position.y + fxPrim->duo.phys.yVel;
+                    fxPrim->v1.z = fxPrim->position.z + fxPrim->duo.phys.zVel;
+
+                    LIST_InsertFunc(&fxTracker->usedPrimList, &fxPrim->node);
+                }
+                else
+                {
+                    FX_Sprite_Insert(&fxTracker->usedPrimListSprite, fxPrim);
+                }
+            }
+        }
+    }
+
+    if (currentParticle->lifeTime > 0)
+    {
+        currentParticle->lifeTime -= FX_Frames;
+
+        if (currentParticle->lifeTime <= 0)
+        {
+            FX_DeleteGeneralEffect((FXGeneralEffect *)currentParticle);
+        }
+    }
+}
 
 void FX_UpdraftPrimModify(FX_PRIM *fxPrim, Instance *instance, FXParticle *particle, FXTracker *fxTracker)
 {
