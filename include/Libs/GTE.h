@@ -5,7 +5,7 @@
  * GTE (COP2) macros.
  *
  * This is an extension of the gte_macros header from rabbitizer (MIT), which emits the COP2 encodings directly instead of parsing them through DMPSX.
- * This header makes some modifications on top of it, such as adding lowercase names for certain macros, and adding macros that aren't present there.  
+ * This header makes some modifications on top of it, such as adding lowercase names for certain macros, as well as other GTE macros that aren't there.  
  *
  */
 #pragma GCC system_header

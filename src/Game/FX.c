@@ -2573,7 +2573,186 @@ void FX_SubDividePrim(FX_PRIM *fxPrim1, FX_PRIM *fxPrim2)
 
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueRibbon);
+void FX_ContinueRibbon(FXRibbon *ribbon, FXTracker *fxTracker)
+{
+    MATRIX *swTransform;  
+    int i; 
+    int i2;  
+    int i3;  
+    int startIndex;  
+    int period;  
+    int d; 
+    FX_PRIM *fxPrim; 
+    FX_PRIM *fxPrim2;  
+    SVECTOR Quad[4];  
+    int temp; // not from decls.h
+
+    if ((ribbon != NULL) && (ribbon->instance->matrix != NULL))
+    {
+        swTransform = &ribbon->instance->matrix[ribbon->startSegment];
+
+        startIndex = ribbon->endIndex;
+
+        if (startIndex == -1)
+        {
+            ribbon->endIndex = 0;
+        }
+
+        period = ribbon->numberVerts / 2;
+
+        if (ribbon->type == 1)
+        {
+            i2 = ribbon->endIndex + period;
+
+            for (i = ribbon->endIndex; i < i2; i++, swTransform++)
+            {
+                ribbon->vertexPool[i].vx = swTransform->t[0];
+                ribbon->vertexPool[i].vy = swTransform->t[1];
+                ribbon->vertexPool[i].vz = swTransform->t[2];
+
+                ribbon->endIndex++;
+            }
+        }
+        else
+        {
+            i = ribbon->endIndex;
+
+            ribbon->vertexPool[i].vx = swTransform->t[0];
+            ribbon->vertexPool[i].vy = swTransform->t[1];
+            ribbon->vertexPool[i].vz = swTransform->t[2];
+
+            i++;
+
+            swTransform = &ribbon->instance->matrix[ribbon->endSegment];
+
+            ribbon->vertexPool[i].vx = swTransform->t[0];
+            ribbon->vertexPool[i].vy = swTransform->t[1];
+            ribbon->vertexPool[i].vz = swTransform->t[2];
+
+            ribbon->endIndex += 2;
+        }
+
+        i2 = ribbon->endIndex;
+
+        if (i2 >= ribbon->numberVerts)
+        {
+            ribbon->endIndex = 0;
+        }
+
+        if (startIndex == -1)
+        {
+            return;
+        }
+
+        if (!(ribbon->instance->flags & 0x800) && !(ribbon->instance->flags2 & 0x4000000))
+        {
+            for (i = startIndex; i < (i2 - 1); i++)
+            {
+                i3 = i - period;
+
+                if (i3 < 0)
+                {
+                    i3 += ribbon->numberVerts;
+                }
+
+                Quad[0] = ribbon->vertexPool[i];
+                Quad[1] = ribbon->vertexPool[i3];
+                Quad[2] = ribbon->vertexPool[i3 + 1];
+                Quad[3] = ribbon->vertexPool[i + 1];
+
+                for (d = 0; d < 4096; d += 4096)
+                {
+                    fxPrim = FX_GetPrim(fxTracker);
+
+                    if (fxPrim != NULL)
+                    {
+                        fxPrim->position.x = ribbon->vertexPool[i].vx;
+                        fxPrim->position.y = ribbon->vertexPool[i].vy;
+                        fxPrim->position.z = ribbon->vertexPool[i].vz;
+
+                        fxPrim->v0 = *(Position *)&Quad[0];
+                        fxPrim->v1 = *(Position *)&Quad[1];
+                        fxPrim->v3 = *(Position *)&Quad[2];
+                        fxPrim->v2 = *(Position *)&Quad[3];
+
+                        fxPrim->fadeValue[0] = ribbon->startFadeValue;
+                        fxPrim->fadeValue[1] = ribbon->startFadeValue;
+                        fxPrim->fadeValue[2] = ribbon->startFadeValue + ribbon->fadeStep;
+                        fxPrim->fadeValue[3] = ribbon->startFadeValue + ribbon->fadeStep;
+                        
+                        fxPrim->fadeStep = ribbon->fadeStep;
+
+                        fxPrim->flags = (fxPrim->flags & ~0x1) | 0x90008;
+
+                        fxPrim->color      = ribbon->startColor;
+                        fxPrim->startColor = ribbon->startColor;
+                        fxPrim->endColor   = ribbon->endColor;
+
+                        fxPrim->colorFadeValue = 0;
+                        fxPrim->colorFadeStep  = ribbon->colorStepValue;
+
+                        if (ribbon->type == 2)
+                        {
+                            fxPrim->process = (void *)FX_ConstrictProcess;
+                        }
+                        else
+                        {
+                            fxPrim->process = (void *)FX_RibbonProcess;
+                        }
+
+                        fxPrim->timeToLive = ribbon->faceLifeTime;
+
+                        LIST_InsertFunc(&fxTracker->usedPrimList, &fxPrim->node);
+
+                        fxPrim2 = FX_GetPrim(fxTracker);
+
+                        if (fxPrim2 != NULL)
+                        {
+                            int fade; 
+
+                            *fxPrim2 = *fxPrim;
+
+                            FX_SubDividePrim(fxPrim, fxPrim2);
+
+                            fade = 4096;
+
+                            temp = 2;
+
+                            if (ribbon->type == temp)
+                            {
+                                fade = 2048;
+
+                                fxPrim2->work0 = 0;
+                                fxPrim->work0  = 0;
+
+                                fxPrim2->work1 = 0;
+                                fxPrim->work1  = 0;
+
+                                fxPrim->work2  = 1;
+                                fxPrim2->work2 = 0;
+                            }
+
+                            fxPrim->fadeValue[0]  = fade;
+                            fxPrim->fadeValue[1]  = fade;
+                            fxPrim2->fadeValue[2] = fade;
+                            fxPrim2->fadeValue[3] = fade;
+
+                            LIST_InsertFunc(&fxTracker->usedPrimList, &fxPrim2->node);
+                        }
+                    }
+
+                    Quad[0] = Quad[1];
+                    Quad[3] = Quad[2];
+                }
+            }
+        }
+    }
+
+    if ((ribbon->lifeTime > 0) && (--ribbon->lifeTime == 0))
+    {
+        FX_DeleteGeneralEffect((FXGeneralEffect *)ribbon);
+    }
+}
 
 void FX_StandardFXPrimProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
 {
