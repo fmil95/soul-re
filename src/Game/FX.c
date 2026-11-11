@@ -35,43 +35,7 @@ static short current_rain_fade = 0;
 
 static Instance *FX_reaver_instance = NULL;
 
-/* sv_vels */
-static SVector D_800D1018[4] =
-{
-    {  15,   0, 100, 6 },
-    { -15,   0, 100, 6 },
-    {   0,  15, 100, 6 },
-    {   0, -15, 100, 6 },
-};
-
-/* ??? */
-static short D_800D1038[2] = {25637, 0};
-
-static short windx = 0;
-
-static short windy = 0;
-
-static short wind_deg = 1024;
-
-static short wind_speed = 20;
-
-static long FX_ColorArray[6] =
-{
-    0x1010C8,
-    0x10C810,
-    0xC81010,
-    0x1800A0,
-    0x93E4,
-    0xA01010,
-};
-
-static short Spiral_Number = 0xFFFF;
-
-static short Spiral_Degrees = 128;
-
-static long Spiral_Current = 0;
-
-static long Spiral_Max = 100000;
+static long FX_ColorArray[6];
 
 static Position FX_ConstrictPosition;
 
@@ -510,7 +474,346 @@ long _FX_DoLighting(MFace *mface)
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_BuildSegmentedSplinters);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_BuildNonSegmentedSplinters);
+void _FX_BuildNonSegmentedSplinters(Instance *instance, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, FXSplinter *splintDef, FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short shardFlags)
+{
+    long j;  
+    long maxTimeToLive;  
+    long faceSkip;  
+    //long numFaces; 
+    MFace *mface; 
+    MFace *endMFace; 
+    short whichMatrix; 
+    Model *model = instance->object->modelList[instance->currentModel];  
+    MVertex *vertexList = model->vertexList; 
+    MFace *faceList = model->faceList; 
+    FX_MATRIX *fxMatrix;  
+    FX_MATRIX *fxMatList[4]; 
+    SVector *curVel; 
+    FX_PRIM *fxPrim;  
+    SVector *vertex0; 
+    SVector *vertex1;  
+    SVector *vertex2;  
+    SVector *poolOfVertices = (SVector *)gameTrackerX.vertexPool;  
+    MATRIX *swTransform;  
+    MATRIX ourM;  
+    Vector Center;  
+    SVector offset;  
+    Normal faceNorm;  
+    SVector sv_temp; 
+    SVector sv_vels[4] = { { 15, 0, 100, 6 }, { -15, 0, 100, 6 }, { 0, 15, 100, 6 }, { 0, -15, 100, 6 } }; 
+
+    PIPE3D_TransformVerticesToWorld(instance, poolOfVertices, (long *)((VertexPool *)poolOfVertices)->color, &Center);
+
+    if (splintDef != NULL)
+    {
+        short start; 
+        short range; // not from decls.h
+
+        start = splintDef->chunkVelXY - splintDef->chunkVelRng;
+        range = splintDef->chunkVelRng;
+
+        if (range != 0)
+        {
+            range *= 2;
+
+            sv_vels[0].x =   start + (rand() % range);
+            sv_vels[1].x = -(start + (rand() % range));
+            sv_vels[2].y =   start + (rand() % range);
+            sv_vels[3].y = -(start + (rand() % range));
+
+            start = splintDef->chunkVelZ - splintDef->chunkVelRng;
+
+            sv_vels[0].z = start + (rand() % range);
+            sv_vels[1].z = start + (rand() % range);
+            sv_vels[2].z = start + (rand() % range);
+            sv_vels[3].z = start + (rand() % range);
+        }
+        else
+        {
+            sv_vels[0].x =  start;
+            sv_vels[1].x = -start;
+            sv_vels[2].y =  start;
+            sv_vels[3].y = -start;
+
+            sv_vels[3].z = sv_vels[2].z = sv_vels[1].z = sv_vels[0].z = splintDef->chunkVelZ;
+        }
+
+        maxTimeToLive = splintDef->lifetime;
+    }
+    else
+    {
+        sv_vels[0].x += (rand() % 8) - 4;
+        sv_vels[1].x += (rand() % 8) - 4;
+        sv_vels[2].y += (rand() % 8) - 4;
+        sv_vels[3].y += (rand() % 8) - 4;
+
+        maxTimeToLive = 32;
+    }
+
+    _FX_SetupLighting(instance);
+
+    swTransform = &ourM;
+
+    ourM.m[0][0] = ourM.m[1][1] = ourM.m[2][2] = 4096;
+    ourM.m[0][1] = ourM.m[0][2] = ourM.m[1][0] = ourM.m[1][2] = ourM.m[2][0] = ourM.m[2][1] = 0;
+
+    ourM.t[0] = Center.x;
+    ourM.t[1] = Center.y;
+    ourM.t[2] = Center.z;
+
+    for (j = 0; j < 4; j++)
+    {
+        fxMatrix = FX_GetMatrix(fxTracker);
+
+        if (fxMatrix == NULL)
+        {
+            if (j == 0)
+            {
+                return;
+            }
+
+            fxMatrix = fxMatList[rand() % j];
+        }
+
+        fxMatList[j] = fxMatrix;
+
+        fxMatrix->lwTransform = *(Transform *)swTransform;
+
+        COPY_SVEC(SVector, &sv_temp, SVector, &sv_vels[j]);
+
+        sv_vels[j].x = ((sv_temp.x * swTransform->m[0][0]) >> 12) + ((sv_temp.y * swTransform->m[0][1]) >> 12) + ((sv_temp.z * swTransform->m[0][2]) >> 12);
+        sv_vels[j].y = ((sv_temp.x * swTransform->m[1][0]) >> 12) + ((sv_temp.y * swTransform->m[1][1]) >> 12) + ((sv_temp.z * swTransform->m[1][2]) >> 12);
+        sv_vels[j].z = ((sv_temp.x * swTransform->m[2][0]) >> 12) + ((sv_temp.y * swTransform->m[2][1]) >> 12) + ((sv_temp.z * swTransform->m[2][2]) >> 12);
+
+        fxMatrix->lwTransform.t[0] += sv_vels[j].x * 4;
+        fxMatrix->lwTransform.t[1] += sv_vels[j].y * 4;
+    }
+
+    if (splintDef != NULL)
+    {
+        if (splintDef->faceLimit != 0)
+        {
+            faceSkip = (model->numFaces / splintDef->faceLimit) + 1;
+        }
+        else
+        {
+            faceSkip = 1;
+        }
+    }
+    else
+    {
+        faceSkip = 1;
+    }
+
+    mface = faceList;
+
+    endMFace = &mface[model->numFaces];
+
+    for (; mface < endMFace; mface += faceSkip)
+    {
+        vertex0 = &poolOfVertices[mface->face.v0];
+        vertex1 = &poolOfVertices[mface->face.v1];
+        vertex2 = &poolOfVertices[mface->face.v2];
+
+        faceNorm.x = (vertex0->x + vertex1->x + vertex2->x) / 3;
+        faceNorm.y = (vertex0->y + vertex1->y + vertex2->y) / 3;
+        faceNorm.z = (vertex0->z + vertex1->z + vertex2->z) / 3;
+
+        if (abs(faceNorm.x) > abs(faceNorm.y))
+        {
+            whichMatrix = faceNorm.x < 1;
+        }
+        else if (faceNorm.y > 0)
+        {
+            whichMatrix = 2;
+        }
+        else
+        {
+            whichMatrix = 3;
+        }
+
+        fxMatrix = fxMatList[whichMatrix];
+
+        curVel = &sv_vels[whichMatrix];
+
+        fxPrim = FX_GetPrim(fxTracker);
+
+        if (fxPrim != NULL)
+        {
+            if (fxSetup != NULL)
+            {
+                fxSetup(fxPrim, fxProcess, fxMatrix, instance, mface, vertexList, center, vel, accl, fxTracker, 30);
+            }
+            else
+            {
+                fxPrim->position.x = fxMatrix->lwTransform.t[0];
+                fxPrim->position.y = fxMatrix->lwTransform.t[1];
+                fxPrim->position.z = fxMatrix->lwTransform.t[2];
+
+                SUB_SVEC(SVector, &offset, Position, &fxPrim->position, Vector, &Center);
+
+                fxPrim->v0.x = vertex0->x - offset.x;
+                fxPrim->v0.y = vertex0->y - offset.y;
+                fxPrim->v0.z = vertex0->z - offset.z;
+
+                fxPrim->v1.x = vertex1->x - offset.x;
+                fxPrim->v1.y = vertex1->y - offset.y;
+                fxPrim->v1.z = vertex1->z - offset.z;
+
+                fxPrim->v2.x = vertex2->x - offset.x;
+                fxPrim->v2.y = vertex2->y - offset.y;
+                fxPrim->v2.z = vertex2->z - offset.z;
+
+                fxPrim->matrix = fxMatrix;
+
+                FX_AniTexSetup(fxPrim, mface, model, fxTracker);
+
+                if (shardFlags & 0x40)
+                {
+                    if (mface->flags & 0x2)
+                    {
+                        TextureMT3 *texture;
+
+                        texture = (TextureMT3 *)mface->color;
+
+                        fxPrim->color  =               texture->color & 0xFFFFFF;
+                        fxPrim->color |= 0x24000000 | (texture->color & 0x3000000);
+                    }
+                    else
+                    {
+                        fxPrim->color  =               mface->color & 0xFFFFFF;
+                        fxPrim->color |= 0x20000000 | (mface->color & 0x3000000);
+                    }
+                }
+                else
+                {
+                    fxPrim->color = _FX_DoLighting(mface);
+                }
+
+                if (fxProcess != NULL)
+                {
+                    fxPrim->process = fxProcess;
+                }
+                else
+                {
+                    fxPrim->process = FX_ShatterProcess;
+                }
+
+                fxPrim->duo.phys.xVel = curVel->x;
+                fxPrim->duo.phys.yVel = curVel->y;
+                fxPrim->duo.phys.zVel = curVel->z;
+
+                if (splintDef != NULL)
+                {
+                    short range; // not from decls.h
+                    short base;  // not from decls.h
+
+                    range = splintDef->triVelRng;
+
+                    if (range != 0)
+                    {
+                        base   = -range;
+                        range *= 2;
+
+                        fxPrim->duo.phys.xVel += base + (rand() % range);
+                        fxPrim->duo.phys.yVel += base + (rand() % range);
+                        fxPrim->duo.phys.zVel += base + (rand() % range);
+                    }
+                }
+                else
+                {
+                    fxPrim->duo.phys.xVel += (rand() % 8) - 4;
+                    fxPrim->duo.phys.yVel += (rand() % 8) - 4;
+                    fxPrim->duo.phys.zVel += (rand() % 8) - 4;
+                }
+
+                if (vel != NULL)
+                {
+                    fxPrim->duo.phys.xVel += vel->vx;
+                    fxPrim->duo.phys.yVel += vel->vy;
+                    fxPrim->duo.phys.zVel += vel->vz;
+                }
+
+                fxPrim->duo.phys.xAccl = 0;
+                fxPrim->duo.phys.yAccl = 0;
+
+                if (splintDef != NULL)
+                {
+                    short range; // not from decls.h
+                    short base;  // not from decls.h
+
+                    range = splintDef->rotRateRng;
+                    base  = -range;
+
+                    if (range != 0)
+                    {
+                        fxPrim->work3 = base + (rand() % (short)(range * 2));
+                    }
+                    else
+                    {
+                        fxPrim->work3 = 0;
+                    }
+
+                    fxPrim->duo.phys.zAccl = splintDef->gravityZ;
+                }
+                else
+                {
+                    fxPrim->duo.phys.zAccl = -8;
+                    
+                    fxPrim->work3 = (rand() % 8) - 4;
+                }
+
+                fxPrim->timeToLive = maxTimeToLive;
+                
+                fxPrim->work1 = 4096;
+
+                if (shardFlags & 0x10)
+                {
+                    fxPrim->work0 = -32767;
+                }
+                else
+                {
+                    fxPrim->work0 = instance->position.z - instance->object->modelList[instance->currentModel]->maxRad;
+                }
+            }
+
+            LIST_InsertFunc(&fxTracker->usedPrimList, (NodeType *)fxPrim);
+        }
+        else
+        {
+            mface = endMFace;
+        }
+    }
+}
+
+/* ??? */
+static short D_800D1038[2] = {25637, 0};
+
+static short windx = 0;
+
+static short windy = 0;
+
+static short wind_deg = 1024;
+
+static short wind_speed = 20;
+
+static long FX_ColorArray[6] =
+{
+    0x1010C8,
+    0x10C810,
+    0xC81010,
+    0x1800A0,
+    0x93E4,
+    0xA01010,
+};
+
+static short Spiral_Number = 0xFFFF;
+
+static short Spiral_Degrees = 128;
+
+static long Spiral_Current = 0;
+
+static long Spiral_Max = 100000;
 
 void _FX_BuildSplinters(struct _Instance *instance, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, struct FXSplinter *splintDef, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short shardFlags)
 {

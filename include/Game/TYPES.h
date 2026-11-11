@@ -673,7 +673,7 @@ typedef enum mcpsx_sync_t
     sync_done = 1,
     sync_func = 2,
     sync_num_items = 3,
-    sync_idle = 0xFFFFFFFF,
+    sync_idle = -1,
 } mcpsx_sync_t;
 
 typedef enum mcpsx_mode_t
