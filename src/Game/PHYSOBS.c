@@ -1296,7 +1296,7 @@ struct _Instance *BirthProjectilePhysOb(struct _Instance *instance, int grabJoin
                 iForce->zAccl = 0;
                 return iForce;
             }
-            Data->physObTimer = 0x96000;
+            Data->physObTimer = 614400;
         }
     }
     return iForce;
@@ -3058,7 +3058,277 @@ int GetObliqueDirection(Instance *instance, SVector *dir)
     return obliqueFlg;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PHYSOBS", CollidePhysicalObject);
+void CollidePhysicalObject(Instance *instance, GameTracker *gameTracker)
+{
+    PhysObData *Data; 
+    CollideInfo *collideInfo; 
+    int obliqueFlg;
+    SVector vel; 
+    SVector dir; 
+    Instance *hitinst; 
+    TFace *tface; 
+    Normal *norm; 
+    SVector normal; 
+    int stickFlg;
+    int drawFlg;
+    int projectile; 
+
+    (void)gameTracker;
+
+    hitinst = NULL;
+    
+    tface = NULL;
+
+    drawFlg    = 1;
+    obliqueFlg = 0;
+
+    collideInfo = (CollideInfo *)instance->collideInfo;
+
+    Data = (PhysObData *)instance->extraData;
+
+    projectile = CheckPhysObFamily(instance, 7) != 0;
+
+    norm = (Normal *)&collideInfo->point0;
+
+    if ((projectile != 0) && (((evObjectBirthProjectileData *)instance->extraData)->joint == 8))
+    {
+        Level *level; 
+
+        level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
+
+        if ((level != NULL) && (instance->position.z < level->waterZLevel))
+        {
+            return;
+        }
+    }
+
+    if ((unsigned char)collideInfo->type1 != 3)
+    {
+        hitinst = (Instance *)collideInfo->inst1;
+    }
+    else
+    {
+        BSPTree *bsp; 
+        Level *level; 
+
+        bsp = (BSPTree *)collideInfo->inst1;
+
+        level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
+
+        tface = (TFace *)collideInfo->prim1;
+
+        if (bsp->flags & 0x1)
+        {
+            drawFlg = 0;
+        }
+        else if (tface->attr & 0x4)
+        {
+            drawFlg = 0;
+        }
+
+        COLLIDE_GetNormal(tface->normal, (short *)level->terrain->normalList, &normal);
+
+        norm = (Normal *)&normal;
+    }
+
+    if ((Data->Mode & 0x10) && (hitinst == Data->throwingInstance))
+    {
+        return;
+    }
+
+    GetPhysObCollisionType(instance);
+
+    if (Data->Mode & 0x4000)
+    {
+        if (Data->Force == hitinst)
+        {
+            return;
+        }
+
+        if (hitinst != NULL)
+        {
+            if ((collideInfo->type0 == 1) && (collideInfo->type1 == 1))
+            {
+                return;
+            }
+
+            if (hitinst->object->oflags2 & 0x40000)
+            {
+                return;
+            }
+        }
+
+        if (tface != NULL)
+        {
+            if (tface->textoff == 0xFFFF)
+            {
+                return;
+            }
+
+            if (!(((TextureFT3 *)((char *)((Level *)collideInfo->level)->terrain->StartTextureList + tface->textoff))->attr & 0x1000))
+            {
+                return;
+            }
+        }
+
+        Data->Mode = (Data->Mode & ~0x4000) | 0x10;
+
+        Data->physObTimer = 614400;
+
+        {
+            Position delta; 
+
+            SUB_SVEC(Position, &delta,              Position, &instance->oldPos,   Position, &instance->position);
+            ADD_SVEC(Position, &instance->position, Position, &instance->position, Position, &delta);
+
+            COLLIDE_UpdateAllTransforms(instance, (SVECTOR *)&delta);
+        }
+    }
+
+    if (Data->Mode & 0x10)
+    {
+        if ((projectile != 0) && ((tface != NULL) && (tface->textoff != 0xFFFF)) && (((TextureFT3 *)((char *)((Level *)collideInfo->level)->terrain->StartTextureList + tface->textoff))->attr & 0x1000))
+        {
+            return;
+        }
+
+        vel.x = instance->xVel;
+        vel.y = instance->yVel;
+        vel.z = instance->zVel;
+
+        obliqueFlg = GetObliqueDirection(instance, &dir);
+
+        if (!(Data->Mode & 0x400000))
+        {
+            instance->xVel = 0;
+            instance->yVel = 0;
+            instance->zVel = 0;
+
+            instance->xAccl = 0;
+            instance->yAccl = 0;
+            instance->zAccl = 0;
+        }
+
+        instance->position.x += collideInfo->offset.x;
+        instance->position.y += collideInfo->offset.y;
+        instance->position.z += collideInfo->offset.z;
+
+        COLLIDE_UpdateAllTransforms(instance, (SVECTOR *)&collideInfo->offset);
+
+        if (((vel.x != 0) || ((vel.y | vel.z) != 0)) && ((short)MATH3D_LengthXYZ(vel.x, vel.y, vel.z) > 100))
+        {
+            instance->flags2 |= 0x2000;
+        }
+
+        stickFlg = 0;
+
+        if ((CheckPhysObAbility(instance, 0x200) != 0) && ((vel.x != 0) || ((vel.y | vel.z) != 0)))
+        {
+            PCollideInfo CInfo; 
+            SVector newPos; 
+
+            newPos.x = instance->position.x + (vel.x << 2);
+            newPos.y = instance->position.y + (vel.y << 2);
+            newPos.z = instance->position.z + (vel.z << 2);
+
+            CInfo.oldPoint = (SVECTOR *)&instance->position;
+            CInfo.newPoint = (SVECTOR *)&newPos;
+
+            PHYSICS_CheckLineInWorld(instance, &CInfo);
+
+            stickFlg = CInfo.type != 0;
+        }
+
+        if (((stickFlg != 0) && (drawFlg != 0)) && (hitinst == NULL) && (norm->z < 2896))
+        {
+            Data->Mode |= 0x1000;
+
+            instance->flags2 &= ~0x80;
+            Data->Mode       &= ~0x10;
+
+            TurnOffCollisionPhysOb(instance, 4);
+        }
+        else
+        {
+            Data->Mode = (Data->Mode & ~0x1000) | 0x400000;
+
+            if (((vel.x != 0) || (vel.y != 0)) && (projectile == 0))
+            {
+                Position delta;
+
+                memset(&delta, 0, sizeof(Position));
+
+                delta.x = -vel.x;
+                delta.y = -vel.y;
+                delta.z = -vel.z;
+
+                ADD_SVEC(Position, &instance->position, Position, &instance->position, Position, &delta);
+
+                COLLIDE_UpdateAllTransforms(instance, (SVECTOR *)&delta);
+            }
+
+            if ((vel.z < 0) && ((((short)MATH3D_LengthXYZ(collideInfo->offset.x, collideInfo->offset.y, collideInfo->offset.z) * 46336) >> 16) > collideInfo->offset.z))
+            {
+                instance->zVel = vel.z;
+            }
+
+            DropPhysOb(instance, 0);
+        }
+    }
+    else if (Data->Mode & 0x200004)
+    {
+        if (((unsigned char)collideInfo->type1 == 1) && (Data->throwingInstance == hitinst))
+        {
+            return;
+        }
+
+        if (norm->z < 2896)
+        {
+            return;
+        }
+
+        if (Data->Mode & 0x200000)
+        {
+            collideInfo->offset.z = 0;
+        }
+
+        instance->position.x += collideInfo->offset.x;
+        instance->position.y += collideInfo->offset.y;
+        instance->position.z += collideInfo->offset.z;
+
+        COLLIDE_UpdateAllTransforms(instance, (SVECTOR *)&collideInfo->offset);
+    }
+    else if ((Data->Mode & 0x80) && (instance->LinkParent != NULL))
+    {
+        CollideInfo parentCI; 
+
+        parentCI = *collideInfo;
+
+        parentCI.inst0 = instance->LinkParent;
+
+        INSTANCE_Post(instance->LinkParent, 0x200004, SetCollideInfoData(&parentCI));
+    }
+
+    if ((CheckPhysObAbility(instance, 0x1000) != 0) && (!(Data->Mode & 0x800000)) && ((gameTrackerX.gameData.asmData.MorphTime == 1000) && (gameTrackerX.gameData.asmData.MorphType == 0)))
+    {
+        PhysObSplinter *splintDef;
+        FXSplinter *splinterData; 
+
+        splintDef    = PhysObGetSplinter(instance);
+        splinterData = NULL;
+
+        if (splintDef != NULL)
+        {
+            splinterData = (FXSplinter *)splintDef->splinterData;
+        }
+
+        _FX_BuildSplinters(instance, NULL, NULL, NULL, splinterData, gFXT, NULL, NULL, 0);
+
+        INSTANCE_PlainDeath(instance);
+    }
+
+    CheckForceCollision(instance, hitinst, tface, collideInfo, &dir, obliqueFlg);
+}
 
 PhysObWeaponAttributes *PhysObGetWeapon(Instance *instance)
 {
