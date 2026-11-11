@@ -2616,7 +2616,215 @@ void COLLIDE_InstanceTerrain(Instance *instance, Level *level)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/COLLIDE", COLLIDE_LineWithSignals);
+long COLLIDE_LineWithSignals(SVector *startPoint, SVector *endPoint, MultiSignal **signalList, long maxSignals, Level *level)
+{
+    IandTScratch *CSpad; 
+    void **stack;
+    BSPNode *bspNode; 
+    TFace *tface; 
+    Terrain *terrain; 
+    long curTree; 
+    long numSignalsCollidedWith; 
+	int temp;    // not from decls.h
+	void* temp2; // not from decls.h
+    
+	CSpad = (IandTScratch*)getScratchAddr(16);
+
+	terrain = level->terrain;
+
+	stack = (void**)getScratchAddr(41);
+
+	CSpad->normalList = (short*)terrain->normalList;
+	CSpad->vertexList = terrain->vertexList;
+
+	CSpad->oldPos = *startPoint;
+	CSpad->newPos = *endPoint;
+
+	numSignalsCollidedWith = 0;
+
+	if (gameTrackerX.gameData.asmData.MorphTime != 1000)
+	{
+        CSpad->in_spectral = 2;
+	}
+	else if (gameTrackerX.gameData.asmData.MorphType == 1)
+	{
+        CSpad->in_spectral = 1;
+	}
+    else
+    {
+        CSpad->in_spectral = 0;
+    }
+
+    SUB_SVEC(SVector, &CSpad->line, SVector, &CSpad->oldPos, SVector, &CSpad->newPos);
+    
+	if ((CSpad->line.x != 0) || (CSpad->line.y != 0) || (CSpad->line.z != 0))
+	{
+        for (curTree = 0; curTree < terrain->numBSPTrees; curTree++) 
+        {
+            if (terrain->BSPTreeArray[curTree].ID == -1)
+            {
+                *stack = stack;
+
+                SUB_SVEC(SVector, &CSpad->newPos, SVector, &CSpad->newPos, Position, &terrain->BSPTreeArray[curTree].globalOffset);
+                SUB_SVEC(SVector, &CSpad->oldPos, SVector, &CSpad->oldPos, Position, &terrain->BSPTreeArray[curTree].globalOffset);
+                
+                *++stack = *(void**)&terrain->BSPTreeArray[curTree];
+
+                CSpad->posMatrix.m[0][0] = CSpad->newPos.x;
+                CSpad->posMatrix.m[0][1] = CSpad->newPos.y;
+                CSpad->posMatrix.m[0][2] = CSpad->newPos.z;
+
+                CSpad->posMatrix.m[1][0] = CSpad->oldPos.x;
+                CSpad->posMatrix.m[1][1] = CSpad->oldPos.y;
+                CSpad->posMatrix.m[1][2] = CSpad->oldPos.z;
+
+                SetRotMatrix(&CSpad->posMatrix);
+
+                while (*stack != stack)
+                {
+                    bspNode = (BSPNode*)*stack--;
+
+                    if (bspNode->flags & 0x2)
+                    {
+                        if (((((((CSpad->newPos.x <= ((short*)&bspNode->front)[1]) || (((short*)&bspNode->front)[1] >= CSpad->oldPos.x)) && (((CSpad->newPos.x >= ((short*)&bspNode->d)[0])) || ((CSpad->oldPos.x >= ((short*)&bspNode->d)[0])))) && ((CSpad->newPos.y <= ((short*)&bspNode->back)[0]) || (((short*)&bspNode->back)[0] >= CSpad->oldPos.y))) && ((CSpad->newPos.y >= ((short*)&bspNode->d)[1]) || (CSpad->oldPos.y >= ((short*)&bspNode->d)[1]))) && ((CSpad->newPos.z <= ((short*)&bspNode->back)[1]) || (((short*)&bspNode->back)[1] >= CSpad->oldPos.z))) && ((CSpad->newPos.z >= ((short*)&bspNode->front)[0]) || (CSpad->oldPos.z >= ((short*)&bspNode->front)[0])))
+                        {
+                            for (CSpad->i = bspNode->c, tface = *(TFace**)&bspNode->a; CSpad->i != 0; CSpad->i--, tface++) 
+                            {
+                                if ((((unsigned short*)&tface->attr)[0] & 0xC0) && (tface->textoff != 0xFFFF))
+                                {
+                                    SVector *vertex0; 
+                                    short *nrmlArray; 
+                                    SVector *nrml; 
+                                    short *sPtr; 
+                                    
+                                    temp = (short)tface->normal;
+                                    
+                                    nrml      = &CSpad->normal;
+                                    nrmlArray = CSpad->normalList;
+                                    
+                                    if (temp >= 0)
+                                    {
+                                        sPtr = &nrmlArray[3 * temp];
+                                        
+                                        nrml->x = *sPtr++ & 0x1FFF;
+                                        nrml->y = *sPtr++;
+                                        nrml->z = *sPtr;
+                                    }
+                                    else
+                                    {
+                                        sPtr = &nrmlArray[3 * -temp];
+                                        
+                                        nrml->x = -(*sPtr++ & 0x1FFF);
+                                        nrml->y = -*sPtr++;
+                                        nrml->z = -*sPtr; 
+                                    }
+                                    
+                                    vertex0 = (SVector*)&CSpad->vertexList[tface->face.v0];
+                                    
+                                    gte_ldv2_ext(vertex0);
+                                    gte_ldv0(&CSpad->normal);
+                                    gte_nrtv0();
+                                    gte_stlvnl(&CSpad->dpv);
+    
+                                    CSpad->dpv.x -= CSpad->dpv.z;
+                                    CSpad->dpv.y -= CSpad->dpv.z;
+                                    
+                                    if ((CSpad->dpv.x < 0) && (CSpad->dpv.y >= 0)) 
+                                    {
+                                        SVector *point; 
+                                        SVector *start; 
+                                        SVector *line; 
+                                        long len; 
+                                        long t; 
+                                        Vector *dpv; // not from decls.h
+    
+                                        point = &CSpad->planePoint;
+                                        start = &CSpad->oldPos;
+                                        line  = &CSpad->line;
+                                        
+                                        dpv = &CSpad->dpv;
+
+                                        len = dpv->x - dpv->y;
+
+                                        t = (len != 0) ? (dpv->y << 12) / len : 0;
+                                    
+                                        point->x = (short)(start->x + ((line->x * t) >> 12));
+                                        point->y = (short)(start->y + ((line->y * t) >> 12)); 
+                                        point->z = (short)(start->z + ((line->z * t) >> 12));
+                                        
+                                        if (COLLIDE_PointInTriangle(vertex0, (SVector*)&CSpad->vertexList[tface->face.v1], (SVector*)&CSpad->vertexList[tface->face.v2], &CSpad->planePoint, &CSpad->normal) != 0)
+                                        {
+                                            MultiSignal *msignal; 
+                                            
+                                            if (numSignalsCollidedWith < maxSignals)
+                                            {
+                                                msignal = (MultiSignal*)((char*)terrain->signals + tface->textoff);
+
+                                                signalList[numSignalsCollidedWith++] = msignal;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        int plane_front_error; 
+                        int plane_back_error; 
+                        
+                        gte_ldv0(&bspNode->a);
+                        gte_nrtv0();
+                        gte_stlvnl(&CSpad->dpv);
+                        
+                        CSpad->dpv.x -= bspNode->d;
+                        CSpad->dpv.y -= bspNode->d;
+
+                        if (CSpad->in_spectral != 0)
+                        {
+                            plane_front_error = bspNode->front_spectral_error;
+                            plane_back_error  = bspNode->back_spectral_error;
+                        }
+                        else
+                        {
+                            plane_front_error = bspNode->front_material_error;
+                            plane_back_error  = bspNode->back_material_error;
+                        }
+                        
+                        if ((CSpad->dpv.x >= plane_front_error) && (CSpad->dpv.y >= plane_front_error))
+                        {
+                            temp2 = bspNode->front;
+                        }
+                        else
+                        {
+                            if ((plane_back_error < CSpad->dpv.x) || (plane_back_error < CSpad->dpv.y)) 
+                            {
+                                if (bspNode->front != NULL) 
+                                {
+                                    *++stack = bspNode->front;
+                                }
+                            }
+                            
+                            temp2 = bspNode->back;
+                        }
+                        
+                        if (temp2 != NULL) 
+                        {
+                            *++stack = temp2;
+                        }
+                    }
+                }
+                
+                ADD_SVEC(SVector, &CSpad->newPos, SVector, &CSpad->newPos, Position, &terrain->BSPTreeArray[curTree].globalOffset);
+                ADD_SVEC(SVector, &CSpad->oldPos, SVector, &CSpad->oldPos, Position, &terrain->BSPTreeArray[curTree].globalOffset);
+            }
+        }
+        
+		return numSignalsCollidedWith;
+	}
+    
+	return numSignalsCollidedWith;
+} 
 
 void COLLIDE_InstanceTerrainSignal(Instance *instance, Level *level)
 {

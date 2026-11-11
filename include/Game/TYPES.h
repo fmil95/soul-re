@@ -7606,7 +7606,7 @@ struct SandTScratch
 };
 
 // size: 0x64
-struct IandTScratch
+typedef struct IandTScratch
 {
     // offset: 0x0000 (32 bytes)
     MATRIX posMatrix;
@@ -7630,7 +7630,7 @@ struct IandTScratch
     short *normalList;
     // offset: 0x0060 (4 bytes)
     TVertex *vertexList;
-};
+} IandTScratch;
 
 // size: 0x4C
 struct PandTFScratch
