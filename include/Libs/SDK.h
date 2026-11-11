@@ -406,6 +406,12 @@
     : : "r"(r0)                 \
     : "memory")
 
+#define gte_stsxy2(r0) __asm__ ( \
+        "swc2    $14, 0(%0)" \
+        : : "r"(r0) \
+        : "memory" \
+    )
+
 #define gte_stopz(r0) __asm__( \
     "swc2    $24, 0(%0)"       \
     : : "r"(r0)                \

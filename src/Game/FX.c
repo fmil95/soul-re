@@ -16,6 +16,7 @@
 #include "Game/GAMEPAD.h"
 #include "Game/GLYPH.h"
 #include "Game/PHYSOBS.h"
+#include "Game/VM.h"
 #include "Game/PSX/MAIN.h"
 
 static FXGeneralEffect *FX_GeneralEffectTracker = NULL;
@@ -456,8 +457,6 @@ void _FX_SetupLighting(struct _Instance *instance)
 
     SetLightMatrix(&lm);
 }
-
-extern Normal gNormalList[]; // TODO: should work via including the VM header, but...
 
 long _FX_DoLighting(MFace *mface)
 {
@@ -6335,7 +6334,144 @@ void FX_Draw_Glowing_Line(unsigned long **ot, long otz, DVECTOR *sxy0, DVECTOR *
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Lightning);
+void FX_Lightning(MATRIX *wcTransform, unsigned long **ot, MATRIX *mat, short deg, struct _SVector *start, struct _SVector *end, int width, int small_width, int segs, int sine_size, int variation, long color, long glow_color)
+{
+    int sz0;           
+    int sz1;           
+    long otz;          
+    int length;        
+    DVECTOR sxy0;      
+    DVECTOR sxy1;      
+    DVECTOR xy0;       
+    DVECTOR xy1;       
+    DVECTOR small_xy0; 
+    DVECTOR small_xy1; 
+    int n;             
+    int increment;     
+    int rsin_nd2;      
+
+    deg &= 0xFFF; 
+    
+    if (mat != NULL)
+    {
+        SetRotMatrix(mat);
+        SetTransMatrix(mat);
+    }
+    else
+    {
+        SetRotMatrix(wcTransform);
+        SetTransMatrix(wcTransform);
+    } 
+    
+    sz0 = 32767;
+
+    width       = width * 320;
+    small_width = small_width * 320;
+
+    increment = 4096 / segs;
+
+    *(int*)&xy0       = 0;
+    *(int*)&small_xy0 = 0;
+
+    n = 0; 
+   
+    for (; segs >= 0; segs--)
+    {
+        SVECTOR point;     
+        
+        LoadAverageShort12((SVECTOR*)start, (SVECTOR*)end, 4096 - n, n, &point);
+        
+        rsin_nd2 = rsin(n / 2);
+        
+        if ((variation != 0) && (segs != 0) && (mat == NULL))
+        {
+            int rsin_n4;       
+            
+            rsin_n4 = rsin(n * 4);
+            
+            point.vx += (((rand() % variation) - (variation / 2)) * rsin_n4) / 4096; 
+            point.vy += (((rand() % variation) - (variation / 2)) * rsin_n4) / 4096; 
+
+            point.vz += (((rsin(n + deg) * sine_size) / 4096) * rsin_nd2 / 4096) + ((rand() % variation) - (variation / 2));
+        }
+        
+        if (mat != NULL)
+        {
+            int tmpdeg;        
+            
+            tmpdeg = deg + (segs * 512);
+            
+            point.vx = (((rcos(tmpdeg) * sine_size / 4096) + (rand() & 7)) * rsin_nd2) / 4096;
+            point.vy = (((rsin(tmpdeg) * sine_size / 4096) + (rand() & 7)) * rsin_nd2) / 4096; 
+
+            point.vz += rand() & 7;
+        }
+        
+        gte_ldv0(&point);
+        gte_nrtps();
+        gte_stsxy2(&sxy1);
+        gte_stsz(&sz1);
+        
+        if (sz0 < sz1)
+        {
+            otz = sz0 / 4;
+        }
+        else
+        {
+            otz = sz1 / 4;
+        }
+        
+        if ((segs != 0) && (n != 0))
+        {
+            int fx;            
+            int fy;            
+            
+            fx = sxy1.vx - sxy0.vx;
+            fy = sxy1.vy - sxy0.vy;
+            
+            length = MATH3D_veclen2(fx, fy) * sz1;
+            
+            if (length <= 0)
+            {
+                length = 1;
+            }
+            
+            xy1.vx = (fy * width) / length;
+            xy1.vy = (fx * width) / length;
+
+            small_xy1.vx = (fy * small_width) / length;
+            small_xy1.vy = (fx * small_width) / length;
+        }
+        else
+        {
+            *(int*)&xy1       = 0;
+            *(int*)&small_xy1 = 0;
+        }
+        
+        if (((n != 0) && (otz > 0)) && (otz < 3072))
+        {
+            if (width != 0)
+            {
+                FX_Draw_Glowing_Line(ot, otz, &sxy0, &sxy1, &xy0, &xy1, glow_color, glow_color);
+            }
+            
+            otz -= 5;
+            
+            if ((otz > 0) && (small_width != 0))
+            {
+                FX_Draw_Glowing_Line(ot, otz, &sxy0, &sxy1, &small_xy0, &small_xy1, color, color);
+            }
+        }
+        
+        n += increment;
+
+        sz0 = sz1;
+        
+        *(int*)&sxy0      = *(int*)&sxy1;
+        *(int*)&xy0       = *(int*)&xy1;
+        *(int*)&small_xy0 = *(int*)&small_xy1;
+    } 
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_LightHouse);
 
