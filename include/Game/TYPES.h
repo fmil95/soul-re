@@ -673,7 +673,7 @@ typedef enum mcpsx_sync_t
     sync_done = 1,
     sync_func = 2,
     sync_num_items = 3,
-    sync_idle = 0xFFFFFFFF,
+    sync_idle = -1,
 } mcpsx_sync_t;
 
 typedef enum mcpsx_mode_t
@@ -734,6 +734,7 @@ typedef enum fsm_t
 } fsm_t;
 
 // size: 0xC0
+#ifndef USE_PSYQ
 struct TCB
 {
     // offset: 0x0000
@@ -745,8 +746,10 @@ struct TCB
     // offset: 0x00A8 (24 bytes)
     long system[6];
 };
+#endif
 
 // size: 0x3C
+#ifndef USE_PSYQ
 struct EXEC
 {
     // offset: 0x0000
@@ -780,8 +783,10 @@ struct EXEC
     // offset: 0x0038
     unsigned long base;
 };
+#endif
 
 // size: 0x28
+#ifndef USE_PSYQ
 struct DIRENTRY
 {
     // offset: 0x0000 (20 bytes)
@@ -797,8 +802,10 @@ struct DIRENTRY
     // offset: 0x0024 (4 bytes)
     char system[4];
 };
+#endif
 
 // size: 0x20
+#ifndef USE_PSYQ
 typedef struct MATRIX
 {
     // offset: 0x0000 (18 bytes)
@@ -806,8 +813,12 @@ typedef struct MATRIX
     // offset: 0x0014 (12 bytes)
     long t[3];
 } MATRIX, Transform;
+#else
+typedef MATRIX Transform;
+#endif
 
 // size: 0x10
+#ifndef USE_PSYQ
 typedef struct VECTOR
 {
     // offset: 0x0000
@@ -819,8 +830,10 @@ typedef struct VECTOR
     // offset: 0x000C
     long pad;
 } VECTOR;
+#endif
 
 // size: 0x8
+#ifndef USE_PSYQ
 typedef struct SVECTOR
 {
     // offset: 0x0000
@@ -832,8 +845,10 @@ typedef struct SVECTOR
     // offset: 0x0006
     short pad;
 } SVECTOR;
+#endif
 
 // size: 0x4
+#ifndef USE_PSYQ
 typedef struct CVECTOR
 {
     // offset: 0x0000
@@ -845,8 +860,10 @@ typedef struct CVECTOR
     // offset: 0x0003
     unsigned char cd;
 } CVECTOR;
+#endif
 
 // size: 0x4
+#ifndef USE_PSYQ
 typedef struct DVECTOR
 {
     // offset: 0x0000
@@ -854,8 +871,10 @@ typedef struct DVECTOR
     // offset: 0x0002
     short vy;
 } DVECTOR;
+#endif
 
 // size: 0x18
+#ifndef USE_PSYQ
 typedef struct RVECTOR
 {
     // offset: 0x0000 (8 bytes)
@@ -871,8 +890,10 @@ typedef struct RVECTOR
     // offset: 0x0014
     unsigned long sz;
 } RVECTOR;
+#endif
 
 // size: 0x58
+#ifndef USE_PSYQ
 typedef struct CRVECTOR3
 {
     // offset: 0x0000 (24 bytes)
@@ -890,8 +911,10 @@ typedef struct CRVECTOR3
     // offset: 0x0054
     unsigned long *rtn;
 } CRVECTOR3;
+#endif
 
 // size: 0x8C
+#ifndef USE_PSYQ
 typedef struct CRVECTOR4
 {
     // offset: 0x0000 (24 bytes)
@@ -915,8 +938,10 @@ typedef struct CRVECTOR4
     // offset: 0x0088
     unsigned long *rtn;
 } CRVECTOR4;
+#endif
 
 // size: 0x8
+#ifndef USE_PSYQ
 typedef struct RECT
 {
     // offset: 0x0000
@@ -928,8 +953,10 @@ typedef struct RECT
     // offset: 0x0006
     short h;
 } RECT;
+#endif
 
 // size: 0x40
+#ifndef USE_PSYQ
 typedef struct DR_ENV
 {
     // offset: 0x0000
@@ -937,8 +964,10 @@ typedef struct DR_ENV
     // offset: 0x0004 (60 bytes)
     unsigned long code[15];
 } DR_ENV;
+#endif
 
 // size: 0x8
+#ifndef USE_PSYQ
 typedef struct P_TAG
 {
     // offset: 0x0000
@@ -954,8 +983,10 @@ typedef struct P_TAG
     // offset: 0x0007
     unsigned char code;
 } P_TAG;
+#endif
 
 // size: 0x4
+#ifndef USE_PSYQ
 typedef struct CdlLOC
 {
     // offset: 0x0000
@@ -967,6 +998,7 @@ typedef struct CdlLOC
     // offset: 0x0003
     unsigned char track;
 } CdlLOC;
+#endif
 
 // size: 0x8
 typedef struct NodeType
@@ -3439,6 +3471,7 @@ typedef struct _CameraCore_Type
 } CameraCore;
 
 // size: 0x4
+#ifndef USE_PSYQ
 typedef struct SpuVolume
 {
     // offset: 0x0000
@@ -3446,8 +3479,10 @@ typedef struct SpuVolume
     // offset: 0x0002
     short right;
 } SpuVolume;
+#endif
 
 // size: 0x40
+#ifndef USE_PSYQ
 typedef struct SpuVoiceAttr
 {
     // offset: 0x0000
@@ -3493,8 +3528,10 @@ typedef struct SpuVoiceAttr
     // offset: 0x003C
     unsigned short adsr2;
 } SpuVoiceAttr;
+#endif
 
 // size: 0xC
+#ifndef USE_PSYQ
 typedef struct SpuExtAttr
 {
     // offset: 0x0000 (4 bytes)
@@ -3504,8 +3541,10 @@ typedef struct SpuExtAttr
     // offset: 0x0008
     long mix;
 } SpuExtAttr;
+#endif
 
 // size: 0x10
+#ifndef USE_PSYQ
 typedef struct SpuStVoiceAttr
 {
     // offset: 0x0000
@@ -3523,6 +3562,7 @@ typedef struct SpuStVoiceAttr
     // offset: 0x000C
     unsigned long data_addr;
 } SpuStVoiceAttr;
+#endif
 
 // size: 0x28
 typedef struct AadSoundBankHdr
@@ -4502,6 +4542,7 @@ typedef struct __State
 }*physadr;*/
 
 // size: 0x18
+#ifndef USE_PSYQ
 typedef struct POLY_F4
 {
     // offset: 0x0000
@@ -4531,6 +4572,7 @@ typedef struct POLY_F4
     // offset: 0x0016
     short y3;
 } POLY_F4;
+#endif
 
 // size: 0x6
 typedef struct _SmallRotation
@@ -6038,6 +6080,7 @@ typedef struct debug_format_t
 } debug_format_t;
 
 // size: 0x28
+#ifndef USE_PSYQ
 typedef struct POLY_GT3
 {
     // offset: 0x0000
@@ -6097,8 +6140,10 @@ typedef struct POLY_GT3
     // offset: 0x0026
     unsigned short pad2;
 } POLY_GT3;
+#endif
 
 // size: 0x34
+#ifndef USE_PSYQ
 typedef struct POLY_GT4
 {
     // offset: 0x0000
@@ -6176,6 +6221,7 @@ typedef struct POLY_GT4
     // offset: 0x0032
     unsigned short pad3;
 } POLY_GT4;
+#endif
 
 // size: 0xC
 typedef struct _Vector
@@ -6388,6 +6434,7 @@ typedef struct SP_SUBDIV_STRUCT
 } SP_SUBDIV_STRUCT;
 
 // size: 0x28
+#ifndef USE_PSYQ
 typedef struct POLY_FT4
 {
     // offset: 0x0000
@@ -6441,6 +6488,7 @@ typedef struct POLY_FT4
     // offset: 0x0026
     unsigned short pad2;
 } POLY_FT4;
+#endif
 
 // size: 0x620
 typedef struct FontTracker
@@ -7131,6 +7179,7 @@ typedef struct
 } cmm;
 
 // size: 0x18
+#ifndef USE_PSYQ
 typedef struct CdlFILE
 {
     // offset: 0x0000 (4 bytes)
@@ -7140,6 +7189,7 @@ typedef struct CdlFILE
     // offset: 0x0008 (16 bytes)
     char name[16];
 } CdlFILE;
+#endif
 
 // size: 0xA0
 typedef struct _LoadStatus
@@ -7200,6 +7250,7 @@ typedef struct RedirectList
 } RedirectList;
 
 // size: 0x5C
+#ifndef USE_PSYQ
 typedef struct DRAWENV
 {
     // offset: 0x0000 (8 bytes)
@@ -7225,8 +7276,10 @@ typedef struct DRAWENV
     // offset: 0x001C (64 bytes)
     DR_ENV dr_env;
 } DRAWENV;
+#endif
 
 // size: 0x14
+#ifndef USE_PSYQ
 typedef struct DISPENV
 {
     // offset: 0x0000 (8 bytes)
@@ -7242,6 +7295,7 @@ typedef struct DISPENV
     // offset: 0x0013
     unsigned char pad1;
 } DISPENV;
+#endif
 
 // size: 0x10
 typedef struct BLK_FILL // this struct was modified from the original
@@ -7606,7 +7660,7 @@ struct SandTScratch
 };
 
 // size: 0x64
-struct IandTScratch
+typedef struct IandTScratch
 {
     // offset: 0x0000 (32 bytes)
     MATRIX posMatrix;
@@ -7630,7 +7684,7 @@ struct IandTScratch
     short *normalList;
     // offset: 0x0060 (4 bytes)
     TVertex *vertexList;
-};
+} IandTScratch;
 
 // size: 0x4C
 struct PandTFScratch
@@ -7706,6 +7760,7 @@ typedef struct ObjectAccess
 } ObjectAccess;
 
 // size: 0x20
+#ifndef USE_PSYQ
 typedef struct POLY_FT3
 {
     // offset: 0x0000
@@ -7749,6 +7804,7 @@ typedef struct POLY_FT3
     // offset: 0x001E
     unsigned short pad1;
 } POLY_FT3;
+#endif
 
 // size: 0x8
 typedef struct _Mirror
@@ -7881,6 +7937,7 @@ typedef struct FXSplinter
 } FXSplinter;
 
 // size: 0x8
+#ifndef USE_PSYQ
 typedef struct DR_TPAGE
 {
     // offset: 0x0000
@@ -7888,6 +7945,7 @@ typedef struct DR_TPAGE
     // offset: 0x0004 (4 bytes)
     unsigned long code[1];
 } DR_TPAGE;
+#endif
 
 // size: 0x40
 typedef struct _POLY_SG4
@@ -8785,6 +8843,7 @@ typedef struct AadSlotAttributes
 } AadSlotAttributes;
 
 // size: 0x24
+#ifndef USE_PSYQ
 typedef struct POLY_G4
 {
     // offset: 0x0000
@@ -8838,8 +8897,10 @@ typedef struct POLY_G4
     // offset: 0x0022
     short y3;
 } POLY_G4;
+#endif
 
 // size: 0xC
+#ifndef USE_PSYQ
 typedef struct DR_AREA
 {
     // offset: 0x0000
@@ -8847,6 +8908,7 @@ typedef struct DR_AREA
     // offset: 0x0004 (8 bytes)
     unsigned long code[2];
 } DR_AREA;
+#endif
 
 // size: 0x8
 typedef struct evPositionData
@@ -11143,6 +11205,7 @@ typedef struct __razController
 } razController;
 
 // size: 0xC
+#ifndef USE_PSYQ
 typedef struct DR_STP
 {
     // offset: 0x0000
@@ -11150,6 +11213,7 @@ typedef struct DR_STP
     // offset: 0x0004 (8 bytes)
     unsigned long code[2];
 } DR_STP;
+#endif
 
 // size: 0x8
 typedef struct UW_ScreenXY
@@ -11248,6 +11312,7 @@ typedef struct _GlobalSaveTracker
 } GlobalSaveTracker;
 
 // size: 0x4
+#ifndef USE_PSYQ
 typedef struct CdlFILTER
 {
     // offset: 0x0000
@@ -11257,8 +11322,10 @@ typedef struct CdlFILTER
     // offset: 0x0002
     unsigned short pad;
 } CdlFILTER;
+#endif
 
 // size: 0x28
+#ifndef USE_PSYQ
 typedef struct SpuCommonAttr
 {
     // offset: 0x0000
@@ -11274,6 +11341,7 @@ typedef struct SpuCommonAttr
     // offset: 0x001C (12 bytes)
     SpuExtAttr ext;
 } SpuCommonAttr;
+#endif
 
 // size: 0x2
 typedef struct XAVoiceListEntry
@@ -11420,6 +11488,7 @@ union _77fake
     RGBAColor rgba;
 };
 
+#ifndef USE_PSYQ
 typedef char *caddr_t;
 
 typedef long *qaddr_t;
@@ -11431,6 +11500,7 @@ typedef long swblk_t;
 typedef long time_t;
 
 typedef long off_t;
+#endif
 
 // typedef void (*CdlCB)();
 
@@ -11536,11 +11606,13 @@ typedef void MessageFunc();
 
 typedef void RelocateTuneFunc();
 
+#ifndef USE_PSYQ
 typedef void (*SpuIRQCallbackProc)();
 
 typedef void (*SpuTransferCallbackProc)();
 
 typedef void (*SpuStCallbackProc)();
+#endif
 
 typedef int AADRESULT;
 

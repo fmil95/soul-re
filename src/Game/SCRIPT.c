@@ -13,6 +13,9 @@
 #include "Game/GENERIC.h"
 #include "Game/PSX/MAIN.h"
 
+// unused - it was originally defined somewhere in RESOLVE, SCRIPT or TIMER, but hard to know for sure which one it actually belongs to
+char *selectMenuText[/*5*/] = { "update save", "save game", "resume play", "see password", "quit" };
+
 void SCRIPT_CombineEulerAngles(Rotation *combinedRotation, Rotation *inputRotation1, Rotation *inputRotation2)
 {
     MATRIX rotMatrix1;

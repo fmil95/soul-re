@@ -61,6 +61,12 @@ static short Camera_lookHeight;
 
 static short Camera_lookDist;
 
+long campoint_hw;
+
+long campoint_hh;
+
+int CameraCenterDelay;
+
 static inline int GetSecondCheckFlag(Camera *camera)
 {
     if ((camera->flags & 0x10000))
@@ -1444,9 +1450,245 @@ void Decouple_AngleMoveToward(short *current_ptr, short destination, short step)
     AngleMoveToward(current_ptr, destination, step);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/CAMERA", CriticalDampValue);
+void CriticalDampValue(long dampMode, short *sourceVal, short targetVal, short *vel, short *accl, int smooth)
+{
+    short maxVel; 
+    short useVel; 
 
-INCLUDE_ASM("asm/nonmatchings/Game/CAMERA", CriticalDampPosition);
+    if ((short)smooth != 0)
+    {
+        if ((short)smooth < 0)
+        {
+            maxVel = -4096 / (short)smooth;
+        }
+        else
+        {
+            maxVel = smooth;
+        }
+
+        switch (dampMode)
+        {
+        case 0:
+            *accl = ((short)(targetVal - *sourceVal) >> 2) - *vel;
+            *vel += *accl;
+
+            *sourceVal += *vel;
+            break;
+        case 1:
+        case 5:
+        case 6:
+            useVel = targetVal - *sourceVal;
+
+            if (dampMode == 5)
+            {
+                *accl = (useVel >> 1) - *vel;
+            }
+            else if (dampMode == 6)
+            {
+                *accl = (useVel >> 3) - *vel;
+            }
+            else
+            {
+                *accl = (useVel >> 2) - *vel;
+            }
+
+            *vel  += *accl;
+            useVel = *vel;
+
+            if (useVel > maxVel)
+            {
+                useVel = maxVel;
+                *vel   = maxVel;
+
+                if (gameTrackerX.timeMult != 4096)
+                {
+                    useVel = (maxVel * gameTrackerX.timeMult) / 4096;
+                }
+            }
+            else if (useVel < -maxVel)
+            {
+                useVel = -maxVel;
+                *vel   = -maxVel;
+
+                if (gameTrackerX.timeMult != 4096)
+                {
+                    useVel = -(maxVel * gameTrackerX.timeMult) / 4096;
+                }
+            }
+
+            *sourceVal += useVel;
+            break;
+        }
+
+        if (*vel == 0)
+        {
+            *sourceVal = targetVal;
+        }
+    }
+    else
+    {
+        *sourceVal = targetVal;
+    }
+}
+
+void CriticalDampPosition(long dampMode, Position *position, Position *targetPos, SVector *vel, SVector *accl, int smooth)
+{
+    long length;    
+    Vector vector;   
+    SVector svector; 
+    short maxVel;    
+    int shift;       
+
+    if ((short)smooth != 0)
+    {
+        maxVel = smooth;
+
+        if (maxVel < 0)
+        {
+            maxVel = -4096 / maxVel;
+        }
+
+        switch (dampMode)
+        {
+        case 0:
+            SUB_LVEC(Vector, &vector, Position, targetPos, Position, position);
+
+            accl->x = (vector.x >> 2) - vel->x;
+            accl->y = (vector.y >> 2) - vel->y;
+            accl->z = (vector.z >> 2) - vel->z;
+
+            vel->x += accl->x;
+            vel->y += accl->y;
+            vel->z += accl->z;
+
+            position->x += vel->x;
+            position->y += vel->y;
+            position->z += vel->z;
+            break;
+        case 1:
+        case 5:
+            if (dampMode == 5)
+            {
+                shift = 1;
+            }
+            else
+            {
+                shift = 2;
+            }
+
+            SUB_LVEC(Vector, &vector, Position, targetPos, Position, position);
+
+            accl->x = (vector.x >> shift) - vel->x;
+            accl->y = (vector.y >> shift) - vel->y;
+            accl->z = (vector.z >> shift) - vel->z;
+
+            vel->x += accl->x;
+            vel->y += accl->y;
+            vel->z += accl->z;
+
+            length = CAMERA_LengthSVector(vel);
+
+            if (maxVel < length)
+            {
+                vel->x = (vel->x * maxVel) / length;
+                vel->y = (vel->y * maxVel) / length;
+                vel->z = (vel->z * maxVel) / length;
+
+                if (gameTrackerX.timeMult != 4096)
+                {
+                    position->x += (vel->x * gameTrackerX.timeMult) / 4096;
+                    position->y += (vel->y * gameTrackerX.timeMult) / 4096;
+                    position->z += (vel->z * gameTrackerX.timeMult) / 4096;
+                }
+                else
+                {
+                    position->x += vel->x;
+                    position->y += vel->y;
+                    position->z += vel->z;
+                }
+            }
+            else
+            {
+                position->x += vel->x;
+                position->y += vel->y;
+                position->z += vel->z;
+            }
+
+            break;
+        case 3:
+            SUB_SVEC(SVector, &svector, Position, targetPos, Position, position);
+
+            length = CAMERA_LengthSVector(&svector);
+
+            if (length < maxVel)
+            {
+                COPY_SVEC(Position, position, Position, targetPos);
+            }
+            else
+            {
+                svector.x = (svector.x * maxVel) / length;
+                svector.y = (svector.y * maxVel) / length;
+                svector.z = (svector.z * maxVel) / length;
+
+                ADD_SVEC(Position, position, Position, position, SVector, &svector);
+            }
+
+            break;
+        case 4:
+            SUB_SVEC(SVector, &svector, Position, targetPos, Position, position);
+
+            accl->x = (svector.x >> 2) - vel->x;
+            accl->y = (svector.y >> 2) - vel->y;
+            accl->z = (svector.z >> 2) - vel->z;
+
+            accl->x = (svector.x > 0) ? ((accl->x < 0) ? 0 : accl->x) : ((accl->x > 0) ? 0 : accl->x);
+            accl->y = (svector.y > 0) ? ((accl->y < 0) ? 0 : accl->y) : ((accl->y > 0) ? 0 : accl->y);
+            accl->z = (svector.z > 0) ? ((accl->z < 0) ? 0 : accl->z) : ((accl->z > 0) ? 0 : accl->z);
+
+            vel->x += accl->x;
+            vel->y += accl->y;
+            vel->z += accl->z;
+
+            length = CAMERA_LengthSVector(vel);
+
+            if (CAMERA_LengthSVector(&svector) < length)
+            {
+                COPY_SVEC(Position, position, Position, targetPos);
+            }
+            else if (length < maxVel)
+            {
+                position->x += vel->x;
+                position->y += vel->y;
+                position->z += vel->z;
+            }
+            else
+            {
+                vel->x = (vel->x * maxVel) / length;
+                vel->y = (vel->y * maxVel) / length;
+                vel->z = (vel->z * maxVel) / length;
+
+                if (gameTrackerX.timeMult != 4096)
+                {
+                    position->x += (vel->x * gameTrackerX.timeMult) / 4096;
+                    position->y += (vel->y * gameTrackerX.timeMult) / 4096;
+                    position->z += (vel->z * gameTrackerX.timeMult) / 4096;
+                }
+                else
+                {
+                    position->x += vel->x;
+                    position->y += vel->y;
+                    position->z += vel->z;
+                }
+            }
+
+            break;
+        }
+    }
+    else
+    {
+        COPY_SVEC(Position, position, Position, targetPos);
+    }
+}
 
 void CriticalDampAngle(long dampMode, short *currentVal, short target, short *vel, short *accl, int smooth)
 {
@@ -3183,7 +3425,129 @@ void CAMERA_SplineGetNearestPoint2(Camera *camera, Spline *spline, SVector *poin
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/CAMERA", CAMERA_SplineGetNearestPoint);
+void CAMERA_SplineGetNearestPoint(Spline *spline, SVector *point, int *currkey, SVector *ret_dpoint)
+{
+    SVector dpoint;       
+    SVector dpoint2;     
+    SVector dpoint3;     
+    SVector point0;       
+    SVector point1;      
+    SVector point2;     
+    SVector point3;      
+    int current_keyframe; 
+    int dist;            
+    int ret;            
+    int ret2;            
+    int ret3;            
+    SplineKey *key;     
+    int circular_spline;  
+    int prev_key;         
+    int next_key;        
+
+    current_keyframe = *currkey;
+
+    key = spline->key;
+
+    if (current_keyframe > (spline->numkeys - 2))
+    {
+        current_keyframe = spline->numkeys - 2;
+
+        *currkey = current_keyframe;
+    }
+
+    if ((abs_diff(key->point.x, key[spline->numkeys - 1].point.x) < 5) && (abs_diff(key->point.y, key[spline->numkeys - 1].point.y) < 5) && (abs_diff(key->point.z, key[spline->numkeys - 1].point.z) < 5))
+    {
+        circular_spline = 1;
+    }
+    else
+    {
+        circular_spline = 0;
+    }
+
+    COPY_SVEC(SVector, &point1, vecS, &key[current_keyframe].point);
+    COPY_SVEC(SVector, &point2, vecS, &key[current_keyframe + 1].point);
+
+    ret = COLLIDE_NearestPointOnLine_S(&dpoint, (SVECTOR *)&point1, (SVECTOR *)&point2, (Position *)point);
+
+    dist = CAMERA_GetDistSq(&dpoint, point);
+
+    if (current_keyframe < (spline->numkeys - 2))
+    {
+        next_key = current_keyframe + 1;
+    }
+    else if (circular_spline != 0)
+    {
+        next_key = 0;
+    }
+    else
+    {
+        next_key = -1;
+    }
+
+    if (current_keyframe > 0)
+    {
+        prev_key = current_keyframe - 1;
+    }
+    else if (circular_spline != 0)
+    {
+        prev_key = spline->numkeys - 2;
+    }
+    else
+    {
+        prev_key = -1;
+    }
+
+    if (next_key != -1)
+    {
+        COPY_SVEC(SVector, &point3, vecS, &key[next_key + 1].point);
+
+        ret2 = COLLIDE_NearestPointOnLine_S(&dpoint2, (SVECTOR *)&point2, (SVECTOR *)&point3, (Position *)point);
+
+        if (ret >= 4096)
+        {
+            *currkey    = next_key;
+            *ret_dpoint = dpoint2;
+            return;
+        }
+    }
+    else
+    {
+        ret2 = -1;
+    }
+
+    if (prev_key != -1)
+    {
+        COPY_SVEC(SVector, &point0, vecS, &key[prev_key].point);
+
+        ret3 = COLLIDE_NearestPointOnLine_S(&dpoint3, (SVECTOR *)&point0, (SVECTOR *)&point1, (Position *)point);
+
+        if (ret <= 0)
+        {
+            *currkey    = prev_key;
+            *ret_dpoint = dpoint3;
+            return;
+        }
+    }
+    else
+    {
+        ret3 = -1;
+    }
+
+    if (((ret2 > 0) && (ret2 < 4096)) && (CAMERA_GetDistSq(&dpoint2, point) < dist))
+    {
+        *currkey    = next_key;
+        *ret_dpoint = dpoint2;
+    }
+    else if (((ret3 > 0) && (ret3 < 4096)) && (CAMERA_GetDistSq(&dpoint3, point) < dist))
+    {
+        *currkey    = prev_key;
+        *ret_dpoint = dpoint3;
+    }
+    else
+    {
+        *ret_dpoint = dpoint;
+    }
+}
 
 void CAMERA_SplineHelpMove(Camera *camera)
 {

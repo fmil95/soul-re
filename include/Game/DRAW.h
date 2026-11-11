@@ -7,6 +7,8 @@ void DRAW_CreateAGlowingCircle(Vector *f1, long z, PrimPool *primPool, unsigned 
 void DRAW_TranslucentQuad(short x0, short y0, short x1, short y1, short x2, short y2, short x3, short y3, short r, short g, short b, short abr, PrimPool *primPool, unsigned long **ot);
 unsigned long *DRAW_DrawRingPoints(Model *model, VertexPool *vertexPool, MATRIX *pcTransform, PrimPool *primPool, unsigned long **ot, long color, int ring_type);
 void DRAW_InitShadow();
+int DRAW_DisplayTFace_zclipped_C(SVECTOR *vertex0, SVECTOR *vertex1, SVECTOR *vertex2, UVTYPE *uv0, UVTYPE *uv1, UVTYPE *uv2, long color0, long color1, long color2, PrimPool *primPool, unsigned long **ot, int ndiv);
+long *DRAW_Zclip_subdiv(POLY_GT3 *texture, unsigned long **ot, int ndiv);
 void DRAW_FlatQuad(CVECTOR *color, short x0, short y0, short x1, short y1, short x2, short y2, short x3, short y3, PrimPool *primPool, unsigned long **ot);
 void DRAW_LoadingMessage();
 void DRAW_LoadButton(long *addr, ButtonTexture *button);

@@ -10,7 +10,7 @@
 #include "Game/PSX/SUPPORT.h"
 #include "Game/PSX/MAIN.h"
 
-STATIC LoadStatus loadStatus;
+static LoadStatus loadStatus;
 
 long crap1;
 
@@ -99,15 +99,9 @@ void LOAD_CdDataReady()
     }
 }
 
-static char D_800D0924[] = "something %x\n";
-
-// Matches 100% on decomp.me but differs on this project
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/LOAD3D", LOAD_CdReadReady);
-#else
 void LOAD_CdReadReady(unsigned char intr, unsigned char *result)
 {
-    STATIC int crap;
+    static int crap;
 
     (void)result;
 
@@ -163,8 +157,7 @@ void LOAD_CdReadReady(unsigned char intr, unsigned char *result)
         }
         else
         {
-            // printf("something %x\n", intr);
-            printf(D_800D0924, intr);
+            printf("something %x\n", intr);
         }
     }
 
@@ -179,7 +172,6 @@ void LOAD_CdReadReady(unsigned char intr, unsigned char *result)
 
     crap = (GetRCnt(0xF2000000) & 0xFFFF) | (gameTimer << 16);
 }
-#endif
 
 void LOAD_UpdateCheckSum(long bytes)
 {

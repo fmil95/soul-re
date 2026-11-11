@@ -3,10 +3,12 @@ KAIN2.ld
 asm/
 expected/
 build/
+include/Libs/psyq_4.3
 .vscode/
 __pycache__/
 nonmatchings/
 .venv/
+debug/
 *.d
 diff.py
 objdiff.json
@@ -61,3 +63,4 @@ roninbss.bin
 roninbss.drm
 roninbss.ld
 roninbss.orig.bin
+tools/cd-dat-utils/

@@ -38,11 +38,19 @@ long WaterInUse = 0;
 
 long NumSignalsToReset = 0;
 
-STATIC long numActiveEventTimers;
+static Event *currentEventInstance;
 
-STATIC EventTimer eventTimerArray[24];
+static ScriptPCode *currentActionScript;
 
-STATIC WaterLevelProcess WaterLevelArray[5];
+static short *EventAbortedPosition;
+
+static WaterLevelProcess WaterLevelArray[5];
+
+static Level *CurrentPuzzleLevel;
+
+static EventTimer eventTimerArray[24];
+
+static long numActiveEventTimers;
 
 long WaitingForVoiceNumber;
 
@@ -57,14 +65,6 @@ short MovieToPlay;
 HintSystemStruct gHintSystem;
 
 struct SignalResetStruct ResetSignalArray[16];
-
-STATIC struct Event *currentEventInstance;
-
-STATIC struct Level *CurrentPuzzleLevel;
-
-STATIC ScriptPCode *currentActionScript;
-
-STATIC short *EventAbortedPosition;
 
 long eventListNumInstances[20];
 

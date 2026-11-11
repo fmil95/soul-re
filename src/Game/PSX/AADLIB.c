@@ -15,15 +15,6 @@ AadMemoryStruct *aadMem = NULL;
 
 static int gDefragRequest = 0;
 
-static char D_800D1178[] = "0123456789";
-
-static char D_800D1184[] = "\\kain2\\area\\%s\\bin\\%s.snf";
-static char D_800D11A0[] = "\\kain2\\area\\%s\\bin\\%s.smf";
-static char D_800D11BC[] = "\\kain2\\sfx\\object\\%s\\%s.snf";
-static char D_800D11D8[] = "\\kain2\\sfx\\object\\%s\\%s.smf";
-
-static unsigned long aadReverbModeSize[10] = {0x00000000, 0x000026C0, 0x00001F40, 0x00004840, 0x00006FE0, 0x00000ADE0, 0x0000F6C0, 0x00018040, 0x00018040, 0x00003C00};
-
 static unsigned long __hblankEvent;
 
 static unsigned char *smfDataPtr;
@@ -33,6 +24,16 @@ static unsigned long smfBytesLeft;
 static AadDynamicSfxLoadInfo *smfInfo;
 
 int gSramFullAlarm;
+
+int gSramTotalUsed;
+
+int gSramTotalFree;
+
+int gSramUsedBlocks;
+
+int gSramLargestFree;
+
+int gSramFreeBlocks;
 
 unsigned long aadGetMemorySize(AadInitAttr *attributes)
 {
@@ -807,7 +808,70 @@ void aadRelocateMusicMemoryBegin()
     aadMem->flags |= 0x2;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadRelocateMusicMemoryEnd);
+void aadRelocateMusicMemoryEnd(void *oldAddress, int offset)
+{
+	int bank; 
+    AadSoundBankHdr *temp; // not from decls.h
+
+	for (bank = 0; bank < 2; bank++)
+	{
+		if ((unsigned char*)oldAddress == aadMem->dynamicSoundBankData[bank])
+		{
+            int slotNumber;        
+            int i;                    
+            AadSoundBankHdr *bankHdr; 
+            
+			aadMem->dynamicSoundBankData[bank] = (unsigned char*)((char*)aadMem->dynamicSoundBankData[bank] + offset);
+			aadMem->dynamicProgramAtr[bank]    = (AadProgramAtr*)((char*)aadMem->dynamicProgramAtr[bank] + offset);
+			aadMem->dynamicToneAtr[bank]       = (AadToneAtr*)((char*)aadMem->dynamicToneAtr[bank] + offset);
+            
+			bankHdr = aadMem->dynamicSoundBankHdr[bank];
+            bankHdr = (AadSoundBankHdr*)((char*)bankHdr + offset);
+            
+			aadMem->dynamicSoundBankHdr[bank]       = bankHdr;
+			aadMem->dynamicWaveAddr[bank]           = (unsigned long*)((char*)aadMem->dynamicWaveAddr[bank] + offset);
+			aadMem->dynamicSequenceAddressTbl[bank] = (unsigned char**)((char*)aadMem->dynamicSequenceAddressTbl[bank] + offset);
+
+			temp = bankHdr;
+
+			for (i = 0; i < temp->numSequences; i++)
+			{
+				aadMem->dynamicSequenceAddressTbl[bank][i] += offset;
+			}
+
+			aadMem->dynamicSequenceLabelOffsetTbl[bank] = (unsigned long*)((char*)aadMem->dynamicSequenceLabelOffsetTbl[bank] + offset);
+
+			for (slotNumber = 0; slotNumber < aadMem->numSlots; slotNumber++)
+			{
+                AadSequenceSlot *slot; 
+                
+				slot = aadMem->sequenceSlots[slotNumber];
+
+				if ((slot->sequenceNumberAssigned != 255) && (slot->sequenceAssignedDynamicBank == bank))
+				{
+                    int track; 
+                    
+					for (track = 0; track < 16; track++)
+					{
+						if (slot->sequencePosition[track] != NULL)
+						{
+							slot->sequencePosition[track] += offset;
+
+							for (i = 0; i < slot->loopCurrentNestLevel[track]; i++)
+							{
+								slot->loopSequencePosition[i][track] += offset;
+							}
+						}
+					}
+				}
+			}
+
+			break;
+		}
+	}
+
+	aadMem->flags &= ~0x2;
+}
 
 void aadRelocateSfxMemory(void *oldAddress, int offset)
 {
@@ -849,10 +913,6 @@ void aadPurgeLoadQueue()
     aadMem->numLoadReqsQueued = 0;
 }
 
-// Matches 100% on decomp.me but differs on this project
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadProcessLoadQueue);
-#else
 void aadProcessLoadQueue()
 {
     AadDynamicSfxLoadInfo *info;
@@ -996,7 +1056,6 @@ void aadProcessLoadQueue()
         aadProcessSramDefrag();
     }
 }
-#endif
 
 void aadLoadDynamicSfxAbort(AadDynamicSfxLoadInfo *info, int error)
 {
@@ -1085,7 +1144,132 @@ void aadLoadDynamicSfxReturn(void *loadedDataPtr, void *data, void *data2)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadWaveMalloc);
+int aadWaveMalloc(unsigned short waveID, unsigned long waveSize)
+{
+	AadNewSramBlockDesc *sramDesc;
+    AadNewSramBlockDesc *bestFit; 
+    AadNewSramBlockDesc *next; 
+    AadNewSramBlockDesc *sramDescTbl; 
+    unsigned long safeWaveSize; 
+    int i; 
+    int sramDescIndex; 
+    int bestFitIndex; 
+
+	waveSize >>= 3;
+    
+	safeWaveSize = waveSize & ~(0x1 | 0x2 | 0x4); 
+
+	if ((bestFitIndex = waveSize) & 0x7) // this line is devious 
+	{
+		safeWaveSize += 8;
+	}
+
+	bestFit      = NULL;
+	bestFitIndex = 255;
+    
+	sramDescIndex = aadMem->firstSramBlockDescIndex;
+	sramDescTbl   = aadMem->sramDescriptorTbl;
+    
+	sramDesc = &sramDescTbl[sramDescIndex];
+
+	for (i = 128; sramDesc != NULL; )
+	{
+		if (i-- == 0)
+		{
+			break;
+		}
+
+		if ((!(sramDesc->waveID & 0x4000) && (sramDesc->size >= safeWaveSize)) && ((bestFit == NULL) || (sramDesc->size < bestFit->size)))
+		{
+            bestFitIndex = sramDescIndex;
+            bestFit      = sramDesc;
+		}
+
+        if (((signed char)sramDesc->nextIndex >= 0) && (sramDesc->nextIndex != sramDescIndex))
+        {
+            sramDescIndex = sramDesc->nextIndex;
+        
+            sramDesc = &sramDescTbl[sramDescIndex];
+        }
+        else
+        {
+            sramDesc = NULL;
+        }
+	}
+
+	if (bestFit != NULL)
+	{
+		bestFit->waveID = waveID | 0xC000;
+
+		if (waveSize < bestFit->size)
+		{
+			if ((signed char)bestFit->nextIndex >= 0)
+			{
+				next = &sramDescTbl[bestFit->nextIndex];
+
+				if (!(next->waveID & 0x4000))
+				{
+					next->address -= bestFit->size - waveSize;
+                    next->size    += bestFit->size - waveSize;
+
+					bestFit->size = waveSize;
+
+					return bestFitIndex;
+				}
+			}
+
+			sramDescIndex = aadMem->nextSramDescIndex;
+
+			sramDesc = &sramDescTbl[sramDescIndex];
+
+            i = sramDescIndex;
+
+            if (sramDesc->waveID & 0x8000)
+            {
+                int temp; // not from decls.h
+
+                temp = sramDescIndex;
+
+                for (; sramDesc->waveID & 0x8000; sramDesc = &sramDescTbl[i])
+                {
+                    i = (i + 1) & 0x7F;
+    
+                    if (i == temp)
+                    {
+                        return 255;
+                    }
+                    else
+                    {
+                        sramDescIndex = i;
+                    }
+                }
+            }
+
+			aadMem->nextSramDescIndex = (aadMem->nextSramDescIndex + 8) & 0x7F;
+
+			sramDesc->waveID = 32768;
+			
+            sramDesc->address = bestFit->address + waveSize;
+            sramDesc->size    = bestFit->size    - waveSize;
+			
+            sramDesc->prevIndex = bestFitIndex;
+			sramDesc->nextIndex = bestFit->nextIndex;
+
+			if ((signed char)sramDesc->nextIndex >= 0)
+			{
+				sramDescTbl[sramDesc->nextIndex].prevIndex = sramDescIndex;
+			}
+
+			bestFit->size = waveSize;
+            
+			bestFit->nextIndex = sramDescIndex;
+		}
+        
+		return bestFitIndex;
+	}
+
+	return 255;
+}
 
 unsigned long aadGetSramBlockAddr(int handle)
 {
@@ -1191,9 +1375,198 @@ void aadFreeSingleDynSfx(int sfxID)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", setSramFullAlarm);
+void setSramFullAlarm()
+{ 
+	AadNewSramBlockDesc *sramDescTbl; 
+    AadNewSramBlockDesc *sramDesc;  
+    long totalUsed;                      
+    long totalFree;                         
+    long largestFree;                     
+    long numFreeBlocks;                      
+    long numUsedBlocks;                     
+    int i;                                   
 
-INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADLIB", aadLoadSingleDynSfx);
+	totalUsed = 0;
+	totalFree = 0;
+    
+	largestFree = 0;
+    
+	numFreeBlocks = 0;
+	numUsedBlocks = 0;
+
+	sramDescTbl = aadMem->sramDescriptorTbl;
+
+	sramDesc = sramDescTbl + aadMem->firstSramBlockDescIndex;
+
+	i = 128;
+    
+	while (sramDesc != NULL)
+	{
+		if (sramDesc->waveID & 0x4000)
+		{
+			numUsedBlocks++;
+			totalUsed += sramDesc->size;
+		}
+		else
+		{
+			numFreeBlocks++;
+			totalFree += sramDesc->size;
+			
+			if (largestFree < sramDesc->size)
+			{
+				largestFree = sramDesc->size;
+			}
+		}
+
+		if ((signed char)sramDesc->nextIndex >= 0)
+		{
+			sramDesc = sramDescTbl + sramDesc->nextIndex;
+		}
+		else
+		{
+			sramDesc = NULL;
+		}
+
+		if (--i == 0) 
+        {
+			break;
+        }
+	}
+
+	gSramFullAlarm = 1;
+
+	gSramUsedBlocks = numUsedBlocks;
+
+	gSramTotalUsed = totalUsed << 3;
+	gSramTotalFree = totalFree << 3;
+
+	gSramLargestFree = largestFree << 3;
+
+	gSramFreeBlocks = numFreeBlocks;
+}
+
+void aadLoadSingleDynSfx(AadDynamicSfxLoadInfo *info)
+{
+    int i;
+    AadLoadedSfxToneAttr *toneAttr;
+    AadLoadedSfxWaveAttr *waveAttr;
+    AadDynSfxAttr *attr;
+
+    attr = &info->attr;
+
+    info->waveTransferAddr = 0;
+
+    if (aadMem->sfxToneMasterList[info->attr.sfxID] == 254)
+    {
+        aadMem->sfxToneMasterList[info->attr.sfxID] = 255;
+    }
+
+    i = aadMem->sfxToneMasterList[info->attr.sfxID];
+
+    if (i != 255)
+    {
+        toneAttr = &aadMem->sfxToneAttrTbl[i];
+
+        toneAttr->referenceCount++;
+
+        info->smfLoadingState = 2;
+        return;
+    }
+
+    i = aadMem->nextToneIndex;
+
+    toneAttr = &aadMem->sfxToneAttrTbl[i];
+
+    while (toneAttr->referenceCount != 0)
+    {
+        i = (i + 1) & 0x7F;
+
+        if (i == aadMem->nextToneIndex)
+        {
+            info->smfLoadingState = 2;
+
+            aadMem->sfxToneMasterList[attr->sfxID] = 254;
+
+            setSramFullAlarm();
+            return;
+        }
+
+        toneAttr = &aadMem->sfxToneAttrTbl[i];
+    }
+
+    aadMem->nextToneIndex = (aadMem->nextToneIndex + 8) & 0x7F;
+
+    toneAttr->referenceCount = 1;
+    
+    toneAttr->waveID = attr->waveID;
+
+    toneAttr->toneAttr = attr->toneAttr;
+
+    aadMem->sfxToneMasterList[attr->sfxID] = i;
+
+    i = aadMem->sfxWaveMasterList[attr->waveID];
+
+    if (i != 255)
+    {
+        waveAttr = &aadMem->sfxWaveAttrTbl[i];
+
+        waveAttr->referenceCount++;
+
+        info->smfLoadingState = 2;
+        return;
+    }
+
+    i = aadMem->nextWaveIndex;
+
+    while ((waveAttr = &aadMem->sfxWaveAttrTbl[i])->referenceCount != 0)
+    {
+        if (++i >= 120)
+        {
+            i = 0;
+        }
+
+        if (i == aadMem->nextWaveIndex)
+        {
+            aadFreeSingleDynSfx(attr->sfxID);
+
+            info->smfLoadingState = 2;
+
+            aadMem->sfxToneMasterList[attr->sfxID] = 254;
+
+            setSramFullAlarm();
+            return;
+        }
+    }
+
+    aadMem->nextWaveIndex += 8;
+
+    if (aadMem->nextWaveIndex >= 120)
+    {
+        aadMem->nextWaveIndex -= 120;
+    }
+
+    waveAttr->referenceCount = 1;
+
+    aadMem->sfxWaveMasterList[attr->waveID] = i;
+
+    waveAttr->sramHandle = aadWaveMalloc(attr->waveID, attr->waveSize);
+
+    if (waveAttr->sramHandle < 128)
+    {
+        info->waveTransferAddr = aadGetSramBlockAddr(waveAttr->sramHandle);
+
+        info->smfLoadingState = 3;
+        return;
+    }
+
+    aadFreeSingleDynSfx(attr->sfxID);
+
+    info->smfLoadingState = 2;
+
+    aadMem->sfxToneMasterList[attr->sfxID] = 254;
+
+    setSramFullAlarm();
+}
 
 void HackCallback()
 {
@@ -1753,6 +2126,8 @@ int aadGetReverbMode()
 {
     return 3;
 }
+
+static unsigned long aadReverbModeSize[10] = {0x00000000, 0x000026C0, 0x00001F40, 0x00004840, 0x00006FE0, 0x00000ADE0, 0x0000F6C0, 0x00018040, 0x00018040, 0x00003C00};
 
 unsigned long aadGetReverbSize()
 {

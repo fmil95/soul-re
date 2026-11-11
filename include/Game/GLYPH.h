@@ -18,6 +18,7 @@ void HUD_Setup_Chit_Count(int chits);
 void HUD_Draw();
 void GlyphProcess(Instance *instance, GameTracker *gameTracker);
 int GlyphIsGlyphOpen(Instance *instance);
+void _GlyphGenericProcess(Instance *instance, int data1, int data2);
 void GlyphTrigger();
 void GlyphInit(Instance *instance, GameTracker *gameTracker);
 void GlyphCollide();

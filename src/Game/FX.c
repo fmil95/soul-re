@@ -16,6 +16,7 @@
 #include "Game/GAMEPAD.h"
 #include "Game/GLYPH.h"
 #include "Game/PHYSOBS.h"
+#include "Game/VM.h"
 #include "Game/PSX/MAIN.h"
 
 static FXGeneralEffect *FX_GeneralEffectTracker = NULL;
@@ -34,70 +35,31 @@ static short current_rain_fade = 0;
 
 static Instance *FX_reaver_instance = NULL;
 
-/* sv_vels */
-static SVector D_800D1018[4] =
-{
-    {  15,   0, 100, 6 },
-    { -15,   0, 100, 6 },
-    {   0,  15, 100, 6 },
-    {   0, -15, 100, 6 },
-};
+static long FX_ColorArray[6];
 
-/* ??? */
-static short D_800D1038[2] = {25637, 0};
+static Position FX_ConstrictPosition;
 
-static short windx = 0;
+static Position *FX_ConstrictPositionPtr;
 
-static short windy = 0;
+static FX_PRIM *FX_LastUsedPrim;
 
-static short wind_deg = 1024;
+static short FX_Frames;
 
-static short wind_speed = 20;
+static short FX_TimeCount;
 
-static long FX_ColorArray[6] =
-{
-    0x1010C8,
-    0x10C810,
-    0xC81010,
-    0x1800A0,
-    0x93E4,
-    0xA01010,
-};
+static DVECTOR Spiral_Array[65];
 
-static short Spiral_Number = 0xFFFF;
+static DVECTOR Spiral_OffsetP[64];
 
-static short Spiral_Degrees = 128;
+static DVECTOR Spiral_OffsetM[64];
 
-static long Spiral_Current = 0;
+static int Spiral_Glow_X;
 
-static long Spiral_Max = 100000;
+static int Spiral_Glow_Y;
 
-/* cnt */
-static int D_800D1068 = 0;
+static int Spiral_Glow_Size;
 
-STATIC FX_PRIM *FX_LastUsedPrim;
-
-STATIC DVECTOR Spiral_Array[65];
-
-STATIC DVECTOR Spiral_OffsetP[64];
-
-STATIC DVECTOR Spiral_OffsetM[64];
-
-STATIC int Spiral_Glow_X;
-
-STATIC int Spiral_Glow_Y;
-
-STATIC int Spiral_Glow_Size;
-
-STATIC int Spiral_Mod;
-
-STATIC Position FX_ConstrictPosition;
-
-STATIC Position *FX_ConstrictPositionPtr;
-
-STATIC short FX_Frames;
-
-STATIC short FX_TimeCount;
+static int Spiral_Mod;
 
 static inline long FX_GetColor(ObjectEffect *effect, int i)
 {
@@ -444,7 +406,7 @@ struct _FX_PRIM *_FX_BuildSingleFaceWithModel(struct _Model *model, struct _MFac
     return fxPrim;
 }
 
-struct _FX_PRIM *FX_BuildSingleFaceWithModel(struct _Model *model, struct _MFace *mface, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short timeToLive)
+struct _FX_PRIM *FX_BuildSingleFaceWithModel(struct _Model *model, struct _MFace *mface, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short timeToLive)
 {
     return _FX_BuildSingleFaceWithModel(model, mface, center, vel, accl, fxTracker, (void *)fxSetup, fxProcess, 0, timeToLive);
 }
@@ -460,13 +422,400 @@ void _FX_SetupLighting(struct _Instance *instance)
     SetLightMatrix(&lm);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_DoLighting);
+long _FX_DoLighting(MFace *mface)
+{
+    long modelDQP;
+    long color; 
+    TextureMT3 *texture; 
+
+    modelDQP = 0;
+
+    if (mface->flags & 0x2)
+    {
+        texture = (TextureMT3 *)mface->color;
+
+        if (mface->flags & 0x8)
+        {
+            color = texture->color;
+        }
+        else
+        {
+            gte_ldv0(&gNormalList[mface->normal]);
+            gte_SetRGBcd(&texture->color);
+            gte_lddp(modelDQP);
+            gte_nncds();
+            gte_strgb(&color);
+        }
+
+        color &= 0xFFFFFF;
+        color |= 0x24000000 | (texture->color & 0x3000000);
+    }
+    else
+    {
+        if (mface->flags & 0x8)
+        {
+            color = mface->color;
+        }
+        else
+        {
+            gte_ldv0(&gNormalList[mface->normal]);
+            gte_SetRGBcd(&mface->color);
+            gte_lddp(modelDQP);
+            gte_nncds();
+            gte_strgb(&color);
+        }
+
+        color &= 0xFFFFFF;
+        color |= 0x20000000 | (mface->color & 0x3000000);
+    }
+
+    return color;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_BuildSegmentedSplinters);
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_BuildNonSegmentedSplinters);
+void _FX_BuildNonSegmentedSplinters(Instance *instance, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, FXSplinter *splintDef, FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short shardFlags)
+{
+    long j;  
+    long maxTimeToLive;  
+    long faceSkip;  
+    //long numFaces; 
+    MFace *mface; 
+    MFace *endMFace; 
+    short whichMatrix; 
+    Model *model = instance->object->modelList[instance->currentModel];  
+    MVertex *vertexList = model->vertexList; 
+    MFace *faceList = model->faceList; 
+    FX_MATRIX *fxMatrix;  
+    FX_MATRIX *fxMatList[4]; 
+    SVector *curVel; 
+    FX_PRIM *fxPrim;  
+    SVector *vertex0; 
+    SVector *vertex1;  
+    SVector *vertex2;  
+    SVector *poolOfVertices = (SVector *)gameTrackerX.vertexPool;  
+    MATRIX *swTransform;  
+    MATRIX ourM;  
+    Vector Center;  
+    SVector offset;  
+    Normal faceNorm;  
+    SVector sv_temp; 
+    SVector sv_vels[4] = { { 15, 0, 100, 6 }, { -15, 0, 100, 6 }, { 0, 15, 100, 6 }, { 0, -15, 100, 6 } }; 
 
-void _FX_BuildSplinters(struct _Instance *instance, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct FXSplinter *splintDef, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short shardFlags)
+    PIPE3D_TransformVerticesToWorld(instance, poolOfVertices, (long *)((VertexPool *)poolOfVertices)->color, &Center);
+
+    if (splintDef != NULL)
+    {
+        short start; 
+        short range; // not from decls.h
+
+        start = splintDef->chunkVelXY - splintDef->chunkVelRng;
+        range = splintDef->chunkVelRng;
+
+        if (range != 0)
+        {
+            range *= 2;
+
+            sv_vels[0].x =   start + (rand() % range);
+            sv_vels[1].x = -(start + (rand() % range));
+            sv_vels[2].y =   start + (rand() % range);
+            sv_vels[3].y = -(start + (rand() % range));
+
+            start = splintDef->chunkVelZ - splintDef->chunkVelRng;
+
+            sv_vels[0].z = start + (rand() % range);
+            sv_vels[1].z = start + (rand() % range);
+            sv_vels[2].z = start + (rand() % range);
+            sv_vels[3].z = start + (rand() % range);
+        }
+        else
+        {
+            sv_vels[0].x =  start;
+            sv_vels[1].x = -start;
+            sv_vels[2].y =  start;
+            sv_vels[3].y = -start;
+
+            sv_vels[3].z = sv_vels[2].z = sv_vels[1].z = sv_vels[0].z = splintDef->chunkVelZ;
+        }
+
+        maxTimeToLive = splintDef->lifetime;
+    }
+    else
+    {
+        sv_vels[0].x += (rand() % 8) - 4;
+        sv_vels[1].x += (rand() % 8) - 4;
+        sv_vels[2].y += (rand() % 8) - 4;
+        sv_vels[3].y += (rand() % 8) - 4;
+
+        maxTimeToLive = 32;
+    }
+
+    _FX_SetupLighting(instance);
+
+    swTransform = &ourM;
+
+    ourM.m[0][0] = ourM.m[1][1] = ourM.m[2][2] = 4096;
+    ourM.m[0][1] = ourM.m[0][2] = ourM.m[1][0] = ourM.m[1][2] = ourM.m[2][0] = ourM.m[2][1] = 0;
+
+    ourM.t[0] = Center.x;
+    ourM.t[1] = Center.y;
+    ourM.t[2] = Center.z;
+
+    for (j = 0; j < 4; j++)
+    {
+        fxMatrix = FX_GetMatrix(fxTracker);
+
+        if (fxMatrix == NULL)
+        {
+            if (j == 0)
+            {
+                return;
+            }
+
+            fxMatrix = fxMatList[rand() % j];
+        }
+
+        fxMatList[j] = fxMatrix;
+
+        fxMatrix->lwTransform = *(Transform *)swTransform;
+
+        COPY_SVEC(SVector, &sv_temp, SVector, &sv_vels[j]);
+
+        sv_vels[j].x = ((sv_temp.x * swTransform->m[0][0]) >> 12) + ((sv_temp.y * swTransform->m[0][1]) >> 12) + ((sv_temp.z * swTransform->m[0][2]) >> 12);
+        sv_vels[j].y = ((sv_temp.x * swTransform->m[1][0]) >> 12) + ((sv_temp.y * swTransform->m[1][1]) >> 12) + ((sv_temp.z * swTransform->m[1][2]) >> 12);
+        sv_vels[j].z = ((sv_temp.x * swTransform->m[2][0]) >> 12) + ((sv_temp.y * swTransform->m[2][1]) >> 12) + ((sv_temp.z * swTransform->m[2][2]) >> 12);
+
+        fxMatrix->lwTransform.t[0] += sv_vels[j].x * 4;
+        fxMatrix->lwTransform.t[1] += sv_vels[j].y * 4;
+    }
+
+    if (splintDef != NULL)
+    {
+        if (splintDef->faceLimit != 0)
+        {
+            faceSkip = (model->numFaces / splintDef->faceLimit) + 1;
+        }
+        else
+        {
+            faceSkip = 1;
+        }
+    }
+    else
+    {
+        faceSkip = 1;
+    }
+
+    mface = faceList;
+
+    endMFace = &mface[model->numFaces];
+
+    for (; mface < endMFace; mface += faceSkip)
+    {
+        vertex0 = &poolOfVertices[mface->face.v0];
+        vertex1 = &poolOfVertices[mface->face.v1];
+        vertex2 = &poolOfVertices[mface->face.v2];
+
+        faceNorm.x = (vertex0->x + vertex1->x + vertex2->x) / 3;
+        faceNorm.y = (vertex0->y + vertex1->y + vertex2->y) / 3;
+        faceNorm.z = (vertex0->z + vertex1->z + vertex2->z) / 3;
+
+        if (abs(faceNorm.x) > abs(faceNorm.y))
+        {
+            whichMatrix = faceNorm.x < 1;
+        }
+        else if (faceNorm.y > 0)
+        {
+            whichMatrix = 2;
+        }
+        else
+        {
+            whichMatrix = 3;
+        }
+
+        fxMatrix = fxMatList[whichMatrix];
+
+        curVel = &sv_vels[whichMatrix];
+
+        fxPrim = FX_GetPrim(fxTracker);
+
+        if (fxPrim != NULL)
+        {
+            if (fxSetup != NULL)
+            {
+                fxSetup(fxPrim, fxProcess, fxMatrix, instance, mface, vertexList, center, vel, accl, fxTracker, 30);
+            }
+            else
+            {
+                fxPrim->position.x = fxMatrix->lwTransform.t[0];
+                fxPrim->position.y = fxMatrix->lwTransform.t[1];
+                fxPrim->position.z = fxMatrix->lwTransform.t[2];
+
+                SUB_SVEC(SVector, &offset, Position, &fxPrim->position, Vector, &Center);
+
+                fxPrim->v0.x = vertex0->x - offset.x;
+                fxPrim->v0.y = vertex0->y - offset.y;
+                fxPrim->v0.z = vertex0->z - offset.z;
+
+                fxPrim->v1.x = vertex1->x - offset.x;
+                fxPrim->v1.y = vertex1->y - offset.y;
+                fxPrim->v1.z = vertex1->z - offset.z;
+
+                fxPrim->v2.x = vertex2->x - offset.x;
+                fxPrim->v2.y = vertex2->y - offset.y;
+                fxPrim->v2.z = vertex2->z - offset.z;
+
+                fxPrim->matrix = fxMatrix;
+
+                FX_AniTexSetup(fxPrim, mface, model, fxTracker);
+
+                if (shardFlags & 0x40)
+                {
+                    if (mface->flags & 0x2)
+                    {
+                        TextureMT3 *texture;
+
+                        texture = (TextureMT3 *)mface->color;
+
+                        fxPrim->color  =               texture->color & 0xFFFFFF;
+                        fxPrim->color |= 0x24000000 | (texture->color & 0x3000000);
+                    }
+                    else
+                    {
+                        fxPrim->color  =               mface->color & 0xFFFFFF;
+                        fxPrim->color |= 0x20000000 | (mface->color & 0x3000000);
+                    }
+                }
+                else
+                {
+                    fxPrim->color = _FX_DoLighting(mface);
+                }
+
+                if (fxProcess != NULL)
+                {
+                    fxPrim->process = fxProcess;
+                }
+                else
+                {
+                    fxPrim->process = FX_ShatterProcess;
+                }
+
+                fxPrim->duo.phys.xVel = curVel->x;
+                fxPrim->duo.phys.yVel = curVel->y;
+                fxPrim->duo.phys.zVel = curVel->z;
+
+                if (splintDef != NULL)
+                {
+                    short range; // not from decls.h
+                    short base;  // not from decls.h
+
+                    range = splintDef->triVelRng;
+
+                    if (range != 0)
+                    {
+                        base   = -range;
+                        range *= 2;
+
+                        fxPrim->duo.phys.xVel += base + (rand() % range);
+                        fxPrim->duo.phys.yVel += base + (rand() % range);
+                        fxPrim->duo.phys.zVel += base + (rand() % range);
+                    }
+                }
+                else
+                {
+                    fxPrim->duo.phys.xVel += (rand() % 8) - 4;
+                    fxPrim->duo.phys.yVel += (rand() % 8) - 4;
+                    fxPrim->duo.phys.zVel += (rand() % 8) - 4;
+                }
+
+                if (vel != NULL)
+                {
+                    fxPrim->duo.phys.xVel += vel->vx;
+                    fxPrim->duo.phys.yVel += vel->vy;
+                    fxPrim->duo.phys.zVel += vel->vz;
+                }
+
+                fxPrim->duo.phys.xAccl = 0;
+                fxPrim->duo.phys.yAccl = 0;
+
+                if (splintDef != NULL)
+                {
+                    short range; // not from decls.h
+                    short base;  // not from decls.h
+
+                    range = splintDef->rotRateRng;
+                    base  = -range;
+
+                    if (range != 0)
+                    {
+                        fxPrim->work3 = base + (rand() % (short)(range * 2));
+                    }
+                    else
+                    {
+                        fxPrim->work3 = 0;
+                    }
+
+                    fxPrim->duo.phys.zAccl = splintDef->gravityZ;
+                }
+                else
+                {
+                    fxPrim->duo.phys.zAccl = -8;
+                    
+                    fxPrim->work3 = (rand() % 8) - 4;
+                }
+
+                fxPrim->timeToLive = maxTimeToLive;
+                
+                fxPrim->work1 = 4096;
+
+                if (shardFlags & 0x10)
+                {
+                    fxPrim->work0 = -32767;
+                }
+                else
+                {
+                    fxPrim->work0 = instance->position.z - instance->object->modelList[instance->currentModel]->maxRad;
+                }
+            }
+
+            LIST_InsertFunc(&fxTracker->usedPrimList, (NodeType *)fxPrim);
+        }
+        else
+        {
+            mface = endMFace;
+        }
+    }
+}
+
+/* ??? */
+static short D_800D1038[2] = {25637, 0};
+
+static short windx = 0;
+
+static short windy = 0;
+
+static short wind_deg = 1024;
+
+static short wind_speed = 20;
+
+static long FX_ColorArray[6] =
+{
+    0x1010C8,
+    0x10C810,
+    0xC81010,
+    0x1800A0,
+    0x93E4,
+    0xA01010,
+};
+
+static short Spiral_Number = 0xFFFF;
+
+static short Spiral_Degrees = 128;
+
+static long Spiral_Current = 0;
+
+static long Spiral_Max = 100000;
+
+void _FX_BuildSplinters(struct _Instance *instance, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, struct FXSplinter *splintDef, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short shardFlags)
 {
     if (MEMPACK_MemoryValidFunc((char *)instance->object) != 0)
     {
@@ -491,7 +840,7 @@ void _FX_BuildSplinters(struct _Instance *instance, struct SVECTOR *center, stru
     }
 }
 
-void _FX_Build(struct _Instance *instance, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short shardFlags)
+void _FX_Build(struct _Instance *instance, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short shardFlags)
 {
     if (MEMPACK_MemoryValidFunc((char *)instance->object) != 0)
     {
@@ -506,7 +855,7 @@ void _FX_Build(struct _Instance *instance, struct SVECTOR *center, struct SVECTO
     }
 }
 
-void FX_Build(struct _Instance *instance, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)())
+void FX_Build(struct _Instance *instance, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)())
 {
     _FX_Build(instance, center, vel, accl, fxTracker, fxSetup, fxProcess, 0);
 }
@@ -1113,9 +1462,9 @@ void FX_DrawList(FXTracker *fxTracker, GameTracker *gameTracker, unsigned long *
                         *(short *)&ft4->u2 = uMin | vMax;
                         *(short *)&ft4->u3 = uMax | vMax;
 
-                        *(unsigned short *)&ft4->clut = texture->clut;
+                        ft4->clut = texture->clut;
 
-                        *(unsigned short *)&ft4->tpage = texture->tpage;
+                        ft4->tpage = texture->tpage;
 
                         gte_stsxy(&((POLY_FT4 *)prim)->x3);
 
@@ -1521,9 +1870,9 @@ void FX_DrawList(FXTracker *fxTracker, GameTracker *gameTracker, unsigned long *
                         *(short *)&ft4->u2 = uMin | vMax;
                         *(short *)&ft4->u3 = uMax | vMax;
 
-                        *(unsigned short *)&ft4->clut = texture->clut;
+                        ft4->clut = texture->clut;
 
-                        *(unsigned short *)&ft4->tpage = texture->tpage;
+                        ft4->tpage = texture->tpage;
 
                         ft4->x0 = ft4->x2 = xy_pos.vx + (sizex / 2);
                         ft4->y0 = ft4->y1 = xy_pos.vy + (sizey / 2);
@@ -2005,7 +2354,68 @@ void FX_MakeMannaIcon(int x, int y, int xsize, int ysize)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_MakeGlyphIcon);
+void FX_MakeGlyphIcon(Position *position, Object *glyphObject, int size, int glyphnum, int enabled)
+{
+    int sizex;  
+    POLY_GT4 *poly;  
+    TextureMT3 *texture;  
+    DVECTOR xy_pos;  
+    int otz;  
+    long *color_array; 
+    GlyphTuneData *glyphtunedata;  
+
+    if (glyphObject == NULL)
+    {
+        return;
+    }
+
+    if (glyphnum == 7)
+    {
+        Object *object;  
+
+        object = (Object *)objectAccess[10].object;
+
+        if (object == NULL)
+        {
+            return;
+        }
+
+        texture = FX_GetTextureObject(object, 0, 0);
+
+        size /= 2;
+    }
+    else
+    {
+        texture = FX_GetTextureObject(glyphObject, 0, glyphnum);
+    }
+
+    xy_pos.vx = position->x;
+    xy_pos.vy = position->y;
+
+    sizex = (size << 9) / 320;
+
+    otz = ((24 - size) / 4) + 1;
+
+    glyphtunedata = (GlyphTuneData *)glyphObject->data;
+
+    glyphnum *= 4;
+
+    color_array = glyphtunedata->color_array;
+
+    if (enabled != 0)
+    {
+        poly = FX_SetupPolyGT4(xy_pos.vx - sizex, xy_pos.vy - size, (xy_pos.vx + sizex) + 1, (xy_pos.vy + size) + 1, otz, texture, color_array[glyphnum], color_array[glyphnum + 1], color_array[glyphnum + 2], color_array[glyphnum + 3]);
+    }
+    else
+    {
+        poly = FX_SetupPolyGT4(xy_pos.vx - sizex, xy_pos.vy - size, (xy_pos.vx + sizex) + 1, (xy_pos.vy + size) + 1, otz, texture, 0x202020,              0x202020,                  0x202020,                  0x202020);
+    }
+
+    if (poly != NULL)
+    {
+        poly->code = ((texture->color >> 24) & 0x3) | 0x3C;
+    }
+}
 
 void FX_SoulDustProcess(struct _FX_PRIM *fxPrim, struct _FXTracker *fxTracker)
 {
@@ -2466,7 +2876,186 @@ void FX_SubDividePrim(FX_PRIM *fxPrim1, FX_PRIM *fxPrim2)
 
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueRibbon);
+void FX_ContinueRibbon(FXRibbon *ribbon, FXTracker *fxTracker)
+{
+    MATRIX *swTransform;  
+    int i; 
+    int i2;  
+    int i3;  
+    int startIndex;  
+    int period;  
+    int d; 
+    FX_PRIM *fxPrim; 
+    FX_PRIM *fxPrim2;  
+    SVECTOR Quad[4];  
+    int temp; // not from decls.h
+
+    if ((ribbon != NULL) && (ribbon->instance->matrix != NULL))
+    {
+        swTransform = &ribbon->instance->matrix[ribbon->startSegment];
+
+        startIndex = ribbon->endIndex;
+
+        if (startIndex == -1)
+        {
+            ribbon->endIndex = 0;
+        }
+
+        period = ribbon->numberVerts / 2;
+
+        if (ribbon->type == 1)
+        {
+            i2 = ribbon->endIndex + period;
+
+            for (i = ribbon->endIndex; i < i2; i++, swTransform++)
+            {
+                ribbon->vertexPool[i].vx = swTransform->t[0];
+                ribbon->vertexPool[i].vy = swTransform->t[1];
+                ribbon->vertexPool[i].vz = swTransform->t[2];
+
+                ribbon->endIndex++;
+            }
+        }
+        else
+        {
+            i = ribbon->endIndex;
+
+            ribbon->vertexPool[i].vx = swTransform->t[0];
+            ribbon->vertexPool[i].vy = swTransform->t[1];
+            ribbon->vertexPool[i].vz = swTransform->t[2];
+
+            i++;
+
+            swTransform = &ribbon->instance->matrix[ribbon->endSegment];
+
+            ribbon->vertexPool[i].vx = swTransform->t[0];
+            ribbon->vertexPool[i].vy = swTransform->t[1];
+            ribbon->vertexPool[i].vz = swTransform->t[2];
+
+            ribbon->endIndex += 2;
+        }
+
+        i2 = ribbon->endIndex;
+
+        if (i2 >= ribbon->numberVerts)
+        {
+            ribbon->endIndex = 0;
+        }
+
+        if (startIndex == -1)
+        {
+            return;
+        }
+
+        if (!(ribbon->instance->flags & 0x800) && !(ribbon->instance->flags2 & 0x4000000))
+        {
+            for (i = startIndex; i < (i2 - 1); i++)
+            {
+                i3 = i - period;
+
+                if (i3 < 0)
+                {
+                    i3 += ribbon->numberVerts;
+                }
+
+                Quad[0] = ribbon->vertexPool[i];
+                Quad[1] = ribbon->vertexPool[i3];
+                Quad[2] = ribbon->vertexPool[i3 + 1];
+                Quad[3] = ribbon->vertexPool[i  + 1];
+
+                for (d = 0; d < 4096; d += 4096)
+                {
+                    fxPrim = FX_GetPrim(fxTracker);
+
+                    if (fxPrim != NULL)
+                    {
+                        fxPrim->position.x = ribbon->vertexPool[i].vx;
+                        fxPrim->position.y = ribbon->vertexPool[i].vy;
+                        fxPrim->position.z = ribbon->vertexPool[i].vz;
+
+                        fxPrim->v0 = *(Position *)&Quad[0];
+                        fxPrim->v1 = *(Position *)&Quad[1];
+                        fxPrim->v3 = *(Position *)&Quad[2];
+                        fxPrim->v2 = *(Position *)&Quad[3];
+
+                        fxPrim->fadeValue[0] = ribbon->startFadeValue;
+                        fxPrim->fadeValue[1] = ribbon->startFadeValue;
+                        fxPrim->fadeValue[2] = ribbon->startFadeValue + ribbon->fadeStep;
+                        fxPrim->fadeValue[3] = ribbon->startFadeValue + ribbon->fadeStep;
+                        
+                        fxPrim->fadeStep = ribbon->fadeStep;
+
+                        fxPrim->flags = (fxPrim->flags & ~0x1) | 0x90008;
+
+                        fxPrim->color      = ribbon->startColor;
+                        fxPrim->startColor = ribbon->startColor;
+                        fxPrim->endColor   = ribbon->endColor;
+
+                        fxPrim->colorFadeValue = 0;
+                        fxPrim->colorFadeStep  = ribbon->colorStepValue;
+
+                        if (ribbon->type == 2)
+                        {
+                            fxPrim->process = (void *)FX_ConstrictProcess;
+                        }
+                        else
+                        {
+                            fxPrim->process = (void *)FX_RibbonProcess;
+                        }
+
+                        fxPrim->timeToLive = ribbon->faceLifeTime;
+
+                        LIST_InsertFunc(&fxTracker->usedPrimList, &fxPrim->node);
+
+                        fxPrim2 = FX_GetPrim(fxTracker);
+
+                        if (fxPrim2 != NULL)
+                        {
+                            int fade; 
+
+                            *fxPrim2 = *fxPrim;
+
+                            FX_SubDividePrim(fxPrim, fxPrim2);
+
+                            fade = 4096;
+
+                            temp = 2;
+
+                            if (ribbon->type == temp)
+                            {
+                                fade = 2048;
+
+                                fxPrim2->work0 = 0;
+                                fxPrim->work0  = 0;
+
+                                fxPrim2->work1 = 0;
+                                fxPrim->work1  = 0;
+
+                                fxPrim->work2  = 1;
+                                fxPrim2->work2 = 0;
+                            }
+
+                            fxPrim->fadeValue[0]  = fade;
+                            fxPrim->fadeValue[1]  = fade;
+                            fxPrim2->fadeValue[2] = fade;
+                            fxPrim2->fadeValue[3] = fade;
+
+                            LIST_InsertFunc(&fxTracker->usedPrimList, &fxPrim2->node);
+                        }
+                    }
+
+                    Quad[0] = Quad[1];
+                    Quad[3] = Quad[2];
+                }
+            }
+        }
+    }
+
+    if ((ribbon->lifeTime > 0) && (--ribbon->lifeTime == 0))
+    {
+        FX_DeleteGeneralEffect((FXGeneralEffect *)ribbon);
+    }
+}
 
 void FX_StandardFXPrimProcess(FX_PRIM *fxPrim, FXTracker *fxTracker)
 {
@@ -3305,7 +3894,244 @@ void FX_MakeSpark(Instance *instance, Model *model, int segment)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_ContinueParticle);
+void FX_ContinueParticle(FXParticle *currentParticle, FXTracker *fxTracker)
+{
+    FX_PRIM *fxPrim; 
+    VECTOR movement; 
+    int i; 
+    int num;  
+    MATRIX *swTransform;  
+    MATRIX *swOldTransform;  
+    long birthRadius;  
+    Instance *instance; 
+    int InstanceFade;
+    unsigned long black;  
+
+    black = 0;
+
+    num = currentParticle->numberBirthParticles;
+
+    if (num < 0)
+    {
+        num = (rand() % -num) == 0;
+    }
+
+    instance = currentParticle->instance;
+
+    if ((!(instance->flags & 0x800) && !(instance->flags2 & 0x4000000) && (instance->flags & 0x200)) && ((instance->matrix != NULL) && (instance->oldMatrix != NULL)) && (num > 0))
+    {
+        swTransform    = &instance->matrix[(int)currentParticle->startSegment];
+        swOldTransform = &instance->oldMatrix[(int)currentParticle->startSegment];
+
+        birthRadius = currentParticle->birthRadius;
+
+        if (currentParticle->type == 1)
+        {
+            movement.vx = (birthRadius << 12) / 128;
+            movement.vy = (birthRadius << 12) / 128;
+            movement.vz = (birthRadius << 12) / 128;
+        }
+        else
+        {
+            if ((currentParticle->type == 2) || (currentParticle->type == 3))
+            {
+                swOldTransform = &instance->matrix[(int)currentParticle->endSegment];
+            }
+
+            movement.vx = (((swOldTransform->t[0] - swTransform->t[0]) + birthRadius) << 12) / 128;
+            movement.vy = (((swOldTransform->t[1] - swTransform->t[1]) + birthRadius) << 12) / 128;
+            movement.vz = (((swOldTransform->t[2] - swTransform->t[2]) + birthRadius) << 12) / 128;
+        }
+
+        if (instance == gameTrackerX.playerInstance)
+        {
+            InstanceFade = 0;
+        }
+        else if (gameTrackerX.gameData.asmData.MorphTime != 1000)
+        {
+            InstanceFade = INSTANCE_GetFadeValue(instance);
+        }
+        else
+        {
+            InstanceFade = instance->fadeValue;
+        }
+
+        birthRadius /= 2;
+
+        for (i = 0; i < num; i++)
+        {
+            fxPrim = FX_GetPrim(gFXT);
+
+            if (fxPrim != NULL)
+            {
+                fxPrim->position.x = ((currentParticle->offset.x + swTransform->t[0]) + ((movement.vx * (rand() & 0x7F)) >> 12)) - birthRadius;
+                fxPrim->position.y = ((currentParticle->offset.y + swTransform->t[1]) + ((movement.vy * (rand() & 0x7F)) >> 12)) - birthRadius;
+                fxPrim->position.z = ((currentParticle->offset.z + swTransform->t[2]) + ((movement.vz * (rand() & 0x7F)) >> 12)) - birthRadius;
+
+                switch (currentParticle->z_undulate)
+                {
+                case 0:
+                    break;
+                case 1:
+                    fxPrim->position.z += 20 + ((rcos(gameTrackerX.frameCount * 128) * 40) / 4096);
+                    break;
+                case 2:
+                    fxPrim->position.z += 10 + ((rcos(gameTrackerX.frameCount * 256) * 20) / 4096);
+                    break;
+                case 3:
+                    fxPrim->position.z += 8  + ((rcos(gameTrackerX.frameCount * 256) * 15) / 4096);
+                    break;
+                case 4:
+                    fxPrim->position.z += 4  +  (rcos(gameTrackerX.frameCount * 256)       / 512);
+                    break;
+                }
+
+                if (currentParticle->type == 3)
+                {
+                    fxPrim->duo.phys.xVel = (swTransform->t[0] - fxPrim->position.x) / currentParticle->primLifeTime;
+                    fxPrim->duo.phys.yVel = (swTransform->t[1] - fxPrim->position.y) / currentParticle->primLifeTime;
+                    fxPrim->duo.phys.zVel = (swTransform->t[2] - fxPrim->position.z) / currentParticle->primLifeTime;
+                }
+                else if (currentParticle->flag_bits & 0x2)
+                {
+                    fxPrim->duo.phys.xVel = currentParticle->direction.x;
+                    fxPrim->duo.phys.yVel = currentParticle->direction.y;
+                    fxPrim->duo.phys.zVel = currentParticle->direction.z;
+                }
+                else
+                {
+                    fxPrim->duo.phys.xVel = (((rand() & 0x1FF) - 255) * currentParticle->direction.x) / 4096;
+                    fxPrim->duo.phys.yVel = (((rand() & 0x1FF) - 255) * currentParticle->direction.y) / 4096;
+                    fxPrim->duo.phys.zVel = (((rand() & 0x1FF) - 255) * currentParticle->direction.z) / 4096;
+                }
+
+                fxPrim->duo.phys.xAccl = currentParticle->acceleration.x;
+                fxPrim->duo.phys.yAccl = currentParticle->acceleration.y;
+                fxPrim->duo.phys.zAccl = currentParticle->acceleration.z;
+
+                fxPrim->v0.x = fxPrim->v0.z = currentParticle->size;
+                fxPrim->v0.y = 4096;
+
+                fxPrim->timeToLive = currentParticle->primLifeTime;
+
+                fxPrim->flags = 0xC0008;
+
+                fxPrim->startColor = currentParticle->startColor;
+
+                if ((currentParticle->flag_bits & 0x1) && ((gameTrackerX.gameData.asmData.MorphType == 1) || (gameTrackerX.gameData.asmData.MorphTime != 1000)))
+                {
+                    int tmp_blue;  
+                    CVECTOR *ptr;  
+
+                    ptr = (CVECTOR *)&fxPrim->startColor;
+
+                    tmp_blue = ptr->b;
+
+                    ptr->b = ptr->r;
+                    ptr->r = tmp_blue;
+
+                    if (gameTrackerX.gameData.asmData.MorphTime != 1000)
+                    {
+                        int fade; 
+
+                        fade = FX_GetMorphFadeVal();
+
+                        LoadAverageCol((unsigned char *)&currentParticle->startColor, (unsigned char *)ptr, 4096 - fade, fade, (unsigned char *)ptr);
+                    }
+                }
+
+                fxPrim->endColor = currentParticle->endColor;
+
+                fxPrim->fadeValue[0] = fxPrim->fadeValue[1] = fxPrim->fadeValue[2] = fxPrim->fadeValue[3] = InstanceFade;
+
+                if (InstanceFade == 0)
+                {
+                    fxPrim->fadeStep = 4096                  / currentParticle->primLifeTime;
+                }
+                else
+                {
+                    fxPrim->fadeStep = (4096 - InstanceFade) / currentParticle->primLifeTime;
+
+                    LoadAverageCol((unsigned char *)&fxPrim->startColor, (unsigned char *)&black, 4096 - InstanceFade, InstanceFade, (unsigned char *)&fxPrim->startColor);
+                    LoadAverageCol((unsigned char *)&fxPrim->endColor,   (unsigned char *)&black, 4096 - InstanceFade, InstanceFade, (unsigned char *)&fxPrim->endColor);
+                }
+
+                if (currentParticle->texture != NULL)
+                {
+                    fxPrim->flags |= 0x1;
+
+                    fxPrim->texture = currentParticle->texture;
+
+                    fxPrim->color = (fxPrim->startColor & 0x3FFFFFF) | 0x2C000000;
+                }
+                else
+                {
+                    fxPrim->color = (fxPrim->startColor & 0x3FFFFFF) | 0x20000000;
+                }
+
+                if (currentParticle->scaleSpeed != 0)
+                {
+                    fxPrim->flags |= 0x2000;
+
+                    fxPrim->v0.y  = currentParticle->startScale;
+                    fxPrim->work3 = currentParticle->scaleSpeed;
+                }
+
+                if (currentParticle->type == 1)
+                {
+                    fxPrim->matrix = (FX_MATRIX *)instance;
+                    
+                    fxPrim->work0 = currentParticle->startSegment;
+
+                    fxPrim->flags |= 0x8000000;
+                }
+
+                if (currentParticle->fxprim_process != NULL)
+                {
+                    fxPrim->process = currentParticle->fxprim_process;
+                }
+                else
+                {
+                    fxPrim->process = FX_StandardFXPrimProcess;
+                }
+
+                if (currentParticle->fxprim_modify_process != NULL)
+                {
+                    ((void (*)())currentParticle->fxprim_modify_process)(fxPrim, instance, currentParticle, fxTracker);
+                }
+
+                if (currentParticle->type == 3)
+                {
+                    fxPrim->flags = 0x1090000;
+
+                    fxPrim->v0.x = fxPrim->position.x;
+                    fxPrim->v0.y = fxPrim->position.y;
+                    fxPrim->v0.z = fxPrim->position.z;
+
+                    fxPrim->v1.x = fxPrim->position.x + fxPrim->duo.phys.xVel;
+                    fxPrim->v1.y = fxPrim->position.y + fxPrim->duo.phys.yVel;
+                    fxPrim->v1.z = fxPrim->position.z + fxPrim->duo.phys.zVel;
+
+                    LIST_InsertFunc(&fxTracker->usedPrimList, &fxPrim->node);
+                }
+                else
+                {
+                    FX_Sprite_Insert(&fxTracker->usedPrimListSprite, fxPrim);
+                }
+            }
+        }
+    }
+
+    if (currentParticle->lifeTime > 0)
+    {
+        currentParticle->lifeTime -= FX_Frames;
+
+        if (currentParticle->lifeTime <= 0)
+        {
+            FX_DeleteGeneralEffect((FXGeneralEffect *)currentParticle);
+        }
+    }
+}
 
 void FX_UpdraftPrimModify(FX_PRIM *fxPrim, Instance *instance, FXParticle *particle, FXTracker *fxTracker)
 {
@@ -3383,7 +4209,125 @@ void FX_SetReaverInstance(Instance *instance)
     FX_reaver_instance = instance;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_SoulReaverBlade);
+void FX_SoulReaverBlade(Instance *instance, unsigned long **drawot)
+{
+    SVECTOR location;  
+    int i; 
+    int size; 
+    int reaverScale;  
+    Object *sreaver; 
+    ReaverData *data;  
+    short deg; 
+    long color; 
+    TextureMT3 *texture;  
+    MATRIX mat; 
+    DVECTOR xy_pos; 
+    long sizex;  
+    long sizey;  
+    long otz; 
+    POLY_FT4 *poly; 
+    POLY_FT4 poly2;  
+
+    data = (ReaverData *)instance->extraData;
+
+    poly = (POLY_FT4 *)gameTrackerX.primPool->nextPrim;
+
+    if ((data->ReaverSize != 0) && ((unsigned long *)(poly + 40) < gameTrackerX.primPool->lastPrim))
+    {
+        color = data->ReaverGlowColor;
+
+        sreaver = (Object *)objectAccess[10].object;
+
+        deg = data->ReaverDeg;
+
+        if ((sreaver != NULL) && ((instance->flags & 0x200) && (!(instance->flags & 0x800) && ((instance->matrix != NULL) && (instance->oldMatrix != NULL)))))
+        {
+            location.vz = 0;
+
+            CompMatrix(theCamera.core.wcTransform, &instance->matrix[1], &mat);
+
+            SetRotMatrix(&mat);
+            SetTransMatrix(&mat);
+
+            reaverScale = (data->ReaverSize * data->ReaverScale) / 4096;
+
+            texture = FX_GetTextureObject(sreaver, 0, 0);
+
+            gte_lddqb(0);
+
+            color |= 0x2E000000;
+
+            *(short *)&poly2.u0 = *(short *)&texture->u2;
+            *(short *)&poly2.u1 = *(short *)&texture->u1;
+            *(short *)&poly2.u2 = *(short *)&texture->u0;
+
+            poly2.u3 = poly2.u1;
+            poly2.v3 = poly2.v2;
+
+            poly2.tpage = texture->tpage;
+            poly2.clut  = texture->clut;
+
+            for (i = 1; i < 40; i++)
+            {
+                int scale1; 
+
+                scale1 = ((40 - i) * 4096) / 40;
+                size   =  (40 - i) * 2;
+
+                if (reaverScale != 4096)
+                {
+                    size = (size * reaverScale) / 4096;
+                }
+
+                if (i < 8)
+                {
+                    scale1 = ((scale1 << 9) * i) / 4096;
+                }
+
+                location.vx = ((rcos(deg + (i * 256)) / 128) * scale1) / 4096;
+                location.vy = ((rsin(deg + (i * 256)) / 128) * scale1) / 4096;
+
+                gte_ldv0(&location);
+                gte_lddqa(size);
+                gte_nrtps();
+
+                *(long *)&poly->u0 = *(long *)&poly2.u0;
+                *(long *)&poly->u1 = *(long *)&poly2.u1;
+                *(long *)&poly->u2 = *(long *)&poly2.u2;
+                *(long *)&poly->u3 = *(long *)&poly2.u3;
+
+                *(long *)&poly->r0 = color;
+
+                gte_stsxy(&xy_pos);
+                gte_stopz(&sizex);
+                gte_stsz(&otz);
+
+                sizey = (sizex + 0xFFFF)                >> 16;
+                sizex = (((sizex / 320) << 9) + 0xFFFF) >> 16;
+
+                poly->x3 = poly->x1 = xy_pos.vx +  sizex;
+                poly->x0 = poly->x2 = xy_pos.vx - (sizex / 2);
+                poly->y0 = poly->y1 = xy_pos.vy - (sizey / 2);
+
+                otz >>= 2;
+
+                poly->y3 = poly->y2 = xy_pos.vy + sizey;
+
+                if (((otz - 1) >= 0) && ((otz - 1) < 3071))
+                {
+                    // addPrim(drawot[otz], poly);
+
+                    poly->tag = getaddr(&drawot[otz]) | 0x9000000;
+                    drawot[otz] = (unsigned long *)((intptr_t)poly++ & 0xFFFFFF);
+                }
+
+                location.vz -= size / 4;
+            }
+
+            gameTrackerX.primPool->nextPrim = (unsigned long *)poly;
+        }
+    }
+}
 
 void FX_ReaverBladeInit()
 {
@@ -3537,7 +4481,79 @@ void FX_DoInstancePowerRing(Instance *instance, long atuTime, long *color, long 
 
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdatePowerRing);
+void FX_UpdatePowerRing(FXHalvePlane *ring) 
+{
+    Instance *instance;     
+    PlaneConstants *cPlane; 
+    long offset;            
+    long offset2;           
+    long cutX;              
+    long cutY;              
+    long cutZ;              
+    long colorIndex;        
+    long percent;           
+    
+    instance = ring->instance;
+
+    cutZ = instance->position.z;
+    cutX = instance->position.x;
+    cutY = instance->position.y;
+
+    offset  = 512 - ((ring->diffTime * 512) / ring->lifeTime);
+    offset2 = ((gameTrackerX.currentTime % 1000) * 4096) / 1000;
+    
+    if (ring->diffTime >= ring->lifeTime)
+    { 
+        offset = 512;
+
+        ring->diffTime = ring->lifeTime;
+        ring->lifeTime = 0;
+    }
+    
+    cPlane = &ring->ringPlane;
+
+    cPlane->flags = 0;
+
+    cPlane->a =  rsin(200) * rsin(offset2) >> 12;
+    cPlane->b = -rsin(200) * rcos(offset2) >> 12;
+    cPlane->c =  rcos(200);
+
+    cutZ += offset;
+
+    cPlane->d = -(((cPlane->a * cutX) + (cPlane->b * cutY) + (cPlane->c * cutZ)) >> 12);
+
+    if (ring->colorArray != 0)
+    {
+        if (ring->diffTime != 0)
+        {
+            colorIndex = ring->diffTime / ring->colorBlendLife;
+        }
+        else
+        {
+            colorIndex = 0;
+        }
+
+        percent = ((ring->diffTime % (ring->colorBlendLife + 1)) * 4096) / ring->colorBlendLife;
+
+        if (colorIndex >= (ring->numColors - 1))
+        {
+            colorIndex = ring->numColors - 2;
+
+            percent = 4096;
+        }
+
+        gte_lddp(4096 - percent);
+        gte_ldcv(&ring->colorArray[colorIndex]);
+        gte_ngpf12();
+        
+        gte_lddp(percent);
+        gte_ldcv(&ring->colorArray[colorIndex + 1]);
+        gte_ngpl12();
+        gte_stcv(&ring->currentColor);
+    }
+    
+    ring->diffTime += gameTrackerX.lastLoopTime;
+}
 
 void FX_UpdateInstanceSplitRing(FXHalvePlane *ring, FXTracker *fxTracker)
 {
@@ -5248,10 +6264,6 @@ void FX_CalcSpiral(int degchange)
     Spiral_Glow_Y = (miny + maxy) / 2;
 }
 
-// Matches 100% on decomp.me but differs on this project
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Spiral);
-#else
 void FX_Spiral(PrimPool *primPool, unsigned long **ot)
 {
     POLY_2G4 *poly;
@@ -5259,12 +6271,12 @@ void FX_Spiral(PrimPool *primPool, unsigned long **ot)
     long offp;
     long offm;
     int n;
-    //DR_TPAGE *drtpage; // unused
+    DR_TPAGE *drtpage;
     int health;
     int health_mod;
     long no_color;
     long color;
-    STATIC short cnt = 0;
+    static short cnt = 0;
     int current_cnt;
     int max64;
     long SPIRAL_COLOR;
@@ -5403,20 +6415,20 @@ void FX_Spiral(PrimPool *primPool, unsigned long **ot)
             *(int *)&ot[1] = (intptr_t)poly & 0xFFFFFF;
         }
 
-        // setDrawTPage(poly, 1, 1, 32);
+        drtpage = (DR_TPAGE *)poly;
 
-        ((unsigned long *)poly)[1] = _get_mode(1, 1, 32);
+        // setDrawTPage(drtpage, 1, 1, 32);
+        drtpage->code[0] = _get_mode(1, 1, 32);
 
-        // addPrim(poly, ot[1]);
+        // addPrim(ot[1], drtpage);
+        drtpage->tag = getaddr(&ot[1]) | 0x1000000;
+        ot[1] = (unsigned long *)((intptr_t)drtpage & 0xFFFFFF);
 
-        *(int *)poly = getaddr(&ot[1]) | 0x1000000;
-        *(int *)&ot[1] = (intptr_t)poly & 0xFFFFFF;
-
-        primPool->nextPrim = (unsigned long *)((char *)poly + 8);
+        primPool->nextPrim = (unsigned long *)(drtpage + 1);
 
         if ((Spiral_Number != 0) || (Spiral_Current == Spiral_Max))
         {
-            STATIC short deg;
+            static short deg = 0;
             Vector f1;
 
             f1.x = Spiral_Glow_X;
@@ -5428,7 +6440,6 @@ void FX_Spiral(PrimPool *primPool, unsigned long **ot)
         }
     }
 }
-#endif
 
 void FX_Health_Spiral(int number, int current_health, int max_health)
 {
@@ -5664,7 +6675,117 @@ long fx_get_startz(SVector *position)
     return tmpmat.t[2] / 4;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawRing);
+void FX_DrawRing(MATRIX *wcTransform, SVector *position, MATRIX *matrix, int radius, int radius2, int radius3, int z1, int z2, int z3, long color, int sortInWorld)
+{
+    int n;                  
+    POLY_2G4T *poly;        
+    unsigned long **drawot; 
+    SVector points[3];      
+    long sxy[3];            
+    long degrees;           
+    long color_black;       
+    long sz0;               
+    long sz1;               
+    long sz2;               
+    long startz;            
+    
+    poly = (POLY_2G4T*)gameTrackerX.primPool->nextPrim;
+
+    degrees = 0;
+
+    drawot = gameTrackerX.drawOT;
+    
+    if ((gameTrackerX.primPool->nextPrim + (sizeof(POLY_2G4T) * 8)) < gameTrackerX.primPool->lastPrim) 
+    {
+        PushMatrix();
+        
+        SetRotMatrix(wcTransform);
+        SetTransMatrix(wcTransform);
+        
+        startz = fx_get_startz(position);
+        
+        SetRotMatrix(matrix); 
+        
+        points[0].z = z1;
+        points[1].z = z2;
+        points[2].z = z3; 
+        
+        fx_calc_points(points, degrees, radius, radius2, radius3);
+        
+        color      |= 0x3A000000;
+        color_black = 0x3A000000;
+        
+        gte_stsxy3(&sxy[0], &sxy[1], &sxy[2]);
+        
+        for (n = 0; n < 32; n++) 
+        {
+            degrees += 128;
+            
+            fx_calc_points(points, degrees, radius, radius2, radius3);
+            
+            *(int*)&poly->p2.r3 = color_black;
+            *(int*)&poly->p2.r2 = color_black;
+            *(int*)&poly->p1.r1 = color_black;
+            *(int*)&poly->p1.r0 = color_black;
+            
+            *(int*)&poly->p1.r3 = color;
+            *(int*)&poly->p1.r2 = color;
+            *(int*)&poly->p2.r1 = color;
+            *(int*)&poly->p2.r0 = color;
+            
+            *(int*)&poly->p1.x0 = sxy[2];
+            *(int*)&poly->p1.x2 = sxy[1];
+            *(int*)&poly->p2.x0 = sxy[1];
+            *(int*)&poly->p2.x2 = sxy[0];
+            
+            // setDrawTPage(&poly->drawTPage1, TRUE, TRUE, 32);
+            
+            *(int*)&poly->drawTPage1 = _get_mode(1, 1, 32);
+            
+            gte_stsxy3(&sxy[0], &sxy[1], &sxy[2]);
+            gte_stsz3(&sz0, &sz1, &sz2);
+            
+            *(int*)&poly->p1.x1 = sxy[2];
+            *(int*)&poly->p1.x3 = sxy[1];
+            *(int*)&poly->p2.x1 = sxy[1];
+            *(int*)&poly->p2.x3 = sxy[0];
+            
+            if (sz2 < sz0) 
+            {
+                sz0 = sz2;
+            }
+            
+            if (sz0 > 0) 
+            {
+                sz0 /= 4;
+                
+                if (sortInWorld == 0) 
+                {
+                    if (startz >= sz0) 
+                    {
+                        sz0 = 1;
+                    }
+                    else 
+                    {
+                        sz0 = startz + 16;
+                    }
+                }
+                
+                if (((sz0 - 1) >= 0) && ((sz0 - 1) <= 3070)) 
+                {
+                    // addPrim(drawot[sz0], poly);
+                    
+                    poly->tag = getaddr(&drawot[sz0]) | 0x11000000;
+                    drawot[sz0] = (unsigned long *)((intptr_t)poly++ & 0xFFFFFF);
+                }
+            }
+        }
+        
+        gameTrackerX.primPool->nextPrim = (unsigned long*)poly;
+        
+        PopMatrix();
+    }
+}
 
 void fx_setTex(DVECTOR *x, unsigned char *uv, int tx, int offset)
 {
@@ -5682,7 +6803,144 @@ void fx_setTex(DVECTOR *x, unsigned char *uv, int tx, int offset)
     x->vy += offset;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawRing2);
+void FX_DrawRing2(MATRIX *wcTransform, SVector *position, MATRIX *matrix, int radius, int radius2, int radius3, int z1, int z2, int z3, long offset, int sortInWorld)
+{
+    int n;  
+    POLY_FT4 *poly;  
+    unsigned long **drawot; 
+    SVector points[3]; 
+    long sxy[3];  
+    long degrees; 
+    long sz0;  
+    long sz1;  
+    long sz2; 
+    long startz; 
+    short tx; 
+    long dispYPos; 
+    int num_faces; 
+    int deg_change;
+
+    degrees = 0;
+
+    num_faces = 32;
+
+    drawot = gameTrackerX.drawOT;
+
+    if (radius < 120)
+    {
+        num_faces = 8;
+    }
+
+    poly = (POLY_FT4 *)gameTrackerX.primPool->nextPrim;
+
+    if ((unsigned long *)&poly[num_faces] < gameTrackerX.primPool->lastPrim)
+    {
+        PushMatrix();
+
+        SetRotMatrix(wcTransform);
+        SetTransMatrix(wcTransform);
+
+        startz = fx_get_startz(position);
+
+        SetRotMatrix(matrix);
+
+        points[0].z = z1;
+        points[1].z = z2;
+        points[2].z = z3;
+
+        dispYPos = (gameTrackerX.gameData.asmData.dispPage ^ 1) << 8;
+
+        fx_calc_points(points, degrees, radius, radius2, radius3);
+
+        gte_stsxy3(&sxy[0], &sxy[1], &sxy[2]);
+
+        deg_change = 4096 / num_faces;
+
+        for (n = 0; n < num_faces; n++)
+        {
+            degrees += deg_change;
+
+            fx_calc_points(points, degrees, radius, radius2, radius3);
+
+            *(long *)&poly->r0 = 0x2DC0C0C0;
+
+            *(long *)&poly->x0 = sxy[2];
+            *(long *)&poly->x2 = sxy[0];
+
+            tx = (*(short *)&sxy[2] < *(short *)&sxy[0]) ? *(short *)&sxy[2] : *(short *)&sxy[0];
+
+            gte_stsxy3(&sxy[0], &sxy[1], &sxy[2]);
+            gte_stsz3(&sz0, &sz1, &sz2);
+
+            *(long *)&poly->x1 = sxy[2];
+            *(long *)&poly->x3 = sxy[0];
+
+            if (*(short *)&sxy[2] < tx)
+            {
+                tx = *(short *)&sxy[2];
+            }
+
+            if (*(short *)&sxy[0] < tx)
+            {
+                tx = *(short *)&sxy[0];
+            }
+
+            tx &= ~0x3F;
+
+            if (tx <= -64)
+            {
+                poly->tpage = getTPage(2, 0, 0, dispYPos);
+            }
+            else if (tx < 0)
+            {
+                poly->tpage = getTPage(2, 0, tx + 1024, dispYPos);
+            }
+            else
+            {
+                poly->tpage = getTPage(2, 0, tx, dispYPos);
+            }
+
+            fx_setTex((DVECTOR *)&poly->x0, &poly->u0, tx, offset);
+            fx_setTex((DVECTOR *)&poly->x1, &poly->u1, tx, offset);
+            fx_setTex((DVECTOR *)&poly->x2, &poly->u2, tx, offset);
+            fx_setTex((DVECTOR *)&poly->x3, &poly->u3, tx, offset);
+
+            if (sz2 < sz0)
+            {
+                sz0 = sz2;
+            }
+
+            sz0 /= 4;
+
+            if (sz0 > 0)
+            {
+                if (sortInWorld == 0)
+                {
+                    if (startz >= sz0)
+                    {
+                        sz0 = 1;
+                    }
+                    else
+                    {
+                        sz0 = startz + 16;
+                    }
+                }
+
+                if (((sz0 - 1) >= 0) && ((sz0 - 1) <= 3070))
+                {
+                    // addPrim(drawot[sz0], poly);
+                    
+                    poly->tag = getaddr(&drawot[sz0]) | 0x9000000;
+                    drawot[sz0] = (unsigned long *)((intptr_t)poly++ & 0xFFFFFF);
+                }
+            }
+        }
+
+        gameTrackerX.primPool->nextPrim = (unsigned long *)poly;
+
+        PopMatrix();
+    }
+}
 
 void FX_DrawFField(MATRIX *wcTransform, FXForceFieldEffect *field)
 {
@@ -5913,9 +7171,351 @@ void FX_Draw_Glowing_Line(unsigned long **ot, long otz, DVECTOR *sxy0, DVECTOR *
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_Lightning);
+void FX_Lightning(MATRIX *wcTransform, unsigned long **ot, MATRIX *mat, short deg, SVector *start, SVector *end, int width, int small_width, int segs, int sine_size, int variation, long color, long glow_color)
+{
+    int sz0;           
+    int sz1;           
+    long otz;          
+    int length;        
+    DVECTOR sxy0;      
+    DVECTOR sxy1;      
+    DVECTOR xy0;       
+    DVECTOR xy1;       
+    DVECTOR small_xy0; 
+    DVECTOR small_xy1; 
+    int n;             
+    int increment;     
+    int rsin_nd2;      
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_LightHouse);
+    deg &= 0xFFF; 
+    
+    if (mat != NULL)
+    {
+        SetRotMatrix(mat);
+        SetTransMatrix(mat);
+    }
+    else
+    {
+        SetRotMatrix(wcTransform);
+        SetTransMatrix(wcTransform);
+    } 
+    
+    sz0 = 32767;
+
+    width       = width * 320;
+    small_width = small_width * 320;
+
+    increment = 4096 / segs;
+
+    *(int*)&xy0       = 0;
+    *(int*)&small_xy0 = 0;
+
+    n = 0; 
+   
+    for (; segs >= 0; segs--)
+    {
+        SVECTOR point;     
+        
+        LoadAverageShort12((SVECTOR*)start, (SVECTOR*)end, 4096 - n, n, &point);
+        
+        rsin_nd2 = rsin(n / 2);
+        
+        if ((variation != 0) && (segs != 0) && (mat == NULL))
+        {
+            int rsin_n4;       
+            
+            rsin_n4 = rsin(n * 4);
+            
+            point.vx += (((rand() % variation) - (variation / 2)) * rsin_n4) / 4096; 
+            point.vy += (((rand() % variation) - (variation / 2)) * rsin_n4) / 4096; 
+
+            point.vz += (((rsin(n + deg) * sine_size) / 4096) * rsin_nd2 / 4096) + ((rand() % variation) - (variation / 2));
+        }
+        
+        if (mat != NULL)
+        {
+            int tmpdeg;        
+            
+            tmpdeg = deg + (segs * 512);
+            
+            point.vx = (((rcos(tmpdeg) * sine_size / 4096) + (rand() & 7)) * rsin_nd2) / 4096;
+            point.vy = (((rsin(tmpdeg) * sine_size / 4096) + (rand() & 7)) * rsin_nd2) / 4096; 
+
+            point.vz += rand() & 7;
+        }
+        
+        gte_ldv0(&point);
+        gte_nrtps();
+        gte_stsxy2(&sxy1);
+        gte_stsz(&sz1);
+        
+        if (sz0 < sz1)
+        {
+            otz = sz0 / 4;
+        }
+        else
+        {
+            otz = sz1 / 4;
+        }
+        
+        if ((segs != 0) && (n != 0))
+        {
+            int fx;            
+            int fy;            
+            
+            fx = sxy1.vx - sxy0.vx;
+            fy = sxy1.vy - sxy0.vy;
+            
+            length = MATH3D_veclen2(fx, fy) * sz1;
+            
+            if (length <= 0)
+            {
+                length = 1;
+            }
+            
+            xy1.vx = (fy * width) / length;
+            xy1.vy = (fx * width) / length;
+
+            small_xy1.vx = (fy * small_width) / length;
+            small_xy1.vy = (fx * small_width) / length;
+        }
+        else
+        {
+            *(int*)&xy1       = 0;
+            *(int*)&small_xy1 = 0;
+        }
+        
+        if (((n != 0) && (otz > 0)) && (otz < 3072))
+        {
+            if (width != 0)
+            {
+                FX_Draw_Glowing_Line(ot, otz, &sxy0, &sxy1, &xy0, &xy1, glow_color, glow_color);
+            }
+            
+            otz -= 5;
+            
+            if ((otz > 0) && (small_width != 0))
+            {
+                FX_Draw_Glowing_Line(ot, otz, &sxy0, &sxy1, &small_xy0, &small_xy1, color, color);
+            }
+        }
+        
+        n += increment;
+
+        sz0 = sz1;
+        
+        *(int*)&sxy0      = *(int*)&sxy1;
+        *(int*)&xy0       = *(int*)&xy1;
+        *(int*)&small_xy0 = *(int*)&small_xy1;
+    } 
+}
+
+void FX_LightHouse(MATRIX *wcTransform, unsigned long **ot, Instance *instance, int startSeg, int endSeg, int segs, long beam_color)
+{
+    int sz0;  
+    int sz1; 
+    long otz; 
+    int width; 
+    SVector start;  
+    SVector end;  
+    DVECTOR sxy0; 
+    DVECTOR sxy1; 
+    DVECTOR xy0; 
+    DVECTOR xy1;  
+    int fade; 
+    int n; 
+    int increment;  
+    long black; 
+    long color;  
+    long color1;  
+    long color2; 
+    int fx; 
+    int fy;  
+    int length;  
+    int segcnt;  
+    int end_width;  
+    int flag;
+    MATRIX *swTransform;  
+
+    flag = 0;
+
+    if (instance->flags & 0x800)
+    {
+        return;
+    }
+
+    swTransform = instance->matrix;
+
+    if (swTransform == NULL)
+    {
+        return;
+    }
+
+    swTransform = &swTransform[startSeg];
+
+    start.x = swTransform->t[0];
+    start.y = swTransform->t[1];
+    start.z = swTransform->t[2];
+
+    swTransform = &instance->matrix[endSeg];
+
+    end.x = swTransform->t[0];
+    end.y = swTransform->t[1];
+    end.z = swTransform->t[2];
+
+    SetRotMatrix(wcTransform);
+
+    sz0 = 32767;
+
+    SetTransMatrix(wcTransform);
+
+    *(long *)&xy0 = 0;
+
+    color  = color2 = beam_color;
+    color1          = beam_color;
+     
+    black = 0;
+
+    fade = MATH3D_DistanceBetweenPositions((Position *)&start, (Position *)&end) / 2;
+
+    end_width = ((fade * 1056) / 4096) + 96;
+
+    length = 0;
+
+    n = 0;
+
+    fx = fy = 0;
+
+    segcnt = segs / 4;
+
+    increment = 4096 / segcnt;
+
+    for (; segcnt >= 0; segcnt--)
+    {
+        SVECTOR point; 
+
+        LoadAverageShort12((SVECTOR *)&start, (SVECTOR *)&end, 4096 - n, n, &point);
+
+        gte_ldv0(&point);
+        gte_nrtps();
+        gte_stsxy(&sxy1);
+        gte_stsz(&sz1);
+
+        if ((flag != 0) && ((sz1 > 240) && (sxy1.vx > -512) && (sxy1.vx < 512)))
+        {
+            int newlength; 
+            int newfx;  
+            int newfy;  
+
+            newfx = sxy1.vx - sxy0.vx;
+            newfy = sxy1.vy - sxy0.vy;
+
+            newlength = MATH3D_veclen2(newfx, newfy);
+
+            if ((length < newlength) && (newlength < 256))
+            {
+                length = newlength;
+
+                fx = newfx;
+                fy = newfy;
+            }
+        }
+
+        if (sz1 > 240)
+        {
+            flag = 1;
+
+            *(long *)&sxy0 = *(long *)&sxy1;
+        }
+
+        n += increment;
+    }
+
+    if (length != 0)
+    {
+        segcnt = segs;
+
+        increment = 4096 / segcnt;
+
+        n = 0;
+
+        for (; segcnt >= 0; segcnt--)
+        {
+            SVECTOR point;  
+
+            LoadAverageShort12((SVECTOR *)&start, (SVECTOR *)&end, 4096 - n, n, &point);
+
+            width  = (((end_width - 96) * n) / 4096) + 96;
+            width *= 320;
+
+            if (n >= 2048)
+            {
+                if (n > 2048)
+                {
+                    fade = (n * 2) - 4096;
+                }
+                else
+                {
+                    fade = 0;
+                }
+            }
+            else
+            {
+                fade = 4096 - (n * 2);
+            }
+
+            LoadAverageCol((unsigned char *)&color, (unsigned char *)&black, 4096 - fade, fade, (unsigned char *)&color2);
+
+            gte_ldv0(&point);
+            gte_nrtps();
+            gte_stsxy(&sxy1);
+            gte_stsz(&sz1);
+
+            if (sz0 < sz1)
+            {
+                otz = sz0 / 4;
+            }
+            else
+            {
+                otz = sz1 / 4;
+            }
+
+            if (n != 0)
+            {
+                int x; 
+
+                if (sz1 <= 0)
+                {
+                    sz1 = 1;
+                }
+
+                x = (fy * width) / (length * sz1);
+
+                xy1.vy = (fx * width) / (length * sz1);
+                xy1.vx = (x * 512) / 320;
+            }
+
+            if (n == increment)
+            {
+                *(long *)&xy0 = *(long *)&xy1;
+            }
+
+            if ((n != 0) && (otz > 0))
+            {
+                FX_Draw_Glowing_Line(ot, otz, &sxy0, &sxy1, &xy0, &xy1, color1, color2);
+            }
+
+            n += increment;
+
+            color1 = color2;
+
+            sz0 = sz1;
+
+            *(long *)&sxy0 = *(long *)&sxy1;
+            *(long *)&xy0  = *(long *)&xy1;
+        }
+    }
+}
 
 void FX_StartPassthruFX(Instance *instance, SVector *normal, SVector *point)
 {

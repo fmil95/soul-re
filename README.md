@@ -16,25 +16,25 @@ For the decompilation of the next game in the series, check the [Soul Reaver 2 d
 
 [Build Status]: https://github.com/fmil95/soul-re/actions/workflows/progress_report.yml/badge.svg
 [actions]: https://github.com/fmil95/soul-re/actions/workflows/progress_report.yml
-[Code Progress]: https://decomp.dev/fmil95/soul-re.svg?mode=shield&label=Code&measure=matched_code_percent
-[Data Progress]: https://decomp.dev/fmil95/soul-re.svg?mode=shield&label=Functions&measure=matched_functions
-[progress]: https://decomp.dev/fmil95/soul-re
+[Code Progress]: https://fmil95.github.io/soul-re/badges/all_code.svg
+[Data Progress]: https://fmil95.github.io/soul-re/badges/all_functions.svg
+[progress]: https://fmil95.github.io/soul-re/
 
 | Name         | Purpose                  | Status                                                                                                                                                                                                                                        |
 | ------------ | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| SLUS_007.08  | Gex 2 engine + game code | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=main&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=main&label=Functions&measure=matched_functions)         |
-| cinemax.drm  | Video Player overlay     | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=cinemax&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=cinemax&label=Functions&measure=matched_functions)   |
-| mcardx.drm   | Memory Card overlay      | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=mcardx&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=mcardx&label=Functions&measure=matched_functions)     |
-| hunter.drm   | Human Hunter overlay     | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=hunter&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=hunter&label=Functions&measure=matched_functions)     |
-| skinner.drm  | Melchiahim overlay       | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=skinner&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=skinner&label=Functions&measure=matched_functions)   |
-| wallcr.drm   | Zephonim overlay         | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=wallcr&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=wallcr&label=Functions&measure=matched_functions)     |
-| aluka.drm    | Rahabim overlay          | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=aluka&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=aluka&label=Functions&measure=matched_functions)       |
-| skinbos.drm  | Melchiah overlay         | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=skinbos&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=skinbos&label=Functions&measure=matched_functions)   |
-| kain.drm     | Kain overlay             | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=kain&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=kain&label=Functions&measure=matched_functions)         |
-| walboss.drm  | Zephon overlay A         | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=walboss&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=walboss&label=Functions&measure=matched_functions)   |
-| walbosb.drm  | Zephon overlay B         | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=walbosb&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=walbosb&label=Functions&measure=matched_functions)   |
-| alukabss.drm | Rahab overlay            | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=alukabss&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=alukabss&label=Functions&measure=matched_functions) |
-| roninbss.drm | Dumah overlay            | ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=roninbss&label=Code&measure=matched_code_percent) ![image](https://decomp.dev/fmil95/soul-re.svg?mode=shield&category=roninbss&label=Functions&measure=matched_functions) |
+| SLUS_007.08  | Gex 2 engine + game code | ![image](https://fmil95.github.io/soul-re/badges/main_code.svg) ![image](https://fmil95.github.io/soul-re/badges/main_functions.svg)         |
+| cinemax.drm  | Video Player overlay     | ![image](https://fmil95.github.io/soul-re/badges/cinemax_code.svg) ![image](https://fmil95.github.io/soul-re/badges/cinemax_functions.svg)   |
+| mcardx.drm   | Memory Card overlay      | ![image](https://fmil95.github.io/soul-re/badges/mcardx_code.svg) ![image](https://fmil95.github.io/soul-re/badges/mcardx_functions.svg)     |
+| hunter.drm   | Human Hunter overlay     | ![image](https://fmil95.github.io/soul-re/badges/hunter_code.svg) ![image](https://fmil95.github.io/soul-re/badges/hunter_functions.svg)     |
+| skinner.drm  | Melchiahim overlay       | ![image](https://fmil95.github.io/soul-re/badges/skinner_code.svg) ![image](https://fmil95.github.io/soul-re/badges/skinner_functions.svg)   |
+| wallcr.drm   | Zephonim overlay         | ![image](https://fmil95.github.io/soul-re/badges/wallcr_code.svg) ![image](https://fmil95.github.io/soul-re/badges/wallcr_functions.svg)     |
+| aluka.drm    | Rahabim overlay          | ![image](https://fmil95.github.io/soul-re/badges/aluka_code.svg) ![image](https://fmil95.github.io/soul-re/badges/aluka_functions.svg)       |
+| skinbos.drm  | Melchiah overlay         | ![image](https://fmil95.github.io/soul-re/badges/skinbos_code.svg) ![image](https://fmil95.github.io/soul-re/badges/skinbos_functions.svg)   |
+| kain.drm     | Kain overlay             | ![image](https://fmil95.github.io/soul-re/badges/kain_code.svg) ![image](https://fmil95.github.io/soul-re/badges/kain_functions.svg)         |
+| walboss.drm  | Zephon overlay A         | ![image](https://fmil95.github.io/soul-re/badges/walboss_code.svg) ![image](https://fmil95.github.io/soul-re/badges/walboss_functions.svg)   |
+| walbosb.drm  | Zephon overlay B         | ![image](https://fmil95.github.io/soul-re/badges/walbosb_code.svg) ![image](https://fmil95.github.io/soul-re/badges/walbosb_functions.svg)   |
+| alukabss.drm | Rahab overlay            | ![image](https://fmil95.github.io/soul-re/badges/alukabss_code.svg) ![image](https://fmil95.github.io/soul-re/badges/alukabss_functions.svg) |
+| roninbss.drm | Dumah overlay            | ![image](https://fmil95.github.io/soul-re/badges/roninbss_code.svg) ![image](https://fmil95.github.io/soul-re/badges/roninbss_functions.svg) |
 
 In case you wonder what an overlay is: Soul Reaver like many other titles for the PlayStation (especially those near the end of the system's life cycle) distributes a good amount of game logic throughout _overlays_. For those not familiar with the concept, overlays are binaries which contain code that is loaded at specific instances during gameplay by the primary executable. This was designed such to taper the maximum amount of memory that the game consumes at once, which could never be too high due to hardware limitations.
 

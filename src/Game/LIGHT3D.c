@@ -68,6 +68,15 @@ static inline int LIGHT3D_FixedMultiplication3(short a, long b)
     return r >> 12;
 }
 
+static inline long LIGHT3D_FixedMultiplication4(long a, long b) 
+{
+    long r;
+
+    r = a * b;
+    
+    return r / 4096;
+}
+
 static inline int LIGHT3D_FixedNormalization(long a, long b, long x, long y)
 {
     long r;
@@ -87,7 +96,7 @@ static inline int LIGHT3D_FixedNormalization(long a, long b, long x, long y)
     return r;
 }
 
-void LIGHT_GetLightMatrix(struct _Instance *instance, struct Level *level, struct MATRIX *lightM, struct MATRIX *colorM)
+void LIGHT_GetLightMatrix(struct _Instance *instance, struct Level *level, MATRIX *lightM, MATRIX *colorM)
 {
     MATRIX *lightGroup;
     struct LightList *lightList;
@@ -331,7 +340,262 @@ void LIGHT_GetAmbient(struct _ColorType *color, struct _Instance *instance)
     color->r = lightval;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/LIGHT3D", LIGHT_CalcLightValue);
+void LIGHT_CalcLightValue(TFace* tface, Instance* instance, Terrain* terrain) 
+{
+    ColorType color; 
+    short fadespeed;       
+
+    if ((!(instance->flags & 0x400000)) && (tface != NULL) && (instance->lightMatrix == 0))
+    {
+        ColorType color1;
+        ColorType color2; 
+        long n; 
+        long count; 
+        long edge; 
+        int x1; 
+        int x2; 
+        int interp1;
+        int interp2; 
+        int interp; 
+        short *temp; 
+        short *vertex0; 
+        short *vertex1; 
+        short *vertex2; 
+        short position[3]; 
+        SVector normal; 
+        BSPTree *bsp; 
+        int major; 
+        int minor; 
+
+        bsp = &terrain->BSPTreeArray[instance->bspTree];
+        
+        vertex0 = (short*)&terrain->vertexList[tface->face.v0];
+        vertex1 = (short*)&terrain->vertexList[tface->face.v1];
+        vertex2 = (short*)&terrain->vertexList[tface->face.v2];
+        
+        position[0] = instance->position.x       - bsp->globalOffset.x;
+        position[1] = instance->position.y       - bsp->globalOffset.y;
+        position[2] = instance->shadowPosition.z - bsp->globalOffset.z;
+
+        minor = COLLIDE_GetNormal(tface->normal, (short*)terrain->normalList, &normal);
+        
+        minor++;
+        
+        major = minor + 1;
+        
+        if (major > 2)
+        {
+            major -= 3;
+        }
+
+        if (minor > 2) 
+        {
+            minor -= 3;
+        }
+        
+        edge = 0;
+        
+        if (((position[major] > vertex0[major]) && (position[major] < vertex1[major])) || ((position[major] < vertex0[major]) && (position[major] > vertex1[major])))
+        {
+            edge |= 0x1;
+        }
+        
+        if (((position[major] > vertex1[major]) && (position[major] < vertex2[major])) || ((position[major] < vertex1[major]) && (position[major] > vertex2[major])))
+        {
+            edge |= 0x2;
+        }
+        
+        if (((position[major] > vertex2[major]) && (position[major] < vertex0[major])) || ((position[major] < vertex2[major]) && (position[major] > vertex0[major])))
+        {
+            edge |= 0x4;
+        }
+
+        if (edge == 3) 
+        {
+            count = 1;
+        }
+        else if (edge == 6) 
+        {
+            count = 2;
+        }
+        else if (edge == 5)
+        {
+            count = 0;
+        } 
+        else 
+        {
+            return;
+        }
+        
+        for (n = 0; n < count; n++) 
+        {
+            temp = vertex0;
+            
+            vertex0 = vertex1;
+            vertex1 = vertex2;
+            vertex2 = temp;
+        }
+        
+        if (vertex1[major] == vertex0[major]) 
+        {
+            return;
+        }
+
+        interp1 = abs(((vertex0[major] - position[major]) * 4096) / (vertex1[major] - vertex0[major]));
+        interp1 = MIN(MAX(interp1, 0), 4096);
+        
+        if (vertex2[major] == vertex0[major]) 
+        {
+            return;
+        }
+
+        interp2 = abs(((vertex0[major] - position[major]) * 4096) / (vertex2[major] - vertex0[major]));
+        interp2 = MIN(MAX(interp2, 0), 4096);
+        
+        LoadAverageCol((unsigned char*)&vertex0[4], (unsigned char*)&vertex1[4], 4096 - interp1, interp1, (unsigned char*)&color1);
+        LoadAverageCol((unsigned char*)&vertex0[4], (unsigned char*)&vertex2[4], 4096 - interp2, interp2, (unsigned char*)&color2);
+
+        x1 = vertex0[minor] + (((vertex1[minor] - vertex0[minor]) * interp1) / 4096);
+        x2 = vertex0[minor] + (((vertex2[minor] - vertex0[minor]) * interp2) / 4096);
+        
+        if (x1 == x2)
+        {
+            return;
+        }
+        
+        interp = abs(((x1 - position[minor]) * 4096) / (x1 - x2));
+        interp = MIN(MAX(interp, 0), 4096);
+        
+        LoadAverageCol((unsigned char*)&color1, (unsigned char*)&color2, 4096 - interp, interp, (unsigned char*)&color);
+
+        {
+        long r; 
+        long g; 
+        long b; 
+        //int lum; 
+
+        r = color.r;
+        g = color.g;
+        b = color.b;
+            
+        x1 = (r * 1224) + (g * 2404) + (b * 467);
+        
+        x2 = LIGHT3D_FixedMultiplication4(x1, 1);
+        
+        if (68 < x2) 
+        {
+            x2 = ((x2 - 68) / 2) + 68;
+        }
+        
+        color.b = x2;
+        color.g = x2;
+        color.r = x2;
+        
+        fadespeed = 1024;
+        }
+    } 
+    else 
+    {
+        LIGHT_GetAmbient(&color, instance);
+        
+        fadespeed = 256;
+    }
+
+    {
+    int i; 
+    LightInstance *li; 
+    long dist; 
+    LightInstance *tli; 
+        
+    li = NULL;
+        
+    dist = 32767;
+        
+    tli = (LightInstance*)&gameTrackerX.gameData.asmData.lightInstances;
+        
+    for (i = 0; i < 1; i++, tli++) 
+    {
+        Instance *inst; 
+        
+        inst = tli->lightInstance;
+        
+        if (((inst != NULL) && (inst != instance)) && (inst->matrix != NULL))
+        {
+            short tdist; 
+            Position pos; 
+            MATRIX *mat; 
+                
+            mat = &inst->matrix[tli->segment];
+            
+            pos.x = (short)(mat->t[0] - instance->position.x);
+            pos.y = (short)(mat->t[1] - instance->position.y);
+            pos.z = (short)(mat->t[2] - instance->position.z);
+            
+            pos.x = abs(pos.x);
+            pos.y = abs(pos.y);
+            pos.z = abs(pos.z);
+            
+            tdist = (pos.x > ((pos.y > pos.z) ? pos.y : pos.z)) ? pos.x : ((pos.y > pos.z) ? pos.y : pos.z);
+            
+            if ((tdist < tli->radius) && (tdist < dist)) 
+            {
+                dist = tdist;   
+                
+                li = tli;
+            }
+        }
+    }
+    
+    if (li != NULL)
+    {
+        dist = li->radius - dist;
+
+        i = color.r + ((dist * li->r) >> 12);
+
+        if (i < 0)
+        {
+            i = 0;
+        }
+
+        if (i > 255)
+        {
+            i = 255;
+        }
+
+        color.r = i;
+
+        i = color.g + ((dist * li->g) >> 12);
+
+        if (i < 0)
+        {
+            i = 0;
+        }
+
+        if (i > 255)
+        {
+            i = 255;
+        }
+
+        color.g = i;
+
+        i = color.b + ((dist * li->b) >> 12);
+
+        if (i < 0)
+        {
+            i = 0;
+        }
+
+        if (i > 255)
+        {
+            i = 255;
+        }
+
+        color.b = i;
+    }
+    
+    LoadAverageCol((unsigned char*)&color, (unsigned char*)&instance->light_color, fadespeed, 4096 - fadespeed, (unsigned char*)&instance->light_color);
+    }
+}
 
 void LIGHT_SetAmbientInstance(Instance *instance, Level *level)
 {

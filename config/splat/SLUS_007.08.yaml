@@ -313,7 +313,9 @@ segments:
       - [0x0BA7C0, .data, Game/FONT]
       - [0x0BA9F4, .data, Game/GAMELOOP]
       - [0x0BAA1C, .data, Game/GAMEPAD]
-      - [0x0BAA28, data]
+      - [0x0BAA28, .data, Game/SCRIPT]
+      - [0x0BAA3C, .data, Game/OBTABLE]
+      - [0x0BAB1C, .data, Game/OBTABLE2]
       - [0x0BAC3C, .data, Game/FX]
       - [0x0BAC54, .data, Game/VM]
       - [0x0BCBF4, .data, Game/PSX/AADLIB]
@@ -373,11 +375,10 @@ segments:
       - [0x0C119C, .sdata, Game/PSX/MAIN]
       - [0x0C14FC, .sdata, Game/MATH3D]
       - [0x0C1510, .sdata, Game/PIPE3D]
-      - [0x0C1524, sdata] # Unused
+      - [0x0C1524, .sdata, Game/SCRIPT]
       - [0x0C1560, .sdata, Game/TIMER]
-      - [0x0C1564, sdata] # Unused
-      - [0x0C16A8, .sdata, Game/OBTABLE]
-      - [0x0C16C0, sdata] # Unused
+      - [0x0C1564, .sdata, Game/OBTABLE]
+      - [0x0C16C0, .sdata, Game/OBTABLE2]
       - [0x0C1714, .sdata, Game/GENERIC]
       - [0x0C1720, .sdata, Game/SOUND]
       - [0x0C17D4, .sdata, Game/SPLINE]
@@ -418,32 +419,27 @@ segments:
       - [0x0C2750, .sdata, Game/MENU/MENUDEFS]
       - [0x0C2804, .sdata, Game/MENU/MENUFACE]
 
-      - {start: 0x0C28AC, type:  sbss, vram: 0x800D20AC, name: Game/DEBUG}
+      - {start: 0x0C28AC, type: .sbss, vram: 0x800D20AC, name: Game/DEBUG}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D20FC, name: Game/CAMERA}
-      - {start: 0x0C28AC, type:  comm, vram: 0x800D2228, name: Game/CAMERA}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D26F8, name: Game/COLLIDE}
-      - {start: 0x0C28AC, type:  sbss, vram: 0x800D271C, name: Game/DRAW}
+      - {start: 0x0C28AC, type: .sbss, vram: 0x800D271C, name: Game/DRAW}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D277C, name: Game/FONT}
-      - {start: 0x0C28AC, type:  comm, vram: 0x800D297C, name: Game/FONT}
-      - {start: 0x0C28AC, type:  sbss, vram: 0x800D2FA4, name: Game/GAMELOOP}
-      - {start: 0x0C28AC, type:  sbss, vram: 0x800D2FF8, name: Game/GAMEPAD}
-      - {start: 0x0C28AC, type:  comm, vram: 0x800D3060, name: Game/GAMEPAD}
+      - {start: 0x0C28AC, type: .sbss, vram: 0x800D2FA4, name: Game/GAMELOOP}
+      - {start: 0x0C28AC, type: .sbss, vram: 0x800D2FF8, name: Game/GAMEPAD}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D310C, name: Game/LIGHT3D}
-      - {start: 0x0C28AC, type:  sbss, vram: 0x800D311C, name: Game/LOAD3D}
+      - {start: 0x0C28AC, type: .sbss, vram: 0x800D311C, name: Game/LOAD3D}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D31D0, name: Game/PSX/MAIN}
-      - {start: 0x0C28AC, type:  comm, vram: 0x800D31D4, name: Game/PSX/MAIN}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D3664, name: Game/GENERIC}
-      - {start: 0x0C28AC, type:  sbss, vram: 0x800D3670, name: Game/SOUND}
+      - {start: 0x0C28AC, type: .sbss, vram: 0x800D3670, name: Game/SOUND}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D3910, name: Game/SPLINE}
-      - {start: 0x0C28AC, type:  sbss, vram: 0x800D3948, name: Game/FX}
+      - {start: 0x0C28AC, type: .sbss, vram: 0x800D3948, name: Game/FX}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D3C88, name: Game/MEMPACK}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D3C9C, name: Game/PSX/AADLIB}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D3CAC, name: Game/STREAM}
-      - {start: 0x0C28AC, type:  comm, vram: 0x800D3CB0, name: Game/STREAM}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D40D8, name: Game/STRMLOAD}
-      - {start: 0x0C28AC, type:  sbss, vram: 0x800D40E8, name: Game/EVENT}
+      - {start: 0x0C28AC, type: .sbss, vram: 0x800D40E8, name: Game/EVENT}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D47E0, name: Game/STATE}
-      - {start: 0x0C28AC, type:  comm, vram: 0x800D57E0, name: Game/VRAM}
+      - {start: 0x0C28AC, type: .sbss, vram: 0x800D57E0, name: Game/VRAM}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D61E4, name: Game/PHYSICS}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D626C, name: Game/REAVER}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D6270, name: Game/GLYPH}
@@ -452,7 +448,7 @@ segments:
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D6B30, name: Game/PSX/PSX_G2/MAINVM}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D6B38, name: Game/PLAN/PLANAPI}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D6B88, name: Game/RAZIEL/CONTROL}
-      - {start: 0x0C28AC, type:  sbss, vram: 0x800D6BB8, name: Game/RAZIEL/RAZIEL}
+      - {start: 0x0C28AC, type: .sbss, vram: 0x800D6BB8, name: Game/RAZIEL/RAZIEL}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D7364, name: Game/UNDRWRLD}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D7374, name: Game/SAVEINFO}
       - {start: 0x0C28AC, type: .sbss, vram: 0x800D7484, name: Game/ENTRYPOINT}

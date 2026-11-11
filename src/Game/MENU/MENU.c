@@ -6,8 +6,6 @@
 
 static int dy[16] = {40, 30, 20, 15, 10, 8, 6, 5, 4, 3, 2, 2, 1, 1, 1, 0};
 
-static char D_800D1F3C[2] = "\t"; // goes into menu_draw_item
-
 int menu_data_size()
 {
     return sizeof(menu_t);
@@ -191,7 +189,229 @@ void DisplayMenuBox(int x0, int x1, int y0, int y1)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MENU/MENU", menu_draw_item);
+char *strtok(char *str, const char *delim); // TODO: get rid of this declaration, and import string.h instead
+int menu_draw_item(menu_t *menu, int ypos, int xadj, int yadj, char *text, int color, long flags, Extents2d *e)
+{
+    menu_format_t *fmt;
+    int numColumns;
+    int i;
+    int texLen;
+    int columnWidth;
+    char *columnText;
+    char tmpBuff[256];
+    char *lineText;
+    int columnYPos;
+    int maxColumnYPos;
+    int center;
+    int leftEdge;
+    int xpos;
+
+    maxColumnYPos = 0;
+
+    fmt = &menu->stack[menu->nmenus - 1].format;
+
+    if (flags & 0x1)
+    {
+        center = 1;
+    }
+    else if (flags & 0x2)
+    {
+        center = 0;
+    }
+    else
+    {
+        center = fmt->center;
+    }
+
+    if (ypos == 0)
+    {
+        ypos = fmt->ypos;
+    }
+
+    ypos += yadj;
+
+    texLen = strlen(text);
+
+    numColumns = 1;
+
+    for (i = 0; i < texLen; i++)
+    {
+        if (((unsigned char *)text)[i] == '\t')
+        {
+            numColumns++;
+        }
+    }
+
+    columnWidth = fmt->width / numColumns;
+
+    if (fmt->center != 0)
+    {
+        leftEdge = (fmt->xpos + xadj) - (fmt->width >> 1);
+    }
+    else
+    {
+        leftEdge = fmt->xpos + xadj;
+    }
+
+    columnText = strtok(text, "\t");
+
+    i = 0;
+
+    while (columnText != NULL)
+    {
+        xpos = (leftEdge + xadj) + (i * columnWidth);
+
+        if (center != 0)
+        {
+            xpos += columnWidth >> 1;
+        }
+
+        columnYPos = ypos;
+
+        if (columnYPos < e->ymin)
+        {
+            e->ymin = columnYPos;
+        }
+
+        strcpy(tmpBuff, columnText);
+
+        lineText = tmpBuff;
+
+        do
+        {
+            char *eol;
+
+            eol = strchr(lineText, '\n');
+
+            if (eol != NULL)
+            {
+                *eol = 0;
+            }
+
+            while (lineText != NULL)
+            {
+                char *eop;
+
+                eop = strchr(lineText, ' ');
+
+                while (eop != NULL)
+                {
+                    char *tmp;
+                    int wd;
+
+                    tmp = strchr(&eop[1], ' ');
+
+                    if (tmp != NULL)
+                    {
+                        *tmp = 0;
+                    }
+
+                    wd = menu_text_width(lineText);
+
+                    if (tmp != NULL)
+                    {
+                        *tmp = ' ';
+                    }
+
+                    if (wd > columnWidth)
+                    {
+                        break;
+                    }
+
+                    eop = tmp;
+                }
+
+                if (eop != NULL)
+                {
+                    *eop = 0;
+                }
+
+                if (center != 0)
+                {
+                    int wd;
+                    int temp; // not from decls.h
+
+                    wd = menu_text_width(lineText) >> 1;
+
+                    temp = xpos - wd;
+
+                    menu_print(temp, columnYPos, lineText, color);
+
+                    if (temp < e->xmin)
+                    {
+                        e->xmin = temp;
+                    }
+
+                    if (e->xmax < (xpos + wd))
+                    {
+                        e->xmax = xpos + wd;
+                    }
+                }
+                else
+                {
+                    int wd; // not from decls.h
+
+                    wd = menu_text_width(lineText);
+
+                    menu_print(xpos, columnYPos, lineText, color);
+
+                    if (xpos < e->xmin)
+                    {
+                        e->xmin = xpos;
+                    }
+
+                    if (e->xmax < (xpos + wd))
+                    {
+                        e->xmax = xpos + wd;
+                    }
+                }
+
+                columnYPos += fmt->lineskip;
+
+                if (eop == NULL)
+                {
+                    break;
+                }
+
+                *eop++ = ' ';
+
+                lineText = eop;
+            }
+
+            if (eol == NULL)
+            {
+                break;
+            }
+
+            *eol = '\n';
+
+            lineText = eol + 1;
+        } while (lineText != NULL);
+
+        i++;
+
+        columnText = strtok(NULL, "\t");
+
+        if (maxColumnYPos < columnYPos)
+        {
+            maxColumnYPos = columnYPos;
+        }
+    }
+
+    if (e->ymax < maxColumnYPos)
+    {
+        e->ymax = maxColumnYPos;
+    }
+
+    maxColumnYPos += fmt->itemskip;
+
+    if (flags & 0x4)
+    {
+        maxColumnYPos += fmt->lineskip >> 1;
+    }
+
+    return maxColumnYPos;
+}
 
 void menu_draw(menu_t *menu)
 {

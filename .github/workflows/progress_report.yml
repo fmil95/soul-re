@@ -5,6 +5,17 @@ on:
   pull_request:
   workflow_dispatch:
 
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: progress-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+env:
+  SITE_URL: https://fmil95.github.io/soul-re
+
 jobs:
   update_progress:
     name: Update Progress
@@ -33,8 +44,49 @@ jobs:
       - name: Create Progress Report
         run: make report
 
+      - name: Fetch Published Progress
+        run: |
+          python3 - <<'EOF'
+          import os, urllib.request
+          for name in ("progress.json", "history.json"):
+              try:
+                  urllib.request.urlretrieve(os.environ["SITE_URL"] + "/" + name, "published_" + name)
+                  print("fetched", name)
+              except Exception as e:
+                  print("could not fetch", name, "-", e)
+          EOF
+
+      - name: Write Job Summary
+        run: python3 tools/scripts/progress_site.py summary build/progress.json --base published_progress.json >> "$GITHUB_STEP_SUMMARY"
+
       - name: Publish Progress Report
         uses: actions/upload-artifact@v4
         with:
-            name: ${{ matrix.game_id }}_report
-            path: ./build/progress.json
+          name: ${{ matrix.game_id }}_report
+          path: ./build/progress.json
+
+      - name: Build Progress Site
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        run: python3 tools/scripts/progress_site.py site build/progress.json site --history published_history.json --commit "$GITHUB_SHA" --repo "$GITHUB_REPOSITORY"
+
+      - name: Upload Progress Site
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./site
+
+  deploy_progress:
+    name: Deploy Progress Site
+    needs: update_progress
+    if: github.repository == 'fmil95/soul-re' && github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

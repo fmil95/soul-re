@@ -1296,7 +1296,7 @@ struct _Instance *BirthProjectilePhysOb(struct _Instance *instance, int grabJoin
                 iForce->zAccl = 0;
                 return iForce;
             }
-            Data->physObTimer = 0x96000;
+            Data->physObTimer = 614400;
         }
     }
     return iForce;
@@ -3058,7 +3058,277 @@ int GetObliqueDirection(Instance *instance, SVector *dir)
     return obliqueFlg;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PHYSOBS", CollidePhysicalObject);
+void CollidePhysicalObject(Instance *instance, GameTracker *gameTracker)
+{
+    PhysObData *Data; 
+    CollideInfo *collideInfo; 
+    int obliqueFlg;
+    SVector vel; 
+    SVector dir; 
+    Instance *hitinst; 
+    TFace *tface; 
+    Normal *norm; 
+    SVector normal; 
+    int stickFlg;
+    int drawFlg;
+    int projectile; 
+
+    (void)gameTracker;
+
+    hitinst = NULL;
+
+    tface = NULL;
+
+    drawFlg    = 1;
+    obliqueFlg = 0;
+
+    collideInfo = (CollideInfo *)instance->collideInfo;
+
+    Data = (PhysObData *)instance->extraData;
+
+    projectile = CheckPhysObFamily(instance, 7) != 0;
+
+    norm = (Normal *)&collideInfo->point0;
+
+    if ((projectile != 0) && (((evObjectBirthProjectileData *)instance->extraData)->joint == 8))
+    {
+        Level *level; 
+
+        level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
+
+        if ((level != NULL) && (instance->position.z < level->waterZLevel))
+        {
+            return;
+        }
+    }
+
+    if ((unsigned char)collideInfo->type1 != 3)
+    {
+        hitinst = (Instance *)collideInfo->inst1;
+    }
+    else
+    {
+        BSPTree *bsp; 
+        Level *level; 
+
+        bsp = (BSPTree *)collideInfo->inst1;
+
+        level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
+
+        tface = (TFace *)collideInfo->prim1;
+
+        if (bsp->flags & 0x1)
+        {
+            drawFlg = 0;
+        }
+        else if (tface->attr & 0x4)
+        {
+            drawFlg = 0;
+        }
+
+        COLLIDE_GetNormal(tface->normal, (short *)level->terrain->normalList, &normal);
+
+        norm = (Normal *)&normal;
+    }
+
+    if ((Data->Mode & 0x10) && (hitinst == Data->throwingInstance))
+    {
+        return;
+    }
+
+    GetPhysObCollisionType(instance);
+
+    if (Data->Mode & 0x4000)
+    {
+        if (Data->Force == hitinst)
+        {
+            return;
+        }
+
+        if (hitinst != NULL)
+        {
+            if ((collideInfo->type0 == 1) && (collideInfo->type1 == 1))
+            {
+                return;
+            }
+
+            if (hitinst->object->oflags2 & 0x40000)
+            {
+                return;
+            }
+        }
+
+        if (tface != NULL)
+        {
+            if (tface->textoff == 0xFFFF)
+            {
+                return;
+            }
+
+            if (!(((TextureFT3 *)((char *)((Level *)collideInfo->level)->terrain->StartTextureList + tface->textoff))->attr & 0x1000))
+            {
+                return;
+            }
+        }
+
+        Data->Mode = (Data->Mode & ~0x4000) | 0x10;
+
+        Data->physObTimer = 614400;
+
+        {
+            Position delta; 
+
+            SUB_SVEC(Position, &delta,              Position, &instance->oldPos,   Position, &instance->position);
+            ADD_SVEC(Position, &instance->position, Position, &instance->position, Position, &delta);
+
+            COLLIDE_UpdateAllTransforms(instance, (SVECTOR *)&delta);
+        }
+    }
+
+    if (Data->Mode & 0x10)
+    {
+        if ((projectile != 0) && ((tface != NULL) && (tface->textoff != 0xFFFF)) && (((TextureFT3 *)((char *)((Level *)collideInfo->level)->terrain->StartTextureList + tface->textoff))->attr & 0x1000))
+        {
+            return;
+        }
+
+        vel.x = instance->xVel;
+        vel.y = instance->yVel;
+        vel.z = instance->zVel;
+
+        obliqueFlg = GetObliqueDirection(instance, &dir);
+
+        if (!(Data->Mode & 0x400000))
+        {
+            instance->xVel = 0;
+            instance->yVel = 0;
+            instance->zVel = 0;
+
+            instance->xAccl = 0;
+            instance->yAccl = 0;
+            instance->zAccl = 0;
+        }
+
+        instance->position.x += collideInfo->offset.x;
+        instance->position.y += collideInfo->offset.y;
+        instance->position.z += collideInfo->offset.z;
+
+        COLLIDE_UpdateAllTransforms(instance, (SVECTOR *)&collideInfo->offset);
+
+        if (((vel.x != 0) || ((vel.y | vel.z) != 0)) && ((short)MATH3D_LengthXYZ(vel.x, vel.y, vel.z) > 100))
+        {
+            instance->flags2 |= 0x2000;
+        }
+
+        stickFlg = 0;
+
+        if ((CheckPhysObAbility(instance, 0x200) != 0) && ((vel.x != 0) || ((vel.y | vel.z) != 0)))
+        {
+            PCollideInfo CInfo; 
+            SVector newPos; 
+
+            newPos.x = instance->position.x + (vel.x << 2);
+            newPos.y = instance->position.y + (vel.y << 2);
+            newPos.z = instance->position.z + (vel.z << 2);
+
+            CInfo.oldPoint = (SVECTOR *)&instance->position;
+            CInfo.newPoint = (SVECTOR *)&newPos;
+
+            PHYSICS_CheckLineInWorld(instance, &CInfo);
+
+            stickFlg = CInfo.type != 0;
+        }
+
+        if (((stickFlg != 0) && (drawFlg != 0)) && (hitinst == NULL) && (norm->z < 2896))
+        {
+            Data->Mode |= 0x1000;
+
+            instance->flags2 &= ~0x80;
+            Data->Mode       &= ~0x10;
+
+            TurnOffCollisionPhysOb(instance, 4);
+        }
+        else
+        {
+            Data->Mode = (Data->Mode & ~0x1000) | 0x400000;
+
+            if (((vel.x != 0) || (vel.y != 0)) && (projectile == 0))
+            {
+                Position delta;
+
+                memset(&delta, 0, sizeof(Position));
+
+                delta.x = -vel.x;
+                delta.y = -vel.y;
+                delta.z = -vel.z;
+
+                ADD_SVEC(Position, &instance->position, Position, &instance->position, Position, &delta);
+
+                COLLIDE_UpdateAllTransforms(instance, (SVECTOR *)&delta);
+            }
+
+            if ((vel.z < 0) && ((((short)MATH3D_LengthXYZ(collideInfo->offset.x, collideInfo->offset.y, collideInfo->offset.z) * 46336) >> 16) > collideInfo->offset.z))
+            {
+                instance->zVel = vel.z;
+            }
+
+            DropPhysOb(instance, 0);
+        }
+    }
+    else if (Data->Mode & 0x200004)
+    {
+        if (((unsigned char)collideInfo->type1 == 1) && (Data->throwingInstance == hitinst))
+        {
+            return;
+        }
+
+        if (norm->z < 2896)
+        {
+            return;
+        }
+
+        if (Data->Mode & 0x200000)
+        {
+            collideInfo->offset.z = 0;
+        }
+
+        instance->position.x += collideInfo->offset.x;
+        instance->position.y += collideInfo->offset.y;
+        instance->position.z += collideInfo->offset.z;
+
+        COLLIDE_UpdateAllTransforms(instance, (SVECTOR *)&collideInfo->offset);
+    }
+    else if ((Data->Mode & 0x80) && (instance->LinkParent != NULL))
+    {
+        CollideInfo parentCI; 
+
+        parentCI = *collideInfo;
+
+        parentCI.inst0 = instance->LinkParent;
+
+        INSTANCE_Post(instance->LinkParent, 0x200004, SetCollideInfoData(&parentCI));
+    }
+
+    if ((CheckPhysObAbility(instance, 0x1000) != 0) && (!(Data->Mode & 0x800000)) && ((gameTrackerX.gameData.asmData.MorphTime == 1000) && (gameTrackerX.gameData.asmData.MorphType == 0)))
+    {
+        PhysObSplinter *splintDef;
+        FXSplinter *splinterData; 
+
+        splintDef    = PhysObGetSplinter(instance);
+        splinterData = NULL;
+
+        if (splintDef != NULL)
+        {
+            splinterData = (FXSplinter *)splintDef->splinterData;
+        }
+
+        _FX_BuildSplinters(instance, NULL, NULL, NULL, splinterData, gFXT, NULL, NULL, 0);
+
+        INSTANCE_PlainDeath(instance);
+    }
+
+    CheckForceCollision(instance, hitinst, tface, collideInfo, &dir, obliqueFlg);
+}
 
 PhysObWeaponAttributes *PhysObGetWeapon(Instance *instance)
 {
@@ -3524,9 +3794,364 @@ int PHYSOBS_FigureDragForSlope(Instance *instance, int pathNumber, int *result)
     return didSomething;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PHYSOBS", PHYSOB_CheckThrownLineCollision);
+int PHYSOB_CheckThrownLineCollision(Instance *instance, Instance *parent)
+{
+    PCollideInfo pcollideInfo; 
+    Position newPos; 
+    Position oldPos; 
+    Position orgNew; 
+    MATRIX *mat; 
+    PhysObWeaponAttributes *weapon; 
 
-INCLUDE_ASM("asm/nonmatchings/Game/PHYSOBS", PHYSOB_CheckDroppedLineCollision);
+    if (instance->oldMatrix == NULL)
+    {
+        return 0;
+    }
+
+    mat = &instance->oldMatrix[2];
+
+    oldPos.x = mat->t[0];
+    oldPos.y = mat->t[1];
+    oldPos.z = mat->t[2];
+
+    weapon = PhysObGetWeapon(instance);
+
+    if (weapon == NULL)
+    {
+        return 0;
+    }
+
+    mat = &instance->matrix[(int)weapon->ThrowSphere];
+
+    newPos.x = mat->t[0];
+    newPos.y = mat->t[1];
+    newPos.z = mat->t[2];
+
+    {
+        SVector line;
+        SVector delta; 
+        long dp; 
+
+        line.x =  rsin(parent->rotation.z);
+        line.y = -rcos(parent->rotation.z);
+        line.z = 0;
+
+        delta.x = parent->position.x - oldPos.x;
+        delta.y = parent->position.y - oldPos.y;
+
+        dp = (delta.x * line.x) + (delta.y * line.y);
+
+        if (dp > 0)
+        {
+            SUB_SVEC(SVector, &line, Position, &newPos, Position, &oldPos);
+
+            dp /= MATH3D_LengthXY(line.x, line.y);
+
+            line.x = (line.x * dp) / 4096;
+            line.y = (line.y * dp) / 4096;
+            line.z = (line.z * dp) / 4096;
+
+            ADD_SVEC(Position, &oldPos, Position, &oldPos, SVector, &line);
+        }
+        else
+        {
+            oldPos.x = parent->position.x;
+            oldPos.y = parent->position.y;
+        }
+
+        COPY_SVEC(Position, &orgNew, Position, &newPos);
+
+        delta.x = newPos.x - oldPos.x;
+        delta.y = newPos.y - oldPos.y;
+
+        newPos.x = oldPos.x + ((delta.x << 1) + delta.x);
+        newPos.y = oldPos.y + ((delta.y << 1) + delta.y);
+
+        if ((CheckPhysObAbility(instance, 0x200) == 0) && (CheckPhysObFamily(instance, 7) == 0))
+        {
+            orgNew.x = oldPos.x + ((unsigned short)delta.x * 2);
+            orgNew.y = oldPos.y + ((unsigned short)delta.y * 2);
+        }
+    }
+
+    pcollideInfo.newPoint = (SVECTOR *)&newPos;
+    pcollideInfo.oldPoint = (SVECTOR *)&oldPos;
+
+    PHYSICS_CheckLineInWorld(instance, &pcollideInfo);
+
+    if (pcollideInfo.type == 0)
+    {
+        return 0;
+    }
+
+    if (pcollideInfo.type == 3)
+    {
+        TFace *tface; 
+        Level *level; 
+
+        tface = (TFace *)pcollideInfo.prim;
+
+        level = (Level *)pcollideInfo.inst;
+
+        if ((tface != NULL) && (level != NULL) && ((tface->textoff != 0xFFFF) && (((TextureFT3 *)((char *)level->terrain->StartTextureList + tface->textoff))->attr & 0x1000)))
+        {
+            return 0;
+        }
+    }
+
+    SUB_SVEC(Position, &orgNew,             Position, &newPos,             Position, &orgNew);
+    ADD_SVEC(Position, &instance->position, Position, &instance->position, Position, &orgNew);
+
+    COLLIDE_UpdateAllTransforms(instance, (SVECTOR *)&orgNew);
+
+    {
+        PhysObData *Data; 
+
+        Data = (PhysObData *)instance->extraData;
+
+        if ((CheckPhysObAbility(instance, 0x1000) != 0) && (!(Data->Mode & 0x800000)) && ((gameTrackerX.gameData.asmData.MorphTime == 1000) && (gameTrackerX.gameData.asmData.MorphType == 0)))
+        {
+            PhysObSplinter *splintDef; 
+            FXSplinter *splinterData; 
+
+            splintDef    = PhysObGetSplinter(instance);
+            splinterData = NULL;
+
+            if (splintDef != NULL)
+            {
+                splinterData = (FXSplinter *)splintDef->splinterData;
+            }
+
+            _FX_BuildSplinters(instance, NULL, NULL, NULL, splinterData, gFXT, NULL, NULL, 0);
+
+            INSTANCE_PlainDeath(instance);
+        }
+
+        {
+            SVector dir;
+            Instance *hitInst; 
+            TFace *tface; 
+            CollideInfo collideInfo; 
+
+            hitInst = NULL;
+
+            tface = NULL;
+
+            if (pcollideInfo.type == 3)
+            {
+                tface = (TFace *)pcollideInfo.prim;
+            }
+            else
+            {
+                hitInst = pcollideInfo.inst;
+            }
+
+            collideInfo.level = pcollideInfo.inst;
+            collideInfo.bspID = pcollideInfo.segment;
+
+            CheckForceCollision(instance, hitInst, tface, &collideInfo, &dir, GetObliqueDirection(instance, &dir));
+        }
+    }
+
+    if (pcollideInfo.type == 3)
+    {
+        Level *level; 
+        int bspID; 
+        BSPTree *bsp; 
+
+        level = (Level *)pcollideInfo.inst;
+
+        bspID = pcollideInfo.segment;
+        bsp   = &level->terrain->BSPTreeArray[bspID];
+
+        if (bsp->flags & 0x1)
+        {
+            return 3;
+        }
+
+        return 1;
+    }
+
+    return 2;
+}
+
+int PHYSOB_CheckDroppedLineCollision(Instance *instance, Instance *parent)
+{
+    PCollideInfo pcollideInfo; 
+    Position parentPos; 
+    Position newPos; 
+    Position oldPos; 
+    SVector offset; 
+    Position basePos; 
+    int seg; 
+    int collided; 
+
+    if (parent == NULL)
+    {
+        return 0;
+    }
+
+    parentPos = parent->position;
+
+    if (instance->matrix == NULL)
+    {
+        return 0;
+    }
+
+    collided = 0;
+    
+    seg = 0;
+
+    instance->position.x = instance->matrix->t[0];
+    instance->position.y = instance->matrix->t[1];
+    instance->position.z = instance->matrix->t[2];
+
+    do
+    {
+        MATRIX *mat; 
+
+        mat = &instance->matrix[seg];
+
+        oldPos.x = parentPos.x;
+        oldPos.y = parentPos.y;
+        oldPos.z = mat->t[2] + 100;
+
+        newPos.x = mat->t[0];
+        newPos.y = mat->t[1];
+        newPos.z = mat->t[2];
+
+        // TODO: replace this scoped block with a macro
+        {
+            short _x0;
+            short _y0; 
+            short _z0; 
+            short _x1;
+            short _y1; 
+            short _z1; 
+            SVector *_v; 
+            Position *_v0; 
+            Position *_v1; 
+
+            _v = &offset;
+            _v0 = &newPos;
+            _v1 = &oldPos;
+
+            _x0 = _v0->x;
+            _y0 = _v0->y;
+            _z0 = _v0->z;
+
+            _x1 = _v1->x;
+            _y1 = _v1->y;
+            _z1 = _v1->z;
+
+            _x0 -= _x1;
+            _y0 -= _y1;
+            _z0 -= _z1;
+
+            _v->x = _x0;
+            _v->y = _y0;
+            _v->z = _z0;
+        }
+
+        offset.x = (offset.x * 6000) / 4096;
+        offset.y = (offset.y * 6000) / 4096;
+        offset.z = (offset.z * 6000) / 4096;
+
+        ADD_SVEC(Position, &newPos, SVector, &offset, Position, &oldPos);
+
+        basePos = newPos;
+
+        (void)basePos;
+
+        pcollideInfo.newPoint = (SVECTOR *)&newPos;
+        pcollideInfo.oldPoint = (SVECTOR *)&oldPos;
+
+        SetNoPtCollideInFamily(parent);
+
+        PHYSICS_CheckLineInWorld(instance, &pcollideInfo);
+
+        ResetNoPtCollideInFamily(parent);
+
+        if ((pcollideInfo.type != 0) && (pcollideInfo.wNormal.vz <= 3800))
+        {
+            collided = 1;
+        }
+
+        seg += 2;
+    } while ((seg < 3) && (collided == 0));
+
+    if (collided != 0)
+    {
+        SVector origin; 
+        SVector node2; 
+        SVector orgDir; 
+        SVector newDir; 
+        SVector axis; 
+        short angle; 
+        MATRIX mat; 
+        G2EulerAngles ea; 
+
+        origin.x = instance->matrix->t[0];
+        origin.y = instance->matrix->t[1];
+        origin.z = instance->matrix->t[2];
+
+        node2.x = instance->matrix[2].t[0];
+        node2.y = instance->matrix[2].t[1];
+        node2.z = instance->matrix[2].t[2];
+
+        SUB_SVEC(SVector, &orgDir, SVector, &node2, SVector, &origin);
+
+        MATH3D_Normalize((Normal *)&orgDir);
+
+        newDir.x = 10;
+        newDir.y = 0;
+        newDir.z = 4096;
+
+        angle = MATH3D_AngleBetweenVectors(&newDir, &orgDir);
+
+        MATH3D_CrossProduct(&axis, &orgDir, &newDir);
+
+        mat = *instance->matrix;
+
+        MATH3D_RotMatAboutVec(&axis, &mat, angle);
+
+        G2EulerAngles_FromMatrix(&ea, (G2Matrix *)&mat, 0);
+
+        instance->rotation.x = ea.x;
+        instance->rotation.y = ea.y;
+        instance->rotation.z = ea.z;
+
+        instance->position = parent->position;
+
+        {
+            SVector delta; 
+            int i; 
+            Model *model;
+            MATRIX *m; 
+
+            m = instance->matrix;
+
+            model = instance->object->modelList[instance->currentModel];
+
+            delta.x = instance->position.x - m->t[0];
+            delta.y = instance->position.y - m->t[1];
+            delta.z = instance->position.z - (short)(m->t[2] - 20);
+
+            for (i = 0; i < model->numSegments; i++)
+            {
+                m = &instance->matrix[i];
+
+                m->t[0] += delta.x;
+                m->t[1] += delta.y;
+                m->t[2] += delta.z;
+            }
+        }
+    }
+
+    instance->position.z += 20;
+
+    return 1;
+}
 
 int PHYSOB_CheckDirectedLineCollision(Instance *instance, int xoffset, int yoffset, int startZOffset)
 {
@@ -3974,7 +4599,185 @@ int PHYSOB_MoveTowardsAlign(Instance *instance, SVector *orgVec, SVector *endVec
     return theta < 20;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PHYSOBS", PHYSOB_ReAlignFalling);
+int PHYSOB_ReAlignFalling(Instance *instance, int zEndOff)
+{
+    Model *model; 
+    int i; 
+    Position seg0; 
+    Position segn; 
+    Position start0; 
+    Position startn; 
+    int startFlg; 
+    short zOff;
+
+    zOff = -32000;
+
+    model = instance->object->modelList[instance->currentModel];
+
+    startFlg = 0;
+
+    for (i = 0; i < model->numSegments; i++)
+    {
+        PCollideInfo pcollideInfo; 
+        Position newPos; 
+        Position oldPos; 
+        short x;
+        short y;
+        MATRIX *mat; 
+
+        x = 0;
+        y = 0;
+
+        if ((model->segmentList[i].hInfo == NULL) && (i != 0))
+        {
+            continue;
+        }
+
+        mat = &instance->matrix[i];
+
+        oldPos.x = mat->t[0];
+        oldPos.y = mat->t[1];
+        oldPos.z = mat->t[2];
+
+        newPos.x = oldPos.x;
+        newPos.y = oldPos.y;
+        newPos.z = oldPos.z + zEndOff;
+
+        oldPos.z += 300;
+
+        if (startFlg != 0)
+        {
+            short ax; 
+            short ay; 
+
+            x = oldPos.x - start0.x;
+            y = oldPos.y - start0.y;
+
+            ax = abs(x);
+            ay = abs(y);
+
+            if ((ax < 100) && (ay < 100))
+            {
+                if ((ax == 0) && (ay == 0))
+                {
+                    x = 64;
+                    y = 0;
+                }
+                else if ((ax < 20) && (ay < 20))
+                {
+                    x <<= 4;
+                    y <<= 4;
+                }
+                else
+                {
+                    x <<= 2;
+                    y <<= 2;
+                }
+
+                oldPos.x += x;
+                newPos.x += x;
+
+                oldPos.y += y;
+                newPos.y += y;
+            }
+            else
+            {
+                x = y = 0;
+            }
+        }
+
+        pcollideInfo.newPoint = (SVECTOR *)&newPos;
+        pcollideInfo.oldPoint = (SVECTOR *)&oldPos;
+
+        PHYSICS_CheckLineInWorld(instance, &pcollideInfo);
+
+        if (pcollideInfo.type != 0)
+        {
+            zOff = ((short)(newPos.z - instance->matrix[i].t[2]) < zOff) ? zOff : newPos.z - instance->matrix[i].t[2];
+
+            if (startFlg == 0)
+            {
+                seg0   = newPos;
+                start0 = oldPos;
+                
+                segn   = newPos;
+                startn = oldPos;
+
+                startFlg = 1;
+            }
+            else
+            {
+                segn   = newPos;
+                startn = oldPos;
+
+                startn.x -= x;
+                startn.y -= y;
+            }
+        }
+    }
+
+    if (startFlg == 0)
+    {
+        return 1;
+    }
+
+    instance->zAccl = 0;
+    instance->zVel  = 0;
+
+    instance->position.z = instance->matrix->t[2] + zOff;
+
+    SUB_SVEC(Position, &startn, Position, &startn, Position, &start0);
+    SUB_SVEC(Position, &segn,   Position, &segn,   Position, &seg0);
+
+    if (((startn.x == segn.x) && (startn.y == segn.y) && (startn.z == segn.z)) && (zOff == 0))
+    {
+        return 1;
+    }
+
+    for (i = 1; i < model->numSegments; i++)
+    {
+        PCollideInfo pcollideInfo; 
+        Position newPos; 
+        Position oldPos; 
+        Position deltaPos; 
+        MATRIX *mat; 
+
+        (void)deltaPos;
+
+        if ((model->segmentList[i].hInfo == NULL) && (i != 0))
+        {
+            continue;
+        }
+
+        mat = &instance->oldMatrix[i];
+
+        oldPos.x = mat->t[0];
+        oldPos.y = mat->t[1];
+        oldPos.z = mat->t[2];
+
+        mat = &instance->matrix[i];
+
+        newPos.x = mat->t[0];
+        newPos.y = mat->t[1];
+        newPos.z = mat->t[2];
+
+        pcollideInfo.newPoint = (SVECTOR *)&newPos;
+        pcollideInfo.oldPoint = (SVECTOR *)&oldPos;
+
+        PHYSICS_CheckLineInWorld(instance, &pcollideInfo);
+
+        if (pcollideInfo.type != 0)
+        {
+            instance->rotation = instance->oldRotation;
+
+            return 1;
+        }
+    }
+
+    startFlg = PHYSOB_MoveTowardsAlign(instance, (SVector *)&startn, (SVector *)&segn);
+
+    return (zOff == 0) && (startFlg != 0);
+}
 
 void DropPhysOb(Instance *instance, int flags)
 {

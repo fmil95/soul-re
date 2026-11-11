@@ -8,4 +8,6 @@ AadSynthVoice *aadAllocateVoice(int priority);
 void aadPlayTone(AadToneAtr *toneAtr, unsigned long waveStartAddr, AadProgramAtr *progAtr, int midiNote, int volume, int masterVolume, int masterPan, int slotVolume, int masterMasterVol, AadSynthVoice *voice, int pitchOffset);
 void aadPlayTonePitchBend(AadToneAtr *toneAtr, unsigned long waveStartAddr, AadProgramAtr *progAtr, int midiNote, int volume, int masterVolume, int masterPan, int slotVolume, int masterMasterVol, AadSynthVoice *voice, int pitchOffset);
 
+extern short aadStepsPerSemitone[85];
+
 #endif

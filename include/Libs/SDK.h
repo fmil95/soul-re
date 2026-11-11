@@ -4,6 +4,7 @@
 #include "common.h"
 /*TODO: Remove LIBS/ when adding PSYQ headers*/
 
+#ifndef USE_PSYQ
 #define PadStateDiscon 0
 #define PadStateFindPad 1
 #define PadStateFindCTP1 2
@@ -11,6 +12,7 @@
 #define PadStateReqInfo 4
 #define PadStateExecCmd 5
 #define PadStateStable 6
+#endif
 
 #ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
@@ -30,6 +32,7 @@
 
 #define _break(CODE) __asm__("break " #CODE)
 
+#ifndef USE_PSYQ
 #define getScratchAddr(offset) ((unsigned long *)(0x1f800000 + (offset) * 4))
 
 #define getTPage(tp, abr, x, y)                                                                 \
@@ -38,418 +41,7 @@
 
 #define getClut(x, y) \
     (((y) << 6) | (((x) >> 4) & 0x3f))
-
-// GTE macros
-
-#define gte_SetRotMatrix(r0) __asm__( \
-    "lw    $12, 0(%0);"               \
-    "lw    $13, 4(%0);"               \
-    "ctc2    $12, $0;"                \
-    "ctc2    $13, $1;"                \
-    "lw    $12, 8(%0);"               \
-    "lw    $13, 12(%0);"              \
-    "lw    $14, 16(%0);"              \
-    "ctc2    $12, $2;"                \
-    "ctc2    $13, $3;"                \
-    "ctc2    $14, $4"                 \
-    : : "r"(r0)                       \
-    : "$12", "$13", "$14")
-
-#define gte_SetTransMatrix(r0) __asm__( \
-    "lw    $12, 20(%0);"                \
-    "lw    $13, 24(%0);"                \
-    "ctc2    $12, $5;"                  \
-    "lw    $14, 28(%0);"                \
-    "ctc2    $13, $6;"                  \
-    "ctc2    $14, $7"                   \
-    : : "r"(r0)                         \
-    : "$12", "$13", "$14")
-
-#define gte_ldv0(r0) __asm__( \
-    "lwc2    $0, 0(%0);"      \
-    "lwc2    $1, 4(%0)"       \
-    : : "r"(r0))
-
-#define gte_nmvmva(sf, mx, v, cv, lm) __asm__( \
-    "nop;"                                     \
-    "nop;"                                     \
-    ".word %0"                                 \
-    : : "g"(0x4A400012 | ((sf) & 0x1) << 19 | ((mx) & 0x3) << 17 | ((v) & 0x3) << 15 | ((cv) & 0x3) << 13 | ((lm) & 0x1) << 10))
-
-#define gte_nrtv0tr() gte_nmvmva(1, 0, 0, 0, 0)
-
-#define gte_mvmva(sf, mx, v, cv, lm) __asm__( \
-    ".word %0"                                \
-    : : "g"(0x4A400012 | ((sf) & 0x1) << 19 | ((mx) & 0x3) << 17 | ((v) & 0x3) << 15 | ((cv) & 0x3) << 13 | ((lm) & 0x1) << 10))
-
-#define gte_stlvnl(r0) __asm__( \
-    "swc2    $25, 0(%0);"       \
-    "swc2    $26, 4(%0);"       \
-    "swc2    $27, 8(%0)"        \
-    : : "r"(r0)                 \
-    : "memory")
-
-#define gte_nrtv0() gte_nmvmva(1, 0, 0, 3, 0)
-
-#define gte_ldlvl(r0) __asm__( \
-    "lwc2    $9, 0(%0);"       \
-    "lwc2    $10, 4(%0);"      \
-    "lwc2    $11, 8(%0)"       \
-    : : "r"(r0))
-
-#define gte_nsqr(sf) __asm__( \
-    "nop;"                    \
-    "nop;"                    \
-    ".word %0"                \
-    : : "g"(0x4AA00428 | ((sf) & 0x1) << 19))
-
-#define gte_nsqr0() gte_nsqr(0)
-
-#define gte_sqr(sf) __asm__( \
-    ".word %0"               \
-    : : "g"(0x4AA00428 | ((sf) & 0x1) << 19))
-
-#define gte_sqr0() gte_sqr(0)
-
-#define gte_nrtps() __asm__( \
-    "nop;"                   \
-    "nop;"                   \
-    ".word 0x4A180001")
-
-#define gte_stsxy(r0) __asm__( \
-    "swc2    $14, 0(%0)"       \
-    : : "r"(r0)                \
-    : "memory")
-
-#define gte_ldsv(r0) __asm__( \
-    "lhu    $12, 0(%0);"      \
-    "lhu    $13, 2(%0);"      \
-    "lhu    $14, 4(%0);"      \
-    "mtc2    $12, $9;"        \
-    "mtc2    $13, $10;"       \
-    "mtc2    $14, $11"        \
-    : : "r"(r0)               \
-    : "$12", "$13", "$14")
-
-#define gte_lddp(r0) __asm__( \
-    "mtc2    %0, $8"          \
-    : : "r"(r0))
-
-#define gte_gpl(sf) __asm__( \
-    ".word %0"               \
-    : : "g"(0x4BA0003E | ((sf) & 0x1) << 19))
-
-#define gte_gpl12() gte_gpl(1)
-
-#define gte_ldsvrtrow0(r0) __asm__( \
-    "lw    $12, 0(%0);"             \
-    "lw    $13, 4(%0);"             \
-    "ctc2    $12, $0;"              \
-    "ctc2    $13, $1"               \
-    : : "r"(r0)                     \
-    : "$12", "$13")
-
-#define gte_ngpl(sf) __asm__( \
-    "nop;"                    \
-    "nop;"                    \
-    ".word %0"                \
-    : : "g"(0x4BA0003E | ((sf) & 0x1) << 19))
-
-#define gte_ngpl12() gte_ngpl(1)
-
-#define gte_stsv(r0) __asm__( \
-    "mfc2    $12, $9;"        \
-    "mfc2    $13, $10;"       \
-    "mfc2    $14, $11;"       \
-    "sh    $12, 0(%0);"       \
-    "sh    $13, 2(%0);"       \
-    "sh    $14, 4(%0)"        \
-    : : "r"(r0)               \
-    : "$12", "$13", "$14", "memory")
-
-#define gte_stsz(r0) __asm__( \
-    "swc2    $19, 0(%0)"      \
-    : : "r"(r0)               \
-    : "memory")
-
-#define gte_stdp(r0) __asm__( \
-    "swc2    $8, 0(%0)"       \
-    : : "r"(r0)               \
-    : "memory")
-
-#define gte_stflg(r0) __asm__ ( \
-        "cfc2    $12, $31;" \
-        "nop;" \
-        "sw    $12, 0(%0)" \
-        : : "r"(r0) \
-        : "$12", "memory" \
-    )
-
-#define gte_stsxy01( r0, r1 ) __asm__ ( \
-        "swc2    $12, 0(%0);" \
-        "swc2    $13, 0(%1)" \
-        : : "r"(r0), "r"(r1) \
-        : "memory" \
-    )
-
-// custom macro
-#define gte_ldlvnlsv(r0) __asm__ volatile( \
-    "lhu	$12, 0( %0 );"                    \
-    "lhu	$13, 2 ( %0 );"                   \
-    "lhu	$14, 4 ( %0 );"                   \
-    "mtc2	$12, $25;"                       \
-    "mtc2	$13, $26;"                       \
-    "mtc2	$14, $27"                        \
-    :                                      \
-    : "r"(r0)                              \
-    : "$12", "$13", "$14")
-
-// custom macro
-#define gte_stlvnlsv(r0) __asm__ volatile( \
-    "mfc2	$12, $25;"                       \
-    "mfc2	$13, $26;"                       \
-    "mfc2	$14, $27;"                       \
-    "sh	$12, 0( %0 );"                     \
-    "sh	$13, 2( %0 );"                     \
-    "sh	$14, 4( %0 )"                      \
-    :                                      \
-    : "r"(r0)                              \
-    : "$12", "$13", "$14", "memory")
-
-// custom macro
-#define gte_ldv2_ext(r0) __asm__ volatile( \
-    "lw		$12, 0( %0 );"                    \
-    "lw		$13, 4( %0 );"                    \
-    "ctc2	$12, $3;"                        \
-    "ctc2	$13, $4;"                        \
-    :                                      \
-    : "r"(r0)                              \
-    : "$12", "$13")
-
-// custom macro
-#define gte_nrtvx() gte_nmvmva(1, 0, 0, 0, 0)
-
-// custom macro
-#define gte_ldv0sv(r0) __asm__ volatile( \
-    "lhu	$12, 0( %0 );"                  \
-    "lhu	$13, 2( %0 );"                  \
-    "lhu	$14, 4( %0 );"                  \
-    "or     $12, $13;"                   \
-    "ctc2	$12, $0;"                      \
-    "ctc2	$14, $1;"                      \
-    :                                    \
-    : "r"(r0)                            \
-    : "$12", "$13", "$14")
-
-#define gte_rtir12() gte_mvmva(1, 0, 3, 3, 0)
-
-#define gte_nrtir12() gte_nmvmva(1, 0, 3, 3, 0)
-
-#define gte_stlvnl0(r0) __asm__( \
-    "swc2    $25, 0(%0)"         \
-    : : "r"(r0)                  \
-    : "memory")
-
-#define gte_gpf(sf) __asm__( \
-    ".word %0"               \
-    : : "g"(0x4B90003D | ((sf) & 0x1) << 19))
-
-#define gte_gpf12() gte_gpf(1)
-
-#define gte_stlvl(r0) __asm__( \
-    "swc2    $9, 0(%0);"       \
-    "swc2    $10, 4(%0);"      \
-    "swc2    $11, 8(%0)"       \
-    : : "r"(r0)                \
-    : "memory")
-
-#define gte_ngpf(sf) __asm__( \
-    "nop;"                    \
-    "nop;"                    \
-    ".word %0"                \
-    : : "g"(0x4B90003D | ((sf) & 0x1) << 19))
-
-#define gte_ngpf12() gte_ngpf(1)
-
-#define gte_ldv3(r0, r1, r2) __asm__( \
-    "lwc2    $0, 0(%0);"              \
-    "lwc2    $1, 4(%0);"              \
-    "lwc2    $2, 0(%1);"              \
-    "lwc2    $3, 4(%1);"              \
-    "lwc2    $4, 0(%2);"              \
-    "lwc2    $5, 4(%2)"               \
-    : : "r"(r0), "r"(r1), "r"(r2))
-
-#define gte_ldv3c(r0) __asm__ ( \
-        "lwc2    $0, 0(%0);" \
-        "lwc2    $1, 4(%0);" \
-        "lwc2    $2, 8(%0);" \
-        "lwc2    $3, 12(%0);" \
-        "lwc2    $4, 16(%0);" \
-        "lwc2    $5, 20(%0)" \
-        : : "r"(r0) \
-    )
-
-#define gte_ldsxy3( r0, r1, r2 ) __asm__ ( \
-	"mtc2	%0, $12;"		\
-	"mtc2	%2, $14;"		\
-	"mtc2	%1, $13;"		\
-	:						\
-	: "r"( r0 ), "r"( r1 ), "r"( r2 ))
-
-#define gte_nrtpt() __asm__( \
-    "nop;"                   \
-    "nop;"                   \
-    ".word 0x4A280030")
-
-#define gte_stsz3(r0, r1, r2) __asm__( \
-    "swc2    $17, 0(%0);"              \
-    "swc2    $18, 0(%1);"              \
-    "swc2    $19, 0(%2)"               \
-    : : "r"(r0), "r"(r1), "r"(r2)      \
-    : "memory")
-
-#define gte_stszotz(r0) __asm__( \
-    "mfc2    $12, $19;"          \
-    "nop;"                       \
-    "sra    $12, $12, 2;"        \
-    "sw    $12, 0(%0)"           \
-    : : "r"(r0)                  \
-    : "$12", "memory")
-
-#define gte_stsxy3(r0, r1, r2) __asm__( \
-    "swc2    $12, 0(%0);"               \
-    "swc2    $13, 0(%1);"               \
-    "swc2    $14, 0(%2)"                \
-    : : "r"(r0), "r"(r1), "r"(r2)       \
-    : "memory")
-
-#define gte_ldcv(r0) __asm__( \
-    "lbu    $12, 0(%0);"      \
-    "lbu    $13, 1(%0);"      \
-    "lbu    $14, 2(%0);"      \
-    "mtc2    $12, $9;"        \
-    "mtc2    $13, $10;"       \
-    "mtc2    $14, $11"        \
-    : : "r"(r0)               \
-    : "$12", "$13", "$14")
-
-#define gte_stcv(r0) __asm__( \
-    "mfc2    $12, $9;"        \
-    "mfc2    $13, $10;"       \
-    "mfc2    $14, $11;"       \
-    "sb    $12, 0(%0);"       \
-    "sb    $13, 1(%0);"       \
-    "sb    $14, 2(%0)"        \
-    : : "r"(r0)               \
-    : "$12", "$13", "$14", "memory")
-
-#define gte_stsxy0(r0) __asm__( \
-    "swc2    $12, 0(%0)"        \
-    : : "r"(r0)                 \
-    : "memory")
-
-#define gte_stsxy1(r0) __asm__( \
-    "swc2    $13, 0(%0)"        \
-    : : "r"(r0)                 \
-    : "memory")
-
-#define gte_stopz(r0) __asm__( \
-    "swc2    $24, 0(%0)"       \
-    : : "r"(r0)                \
-    : "memory")
-
-// custom macro
-#define gte_lddqb(r0) __asm__ volatile( \
-    "ctc2	%0, $28"                      \
-    :                                   \
-    : "r"(r0))
-
-// custom macro
-#define gte_lddqa(r0) __asm__ volatile( \
-    "ctc2	%0, $27"                      \
-    :                                   \
-    : "r"(r0))
-
-#define gte_ldclmv(r0) __asm__ ( \
-        "lhu    $12, 0(%0);" \
-        "lhu    $13, 6(%0);" \
-        "lhu    $14, 12(%0);" \
-        "mtc2    $12, $9;" \
-        "mtc2    $13, $10;" \
-        "mtc2    $14, $11" \
-        : : "r"(r0) \
-        : "$12", "$13", "$14" \
-    )
-
-#define gte_stclmv(r0) __asm__ ( \
-        "mfc2    $12, $9;" \
-        "mfc2    $13, $10;" \
-        "mfc2    $14, $11;" \
-        "sh    $12, 0(%0);" \
-        "sh    $13, 6(%0);" \
-        "sh    $14, 12(%0)" \
-        : : "r"(r0) \
-        : "$12", "$13", "$14", "memory" \
-    )
-
-#define gte_ldlv0(r0) __asm__ ( \
-        "lhu    $13, 4(%0);" \
-        "lhu    $12, 0(%0);" \
-        "sll    $13, $13, 16;" \
-        "or    $12, $12, $13;" \
-        "mtc2    $12, $0;" \
-        "lwc2    $1, 8(%0)" \
-        : : "r"(r0) \
-        : "$12", "$13" \
-    )
-
-#define gte_ldv1(r0) __asm__ ( \
-        "lwc2    $2, 0(%0);" \
-        "lwc2    $3, 4(%0)" \
-        : : "r"(r0) \
-    )
-
-#define gte_ldv2(r0) __asm__ ( \
-        "lwc2    $4, 0(%0);" \
-        "lwc2    $5, 4(%0)" \
-        : : "r"(r0) \
-    )
-
-#define gte_SetRGBcd(r0) __asm__ ( \
-        "lwc2    $6, 0(%0)" \
-        : : "r"(r0) \
-    )
-
-#define gte_strgb(r0) __asm__ ( \
-        "swc2    $22, 0(%0)" \
-        : : "r"(r0) \
-        : "memory" \
-    )
-
-#define gte_ndpcs() __asm__ ( \
-        "nop;" \
-        "nop;" \
-        ".word 0x4A780010" \
-    )
-
-#define gte_stotz(r0) __asm__ ( \
-        "swc2    $7, 0(%0)" \
-        : : "r"(r0) \
-        : "memory" \
-    )
-
-#define gte_navsz3() __asm__ ( \
-        "nop;" \
-        "nop;" \
-        ".word 0x4B58002D" \
-    )
-
-#define gte_nclip() __asm__ ( \
-        "nop;" \
-        "nop;" \
-        ".word 0x4B400006" \
-    )
+#endif
 
 // custom struct
 typedef struct _LINE_SG2
@@ -463,6 +55,7 @@ typedef struct _LINE_SG2
     short x1, y1;
 } LINE_SG2;
 
+#ifndef USE_PSYQ
 typedef struct
 {
     u_long tag;
@@ -488,13 +81,21 @@ typedef struct
 
 #define getaddr(p) (u_long)(((P_TAG *)(p))->addr)
 
+#define getlen(p) (u_char)(((P_TAG *)(p))->len)
+
+#define isendprim(p) ((((P_TAG *)(p))->addr) == 0xFFFFFF)
+
+#define termPrim(p) setaddr(p, 0xFFFFFF)
+
 #define setDrawTPage(p, dfe, dtd, tpage) \
     setlen(p, 1),                        \
         ((u_long *)(p))[1] = _get_mode(dfe, dtd, tpage)
+#endif
 
 /*
  * Set Primitive Colors
  */
+#ifndef USE_PSYQ
 #define setRGB0(p, _r0, _g0, _b0) \
     (p)->r0 = _r0, (p)->g0 = _g0, (p)->b0 = _b0
 
@@ -506,10 +107,12 @@ typedef struct
 
 #define setRGB3(p, _r3, _g3, _b3) \
     (p)->r3 = _r3, (p)->g3 = _g3, (p)->b3 = _b3
+#endif
 
  /*
   * Set Primitive Screen Points
   */
+#ifndef USE_PSYQ
 #define setXY0(p, _x0, _y0) \
     (p)->x0 = (_x0), (p)->y0 = (_y0)
 
@@ -537,17 +140,25 @@ typedef struct
 #define setWH(p, _w, _h) \
     (p)->w = _w, (p)->h = _h
 
+#define setSemiTrans(p, abe) \
+	((abe)?setcode(p, getcode(p)|0x02):setcode(p, getcode(p)&~0x02))
+    
+#define setPolyGT3(p)	setlen(p, 9),  setcode(p, 0x34)
 #define setPolyF4(p) setlen(p, 5), setcode(p, 0x28)
 #define setPolyG4(p) setlen(p, 8), setcode(p, 0x38)
+#endif
 
   // custom macro
 #define setAbr(p, abr) (p)->dr_tpage |= abr << 5
 
+#ifndef USE_PSYQ
 typedef void (*CdlCB)(u_char, u_char *);
+#endif
 
 /*
  * CD-ROM Primitive Commands
  */
+#ifndef USE_PSYQ
 #define CdlNop		0x01
 #define CdlSetloc	0x02
 #define CdlPlay		0x03
@@ -569,10 +180,12 @@ typedef void (*CdlCB)(u_char, u_char *);
 #define CdlSeekL	0x15
 #define CdlSeekP	0x16
 #define CdlReadS	0x1B
+#endif
 
  /*
   * CD-ROM Mode (used int CdlSetmode)
   */
+#ifndef USE_PSYQ
 #define CdlModeStream  0x100    /* Normal Streaming                     */
 #define CdlModeStream2 0x120    /* SUB HEADER information includes      */
 #define CdlModeSpeed	0x80	/* 0: normal speed	1: double speed	*/
@@ -583,16 +196,19 @@ typedef void (*CdlCB)(u_char, u_char *);
 #define CdlModeRept  	0x04	/* 0: Report off	1: Report on	*/
 #define CdlModeAP	0x02	/* 0: AutoPause off	1: AutoPause on */
 #define CdlModeDA	0x01	/* 0: CD-DA off		1: CD-DA on	*/ 
+#endif
 
   /*
    * Interrupts
    */
+#ifndef USE_PSYQ
 #define CdlNoIntr	0x00	/* No interrupt */
 #define CdlDataReady	0x01	/* Data Ready */
 #define CdlComplete	0x02	/* Command Complete */
 #define CdlAcknowledge	0x03	/* Acknowledge (reserved) */
 #define CdlDataEnd	0x04	/* End of Data Detected */
 #define CdlDiskError	0x05	/* Error Detected */
+#endif
 
 #define RING_SIZE 23
 
@@ -609,6 +225,7 @@ typedef struct {
 /*
  * Streaming Structures
  */
+#ifndef USE_PSYQ
 typedef struct {
 	u_short id;
 	u_short type;
@@ -623,26 +240,32 @@ typedef struct {
 	u_long dummy2;
 	DslLOC loc;
 } StHEADER;		/* CD-ROM STR structure */
+#endif
 
 void MemCardStart(void);   
 void MemCardStop(void);
 long MemCardSync( long mode, long* cmds, long* rslt ); 
+#ifndef USE_PSYQ
 u_long	StGetNext(u_long **addr,u_long **header);
 u_long	StFreeRing(u_long *base);
 void StSetRing( u_long* ring_addr, u_long ring_size );
 void StSetStream( u_long mode, u_long start_frame, u_long end_frame, void ( *func1 )(), void ( *func2 )() );
+#endif
 int DecDCTvlc(u_long *bs, u_long *buf);
 void DecDCTReset(int mode);
 void DecDCTin(u_long *buf, int mode);
 void DecDCTout(u_long *buf, int size);
 int DecDCToutCallback(void (*func)());
+#ifndef USE_PSYQ
 void SpuSetCommonCDMix(long cd_mix);
 void SpuSetCommonMasterVolume(short mvol_left, short mvol_right);
 long EnableEvent(long);
 long OpenEvent(unsigned long, long, long, long (*func)());
 long SetRCnt(unsigned long, unsigned short, long);
 long StartRCnt(unsigned long);
+#endif
 int rand();
+#ifndef USE_PSYQ
 void ApplyMatrix(MATRIX *, SVECTOR *, VECTOR *);
 void ApplyMatrixSV(MATRIX *, SVECTOR *, SVECTOR *);
 void ApplyMatrixLV(MATRIX *, VECTOR *, VECTOR *);
@@ -662,10 +285,13 @@ MATRIX *MulMatrix2(MATRIX *m0, MATRIX *m1);
 void SetBackColor(long rbk, long gbk, long bbk);
 void SetGeomScreen(long h);
 void SetFogNearFar(long a, long b, long h);
+#endif
 int checkagain();
+#ifndef USE_PSYQ
 void PopMatrix();
 void SetTransMatrix(MATRIX *m);
 void SetRotMatrix(MATRIX *m);
+u_short GetTPage(int tp, int abr, int x, int y);
 void PushMatrix();
 MATRIX *CompMatrix(MATRIX *m0, MATRIX *m1, MATRIX *m2);
 MATRIX *TransMatrix(MATRIX *m, VECTOR *v);
@@ -749,6 +375,7 @@ unsigned long SpuSetTransferStartAddr(unsigned long addr);
 unsigned long SpuRead(unsigned char *addr, unsigned long size);
 unsigned long SpuWrite(unsigned char *addr, unsigned long size);
 void SpuInit (void);
+#endif
 
 extern int StCdIntrFlag;
 
