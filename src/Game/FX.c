@@ -2041,7 +2041,7 @@ void FX_MakeGlyphIcon(Position *position, Object *glyphObject, int size, int gly
     xy_pos.vy = position->y;
 
     sizex = (size << 9) / 320;
-    
+
     otz = ((24 - size) / 4) + 1;
 
     glyphtunedata = (GlyphTuneData *)glyphObject->data;
@@ -3595,7 +3595,79 @@ void FX_DoInstancePowerRing(Instance *instance, long atuTime, long *color, long 
 
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_UpdatePowerRing);
+void FX_UpdatePowerRing(FXHalvePlane *ring) 
+{
+    Instance *instance;     
+    PlaneConstants *cPlane; 
+    long offset;            
+    long offset2;           
+    long cutX;              
+    long cutY;              
+    long cutZ;              
+    long colorIndex;        
+    long percent;           
+    
+    instance = ring->instance;
+
+    cutZ = instance->position.z;
+    cutX = instance->position.x;
+    cutY = instance->position.y;
+
+    offset  = 512 - ((ring->diffTime * 512) / ring->lifeTime);
+    offset2 = ((gameTrackerX.currentTime % 1000) * 4096) / 1000;
+    
+    if (ring->diffTime >= ring->lifeTime)
+    { 
+        offset = 512;
+
+        ring->diffTime = ring->lifeTime;
+        ring->lifeTime = 0;
+    }
+    
+    cPlane = &ring->ringPlane;
+
+    cPlane->flags = 0;
+
+    cPlane->a =  rsin(200) * rsin(offset2) >> 12;
+    cPlane->b = -rsin(200) * rcos(offset2) >> 12;
+    cPlane->c =  rcos(200);
+
+    cutZ += offset;
+
+    cPlane->d = -(((cPlane->a * cutX) + (cPlane->b * cutY) + (cPlane->c * cutZ)) >> 12);
+
+    if (ring->colorArray != 0)
+    {
+        if (ring->diffTime != 0)
+        {
+            colorIndex = ring->diffTime / ring->colorBlendLife;
+        }
+        else
+        {
+            colorIndex = 0;
+        }
+
+        percent = ((ring->diffTime % (ring->colorBlendLife + 1)) * 4096) / ring->colorBlendLife;
+
+        if (colorIndex >= (ring->numColors - 1))
+        {
+            colorIndex = ring->numColors - 2;
+
+            percent = 4096;
+        }
+
+        gte_lddp(4096 - percent);
+        gte_ldcv(&ring->colorArray[colorIndex]);
+        gte_ngpf12();
+        
+        gte_lddp(percent);
+        gte_ldcv(&ring->colorArray[colorIndex + 1]);
+        gte_ngpl12();
+        gte_stcv(&ring->currentColor);
+    }
+    
+    ring->diffTime += gameTrackerX.lastLoopTime;
+}
 
 void FX_UpdateInstanceSplitRing(FXHalvePlane *ring, FXTracker *fxTracker)
 {
