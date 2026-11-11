@@ -96,7 +96,7 @@ static inline int LIGHT3D_FixedNormalization(long a, long b, long x, long y)
     return r;
 }
 
-void LIGHT_GetLightMatrix(struct _Instance *instance, struct Level *level, struct MATRIX *lightM, struct MATRIX *colorM)
+void LIGHT_GetLightMatrix(struct _Instance *instance, struct Level *level, MATRIX *lightM, MATRIX *colorM)
 {
     MATRIX *lightGroup;
     struct LightList *lightList;

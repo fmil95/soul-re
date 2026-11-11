@@ -2727,7 +2727,7 @@ void ProcessBloodyMess(Instance *instance, int vertidx, int segidx, int dist, vo
 {
 
     long scl;
-    struct CVECTOR *cv;
+    CVECTOR *cv;
     MonsterVars *mv;
 
     mv = (MonsterVars *)instance->extraData;

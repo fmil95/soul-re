@@ -441,7 +441,7 @@ struct _FX_PRIM *_FX_BuildSingleFaceWithModel(struct _Model *model, struct _MFac
     return fxPrim;
 }
 
-struct _FX_PRIM *FX_BuildSingleFaceWithModel(struct _Model *model, struct _MFace *mface, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short timeToLive)
+struct _FX_PRIM *FX_BuildSingleFaceWithModel(struct _Model *model, struct _MFace *mface, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short timeToLive)
 {
     return _FX_BuildSingleFaceWithModel(model, mface, center, vel, accl, fxTracker, (void *)fxSetup, fxProcess, 0, timeToLive);
 }
@@ -463,7 +463,7 @@ INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_BuildSegmentedSplinters);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_BuildNonSegmentedSplinters);
 
-void _FX_BuildSplinters(struct _Instance *instance, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct FXSplinter *splintDef, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short shardFlags)
+void _FX_BuildSplinters(struct _Instance *instance, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, struct FXSplinter *splintDef, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short shardFlags)
 {
     if (MEMPACK_MemoryValidFunc((char *)instance->object) != 0)
     {
@@ -488,7 +488,7 @@ void _FX_BuildSplinters(struct _Instance *instance, struct SVECTOR *center, stru
     }
 }
 
-void _FX_Build(struct _Instance *instance, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short shardFlags)
+void _FX_Build(struct _Instance *instance, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short shardFlags)
 {
     if (MEMPACK_MemoryValidFunc((char *)instance->object) != 0)
     {
@@ -503,7 +503,7 @@ void _FX_Build(struct _Instance *instance, struct SVECTOR *center, struct SVECTO
     }
 }
 
-void FX_Build(struct _Instance *instance, struct SVECTOR *center, struct SVECTOR *vel, struct SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)())
+void FX_Build(struct _Instance *instance, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, struct _FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)())
 {
     _FX_Build(instance, center, vel, accl, fxTracker, fxSetup, fxProcess, 0);
 }
@@ -1110,9 +1110,9 @@ void FX_DrawList(FXTracker *fxTracker, GameTracker *gameTracker, unsigned long *
                         *(short *)&ft4->u2 = uMin | vMax;
                         *(short *)&ft4->u3 = uMax | vMax;
 
-                        *(unsigned short *)&ft4->clut = texture->clut;
+                        ft4->clut = texture->clut;
 
-                        *(unsigned short *)&ft4->tpage = texture->tpage;
+                        ft4->tpage = texture->tpage;
 
                         gte_stsxy(&((POLY_FT4 *)prim)->x3);
 
@@ -1518,9 +1518,9 @@ void FX_DrawList(FXTracker *fxTracker, GameTracker *gameTracker, unsigned long *
                         *(short *)&ft4->u2 = uMin | vMax;
                         *(short *)&ft4->u3 = uMax | vMax;
 
-                        *(unsigned short *)&ft4->clut = texture->clut;
+                        ft4->clut = texture->clut;
 
-                        *(unsigned short *)&ft4->tpage = texture->tpage;
+                        ft4->tpage = texture->tpage;
 
                         ft4->x0 = ft4->x2 = xy_pos.vx + (sizex / 2);
                         ft4->y0 = ft4->y1 = xy_pos.vy + (sizey / 2);

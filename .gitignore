@@ -3,6 +3,7 @@ KAIN2.ld
 asm/
 expected/
 build/
+include/Libs/psyq_4.3
 .vscode/
 __pycache__/
 nonmatchings/

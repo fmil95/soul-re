@@ -4,6 +4,7 @@
 #include "common.h"
 /*TODO: Remove LIBS/ when adding PSYQ headers*/
 
+#ifndef USE_PSYQ
 #define PadStateDiscon 0
 #define PadStateFindPad 1
 #define PadStateFindCTP1 2
@@ -11,6 +12,7 @@
 #define PadStateReqInfo 4
 #define PadStateExecCmd 5
 #define PadStateStable 6
+#endif
 
 #ifndef MIN
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
@@ -30,6 +32,7 @@
 
 #define _break(CODE) __asm__("break " #CODE)
 
+#ifndef USE_PSYQ
 #define getScratchAddr(offset) ((unsigned long *)(0x1f800000 + (offset) * 4))
 
 #define getTPage(tp, abr, x, y)                                                                 \
@@ -38,6 +41,7 @@
 
 #define getClut(x, y) \
     (((y) << 6) | (((x) >> 4) & 0x3f))
+#endif
 
 // GTE macros
 
@@ -523,6 +527,7 @@ typedef struct _LINE_SG2
     short x1, y1;
 } LINE_SG2;
 
+#ifndef USE_PSYQ
 typedef struct
 {
     u_long tag;
@@ -557,10 +562,12 @@ typedef struct
 #define setDrawTPage(p, dfe, dtd, tpage) \
     setlen(p, 1),                        \
         ((u_long *)(p))[1] = _get_mode(dfe, dtd, tpage)
+#endif
 
 /*
  * Set Primitive Colors
  */
+#ifndef USE_PSYQ
 #define setRGB0(p, _r0, _g0, _b0) \
     (p)->r0 = _r0, (p)->g0 = _g0, (p)->b0 = _b0
 
@@ -572,10 +579,12 @@ typedef struct
 
 #define setRGB3(p, _r3, _g3, _b3) \
     (p)->r3 = _r3, (p)->g3 = _g3, (p)->b3 = _b3
+#endif
 
  /*
   * Set Primitive Screen Points
   */
+#ifndef USE_PSYQ
 #define setXY0(p, _x0, _y0) \
     (p)->x0 = (_x0), (p)->y0 = (_y0)
 
@@ -609,15 +618,19 @@ typedef struct
 #define setPolyGT3(p)	setlen(p, 9),  setcode(p, 0x34)
 #define setPolyF4(p) setlen(p, 5), setcode(p, 0x28)
 #define setPolyG4(p) setlen(p, 8), setcode(p, 0x38)
+#endif
 
   // custom macro
 #define setAbr(p, abr) (p)->dr_tpage |= abr << 5
 
+#ifndef USE_PSYQ
 typedef void (*CdlCB)(u_char, u_char *);
+#endif
 
 /*
  * CD-ROM Primitive Commands
  */
+#ifndef USE_PSYQ
 #define CdlNop		0x01
 #define CdlSetloc	0x02
 #define CdlPlay		0x03
@@ -639,10 +652,12 @@ typedef void (*CdlCB)(u_char, u_char *);
 #define CdlSeekL	0x15
 #define CdlSeekP	0x16
 #define CdlReadS	0x1B
+#endif
 
  /*
   * CD-ROM Mode (used int CdlSetmode)
   */
+#ifndef USE_PSYQ
 #define CdlModeStream  0x100    /* Normal Streaming                     */
 #define CdlModeStream2 0x120    /* SUB HEADER information includes      */
 #define CdlModeSpeed	0x80	/* 0: normal speed	1: double speed	*/
@@ -653,16 +668,19 @@ typedef void (*CdlCB)(u_char, u_char *);
 #define CdlModeRept  	0x04	/* 0: Report off	1: Report on	*/
 #define CdlModeAP	0x02	/* 0: AutoPause off	1: AutoPause on */
 #define CdlModeDA	0x01	/* 0: CD-DA off		1: CD-DA on	*/ 
+#endif
 
   /*
    * Interrupts
    */
+#ifndef USE_PSYQ
 #define CdlNoIntr	0x00	/* No interrupt */
 #define CdlDataReady	0x01	/* Data Ready */
 #define CdlComplete	0x02	/* Command Complete */
 #define CdlAcknowledge	0x03	/* Acknowledge (reserved) */
 #define CdlDataEnd	0x04	/* End of Data Detected */
 #define CdlDiskError	0x05	/* Error Detected */
+#endif
 
 #define RING_SIZE 23
 
@@ -679,6 +697,7 @@ typedef struct {
 /*
  * Streaming Structures
  */
+#ifndef USE_PSYQ
 typedef struct {
 	u_short id;
 	u_short type;
@@ -693,26 +712,32 @@ typedef struct {
 	u_long dummy2;
 	DslLOC loc;
 } StHEADER;		/* CD-ROM STR structure */
+#endif
 
 void MemCardStart(void);   
 void MemCardStop(void);
 long MemCardSync( long mode, long* cmds, long* rslt ); 
+#ifndef USE_PSYQ
 u_long	StGetNext(u_long **addr,u_long **header);
 u_long	StFreeRing(u_long *base);
 void StSetRing( u_long* ring_addr, u_long ring_size );
 void StSetStream( u_long mode, u_long start_frame, u_long end_frame, void ( *func1 )(), void ( *func2 )() );
+#endif
 int DecDCTvlc(u_long *bs, u_long *buf);
 void DecDCTReset(int mode);
 void DecDCTin(u_long *buf, int mode);
 void DecDCTout(u_long *buf, int size);
 int DecDCToutCallback(void (*func)());
+#ifndef USE_PSYQ
 void SpuSetCommonCDMix(long cd_mix);
 void SpuSetCommonMasterVolume(short mvol_left, short mvol_right);
 long EnableEvent(long);
 long OpenEvent(unsigned long, long, long, long (*func)());
 long SetRCnt(unsigned long, unsigned short, long);
 long StartRCnt(unsigned long);
+#endif
 int rand();
+#ifndef USE_PSYQ
 void ApplyMatrix(MATRIX *, SVECTOR *, VECTOR *);
 void ApplyMatrixSV(MATRIX *, SVECTOR *, SVECTOR *);
 void ApplyMatrixLV(MATRIX *, VECTOR *, VECTOR *);
@@ -732,7 +757,9 @@ MATRIX *MulMatrix2(MATRIX *m0, MATRIX *m1);
 void SetBackColor(long rbk, long gbk, long bbk);
 void SetGeomScreen(long h);
 void SetFogNearFar(long a, long b, long h);
+#endif
 int checkagain();
+#ifndef USE_PSYQ
 void PopMatrix();
 void SetTransMatrix(MATRIX *m);
 void SetRotMatrix(MATRIX *m);
@@ -820,6 +847,7 @@ unsigned long SpuSetTransferStartAddr(unsigned long addr);
 unsigned long SpuRead(unsigned char *addr, unsigned long size);
 unsigned long SpuWrite(unsigned char *addr, unsigned long size);
 void SpuInit (void);
+#endif
 
 extern int StCdIntrFlag;
 

@@ -88,6 +88,17 @@ ENDLINE := \n'
 ASFLAGS        := -Iinclude -march=r3000 -mtune=r3000 -no-pad-sections
 CFLAGS         := -O2 -G4096 -gcoff -quiet -fsigned-char
 CPPFLAGS       := -Iinclude -Isrc -DTARGET_PSX
+
+PSYQ_DIR       ?= include/Libs/psyq_4.3
+
+ifneq ($(wildcard $(PSYQ_DIR)/include/libgte.h),)
+	CPPFLAGS += -DUSE_PSYQ
+
+	PSYQ_INC_PSX  := -I$(PSYQ_DIR)/include
+	PSYQ_INC_HOST := -idirafter $(PSYQ_DIR)/include -D_LANGUAGE_C
+	PSYQ_INC_HOST += -Wno-parentheses -Wno-overflow
+endif
+
 LDFLAGS        := -T $(CONFIG_DIR)/syms/undefined_syms.txt -T $(CONFIG_DIR)/syms/undefined_funcs.txt -T $(BUILD_DIR)/$(LD_SCRIPT) -Map $(LD_MAP) \
                   --no-check-sections -nostdlib
 CFLAGS_CHECK   := -fsyntax-only -fno-builtin -std=gnu90
@@ -265,9 +276,9 @@ $(BUILD_DIR)/%.c.o: %.c
 	@$(PRINT)$(GREEN)Compiling C file: $(ENDGREEN)$(BLUE)$<$(ENDBLUE)$(ENDLINE)
 	@mkdir -p $(shell dirname $@)
 ifeq ($(CHECK),1)
-	@$(CC_HOST) $(CFLAGS_CHECK) $(CHECK_WARNINGS) $(CPPFLAGS) -UTARGET_PSX $<
+	@$(CC_HOST) $(CFLAGS_CHECK) $(CHECK_WARNINGS) $(CPPFLAGS) $(PSYQ_INC_HOST) -UTARGET_PSX $<
 endif
-	$(V)$(CPP) $(CPPFLAGS) -ffreestanding -MMD -MP -MT $@ -MF $@.d $< | $(CC) $(CFLAGS) | $(MASPSX) $(if $(findstring Overlays,$@),--expand-div,) $(if $(COMM_SBSS),| $(COMM_TO_SBSS) $(COMM_SBSS),) | $(AS) $(ASFLAGS) -o $@
+	$(V)$(CPP) $(CPPFLAGS) $(PSYQ_INC_PSX) -ffreestanding -MMD -MP -MT $@ -MF $@.d $< | $(CC) $(CFLAGS) | $(MASPSX) $(if $(findstring Overlays,$@),--expand-div,) $(if $(COMM_SBSS),| $(COMM_TO_SBSS) $(COMM_SBSS),) | $(AS) $(ASFLAGS) -o $@
 
 # Compile .s files
 $(BUILD_DIR)/%.s.o: %.s

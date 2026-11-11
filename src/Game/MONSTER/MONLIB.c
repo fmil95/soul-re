@@ -800,8 +800,8 @@ int MON_ChooseCombatMove(Instance *instance, int reason)
     int dir;
     short zrot;
     struct _Position temp;
-    struct SVECTOR New;
-    struct VECTOR OutTrans;
+    SVECTOR New;
+    VECTOR OutTrans;
 
     mv = (MonsterVars *)instance->extraData;
     enemy = mv->enemy;
