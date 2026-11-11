@@ -579,7 +579,91 @@ void Glyph_StartSpell(Instance *instance, int glyphnum)
     INSTANCE_Post(gameTrackerX.playerInstance, message, 0);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/GLYPH", Glyph_Broadcast);
+void Glyph_Broadcast(Instance *sender, int glyphnum)
+{
+    Instance *instance;
+    int plane;
+    long whatAmIMask;
+    int Message;
+    int radius;
+    int radius_old;
+    int range;
+    int temp; // not from decls.h
+
+    plane = gameTrackerX.gameData.asmData.MorphType;
+
+    temp = 0xA;
+
+    whatAmIMask = 0;
+
+    Message = 0;
+
+    radius     = fx_blastring->radius >> 12;
+    radius_old = fx_radius_old        >> 12;
+
+    range = blast_range >> 12;
+    range = (range * 7) / 8;
+
+    switch (glyphnum)
+    {
+    case 6:
+        whatAmIMask = 0xA;
+        Message     = 0x80006;
+        break;
+    case 4:
+        whatAmIMask = 0xA;
+        Message     = 0x80004;
+        break;
+    case 5:
+        whatAmIMask = 0x2A;
+        Message     = 0x80005;
+        break;
+    case 2:
+        whatAmIMask = temp;
+        Message     = 0x80002;
+        break;
+    case 1:
+        whatAmIMask = 0xA;
+        Message     = 0x80001;
+        break;
+    case 3:
+        whatAmIMask = 0xA;
+        Message     = 0x80003;
+        break;
+    case 7:
+        return;
+    }
+
+    for (instance = gameTrackerX.instanceList->first; instance != NULL; instance = instance->next)
+    {
+        int dist;
+        int old_dist;
+        int old_x;
+        int old_y;
+        int new_x;
+        int new_y;
+        long whatAmI;
+
+        whatAmI = INSTANCE_Query(instance, 1);
+
+        if (((((instance != sender) && (whatAmI & whatAmIMask)) && (INSTANCE_InPlane(instance, plane) != 0)) && ((whatAmI != 0x20) || (INSTANCE_Query(instance, 2) & 0x4000))) && ((instance->oldMatrix != NULL) && (instance->matrix != NULL)))
+        {
+            new_x = instance->matrix->t[0];
+            new_y = instance->matrix->t[1];
+
+            old_x = instance->oldMatrix->t[0];
+            old_y = instance->oldMatrix->t[1];
+
+            dist     = MATH3D_veclen2(new_x - sender->position.x, new_y - sender->position.y);
+            old_dist = MATH3D_veclen2(old_x - sender->position.x, old_y - sender->position.y);
+
+            if (((dist <= radius) && (radius_old < old_dist)) && ((((instance->matrix->t[2] - sender->position.z) < 0) ? sender->position.z - instance->matrix->t[2] : instance->matrix->t[2] - sender->position.z) < range))
+            {
+                INSTANCE_Post(instance, Message, 0);
+            }
+        }
+    }
+}
 
 void Glyph_DoSpell(Instance *instance, int glyphnum)
 {
