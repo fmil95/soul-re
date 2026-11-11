@@ -1450,7 +1450,86 @@ void Decouple_AngleMoveToward(short *current_ptr, short destination, short step)
     AngleMoveToward(current_ptr, destination, step);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/CAMERA", CriticalDampValue);
+void CriticalDampValue(long dampMode, short *sourceVal, short targetVal, short *vel, short *accl, int smooth)
+{
+    short maxVel; 
+    short useVel; 
+
+    if ((short)smooth != 0)
+    {
+        if ((short)smooth < 0)
+        {
+            maxVel = -4096 / (short)smooth;
+        }
+        else
+        {
+            maxVel = smooth;
+        }
+
+        switch (dampMode)
+        {
+        case 0:
+            *accl = ((short)(targetVal - *sourceVal) >> 2) - *vel;
+            *vel += *accl;
+            
+            *sourceVal += *vel;
+            break;
+        case 1:
+        case 5:
+        case 6:
+            useVel = targetVal - *sourceVal;
+
+            if (dampMode == 5)
+            {
+                *accl = (useVel >> 1) - *vel;
+            }
+            else if (dampMode == 6)
+            {
+                *accl = (useVel >> 3) - *vel;
+            }
+            else
+            {
+                *accl = (useVel >> 2) - *vel;
+            }
+
+            *vel  += *accl;
+            useVel = *vel;
+
+            if (useVel > maxVel)
+            {
+                useVel = maxVel;
+                *vel   = maxVel;
+
+                if (gameTrackerX.timeMult != 4096)
+                {
+                    useVel = (maxVel * gameTrackerX.timeMult) / 4096;
+                }
+            }
+            else if (useVel < -maxVel)
+            {
+                useVel = -maxVel;
+                *vel   = -maxVel;
+
+                if (gameTrackerX.timeMult != 4096)
+                {
+                    useVel = -(maxVel * gameTrackerX.timeMult) / 4096;
+                }
+            }
+
+            *sourceVal += useVel;
+            break;
+        }
+
+        if (*vel == 0)
+        {
+            *sourceVal = targetVal;
+        }
+    }
+    else
+    {
+        *sourceVal = targetVal;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/CAMERA", CriticalDampPosition);
 
