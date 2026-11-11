@@ -419,7 +419,122 @@ void DRAW_RingPoint(PrimPool *primPool, unsigned long **ot, long color, SVector 
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_DrawRingPoints);
+unsigned long *DRAW_DrawRingPoints(Model *model, VertexPool *vertexPool, MATRIX *pcTransform, PrimPool *primPool, unsigned long **ot, long color, int ring_type)
+{
+    MFace *mface;          
+    MFace *endMFace;      
+    PVertex *pvertexList;  
+    SVector *pvertex[3];   
+    SVector newVertex[3];  
+    long outcode;        
+    int first;            
+    int second;           
+    SVector vel;           
+    SVector acc;           
+
+    mface    = model->faceList;
+    endMFace = &mface[model->numFaces];
+
+    pvertexList = vertexPool->vertex;
+
+    if (ring_type == 2)
+    {
+        vel.x = vel.y = vel.z = 0;
+
+        acc.x = acc.y = 0;
+        acc.z = -1;
+    }
+
+    SetRotMatrix(pcTransform);
+    SetTransMatrix(pcTransform);
+
+    for (; mface < endMFace; mface++)
+    {
+        if (!(mface->flags & 0x10))
+        {
+            pvertex[0] = (SVector *)&pvertexList[mface->face.v0];
+            pvertex[1] = (SVector *)&pvertexList[mface->face.v1];
+            pvertex[2] = (SVector *)&pvertexList[mface->face.v2];
+
+            outcode = pvertex[0]->z >= 0;
+
+            if (pvertex[1]->z >= 0)
+            {
+                outcode |= 0x2;
+            }
+
+            if (pvertex[2]->z >= 0)
+            {
+                outcode |= 0x4;
+            }
+
+            switch (outcode)
+            {
+            case 1:
+                fDRAW_SPLIT_INTPL_XYZ(&newVertex[1], pvertex[0], pvertex[1]);
+                fDRAW_SPLIT_INTPL_XYZ(&newVertex[2], pvertex[0], pvertex[2]);
+
+                first  = 1;
+                second = 2;
+                break;
+            case 2:
+                fDRAW_SPLIT_INTPL_XYZ(&newVertex[0], pvertex[1], pvertex[0]);
+                fDRAW_SPLIT_INTPL_XYZ(&newVertex[2], pvertex[1], pvertex[2]);
+
+                first  = 2;
+                second = 0;
+                break;
+            case 3:
+                fDRAW_SPLIT_INTPL_XYZ(&newVertex[1], pvertex[1], pvertex[2]);
+                fDRAW_SPLIT_INTPL_XYZ(&newVertex[0], pvertex[0], pvertex[2]);
+
+                first  = 1;
+                second = 0;
+                break;
+            case 4:
+                fDRAW_SPLIT_INTPL_XYZ(&newVertex[0], pvertex[2], pvertex[0]);
+                fDRAW_SPLIT_INTPL_XYZ(&newVertex[1], pvertex[2], pvertex[1]);
+
+                first  = 0;
+                second = 1;
+                break;
+            case 5:
+                fDRAW_SPLIT_INTPL_XYZ(&newVertex[0], pvertex[0], pvertex[1]);
+                fDRAW_SPLIT_INTPL_XYZ(&newVertex[2], pvertex[2], pvertex[1]);
+
+                first  = 0;
+                second = 2;
+                break;
+            case 6:
+                fDRAW_SPLIT_INTPL_XYZ(&newVertex[2], pvertex[2], pvertex[0]);
+                fDRAW_SPLIT_INTPL_XYZ(&newVertex[1], pvertex[1], pvertex[0]);
+
+                first  = 2;
+                second = 1;
+                break;
+            default:
+                continue;
+            }
+
+            if (ring_type == 2)
+            {
+                gte_ldv0(&newVertex[first]);
+                gte_nrtv0tr();
+
+                DRAW_RingPoint(primPool, ot, color, &vel, &acc);
+            }
+            else
+            {
+                gte_ldv3(&newVertex[first], &newVertex[second], &newVertex[first]);
+                gte_nrtpt();
+
+                DRAW_RingLine(primPool, ot, color);
+            }
+        }
+    }
+
+    return primPool->nextPrim;
+}
 
 void DRAW_GlowQuad(PrimPool *primPool, unsigned long **ot, long otz, long color, Vector *v0, Vector *v1, Vector *v2, Vector *v3)
 {
@@ -731,7 +846,7 @@ long *DRAW_Zclip_subdiv(POLY_GT3 *texture, unsigned long **ot, int ndiv)
     sp->face_uv01.v = (sp->face_uv0.v + sp->face_uv1.v) >> 1;
     
     sp->face_uv12.u = (sp->face_uv1.u + sp->face_uv2.u) >> 1;
-    
+
     sp->face_uv01.pad = sp->face_uv12.pad = sp->face_uv1.pad;
 
     sp->face_uv12.v = (sp->face_uv1.v + sp->face_uv2.v) >> 1;
