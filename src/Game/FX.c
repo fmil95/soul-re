@@ -5789,7 +5789,118 @@ long fx_get_startz(SVector *position)
     return tmpmat.t[2] / 4;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_DrawRing);
+void FX_DrawRing(MATRIX *wcTransform, SVector *position, MATRIX *matrix, int radius, int radius2, int radius3, int z1, int z2, int z3, long color, int sortInWorld)
+{
+    int n;                  
+    POLY_2G4T *poly;        
+    unsigned long **drawot; 
+    SVector points[3];      
+    long sxy[3];            
+    long degrees;           
+    long color_black;       
+    long sz0;               
+    long sz1;               
+    long sz2;               
+    long startz;            
+    
+    poly = (POLY_2G4T*)gameTrackerX.primPool->nextPrim;
+
+    degrees = 0;
+
+    drawot = gameTrackerX.drawOT;
+    
+    if ((gameTrackerX.primPool->nextPrim + (sizeof(POLY_2G4T) * 8)) < gameTrackerX.primPool->lastPrim) 
+    {
+        PushMatrix();
+        
+        SetRotMatrix(wcTransform);
+        SetTransMatrix(wcTransform);
+        
+        startz = fx_get_startz(position);
+        
+        SetRotMatrix(matrix); 
+        
+        points[0].z = z1;
+        points[1].z = z2;
+        points[2].z = z3; 
+        
+        fx_calc_points(points, degrees, radius, radius2, radius3);
+        
+        color      |= 0x3A000000;
+        color_black = 0x3A000000;
+        
+        gte_stsxy3(&sxy[0], &sxy[1], &sxy[2]);
+        
+        for (n = 0; n < 32; n++) 
+        {
+            degrees += 128;
+            
+            fx_calc_points(points, degrees, radius, radius2, radius3);
+            
+            *(int*)&poly->p2.r3 = color_black;
+            *(int*)&poly->p2.r2 = color_black;
+            *(int*)&poly->p1.r1 = color_black;
+            *(int*)&poly->p1.r0 = color_black;
+            
+            *(int*)&poly->p1.r3 = color;
+            *(int*)&poly->p1.r2 = color;
+            *(int*)&poly->p2.r1 = color;
+            *(int*)&poly->p2.r0 = color;
+            
+            *(int*)&poly->p1.x0 = sxy[2];
+            *(int*)&poly->p1.x2 = sxy[1];
+            *(int*)&poly->p2.x0 = sxy[1];
+            *(int*)&poly->p2.x2 = sxy[0];
+            
+            // setDrawTPage(&poly->drawTPage1, TRUE, TRUE, 32);
+            
+            *(int*)&poly->drawTPage1 = _get_mode(1, 1, 32);
+            
+            gte_stsxy3(&sxy[0], &sxy[1], &sxy[2]);
+            gte_stsz3(&sz0, &sz1, &sz2);
+            
+            *(int*)&poly->p1.x1 = sxy[2];
+            *(int*)&poly->p1.x3 = sxy[1];
+            *(int*)&poly->p2.x1 = sxy[1];
+            *(int*)&poly->p2.x3 = sxy[0];
+            
+            if (sz2 < sz0) 
+            {
+                sz0 = sz2;
+            }
+            
+            
+            if (sz0 > 0) 
+            {
+                sz0 /= 4;
+                
+                if (sortInWorld == 0) 
+                {
+                    if (startz >= sz0) 
+                    {
+                        sz0 = 1;
+                    }
+                    else 
+                    {
+                        sz0 = startz + 16;
+                    }
+                }
+                
+                if (((sz0 - 1) >= 0) && ((sz0 - 1) <= 3070)) 
+                {
+                    // addPrim(drawot[sz0], poly);
+                    
+                    poly->tag = getaddr(&drawot[sz0]) | 0x11000000;
+                    drawot[sz0] = (unsigned long *)((intptr_t)poly++ & 0xFFFFFF);
+                }
+            }
+        }
+        
+        gameTrackerX.primPool->nextPrim = (unsigned long*)poly;
+        
+        PopMatrix();
+    }
+}
 
 void fx_setTex(DVECTOR *x, unsigned char *uv, int tx, int offset)
 {
