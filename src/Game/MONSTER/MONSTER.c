@@ -1719,7 +1719,208 @@ void MON_PursueEntry(Instance *instance)
     mv->mvFlags &= ~0x20000;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Pursue);
+void MON_Pursue(Instance *instance)
+{
+    MonsterVars *mv; 
+    int anim; 
+    int planresult; 
+    long range; 
+    MonsterIR *target; 
+    int pursueType; 
+
+    range = 0;
+
+    mv = instance->extraData;
+
+    target = NULL;
+
+    pursueType = 0;
+
+    mv->lookAtPos = NULL;
+
+    if (mv->mvFlags & 0x4) 
+    {
+        MON_GroundMoveQueueHandler(instance);
+        return;
+    }
+
+    if (MON_ValidPosition(instance) != 0) 
+    {
+        if ((mv->behaviorState == 7) && (instance->intro != NULL)) 
+        {
+            if (MATH3D_LengthXYZ(instance->position.x - instance->intro->position.x, instance->position.y - instance->intro->position.y, instance->position.z - instance->intro->position.z) > mv->guardRange) 
+            {
+                pursueType = 1;
+
+                *(Position*)&mv->destination = *(Position*)&instance->intro->position;
+
+                mv->lookAtPos = &mv->destination;
+            }
+        }
+    } 
+    else 
+    {
+        pursueType = 1;
+
+        *(Position*)&mv->destination = *(Position*)&mv->lastValidPos;
+
+        mv->lookAtPos = &mv->destination;
+    }
+
+    if (pursueType != 1)
+    {
+        if (mv->enemy == NULL) 
+        {
+            MON_SwitchState(instance, MONSTER_STATE_IDLE);
+
+            pursueType = 0;
+        } 
+        else if ((mv->mvFlags & 0x10000000) && (mv->enemy->mirFlags & 0x1000)) 
+        {
+            MON_SwitchState(instance, MONSTER_STATE_EMBRACE);
+
+            pursueType = 0;
+        }
+        else 
+        {
+            MonsterCombatAttributes *combat;
+            MonsterIR *ally; 
+
+            combat = mv->subAttr->combatAttributes;
+
+            pursueType = 2;
+
+            if ((mv->mvFlags & 0x2000000) && (ally = mv->ally, (ally != NULL)) && (!(ally->mirFlags & 0x200))) 
+            {
+                target = ally;
+
+                range = combat->allyRange;
+
+                pursueType = 3;
+            }
+            else 
+            {
+                target = mv->enemy;
+
+                range = combat->combatRange - 200;
+            }
+
+            if (target == NULL) 
+            {
+                MON_SwitchState(instance, MONSTER_STATE_IDLE);
+            } 
+            else if (MON_ShouldIFireAtTarget(instance, target) != 0)
+            {
+                MON_SwitchState(instance, MONSTER_STATE_PROJECTILE);
+
+                pursueType = 0;
+            } 
+            else 
+            {
+                *(Position*)&mv->destination = *(Position*)&target->instance->position;
+
+                mv->lookAtPos = &mv->destination;
+
+                if ((MON_ValidUnit(instance, target->instance->currentStreamUnitID) == 0) || ((mv->behaviorState == 7) && (instance->intro != NULL) && (MATH3D_LengthXYZ(mv->destination.x - instance->intro->position.x, mv->destination.y - instance->intro->position.y, mv->destination.z - instance->intro->position.z) > mv->guardRange))) 
+                {
+                    MON_SwitchState(instance, MONSTER_STATE_IDLE);
+
+                    MON_PlayCombatIdle(instance, 2);
+
+                    pursueType = 0;
+                }
+            }
+        }
+    }
+
+    if (pursueType == 0) 
+    {
+        MON_DefaultQueueHandler(instance);
+        return;
+    }
+
+    if (MON_CheckPointSuitability(instance, &instance->position, &mv->destination) != 0)
+    {
+        int state; 
+
+        state = -1;
+
+        if (target->distance < (range + MON_GetAnim(instance, mv->subAttr->animList, 2)->distance)) 
+        {
+            anim = 2;
+        } 
+        else 
+        {
+            anim = 3;
+        }
+
+        if (((unsigned char)anim >> 8) != 0) 
+        {
+            range = target->distance + target->mirFlags;
+        }
+        
+        if (range < 0) 
+        {
+            range = 0;
+        }
+
+        planresult = MON_DefaultPlanMovement(instance, anim, range);
+
+        switch (planresult) 
+        {
+        case 1:
+        case 5:
+        case 6:
+            break;
+        case 4:
+            switch (pursueType) 
+            {
+            case 3:
+                MON_GetPlanSlot(mv);
+                break;
+            case 2:
+                state = MONSTER_STATE_COMBAT;
+                break;
+            case 1:
+                state = MONSTER_STATE_IDLE;
+                break;
+            }
+
+            break;
+        case 2:
+            if (pursueType == 1) 
+            {
+                mv->validUnits[0] = 0;
+            }
+
+            MON_GetPlanSlot(mv);
+            break;
+        case 0:
+            break;
+        case 3:
+            state = MONSTER_STATE_IDLE;
+
+            do {} while (0); // garbage code for reordering
+            break;
+        }
+
+        if (state != -1) 
+        {
+            MON_SwitchState(instance, state);
+        }
+    } 
+    else 
+    {
+        MON_GetPlanSlot(mv);
+
+        MON_DefaultQueueHandler(instance);
+
+        if (pursueType == 1) 
+        {
+            mv->validUnits[0] = 0;
+        }
+    }
+}
 
 void MON_WanderEntry(Instance *instance)
 {
