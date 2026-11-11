@@ -44,6 +44,7 @@ typedef unsigned char u_char;
 #include "Game/TYPES.h"
 #include "Game/EXTRA.h"
 #include "Libs/SDK.h"
+#include "Libs/GTE.h"
 
 #define ARRAY_COUNT(arr) (sizeof(arr) / sizeof(arr[0]))
 
