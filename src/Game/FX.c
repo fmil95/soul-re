@@ -2002,7 +2002,68 @@ void FX_MakeMannaIcon(int x, int y, int xsize, int ysize)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_MakeGlyphIcon);
+void FX_MakeGlyphIcon(Position *position, Object *glyphObject, int size, int glyphnum, int enabled)
+{
+    int sizex;  
+    POLY_GT4 *poly;  
+    TextureMT3 *texture;  
+    DVECTOR xy_pos;  
+    int otz;  
+    long *color_array; 
+    GlyphTuneData *glyphtunedata;  
+
+    if (glyphObject == NULL)
+    {
+        return;
+    }
+
+    if (glyphnum == 7)
+    {
+        Object *object;  
+
+        object = (Object *)objectAccess[10].object;
+
+        if (object == NULL)
+        {
+            return;
+        }
+
+        texture = FX_GetTextureObject(object, 0, 0);
+
+        size /= 2;
+    }
+    else
+    {
+        texture = FX_GetTextureObject(glyphObject, 0, glyphnum);
+    }
+
+    xy_pos.vx = position->x;
+    xy_pos.vy = position->y;
+
+    sizex = (size << 9) / 320;
+    
+    otz = ((24 - size) / 4) + 1;
+
+    glyphtunedata = (GlyphTuneData *)glyphObject->data;
+
+    glyphnum *= 4;
+
+    color_array = glyphtunedata->color_array;
+
+    if (enabled != 0)
+    {
+        poly = FX_SetupPolyGT4(xy_pos.vx - sizex, xy_pos.vy - size, (xy_pos.vx + sizex) + 1, (xy_pos.vy + size) + 1, otz, texture, color_array[glyphnum], color_array[glyphnum + 1], color_array[glyphnum + 2], color_array[glyphnum + 3]);
+    }
+    else
+    {
+        poly = FX_SetupPolyGT4(xy_pos.vx - sizex, xy_pos.vy - size, (xy_pos.vx + sizex) + 1, (xy_pos.vy + size) + 1, otz, texture, 0x202020,              0x202020,                  0x202020,                  0x202020);
+    }
+
+    if (poly != NULL)
+    {
+        poly->code = ((texture->color >> 24) & 0x3) | 0x3C;
+    }
+}
 
 void FX_SoulDustProcess(struct _FX_PRIM *fxPrim, struct _FXTracker *fxTracker)
 {
