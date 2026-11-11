@@ -681,7 +681,96 @@ unsigned long *DRAW_DrawGlowPoint(Instance *instance, long seg1, PrimPool *primP
 
 INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_DisplayTFace_zclipped_C);
 
-INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_Zclip_subdiv);
+long *DRAW_Zclip_subdiv(POLY_GT3 *texture, unsigned long **ot, int ndiv)
+{
+    SP_SUBDIV_STRUCT *sp; 
+    PrimPool *primPool;   
+    int clip;             
+
+    sp = (SP_SUBDIV_STRUCT *)getScratchAddr(128);
+
+    if (ndiv != 0)
+    {
+        sp = (SP_SUBDIV_STRUCT *)getScratchAddr(181);
+    }
+
+    gte_strgb3(&sp->color0, &sp->color1, &sp->color2);
+
+    gte_stv0(&sp->vertex0);
+    gte_stv1(&sp->vertex1);
+    gte_stv2(&sp->vertex2);
+
+    primPool = gameTrackerX.primPool;
+
+    primPool->nextPrim = (unsigned long *)texture;
+
+    *(long *)&sp->face_v1.vx = *(long *)&sp->vertex1.x;
+    *(long *)&sp->face_v0.vx = *(long *)&sp->vertex0.x;
+    *(long *)&sp->face_v0.vz = *(long *)&sp->vertex0.z;
+    *(long *)&sp->face_v1.vz = *(long *)&sp->vertex1.z;
+    *(long *)&sp->face_v2.vx = *(long *)&sp->vertex2.x;
+    *(long *)&sp->face_v2.vz = *(long *)&sp->vertex2.z;
+
+    sp->face_v01.vx = (sp->face_v0.vx + sp->face_v1.vx) / 2;
+    sp->face_v01.vy = (sp->face_v0.vy + sp->face_v1.vy) / 2;
+    sp->face_v01.vz = (sp->face_v0.vz + sp->face_v1.vz) / 2;
+
+    sp->face_v12.vx = (sp->face_v1.vx + sp->face_v2.vx) / 2;
+    sp->face_v12.vy = (sp->face_v1.vy + sp->face_v2.vy) / 2;
+    sp->face_v12.vz = (sp->face_v1.vz + sp->face_v2.vz) / 2;
+
+    sp->face_v20.vx = (sp->face_v2.vx + sp->face_v0.vx) / 2;
+    sp->face_v20.vy = (sp->face_v2.vy + sp->face_v0.vy) / 2;
+    sp->face_v20.vz = (sp->face_v2.vz + sp->face_v0.vz) / 2;
+
+    *(long *)&sp->face_uv0 = *(long *)&texture->u0;
+    *(long *)&sp->face_uv1 = *(long *)&texture->u1;
+    *(long *)&sp->face_uv2 = *(long *)&texture->u2;
+
+    sp->face_uv01.u = (sp->face_uv0.u + sp->face_uv1.u) >> 1;
+    sp->face_uv01.v = (sp->face_uv0.v + sp->face_uv1.v) >> 1;
+    
+    sp->face_uv12.u = (sp->face_uv1.u + sp->face_uv2.u) >> 1;
+    
+    sp->face_uv01.pad = sp->face_uv12.pad = sp->face_uv1.pad;
+
+    sp->face_uv12.v = (sp->face_uv1.v + sp->face_uv2.v) >> 1;
+
+    sp->face_uv20.u = (sp->face_uv2.u + sp->face_uv0.u) >> 1;
+    sp->face_uv20.v = (sp->face_uv2.v + sp->face_uv0.v) >> 1;
+
+    sp->face_uv20.pad = sp->face_uv0.pad;
+
+    sp->color01.r = (sp->color0.r + sp->color1.r) >> 1;
+    sp->color01.g = (sp->color0.g + sp->color1.g) >> 1;
+    sp->color01.b = (sp->color0.b + sp->color1.b) >> 1;
+
+    sp->color12.r = (sp->color1.r + sp->color2.r) >> 1;
+    sp->color12.g = (sp->color1.g + sp->color2.g) >> 1;
+    sp->color12.b = (sp->color1.b + sp->color2.b) >> 1;
+
+    sp->color20.r = (sp->color2.r + sp->color0.r) >> 1;
+    sp->color20.g = (sp->color2.g + sp->color0.g) >> 1;
+    sp->color20.b = (sp->color2.b + sp->color0.b) >> 1;
+
+    sp->color01.code = sp->color20.code = sp->color0.code;
+
+    clip =  DRAW_DisplayTFace_zclipped_C(&sp->face_v0,  &sp->face_v01, &sp->face_v20, &sp->face_uv0,  &sp->face_uv01, &sp->face_uv20, *(long *)&sp->color0,  *(long *)&sp->color01, *(long *)&sp->color20, primPool, ot, ndiv);
+    clip |= DRAW_DisplayTFace_zclipped_C(&sp->face_v20, &sp->face_v12, &sp->face_v2,  &sp->face_uv20, &sp->face_uv12, &sp->face_uv2,  *(long *)&sp->color20, *(long *)&sp->color12, *(long *)&sp->color2,  primPool, ot, ndiv);
+
+    sp->face_uv01.pad = sp->face_uv0.pad;
+    sp->face_uv20.pad = sp->face_uv1.pad;
+
+    clip |= DRAW_DisplayTFace_zclipped_C(&sp->face_v01, &sp->face_v12, &sp->face_v20, &sp->face_uv01, &sp->face_uv12, &sp->face_uv20, *(long *)&sp->color01, *(long *)&sp->color12, *(long *)&sp->color20, primPool, ot, ndiv);
+    clip |= DRAW_DisplayTFace_zclipped_C(&sp->face_v01, &sp->face_v1,  &sp->face_v12, &sp->face_uv01, &sp->face_uv1,  &sp->face_uv12, *(long *)&sp->color01, *(long *)&sp->color1,  *(long *)&sp->color12, primPool, ot, ndiv);
+
+    if ((clip & 0x5) != 0x4)
+    {
+        return (long *)primPool->nextPrim;
+    }
+
+    return NULL;
+}
 
 void DRAW_LoadingMessage()
 {
