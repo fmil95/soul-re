@@ -561,7 +561,61 @@ void VRAM_ClearVramBlock(BlockVramEntry *block)
     }
 }
 
+// Has regalloc and hoisting diffs
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/VRAM", AdjustVramCoordsObject);
+#else
+void AdjustVramCoordsObject(int oldx, int oldy, int newx, int newy, Object *object)
+{
+    TextureMT3 *texture;
+	int oldclutxoffset;
+	int oldclutyoffset;
+	int newclut;
+	int d;
+	int oldtpagexoffset;
+	int oldtpageyoffset;
+	int newtpage;
+	Model *model;
+	short diffy;
+	short diffx;
+
+    diffx = (newx & 0x3F) - (oldx & 0x3F);
+    diffy = (newy & 0xFF) - (oldy & 0xFF);
+
+    for (d = 0; d < object->numModels; d++)
+    {
+        model = object->modelList[d];
+
+        if (model->startTextures != NULL)
+        {
+            for (texture = model->startTextures; texture < model->endTextures; texture++)
+            {
+                oldclutxoffset = (newx & ~0xF) + (((texture->clut & 0x3F) << 4) - (oldx & ~0xF));
+                oldclutyoffset =  newy         +  ((texture->clut         >> 6) -  oldy);
+
+                newclut  = getClut(oldclutxoffset, oldclutyoffset);
+                newtpage = texture->tpage;
+
+                oldtpagexoffset = (newx & ~0x3F) + (((newtpage & 0xF)  << 6) - (oldx & ~0x3F));
+                oldtpageyoffset =  newy          + (((newtpage & 0x10) << 4) - (oldy & ~0xFF));
+
+                texture->v0 += diffy;
+                texture->v2 += diffy;
+                texture->v1 += diffy;
+
+                texture->u0 += diffx << (2 - ((newtpage >> 7) & 0x3));
+                texture->u1 += diffx << (2 - ((newtpage >> 7) & 0x3));
+                texture->u2 += diffx << (2 - ((newtpage >> 7) & 0x3));
+
+                newtpage = (newtpage & 0x1E0) | getTPage(0, 0, oldtpagexoffset, oldtpageyoffset);
+
+                texture->tpage = newtpage;
+                texture->clut  = newclut;
+            }
+        }
+    }
+}
+#endif
 
 BlockVramEntry *VRAM_InsertionSort(BlockVramEntry *rootNode, BlockVramEntry *newBlock)
 {
