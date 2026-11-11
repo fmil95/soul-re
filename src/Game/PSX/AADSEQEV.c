@@ -546,7 +546,65 @@ void aadUpdateSlotVolPan(AadSequenceSlot *slot)
     }
 }
 
+// Regalloc diffs
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", aadUpdateChannelPitchBend);
+#else
+void aadUpdateChannelPitchBend(AadSequenceSlot *slot, int channel)
+{
+    AadSynthVoice *voice;
+    int i;
+    int finePitch;
+    int newPitch;
+    int pitchWheelPos;
+    int pitchIndex;
+    long pitchValueBendAmount;
+    unsigned long tmp; // not from decls.h
+  
+    pitchWheelPos = slot->pitchWheel[channel] - 8192;
+
+    for (i = 0; i < 24; i++)
+    {
+        voice = &aadMem->synthVoice[i];
+
+        if ((voice->voiceID == (slot->slotID | channel)) && (voice->toneAtr->pitchBendMax != 0))
+        {
+            finePitch = pitchWheelPos / (8192 / voice->toneAtr->pitchBendMax);
+
+            tmp = voice->toneAtr->centerNote - 60;
+
+            pitchValueBendAmount = pitchWheelPos % (8192 / voice->toneAtr->pitchBendMax);
+
+            pitchIndex = tmp;
+            pitchIndex = voice->note - pitchIndex;
+            pitchIndex = pitchIndex  + finePitch;
+
+            pitchValueBendAmount = (aadStepsPerSemitone[pitchIndex] * pitchValueBendAmount) / (8192 / voice->toneAtr->pitchBendMax);
+
+            if (voice->toneAtr->centerFine & 0x80)
+            {
+                newPitch  = aadPitchTable[pitchIndex];
+                finePitch = 256 - voice->toneAtr->centerFine;
+
+                tmp = aadStepsPerCent[pitchIndex] * 100;
+
+                newPitch -= (tmp * finePitch) >> 23;
+            }
+            else
+            {
+                newPitch  = aadPitchTable[pitchIndex];
+                finePitch = voice->toneAtr->centerFine;
+
+                tmp = aadStepsPerCent[pitchIndex] * 100;
+
+                newPitch += (tmp * finePitch) >> 23;
+            }
+
+            SpuSetVoicePitch(i, (unsigned short)(newPitch + pitchValueBendAmount));
+        }
+    }
+}
+#endif
 
 void midiPolyphonicAftertouch()
 {
