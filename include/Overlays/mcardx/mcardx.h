@@ -5,12 +5,12 @@
 
 void func_880004A8(mcpsx_t *mcpsx);
 void func_88000464(mcpsx_t *mcpsx);
-void func_88000510(mcpsx_t *mcpsx, int err);   
+void func_88000510(mcpsx_t *mcpsx, mcpsx_err_t err);
 void func_880006B8(mcpsx_t *mcpsx);
 int func_880010DC(void *opaque, int param, menu_ctrl_t ctrl);
 int func_88001148(void *opaque, int param, menu_ctrl_t ctrl);
 int func_8800125C(void *opaque, int param, menu_ctrl_t ctrl);
-int func_880013DC(mcmenu_t *mcmenu, int index, int arg2);  
+int func_880013DC(mcmenu_t *mcmenu, int index, int arg2);
 int func_88001D50(mcmenu_t *mcmenu, int index);
 int func_88001DBC(mcmenu_t *mcmenu, int index);
 
