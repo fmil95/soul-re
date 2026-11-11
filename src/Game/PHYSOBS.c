@@ -3076,7 +3076,7 @@ void CollidePhysicalObject(Instance *instance, GameTracker *gameTracker)
     (void)gameTracker;
 
     hitinst = NULL;
-    
+
     tface = NULL;
 
     drawFlg    = 1;
@@ -3794,7 +3794,186 @@ int PHYSOBS_FigureDragForSlope(Instance *instance, int pathNumber, int *result)
     return didSomething;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/PHYSOBS", PHYSOB_CheckThrownLineCollision);
+int PHYSOB_CheckThrownLineCollision(Instance *instance, Instance *parent)
+{
+    PCollideInfo pcollideInfo; 
+    Position newPos; 
+    Position oldPos; 
+    Position orgNew; 
+    MATRIX *mat; 
+    PhysObWeaponAttributes *weapon; 
+
+    if (instance->oldMatrix == NULL)
+    {
+        return 0;
+    }
+
+    mat = &instance->oldMatrix[2];
+
+    oldPos.x = mat->t[0];
+    oldPos.y = mat->t[1];
+    oldPos.z = mat->t[2];
+
+    weapon = PhysObGetWeapon(instance);
+
+    if (weapon == NULL)
+    {
+        return 0;
+    }
+
+    mat = &instance->matrix[(int)weapon->ThrowSphere];
+
+    newPos.x = mat->t[0];
+    newPos.y = mat->t[1];
+    newPos.z = mat->t[2];
+
+    {
+        SVector line;
+        SVector delta; 
+        long dp; 
+
+        line.x = rsin(parent->rotation.z);
+        line.y = -rcos(parent->rotation.z);
+        line.z = 0;
+
+        delta.x = parent->position.x - oldPos.x;
+        delta.y = parent->position.y - oldPos.y;
+
+        dp = (delta.x * line.x) + (delta.y * line.y);
+
+        if (dp > 0)
+        {
+            SUB_SVEC(SVector, &line, Position, &newPos, Position, &oldPos);
+
+            dp /= MATH3D_LengthXY(line.x, line.y);
+
+            line.x = (line.x * dp) / 4096;
+            line.y = (line.y * dp) / 4096;
+            line.z = (line.z * dp) / 4096;
+
+            ADD_SVEC(Position, &oldPos, Position, &oldPos, SVector, &line);
+        }
+        else
+        {
+            oldPos.x = parent->position.x;
+            oldPos.y = parent->position.y;
+        }
+
+        COPY_SVEC(Position, &orgNew, Position, &newPos);
+
+        delta.x = newPos.x - oldPos.x;
+        delta.y = newPos.y - oldPos.y;
+
+        newPos.x = oldPos.x + ((delta.x << 1) + delta.x);
+        newPos.y = oldPos.y + ((delta.y << 1) + delta.y);
+
+        if ((CheckPhysObAbility(instance, 0x200) == 0) && (CheckPhysObFamily(instance, 7) == 0))
+        {
+            orgNew.x = oldPos.x + ((unsigned short)delta.x * 2);
+            orgNew.y = oldPos.y + ((unsigned short)delta.y * 2);
+        }
+    }
+
+    pcollideInfo.newPoint = (SVECTOR *)&newPos;
+    pcollideInfo.oldPoint = (SVECTOR *)&oldPos;
+
+    PHYSICS_CheckLineInWorld(instance, &pcollideInfo);
+
+    if (pcollideInfo.type == 0)
+    {
+        return 0;
+    }
+
+    if (pcollideInfo.type == 3)
+    {
+        TFace *tface; 
+        Level *level; 
+
+        tface = (TFace *)pcollideInfo.prim;
+
+        level = (Level *)pcollideInfo.inst;
+
+        if ((tface != NULL) && (level != NULL) && ((tface->textoff != 0xFFFF) && (((TextureFT3 *)((char *)level->terrain->StartTextureList + tface->textoff))->attr & 0x1000)))
+        {
+            return 0;
+        }
+    }
+
+    SUB_SVEC(Position, &orgNew,             Position, &newPos,             Position, &orgNew);
+    ADD_SVEC(Position, &instance->position, Position, &instance->position, Position, &orgNew);
+
+    COLLIDE_UpdateAllTransforms(instance, (SVECTOR *)&orgNew);
+
+    {
+        PhysObData *Data; 
+
+        Data = (PhysObData *)instance->extraData;
+
+        if ((CheckPhysObAbility(instance, 0x1000) != 0) && (!(Data->Mode & 0x800000)) && ((gameTrackerX.gameData.asmData.MorphTime == 1000) && (gameTrackerX.gameData.asmData.MorphType == 0)))
+        {
+            PhysObSplinter *splintDef; 
+            FXSplinter *splinterData; 
+
+            splintDef    = PhysObGetSplinter(instance);
+            splinterData = NULL;
+
+            if (splintDef != NULL)
+            {
+                splinterData = (FXSplinter *)splintDef->splinterData;
+            }
+
+            _FX_BuildSplinters(instance, NULL, NULL, NULL, splinterData, gFXT, NULL, NULL, 0);
+
+            INSTANCE_PlainDeath(instance);
+        }
+
+        {
+            SVector dir;
+            Instance *hitInst; 
+            TFace *tface; 
+            CollideInfo collideInfo; 
+
+            hitInst = NULL;
+
+            tface = NULL;
+
+            if (pcollideInfo.type == 3)
+            {
+                tface = (TFace *)pcollideInfo.prim;
+            }
+            else
+            {
+                hitInst = pcollideInfo.inst;
+            }
+
+            collideInfo.level = pcollideInfo.inst;
+            collideInfo.bspID = pcollideInfo.segment;
+
+            CheckForceCollision(instance, hitInst, tface, &collideInfo, &dir, GetObliqueDirection(instance, &dir));
+        }
+    }
+
+    if (pcollideInfo.type == 3)
+    {
+        Level *level; 
+        int bspID; 
+        BSPTree *bsp; 
+
+        level = (Level *)pcollideInfo.inst;
+
+        bspID = pcollideInfo.segment;
+        bsp   = &level->terrain->BSPTreeArray[bspID];
+
+        if (bsp->flags & 0x1)
+        {
+            return 3;
+        }
+
+        return 1;
+    }
+
+    return 2;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Game/PHYSOBS", PHYSOB_CheckDroppedLineCollision);
 
