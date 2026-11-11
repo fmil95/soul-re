@@ -3513,106 +3513,99 @@ void FX_SoulReaverBlade(Instance *instance, unsigned long **drawot)
 
     poly = (POLY_FT4 *)gameTrackerX.primPool->nextPrim;
 
-    if (data->ReaverSize != 0)
+    if ((data->ReaverSize != 0) && ((unsigned long *)(poly + 40) < gameTrackerX.primPool->lastPrim))
     {
-        if ((unsigned long *)(poly + 40) < gameTrackerX.primPool->lastPrim)
+        color = data->ReaverGlowColor;
+
+        sreaver = (Object *)objectAccess[10].object;
+
+        deg = data->ReaverDeg;
+
+        if ((sreaver != NULL) && ((instance->flags & 0x200) && (!(instance->flags & 0x800) && ((instance->matrix != NULL) && (instance->oldMatrix != NULL)))))
         {
-            color = data->ReaverGlowColor;
+            location.vz = 0;
 
-            sreaver = (Object *)objectAccess[10].object;
+            CompMatrix(theCamera.core.wcTransform, &instance->matrix[1], &mat);
 
-            deg = data->ReaverDeg;
+            SetRotMatrix(&mat);
+            SetTransMatrix(&mat);
 
-            if ((sreaver != NULL) && (instance->flags & 0x200))
+            reaverScale = (data->ReaverSize * data->ReaverScale) / 4096;
+
+            texture = FX_GetTextureObject(sreaver, 0, 0);
+
+            gte_lddqb(0);
+
+            color |= 0x2E000000;
+
+            *(short *)&poly2.u0 = *(short *)&texture->u2;
+            *(short *)&poly2.u1 = *(short *)&texture->u1;
+            *(short *)&poly2.u2 = *(short *)&texture->u0;
+
+            poly2.u3 = poly2.u1;
+            poly2.v3 = poly2.v2;
+
+            poly2.tpage = texture->tpage;
+            poly2.clut  = texture->clut;
+
+            for (i = 1; i < 40; i++)
             {
-                if (!(instance->flags & 0x800) && ((instance->matrix != NULL) && (instance->oldMatrix != NULL)))
+                int scale1; 
+
+                scale1 = ((40 - i) * 4096) / 40;
+                size   =  (40 - i) * 2;
+
+                if (reaverScale != 4096)
                 {
-                    location.vz = 0;
-
-                    CompMatrix(theCamera.core.wcTransform, &instance->matrix[1], &mat);
-
-                    SetRotMatrix(&mat);
-                    SetTransMatrix(&mat);
-
-                    reaverScale = (data->ReaverSize * data->ReaverScale) / 4096;
-
-                    texture = FX_GetTextureObject(sreaver, 0, 0);
-
-                    gte_lddqb(0);
-
-                    color |= 0x2E000000;
-
-                    *(short *)&poly2.u0 = *(short *)&texture->u2;
-                    *(short *)&poly2.u1 = *(short *)&texture->u1;
-                    *(short *)&poly2.u2 = *(short *)&texture->u0;
-
-                    poly2.u3 = poly2.u1;
-                    poly2.v3 = poly2.v2;
-
-                    poly2.tpage = texture->tpage;
-                    poly2.clut  = texture->clut;
-
-                    for (i = 1; i < 40; i++)
-                    {
-                        int scale1; 
-
-                        scale1 = ((40 - i) * 4096) / 40;
-
-                        size = (40 - i) * 2;
-
-                        if (reaverScale != 4096)
-                        {
-                            size = (size * reaverScale) / 4096;
-                        }
-
-                        if (i < 8)
-                        {
-                            scale1 = ((scale1 << 9) * i) / 4096;
-                        }
-
-                        location.vx = ((rcos(deg + (i * 256)) / 128) * scale1) / 4096;
-                        location.vy = ((rsin(deg + (i * 256)) / 128) * scale1) / 4096;
-
-                        gte_ldv0(&location);
-                        gte_lddqa(size);
-                        gte_nrtps();
-
-                        *(long *)&poly->u0 = *(long *)&poly2.u0;
-                        *(long *)&poly->u1 = *(long *)&poly2.u1;
-                        *(long *)&poly->u2 = *(long *)&poly2.u2;
-                        *(long *)&poly->u3 = *(long *)&poly2.u3;
-
-                        *(long *)&poly->r0 = color;
-
-                        gte_stsxy(&xy_pos);
-                        gte_stopz(&sizex);
-                        gte_stsz(&otz);
-
-                        sizey = (sizex + 0xFFFF) >> 16;
-                        sizex = (((sizex / 320) << 9) + 0xFFFF) >> 16;
-
-                        poly->x3 = poly->x1 = xy_pos.vx +  sizex;
-                        poly->x0 = poly->x2 = xy_pos.vx - (sizex / 2);
-                        poly->y0 = poly->y1 = xy_pos.vy - (sizey / 2);
-
-                        otz >>= 2;
-
-                        poly->y3 = poly->y2 = xy_pos.vy + sizey;
-
-                        if (((otz - 1) >= 0) && ((otz - 1) < 3071))
-                        {
-                            // addPrim(drawot[otz], poly);
-
-                            poly->tag = getaddr(&drawot[otz]) | 0x9000000;
-                            drawot[otz] = (unsigned long *)((intptr_t)poly++ & 0xFFFFFF);
-                        }
-
-                        location.vz -= size / 4;
-                    }
-
-                    gameTrackerX.primPool->nextPrim = (unsigned long *)poly;
+                    size = (size * reaverScale) / 4096;
                 }
+
+                if (i < 8)
+                {
+                    scale1 = ((scale1 << 9) * i) / 4096;
+                }
+
+                location.vx = ((rcos(deg + (i * 256)) / 128) * scale1) / 4096;
+                location.vy = ((rsin(deg + (i * 256)) / 128) * scale1) / 4096;
+
+                gte_ldv0(&location);
+                gte_lddqa(size);
+                gte_nrtps();
+
+                *(long *)&poly->u0 = *(long *)&poly2.u0;
+                *(long *)&poly->u1 = *(long *)&poly2.u1;
+                *(long *)&poly->u2 = *(long *)&poly2.u2;
+                *(long *)&poly->u3 = *(long *)&poly2.u3;
+
+                *(long *)&poly->r0 = color;
+
+                gte_stsxy(&xy_pos);
+                gte_stopz(&sizex);
+                gte_stsz(&otz);
+
+                sizey = (sizex + 0xFFFF)                >> 16;
+                sizex = (((sizex / 320) << 9) + 0xFFFF) >> 16;
+
+                poly->x3 = poly->x1 = xy_pos.vx +  sizex;
+                poly->x0 = poly->x2 = xy_pos.vx - (sizex / 2);
+                poly->y0 = poly->y1 = xy_pos.vy - (sizey / 2);
+
+                otz >>= 2;
+
+                poly->y3 = poly->y2 = xy_pos.vy + sizey;
+
+                if (((otz - 1) >= 0) && ((otz - 1) < 3071))
+                {
+                    // addPrim(drawot[otz], poly);
+
+                    poly->tag = getaddr(&drawot[otz]) | 0x9000000;
+                    drawot[otz] = (unsigned long *)((intptr_t)poly++ & 0xFFFFFF);
+                }
+
+                location.vz -= size / 4;
             }
+
+            gameTrackerX.primPool->nextPrim = (unsigned long *)poly;
         }
     }
 }
@@ -6598,7 +6591,212 @@ void FX_Lightning(MATRIX *wcTransform, unsigned long **ot, MATRIX *mat, short de
     } 
 }
 
-INCLUDE_ASM("asm/nonmatchings/Game/FX", FX_LightHouse);
+void FX_LightHouse(MATRIX *wcTransform, unsigned long **ot, Instance *instance, int startSeg, int endSeg, int segs, long beam_color)
+{
+    int sz0;  
+    int sz1; 
+    long otz; 
+    int width; 
+    SVector start;  
+    SVector end;  
+    DVECTOR sxy0; 
+    DVECTOR sxy1; 
+    DVECTOR xy0; 
+    DVECTOR xy1;  
+    int fade; 
+    int n; 
+    int increment;  
+    long black; 
+    long color;  
+    long color1;  
+    long color2; 
+    int fx; 
+    int fy;  
+    int length;  
+    int segcnt;  
+    int end_width;  
+    int flag;
+    MATRIX *swTransform;  
+
+    flag = 0;
+
+    if (instance->flags & 0x800)
+    {
+        return;
+    }
+
+    swTransform = instance->matrix;
+
+    if (swTransform == NULL)
+    {
+        return;
+    }
+
+    swTransform = &swTransform[startSeg];
+
+    start.x = swTransform->t[0];
+    start.y = swTransform->t[1];
+    start.z = swTransform->t[2];
+
+    swTransform = &instance->matrix[endSeg];
+
+    end.x = swTransform->t[0];
+    end.y = swTransform->t[1];
+    end.z = swTransform->t[2];
+
+    SetRotMatrix(wcTransform);
+
+    sz0 = 32767;
+
+    SetTransMatrix(wcTransform);
+
+    *(long *)&xy0 = 0;
+
+    color  = color2 = beam_color;
+    color1          = beam_color;
+     
+    black = 0;
+
+    fade = MATH3D_DistanceBetweenPositions((Position *)&start, (Position *)&end) / 2;
+
+    end_width = ((fade * 1056) / 4096) + 96;
+
+    length = 0;
+
+    n = 0;
+
+    fx = fy = 0;
+
+    segcnt = segs / 4;
+
+    increment = 4096 / segcnt;
+
+    for (; segcnt >= 0; segcnt--)
+    {
+        SVECTOR point; 
+
+        LoadAverageShort12((SVECTOR *)&start, (SVECTOR *)&end, 4096 - n, n, &point);
+
+        gte_ldv0(&point);
+        gte_nrtps();
+        gte_stsxy(&sxy1);
+        gte_stsz(&sz1);
+
+        if ((flag != 0) && ((sz1 > 240) && (sxy1.vx > -512) && (sxy1.vx < 512)))
+        {
+            int newlength; 
+            int newfx;  
+            int newfy;  
+
+            newfx = sxy1.vx - sxy0.vx;
+            newfy = sxy1.vy - sxy0.vy;
+
+            newlength = MATH3D_veclen2(newfx, newfy);
+
+            if ((length < newlength) && (newlength < 256))
+            {
+                length = newlength;
+
+                fx = newfx;
+                fy = newfy;
+            }
+        }
+
+        if (sz1 > 240)
+        {
+            flag = 1;
+
+            *(long *)&sxy0 = *(long *)&sxy1;
+        }
+
+        n += increment;
+    }
+
+    if (length != 0)
+    {
+        segcnt = segs;
+
+        increment = 4096 / segcnt;
+
+        n = 0;
+
+        for (; segcnt >= 0; segcnt--)
+        {
+            SVECTOR point;  
+
+            LoadAverageShort12((SVECTOR *)&start, (SVECTOR *)&end, 4096 - n, n, &point);
+
+            width  = (((end_width - 96) * n) / 4096) + 96;
+            width *= 320;
+
+            if (n >= 2048)
+            {
+                if (n > 2048)
+                {
+                    fade = (n * 2) - 4096;
+                }
+                else
+                {
+                    fade = 0;
+                }
+            }
+            else
+            {
+                fade = 4096 - (n * 2);
+            }
+
+            LoadAverageCol((unsigned char *)&color, (unsigned char *)&black, 4096 - fade, fade, (unsigned char *)&color2);
+
+            gte_ldv0(&point);
+            gte_nrtps();
+            gte_stsxy(&sxy1);
+            gte_stsz(&sz1);
+
+            if (sz0 < sz1)
+            {
+                otz = sz0 / 4;
+            }
+            else
+            {
+                otz = sz1 / 4;
+            }
+
+            if (n != 0)
+            {
+                int x; 
+
+                if (sz1 <= 0)
+                {
+                    sz1 = 1;
+                }
+
+                x = (fy * width) / (length * sz1);
+
+                xy1.vy = (fx * width) / (length * sz1);
+                xy1.vx = (x * 512) / 320;
+            }
+
+            if (n == increment)
+            {
+                *(long *)&xy0 = *(long *)&xy1;
+            }
+
+            if ((n != 0) && (otz > 0))
+            {
+                FX_Draw_Glowing_Line(ot, otz, &sxy0, &sxy1, &xy0, &xy1, color1, color2);
+            }
+
+            n += increment;
+
+            color1 = color2;
+
+            sz0 = sz1;
+
+            *(long *)&sxy0 = *(long *)&sxy1;
+            *(long *)&xy0  = *(long *)&xy1;
+        }
+    }
+}
 
 void FX_StartPassthruFX(Instance *instance, SVector *normal, SVector *point)
 {
