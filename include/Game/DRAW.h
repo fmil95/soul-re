@@ -19,4 +19,6 @@ void DRAW_GlowQuad(PrimPool *primPool, unsigned long **ot, long otz, long color,
 unsigned long *DRAW_DrawGlowPoint(Instance *instance, long seg1, PrimPool *primPool, unsigned long **ot, long color, short width, short height);
 unsigned long *DRAW_DrawGlowPoints2(Instance *instance, long seg1, long seg2, PrimPool *primPool, unsigned long **ot, long color, long height);
 
+extern long modelDQP;
+
 #endif

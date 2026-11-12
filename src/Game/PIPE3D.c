@@ -8,7 +8,7 @@
 #include "Game/STREAM.h"
 #include "Game/FX.h"
 #include "Game/INSTANCE.h"
-#include "Game/DRAW.h"
+#include "Game/VM.h"
 #include "Game/G2/QUATG2.h"
 #include "Game/PSX/MAIN.h"
 
@@ -613,7 +613,235 @@ void PIPE3D_CalcWorldToSplitPlaneTransform(MATRIX *wpTransform, SVector *normal,
     wpTransform->t[2] = vector.z;
 }
 
+// near match, scheduling diff in relation to gNormalList order
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/PIPE3D", PIPE3D_TransformAnimatedSplitInstanceVertices);
+#else
+long PIPE3D_TransformAnimatedSplitInstanceVertices(MVertex *vertexList, PVertex *poolVertex, Model *model, MATRIX *wcTransform, MATRIX *matrixPool, Mirror *mirror, MATRIX *lm, CVECTOR *vertexColor, CVECTOR *vertexSrcCol)
+{
+    TransformAnimatedInstanceVerticesWork_t *w = (TransformAnimatedInstanceVerticesWork_t *)getScratchAddr(0);
+    MATRIX *segMatrix;
+    long i;
+    Segment *segment = model->segmentList;
+    CVECTOR defaultRGBCD = *(CVECTOR *)&D_800D0D10; // this line needs proper assignment of the values 
+
+    (void)mirror;
+
+    if (vertexColor != NULL)
+    {
+        gte_SetRGBcd(&defaultRGBCD);
+    }
+
+    if (modelFadeValue != 0)
+    {
+        gte_lddp(modelFadeValue);
+    }
+    else
+    {
+        gte_lddp(0);
+    }
+
+    for (i = 0; i < model->numSegments; segment++, i++)
+    {
+        if (segment->lastVertex != -1)
+        {
+            MVertex *firstVertex;
+            MVertex *lastVertex;
+            MVertex *modelVertex;
+            Normal *n0;
+            Normal *n1;
+            Normal *n2;
+            CVECTOR white;
+            CVECTOR *c0;
+            CVECTOR *c1;
+            CVECTOR *c2;
+            long vtxcolflgs;
+
+            lastVertex = &vertexList[segment->lastVertex];
+
+            c0 = &white;
+            c1 = c0;
+            c2 = c0;
+
+            vtxcolflgs = 0;
+
+            firstVertex = &vertexList[segment->firstVertex];
+
+            white = *(CVECTOR *)&D_800D0D10;
+
+            segMatrix = &matrixPool[i];
+
+            if (vertexColor != NULL)
+            {
+                MulMatrix0(lm, segMatrix, &w->llm);
+                SetLightMatrix(&w->llm);
+            }
+
+            CompMatrix(wcTransform, segMatrix, (MATRIX *)&w->scTransform);
+
+            SetRotMatrix((MATRIX *)&w->scTransform);
+            SetTransMatrix((MATRIX *)&w->scTransform);
+
+            modelVertex = firstVertex;
+
+            for (lastVertex -= 2; modelVertex <= lastVertex; modelVertex += 3)
+            {
+                gte_ldv0(&modelVertex[0]);
+                gte_nrtv0tr();
+
+                n0 = &gNormalList[modelVertex[0].normal];
+                n1 = &gNormalList[modelVertex[1].normal];
+                n2 = &gNormalList[modelVertex[2].normal];
+
+                gte_stlvnl(&w->vector);
+
+                poolVertex->x = w->vector.x;
+                poolVertex->y = w->vector.y;
+                
+                *(short *)&poolVertex->otz = w->vector.z;
+
+                poolVertex++;
+
+                gte_ldv0(&modelVertex[1]);
+                gte_nrtv0tr();
+                gte_stlvnl(&w->vector);
+
+                poolVertex->x = w->vector.x;
+                poolVertex->y = w->vector.y;
+
+                *(short *)&poolVertex->otz = w->vector.z;
+
+                poolVertex++;
+
+                gte_ldv0(&modelVertex[2]);
+                gte_nrtv0tr();
+                gte_stlvnl(&w->vector);
+
+                poolVertex->x = w->vector.x;
+                poolVertex->y = w->vector.y;
+
+                *(short *)&poolVertex->otz = w->vector.z;
+
+                poolVertex++;
+
+                if (vertexColor != NULL)
+                {
+                    if (vertexSrcCol != NULL)
+                    {
+                        c0 = vertexSrcCol;
+                        c1 = vertexSrcCol + 1;
+                        c2 = c0 + 2;
+
+                        vertexSrcCol = c0 + 3;
+
+                        vtxcolflgs = *(long *)c0 & *(long *)c1 & *(long *)c2;
+                    }
+
+                    if (vtxcolflgs & 0x40000000)
+                    {
+                        vertexColor[0] = *c0;
+                        vertexColor[1] = *c1;
+                        vertexColor[2] = *c2;
+                    }
+                    else
+                    {
+                        if (modelFadeValue == 0)
+                        {
+                            gte_ldv0(n0);
+                            gte_SetRGBcd(c0);
+                            gte_nnccs();
+
+                            gte_ldv0(n1);
+                            gte_SetRGBcd(c1);
+                            gte_nnccs();
+
+                            gte_ldv0(n2);
+                            gte_SetRGBcd(c2);
+                            gte_nnccs();
+                        }
+                        else
+                        {
+                            gte_ldv0(n0);
+                            gte_SetRGBcd(c0);
+                            gte_nncds();
+
+                            gte_ldv0(n1);
+                            gte_SetRGBcd(c1);
+                            gte_nncds();
+
+                            gte_ldv0(n2);
+                            gte_SetRGBcd(c2);
+                            gte_nncds();
+                        }
+
+                        gte_strgb3(&vertexColor[0], &vertexColor[1], &vertexColor[2]);
+
+                        if (*(long *)c0 & 0x40000000)
+                        {
+                            vertexColor[0] = *c0;
+                        }
+
+                        if (*(long *)c1 & 0x40000000)
+                        {
+                            vertexColor[1] = *c1;
+                        }
+
+                        if (*(long *)c2 & 0x40000000)
+                        {
+                            vertexColor[2] = *c2;
+                        }
+                    }
+
+                    vertexColor += 3;
+                }
+            }
+
+            for (lastVertex += 2; modelVertex <= lastVertex; modelVertex++)
+            {
+                gte_ldv0(modelVertex);
+                gte_nrtv0tr();
+
+                n0 = &gNormalList[modelVertex->normal];
+
+                gte_stlvnl(&w->vector);
+
+                poolVertex->x = w->vector.x;
+                poolVertex->y = w->vector.y;
+
+                *(short *)&poolVertex->otz = w->vector.z;
+
+                poolVertex++;
+
+                if (vertexColor != NULL)
+                {
+                    if (vertexSrcCol != NULL)
+                    {
+                        c0 = vertexSrcCol++;
+                    }
+
+                    if (*(long *)c0 & 0x40000000)
+                    {
+                        *vertexColor = *c0;
+                    }
+                    else
+                    {
+                        gte_SetRGBcd(c0);
+                        gte_ldv0(n0);
+                        gte_nncds();
+                        gte_strgb(vertexColor);
+                    }
+
+                    vertexColor++;
+                }
+            }
+        }
+    }
+
+    gte_stdp(&modelDQP);
+
+    return 0;
+}
+#endif 
 
 void PIPE3D_TransformSplitInstanceVertices(MVertex *vertexList, PVertex *pvertex, Model *model, MATRIX *wpTransform, MATRIX *matrixPool, Mirror *mirror)
 {
