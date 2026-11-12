@@ -794,7 +794,7 @@ unsigned long *DRAW_DrawGlowPoint(Instance *instance, long seg1, PrimPool *primP
     return primPool->nextPrim;
 }
 
-// close match, but the block merging isn't accurate (99.38%)
+// Close match, but the block merging isn't accurate (99.38%)
 #ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_DisplayTFace_zclipped_C);
 #else

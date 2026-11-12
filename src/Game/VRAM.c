@@ -561,7 +561,7 @@ void VRAM_ClearVramBlock(BlockVramEntry *block)
     }
 }
 
-// Has regalloc and hoisting diffs (83% match)
+// Weak match. This one is for the permuter (83% match)
 #ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/VRAM", AdjustVramCoordsObject);
 #else

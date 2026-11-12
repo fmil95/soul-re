@@ -613,7 +613,7 @@ void PIPE3D_CalcWorldToSplitPlaneTransform(MATRIX *wpTransform, SVector *normal,
     wpTransform->t[2] = vector.z;
 }
 
-// close match, has an ordering issue with the globals (95.71%) 
+// Close match, has an ordering issue with the globals (95.71%) 
 #ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/PIPE3D", PIPE3D_TransformAnimatedSplitInstanceVertices);
 #else

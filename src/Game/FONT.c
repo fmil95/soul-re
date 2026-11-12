@@ -780,7 +780,7 @@ void FONT_VaReallyPrint(char *fmt, void *ap)
     long spaceWidth; // not from decls.h
     long fontXSize;  // not from decls.h
 
-    (void*)ap;
+    (void)ap;
 
     fontXSize = 8 * 65536;
     
