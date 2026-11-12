@@ -297,7 +297,152 @@ long FONT_Get2DImageIndex(unsigned char c)
     return fontTransTable[c];
 }
 
+// Worst match ever. Works but barely (78.98%) 
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", drawChar2DPoly);
+#else
+void drawChar2DPoly(long fpi, long x, long y)
+{
+    unsigned long **drawOT;  
+    POLY_FT4 *textPoly; 
+    long xl;                
+    long xr;                  
+    long yt;                   
+    long yb;                   
+    long w;                     
+    long h;                    
+    int u;                    
+    int v;                    
+    int u0;                     
+    int v0;                     
+    int u1;                    
+    int v1;                    
+    int u2;                    
+    int v2;                    
+    int u3;                
+    int v3;                     
+    
+    u = ABS((signed char)fontPos[fpi].x);
+    
+    xl = x;
+    
+    v = ABS((signed char)fontPos[fpi].y);
+    
+    u0 = u + fontTracker.font_vramU;
+    u2 = u0;
+    
+    drawOT = gameTrackerX.drawOT;
+    
+    v0 = v + fontTracker.font_vramV;
+    
+    w = ABS((signed char)fontPos[fpi].w);
+    
+    u1 = u0 + w;
+    v1 = v0;
+    
+    h = ABS((signed char)fontPos[fpi].h);
+    
+    v2 = v1 + h;
+    
+    u3 = u1;
+    v3 = v2;
+    
+    xr = xl + w;
+    
+    h -= 12;
+    
+    yt = y - h;
+    yb = y + 12;
+    
+    textPoly = (POLY_FT4 *)gameTrackerX.primPool->nextPrim;
+    
+    if ((signed char)fontPos[fpi].h < 0)
+    {
+        v0 = v3;
+        v2 = v1;
+        
+        v1 = v0;
+        v3 = v2;
+    }
+    
+    if ((signed char)fontPos[fpi].w < 0)
+    {
+        int holdu;                 
+        int holdv;              
+        
+        holdu = u0;
+        holdv = v0;
+        
+        u0 = u1;
+        v0 = v1;
+        
+        u1 = holdu;
+        v1 = holdv;
+        
+        holdu = u3;
+        holdv = v3;
+        
+        u3 = u2;
+        v3 = v2;
+        
+        u2 = holdu;
+        v2 = holdv;
+    }
+    
+    setPolyFT4(textPoly);
+    
+    if (fontTracker.color_local == 0)
+    {
+        textPoly->code = 45;
+    }
+    else
+    {
+        font_color_t *color; 
+        
+        textPoly->code = 44;
+        
+        color = &the_font_color_table[(int)fontTracker.color_local];
+        
+        setRGB0(textPoly, color->r, color->g, color->b);
+    }
+    
+    textPoly->u0 = u0;
+    textPoly->v0 = v0;
+    
+    textPoly->u1 = u1;
+    textPoly->v1 = v1;
+    
+    textPoly->u2 = u2;
+    textPoly->v2 = v2;
+    
+    textPoly->u3 = u3;
+    textPoly->v3 = v3;
+    
+    textPoly->x0 = xl;
+    textPoly->y0 = yt;
+    
+    textPoly->x1 = xr;
+    textPoly->y1 = yt;
+    
+    textPoly->x2 = xl;
+    textPoly->y2 = yb;
+    
+    textPoly->x3 = xr;
+    textPoly->y3 = yb;
+    
+    textPoly->code &= ~0x2;
+    
+    textPoly->tpage = fontTracker.font_tpage;
+    textPoly->clut  = fontTracker.font_clut;
+    
+    // addPrim(drawOT, textPoly);
+
+    *(int *)textPoly = getaddr(drawOT) | 0x9000000;
+    *(int *)drawOT   = (intptr_t)textPoly & 0xFFFFFF;
+    
+    gameTrackerX.primPool->nextPrim = (unsigned long *)(textPoly + 1);
+}
+#endif
 
 // Mediocre match, the code should work just the same but needs refining (90.76%)
 #ifndef NON_MATCHING
