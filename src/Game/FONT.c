@@ -300,7 +300,96 @@ INCLUDE_ASM("asm/nonmatchings/Game/FONT", drawChar2DPoly);
 
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_DrawChar2D);
 
+// Weak match, code should be equivalent though (87.47%) 
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_CharSpacing);
+#else
+long FONT_CharSpacing(char c, long fontXSize)
+{
+    long index;
+    long w;
+    long w1;
+    long w2;
+    long w3;
+    char i1;
+    char i2;
+    char i3;
+    
+    if (c != ' ')
+    {
+        index = FONT_Get2DImageIndex(c);
+        
+        if (index != -1)
+        {
+            int holdw;
+            int holdw2;
+        
+            i1 = (signed char)charMap[index][0];
+            i2 = (signed char)charMap[index][1];
+                
+            w2 = i1;
+                
+            i3 = (signed char)charMap[index][2];
+                
+            holdw = abs((signed char)fontPos[(signed char)w2].w);
+                
+            if ((signed char)fontPos[(signed char)w2].x < 0)
+            {
+                holdw = (signed char)fontPos[(signed char)w2].h;
+            }
+            
+            w1 = 8;
+                
+            if ((signed char)i1 >= 0)
+            {
+                w1 = holdw;
+            }
+                
+            holdw2 = abs((signed char)fontPos[(signed char)i2].w);
+            
+            w2 = w1;
+                
+            if ((signed char)i2 >= 0)
+            {
+                w2 = holdw2;
+            }
+                
+            holdw2 = abs((signed char)fontPos[(signed char)i3].w);
+            
+            w3 = w1;
+                
+            if ((signed char)i3 >= 0)
+            {
+                w3 = holdw2;
+            }
+                
+            if (w2 < w1)
+            {
+                if (w3 < w1)
+                {
+                    w = w1;
+                }
+                else
+                {
+                    w = w3;
+                }
+            }
+            else if (w3 < w2)
+            {
+                w = w2;
+            }
+            else
+            {
+                w = w3;
+            }
+                
+            return w + 1;
+        }
+    }
+    
+    return fontXSize;
+}
+#endif
 
 void FONT_AddCharToBuffer(char c, long x, long y)
 {
@@ -414,7 +503,7 @@ void FONT_SetCursor(short x, short y)
     fontTracker.font_ypos = y;
 }
 
-// scheduling only: the three hoisted constants end up before the loop entry test
+// Close match, only a few instructions reordered at the start (96.44%)
 #ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_VaReallyPrint);
 #else
@@ -426,6 +515,8 @@ void FONT_VaReallyPrint(char *fmt, void *ap)
     short tabWidth;  // not from decls.h
     long spaceWidth; // not from decls.h
     long fontXSize;  // not from decls.h
+
+    (void*)ap;
 
     fontXSize = 8 * 65536;
     
