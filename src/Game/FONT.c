@@ -414,7 +414,73 @@ void FONT_SetCursor(short x, short y)
     fontTracker.font_ypos = y;
 }
 
+// scheduling only: the three hoisted constants end up before the loop entry test
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_VaReallyPrint);
+#else
+void FONT_VaReallyPrint(char *fmt, void *ap)
+{
+    char *p;
+    long *xpos;
+    long *ypos;
+    short tabWidth;  // not from decls.h
+    long spaceWidth; // not from decls.h
+    long fontXSize;  // not from decls.h
+
+    fontXSize = 8 * 65536;
+    
+    spaceWidth = 8;
+    tabWidth   = 32;
+    
+    xpos = &fontTracker.font_xpos;
+    ypos = &fontTracker.font_ypos;
+
+    for (p = fmt; *p != '\0'; p++)
+    {
+        if (*p == '\n')
+        {
+            *xpos  = 10;
+            *ypos += 12;
+        } 
+        else if (*p == '@') 
+        {
+            unsigned char w;
+            unsigned char h;
+            
+            h = p[1] - 64;
+            w = p[2] - 64;
+            
+            FONT_AddCharToBuffer('@', *xpos, *ypos);
+            FONT_AddCharToBuffer('@', w,     h);
+            
+            p += 2;
+        } 
+        else if (*p == '$') 
+        {
+            *xpos = 10;
+            *ypos = 16;
+        } 
+        else if (*p == '\r') 
+        {
+            *xpos = 10;
+        }
+        else if (*p == '\t')
+        {
+            *xpos += tabWidth;
+        } 
+        else if ((*p == ' ') || (*p == '_')) 
+        {
+            *xpos += spaceWidth;
+        } 
+        else 
+        {
+            FONT_AddCharToBuffer(*p, *xpos, *ypos);
+            
+            *xpos += FONT_CharSpacing(*p, fontXSize >> 16);
+        }
+    }
+}
+#endif
 
 void FONT_FontPrintCentered(char *text, long y)
 {

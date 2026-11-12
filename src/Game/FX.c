@@ -626,7 +626,7 @@ void _FX_BuildSegmentedSplinters(Instance *instance, SVECTOR *center, SVECTOR *v
                     short base;  // not from decls.h
                     
                     range = splintDef->chunkVelXY - splintDef->chunkVelRng;
-                    base = splintDef->chunkVelRng * 2;
+                    base  = splintDef->chunkVelRng * 2;
                     
                     if (base != 0)
                     {
