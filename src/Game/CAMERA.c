@@ -4427,7 +4427,90 @@ void CAMERA_UpdateFocusRotationX(Camera *camera, Instance *focusInstance)
     }
 }
 
+// Near match, but has regswap when offset XYZ is assigned to normal XYZ (99.73%)
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/CAMERA", CAMERA_FollowPlayerTilt);
+#else
+void CAMERA_FollowPlayerTilt(Camera *camera, Instance *focusInstance)
+{
+    int speed;              
+    int mode;               
+    long focusInstanceStatus;
+
+    focusInstanceStatus = INSTANCE_Query(focusInstance, 9);
+
+    if (camera->flags & 0x10000)
+    {
+        mode = 5;
+    }
+    else
+    {
+        mode = 1;
+    }
+
+    if (camera->instance_mode & 0x4000000)
+    {
+        camera->targetTilt = -camera->focusInstance->rotation.x;
+
+        speed = 32;
+    }
+    else if (focusInstanceStatus & 0x40)
+    {
+        camera->targetTilt = -171;
+
+        speed = 32;
+    }
+    else
+    {
+        SVector offset; 
+        Normal normal; 
+
+        CAMERA_CalcFocusOffsetForSwim(&offset, camera);
+
+        normal.x = offset.x;
+        normal.z = offset.z;
+        normal.y = offset.y;
+
+        camera->targetTilt = CAMERA_CalcTilt(&normal, camera->targetFocusRotation.z) + 1024;
+        camera->targetTilt = *(volatile short *)&camera->targetTilt - 128; // TODO: the volatile keyword wasn't likely used here 
+
+        speed = ((AngleDiff(camera->targetTilt, camera->tilt) >= 0) ? AngleDiff(camera->targetTilt, camera->tilt) : -AngleDiff(camera->targetTilt, camera->tilt)) / 16;
+
+        if (speed > 32)
+        {
+            speed = 32;
+        }
+
+        {
+            int waterZ; 
+            int target; 
+            int height; 
+
+            waterZ = STREAM_GetLevelWithID(camera->focusInstance->currentStreamUnitID)->waterZLevel - 160;
+
+            height = camera->focusPoint.z - waterZ;
+
+            if (abs(height) < camera->focusDistance)
+            {
+                int fdsq; 
+
+                fdsq = (camera->focusDistance * camera->focusDistance) - (height * height);
+
+                target = ratan2(height, MATH3D_FastSqrt0(fdsq));
+
+                if (camera->targetTilt < target)
+                {
+                    camera->targetTilt = target;
+                }
+            }
+        }
+    }
+
+    CriticalDampAngle(mode, &camera->tilt, camera->targetTilt, &camera->tiltVel, &camera->tiltAccl, (short)speed);
+
+    camera->tfaceTilt = camera->tilt & 0xFFF;
+}
+#endif
 
 void CAMERA_FollowGoBehindPlayerWithTimer(Camera *camera)
 {

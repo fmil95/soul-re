@@ -630,7 +630,7 @@ TFace *COLLIDE_PointAndTerrainFunc(Terrain *terrain, PCollideInfo *pCollideInfo,
 
         if (bsp->flags & 0x2)
         {
-            if ((!(pCollideInfo->collideType & 0x80)) && ((!(bsp->flags & 0x40)) || (!(pCollideInfo->collideType & 0x100))))
+            if (!(pCollideInfo->collideType & 0x80) && (!(bsp->flags & 0x40) || !(pCollideInfo->collideType & 0x100)))
             {
                 continue;
             }
@@ -717,7 +717,7 @@ TFace *COLLIDE_PointAndTerrainFunc(Terrain *terrain, PCollideInfo *pCollideInfo,
 
                 for (CSpad->i = bspNode->c, tface = *(TFace**)&bspNode->a; CSpad->i != 0; CSpad->i--, tface++)
                 {
-                    if ((!(tface->attr & CSpad->ignore_attr)) || (tface->attr & CSpad->accept_attr))
+                    if (!(tface->attr & CSpad->ignore_attr) || (tface->attr & CSpad->accept_attr))
                     {
                         SVector *vertex0;
                         short *nrmlArray;       
@@ -770,7 +770,7 @@ TFace *COLLIDE_PointAndTerrainFunc(Terrain *terrain, PCollideInfo *pCollideInfo,
                         CSpad->dpv.x -= CSpad->dpv.z;
                         CSpad->dpv.y -= CSpad->dpv.z;
 
-                        if (((CSpad->dpv.x < 0) && (CSpad->dpv.y >= 0)) || ((CSpad->flags & 1) && ((CSpad->dpv.x > 0) && (CSpad->dpv.y <= 0))))
+                        if (((CSpad->dpv.x < 0) && (CSpad->dpv.y >= 0)) || ((CSpad->flags & 0x1) && ((CSpad->dpv.x > 0) && (CSpad->dpv.y <= 0))))
                         {
                             point = &CSpad->planePoint;
                             start = &CSpad->oldPos;
@@ -803,7 +803,7 @@ TFace *COLLIDE_PointAndTerrainFunc(Terrain *terrain, PCollideInfo *pCollideInfo,
                                         ADD_SVEC(SVector, &instance->splitPoint, SVector, &instance->splitPoint, Position, &bsp->globalOffset);
                                     }
                                 }
-                                else if (((unsigned short)tface->textoff == 0xFFFF) || (!((((TextureFT3 *)((char*)terrain->StartTextureList + tface->textoff))->attr) & 0x2000)) || (tface->attr & CSpad->accept_attr))
+                                else if (((unsigned short)tface->textoff == 0xFFFF) || !((((TextureFT3 *)((char*)terrain->StartTextureList + tface->textoff))->attr) & 0x2000) || (tface->attr & CSpad->accept_attr))
                                 {
                                     *(unsigned int *)&CSpad->newPos.x = *(unsigned int *)&CSpad->planePoint.x;
                                     *(unsigned int *)&CSpad->newPos.z = *(unsigned int *)&CSpad->planePoint.z;
