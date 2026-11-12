@@ -7552,7 +7552,7 @@ typedef struct SCollideInfo
 } SCollideInfo;
 
 // size: 0x7C
-struct PandTScratch
+typedef struct PandTScratch
 {
     // offset: 0x0000 (32 bytes)
     MATRIX posMatrix;
@@ -7588,7 +7588,7 @@ struct PandTScratch
     TFace *result;
     // offset: 0x0074 (8 bytes)
     SVector line;
-};
+} PandTScratch;
 
 // size: 0xC
 typedef struct

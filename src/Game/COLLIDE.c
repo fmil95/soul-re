@@ -548,7 +548,396 @@ TFace *COLLIDE_PointAndTerrain(Terrain *terrain, PCollideInfo *pcollideInfo, LCo
     return COLLIDE_PointAndTerrainFunc(terrain, pcollideInfo, 0, NULL, 0, 0, lcol);
 }
 
+// Has scheduling diffs for a couple of scratchpad stores
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/COLLIDE", COLLIDE_PointAndTerrainFunc);
+#else
+TFace *COLLIDE_PointAndTerrainFunc(Terrain *terrain, PCollideInfo *pCollideInfo, int Flags, short *Backface_Flag, long ignoreAttr, long acceptAttr, LCollideInfo *lcolinfo)
+{
+    PandTScratch *CSpad; 
+    void **stack;               
+    BSPNode *bspNode;   
+    int curTree;            
+    SVector *NewPos;    
+    SVector *OldPos;   
+    Instance *instance;
+    Vector *dpv; // not from decls.h
+
+    CSpad = (PandTScratch*)getScratchAddr(12);
+
+    stack = (void **)getScratchAddr(43);
+
+    NewPos = (SVector*)pCollideInfo->newPoint;
+    OldPos = (SVector*)pCollideInfo->oldPoint;
+
+    instance = pCollideInfo->instance;
+
+    CSpad->flags         = Flags;
+    CSpad->backface_flag = Backface_Flag;
+
+    CSpad->slack = 0;
+
+    CSpad->ignore_attr = ignoreAttr;
+    CSpad->accept_attr = acceptAttr;
+    
+    CSpad->normalList = (short*)terrain->normalList;
+    CSpad->vertexList = terrain->vertexList;
+    
+    CSpad->result = 0;
+
+    COPY_SVEC(SVector, &CSpad->newPos, SVector, NewPos);
+    COPY_SVEC(SVector, &CSpad->oldPos, SVector, OldPos);
+
+    SUB_SVEC(SVector, &CSpad->line, SVector, &CSpad->oldPos, SVector, &CSpad->newPos);
+
+    if (gameTrackerX.gameData.asmData.MorphTime != 1000)
+    {
+        CSpad->in_spectral = 2;
+
+        CSpad->slack = 2048;
+    }
+    else
+    {
+        if (gameTrackerX.gameData.asmData.MorphType == 1)
+        {
+            CSpad->in_spectral = 1;
+        }
+        else
+        {
+            CSpad->in_spectral = 0;
+        }
+    }
+
+    if (CSpad->backface_flag != NULL)
+    {
+        *CSpad->backface_flag = 0;
+    }
+
+    for (curTree = 0; curTree < terrain->numBSPTrees; curTree++)
+    {
+        BSPTree *bsp; 
+
+        bsp = &terrain->BSPTreeArray[curTree];
+
+        dpv = &CSpad->dpv;
+        
+        *stack = stack;
+
+        if (bsp->ID < 0)
+        {
+            continue;
+        }
+
+        if (bsp->flags & 0x2)
+        {
+            if ((!(pCollideInfo->collideType & 0x80)) && ((!(bsp->flags & 0x40)) || (!(pCollideInfo->collideType & 0x100))))
+            {
+                continue;
+            }
+        }
+
+        if ((bsp->flags & 0x4100) == 0x4100)
+        {
+            if (gameTrackerX.plan_collide_override == 0)
+            {
+                continue;
+            }
+        }
+        else
+        {
+            if ((bsp->flags & 0x100) && (gameTrackerX.block_collide_override == 0))
+            {
+                continue;
+            }
+
+            if ((bsp->flags & 0x4000) && (gameTrackerX.raziel_collide_override == 0))
+            {
+                continue;
+            }
+        }
+
+        if (((bsp->flags & 0x1000) && (CSpad->ignore_attr & 0x10)) || ((bsp->flags & 0x2000) && (gameTrackerX.monster_collide_override == 0)))
+        {
+            continue;
+        }
+
+        SUB_SVEC(SVector, &CSpad->newPos, SVector, &CSpad->newPos, Position, &bsp->globalOffset);
+        SUB_SVEC(SVector, &CSpad->oldPos, SVector, &CSpad->oldPos, Position, &bsp->globalOffset);
+
+        CSpad->posMatrix.m[0][0] = CSpad->newPos.x;
+        CSpad->posMatrix.m[0][1] = CSpad->newPos.y;
+        CSpad->posMatrix.m[0][2] = CSpad->newPos.z;
+
+        CSpad->posMatrix.m[1][0] = CSpad->oldPos.x;
+        CSpad->posMatrix.m[1][1] = CSpad->oldPos.y;
+        CSpad->posMatrix.m[1][2] = CSpad->oldPos.z;
+
+        gte_SetRotMatrix(&CSpad->posMatrix);
+
+        *++stack = bsp->bspRoot;
+
+        while (*stack != stack)
+        {
+            bspNode = (BSPNode *)*stack--;
+
+            if (bspNode->flags & 0x2)
+            {
+                if ((((short*)&bspNode->front)[1] + (CSpad->slack < CSpad->posMatrix.m[0][0])) && ((((short*)&bspNode->front)[1] + CSpad->slack) < CSpad->posMatrix.m[1][0]))
+                {
+                    continue;
+                }
+
+                if ((CSpad->posMatrix.m[0][0] < (((short*)&bspNode->d)[0] - CSpad->slack)) && (CSpad->posMatrix.m[1][0] < (((short*)&bspNode->d)[0] - CSpad->slack)))
+                {
+                    continue;
+                }
+
+                if ((CSpad->posMatrix.m[0][1] > (((short*)&bspNode->back)[0] + CSpad->slack)) && (((short*)&bspNode->back)[0] + (CSpad->slack < CSpad->posMatrix.m[1][1])))
+                {
+                    continue;
+                }
+
+                if ((CSpad->posMatrix.m[0][1] < (((short*)&bspNode->d)[1] - CSpad->slack)) && (CSpad->posMatrix.m[1][1] < (((short*)&bspNode->d)[1] - CSpad->slack)))
+                {
+                    continue;
+                }
+
+                if ((CSpad->posMatrix.m[0][2] > (((short*)&bspNode->back)[1] + CSpad->slack)) && ((((short*)&bspNode->back)[1] + CSpad->slack) < CSpad->posMatrix.m[1][2]))
+                {
+                    continue;
+                }
+
+                if ((CSpad->posMatrix.m[0][2] < (((short*)&bspNode->front)[0] - CSpad->slack)) && (CSpad->posMatrix.m[1][2] < (((short*)&bspNode->front)[0] - CSpad->slack)))
+                {
+                    continue;
+                }
+
+                {
+                TFace *tface;
+
+                for (CSpad->i = bspNode->c, tface = *(TFace**)&bspNode->a; CSpad->i != 0; CSpad->i--, tface++)
+                {
+                    if ((!(tface->attr & CSpad->ignore_attr)) || (tface->attr & CSpad->accept_attr))
+                    {
+                        SVector *vertex0;
+                        short *nrmlArray;       
+                        SVector *nrml;   
+                        short *sPtr;            
+                        SVector *point;   
+                        SVector *start;  
+                        SVector *line;   
+                        long len;                
+                        long t;                   
+                        int temp; // not from decls.h
+
+                        if ((CSpad->in_spectral == 2) && (tface->normal != *((-(((char*)tface - (char*)terrain->faceList) * 0x55555555) >> 2) + terrain->morphNormalIdx))) // this line is a bit nonsensical
+                        {
+                            COLLIDE_MakeNormal(terrain, tface, &CSpad->normal);
+                        }
+                        else
+                        {
+                            temp = (short)tface->normal;
+
+                            nrml = &CSpad->normal;
+
+                            nrmlArray = CSpad->normalList;
+
+                            if (temp >= 0)
+                            {
+                                sPtr = &nrmlArray[3 * temp];
+
+                                nrml->x = *sPtr++ & 0x1FFF;
+                                nrml->y = *sPtr++;
+                                nrml->z = *sPtr;
+                            }
+                            else
+                            {
+                                sPtr = &nrmlArray[3 * -temp];
+
+                                nrml->x = -(*sPtr++ & 0x1FFF);
+                                nrml->y =  -*sPtr++;
+                                nrml->z =  -*sPtr;
+                            }
+                        }
+
+                        vertex0 = (SVector*)&CSpad->vertexList[tface->face.v0];
+
+                        gte_ldv2_ext(vertex0);
+                        gte_ldv0(&CSpad->normal);
+                        gte_nrtv0();
+                        gte_stlvnl(dpv);
+
+                        CSpad->dpv.x -= CSpad->dpv.z;
+                        CSpad->dpv.y -= CSpad->dpv.z;
+
+                        if (((CSpad->dpv.x < 0) && (CSpad->dpv.y >= 0)) || ((CSpad->flags & 1) && ((CSpad->dpv.x > 0) && (CSpad->dpv.y <= 0))))
+                        {
+                            point = &CSpad->planePoint;
+                            start = &CSpad->oldPos;
+                            line  = &CSpad->line;
+
+                            len = CSpad->dpv.x - dpv->y;
+
+                            t = (len != 0) ? (dpv->y << 12) / len : 0;
+
+                            point->x = (short)(start->x + ((line->x * t) >> 12));
+                            point->y = (short)(start->y + ((line->y * t) >> 12));
+                            point->z = (short)(start->z + ((line->z * t) >> 12));
+
+                            if (COLLIDE_PointInTriangle(vertex0, (SVector *)&CSpad->vertexList[tface->face.v1], (SVector *)&CSpad->vertexList[tface->face.v2], &CSpad->planePoint, &CSpad->normal) != 0)
+                            {
+                                if (((CSpad->backface_flag != 0) && (CSpad->flags & 0x1)) && ((CSpad->dpv.x > 0) && (CSpad->dpv.y <= 0)))
+                                {
+                                    CSpad->backface_flag[0] = 1;
+                                }
+
+                                if (tface->attr & 0x8)
+                                {
+                                    if (gameTrackerX.gameFlags & 0x8000)
+                                    {
+                                        instance->waterFace        = tface;
+                                        instance->waterFaceTerrain = terrain;
+
+                                        instance->splitPoint = CSpad->planePoint;
+
+                                        ADD_SVEC(SVector, &instance->splitPoint, SVector, &instance->splitPoint, Position, &bsp->globalOffset);
+                                    }
+                                }
+                                else if (((unsigned short)tface->textoff == 0xFFFF) || (!((((TextureFT3 *)((char*)terrain->StartTextureList + tface->textoff))->attr) & 0x2000)) || (tface->attr & CSpad->accept_attr))
+                                {
+                                    *(unsigned int *)&CSpad->newPos.x = *(unsigned int *)&CSpad->planePoint.x;
+                                    *(unsigned int *)&CSpad->newPos.z = *(unsigned int *)&CSpad->planePoint.z;
+
+                                    *(unsigned int *)&CSpad->posMatrix.m[0][0] = *(unsigned int *)&CSpad->newPos.x;
+
+                                    CSpad->result = tface;
+
+                                    CSpad->posMatrix.m[0][2] = CSpad->newPos.z;
+
+                                    SUB_SVEC(SVector, &CSpad->line, SVector, &CSpad->oldPos, SVector, &CSpad->newPos);
+
+                                    if (lcolinfo != NULL)
+                                    {
+                                        lcolinfo->tface   = tface;
+                                        lcolinfo->terrain = terrain;
+                                        lcolinfo->curTree = curTree;
+                                    }
+                                }
+
+                                gte_ldsvrtrow0(&CSpad->posMatrix);
+                            }
+                        }
+                    }
+                }
+                }
+
+                if ((CSpad->result != 0) && (CSpad->in_spectral == 0))
+                {
+                    *stack = stack;
+                }
+            }
+            else
+            {
+                int plane_front_error; 
+                int plane_back_error;  
+
+                gte_ldv0(&bspNode->a);
+                gte_nrtv0();
+                gte_stlvnl(dpv);
+
+                CSpad->dpv.x -= bspNode->d;
+                CSpad->dpv.y -= bspNode->d;
+
+                if (CSpad->in_spectral != 0)
+                {
+                    plane_front_error = bspNode->front_spectral_error;
+                    plane_back_error  = bspNode->back_spectral_error;
+                }
+                else
+                {
+                    plane_front_error = bspNode->front_material_error;
+                    plane_back_error  = bspNode->back_material_error;
+                }
+
+                plane_front_error += 5;
+                plane_back_error  -= 5;
+
+                if (CSpad->dpv.y >= plane_front_error)
+                {
+                    if (plane_front_error >= CSpad->dpv.x)
+                    {
+                        if (bspNode->back != NULL)
+                        {
+                            *++stack = bspNode->back;
+                        }
+
+                        if (bspNode->front != NULL)
+                        {
+                            *++stack = bspNode->front;
+                        }
+                    }
+                    else
+                    {
+                        if (bspNode->front != NULL)
+                        {
+                            *++stack = bspNode->front;
+                        }
+                    }
+                }
+                else if (CSpad->dpv.y <= plane_back_error)
+                {
+                    if (CSpad->dpv.x >= plane_back_error)
+                    {
+                        if (bspNode->front != NULL)
+                        {
+                            *++stack = bspNode->front;
+                        }
+                    }
+
+                    if (bspNode->back != NULL)
+                    {
+                        *++stack = bspNode->back;
+                    }
+                }
+                else
+                {
+                    if (CSpad->dpv.x >= CSpad->dpv.y)
+                    {
+                        if (bspNode->front != NULL)
+                        {
+                            *++stack = bspNode->front;
+                        }
+
+                        if (bspNode->back != NULL)
+                        {
+                            *++stack = bspNode->back;
+                        }
+                    }
+                    else
+                    {
+                        if (bspNode->back != NULL)
+                        {
+                            *++stack = bspNode->back;
+                        }
+
+                        if (bspNode->front != NULL)
+                        {
+                            *++stack = bspNode->front;
+                        }
+                    }
+                }
+            }
+        }
+
+        ADD_SVEC(SVector, &CSpad->newPos, SVector, &CSpad->newPos, Position, &bsp->globalOffset);
+        ADD_SVEC(SVector, &CSpad->oldPos, SVector, &CSpad->oldPos, Position, &bsp->globalOffset);
+    }
+
+    COPY_SVEC(SVector, NewPos, SVector, &CSpad->newPos);
+
+    return CSpad->result;
+}
+#endif
 
 int COLLIDE_PointAndHFace(SVector *newPos, SVector *oldPos, HFace *hface, Model *model, SVector *hfNormal)
 {

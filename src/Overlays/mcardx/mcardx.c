@@ -524,7 +524,7 @@ void func_88000C34(void) {};
 
 void func_88000C68(void) {};
 
-mcard_status_t func_88000C8C(mcard_t *mcard)) {};
+mcard_status_t func_88000C8C(mcard_t *mcard) {};
 
 void func_88000EF8(mcard_t *mcard)
 {
