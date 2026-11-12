@@ -2,6 +2,7 @@
 #include "Game/MEMPACK.h"
 #include "Game/LOAD3D.h"
 #include "Game/VRAM.h"
+#include "Game/GAMELOOP.h"
 
 FontPos fontPos[] =
 {
@@ -298,7 +299,125 @@ long FONT_Get2DImageIndex(unsigned char c)
 
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", drawChar2DPoly);
 
+// Mediocre match, the code should work just the same but needs refining (90.76%)
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/FONT", FONT_DrawChar2D);
+#else
+void FONT_DrawChar2D(unsigned char c, long x, long y)
+{
+    long w;
+    long h;
+    long w1;
+    long w2;
+    long w3;
+    long xoff;
+    long yoff;
+    int i1;
+    int i2;
+    int i3;
+    
+    if (gameTrackerX.primPool->nextPrim <= (gameTrackerX.primPool->lastPrim - 12))
+    {
+        i1 = FONT_Get2DImageIndex(c);
+        
+        i2 = (signed char)charMap[i1][1];
+        i3 = (signed char)charMap[i1][2];
+        i1 = (signed char)charMap[i1][0];
+        
+        if (i1 >= 0)
+        {
+            w1 = abs((signed char)fontPos[i1].w);
+        }
+        else
+        {
+            w1 = 8;
+        }
+        
+        if (i2 >= 0)
+        {
+            w2 = abs((signed char)fontPos[i2].w);
+        }
+        else
+        {
+            w2 = w1;
+        }
+        
+        if (i3 >= 0)
+        {
+            w3 = abs((signed char)fontPos[i3].w);
+        }
+        else
+        {
+            w3 = w1;
+        }
+        
+        if (w2 < w1)
+        {
+            if (w3 < w1)
+            {
+                w = w1;
+            }
+            else
+            {
+                w = w3;
+            }
+        }
+        else if (w3 < w2)
+        {
+            w = w2;
+        }
+        else
+        {
+            w = w3;
+        }
+        
+        if (i1 >= 0)
+        {
+            h = abs((signed char)fontPos[i1].h);
+        }
+        else
+        {
+            h = 12;
+        }
+        
+        if (i1 >= 0)
+        {
+            xoff = x + ((w - w1) / 2);
+            yoff = y;
+            
+            drawChar2DPoly(i1, xoff, yoff);
+        }
+        
+        xoff = x + ((w - w2) / 2);
+        yoff = y;
+        
+        if (c == 'A')
+        {
+            yoff = y + 2;
+        }
+        
+        if (c == '\'')
+        {
+            y += 3;
+        }
+        
+        if (i2 >= 0)
+        {
+            drawChar2DPoly(i2, xoff, yoff);
+        }
+        
+        if (i3 >= 0)
+        {
+            xoff = x + ((w - w3) / 2);
+            yoff = y + 1;
+            
+            yoff -= h;
+            
+            drawChar2DPoly(i3, xoff, yoff);
+        }
+    }
+}
+#endif
 
 // Weak match, code should be equivalent though (87.47%) 
 #ifndef NON_MATCHING

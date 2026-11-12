@@ -12,6 +12,7 @@ void FONT_FontPrintCentered(char *text, long y);
 void FONT_SetColorIndex(int color);
 void FONT_SetColorIndexCol(int color, int r, int g, int b);
 void FONT_Init();
+void drawChar2DPoly(long fpi, long x, long y);
 void FONT_DrawChar2D(unsigned char c, long x, long y);
 void FONT_ReloadFont();
 long FONT_CharSpacing(char c, long fontXSize);
