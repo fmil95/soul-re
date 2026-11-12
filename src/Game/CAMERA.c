@@ -4482,27 +4482,27 @@ void CAMERA_FollowPlayerTilt(Camera *camera, Instance *focusInstance)
         }
 
         {
-            int waterZ; 
-            int target; 
-            int height; 
+        int waterZ; 
+        int target; 
+        int height; 
 
-            waterZ = STREAM_GetLevelWithID(camera->focusInstance->currentStreamUnitID)->waterZLevel - 160;
+        waterZ = STREAM_GetLevelWithID(camera->focusInstance->currentStreamUnitID)->waterZLevel - 160;
 
-            height = camera->focusPoint.z - waterZ;
+        height = camera->focusPoint.z - waterZ;
 
-            if (abs(height) < camera->focusDistance)
+        if (abs(height) < camera->focusDistance)
+        {
+            int fdsq; 
+
+            fdsq = (camera->focusDistance * camera->focusDistance) - (height * height);
+
+            target = ratan2(height, MATH3D_FastSqrt0(fdsq));
+
+            if (camera->targetTilt < target)
             {
-                int fdsq; 
-
-                fdsq = (camera->focusDistance * camera->focusDistance) - (height * height);
-
-                target = ratan2(height, MATH3D_FastSqrt0(fdsq));
-
-                if (camera->targetTilt < target)
-                {
-                    camera->targetTilt = target;
-                }
+                camera->targetTilt = target;
             }
+        }
         }
     }
 

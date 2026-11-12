@@ -23,6 +23,7 @@
 #include "Game/G2/ANMG2ILF.h"
 #include "Game/MONSTER/HUMAN.h"
 #include "Game/OBTABLE.h"
+#include "Game/PIPE3D.h"
 #include "Game/PSX/MAIN.h"
 
 static burntTuneType burntTest = {300, 2};
@@ -2721,7 +2722,76 @@ int MONSTER_CalcDamageIntensity(int hp, int maxHp)
     return ((maxHp - hp) * 256) / maxHp;
 }
 
+// Near match, has regswap where the tmp local is compared (99.74%)
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MONSTER_ProcessClosestVerts);
+#else
+void MONSTER_ProcessClosestVerts(Instance *instance, SVector *location, void (*processVert_cb)(), void *cb_data)
+{
+    int i;
+    Model *model;
+    MVertex *vertexList;
+    Vector locVec;
+    long flag;
+    Segment *seg; // not from decls.h
+    int z;        // not from decls.h
+
+    model = instance->object->modelList[instance->currentModel];
+    
+    vertexList = &model->vertexList[0];
+    seg        = &model->segmentList[1];
+
+    for (i = 1; i < model->numSegments; i++, seg++)
+    {
+        if (seg->lastVertex != -1)
+        {
+            MVertex *firstVertex;
+            MVertex *lastVertex;
+            MVertex *modelVertex;
+            MATRIX inverse;
+            int tmp;
+            int dist;
+             
+            firstVertex = &vertexList[seg->firstVertex];
+            lastVertex  = &vertexList[seg->lastVertex];
+
+            PIPE3D_InvertTransform(&inverse, &instance->matrix[i]);
+            
+            SetRotMatrix(&inverse);
+            SetTransMatrix(&inverse);
+            
+            RotTrans((SVECTOR *)location, (VECTOR *)&locVec, &flag);
+
+            for (modelVertex = firstVertex; modelVertex <= lastVertex; modelVertex++)
+            {
+                tmp = modelVertex->vertex.x - locVec.x;
+                
+                dist = abs(tmp);
+                
+                tmp = modelVertex->vertex.y - locVec.y;
+                
+                tmp = abs(tmp);
+                
+                dist = (dist <= tmp) ? tmp : dist;
+                
+                z = modelVertex->vertex.z;
+                
+                tmp  = z;
+                tmp -= locVec.z;
+                
+                tmp = abs(tmp);
+                
+                if (tmp < dist)
+                {
+                    tmp = dist;
+                }
+                
+                processVert_cb(instance, modelVertex - vertexList, i, tmp, cb_data);
+            }
+        }
+    }
+}
+#endif
 
 void ProcessBloodyMess(Instance *instance, int vertidx, int segidx, int dist, void *cb_data)
 {
