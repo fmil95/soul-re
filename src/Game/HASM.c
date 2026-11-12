@@ -52,3 +52,48 @@ long BSP_SphereIntersectsViewVolume_C(Sphere *sphere, Camera *camera)
     
     return 0;
 }
+
+// April 14th
+short MATH3D_racos_C(short cos_ang_dest_act)
+{
+    short test_angle; 
+    short cos_ang; 
+    short step; 
+    short cos_ang_dest; 
+
+    test_angle = 512;
+    
+    cos_ang = 0;
+    
+    step = 256;
+    
+    if (cos_ang_dest_act >= 0) 
+    {
+        cos_ang_dest = cos_ang_dest_act;
+    }
+    else 
+    {
+        cos_ang_dest = -cos_ang_dest_act;
+    }
+    
+    for ( ; (cos_ang != cos_ang_dest) && (step != 0); step >>= 1)
+    {
+        cos_ang = rcos(test_angle);
+        
+        if (cos_ang < cos_ang_dest)
+        {
+            test_angle -= step;
+        }
+        else 
+        {
+            test_angle += step;
+        }
+    }
+    
+    if (cos_ang_dest_act < 0) 
+    {
+        test_angle = 2048 - test_angle;
+    }
+    
+    return test_angle;
+}
