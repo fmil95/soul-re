@@ -794,7 +794,350 @@ unsigned long *DRAW_DrawGlowPoint(Instance *instance, long seg1, PrimPool *primP
     return primPool->nextPrim;
 }
 
+// close match, but the block merging isn't accurate 
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_DisplayTFace_zclipped_C);
+#else
+int DRAW_DisplayTFace_zclipped_C(SVECTOR *vertex0, SVECTOR *vertex1, SVECTOR *vertex2, UVTYPE *uv0, UVTYPE *uv1, UVTYPE *uv2, long color0, long color1, long color2, PrimPool *primPool, unsigned long **ot, int ndiv)
+{
+    SP_SUBDIV_STRUCT *sp;
+    int maxz;
+    int point;
+    int n;
+    POLY_GT4 *prim;
+    long *ptr;
+    long clip;
+
+    sp = (SP_SUBDIV_STRUCT *)getScratchAddr(128);
+
+    gte_ldv0(vertex0);
+    gte_nrtv0tr();
+    gte_stlvnl(&sp->out[0]);
+
+    gte_ldv0(vertex1);
+    gte_nrtv0tr();
+    gte_stlvnl(&sp->out[1]);
+
+    gte_ldv0(vertex2);
+    gte_nrtv0tr();
+    gte_stlvnl(&sp->out[2]);
+
+    if ((sp->out[0].z < 160) && (sp->out[1].z < 160) && (sp->out[2].z < 160))
+    {
+        return 2;
+    }
+
+    point = 0;
+
+    maxz = 160;
+
+    prim = (POLY_GT4 *)primPool->nextPrim;
+
+    sp->texinfo[0] = *(long *)uv0;
+
+    clip = 0xFFFF;
+
+    sp->texinfo[1] = *(long *)uv1;
+    sp->texinfo[2] = *(long *)uv2;
+
+    sp->color[0] = color0;
+    sp->color[1] = color1;
+    sp->color[2] = color2;
+
+    ptr = (long *)&prim->r0;
+
+    for (n = 0; n < 3; n++)
+    {
+        int next_point_in_vv;
+        int current_point_in_vv;
+        int next;
+
+        next = n + 1;
+
+        if (next >= 3)
+        {
+            next = 0;
+        }
+
+        current_point_in_vv = (sp->out[n].z    < 160) ^ 1;
+        next_point_in_vv    = (sp->out[next].z < 160) ^ 1;
+
+        if (current_point_in_vv != 0)
+        {
+            long clip_tmp;
+            long zval;
+            SVECTOR *tmpptr;
+
+            switch (n)
+            {
+            case 0:
+            default:
+                tmpptr = vertex0;
+                break;
+            case 1:
+                tmpptr = vertex1;
+                break;
+            case 2:
+                tmpptr = vertex2;
+                break;
+            }
+
+            gte_ldv0(tmpptr);
+            gte_nrtps();
+
+            ptr[2] = sp->texinfo[n];
+            ptr[0] = sp->color[n];
+
+            gte_stsxy(&ptr[1]);
+            gte_stsxy(&sp->sxy[point]);
+            gte_stsz(&zval);
+
+            if (maxz < zval)
+            {
+                maxz = zval;
+            }
+
+            clip_tmp = (unsigned long)((short *)ptr)[2] >> 31;
+
+            if (((short *)ptr)[3] < 0)
+            {
+                clip_tmp |= 0x2;
+            }
+
+            if (((short *)ptr)[2] > 512)
+            {
+                clip_tmp |= 0x4;
+            }
+
+            if (((short *)ptr)[3] > 240)
+            {
+                clip_tmp |= 0x8;
+            }
+
+            clip &= clip_tmp;
+
+            point++;
+
+            ptr += 3;
+        }
+
+        if (current_point_in_vv != next_point_in_vv)
+        {
+            long zn;
+            long znext;
+            long interp1;
+            long interp2;
+            long clip_tmp;
+
+            zn    = sp->out[n].z;
+            znext = sp->out[next].z;
+
+            interp1 = abs(((zn - 160) << 12) / (zn - znext));
+            interp2 = 4096 - interp1;
+
+            {
+            long x;
+            long y;
+
+            x = ((sp->out[n].x + (((sp->out[next].x - sp->out[n].x) * interp1) / 4096)) * 2) + 256;
+
+            if (x > 1023)
+            {
+                x = 1023;
+            }
+
+            if (x < -1023)
+            {
+                x = -1023;
+            }
+
+            ((short *)ptr)[2] = x;
+
+            y = ((sp->out[n].y + (((sp->out[next].y - sp->out[n].y) * interp1) / 4096)) * 2) + 120;
+
+            if (y > 1023)
+            {
+                y = 1023;
+            }
+
+            if (y < -1023)
+            {
+                y = -1023;
+            }
+
+            ((short *)ptr)[3] = y;
+            }
+
+            gte_lddp(interp2);
+            gte_ldbv(&sp->texinfo[n]);
+            gte_ngpf12();
+            gte_lddp(interp1);
+            gte_ldbv(&sp->texinfo[next]);
+            gte_ngpl12();
+            gte_stbv(&ptr[2]);
+
+            gte_lddp(interp2);
+            gte_ldcv(&sp->color[n]);
+            gte_ngpf12();
+            gte_lddp(interp1);
+            gte_ldcv(&sp->color[next]);
+            gte_ngpl12();
+            gte_stcv(ptr);
+
+            *(long *)&sp->sxy[point] = ptr[1];
+
+            clip_tmp = (unsigned long)((short *)ptr)[2] >> 31;
+
+            if (((short *)ptr)[3] < 0)
+            {
+                clip_tmp |= 0x2;
+            }
+
+            if (((short *)ptr)[2] > 512)
+            {
+                clip_tmp |= 0x4;
+            }
+
+            if (((short *)ptr)[3] > 240)
+            {
+                clip_tmp |= 0x8;
+            }
+
+            clip &= clip_tmp;
+
+            point++;
+
+            ptr += 3;
+        }
+    }
+
+    if (clip != 0)
+    {
+        return 2;
+    }
+
+    maxz >>= 2;
+
+    if (maxz < 3072)
+    {
+        if (ndiv == 0)
+        {
+            int next;
+            int flag;
+
+            flag = 0;
+
+            for (n = 0; n < point; n++)
+            {
+                next = n + 1;
+
+                if (next >= point)
+                {
+                    next = 0;
+                }
+
+                if ((abs_diff(sp->sxy[n].vx, sp->sxy[next].vx) >= 1024) || (abs_diff(sp->sxy[n].vy, sp->sxy[next].vy) >= 512))
+                {
+                    flag = 1;
+                    break;
+                }
+            }
+
+            if ((flag == 0) && (point == 4))
+            {
+                if ((abs_diff(sp->sxy[3].vx, sp->sxy[1].vx) >= 1024) || (abs_diff(sp->sxy[3].vy, sp->sxy[1].vy) >= 512))
+                {
+                    flag = 1;
+                }
+            }
+
+            if (flag != 0)
+            {
+                gte_ldv3(vertex0, vertex1, vertex2);
+
+                ((ColorType *)&sp->color[2])->code = ((ColorType *)&sp->color[0])->code;
+
+                gte_ldrgb3(&sp->color[0], &sp->color[1], &sp->color[2]);
+
+                *(long *)&prim->u0 = *(long *)uv0;
+                *(long *)&prim->u1 = *(long *)uv1;
+                *(long *)&prim->u2 = *(long *)uv2;
+
+                DRAW_Zclip_subdiv((POLY_GT3 *)prim, ot, 1);
+
+                return 1;
+            }
+        }
+
+        {
+        long opz;
+
+        gte_ldsxy3(*(long *)&prim->x0, *(long *)&prim->x1, *(long *)&prim->x2);
+        gte_nclip();
+
+        prim->clut  = ((unsigned short *)&sp->texinfo[0])[1];
+        prim->tpage = ((unsigned short *)&sp->texinfo[1])[1];
+
+        gte_stopz(&opz);
+
+        if (opz > 0)
+        {
+            return 4;
+        }
+        }
+
+        if (point == 3)
+        {
+            prim->code = color0 >> 24;
+
+            // addPrim(ot[maxz], prim);
+
+            prim->tag = getaddr(&ot[maxz]) | 0x9000000;
+            ot[maxz]  = (unsigned long *)((intptr_t)prim & 0xFFFFFF);
+
+            primPool->nextPrim += sizeof(POLY_GT3) / sizeof(unsigned long);
+            primPool->numPrims++;
+
+            return 1;
+        }
+
+        if (point == 4)
+        {
+            long temp1;
+            long temp2;
+            long temp3;
+
+            temp1 = *(long *)&prim->r2;
+            temp2 = *(long *)&prim->x2;
+            temp3 = *(long *)&prim->u2;
+
+            prim->code = (color0 >> 24) | 0x8;
+
+            *(long *)&prim->r2 = *(long *)&prim->r3;
+            *(long *)&prim->x2 = *(long *)&prim->x3;
+            *(long *)&prim->u2 = *(long *)&prim->u3;
+
+            *(long *)&prim->r3 = temp1;
+            *(long *)&prim->x3 = temp2;
+            *(long *)&prim->u3 = temp3;
+
+            // addPrim(ot[maxz], prim);
+
+            prim->tag = getaddr(&ot[maxz]) | 0xC000000;
+            ot[maxz]  = (unsigned long *)((intptr_t)prim & 0xFFFFFF);
+
+            primPool->nextPrim += sizeof(POLY_GT4) / sizeof(unsigned long);
+            primPool->numPrims++;
+
+            return 1;
+        }
+    }
+    else
+    {
+        return 2;
+    }
+}
+#endif
 
 long *DRAW_Zclip_subdiv(POLY_GT3 *texture, unsigned long **ot, int ndiv)
 {

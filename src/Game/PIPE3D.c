@@ -613,7 +613,7 @@ void PIPE3D_CalcWorldToSplitPlaneTransform(MATRIX *wpTransform, SVector *normal,
     wpTransform->t[2] = vector.z;
 }
 
-// near match, scheduling diff in relation to gNormalList order
+// near match, scheduling diff in relation to gNormalList's order
 #ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/PIPE3D", PIPE3D_TransformAnimatedSplitInstanceVertices);
 #else
@@ -623,7 +623,7 @@ long PIPE3D_TransformAnimatedSplitInstanceVertices(MVertex *vertexList, PVertex 
     MATRIX *segMatrix;
     long i;
     Segment *segment = model->segmentList;
-    CVECTOR defaultRGBCD = *(CVECTOR *)&D_800D0D10; // this line needs proper assignment of the values 
+    CVECTOR defaultRGBCD = *(CVECTOR *)&D_800D0D10; // TODO: this line needs proper assignment of the values 
 
     (void)mirror;
 
@@ -667,13 +667,14 @@ long PIPE3D_TransformAnimatedSplitInstanceVertices(MVertex *vertexList, PVertex 
 
             firstVertex = &vertexList[segment->firstVertex];
 
-            white = *(CVECTOR *)&D_800D0D10;
+            white = *(CVECTOR *)&D_800D0D10; // ???
 
             segMatrix = &matrixPool[i];
 
             if (vertexColor != NULL)
             {
                 MulMatrix0(lm, segMatrix, &w->llm);
+                
                 SetLightMatrix(&w->llm);
             }
 
