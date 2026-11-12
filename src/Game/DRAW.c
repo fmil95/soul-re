@@ -794,7 +794,7 @@ unsigned long *DRAW_DrawGlowPoint(Instance *instance, long seg1, PrimPool *primP
     return primPool->nextPrim;
 }
 
-// close match, but the block merging isn't accurate 
+// close match, but the block merging isn't accurate (99.38%)
 #ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_DisplayTFace_zclipped_C);
 #else
@@ -833,10 +833,9 @@ int DRAW_DisplayTFace_zclipped_C(SVECTOR *vertex0, SVECTOR *vertex1, SVECTOR *ve
 
     prim = (POLY_GT4 *)primPool->nextPrim;
 
-    sp->texinfo[0] = *(long *)uv0;
-
     clip = 0xFFFF;
 
+    sp->texinfo[0] = *(long *)uv0;
     sp->texinfo[1] = *(long *)uv1;
     sp->texinfo[2] = *(long *)uv2;
 
@@ -932,7 +931,7 @@ int DRAW_DisplayTFace_zclipped_C(SVECTOR *vertex0, SVECTOR *vertex1, SVECTOR *ve
             zn    = sp->out[n].z;
             znext = sp->out[next].z;
 
-            interp1 = abs(((zn - 160) << 12) / (zn - znext));
+            interp1 = abs(((zn - 160) * 4096) / (zn - znext));
             interp2 = 4096 - interp1;
 
             {
@@ -941,12 +940,12 @@ int DRAW_DisplayTFace_zclipped_C(SVECTOR *vertex0, SVECTOR *vertex1, SVECTOR *ve
 
             x = ((sp->out[n].x + (((sp->out[next].x - sp->out[n].x) * interp1) / 4096)) * 2) + 256;
 
-            if (x > 1023)
+            if (x >= 1024)
             {
                 x = 1023;
             }
 
-            if (x < -1023)
+            if (x <= -1024)
             {
                 x = -1023;
             }
@@ -955,12 +954,12 @@ int DRAW_DisplayTFace_zclipped_C(SVECTOR *vertex0, SVECTOR *vertex1, SVECTOR *ve
 
             y = ((sp->out[n].y + (((sp->out[next].y - sp->out[n].y) * interp1) / 4096)) * 2) + 120;
 
-            if (y > 1023)
+            if (y >= 1024)
             {
                 y = 1023;
             }
 
-            if (y < -1023)
+            if (y <= -1024)
             {
                 y = -1023;
             }

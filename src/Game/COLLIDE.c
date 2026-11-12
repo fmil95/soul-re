@@ -548,7 +548,7 @@ TFace *COLLIDE_PointAndTerrain(Terrain *terrain, PCollideInfo *pcollideInfo, LCo
     return COLLIDE_PointAndTerrainFunc(terrain, pcollideInfo, 0, NULL, 0, 0, lcol);
 }
 
-// Has scheduling diffs for a couple of scratchpad stores
+// Has scheduling diffs for a couple of flag stores and the first for loop (99.85%)
 #ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/COLLIDE", COLLIDE_PointAndTerrainFunc);
 #else
@@ -645,7 +645,7 @@ TFace *COLLIDE_PointAndTerrainFunc(Terrain *terrain, PCollideInfo *pCollideInfo,
         }
         else
         {
-            if ((bsp->flags & 0x100) && (gameTrackerX.block_collide_override == 0))
+            if ((bsp->flags & 0x100)  && (gameTrackerX.block_collide_override == 0))
             {
                 continue;
             }
@@ -682,7 +682,7 @@ TFace *COLLIDE_PointAndTerrainFunc(Terrain *terrain, PCollideInfo *pCollideInfo,
 
             if (bspNode->flags & 0x2)
             {
-                if ((((short*)&bspNode->front)[1] + (CSpad->slack < CSpad->posMatrix.m[0][0])) && ((((short*)&bspNode->front)[1] + CSpad->slack) < CSpad->posMatrix.m[1][0]))
+                if (((((short*)&bspNode->front)[1] + CSpad->slack) < CSpad->posMatrix.m[0][0]) && ((((short*)&bspNode->front)[1] + CSpad->slack) < CSpad->posMatrix.m[1][0]))
                 {
                     continue;
                 }
@@ -692,7 +692,7 @@ TFace *COLLIDE_PointAndTerrainFunc(Terrain *terrain, PCollideInfo *pCollideInfo,
                     continue;
                 }
 
-                if ((CSpad->posMatrix.m[0][1] > (((short*)&bspNode->back)[0] + CSpad->slack)) && (((short*)&bspNode->back)[0] + (CSpad->slack < CSpad->posMatrix.m[1][1])))
+                if ((CSpad->posMatrix.m[0][1] > (((short*)&bspNode->back)[0] + CSpad->slack)) && ((((short*)&bspNode->back)[0] + CSpad->slack) < CSpad->posMatrix.m[1][1]))
                 {
                     continue;
                 }
@@ -730,7 +730,7 @@ TFace *COLLIDE_PointAndTerrainFunc(Terrain *terrain, PCollideInfo *pCollideInfo,
                         long t;                   
                         int temp; // not from decls.h
 
-                        if ((CSpad->in_spectral == 2) && (tface->normal != *((-(((char*)tface - (char*)terrain->faceList) * 0x55555555) >> 2) + terrain->morphNormalIdx))) // this line is a bit nonsensical
+                        if ((CSpad->in_spectral == 2) && (tface->normal != *((tface - terrain->faceList) + terrain->morphNormalIdx))) 
                         {
                             COLLIDE_MakeNormal(terrain, tface, &CSpad->normal);
                         }
@@ -788,7 +788,7 @@ TFace *COLLIDE_PointAndTerrainFunc(Terrain *terrain, PCollideInfo *pCollideInfo,
                             {
                                 if (((CSpad->backface_flag != 0) && (CSpad->flags & 0x1)) && ((CSpad->dpv.x > 0) && (CSpad->dpv.y <= 0)))
                                 {
-                                    CSpad->backface_flag[0] = 1;
+                                    *CSpad->backface_flag = 1;
                                 }
 
                                 if (tface->attr & 0x8)
@@ -3540,7 +3540,7 @@ long COLLIDE_FindCollisionFaceNormal(CollideInfo *collideInfo, Normal *normal)
         
         tface = collideInfo->prim1;
         
-        if ((tface->textoff == 0xFFFF) || !(((TextureFT3*)(((uintptr_t)((Level*)collideInfo->level)->terrain->StartTextureList) + tface->textoff))->attr & 0x2000)) 
+        if ((tface->textoff == 0xFFFF) || !(((TextureFT3*)(((uintptr_t)((Level*)collideInfo->level)->terrain->StartTextureList + tface->textoff)))->attr & 0x2000)) 
         {
             COLLIDE_GetNormal(tface->normal, (short*)((Level*)collideInfo->level)->terrain->normalList, (SVector*)normal);
             

@@ -28,7 +28,7 @@ int sprintf(char *str, const char *format, ...)
     return vsprintf(str, format, ap);
 }
 
-// near match, but has $s1 and $s3 registers swapped
+// near match, but has $s1 and $s3 registers swapped (98.17%)
 #ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/SUPPORT", vsprintf);
 #else 

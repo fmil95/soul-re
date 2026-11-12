@@ -613,7 +613,7 @@ void PIPE3D_CalcWorldToSplitPlaneTransform(MATRIX *wpTransform, SVector *normal,
     wpTransform->t[2] = vector.z;
 }
 
-// near match, scheduling diff in relation to gNormalList's order
+// close match, has an ordering issue with the globals (95.71%) 
 #ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/PIPE3D", PIPE3D_TransformAnimatedSplitInstanceVertices);
 #else
@@ -660,8 +660,8 @@ long PIPE3D_TransformAnimatedSplitInstanceVertices(MVertex *vertexList, PVertex 
             lastVertex = &vertexList[segment->lastVertex];
 
             c0 = &white;
-            c1 = c0;
-            c2 = c0;
+            c1 = &white;
+            c2 = &white;
 
             vtxcolflgs = 0;
 
@@ -731,7 +731,7 @@ long PIPE3D_TransformAnimatedSplitInstanceVertices(MVertex *vertexList, PVertex 
                     {
                         c0 = vertexSrcCol;
                         c1 = vertexSrcCol + 1;
-                        c2 = c0 + 2;
+                        c2 = vertexSrcCol + 2;
 
                         vertexSrcCol = c0 + 3;
 

@@ -546,7 +546,7 @@ void aadUpdateSlotVolPan(AadSequenceSlot *slot)
     }
 }
 
-// Regalloc diffs
+// Near match, but has regalloc (99.35%)
 #ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/PSX/AADSEQEV", aadUpdateChannelPitchBend);
 #else
@@ -600,7 +600,7 @@ void aadUpdateChannelPitchBend(AadSequenceSlot *slot, int channel)
                 newPitch += (tmp * finePitch) >> 23;
             }
 
-            SpuSetVoicePitch(i, (unsigned short)(newPitch + pitchValueBendAmount));
+            SpuSetVoicePitch(i, newPitch + pitchValueBendAmount);
         }
     }
 }
