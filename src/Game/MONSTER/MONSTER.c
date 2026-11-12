@@ -24,6 +24,7 @@
 #include "Game/MONSTER/HUMAN.h"
 #include "Game/OBTABLE.h"
 #include "Game/PIPE3D.h"
+#include "Game/PHYSOBS.h"
 #include "Game/PSX/MAIN.h"
 
 static burntTuneType burntTest = {300, 2};
@@ -233,7 +234,305 @@ void MON_DeadEntry(Instance *instance)
     }
 }
 
+// Closest of matches! Only a single branch is different (99.99%)
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_Dead);
+#else
+void MON_Dead(Instance *instance)
+{
+    MonsterVars *mv;       
+    Instance *soul;        
+    Message *message;       
+    int reanimate;          
+
+    mv = instance->extraData;
+    
+    soul = NULL;
+    
+    reanimate = 0;
+    
+    if (mv->soulID != 0) 
+    {
+        if (mv->soulID != ~0x80000000) 
+        {
+            soul = INSTANCE_Find(mv->soulID);
+        }
+        
+        if (soul == NULL) 
+        {
+            MON_BirthSoul(instance, 1);
+        } 
+        else 
+        {
+            if (((MonsterVars*)soul->extraData)->soulID == 0) 
+            {
+                ((MonsterVars*)soul->extraData)->soulID = instance->introUniqueID;
+            }
+        }
+    } 
+    else if (mv->mvFlags & 0x200) 
+    {
+        MonsterAttributes *ma;   
+        int fade_amount;         
+
+        ma = instance->data;
+        
+        fade_amount = MON_GetTime(instance) - mv->damageTimer;
+        
+        if (fade_amount >= 4096) 
+        {
+            MON_KillMonster(instance);
+        } 
+        else 
+        {
+            MON_CutOut_Monster(instance, fade_amount, ma->headSegment, ma->rightFootSegment);
+        }
+    } 
+    else if (instance->flags2 & 0x10) 
+    {
+        MON_PlayCombatIdle(instance, 2);
+        
+        MON_SwitchState(instance, MONSTER_STATE_IDLE);
+    }
+    
+    if (mv->causeOfDeath == 6) 
+    {
+        MON_KillMonster(instance);
+    } 
+    else if (((mv->causeOfDeath == 1) || (mv->causeOfDeath == 2) || (mv->causeOfDeath == 3)) && (instance->perVertexColor == NULL)) 
+    {
+        Model *model;          
+        int i;                  
+        CVECTOR *ptr;         
+        
+        model = instance->object->modelList[instance->currentModel];
+        
+        ptr = (CVECTOR*)MEMPACK_Malloc(model->numVertices * 4, 33);
+        
+        instance->perVertexColor = (CVECTOR*)ptr;
+        
+        for (i = model->numVertices; i != 0; i--) 
+        {
+            *(int*)ptr++ = 0x101010;
+        } 
+    } 
+    else if ((mv->causeOfDeath == 0) && (mv->held == NULL)) 
+    {
+        Instance *imp;         
+        Instance *closest;     
+
+        instance->flags2 |= 0x80;
+        
+        closest = NULL;
+        
+        if (mv->heldID == 0) 
+        {
+            long closestdist;     
+
+            closestdist = 1000;
+            
+            for (imp = gameTrackerX.instanceList->first; imp != NULL; imp = imp->next) 
+            {
+                if ((instance != imp) && ((imp->object != NULL) && (imp->object->oflags2 & 0x40000) && (imp->LinkParent == NULL)))
+                {
+                    if ((CheckPhysObFamily(imp, 0) != 0) || (CheckPhysObFamily(imp, 3) != 0)) 
+                    {
+                        long dist;             
+                        
+                        dist = MATH3D_LengthXYZ(imp->position.x - instance->position.x, imp->position.y - instance->position.y, imp->position.z - instance->position.z);
+                        
+                        if (dist < closestdist) 
+                        {
+                            closestdist = dist;
+                            closest     = imp;
+                        }
+                    }
+                }
+            }
+        } 
+        else 
+        {
+            closest = INSTANCE_Find(mv->heldID);
+        }
+        
+        if (closest != NULL)
+        {
+            if (CheckPhysObFamily(closest, 3) == 0) 
+            {
+                INSTANCE_Post(closest, 0x800002, SetObjectData(0, 0, 0, instance, 3));
+            } 
+            else 
+            {
+                INSTANCE_Post(closest, 0x800023, SetObjectBreakOffData(instance, 3, 0, 0, 0, 0, 1));
+            }
+
+            mv->heldID = closest->introUniqueID;
+            mv->held   = closest;
+            
+            instance->flags2 &= ~0x80;
+        }
+    }
+    else if (mv->causeOfDeath == 3) 
+    {
+        if ((mv->effect != 0) && (mv->effectTimer < MON_GetTime(instance))) 
+        {
+            SndEndLoop((unsigned long)mv->effect);
+            
+            mv->effect = 0;
+        }
+        
+        if (!(mv->mvFlags & 0x400))
+        {
+            SVECTOR New;            
+            SVECTOR Old;            
+            PCollideInfo pcinfo;   
+
+            New.vx = Old.vx = instance->position.x;
+            New.vy = Old.vy = instance->position.y;
+            New.vz = Old.vz = instance->position.z;
+            
+            Old.vz = instance->position.z + 512;
+            
+            pcinfo.newPoint = &New;
+            pcinfo.oldPoint = &Old;
+            
+            gameTrackerX.gameFlags |= 0x8000;
+            
+            PHYSICS_CheckLineInWorld(instance, &pcinfo);
+            
+            gameTrackerX.gameFlags &= ~0x8000;
+            
+            if (instance->waterFace == NULL) 
+            {
+                reanimate = 1;
+                
+                mv->causeOfDeath = 7;
+            }
+        }
+        
+        instance->waterFace = NULL;
+    }
+    
+    if ((mv->mvFlags & 0x400000) && (mv->effectTimer < MON_GetTime(instance))) 
+    {
+        mv->mvFlags &= ~0x400000;
+        
+        FX_StopAllGlowEffects(instance, 64);
+    }
+    
+    if (mv->mvFlags & 0x400) 
+    {
+        if (MON_OnGround(instance) != 0) 
+        {
+            mv->mvFlags |= 0x2;
+        }
+        else
+        {
+            mv->mvFlags &= ~0x2;
+        }
+    }
+    
+    if (!(mv->mvFlags & 0x2)) 
+    {
+        MON_ApplyPhysics(instance);
+    }
+    
+    while ((message = DeMessageQueue(&mv->messageQueue)) != NULL) 
+    {
+        switch (message->ID) 
+        {
+        case 0x100000D:
+        {
+            MonsterAttributes *ma;
+            
+            ma = (MonsterAttributes*)instance->data;
+            
+            if ((message->Data != 0) && ((signed char)ma->numSubAttributes >= 3))
+            {
+                mv->age = 2;
+                
+                mv->mvFlags |= 0x10000000;
+                
+                mv->subAttr = ma->subAttributesList[2];
+            }
+            
+            mv->causeOfDeath = 0;
+            
+            mv->soulID = 0;
+            
+            mv->mvFlags &= ~0x200;
+            mv->mvFlags &= ~0x80;
+            mv->mvFlags &= ~0x200000;
+            mv->mvFlags &= ~0x2000;
+            
+            mv->auxFlags &= 0xB8080000;
+            
+            MON_TurnOnAllSpheres(instance);
+            MON_TurnOffWeaponSpheres(instance);
+            
+            MON_PlayAnim(instance, MONSTER_ANIM_GETUP, 1);
+            
+            if (instance->perVertexColor != NULL) 
+            {
+                MEMPACK_Free((char*)instance->perVertexColor);
+                
+                instance->perVertexColor = NULL;
+            }
+            
+            if (instance->object->oflags & 0x200)
+            {
+                instance->flags2 |= 0x40;
+            }
+            
+            if (mv->mvFlags & 0x1000000)
+            {
+                instance->flags2 |= 0x20000;
+            }
+            
+            break;
+        }
+        case 0x100001B:
+            mv->heldID = 0;
+            
+            reanimate = 1;
+            break;
+        case 0x100000B:
+            instance->xAccl = 0;
+            instance->yAccl = 0;
+            instance->zAccl = -16;
+            break;
+        }
+    }
+    
+    if ((reanimate != 0) && (mv->damageTimer == 0)) 
+    {
+        if (soul != NULL) 
+        {
+            if (soul->flags2 & 0x8000000)
+            {
+                MON_KillMonster(soul);
+                
+                if (INSTANCE_Query(soul, 1) & 0x1000)
+                {
+                    INSTANCE_Post(instance, 0x100000D, 1);
+                }
+                else
+                {
+                    INSTANCE_Post(instance, 0x100000D, 0);
+                }
+            }
+            else
+            {
+                INSTANCE_Post(soul, 0x100000D, 0);
+            }
+        }
+        else
+        {
+            INSTANCE_Post(instance, 0x100000D, 0);
+        }
+    }
+} 
+#endif
 
 void MON_MissileHitEntry(Instance *instance)
 {
