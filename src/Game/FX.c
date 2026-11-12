@@ -472,7 +472,409 @@ long _FX_DoLighting(MFace *mface)
     return color;
 }
 
+// Fairly close, but it has a variety of issues (95.51%)
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/FX", _FX_BuildSegmentedSplinters);
+#else
+short identityMatrix[3][3]; // TODO: this matrix should be externed via MATH3D 
+void _FX_BuildSegmentedSplinters(Instance *instance, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, FXSplinter *splintDef, FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), int shardFlags)
+{
+    long j;
+    long maxTimeToLive;
+    long faceSkip;
+    //long numFaces;
+    MFace *mface;
+    MFace *endMFace;
+    Model *model;
+    MVertex *vertexList;
+    MFace *faceList;
+    FX_MATRIX *fxMatrix;
+    FX_MATRIX *fxMatList[60];
+    SVector veloc[60];
+    SVector *curVel;
+    int lastFxMat;
+    unsigned char matIdx[128];
+    FX_PRIM *fxPrim;
+    SVector *vertex0;
+    SVector *vertex1;
+    SVector *vertex2;
+    SVector *poolOfVertices;
+    long *vtxSegment;
+    Vector Center;
+    int seg0;
+    int seg1;
+    int seg2; // not from decls.h
+    SVector offset;
+    
+    poolOfVertices = (SVector *)gameTrackerX.vertexPool;
+    
+    vtxSegment = (long *)gameTrackerX.vertexPool->color;
+    
+    model = instance->object->modelList[instance->currentModel];
+    
+    vertexList = model->vertexList;
+    faceList   = model->faceList;
+    
+    PIPE3D_TransformVerticesToWorld(instance, poolOfVertices, vtxSegment, &Center);
+    
+    if (splintDef != NULL)
+    {
+        maxTimeToLive = splintDef->lifetime;
+    }
+    else
+    {
+        maxTimeToLive = 32;
+    }
+    
+    memset(matIdx, 0xFF, sizeof(matIdx));
+    
+    _FX_SetupLighting(instance);
+    
+    if (splintDef != NULL)
+    {
+        faceSkip = (model->numFaces / splintDef->faceLimit) + 1;
+    }
+    else
+    {
+        faceSkip = 1;
+    }
+    
+    lastFxMat = 0;
+    
+    mface    = faceList;
+    endMFace = &mface[model->numFaces];
+    
+    for (; mface < endMFace; mface += faceSkip)
+    {
+        seg0 = vtxSegment[mface->face.v0];
+        seg1 = vtxSegment[mface->face.v1];
+        seg2 = vtxSegment[mface->face.v2];
+        
+        if (seg1 < seg2)
+        {
+            seg2 = seg1;
+        }
+        
+        if (seg0 < seg2)
+        {
+            seg2 = seg0;
+        }
+        
+        seg0 = seg2;
+        
+        if (matIdx[seg0] == 0xFF)
+        {
+            if (lastFxMat < 60)
+            {
+                fxMatrix = FX_GetMatrix(fxTracker);
+                
+                if (fxMatrix == NULL)
+                {
+                    if (lastFxMat == 0)
+                    {
+                        return;
+                    }
+                    
+                    goto label;
+                }
+                
+                fxMatList[lastFxMat] = fxMatrix;
+                
+                j = lastFxMat;
+                
+                offset.x = instance->matrix[seg0].t[0];
+                offset.y = instance->matrix[seg0].t[1];
+                offset.z = instance->matrix[seg0].t[2];
+                
+                { // TODO: redo this scoped block using a macro
+                short _x0; 
+                short _y0; 
+                short _z0; 
+                short _x1; 
+                short _y1; 
+                short _z1; 
+                SVector *_v; 
+                SVector *_v0; // not from decls.h
+                Vector *_v1; 
+                
+                _v0 = &offset; 
+                _v1 = &Center; 
+                _v = &offset; 
+                
+                _x0 = _v0->x; 
+                _y0 = _v0->y; 
+                _z0 = _v0->z; 
+                
+                _x1 = _v1->x; 
+                _y1 = _v1->y; 
+                _z1 = _v1->z; 
+                
+                _x0 -= _x1; 
+                _y0 -= _y1; 
+                _z0 -= _z1; 
+                
+                _v->x = _x0; 
+                _v->y = _y0; 
+                _v->z = _z0; 
+                };
+                
+                MATH3D_Normalize((Normal *)&offset);
+                
+                if (splintDef != NULL)
+                {
+                    short range; // not from decls.h
+                    short base;  // not from decls.h
+                    
+                    range = splintDef->chunkVelXY - splintDef->chunkVelRng;
+                    base = splintDef->chunkVelRng * 2;
+                    
+                    if (base != 0)
+                    {
+                        veloc[j].x = (offset.x * (range + (rand() % base))) >> 12;
+                        veloc[j].y = (offset.y * (range + (rand() % base))) >> 12;
+                        
+                        range = splintDef->chunkVelZ - splintDef->chunkVelRng;
+                        
+                        veloc[j].z = (offset.z * (range + (rand() % base))) >> 12;
+                    }
+                    else
+                    {
+                        veloc[j].x = (offset.x * range)                >> 12;
+                        veloc[j].y = (offset.y * range)                >> 12;
+                        veloc[j].z = (offset.z * splintDef->chunkVelZ) >> 12;
+                    }
+                }
+                else
+                {
+                    veloc[j].x = (offset.x * ((rand() % 8) + 26)) >> 12;
+                    veloc[j].y = (offset.y * ((rand() % 8) + 26)) >> 12;
+                    veloc[j].z = (offset.z * ((rand() % 8) + 46)) >> 12;
+                }
+                
+                curVel = &veloc[lastFxMat];
+                
+                if (curVel->z < 0)
+                {
+                    curVel->z = 0;
+                }
+                
+                lastFxMat++;
+            }
+            else
+            {
+            label:
+                j = rand() % lastFxMat;
+                
+                fxMatrix = fxMatList[j];
+                
+                curVel = &veloc[j];
+            }
+            
+            matIdx[seg0] = j;
+        }
+        else
+        {
+            curVel = &veloc[matIdx[seg0]];
+            
+            fxMatrix = fxMatList[matIdx[seg0]];
+        }
+        
+        fxMatrix->lwTransform.m[0][0] = identityMatrix[0][0];
+        fxMatrix->lwTransform.m[0][1] = identityMatrix[0][1];
+        fxMatrix->lwTransform.m[0][2] = identityMatrix[0][2];
+        
+        fxMatrix->lwTransform.m[1][0] = identityMatrix[1][0];
+        fxMatrix->lwTransform.m[1][1] = identityMatrix[1][1];
+        fxMatrix->lwTransform.m[1][2] = identityMatrix[1][2];
+        
+        fxMatrix->lwTransform.m[2][0] = identityMatrix[2][0];
+        fxMatrix->lwTransform.m[2][1] = identityMatrix[2][1];
+        fxMatrix->lwTransform.m[2][2] = identityMatrix[2][2];
+        
+        fxMatrix->lwTransform.t[0] = instance->matrix[seg0].t[0];
+        fxMatrix->lwTransform.t[1] = instance->matrix[seg0].t[1];
+        fxMatrix->lwTransform.t[2] = instance->matrix[seg0].t[2];
+        
+        vertex0 = &poolOfVertices[mface->face.v0];
+        vertex1 = &poolOfVertices[mface->face.v1];
+        vertex2 = &poolOfVertices[mface->face.v2];
+        
+        fxPrim = FX_GetPrim(fxTracker);
+        
+        if (fxPrim != NULL)
+        {
+            if (fxSetup != NULL)
+            {
+                fxSetup(fxPrim, fxProcess, fxMatrix, instance, mface, vertexList, center, vel, accl, fxTracker, 30);
+            }
+            else
+            {
+                fxPrim->position.x = fxMatrix->lwTransform.t[0];
+                fxPrim->position.y = fxMatrix->lwTransform.t[1];
+                fxPrim->position.z = fxMatrix->lwTransform.t[2];
+                
+                { // TODO: idem
+                short _x0; 
+                short _y0; 
+                short _z0; 
+                short _x1; 
+                short _y1; 
+                short _z1; 
+                SVector *_v; // not from decls.h
+                Position *_v0; 
+                Vector *_v1; 
+                
+                _v0 = &fxPrim->position; 
+                _v1 = &Center; 
+                _v  = &offset; 
+                
+                _x0 = _v0->x; 
+                _y0 = _v0->y; 
+                _z0 = _v0->z; 
+                
+                _x1 = _v1->x; 
+                _y1 = _v1->y; 
+                _z1 = _v1->z; 
+                
+                _x0 -= _x1; 
+                _y0 -= _y1; 
+                _z0 -= _z1; 
+                
+                _v->x = _x0; 
+                _v->y = _y0; 
+                _v->z = _z0; 
+                };
+                
+                fxPrim->v0.x = vertex0->x - offset.x;
+                fxPrim->v0.y = vertex0->y - offset.y;
+                fxPrim->v0.z = vertex0->z - offset.z;
+                
+                fxPrim->v1.x = vertex1->x - offset.x;
+                fxPrim->v1.y = vertex1->y - offset.y;
+                fxPrim->v1.z = vertex1->z - offset.z;
+                
+                fxPrim->v2.x = vertex2->x - offset.x;
+                fxPrim->v2.y = vertex2->y - offset.y;
+                fxPrim->v2.z = vertex2->z - offset.z;
+                
+                fxPrim->matrix = fxMatrix;
+                
+                FX_AniTexSetup(fxPrim, mface, model, fxTracker);
+                
+                if (shardFlags & 0x40)
+                {
+                    if (mface->flags & 0x2)
+                    {
+                        TextureMT3 *texture;
+                        
+                        texture = (TextureMT3 *)mface->color;
+                        
+                        fxPrim->color =                texture->color & 0xFFFFFF;
+                        fxPrim->color |= 0x24000000 | (texture->color & 0x3000000);
+                    }
+                    else
+                    {
+                        fxPrim->color =                mface->color & 0xFFFFFF;
+                        fxPrim->color |= 0x20000000 | (mface->color & 0x3000000);
+                    }
+                }
+                else
+                {
+                    fxPrim->color = _FX_DoLighting(mface);
+                }
+                
+                if (fxProcess != NULL)
+                {
+                    fxPrim->process = fxProcess;
+                }
+                else
+                {
+                    fxPrim->process = FX_ShatterProcess;
+                }
+                
+                fxPrim->duo.phys.xVel = curVel->x;
+                fxPrim->duo.phys.yVel = curVel->y;
+                fxPrim->duo.phys.zVel = curVel->z;
+                
+                if (splintDef != NULL)
+                {
+                    short range; // not from decls.h
+                    short base;  // not from decls.h
+                    
+                    range = splintDef->triVelRng;
+                    
+                    if (range != 0)
+                    {
+                        base   = -range;
+                        range *= 2;
+                        
+                        fxPrim->duo.phys.xVel += base + (rand() % range);
+                        fxPrim->duo.phys.yVel += base + (rand() % range);
+                        fxPrim->duo.phys.zVel += base + (rand() % range);
+                    }
+                }
+                
+                if (vel != NULL)
+                {
+                    fxPrim->duo.phys.xVel += vel->vx;
+                    fxPrim->duo.phys.yVel += vel->vy;
+                    fxPrim->duo.phys.zVel += vel->vz;
+                }
+                
+                fxPrim->duo.phys.xAccl = 0;
+                fxPrim->duo.phys.yAccl = 0;
+                
+                fxPrim->timeToLive = maxTimeToLive;
+                
+                fxPrim->work1 = 4096;
+                
+                if (splintDef != NULL)
+                {
+                    short range; // not from decls.h
+                    short base;  // not from decls.h
+                    
+                    range = splintDef->rotRateRng;
+                    base  = -range;
+                    
+                    if (range != 0)
+                    {
+                        fxPrim->work3 = base + (rand() % (short)(range * 2));
+                    }
+                    else
+                    {
+                        fxPrim->work3 = 0;
+                    }
+                    
+                    fxPrim->duo.phys.zAccl = splintDef->gravityZ;
+                }
+                else
+                {
+                    fxPrim->duo.phys.zAccl = -8;
+                    
+                    fxPrim->work3 = (rand() % 8) - 4;
+                }
+                
+                fxPrim->work0 = instance->shadowPosition.z - 50;
+                
+                if (shardFlags & 0x10)
+                {
+                    fxPrim->work0 = -32767;
+                }
+                else if ((fxPrim->position.z < fxPrim->work0) || !(instance->object->oflags & 0x200))
+                {
+                    fxPrim->work0 = fxPrim->position.z - 50;
+                }
+            }
+            
+            LIST_InsertFunc(&fxTracker->usedPrimList, &fxPrim->node);
+        }
+        else
+        {
+            mface = endMFace;
+        }
+    }
+}
+#endif
 
 void _FX_BuildNonSegmentedSplinters(Instance *instance, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, FXSplinter *splintDef, FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)(), short shardFlags)
 {

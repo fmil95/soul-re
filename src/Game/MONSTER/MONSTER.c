@@ -245,7 +245,7 @@ void MON_Dead(Instance *instance)
     Message *message;       
     int reanimate;          
 
-    mv = instance->extraData;
+    mv = (MonsterVars*)instance->extraData;
     
     soul = NULL;
     
@@ -275,7 +275,7 @@ void MON_Dead(Instance *instance)
         MonsterAttributes *ma;   
         int fade_amount;         
 
-        ma = instance->data;
+        ma = (MonsterAttributes*)instance->data;
         
         fade_amount = MON_GetTime(instance) - mv->damageTimer;
         
@@ -424,7 +424,7 @@ void MON_Dead(Instance *instance)
     {
         if (MON_OnGround(instance) != 0) 
         {
-            mv->mvFlags |= 0x2;
+            mv->mvFlags |=  0x2;
         }
         else
         {
