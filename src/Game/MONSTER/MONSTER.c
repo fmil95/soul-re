@@ -863,7 +863,85 @@ void MON_ImpaleDeath(Instance *instance)
     }
 }
 
+// Close match, the impaler local gets checked for NULL twice a row in the target ASM (96.41%)
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_TerrainImpaleDeathEntry);
+#else
+void MON_TerrainImpaleDeathEntry(Instance *instance) 
+{
+    MonsterVars *mv;
+    MonsterAttributes *ma;
+    Intro *impaler;
+
+    mv =       (MonsterVars *)instance->extraData;
+    ma = (MonsterAttributes *)instance->data;
+
+    mv->mvFlags |=  0x200000;
+    mv->mvFlags &= ~0x10;
+
+    MON_TurnOffAllSpheres(instance);
+    MON_DropAllObjects(instance);
+    
+    FX_BloodCone(instance, ma->grabSegment, 80);
+
+    mv->mvFlags |= 0x800;
+
+    instance->xVel = 0;
+    instance->yVel = 0;
+    instance->zVel = 0;
+    
+    instance->xAccl = 0;
+    instance->yAccl = 0;
+    instance->zAccl = 0;
+
+    if (mv->terrainImpaleID >= 0) 
+    {
+        impaler = INSTANCE_FindIntro(instance->currentStreamUnitID, mv->terrainImpaleID);
+    } 
+    else
+    {
+        impaler = MON_FindNearestImpalingIntro(instance->currentStreamUnitID, &instance->position);
+        
+        mv->terrainImpaleID = impaler->UniqueID;
+        
+        MON_MoveInstanceToImpalePoint(instance);
+    }
+
+    if (impaler != NULL)
+    {
+        impaler->flags &= ~0x8000;
+    }
+
+    if (impaler == NULL)
+    {
+        MON_PlayAnim(instance, MONSTER_ANIM_IMPALEHORZ, 1);
+    }
+    else
+    {
+        if ((impaler->rotation.x & 0xFFF) <= 2048)
+        {
+            if ((impaler->rotation.x & 0xFFF) < 682)
+            {
+                MON_PlayAnim(instance, MONSTER_ANIM_IMPALEVERT, 1);
+            } 
+            else 
+            {
+                MON_PlayAnim(instance, MONSTER_ANIM_IMPALEHORZ, 1);
+            }
+        } 
+        else if (abs((impaler->rotation.x & 0xFFF) - 4096) < 682)
+        {
+            MON_PlayAnim(instance, MONSTER_ANIM_IMPALEVERT, 1);
+        } 
+        else 
+        {
+            MON_PlayAnim(instance, MONSTER_ANIM_IMPALEHORZ, 1);
+        }
+    }
+
+    mv->causeOfDeath = 0;
+}
+#endif
 
 void MON_TerrainImpaleDeath(Instance *instance)
 {
