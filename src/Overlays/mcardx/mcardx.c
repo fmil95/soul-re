@@ -1,4 +1,5 @@
 #include "Overlays/mcardx/mcardx.h"
+#include "Game/LOCAL/LOCALSTR.h" 
 #include "Game/MCARD/MEMCARD.h"
 #include "Game/MENU/MENUDEFS.h"
 #include "Game/MENU/MENUFACE.h"
@@ -586,7 +587,33 @@ int func_8800125C(void *opaque, int param, menu_ctrl_t ctrl)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880012E8);
+int func_880012E8(mcmenu_t *mcmenu, int nfiles, int index, char *title, char *subtitle)
+{
+	memcard_item(mcmenu->opaque, NULL, 0, 4, title);
+
+	if (subtitle != NULL)
+	{
+		memcard_item(mcmenu->opaque, NULL, 0, 4, subtitle);
+	}
+
+	if (nfiles != 0)
+	{
+		memcard_item(mcmenu->opaque, func_88001148, fsm_start, 0, localstr_get(LOCALSTR_start_game));
+	}
+
+	memcard_item(mcmenu->opaque, func_880010DC, 0, 0, localstr_get(LOCALSTR_go_back));
+
+	if (nfiles != 0)
+	{
+		index = (index < 0) ? 3 : index;
+	}
+	else
+	{
+		index = (index < 0) ? 2 : index;
+	}
+
+	return index;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880013DC);
 

@@ -11,6 +11,7 @@ int MEMCARD_IsWrongVersion(memcard_t *memcard);
 int memcard_pause_menu(void *gt, int index);
 void memcard_pop(void *opaque);  
 void *gt2mcmenu(void *gt);
+void memcard_item(void *opaque, int (*fn)(), long parameter, long flags, char *text);
 
 extern memcard_t gMemcard;
 
