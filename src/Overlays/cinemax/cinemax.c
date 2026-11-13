@@ -121,7 +121,42 @@ void func_88000794(BufferInfo *bufferInfo)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880007C8);
+void func_880007C8(void)
+{
+    RECT snap;
+    int id;
+
+    if (CINE_CDIntrQuery() != 0)
+    {
+        StCdInterrupt();
+    }
+
+    id = D_880125B8.imgid;
+
+    snap = D_880125B8.slice;
+
+    D_880125B8.imgid = (D_880125B8.imgid != 0) ? 0 : 1;
+
+    D_880125B8.slice.x += D_880125B8.slice.w;
+
+    if (D_880125B8.slice.x < (D_880125B8.rect[D_880125B8.unk_30].x + D_880125B8.rect[D_880125B8.unk_30].w))
+    {
+        DecDCTout((unsigned long *)D_880125B8.imgbuf[D_880125B8.imgid], (D_880125B8.slice.w * D_880125B8.slice.h) / 2);
+    }
+    else
+    {
+        D_880125B8.unk_3C = 1;
+
+        D_880125B8.unk_32 = D_880125B8.unk_30;
+
+        func_88000794(&D_880125B8);
+
+        D_880125B8.slice.x = D_880125B8.rect[D_880125B8.unk_30].x;
+        D_880125B8.slice.y = D_880125B8.rect[D_880125B8.unk_30].y;
+    }
+
+    LoadImage(&snap, (unsigned long *)D_880125B8.imgbuf[id]);
+}
 
 int func_88000904(BufferInfo *bufferInfo)
 {
@@ -368,7 +403,42 @@ void func_88000794(BufferInfo *bufferInfo)
     }
 }
 
-void func_880007C8(void) {}
+void func_880007C8(void)
+{
+    RECT snap;
+    int id;
+
+    if (CINE_CDIntrQuery() != 0)
+    {
+        StCdInterrupt();
+    }
+
+    id = D_880125B8.imgid;
+
+    snap = D_880125B8.slice;
+
+    D_880125B8.imgid = (D_880125B8.imgid != 0) ? 0 : 1;
+
+    D_880125B8.slice.x += D_880125B8.slice.w;
+
+    if (D_880125B8.slice.x < (D_880125B8.rect[D_880125B8.unk_30].x + D_880125B8.rect[D_880125B8.unk_30].w))
+    {
+        DecDCTout((unsigned long *)D_880125B8.imgbuf[D_880125B8.imgid], (D_880125B8.slice.w * D_880125B8.slice.h) / 2);
+    }
+    else
+    {
+        D_880125B8.unk_3C = 1;
+        
+        D_880125B8.unk_32 = D_880125B8.unk_30;
+
+        func_88000794(&D_880125B8);
+
+        D_880125B8.slice.x = D_880125B8.rect[D_880125B8.unk_30].x;
+        D_880125B8.slice.y = D_880125B8.rect[D_880125B8.unk_30].y;
+    }
+
+    LoadImage(&snap, (unsigned long *)D_880125B8.imgbuf[id]);
+}
 
 int func_88000904(BufferInfo *bufferInfo)
 {
