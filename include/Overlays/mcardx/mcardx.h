@@ -31,6 +31,8 @@ void func_88000B90(mcard_t *mcard, void *opaque, mcpsx_directory_t *directory, l
 void func_88000C10(mcard_t *mcard);
 void func_88000C34(mcard_t *mcard);
 void func_88000C68(mcard_t *mcard);
+void func_88000EF8(mcard_t *mcard);
+void func_88000F04(mcard_t *mcard);
 int func_880010DC(void *opaque, int param, menu_ctrl_t ctrl);
 int func_88001148(void *opaque, int param, menu_ctrl_t ctrl);
 int func_8800125C(void *opaque, int param, menu_ctrl_t ctrl);
