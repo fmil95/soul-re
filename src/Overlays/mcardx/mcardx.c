@@ -535,7 +535,28 @@ int func_88001148(void *opaque, int param, menu_ctrl_t ctrl)
     return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880011CC);
+int func_880011CC(void *opaque, int param, menu_ctrl_t ctrl)
+{
+	mcmenu_t *mcmenu;
+	GameTracker *gt;
+
+	mcmenu = (mcmenu_t*)gt2mcmenu(opaque);
+
+	if (ctrl == menu_ctrl_engage)
+	{
+		gt = GAMELOOP_GetGT();
+
+		gt->gameFlags |= 0x20000000;
+
+		func_88000F58(mcmenu->mcard, mcmenu->params.directory[param].name, mcmenu->params.buffer, mcmenu->params.nbytes);
+
+		mcmenu->state.fsm = fsm_loading;
+
+		return 1;
+	}
+
+	return 0;
+}
 
 int func_8800125C(void *opaque, int param, menu_ctrl_t ctrl)
 {
@@ -1072,13 +1093,106 @@ int func_880010AC(mcmenu_t *mcmenu, void *buffer, int nbytes)
 	return func_88002298(buffer, mcmenu->params.nblocks);
 }
 
-int func_880010DC(void *opaque, int param, menu_ctrl_t ctrl) {};
+int func_880010DC(void *opaque, int param, menu_ctrl_t ctrl)
+{
+    mcmenu_t *mcmenu;
+    GameTracker *gt;
 
-int func_88001148(void *opaque, int param, menu_ctrl_t ctrl) {};
+    (void)param;
 
-void func_880011CC(void) {};
+    mcmenu = (mcmenu_t *)gt2mcmenu(opaque);
 
-int func_8800125C(void *opaque, int param, menu_ctrl_t ctrl) {};
+    if ((ctrl == menu_ctrl_engage) || (ctrl == menu_ctrl_cancel))
+    {
+        memcard_pop(mcmenu->opaque);
+
+        gt = GAMELOOP_GetGT();
+
+        gt->gameFlags &= ~0x20000000;
+
+        return 1;
+    }
+
+    return 0;
+}
+
+int func_88001148(void *opaque, int param, menu_ctrl_t ctrl)
+{
+    mcmenu_t *mcmenu;
+    GameTracker *gt;
+
+    mcmenu = (mcmenu_t *)gt2mcmenu(opaque);
+
+    if (ctrl == menu_ctrl_engage)
+    {
+        mcmenu->state.fsm = (fsm_t)param;
+
+        return 1;
+    }
+    else if (ctrl == menu_ctrl_cancel)
+    {
+        memcard_pop(mcmenu->opaque);
+
+        gt = GAMELOOP_GetGT();
+
+        gt->gameFlags &= ~0x20000000;
+
+        return 1;
+    }
+
+    return 0;
+}
+
+int func_880011CC(void *opaque, int param, menu_ctrl_t ctrl)
+{
+	mcmenu_t *mcmenu;
+	GameTracker *gt;
+
+	mcmenu = (mcmenu_t*)gt2mcmenu(opaque);
+
+	if (ctrl == menu_ctrl_engage)
+	{
+		gt = GAMELOOP_GetGT();
+
+		gt->gameFlags |= 0x20000000;
+
+		func_88000F58(mcmenu->mcard, mcmenu->params.directory[param].name, mcmenu->params.buffer, mcmenu->params.nbytes);
+
+		mcmenu->state.fsm = fsm_loading;
+
+		return 1;
+	}
+
+	return 0;
+}
+
+int func_8800125C(void *opaque, int param, menu_ctrl_t ctrl)
+{
+    mcmenu_t *mcmenu;
+    GameTracker *gt;
+
+    mcmenu = (mcmenu_t *)gt2mcmenu(opaque);
+
+    if (ctrl == menu_ctrl_engage)
+    {
+        mcmenu->state.slot = (fsm_t)param;
+        mcmenu->state.fsm = 8;
+
+        return 1;
+    }
+    else if (ctrl == menu_ctrl_cancel)
+    {
+        memcard_pop(mcmenu->opaque);
+
+        gt = GAMELOOP_GetGT();
+
+        gt->gameFlags &= ~0x20000000;
+
+        return 1;
+    }
+
+    return 0;
+}
 
 void func_880012E8(void) {};
 

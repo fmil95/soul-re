@@ -43,6 +43,7 @@ void func_8800107C(mcmenu_t *mcmenu);
 int func_880010AC(mcmenu_t *mcmenu, void *buffer, int nbytes);
 int func_880010DC(void *opaque, int param, menu_ctrl_t ctrl);
 int func_88001148(void *opaque, int param, menu_ctrl_t ctrl);
+int func_880011CC(void *opaque, int param, menu_ctrl_t ctrl);
 int func_8800125C(void *opaque, int param, menu_ctrl_t ctrl);
 int func_880013DC(mcmenu_t *mcmenu, int index, int arg2);
 int func_88001D50(mcmenu_t *mcmenu, int index);
