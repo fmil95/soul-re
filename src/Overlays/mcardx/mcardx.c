@@ -126,7 +126,29 @@ void func_880006B8(mcpsx_t *mcpsx)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000700);
+int func_88000700(mcpsx_t *mcpsx) 
+{
+	if (mcpsx->state.observed == 0)
+	{
+		return 0;
+	}
+
+	switch (mcpsx->state.sync)
+	{
+	case sync_func:
+		func_8800055C(mcpsx);
+		
+        return 0;
+	case sync_busy:
+		func_880006B8(mcpsx);
+
+		return 0;
+	case sync_idle:
+		return 1;
+	}
+
+	return 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_8800076C);
 
@@ -450,7 +472,27 @@ void func_8800055C(void) {};
 
 void func_880006B8(mcpsx_t *mcpsx) {};
 
-void func_88000700(void) {};
+int func_88000700(mcpsx_t *mcpsx)
+{
+	if (mcpsx->state.observed == 0)
+	{
+		return 0;
+	}
+
+	switch (mcpsx->state.sync)
+	{
+	case sync_func:
+		func_8800055C(mcpsx); 
+		return 0;
+	case sync_busy:
+		func_880006B8(mcpsx);
+		return 0;
+	case sync_idle:
+		return 1;
+	}
+
+	return 1;
+}
 
 void func_8800076C(void) {};
 

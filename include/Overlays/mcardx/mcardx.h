@@ -6,7 +6,9 @@
 void func_880004A8(mcpsx_t *mcpsx);
 void func_88000464(mcpsx_t *mcpsx);
 void func_88000510(mcpsx_t *mcpsx, mcpsx_err_t err);
+void func_8800055C(mcpsx_t *mcpsx);
 void func_880006B8(mcpsx_t *mcpsx);
+int func_88000700(mcpsx_t *mcpsx);
 int func_880010DC(void *opaque, int param, menu_ctrl_t ctrl);
 int func_88001148(void *opaque, int param, menu_ctrl_t ctrl);
 int func_8800125C(void *opaque, int param, menu_ctrl_t ctrl);
