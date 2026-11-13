@@ -338,7 +338,10 @@ void func_88000B58(mcard_t *mcard)
 	mcard->state.not_exists = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000B70);
+int func_88000B70()
+{
+	return func_880003B4() + sizeof(mcard_t);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000B90);
 
@@ -824,7 +827,10 @@ void func_88000B58(mcard_t *mcard)
 	mcard->state.not_exists = 0;
 }
 
-void func_88000B70(void) {};
+int func_88000B70()
+{
+	return func_880003B4() + sizeof(mcard_t);
+}
 
 void func_88000B90(void) {};
 

@@ -3,6 +3,10 @@
 
 #include "common.h"
 
+int func_880003B4();
+void func_880003BC(mcpsx_t *mcpsx, void *opaque);
+void func_88000438(mcpsx_t *mcpsx);
+void func_88000464(mcpsx_t *mcpsx);
 void func_880004A8(mcpsx_t *mcpsx);
 void func_88000464(mcpsx_t *mcpsx);
 void func_88000510(mcpsx_t *mcpsx, mcpsx_err_t err);
@@ -20,6 +24,9 @@ int func_88000960(mcpsx_t *mcpsx, char *filename);
 int func_880009B0(mcpsx_t *mcpsx);
 int func_880009F0(mcpsx_t *mcpsx);
 int func_88000A30(mcpsx_t *mcpsx, mcpsx_directory_t *directory, long *nfilesptr);
+long func_88000A90(long channel, mcpsx_directory_t *directory, long *nfilesptr);
+void func_88000B58(mcard_t *mcard);
+int func_88000B70();
 int func_880010DC(void *opaque, int param, menu_ctrl_t ctrl);
 int func_88001148(void *opaque, int param, menu_ctrl_t ctrl);
 int func_8800125C(void *opaque, int param, menu_ctrl_t ctrl);
