@@ -280,7 +280,20 @@ int func_880009F0(mcpsx_t *mcpsx)
 	return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000A30);
+int func_88000A30(mcpsx_t *mcpsx, mcpsx_directory_t *directory, long *nfilesptr)
+{
+	if (func_88000700(mcpsx) != 0)
+	{
+		func_88000790(mcpsx, func_directory);
+
+		mcpsx->params.directory = directory;
+		mcpsx->params.nfilesptr = nfilesptr;
+
+		return 1;
+	}
+
+	return 0;
+}
 
 long func_88000A90(long channel, mcpsx_directory_t *directory, long *nfilesptr)
 {
@@ -316,7 +329,14 @@ long func_88000A90(long channel, mcpsx_directory_t *directory, long *nfilesptr)
 
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000B58);
+void func_88000B58(mcard_t *mcard)
+{
+	mcard->state.err    = mcpsx_err_new_card;
+	mcard->state.fsm    = fsmcard_new_card;
+	mcard->state.status = mcard_status_new_card;
+
+	mcard->state.not_exists = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000B70);
 
@@ -574,7 +594,7 @@ void func_8800053C(mcpsx_t *mcpsx, mcpsx_err_t err)
     func_88000510(mcpsx, err);
 }
 
-void func_8800055C(void) {};
+void func_8800055C(mcpsx_t *mcpsx) {};
 
 void func_880006B8(mcpsx_t *mcpsx)
 {
@@ -592,7 +612,7 @@ void func_880006B8(mcpsx_t *mcpsx)
     }
 }
 
-int func_88000700(mcpsx_t *mcpsx)
+int func_88000700(mcpsx_t *mcpsx) 
 {
 	if (mcpsx->state.observed == 0)
 	{
@@ -602,10 +622,12 @@ int func_88000700(mcpsx_t *mcpsx)
 	switch ((int)mcpsx->state.sync)
 	{
 	case sync_func:
-		func_8800055C(mcpsx); 
-		return 0;
+		func_8800055C(mcpsx);
+		
+        return 0;
 	case sync_busy:
 		func_880006B8(mcpsx);
+
 		return 0;
 	case sync_idle:
 		return 1;
@@ -697,7 +719,7 @@ int func_88000900(mcpsx_t *mcpsx, char *filename, long nblocks)
 		func_88000790(mcpsx, func_create_file);
 
 		mcpsx->params.filename = filename;
-        
+
 		mcpsx->params.nblocks = nblocks;
 
 		return 1;
@@ -744,7 +766,20 @@ int func_880009F0(mcpsx_t *mcpsx)
 	return 0;
 }
 
-void func_88000A30(void) {};
+int func_88000A30(mcpsx_t *mcpsx, mcpsx_directory_t *directory, long *nfilesptr)
+{
+	if (func_88000700(mcpsx) != 0)
+	{
+		func_88000790(mcpsx, func_directory);
+
+		mcpsx->params.directory = directory;
+		mcpsx->params.nfilesptr = nfilesptr;
+
+		return 1;
+	}
+
+	return 0;
+}
 
 long func_88000A90(long channel, mcpsx_directory_t *directory, long *nfilesptr)
 {
@@ -780,7 +815,14 @@ long func_88000A90(long channel, mcpsx_directory_t *directory, long *nfilesptr)
 
 }
 
-void func_88000B58(void) {};
+void func_88000B58(mcard_t *mcard)
+{
+	mcard->state.err    = mcpsx_err_new_card;
+	mcard->state.fsm    = fsmcard_new_card;
+	mcard->state.status = mcard_status_new_card;
+
+	mcard->state.not_exists = 0;
+}
 
 void func_88000B70(void) {};
 
