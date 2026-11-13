@@ -256,7 +256,17 @@ int func_88000960(mcpsx_t *mcpsx, char *filename)
 	return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880009B0);
+int func_880009B0(mcpsx_t *mcpsx)
+{
+	if (func_88000700(mcpsx) != 0)
+	{
+		func_88000790(mcpsx, func_format);
+
+		return 1;
+	}
+
+	return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880009F0);
 
@@ -700,7 +710,17 @@ int func_88000960(mcpsx_t *mcpsx, char *filename)
 	return 0;
 }
 
-void func_880009B0(void) {};
+int func_880009B0(mcpsx_t *mcpsx)
+{
+	if (func_88000700(mcpsx) != 0)
+	{
+		func_88000790(mcpsx, func_format);
+
+		return 1;
+	}
+
+	return 0;
+}
 
 void func_880009F0(void) {};
 
