@@ -180,7 +180,17 @@ int func_880007A0(mcpsx_t *mcpsx)
 	return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880007E0);
+int func_880007E0(mcpsx_t *mcpsx)
+{
+	if (func_88000700(mcpsx) != 0)
+	{
+		func_88000790(mcpsx, func_accept);
+
+		return 1;
+	}
+
+	return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000820);
 
