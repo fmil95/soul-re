@@ -661,7 +661,10 @@ INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_8800228C);
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88002298);
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880022DC);
+void func_880022DC(void *prm0, void *prm1)
+{
+	func_8800213C(prm0, prm1);
+}
 
 #else
 
@@ -1221,7 +1224,33 @@ int func_8800125C(void *opaque, int param, menu_ctrl_t ctrl)
     return 0;
 }
 
-void func_880012E8(void) {};
+int func_880012E8(mcmenu_t *mcmenu, int nfiles, int index, char *title, char *subtitle)
+{
+	memcard_item(mcmenu->opaque, NULL, 0, 4, title);
+
+	if (subtitle != NULL)
+	{
+		memcard_item(mcmenu->opaque, NULL, 0, 4, subtitle);
+	}
+
+	if (nfiles != 0)
+	{
+		memcard_item(mcmenu->opaque, func_88001148, fsm_start, 0, localstr_get(LOCALSTR_start_game));
+	}
+
+	memcard_item(mcmenu->opaque, func_880010DC, 0, 0, localstr_get(LOCALSTR_go_back));
+
+	if (nfiles != 0)
+	{
+		index = (index < 0) ? 3 : index;
+	}
+	else
+	{
+		index = (index < 0) ? 2 : index;
+	}
+
+	return index;
+}
 
 int func_880013DC(mcmenu_t *mcmenu, int index, int arg2) {};
 
@@ -1246,7 +1275,7 @@ void func_88001EF8(void) {};
 
 void func_88001F64(void) {};
 
-void func_8800213C(void) {};
+void func_8800213C(void *prm0, void *prm1) {};
 
 void func_88002164(void) {};
 
@@ -1256,6 +1285,9 @@ void func_8800228C(void) {};
 
 int func_88002298(void *buffer, int nblocks) {};
 
-void func_880022DC(void) {};
+void func_880022DC(void *prm0, void *prm1)
+{
+	func_8800213C(prm0, prm1);
+}
 
 #endif

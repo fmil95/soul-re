@@ -49,6 +49,8 @@ int func_880012E8(mcmenu_t *mcmenu, int nfiles, int index, char *title, char *su
 int func_880013DC(mcmenu_t *mcmenu, int index, int arg2);
 int func_88001D50(mcmenu_t *mcmenu, int index);
 int func_88001DBC(mcmenu_t *mcmenu, int index);
+void func_8800213C(void *prm0, void *prm1);
 int func_88002298(void *buffer, int nblocks);
+void func_880022DC(void *prm0, void *prm1);
 
 #endif
