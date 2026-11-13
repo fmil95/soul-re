@@ -454,7 +454,10 @@ void func_88000F90(mcmenu_t *mcmenu, void *opaque, int nblocks)
 	func_88000B90(mcard, mcmenu, mcmenu->params.directory, &mcmenu->params.nfiles);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88001014);
+void func_88001014(mcmenu_t *mcmenu)
+{
+	func_88000C10(mcmenu->mcard);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88001038);
 
@@ -1018,7 +1021,10 @@ void func_88000F90(mcmenu_t *mcmenu, void *opaque, int nblocks)
 	func_88000B90(mcard, mcmenu, mcmenu->params.directory, &mcmenu->params.nfiles);
 }
 
-void func_88001014(void) {};
+void func_88001014(mcmenu_t *mcmenu)
+{
+	func_88000C10(mcmenu->mcard);
+}
 
 void func_88001038(void) {};
 
