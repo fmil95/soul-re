@@ -42,6 +42,12 @@ typedef struct mcard_err_entry_t
 	mcard_status_t status;
 } mcard_err_entry_t;
 
+typedef struct mcmenu_fsm_entry_t
+{
+	mcard_status_t status;
+	fsm_t          fsm;
+} mcmenu_fsm_entry_t;
+
 int func_880003B4();
 void func_880003BC(mcpsx_t *mcpsx, void *opaque);
 void func_88000438(mcpsx_t *mcpsx);
@@ -70,6 +76,7 @@ void func_88000B90(mcard_t *mcard, void *opaque, mcpsx_directory_t *directory, l
 void func_88000C10(mcard_t *mcard);
 void func_88000C34(mcard_t *mcard);
 void func_88000C68(mcard_t *mcard);
+mcard_status_t func_88000C8C(mcard_t *mcard);
 void func_88000EF8(mcard_t *mcard);
 void func_88000F04(mcard_t *mcard);
 void func_88000F40(mcard_t *mcard, char *filename, void *buffer, int nbytes);
@@ -85,7 +92,7 @@ int func_88001148(void *opaque, int param, menu_ctrl_t ctrl);
 int func_880011CC(void *opaque, int param, menu_ctrl_t ctrl);
 int func_8800125C(void *opaque, int param, menu_ctrl_t ctrl);
 int func_880012E8(mcmenu_t *mcmenu, int nfiles, int index, char *title, char *subtitle);
-int func_880013DC(mcmenu_t *mcmenu, int index, int arg2);
+int func_880013DC(mcmenu_t *mcmenu, int index, int load);
 int func_88001D50(mcmenu_t *mcmenu, int index);
 int func_88001DBC(mcmenu_t *mcmenu, int index);
 unsigned short func_88001E14(unsigned char ascii_code);
@@ -99,11 +106,13 @@ int func_88002298(void *buffer, int nblocks);
 void func_880022DC(void *prm0, void *prm1);
 
 extern unsigned char D_880000F0[];
+extern char D_8800516C[][16];
 extern mcardx_ascii_t D_880057D4[3];
 extern unsigned short D_880057E0[];
 extern char D_88005824[5][13];
 extern mcardx_icon_t D_88005868[];
 extern mcardx_clut_t D_880058E8[];
 extern mcard_err_entry_t D_8800571C[];
+extern mcmenu_fsm_entry_t D_880057AC[];
 
 #endif

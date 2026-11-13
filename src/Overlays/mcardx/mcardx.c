@@ -552,7 +552,7 @@ mcard_status_t func_88000C8C(mcard_t *mcard)
 		break;
 	default:
 		mcard->state.status = mcard_status_new_card;
-		mcard->state.fsm = fsmcard_new_card;
+		mcard->state.fsm    = fsmcard_new_card;
 		break;
 	}
 
@@ -798,7 +798,272 @@ int func_880012E8(mcmenu_t *mcmenu, int nfiles, int index, char *title, char *su
 	return index;
 }
 
+// near match, but it has regalloc and also diffing jumptable
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880013DC);
+#else
+int func_880013DC(mcmenu_t *mcmenu, int index, int load)
+{
+	char title[32];
+	GameTracker *gt;
+	mcard_status_t status;
+	mcpsx_directory_t *entry;
+	int i;
+	int nused;
+	int nblocks;
+	int slots;
+
+	gt = GAMELOOP_GetGT();
+
+	status = func_88000C8C(mcmenu->mcard);
+
+	if ((status != mcmenu->state.status) && (status < mcard_status_ready))
+	{
+		mcmenu->state.status = status;
+		mcmenu->state.fsm    = D_880057AC[status].fsm;
+
+		index = -1;
+	}
+
+again:
+	if (mcmenu->state.fsm != mcmenu->state.fsm_prev)
+	{
+		index = -1;
+	}
+
+	mcmenu->state.fsm_prev = mcmenu->state.fsm;
+
+	switch (mcmenu->state.fsm)
+	{
+	case fsm_card_not_exist:
+		if (load != 0)
+		{
+			return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_no_card), localstr_get(LOCALSTR_warning_one));
+		}
+
+		return func_880012E8(mcmenu, 0, index, localstr_get(LOCALSTR_no_card), localstr_get(LOCALSTR_insert_card));
+	case fsm_card_invalid:
+		return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_invalid_card), localstr_get(LOCALSTR_try_card_again));
+	case fsm_not_format:
+		if (load != 0)
+		{
+			return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_unformatted_card), localstr_get(LOCALSTR_warning_one));
+		}
+
+		memcard_item(mcmenu->opaque, NULL,          0,          4, localstr_get(LOCALSTR_unformatted_card));
+		memcard_item(mcmenu->opaque, func_88001148, fsm_format, 0, localstr_get(LOCALSTR_format_card));
+		memcard_item(mcmenu->opaque, func_880010DC, 0,          0, localstr_get(LOCALSTR_go_back));
+
+		return (index < 0) ? 2 : index;
+	case fsm_format:
+		memcard_item(mcmenu->opaque, NULL, 0, 4, localstr_get(LOCALSTR_formatting));
+		memcard_item(mcmenu->opaque, NULL, 0, 0, localstr_get(LOCALSTR_do_not_remove_card));
+
+		index = -1;
+
+		if (status == mcard_status_not_format)
+		{
+			func_88000EF8(mcmenu->mcard);
+		}
+
+		if (status == mcard_status_ready)
+		{
+			mcmenu->state.slot = 0;
+			mcmenu->state.fsm  = fsm_create;
+		}
+
+		break;
+	case fsm_new_card:
+		gt->gameFlags |= 0x20000000;
+
+		memcard_item(mcmenu->opaque, NULL, 0, 0, localstr_get(LOCALSTR_accessing_card));
+
+		index = -1;
+
+		if (status == mcard_status_ready)
+		{
+			mcmenu->state.fsm = fsm_ready;
+		}
+
+		break;
+	case fsm_ready:
+		nused   = 0;
+		slots   = 0;
+		nblocks = mcmenu->params.nblocks;
+
+		for (i = 0; i < mcmenu->params.nfiles; i++)
+		{
+			entry = &mcmenu->params.directory[i];
+
+			nblocks += (entry->nbytes + 8191) / 8192;
+
+			if (func_88002164(entry->name) != 0)
+			{
+				if (nused == 0)
+				{
+					memcard_item(mcmenu->opaque, NULL, 0, 4, localstr_get((load != 0) ? LOCALSTR_choose_load_file : LOCALSTR_choose_save_file));
+				}
+
+				memcard_item(mcmenu->opaque, (load != 0) ? func_880011CC : func_8800125C, i, 0, D_8800516C[((unsigned char *)entry->name)[17]]);
+
+				nused++;
+
+				slots |= 1 << func_8800228C(entry->name);
+			}
+		}
+
+		if (nused > 0)
+		{
+			if (load != 0)
+			{
+				memcard_item(mcmenu->opaque, func_88001148, fsm_start,  0, localstr_get(LOCALSTR_start_new_game));
+			}
+			else if ((nblocks < 16) && (mcmenu->params.nfiles < 15) && (nused < 3))
+			{
+				memcard_item(mcmenu->opaque, func_88001148, fsm_create, 0, localstr_get(LOCALSTR_create_file));
+
+				index = (index < 0) ? nused + 1 : index;
+
+				for (i = 0; (i < 15) && ((slots >> i) & 1); i++);
+
+				mcmenu->state.slot = i;
+
+				goto go_back;
+			}
+
+			index = (index < 0) ? nused + 1 : index;
+		}
+		else
+		{
+			if (nblocks == (mcmenu->params.nblocks + 15))
+			{
+				return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_card_full), localstr_get(LOCALSTR_insert_card_free));
+			}
+
+			if (nblocks >= 16)
+			{
+				return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_card_not_enough_blocks), localstr_get(LOCALSTR_insert_card_free));
+			}
+
+			if (load != 0)
+			{
+				mcmenu->state.fsm = fsm_start;
+
+				goto again;
+			}
+
+			memcard_item(mcmenu->opaque, NULL,          0,          4, localstr_get(LOCALSTR_choose_save_file));
+			memcard_item(mcmenu->opaque, func_88001148, fsm_create, 0, localstr_get(LOCALSTR_create_file));
+
+			index = (index < 0) ? 1 : index;
+		}
+
+	go_back:
+		memcard_item(mcmenu->opaque, func_880010DC, 0, 0, localstr_get(LOCALSTR_go_back));
+
+		return index;
+	case fsm_start:
+		memcard_item(mcmenu->opaque, NULL, 0, 0, " ");
+
+		memcard_start(mcmenu->opaque);
+
+		return -1;
+	case fsm_loading:
+		memcard_item(mcmenu->opaque, NULL, 0, 4, localstr_get(LOCALSTR_loading));
+		memcard_item(mcmenu->opaque, NULL, 0, 0, localstr_get(LOCALSTR_do_not_remove_card));
+
+		index = -1;
+
+		if (status == mcard_status_ready)
+		{
+			gt->gameFlags &= ~0x20000000;
+
+			memcard_load(mcmenu->opaque);
+
+			return index;
+		}
+
+		break;
+	case fsm_query_overwrite:
+		memcard_item(mcmenu->opaque, NULL,          0,             0, D_8800516C[((unsigned char *)mcmenu->params.directory[mcmenu->state.slot].name)[17]]);
+		memcard_item(mcmenu->opaque, NULL,          0,             0, localstr_get(LOCALSTR_query_overwrite));
+		memcard_item(mcmenu->opaque, func_88001148, fsm_overwrite, 0, localstr_get(LOCALSTR_overwrite_game));
+		memcard_item(mcmenu->opaque, func_88001148, fsm_ready,     0, localstr_get(LOCALSTR_go_back));
+
+		return (index < 0) ? 3 : index;
+	case fsm_overwrite:
+		func_880021D0(mcmenu->params.directory[mcmenu->params.nfiles].name, mcmenu->state.slot);
+
+		sprintf(title, "Legacy Of Kain: Soul Reaver %c", mcmenu->state.slot + 'A');
+
+		func_880022DC(mcmenu->params.buffer, title);
+
+		memcard_item(mcmenu->opaque, NULL, 0, 4, localstr_get(LOCALSTR_saving));
+		memcard_item(mcmenu->opaque, NULL, 0, 0, localstr_get(LOCALSTR_do_not_remove_card));
+
+		index = -1;
+
+		memcard_save(mcmenu->opaque);
+
+		gt->gameFlags |= 0x20000800;
+
+		func_88000F40(mcmenu->mcard, mcmenu->params.directory[mcmenu->state.slot].name, mcmenu->params.buffer, mcmenu->params.nbytes);
+
+		mcmenu->state.fsm = fsm_saving;
+		break;
+	case fsm_saving:
+		memcard_item(mcmenu->opaque, NULL, 0, 4, localstr_get(LOCALSTR_saving));
+		memcard_item(mcmenu->opaque, NULL, 0, 0, localstr_get(LOCALSTR_do_not_remove_card));
+
+		index = -1;
+
+		if (status == mcard_status_ready)
+		{
+			mcmenu->state.fsm = fsm_save_complete;
+		}
+
+		break;
+	case fsm_create:
+		entry = &mcmenu->params.directory[mcmenu->params.nfiles];
+
+		func_880021D0(entry->name, mcmenu->state.slot);
+
+		sprintf(title, "Legacy Of Kain: Soul Reaver %c", mcmenu->state.slot + 'A');
+
+		func_880022DC(mcmenu->params.buffer, title);
+
+		index = -1;
+
+		memcard_save(mcmenu->opaque);
+
+		func_88000F10(mcmenu->mcard, entry->name, mcmenu->params.nblocks, mcmenu->params.buffer, mcmenu->params.nbytes);
+
+		memcard_item(mcmenu->opaque, NULL, 0, 4, localstr_get(LOCALSTR_saving));
+		memcard_item(mcmenu->opaque, NULL, 0, 0, localstr_get(LOCALSTR_do_not_remove_card));
+
+		gt->gameFlags |= 0x20000800;
+
+		mcmenu->state.fsm = fsm_saving;
+		break;
+	case fsm_save_complete:
+		memcard_item(mcmenu->opaque, NULL,          0, 4, localstr_get(LOCALSTR_save_ok));
+		memcard_item(mcmenu->opaque, func_880010DC, 0, 0, localstr_get(LOCALSTR_continue));
+
+		index = 1;
+
+		gt->gameFlags &= ~0x800;
+		break;
+	default:
+		gt->gameFlags |= 0x20000000;
+
+		mcmenu->state.fsm = fsm_new_card;
+
+		goto again;
+	}
+
+	return index;
+}
+#endif
 
 int func_88001D50(mcmenu_t *mcmenu, int index)
 {
@@ -1501,7 +1766,7 @@ mcard_status_t func_88000C8C(mcard_t *mcard)
 		break;
 	default:
 		mcard->state.status = mcard_status_new_card;
-		mcard->state.fsm = fsmcard_new_card;
+		mcard->state.fsm    = fsmcard_new_card;
 		break;
 	}
 
@@ -1746,7 +2011,267 @@ int func_880012E8(mcmenu_t *mcmenu, int nfiles, int index, char *title, char *su
 	return index;
 }
 
-int func_880013DC(mcmenu_t *mcmenu, int index, int arg2) {};
+int func_880013DC(mcmenu_t *mcmenu, int index, int load)
+{
+	char title[32];
+	GameTracker *gt;
+	mcard_status_t status;
+	mcpsx_directory_t *entry;
+	int i;
+	int nused;
+	int nblocks;
+	int slots;
+
+	gt = GAMELOOP_GetGT();
+
+	status = func_88000C8C(mcmenu->mcard);
+
+	if ((status != mcmenu->state.status) && (status < mcard_status_ready))
+	{
+		mcmenu->state.status = status;
+		mcmenu->state.fsm    = D_880057AC[status].fsm;
+
+		index = -1;
+	}
+
+again:
+	if (mcmenu->state.fsm != mcmenu->state.fsm_prev)
+	{
+		index = -1;
+	}
+
+	mcmenu->state.fsm_prev = mcmenu->state.fsm;
+
+	switch (mcmenu->state.fsm)
+	{
+	case fsm_card_not_exist:
+		if (load != 0)
+		{
+			return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_no_card), localstr_get(LOCALSTR_warning_one));
+		}
+
+		return func_880012E8(mcmenu, 0, index, localstr_get(LOCALSTR_no_card), localstr_get(LOCALSTR_insert_card));
+	case fsm_card_invalid:
+		return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_invalid_card), localstr_get(LOCALSTR_try_card_again));
+	case fsm_not_format:
+		if (load != 0)
+		{
+			return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_unformatted_card), localstr_get(LOCALSTR_warning_one));
+		}
+
+		memcard_item(mcmenu->opaque, NULL,          0,          4, localstr_get(LOCALSTR_unformatted_card));
+		memcard_item(mcmenu->opaque, func_88001148, fsm_format, 0, localstr_get(LOCALSTR_format_card));
+		memcard_item(mcmenu->opaque, func_880010DC, 0,          0, localstr_get(LOCALSTR_go_back));
+
+		return (index < 0) ? 2 : index;
+	case fsm_format:
+		memcard_item(mcmenu->opaque, NULL, 0, 4, localstr_get(LOCALSTR_formatting));
+		memcard_item(mcmenu->opaque, NULL, 0, 0, localstr_get(LOCALSTR_do_not_remove_card));
+
+		index = -1;
+
+		if (status == mcard_status_not_format)
+		{
+			func_88000EF8(mcmenu->mcard);
+		}
+
+		if (status == mcard_status_ready)
+		{
+			mcmenu->state.slot = 0;
+			mcmenu->state.fsm  = fsm_create;
+		}
+
+		break;
+	case fsm_new_card:
+		gt->gameFlags |= 0x20000000;
+
+		memcard_item(mcmenu->opaque, NULL, 0, 0, localstr_get(LOCALSTR_accessing_card));
+
+		index = -1;
+
+		if (status == mcard_status_ready)
+		{
+			mcmenu->state.fsm = fsm_ready;
+		}
+
+		break;
+	case fsm_ready:
+		nused   = 0;
+		slots   = 0;
+		nblocks = mcmenu->params.nblocks;
+
+		for (i = 0; i < mcmenu->params.nfiles; i++)
+		{
+			entry = &mcmenu->params.directory[i];
+
+			nblocks += (entry->nbytes + 8191) / 8192;
+
+			if (func_88002164(entry->name) != 0)
+			{
+				if (nused == 0)
+				{
+					memcard_item(mcmenu->opaque, NULL, 0, 4, localstr_get((load != 0) ? LOCALSTR_choose_load_file : LOCALSTR_choose_save_file));
+				}
+
+				memcard_item(mcmenu->opaque, (load != 0) ? func_880011CC : func_8800125C, i, 0, D_8800516C[((unsigned char *)entry->name)[17]]);
+
+				nused++;
+
+				slots |= 1 << func_8800228C(entry->name);
+			}
+		}
+
+		if (nused > 0)
+		{
+			if (load != 0)
+			{
+				memcard_item(mcmenu->opaque, func_88001148, fsm_start,  0, localstr_get(LOCALSTR_start_new_game));
+			}
+			else if ((nblocks < 16) && (mcmenu->params.nfiles < 15) && (nused < 3))
+			{
+				memcard_item(mcmenu->opaque, func_88001148, fsm_create, 0, localstr_get(LOCALSTR_create_file));
+
+				index = (index < 0) ? nused + 1 : index;
+
+				for (i = 0; (i < 15) && ((slots >> i) & 1); i++);
+
+				mcmenu->state.slot = i;
+
+				goto go_back;
+			}
+
+			index = (index < 0) ? nused + 1 : index;
+		}
+		else
+		{
+			if (nblocks == (mcmenu->params.nblocks + 15))
+			{
+				return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_card_full), localstr_get(LOCALSTR_insert_card_free));
+			}
+
+			if (nblocks >= 16)
+			{
+				return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_card_not_enough_blocks), localstr_get(LOCALSTR_insert_card_free));
+			}
+
+			if (load != 0)
+			{
+				mcmenu->state.fsm = fsm_start;
+
+				goto again;
+			}
+
+			memcard_item(mcmenu->opaque, NULL,          0,          4, localstr_get(LOCALSTR_choose_save_file));
+			memcard_item(mcmenu->opaque, func_88001148, fsm_create, 0, localstr_get(LOCALSTR_create_file));
+
+			index = (index < 0) ? 1 : index;
+		}
+
+	go_back:
+		memcard_item(mcmenu->opaque, func_880010DC, 0, 0, localstr_get(LOCALSTR_go_back));
+
+		return index;
+	case fsm_start:
+		memcard_item(mcmenu->opaque, NULL, 0, 0, " ");
+
+		memcard_start(mcmenu->opaque);
+
+		return -1;
+	case fsm_loading:
+		memcard_item(mcmenu->opaque, NULL, 0, 4, localstr_get(LOCALSTR_loading));
+		memcard_item(mcmenu->opaque, NULL, 0, 0, localstr_get(LOCALSTR_do_not_remove_card));
+
+		index = -1;
+
+		if (status == mcard_status_ready)
+		{
+			gt->gameFlags &= ~0x20000000;
+
+			memcard_load(mcmenu->opaque);
+
+			return index;
+		}
+
+		break;
+	case fsm_query_overwrite:
+		memcard_item(mcmenu->opaque, NULL,          0,             0, D_8800516C[((unsigned char *)mcmenu->params.directory[mcmenu->state.slot].name)[17]]);
+		memcard_item(mcmenu->opaque, NULL,          0,             0, localstr_get(LOCALSTR_query_overwrite));
+		memcard_item(mcmenu->opaque, func_88001148, fsm_overwrite, 0, localstr_get(LOCALSTR_overwrite_game));
+		memcard_item(mcmenu->opaque, func_88001148, fsm_ready,     0, localstr_get(LOCALSTR_go_back));
+
+		return (index < 0) ? 3 : index;
+	case fsm_overwrite:
+		func_880021D0(mcmenu->params.directory[mcmenu->params.nfiles].name, mcmenu->state.slot);
+
+		sprintf(title, "Legacy Of Kain: Soul Reaver %c", mcmenu->state.slot + 'A');
+
+		func_880022DC(mcmenu->params.buffer, title);
+
+		memcard_item(mcmenu->opaque, NULL, 0, 4, localstr_get(LOCALSTR_saving));
+		memcard_item(mcmenu->opaque, NULL, 0, 0, localstr_get(LOCALSTR_do_not_remove_card));
+
+		index = -1;
+
+		memcard_save(mcmenu->opaque);
+
+		gt->gameFlags |= 0x20000800;
+
+		func_88000F40(mcmenu->mcard, mcmenu->params.directory[mcmenu->state.slot].name, mcmenu->params.buffer, mcmenu->params.nbytes);
+
+		mcmenu->state.fsm = fsm_saving;
+		break;
+	case fsm_saving:
+		memcard_item(mcmenu->opaque, NULL, 0, 4, localstr_get(LOCALSTR_saving));
+		memcard_item(mcmenu->opaque, NULL, 0, 0, localstr_get(LOCALSTR_do_not_remove_card));
+
+		index = -1;
+
+		if (status == mcard_status_ready)
+		{
+			mcmenu->state.fsm = fsm_save_complete;
+		}
+
+		break;
+	case fsm_create:
+		entry = &mcmenu->params.directory[mcmenu->params.nfiles];
+
+		func_880021D0(entry->name, mcmenu->state.slot);
+
+		sprintf(title, "Legacy Of Kain: Soul Reaver %c", mcmenu->state.slot + 'A');
+
+		func_880022DC(mcmenu->params.buffer, title);
+
+		index = -1;
+
+		memcard_save(mcmenu->opaque);
+
+		func_88000F10(mcmenu->mcard, entry->name, mcmenu->params.nblocks, mcmenu->params.buffer, mcmenu->params.nbytes);
+
+		memcard_item(mcmenu->opaque, NULL, 0, 4, localstr_get(LOCALSTR_saving));
+		memcard_item(mcmenu->opaque, NULL, 0, 0, localstr_get(LOCALSTR_do_not_remove_card));
+
+		gt->gameFlags |= 0x20000800;
+
+		mcmenu->state.fsm = fsm_saving;
+		break;
+	case fsm_save_complete:
+		memcard_item(mcmenu->opaque, NULL,          0, 4, localstr_get(LOCALSTR_save_ok));
+		memcard_item(mcmenu->opaque, func_880010DC, 0, 0, localstr_get(LOCALSTR_continue));
+
+		index = 1;
+
+		gt->gameFlags &= ~0x800;
+		break;
+	default:
+		gt->gameFlags |= 0x20000000;
+
+		mcmenu->state.fsm = fsm_new_card;
+
+		goto again;
+	}
+
+	return index;
+}
 
 int func_88001D50(mcmenu_t *mcmenu, int index)
 {
