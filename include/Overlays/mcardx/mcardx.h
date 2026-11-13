@@ -56,6 +56,7 @@ int func_880013DC(mcmenu_t *mcmenu, int index, int arg2);
 int func_88001D50(mcmenu_t *mcmenu, int index);
 int func_88001DBC(mcmenu_t *mcmenu, int index);
 unsigned short func_88001E14(unsigned char ascii_code);
+void func_88001EF8(unsigned char *src, unsigned short *dst);
 void func_8800213C(void *prm0, void *prm1);
 int func_88002298(void *buffer, int nblocks);
 void func_880022DC(void *prm0, void *prm1);

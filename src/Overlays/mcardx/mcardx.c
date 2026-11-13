@@ -647,8 +647,8 @@ int func_88001DBC(mcmenu_t *mcmenu, int index)
 
 unsigned short func_88001E14(unsigned char ascii_code)
 {
-	int stmp;
 	mcardx_ascii_t *entry;
+    int stmp;
 	int stmp2;
 
     stmp  = 0;
@@ -703,7 +703,25 @@ unsigned short func_88001E14(unsigned char ascii_code)
     }
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88001EF8);
+void func_88001EF8(unsigned char *src, unsigned short *dst)
+{
+	unsigned char code;
+	unsigned short sjis;
+
+loop:
+	code = *src++;
+
+	if (code != 0)
+	{
+		sjis = func_88001E14(code);
+
+		*dst++ = ((sjis & 0xFF00) >> 8) | ((sjis & 0xFF) << 8);
+
+		goto loop;
+	}
+
+	*dst = 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88001F64);
 
@@ -1310,7 +1328,20 @@ int func_880012E8(mcmenu_t *mcmenu, int nfiles, int index, char *title, char *su
 
 int func_880013DC(mcmenu_t *mcmenu, int index, int arg2) {};
 
-int func_88001D50(mcmenu_t *mcmenu, int index) {};
+int func_88001D50(mcmenu_t *mcmenu, int index)
+{
+    GameTracker *gt;
+
+    gt = GAMELOOP_GetGT();
+
+    gt->gameFlags |= 0x20000000;
+
+    MENUFACE_ChangeStateRandomly(0);
+
+    do_check_controller(gt);
+
+    return func_880013DC(mcmenu, index, 1);
+}
 
 int func_88001DBC(mcmenu_t *mcmenu, int index)
 {
@@ -1327,8 +1358,8 @@ int func_88001DBC(mcmenu_t *mcmenu, int index)
 
 unsigned short func_88001E14(unsigned char ascii_code)
 {
-	int stmp;
 	mcardx_ascii_t *entry;
+    int stmp;
 	int stmp2;
 
     stmp  = 0;
@@ -1383,7 +1414,25 @@ unsigned short func_88001E14(unsigned char ascii_code)
     }
 }
 
-void func_88001EF8(void) {};
+void func_88001EF8(unsigned char *src, unsigned short *dst)
+{
+	unsigned char code;
+	unsigned short sjis;
+
+loop:
+	code = *src++;
+
+	if (code != 0)
+	{
+		sjis = func_88001E14(code);
+
+		*dst++ = ((sjis & 0xFF00) >> 8) | ((sjis & 0xFF) << 8);
+
+		goto loop;
+	}
+
+	*dst = 0;
+}
 
 void func_88001F64(void) {};
 
