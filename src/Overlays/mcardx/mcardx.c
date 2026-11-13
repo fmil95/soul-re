@@ -432,7 +432,27 @@ int func_88000F70()
 	return func_88000B70() + sizeof(mcmenu_t);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000F90);
+void func_88000F90(mcmenu_t *mcmenu, void *opaque, int nblocks)
+{
+	mcard_t *mcard;
+
+	mcard = (mcard_t *)&mcmenu[1];
+
+	memset(mcmenu, 0, sizeof(mcmenu_t));
+
+	mcmenu->state.status   = mcard_status_new_card;
+	mcmenu->state.fsm      = fsm_new_card;
+	mcmenu->state.fsm_prev = fsm_new_card;
+
+	mcmenu->state.running = 0;
+
+	mcmenu->params.nblocks = nblocks;
+
+	mcmenu->mcard  = mcard;
+	mcmenu->opaque = opaque;
+
+	func_88000B90(mcard, mcmenu, mcmenu->params.directory, &mcmenu->params.nfiles);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88001014);
 
@@ -976,7 +996,27 @@ int func_88000F70()
 	return func_88000B70() + sizeof(mcmenu_t);
 }
 
-void func_88000F90(void) {};
+void func_88000F90(mcmenu_t *mcmenu, void *opaque, int nblocks)
+{
+	mcard_t *mcard;
+
+	mcard = (mcard_t *)&mcmenu[1];
+
+	memset(mcmenu, 0, sizeof(mcmenu_t));
+
+	mcmenu->state.status   = mcard_status_new_card;
+	mcmenu->state.fsm      = fsm_new_card;
+	mcmenu->state.fsm_prev = fsm_new_card;
+
+	mcmenu->state.running = 0;
+
+	mcmenu->params.nblocks = nblocks;
+
+	mcmenu->mcard  = mcard;
+	mcmenu->opaque = opaque;
+
+	func_88000B90(mcard, mcmenu, mcmenu->params.directory, &mcmenu->params.nfiles);
+}
 
 void func_88001014(void) {};
 
