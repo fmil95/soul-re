@@ -35,6 +35,13 @@ typedef struct mcardx_id_t
 	char id[12];
 } mcardx_id_t;
 
+typedef struct mcard_err_entry_t
+{
+	mcpsx_err_t    err;
+	fsmcard_t      fsm;
+	mcard_status_t status;
+} mcard_err_entry_t;
+
 int func_880003B4();
 void func_880003BC(mcpsx_t *mcpsx, void *opaque);
 void func_88000438(mcpsx_t *mcpsx);
@@ -97,5 +104,6 @@ extern unsigned short D_880057E0[];
 extern char D_88005824[5][13];
 extern mcardx_icon_t D_88005868[];
 extern mcardx_clut_t D_880058E8[];
+extern mcard_err_entry_t D_8800571C[];
 
 #endif

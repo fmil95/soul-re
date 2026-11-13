@@ -417,7 +417,153 @@ void func_88000C68(mcard_t *mcard)
 	func_880004DC(mcard->mcpsx);
 }
 
+// matches, except for the jump table
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000C8C);
+#else
+mcard_status_t func_88000C8C(mcard_t *mcard)
+{
+	mcpsx_err_t err;
+	mcard_err_entry_t *entry;
+	int ok;
+
+	ok = 1;
+
+	err = func_8800076C(mcard->mcpsx);
+
+	if ((err != mcard->state.err) && (err != mcpsx_err_none) && (err < mcpsx_err_busy))
+	{
+		entry = &D_8800571C[err];
+
+		if ((err == mcpsx_err_card_not_exist) && (mcard->state.not_exists < 0))
+		{
+			mcard->state.not_exists++;
+		}
+		else
+		{
+			mcard->state.err    = err;
+			mcard->state.fsm    = entry->fsm;
+			mcard->state.status = entry->status;
+
+			mcard->state.not_exists = 0;
+		}
+	}
+
+	if (mcard->state.fsm >= fsmcard_format)
+	{
+		mcard->state.status = mcard_status_accessing;
+	}
+
+	switch (mcard->state.fsm)
+	{
+	case 0:
+		if (err == mcpsx_err_none)
+		{
+			mcard->state.fsm = fsmcard_new_card;
+		}
+
+		break;
+	case 1:
+	case fsmcard_not_format:
+		break;
+	case fsmcard_new_card:
+		ok = func_880007E0(mcard->mcpsx);
+
+		if (ok != 0)
+		{
+			mcard->state.fsm = fsmcard_directory;
+		}
+
+		break;
+	case fsmcard_directory:
+		ok = func_88000A30(mcard->mcpsx, mcard->params.directory, mcard->params.nfilesptr);
+
+		if (ok != 0)
+		{
+			mcard->state.fsm = fsmcard_ready;
+		}
+
+		break;
+	case fsmcard_ready:
+		if (err == mcpsx_err_none)
+		{
+			mcard->state.status = mcard_status_ready;
+		}
+
+		if (err == mcpsx_err_new_card)
+		{
+			mcard->state.fsm = (fsmcard_t)err;
+		}
+
+		break;
+	case fsmcard_format:
+		ok = func_880009B0(mcard->mcpsx);
+
+		if (ok != 0)
+		{
+			mcard->state.fsm = fsmcard_directory;
+		}
+
+		break;
+	case fsmcard_unformat:
+		ok = func_880009F0(mcard->mcpsx);
+
+		if (ok != 0)
+		{
+			mcard->state.fsm = fsmcard_directory;
+		}
+
+		break;
+	case fsmcard_create:
+		ok = func_88000900(mcard->mcpsx, mcard->params.filename, mcard->params.nblocks);
+
+		if (ok != 0)
+		{
+			mcard->state.fsm = fsmcard_write;
+		}
+
+		break;
+	case fsmcard_delete:
+		ok = func_88000960(mcard->mcpsx, mcard->params.filename);
+
+		if (ok != 0)
+		{
+			mcard->state.fsm = fsmcard_ready;
+		}
+
+		break;
+	case fsmcard_write:
+		ok = func_88000890(mcard->mcpsx, mcard->params.filename, mcard->params.buffer, mcard->params.nbytes);
+
+		if (ok != 0)
+		{
+			mcard->state.fsm = fsmcard_ready;
+		}
+
+		break;
+	case fsmcard_read:
+		ok = func_88000820(mcard->mcpsx, mcard->params.filename, mcard->params.buffer, mcard->params.nbytes);
+
+		if (ok != 0)
+		{
+			mcard->state.fsm = fsmcard_ready;
+		}
+
+		break;
+	default:
+		mcard->state.status = mcard_status_new_card;
+		mcard->state.fsm = fsmcard_new_card;
+		break;
+	}
+
+	if (ok != 0)
+	{
+		func_880007A0(mcard->mcpsx);
+	}
+
+	return mcard->state.status;
+}
+#endif
 
 void func_88000EF8(mcard_t *mcard)
 {
@@ -1224,7 +1370,148 @@ void func_88000C68(mcard_t *mcard)
 	func_880004DC(mcard->mcpsx);
 }
 
-mcard_status_t func_88000C8C(mcard_t *mcard) {};
+mcard_status_t func_88000C8C(mcard_t *mcard)
+{
+	mcpsx_err_t err;
+	mcard_err_entry_t *entry;
+	int ok;
+
+	ok = 1;
+
+	err = func_8800076C(mcard->mcpsx);
+
+	if ((err != mcard->state.err) && (err != mcpsx_err_none) && (err < mcpsx_err_busy))
+	{
+		entry = &D_8800571C[err];
+
+		if ((err == mcpsx_err_card_not_exist) && (mcard->state.not_exists < 0))
+		{
+			mcard->state.not_exists++;
+		}
+		else
+		{
+			mcard->state.err    = err;
+			mcard->state.fsm    = entry->fsm;
+			mcard->state.status = entry->status;
+
+			mcard->state.not_exists = 0;
+		}
+	}
+
+	if (mcard->state.fsm >= fsmcard_format)
+	{
+		mcard->state.status = mcard_status_accessing;
+	}
+
+	switch (mcard->state.fsm)
+	{
+	case 0:
+		if (err == mcpsx_err_none)
+		{
+			mcard->state.fsm = fsmcard_new_card;
+		}
+
+		break;
+	case 1:
+	case fsmcard_not_format:
+		break;
+	case fsmcard_new_card:
+		ok = func_880007E0(mcard->mcpsx);
+
+		if (ok != 0)
+		{
+			mcard->state.fsm = fsmcard_directory;
+		}
+
+		break;
+	case fsmcard_directory:
+		ok = func_88000A30(mcard->mcpsx, mcard->params.directory, mcard->params.nfilesptr);
+
+		if (ok != 0)
+		{
+			mcard->state.fsm = fsmcard_ready;
+		}
+
+		break;
+	case fsmcard_ready:
+		if (err == mcpsx_err_none)
+		{
+			mcard->state.status = mcard_status_ready;
+		}
+
+		if (err == mcpsx_err_new_card)
+		{
+			mcard->state.fsm = (fsmcard_t)err;
+		}
+
+		break;
+	case fsmcard_format:
+		ok = func_880009B0(mcard->mcpsx);
+
+		if (ok != 0)
+		{
+			mcard->state.fsm = fsmcard_directory;
+		}
+
+		break;
+	case fsmcard_unformat:
+		ok = func_880009F0(mcard->mcpsx);
+
+		if (ok != 0)
+		{
+			mcard->state.fsm = fsmcard_directory;
+		}
+
+		break;
+	case fsmcard_create:
+		ok = func_88000900(mcard->mcpsx, mcard->params.filename, mcard->params.nblocks);
+
+		if (ok != 0)
+		{
+			mcard->state.fsm = fsmcard_write;
+		}
+
+		break;
+	case fsmcard_delete:
+		ok = func_88000960(mcard->mcpsx, mcard->params.filename);
+
+		if (ok != 0)
+		{
+			mcard->state.fsm = fsmcard_ready;
+		}
+
+		break;
+	case fsmcard_write:
+		ok = func_88000890(mcard->mcpsx, mcard->params.filename, mcard->params.buffer, mcard->params.nbytes);
+
+		if (ok != 0)
+		{
+			mcard->state.fsm = fsmcard_ready;
+		}
+
+		break;
+	case fsmcard_read:
+		ok = func_88000820(mcard->mcpsx, mcard->params.filename, mcard->params.buffer, mcard->params.nbytes);
+
+		if (ok != 0)
+		{
+			mcard->state.fsm = fsmcard_ready;
+		}
+
+		break;
+	default:
+		mcard->state.status = mcard_status_new_card;
+		mcard->state.fsm = fsmcard_new_card;
+		break;
+	}
+
+	if (ok != 0)
+	{
+		func_880007A0(mcard->mcpsx);
+	}
+
+	return mcard->state.status;
+}
 
 void func_88000EF8(mcard_t *mcard)
 {
