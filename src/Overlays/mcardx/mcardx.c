@@ -343,7 +343,24 @@ int func_88000B70()
 	return func_880003B4() + sizeof(mcard_t);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000B90);
+void func_88000B90(mcard_t *mcard, void *opaque, mcpsx_directory_t *directory, long *nfilesptr)
+{
+	mcpsx_t *mcpsx;
+
+	mcpsx = (mcpsx_t *)&mcard[1];
+
+	memset(mcard, 0, sizeof(mcard_t));
+
+	mcard->mcpsx  = mcpsx;
+	mcard->opaque = opaque;
+
+	mcard->params.nfilesptr = nfilesptr;
+	mcard->params.directory = directory;
+
+	func_880003BC(mcard->mcpsx, mcard);
+
+	func_88000B58(mcard);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000C10);
 
@@ -832,7 +849,24 @@ int func_88000B70()
 	return func_880003B4() + sizeof(mcard_t);
 }
 
-void func_88000B90(void) {};
+void func_88000B90(mcard_t *mcard, void *opaque, mcpsx_directory_t *directory, long *nfilesptr)
+{
+	mcpsx_t *mcpsx;
+
+	mcpsx = (mcpsx_t *)&mcard[1];
+
+	memset(mcard, 0, sizeof(mcard_t));
+
+	mcard->mcpsx  = mcpsx;
+	mcard->opaque = opaque;
+
+	mcard->params.nfilesptr = nfilesptr;
+	mcard->params.directory = directory;
+
+	func_880003BC(mcard->mcpsx, mcard);
+
+	func_88000B58(mcard);
+}
 
 void func_88000C10(void) {};
 

@@ -27,6 +27,7 @@ int func_88000A30(mcpsx_t *mcpsx, mcpsx_directory_t *directory, long *nfilesptr)
 long func_88000A90(long channel, mcpsx_directory_t *directory, long *nfilesptr);
 void func_88000B58(mcard_t *mcard);
 int func_88000B70();
+void func_88000B90(mcard_t *mcard, void *opaque, mcpsx_directory_t *directory, long *nfilesptr);
 int func_880010DC(void *opaque, int param, menu_ctrl_t ctrl);
 int func_88001148(void *opaque, int param, menu_ctrl_t ctrl);
 int func_8800125C(void *opaque, int param, menu_ctrl_t ctrl);
