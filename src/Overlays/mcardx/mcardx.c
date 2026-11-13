@@ -459,7 +459,16 @@ void func_88001014(mcmenu_t *mcmenu)
 	func_88000C10(mcmenu->mcard);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88001038);
+void func_88001038(mcmenu_t *mcmenu)
+{
+	func_88000C34(mcmenu->mcard);
+
+	mcmenu->state.status   = mcard_status_new_card;
+	mcmenu->state.fsm      = fsm_new_card;
+	mcmenu->state.fsm_prev = fsm_new_card;
+
+	mcmenu->state.running = 1;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_8800107C);
 
@@ -1026,7 +1035,16 @@ void func_88001014(mcmenu_t *mcmenu)
 	func_88000C10(mcmenu->mcard);
 }
 
-void func_88001038(void) {};
+void func_88001038(mcmenu_t *mcmenu)
+{
+	func_88000C34(mcmenu->mcard);
+
+	mcmenu->state.status   = mcard_status_new_card;
+	mcmenu->state.fsm      = fsm_new_card;
+	mcmenu->state.fsm_prev = fsm_new_card;
+
+	mcmenu->state.running = 1;
+}
 
 void func_8800107C(void) {};
 

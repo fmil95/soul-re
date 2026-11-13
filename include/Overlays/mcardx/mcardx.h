@@ -38,6 +38,7 @@ void func_88000F58(mcard_t *mcard, char *filename, void *buffer, int nbytes);
 int func_88000F70();
 void func_88000F90(mcmenu_t *mcmenu, void *opaque, int nblocks);
 void func_88001014(mcmenu_t *mcmenu);
+void func_88001038(mcmenu_t *mcmenu);
 int func_880010DC(void *opaque, int param, menu_ctrl_t ctrl);
 int func_88001148(void *opaque, int param, menu_ctrl_t ctrl);
 int func_8800125C(void *opaque, int param, menu_ctrl_t ctrl);
