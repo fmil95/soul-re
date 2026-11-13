@@ -789,7 +789,10 @@ void func_880021D0(char *name, int slot)
 	printf("SetName: %s\n", name);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_8800228C);
+int func_8800228C(char *name)
+{
+	return ((unsigned char *)name)[17] - 'a';
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88002298);
 
@@ -1558,7 +1561,10 @@ void func_880021D0(char *name, int slot)
 	printf("SetName: %s\n", name);
 }
 
-void func_8800228C(void) {};
+int func_8800228C(char *name)
+{
+	return ((unsigned char *)name)[17] - 'a';
+}
 
 int func_88002298(void *buffer, int nblocks) {};
 

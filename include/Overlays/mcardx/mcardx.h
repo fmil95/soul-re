@@ -87,6 +87,7 @@ int func_88001F64(mcardx_header_t *header, unsigned char *title, int nblocks, in
 void func_8800213C(void *prm0, void *prm1);
 int func_88002164(char *name);
 void func_880021D0(char *name, int slot);
+int func_8800228C(char *name);
 int func_88002298(void *buffer, int nblocks);
 void func_880022DC(void *prm0, void *prm1);
 
