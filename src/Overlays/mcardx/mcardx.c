@@ -774,7 +774,20 @@ int func_88002164(char *name)
 	return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880021D0);
+void func_880021D0(char *name, int slot)
+{
+	int language;
+
+	language = localstr_get_language();
+
+	memset(name, 0, 20);
+
+	*(mcardx_id_t *)name = *(mcardx_id_t *)D_88005824[language];
+
+	sprintf(&name[12], "kain %c", slot + 'a');
+    
+	printf("SetName: %s\n", name);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_8800228C);
 
@@ -1530,7 +1543,20 @@ int func_88002164(char *name)
 	return 0;
 }
 
-void func_880021D0(void) {};
+void func_880021D0(char *name, int slot)
+{
+	int language;
+
+	language = localstr_get_language();
+
+	memset(name, 0, 20);
+
+	*(mcardx_id_t *)name = *(mcardx_id_t *)D_88005824[language];
+
+	sprintf(&name[12], "kain %c", slot + 'a');
+
+	printf("SetName: %s\n", name);
+}
 
 void func_8800228C(void) {};
 

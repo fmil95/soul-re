@@ -30,6 +30,11 @@ typedef struct mcardx_header_t
 	mcardx_icon_t icon[3];
 } mcardx_header_t;
 
+typedef struct mcardx_id_t
+{
+	char id[12];
+} mcardx_id_t;
+
 int func_880003B4();
 void func_880003BC(mcpsx_t *mcpsx, void *opaque);
 void func_88000438(mcpsx_t *mcpsx);
@@ -81,6 +86,7 @@ void func_88001EF8(unsigned char *src, unsigned short *dst);
 int func_88001F64(mcardx_header_t *header, unsigned char *title, int nblocks, int nicons, mcardx_clut_t *clut, mcardx_icon_t *icons);
 void func_8800213C(void *prm0, void *prm1);
 int func_88002164(char *name);
+void func_880021D0(char *name, int slot);
 int func_88002298(void *buffer, int nblocks);
 void func_880022DC(void *prm0, void *prm1);
 
