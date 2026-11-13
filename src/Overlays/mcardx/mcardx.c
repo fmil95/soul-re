@@ -751,7 +751,10 @@ int func_88001F64(mcardx_header_t *header, unsigned char *title, int nblocks, in
 	return size;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_8800213C);
+void func_8800213C(void *prm0, void *prm1)
+{
+	func_88001EF8(prm1, (unsigned short *)((char *)prm0 + 4));
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88002164);
 
@@ -1488,7 +1491,10 @@ int func_88001F64(mcardx_header_t *header, unsigned char *title, int nblocks, in
 	return size;
 }
 
-void func_8800213C(void *prm0, void *prm1) {};
+void func_8800213C(void *prm0, void *prm1)
+{
+	func_88001EF8(prm1, (unsigned short *)((char *)prm0 + 4));
+}
 
 void func_88002164(void) {};
 
