@@ -1,5 +1,6 @@
 #include "Overlays/cinemax/cinemax.h"
 #include "Game/CINEMA/CINEPSX.h"
+#include "Game/MEMPACK.h"
 
 unsigned int D_880125F8;
 int D_880125FC;
@@ -9,8 +10,6 @@ int D_88012608;
 
 extern BufferInfo D_880125B8;
 extern int D_8801260C;
-
-//#define CINE_RECT(info, i) (((RECT *)&(info)->rect[0].x)[i])
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -48,7 +47,7 @@ void func_880000C4()
     ClearImage(&rect, 0, 0, 0);
 }
 
-void func_88000138(void)
+void func_88000138()
 {
     DISPENV disp;
 
@@ -67,7 +66,210 @@ void func_88000138(void)
 }
 
 INCLUDE_RODATA("asm/nonmatchings/Overlays/cinemax/cinemax", D_88000000);
+
+// Damn near match, but has $s7 and $s8 registers swapped (99.94%!)
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880001C4);
+#else
+int func_880001C4(char* strfile, unsigned short mask, int buffers) 
+{
+    CdlFILE sp18;
+    CdlLOC sp30;
+    SpuCommonAttr sp38;
+    SpuCommonAttr sp60;
+    DISPENV sp88;
+    char* spA4;
+    char* spA8;
+    char* spAC;
+    char* spB0;
+    char* spB4;
+    short temp_a0;
+    short temp_v0;
+    int var_s2;
+    int var_s5;
+    unsigned short temp_a1;
+    unsigned short temp_s0;
+    unsigned short var_fp;
+    unsigned short var_s7;
+    unsigned int temp_lo;
+
+    var_s5 = 0;
+    var_fp = 0;
+    var_s7 = 0;
+    
+    D_880125F8 = 1;
+    D_8801260C = buffers;
+
+    if (buffers < 2) 
+    {
+        D_8801260C = 2;
+    }
+    
+    if (D_8801260C >= 4)
+    {
+        D_8801260C = 3;
+    }
+    
+    D_88012604 = 0;
+    D_880125FC = 0;
+    D_88012600 = 0;
+    
+    VSyncCallback(NULL);
+    
+    SetDispMask(0);
+    
+    func_880000C4();
+    
+    if (CdSearchFile(&sp18, strfile) == NULL) 
+    {
+        printf("file not found\n");
+        
+        return 0;
+    }
+    
+    D_88012608 = (CdPosToInt(&sp18.pos) + (sp18.size / 2048)) - 5;
+    
+    SpuGetCommonAttr(&sp38);
+    SpuGetCommonAttr(&sp60);
+    
+    sp38.ext.volume.left  = 16383;
+    sp38.ext.volume.right = 16383;
+    
+    sp38.mvol.left  = 16383;
+    sp38.mvol.right = 16383;
+    
+    sp38.cd.volume.left  = 16383;
+    sp38.cd.volume.right = 16383;
+    
+    sp38.mvolmode.left  = 0;
+    sp38.mvolmode.right = 0;
+    
+    sp38.ext.reverb = 0;
+    sp38.ext.mix    = 1;
+    
+    sp38.cd.reverb = 0;
+    sp38.cd.mix    = 1;
+    
+    sp38.mask |= 0x3FCF;
+    sp60.mask  = sp38.mask & ~0xC;
+    
+    SpuSetCommonAttr(&sp38);
+    
+    spA4 = MEMPACK_Malloc(0x18000, 9);
+    spA8 = MEMPACK_Malloc(0x10000, 9);
+    spAC = MEMPACK_Malloc(0x10000, 9);
+    spB0 = MEMPACK_Malloc(0x2D00,  9);
+    spB4 = MEMPACK_Malloc(0x2D00,  9);
+    
+    func_880006C0(spA8, spAC, spB0, spB4, &D_880125B8);
+    
+    while (CdControlB(CdlSetloc, &sp18.pos.minute, NULL) == 0);
+    while (CdControlB(CdlSeekL, NULL, NULL) == 0);
+    
+    CdSync(0, NULL);
+    
+    VSyncCallback(func_88000138);
+    
+    func_88000720(spA4, &sp18.pos, func_880007C8);
+    
+    while (func_88000904(&D_880125B8) == -1) 
+    {
+        sp30 = sp18.pos;
+        
+        func_88000BB8(&sp30);
+    }
+    do 
+    {
+        bufferstruct_t* bs;
+
+        bs = (bufferstruct_t*)&D_880125B8;
+        
+        DecDCTin((unsigned long*)((intptr_t*)&bs->anchor1)[bs->index1], 3);
+        
+        temp_lo = D_880125B8.slice.w * D_880125B8.slice.h;
+        
+        DecDCTout((unsigned long*)((intptr_t*)&bs->anchor2)[bs->index2], (int)(temp_lo + (temp_lo >> 31)) >> 1);
+        
+        while ((func_88000904(&D_880125B8) == -1) && (D_88012604 != 1)) 
+        {
+            if (StGetBackloc(&sp30) <= 0) 
+            {
+                sp30 = sp18.pos;
+            }
+            
+            func_88000BB8(&sp30);
+        }
+        
+        func_88000B04(&D_880125B8, 0);
+        
+        if (func_88000068() != 0) 
+        {
+            D_88012604 = 1;
+        }
+        
+        temp_s0 = CINE_Pad(0);
+        temp_a1 = CINE_Pad(1);
+        
+        temp_v0 = var_s7 & ~temp_s0;
+        temp_a0 = var_fp & ~temp_a1;
+        
+        if (temp_v0 & mask)
+        {
+            var_s5 = temp_v0 & mask;
+        }
+        
+        var_s7 = temp_s0;
+        
+        if (temp_a0 & mask) 
+        {
+            var_s5 = temp_a0 & mask;
+        }
+        
+        var_fp = temp_a1;
+        
+        if (var_s5 != 0) 
+        {
+            D_88012604 = 1;
+        }
+    } while (D_88012604 != 1);
+    
+    StSetMask(1, 0, 0);
+    
+    VSyncCallback(NULL);
+    DecDCToutCallback(NULL);
+    
+    func_880000C4();
+    
+    DrawSync(0);
+    
+    SetDefDispEnv(&sp88, D_880125B8.rect[0].x, D_880125B8.rect[0].y, 320, 240);
+    PutDispEnv(&sp88);
+    
+    for (var_s2 = 5; var_s2 >= 0; --var_s2) 
+    {
+        sp38.cd.volume.right = sp38.cd.volume.left = (var_s2 * 16383) / 6;
+        
+        SpuSetCommonAttr(&sp38);
+        
+        VSync(0);
+    } 
+    
+    CdControlB(CdlPause, NULL, NULL);
+    
+    StClearRing();
+    StUnSetRing();
+    
+    SpuSetCommonAttr(&sp60);
+    
+    MEMPACK_Free(spA4);
+    MEMPACK_Free(spA8);
+    MEMPACK_Free(spAC);
+    MEMPACK_Free(spB0);
+    MEMPACK_Free(spB4);
+    
+    return D_88012604 != 0;
+}
+#endif 
 
 void func_880006C0(char *buff1, char *buff2, char *buff3, char *buff4, BufferInfo *bufferInfo)
 {
@@ -121,7 +323,7 @@ void func_88000794(BufferInfo *bufferInfo)
     }
 }
 
-void func_880007C8(void)
+void func_880007C8()
 {
     RECT snap;
     int id;
@@ -192,7 +394,7 @@ int func_88000904(BufferInfo *bufferInfo)
     return -1;
 }
 
-char *func_880009B4(BufferInfo *buffer_info) 
+char *func_880009B4(BufferInfo *bufferInfo) 
 {
     int i;
 	char* buffer;
@@ -248,10 +450,10 @@ char *func_880009B4(BufferInfo *buffer_info)
 
     mult = D_880125FC * 3;
     
-    buffer_info->rect[0].w = buffer_info->rect[1].w = buffer_info->rect[2].w = (int)(mult + (mult >> 31)) >> 1; 
-    buffer_info->rect[0].h = buffer_info->rect[1].h = buffer_info->rect[2].h = D_88012600;
+    bufferInfo->rect[0].w = bufferInfo->rect[1].w = bufferInfo->rect[2].w = (int)(mult + (mult >> 31)) >> 1; 
+    bufferInfo->rect[0].h = bufferInfo->rect[1].h = bufferInfo->rect[2].h = D_88012600;
     
-    buffer_info->slice.h = D_88012600;
+    bufferInfo->slice.h = D_88012600;
     
     return buffer;
 }
@@ -331,7 +533,7 @@ void func_880000C4()
     ClearImage(&rect, 0, 0, 0);
 }
 
-void func_88000138(void)
+void func_88000138()
 {
     DISPENV disp;
 
@@ -349,7 +551,204 @@ void func_88000138(void)
     }
 }
 
-int func_880001C4(char *strfile, unsigned short mask, int buffers) {};
+int func_880001C4(char* strfile, unsigned short mask, int buffers) 
+{
+    CdlFILE sp18;
+    CdlLOC sp30;
+    SpuCommonAttr sp38;
+    SpuCommonAttr sp60;
+    DISPENV sp88;
+    char* spA4;
+    char* spA8;
+    char* spAC;
+    char* spB0;
+    char* spB4;
+    short temp_a0;
+    short temp_v0;
+    int var_s2;
+    int var_s5;
+    unsigned short temp_a1;
+    unsigned short temp_s0;
+    unsigned short var_fp;
+    unsigned short var_s7;
+    unsigned int temp_lo;
+
+    var_s5 = 0;
+    var_fp = 0;
+    var_s7 = 0;
+    
+    D_880125F8 = 1;
+    D_8801260C = buffers;
+
+    if (buffers < 2) 
+    {
+        D_8801260C = 2;
+    }
+    
+    if (D_8801260C >= 4)
+    {
+        D_8801260C = 3;
+    }
+    
+    D_88012604 = 0;
+    D_880125FC = 0;
+    D_88012600 = 0;
+    
+    VSyncCallback(NULL);
+    
+    SetDispMask(0);
+    
+    func_880000C4();
+    
+    if (CdSearchFile(&sp18, strfile) == NULL) 
+    {
+        printf("file not found\n");
+        
+        return 0;
+    }
+    
+    D_88012608 = (CdPosToInt(&sp18.pos) + (sp18.size / 2048)) - 5;
+    
+    SpuGetCommonAttr(&sp38);
+    SpuGetCommonAttr(&sp60);
+    
+    sp38.ext.volume.left  = 16383;
+    sp38.ext.volume.right = 16383;
+    
+    sp38.mvol.left  = 16383;
+    sp38.mvol.right = 16383;
+    
+    sp38.cd.volume.left  = 16383;
+    sp38.cd.volume.right = 16383;
+    
+    sp38.mvolmode.left  = 0;
+    sp38.mvolmode.right = 0;
+    
+    sp38.ext.reverb = 0;
+    sp38.ext.mix    = 1;
+    
+    sp38.cd.reverb = 0;
+    sp38.cd.mix    = 1;
+    
+    sp38.mask |= 0x3FCF;
+    sp60.mask  = sp38.mask & ~0xC;
+    
+    SpuSetCommonAttr(&sp38);
+    
+    spA4 = MEMPACK_Malloc(0x18000, 9);
+    spA8 = MEMPACK_Malloc(0x10000, 9);
+    spAC = MEMPACK_Malloc(0x10000, 9);
+    spB0 = MEMPACK_Malloc(0x2D00,  9);
+    spB4 = MEMPACK_Malloc(0x2D00,  9);
+    
+    func_880006C0(spA8, spAC, spB0, spB4, &D_880125B8);
+    
+    while (CdControlB(CdlSetloc, &sp18.pos.minute, NULL) == 0);
+    while (CdControlB(CdlSeekL, NULL, NULL) == 0);
+    
+    CdSync(0, NULL);
+    
+    VSyncCallback(func_88000138);
+    
+    func_88000720(spA4, &sp18.pos, func_880007C8);
+    
+    while (func_88000904(&D_880125B8) == -1) 
+    {
+        sp30 = sp18.pos;
+        
+        func_88000BB8(&sp30);
+    }
+    do 
+    {
+        bufferstruct_t* bs;
+
+        bs = (bufferstruct_t*)&D_880125B8;
+        
+        DecDCTin((unsigned long*)((intptr_t*)&bs->anchor1)[bs->index1], 3);
+        
+        temp_lo = D_880125B8.slice.w * D_880125B8.slice.h;
+        
+        DecDCTout((unsigned long*)((intptr_t*)&bs->anchor2)[bs->index2], (int)(temp_lo + (temp_lo >> 31)) >> 1);
+        
+        while ((func_88000904(&D_880125B8) == -1) && (D_88012604 != 1)) 
+        {
+            if (StGetBackloc(&sp30) <= 0) 
+            {
+                sp30 = sp18.pos;
+            }
+            
+            func_88000BB8(&sp30);
+        }
+        
+        func_88000B04(&D_880125B8, 0);
+        
+        if (func_88000068() != 0) 
+        {
+            D_88012604 = 1;
+        }
+        
+        temp_s0 = CINE_Pad(0);
+        temp_a1 = CINE_Pad(1);
+        
+        temp_v0 = var_s7 & ~temp_s0;
+        temp_a0 = var_fp & ~temp_a1;
+        
+        if (temp_v0 & mask)
+        {
+            var_s5 = temp_v0 & mask;
+        }
+        
+        var_s7 = temp_s0;
+        
+        if (temp_a0 & mask) 
+        {
+            var_s5 = temp_a0 & mask;
+        }
+        
+        var_fp = temp_a1;
+        
+        if (var_s5 != 0) 
+        {
+            D_88012604 = 1;
+        }
+    } while (D_88012604 != 1);
+    
+    StSetMask(1, 0, 0);
+    
+    VSyncCallback(NULL);
+    DecDCToutCallback(NULL);
+    
+    func_880000C4();
+    
+    DrawSync(0);
+    
+    SetDefDispEnv(&sp88, D_880125B8.rect[0].x, D_880125B8.rect[0].y, 320, 240);
+    PutDispEnv(&sp88);
+    
+    for (var_s2 = 5; var_s2 >= 0; --var_s2) 
+    {
+        sp38.cd.volume.right = sp38.cd.volume.left = (var_s2 * 16383) / 6;
+        
+        SpuSetCommonAttr(&sp38);
+        
+        VSync(0);
+    } 
+    
+    CdControlB(CdlPause, NULL, NULL);
+    
+    StClearRing();
+    StUnSetRing();
+    
+    SpuSetCommonAttr(&sp60);
+    
+    MEMPACK_Free(spA4);
+    MEMPACK_Free(spA8);
+    MEMPACK_Free(spAC);
+    MEMPACK_Free(spB0);
+    MEMPACK_Free(spB4);
+    
+    return D_88012604 != 0;
+}
 
 void func_880006C0(char *buff1, char *buff2, char *buff3, char *buff4, BufferInfo *bufferInfo)
 {
@@ -403,7 +802,7 @@ void func_88000794(BufferInfo *bufferInfo)
     }
 }
 
-void func_880007C8(void)
+void func_880007C8()
 {
     RECT snap;
     int id;
@@ -474,7 +873,7 @@ int func_88000904(BufferInfo *bufferInfo)
     return -1;
 }
 
-char *func_880009B4(BufferInfo *buffer_info) 
+char *func_880009B4(BufferInfo *bufferInfo) 
 {
     int i;
 	char* buffer;
@@ -530,10 +929,10 @@ char *func_880009B4(BufferInfo *buffer_info)
 
     mult = D_880125FC * 3;
     
-    buffer_info->rect[0].w = buffer_info->rect[1].w = buffer_info->rect[2].w = (int)(mult + (mult >> 31)) >> 1; 
-    buffer_info->rect[0].h = buffer_info->rect[1].h = buffer_info->rect[2].h = D_88012600;
+    bufferInfo->rect[0].w = bufferInfo->rect[1].w = bufferInfo->rect[2].w = (int)(mult + (mult >> 31)) >> 1; 
+    bufferInfo->rect[0].h = bufferInfo->rect[1].h = bufferInfo->rect[2].h = D_88012600;
     
-    buffer_info->slice.h = D_88012600;
+    bufferInfo->slice.h = D_88012600;
     
     return buffer;
 }
