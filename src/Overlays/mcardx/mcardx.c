@@ -756,7 +756,23 @@ void func_8800213C(void *prm0, void *prm1)
 	func_88001EF8(prm1, (unsigned short *)((char *)prm0 + 4));
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88002164);
+int func_88002164(char *name)
+{
+	int i;
+	char *id;
+
+    i = 0;
+
+	for (id = D_88005824[0]; i < 5; i++, id += sizeof(D_88005824[0]))
+	{
+		if (strncmp(id, name, 12) == 0)
+		{
+			return 1;
+		}
+	}
+
+	return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880021D0);
 
@@ -1496,7 +1512,23 @@ void func_8800213C(void *prm0, void *prm1)
 	func_88001EF8(prm1, (unsigned short *)((char *)prm0 + 4));
 }
 
-void func_88002164(void) {};
+int func_88002164(char *name)
+{
+	int i;
+	char *id;
+
+    i = 0;
+
+	for (id = D_88005824[0]; i < 5; i++, id += sizeof(D_88005824[0]))
+	{
+		if (strncmp(id, name, 12) == 0)
+		{
+			return 1;
+		}
+	}
+
+	return 0;
+}
 
 void func_880021D0(void) {};
 

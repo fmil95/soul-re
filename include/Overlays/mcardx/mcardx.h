@@ -80,9 +80,11 @@ unsigned short func_88001E14(unsigned char ascii_code);
 void func_88001EF8(unsigned char *src, unsigned short *dst);
 int func_88001F64(mcardx_header_t *header, unsigned char *title, int nblocks, int nicons, mcardx_clut_t *clut, mcardx_icon_t *icons);
 void func_8800213C(void *prm0, void *prm1);
+int func_88002164(char *name);
 int func_88002298(void *buffer, int nblocks);
 void func_880022DC(void *prm0, void *prm1);
 
+extern char D_88005824[5][13];
 extern mcardx_ascii_t D_880057D4[3];
 extern unsigned short D_880057E0[];
 
