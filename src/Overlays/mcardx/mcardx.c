@@ -242,7 +242,19 @@ int func_88000900(mcpsx_t *mcpsx, char *filename, long nblocks)
 	return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000960);
+int func_88000960(mcpsx_t *mcpsx, char *filename)
+{
+	if (func_88000700(mcpsx) != 0)
+	{
+		func_88000790(mcpsx, func_delete_file);
+
+		mcpsx->params.filename = filename;
+
+		return 1;
+	}
+
+	return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880009B0);
 
@@ -674,7 +686,19 @@ int func_88000900(mcpsx_t *mcpsx, char *filename, long nblocks)
 	return 0;
 }
 
-void func_88000960(void) {};
+int func_88000960(mcpsx_t *mcpsx, char *filename)
+{
+	if (func_88000700(mcpsx) != 0)
+	{
+		func_88000790(mcpsx, func_delete_file);
+
+		mcpsx->params.filename = filename;
+
+		return 1;
+	}
+
+	return 0;
+}
 
 void func_880009B0(void) {};
 

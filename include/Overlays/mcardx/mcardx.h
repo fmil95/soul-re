@@ -16,6 +16,7 @@ int func_880007E0(mcpsx_t *mcpsx);
 int func_88000820(mcpsx_t *mcpsx, char *filename, void *buffer, long nbytes);
 int func_88000890(mcpsx_t *mcpsx, char *filename, void *buffer, long nbytes);
 int func_88000900(mcpsx_t *mcpsx, char *filename, long nblocks);
+int func_88000960(mcpsx_t *mcpsx, char *filename);
 int func_880010DC(void *opaque, int param, menu_ctrl_t ctrl);
 int func_88001148(void *opaque, int param, menu_ctrl_t ctrl);
 int func_8800125C(void *opaque, int param, menu_ctrl_t ctrl);
