@@ -362,7 +362,10 @@ void func_88000B90(mcard_t *mcard, void *opaque, mcpsx_directory_t *directory, l
 	func_88000B58(mcard);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000C10);
+void func_88000C10(mcard_t *mcard)
+{
+	func_88000438(mcard->mcpsx);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000C34);
 
