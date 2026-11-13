@@ -427,7 +427,10 @@ void func_88000F58(mcard_t *mcard, char *filename, void *buffer, int nbytes)
 	mcard->params.nbytes = nbytes;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000F70);
+int func_88000F70()
+{
+	return func_88000B70() + sizeof(mcmenu_t);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000F90);
 
@@ -968,7 +971,10 @@ void func_88000F58(mcard_t *mcard, char *filename, void *buffer, int nbytes)
 	mcard->params.nbytes = nbytes;
 }
 
-void func_88000F70(void) {};
+int func_88000F70()
+{
+	return func_88000B70() + sizeof(mcmenu_t);
+}
 
 void func_88000F90(void) {};
 
