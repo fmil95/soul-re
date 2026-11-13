@@ -374,7 +374,10 @@ void func_88000C34(mcard_t *mcard)
 	func_88000B58(mcard);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000C68);
+void func_88000C68(mcard_t *mcard)
+{
+	func_880004DC(mcard->mcpsx);
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000C8C);
 
@@ -888,7 +891,10 @@ void func_88000C34(mcard_t *mcard)
 	func_88000B58(mcard);
 }
 
-void func_88000C68(void) {};
+void func_88000C68(mcard_t *mcard)
+{
+	func_880004DC(mcard->mcpsx);
+}
 
 mcard_status_t func_88000C8C(mcard_t *mcard) {};
 
