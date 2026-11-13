@@ -645,7 +645,63 @@ int func_88001DBC(mcmenu_t *mcmenu, int index)
     return func_880013DC(mcmenu, index, 0);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88001E14);
+unsigned short func_88001E14(unsigned char ascii_code)
+{
+	int stmp;
+	mcardx_ascii_t *entry;
+	int stmp2;
+
+    stmp  = 0;
+    stmp2 = 0;
+
+	if (ascii_code < ' ') 
+    {
+        return 0;
+    }
+    else if (ascii_code < '0') 
+    {
+        stmp2 = 1;
+    }
+    else if (ascii_code < ':')  
+    {
+        stmp = 0;
+    }
+    else if (ascii_code < 'A')  
+    {
+        stmp2 = 11;
+    }
+    else if (ascii_code < '[') 
+    {
+        stmp = 1;
+    }
+    else if (ascii_code < 'a') 
+    {  
+        stmp2 = 37;
+    }
+    else if (ascii_code < '{')  
+    {
+        stmp = 2;
+    }
+    else if (ascii_code < 0x7F) 
+    {
+        stmp2 = 63;
+    }
+    else
+    {
+        return 0;
+    }
+
+    if (stmp2 != 0) 
+    {
+        return D_880057E0[(ascii_code - ' ') - (stmp2 - 1)];
+    }
+    else
+    {
+        entry = &D_880057D4[stmp];
+
+        return (entry->sjis + ascii_code) - entry->ascii;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88001EF8);
 
@@ -1269,7 +1325,63 @@ int func_88001DBC(mcmenu_t *mcmenu, int index)
     return func_880013DC(mcmenu, index, 0);
 }
 
-void func_88001E14(void) {};
+unsigned short func_88001E14(unsigned char ascii_code)
+{
+	int stmp;
+	mcardx_ascii_t *entry;
+	int stmp2;
+
+    stmp  = 0;
+    stmp2 = 0;
+
+	if (ascii_code < ' ') 
+    {
+        return 0;
+    }
+    else if (ascii_code < '0') 
+    {
+        stmp2 = 1;
+    }
+    else if (ascii_code < ':')  
+    {
+        stmp = 0;
+    }
+    else if (ascii_code < 'A')  
+    {
+        stmp2 = 11;
+    }
+    else if (ascii_code < '[') 
+    {
+        stmp = 1;
+    }
+    else if (ascii_code < 'a') 
+    {  
+        stmp2 = 37;
+    }
+    else if (ascii_code < '{')  
+    {
+        stmp = 2;
+    }
+    else if (ascii_code < 0x7F) 
+    {
+        stmp2 = 63;
+    }
+    else
+    {
+        return 0;
+    }
+
+    if (stmp2 != 0) 
+    {
+        return D_880057E0[(ascii_code - ' ') - (stmp2 - 1)];
+    }
+    else
+    {
+        entry = &D_880057D4[stmp];
+
+        return (entry->sjis + ascii_code) - entry->ascii;
+    }
+}
 
 void func_88001EF8(void) {};
 

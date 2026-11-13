@@ -3,6 +3,12 @@
 
 #include "common.h"
 
+typedef struct mcardx_ascii_t
+{
+	unsigned short sjis;
+	unsigned char  ascii;
+} mcardx_ascii_t;
+
 int func_880003B4();
 void func_880003BC(mcpsx_t *mcpsx, void *opaque);
 void func_88000438(mcpsx_t *mcpsx);
@@ -49,8 +55,12 @@ int func_880012E8(mcmenu_t *mcmenu, int nfiles, int index, char *title, char *su
 int func_880013DC(mcmenu_t *mcmenu, int index, int arg2);
 int func_88001D50(mcmenu_t *mcmenu, int index);
 int func_88001DBC(mcmenu_t *mcmenu, int index);
+unsigned short func_88001E14(unsigned char ascii_code);
 void func_8800213C(void *prm0, void *prm1);
 int func_88002298(void *buffer, int nblocks);
 void func_880022DC(void *prm0, void *prm1);
+
+extern mcardx_ascii_t D_880057D4[3];
+extern unsigned short D_880057E0[];
 
 #endif
