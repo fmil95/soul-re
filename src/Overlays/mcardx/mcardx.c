@@ -708,7 +708,7 @@ void func_88001EF8(unsigned char *src, unsigned short *dst)
 	unsigned char code;
 	unsigned short sjis;
 
-loop:
+loop: // TODO: find the actual loop structure
 	code = *src++;
 
 	if (code != 0)
@@ -723,7 +723,33 @@ loop:
 	*dst = 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88001F64);
+int func_88001F64(mcardx_header_t *header, unsigned char *title, int nblocks, int nicons, mcardx_clut_t *clut, mcardx_icon_t *icons)
+{
+	int i;
+	int size;
+
+	size = (nicons * 128) + 256;
+
+	memset(header, 0, 256);
+
+	header->magic[0] = 'S';
+	header->magic[1] = 'C';
+    
+	header->type = nicons + 16;
+
+	header->nblocks = nblocks;
+
+	func_88001EF8(title, (unsigned short *)header->title);
+
+	header->clut = *clut;
+
+	for (i = 0; i < nicons; i++)
+	{
+		header->icon[i] = icons[i];
+	}
+
+	return size;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_8800213C);
 
@@ -1434,7 +1460,33 @@ loop:
 	*dst = 0;
 }
 
-void func_88001F64(void) {};
+int func_88001F64(mcardx_header_t *header, unsigned char *title, int nblocks, int nicons, mcardx_clut_t *clut, mcardx_icon_t *icons)
+{
+	int i;
+	int size;
+
+	size = (nicons * 128) + 256;
+
+	memset(header, 0, 256);
+
+	header->magic[0] = 'S';
+	header->magic[1] = 'C';
+    
+	header->type = nicons + 16;
+
+	header->nblocks = nblocks;
+
+	func_88001EF8(title, (unsigned short *)header->title);
+
+	header->clut = *clut;
+
+	for (i = 0; i < nicons; i++)
+	{
+		header->icon[i] = icons[i];
+	}
+
+	return size;
+}
 
 void func_8800213C(void *prm0, void *prm1) {};
 

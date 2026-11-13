@@ -9,6 +9,27 @@ typedef struct mcardx_ascii_t
 	unsigned char  ascii;
 } mcardx_ascii_t;
 
+typedef struct mcardx_clut_t
+{
+	char data[32];
+} mcardx_clut_t;
+
+typedef struct mcardx_icon_t
+{
+	char data[128];
+} mcardx_icon_t;
+
+typedef struct mcardx_header_t
+{         
+	char          magic[2];     
+	char          type;        
+	char          nblocks;
+	char          title[64];    
+	char          reserved[28];
+	mcardx_clut_t clut;
+	mcardx_icon_t icon[3];
+} mcardx_header_t;
+
 int func_880003B4();
 void func_880003BC(mcpsx_t *mcpsx, void *opaque);
 void func_88000438(mcpsx_t *mcpsx);
@@ -57,6 +78,7 @@ int func_88001D50(mcmenu_t *mcmenu, int index);
 int func_88001DBC(mcmenu_t *mcmenu, int index);
 unsigned short func_88001E14(unsigned char ascii_code);
 void func_88001EF8(unsigned char *src, unsigned short *dst);
+int func_88001F64(mcardx_header_t *header, unsigned char *title, int nblocks, int nicons, mcardx_clut_t *clut, mcardx_icon_t *icons);
 void func_8800213C(void *prm0, void *prm1);
 int func_88002298(void *buffer, int nblocks);
 void func_880022DC(void *prm0, void *prm1);
