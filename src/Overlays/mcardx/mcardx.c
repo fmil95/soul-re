@@ -168,7 +168,17 @@ void func_88000790(mcpsx_t *mcpsx, mcpsx_func_t func)
     mcpsx->state.sync = sync_func;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880007A0);
+int func_880007A0(mcpsx_t *mcpsx)
+{
+	if (func_88000700(mcpsx) != 0)
+	{
+		func_88000790(mcpsx, func_exist);
+
+		return 1;
+	}
+
+	return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880007E0);
 
