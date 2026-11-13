@@ -794,7 +794,10 @@ int func_8800228C(char *name)
 	return ((unsigned char *)name)[17] - 'a';
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88002298);
+int func_88002298(void *buffer, int nblocks)
+{
+	return func_88001F64(buffer, D_880000F0, nblocks, 1, D_880058E8, D_88005868); 
+}
 
 void func_880022DC(void *prm0, void *prm1)
 {
@@ -1566,7 +1569,10 @@ int func_8800228C(char *name)
 	return ((unsigned char *)name)[17] - 'a';
 }
 
-int func_88002298(void *buffer, int nblocks) {};
+int func_88002298(void *buffer, int nblocks)
+{
+	return func_88001F64(buffer, D_880000F0, nblocks, 1, D_880058E8, D_88005868); 
+}
 
 void func_880022DC(void *prm0, void *prm1)
 {
