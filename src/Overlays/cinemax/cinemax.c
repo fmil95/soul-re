@@ -10,7 +10,7 @@ int D_88012608;
 extern BufferInfo D_880125B8;
 extern int D_8801260C;
 
-#define CINE_RECT(info, i) (((RECT *)&(info)->rect[0].x)[i])
+//#define CINE_RECT(info, i) (((RECT *)&(info)->rect[0].x)[i])
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -113,7 +113,13 @@ void func_88000720(char *buffer, CdlLOC *fp, void (*func)())
     func_88000BB8(fp);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000794);
+void func_88000794(BufferInfo *bufferInfo)
+{
+    if (++bufferInfo->unk_30 >= D_8801260C)
+    {
+        bufferInfo->unk_30 = 0;
+    }
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880007C8);
 
@@ -354,7 +360,13 @@ void func_88000720(char *buffer, CdlLOC *fp, void (*func)())
     func_88000BB8(fp);
 }
 
-void func_88000794(BufferInfo *bufferInfo) {}
+void func_88000794(BufferInfo *bufferInfo)
+{
+    if (++bufferInfo->unk_30 >= D_8801260C)
+    {
+        bufferInfo->unk_30 = 0;
+    }
+}
 
 void func_880007C8(void) {}
 
