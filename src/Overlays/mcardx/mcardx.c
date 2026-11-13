@@ -226,7 +226,21 @@ int func_88000890(mcpsx_t *mcpsx, char *filename, void *buffer, long nbytes)
 	return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000900);
+int func_88000900(mcpsx_t *mcpsx, char *filename, long nblocks)
+{
+	if (func_88000700(mcpsx) != 0)
+	{
+		func_88000790(mcpsx, func_create_file);
+
+		mcpsx->params.filename = filename;
+
+		mcpsx->params.nblocks = nblocks;
+
+		return 1;
+	}
+
+	return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000960);
 
@@ -530,7 +544,21 @@ void func_8800053C(mcpsx_t *mcpsx, mcpsx_err_t err)
 
 void func_8800055C(void) {};
 
-void func_880006B8(mcpsx_t *mcpsx) {};
+void func_880006B8(mcpsx_t *mcpsx)
+{
+    long commands;
+    long result;
+    long sync;
+
+    sync = MemCardSync(1, &commands, &result);
+
+    mcpsx->state.sync = sync;
+
+    if (sync == sync_done)
+    {
+        func_88000510(mcpsx, result);
+    }
+}
 
 int func_88000700(mcpsx_t *mcpsx)
 {
@@ -539,7 +567,7 @@ int func_88000700(mcpsx_t *mcpsx)
 		return 0;
 	}
 
-	switch (mcpsx->state.sync)
+	switch ((int)mcpsx->state.sync)
 	{
 	case sync_func:
 		func_8800055C(mcpsx); 
@@ -554,7 +582,17 @@ int func_88000700(mcpsx_t *mcpsx)
 	return 1;
 }
 
-void func_8800076C(void) {};
+int func_8800076C(mcpsx_t *mcpsx)
+{
+	if (mcpsx->state.sync == sync_idle)
+	{
+		mcpsx->state.observed = 1;
+
+		return mcpsx->state.err;
+	}
+
+	return mcpsx_err_busy;
+}
 
 void func_88000790(mcpsx_t *mcpsx, mcpsx_func_t func)
 {
@@ -562,15 +600,79 @@ void func_88000790(mcpsx_t *mcpsx, mcpsx_func_t func)
     mcpsx->state.sync = sync_func;
 }
 
-void func_880007A0(void) {};
+int func_880007A0(mcpsx_t *mcpsx)
+{
+	if (func_88000700(mcpsx) != 0)
+	{
+		func_88000790(mcpsx, func_exist);
 
-void func_880007E0(void) {};
+		return 1;
+	}
 
-void func_88000820(void) {};
+	return 0;
+}
 
-void func_88000890(void) {};
+int func_880007E0(mcpsx_t *mcpsx)
+{
+	if (func_88000700(mcpsx) != 0)
+	{
+		func_88000790(mcpsx, func_accept);
 
-void func_88000900(void) {};
+		return 1;
+	}
+
+	return 0;
+}
+
+int func_88000820(mcpsx_t *mcpsx, char *filename, void *buffer, long nbytes)
+{
+	if (func_88000700(mcpsx) != 0)
+	{
+		func_88000790(mcpsx, func_read_file);
+
+		mcpsx->params.filename = filename;
+		mcpsx->params.buffer   = buffer;
+
+		mcpsx->params.nbytes = nbytes;
+
+		return 1;
+	}
+
+	return 0;
+}
+
+int func_88000890(mcpsx_t *mcpsx, char *filename, void *buffer, long nbytes)
+{
+	if (func_88000700(mcpsx) != 0)
+	{
+		func_88000790(mcpsx, func_write_file);
+
+		mcpsx->params.filename = filename;
+		mcpsx->params.buffer   = buffer;
+
+		mcpsx->params.nbytes = nbytes;
+
+		return 1;
+	}
+
+	return 0;
+}
+
+int func_88000900(mcpsx_t *mcpsx, char *filename, long nblocks)
+{
+	if (func_88000700(mcpsx) != 0)
+	{
+		func_88000790(mcpsx, func_create_file);
+
+		mcpsx->params.filename = filename;
+        
+		mcpsx->params.nblocks = nblocks;
+
+		return 1;
+	}
+
+	return 0;
+}
 
 void func_88000960(void) {};
 
