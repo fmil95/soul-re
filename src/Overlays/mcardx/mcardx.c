@@ -386,7 +386,10 @@ void func_88000EF8(mcard_t *mcard)
     mcard->state.fsm = fsmcard_format;
 };
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000F04);
+void func_88000F04(mcard_t *mcard)
+{
+	mcard->state.fsm = fsmcard_unformat;
+}
 
 void func_88000F10(mcard_t *mcard, char *filename, int nblocks, void *buffer, int nbytes)
 {
@@ -903,7 +906,10 @@ void func_88000EF8(mcard_t *mcard)
     mcard->state.fsm = fsmcard_format;
 };
 
-void func_88000F04(void) {};
+void func_88000F04(mcard_t *mcard)
+{
+	mcard->state.fsm = fsmcard_unformat;
+}
 
 void func_88000F10(mcard_t *mcard, char *filename, int nblocks, void *buffer, int nbytes)
 {
