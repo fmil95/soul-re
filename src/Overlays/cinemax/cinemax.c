@@ -1,10 +1,16 @@
 #include "Overlays/cinemax/cinemax.h"
+#include "Game/CINEMA/CINEPSX.h"
 
 unsigned int D_880125F8;
 int D_880125FC;
 int D_88012600;
 int D_88012604;
 int D_88012608;
+
+extern BufferInfo D_880125B8;
+extern int D_8801260C;
+
+#define CINE_RECT(info, i) (((RECT *)&(info)->rect[0].x)[i])
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
@@ -42,35 +48,56 @@ void func_880000C4()
     ClearImage(&rect, 0, 0, 0);
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000138);
+void func_88000138(void)
+{
+    DISPENV disp;
+
+    if (D_880125B8.unk_32 != -1)
+    {
+        SetDefDispEnv(&disp, D_880125B8.rect[D_880125B8.unk_32].x, D_880125B8.rect[D_880125B8.unk_32].y, 480, 240);
+
+        disp.isrgb24 = 1;
+
+        disp.disp.w = (disp.disp.w * 2) / 3;
+
+        PutDispEnv(&disp);
+
+        SetDispMask(1);
+    }
+}
 
 INCLUDE_RODATA("asm/nonmatchings/Overlays/cinemax/cinemax", D_88000000);
-
 INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880001C4);
 
 void func_880006C0(char *buff1, char *buff2, char *buff3, char *buff4, BufferInfo *bufferInfo)
 {
-    bufferInfo->unk_22 = 256;
-    bufferInfo->unk_28 = 480;
+    bufferInfo->rect[1].y = 256;
+    bufferInfo->rect[2].x = 480;
 
     bufferInfo->unk_32 = -1;
 
-    bufferInfo->buffer[0] = buff1;
-    bufferInfo->buffer[1] = buff2;
-    bufferInfo->buffer[2] = NULL;
+    bufferInfo->vlcbuf[0] = buff1;
+    bufferInfo->vlcbuf[1] = buff2;
 
-    bufferInfo->buffer[3] = buff3;
-    bufferInfo->buffer[4] = buff4;
-    bufferInfo->buffer[5] = NULL;
+    bufferInfo->vlcid = 0;
 
-    bufferInfo->unk_18 = 0;
-    bufferInfo->unk_1A = 0;
-    bufferInfo->unk_20 = 0;
-    bufferInfo->unk_2A = 0;
+    bufferInfo->imgbuf[0] = buff3;
+    bufferInfo->imgbuf[1] = buff4;
+
+    bufferInfo->imgid = 0;
+
+    bufferInfo->rect[0].x = 0;
+    bufferInfo->rect[0].y = 0;
+
+    bufferInfo->rect[1].x = 0;
+    bufferInfo->rect[2].y = 0;
+
     bufferInfo->unk_30 = 0;
-    bufferInfo->unk_34 = 0;
-    bufferInfo->unk_36 = 0;
-    bufferInfo->unk_38 = 24;
+
+    bufferInfo->slice.x = 0;
+    bufferInfo->slice.y = 0;
+    bufferInfo->slice.w = 24;
+
     bufferInfo->unk_3C = 0;
 }
 
@@ -112,9 +139,9 @@ int func_88000904(BufferInfo *bufferInfo)
 
     if (buffer != NULL)
     {
-        bufferInfo->buffer[2] = (char*)(intptr_t)!bufferInfo->buffer[2];
+        bufferInfo->vlcid = !bufferInfo->vlcid;
         
-        DecDCTvlc((unsigned long*)buffer, (unsigned long*)bufferInfo->buffer[(intptr_t)bufferInfo->buffer[2]]);
+        DecDCTvlc((unsigned long*)buffer, (unsigned long*)bufferInfo->vlcbuf[bufferInfo->vlcid]);
         
         StFreeRing((unsigned long*)buffer);
         
@@ -130,7 +157,6 @@ char *func_880009B4(BufferInfo *buffer_info)
 	char* buffer;
 	StHEADER* header; 
     unsigned int mult;
-    int temp;
 
     for (i = 14000; i != 0; ) 
     {
@@ -181,21 +207,38 @@ char *func_880009B4(BufferInfo *buffer_info)
 
     mult = D_880125FC * 3;
     
-    temp = (int)(mult + (mult >> 31)) >> 1;
+    buffer_info->rect[0].w = buffer_info->rect[1].w = buffer_info->rect[2].w = (int)(mult + (mult >> 31)) >> 1; 
+    buffer_info->rect[0].h = buffer_info->rect[1].h = buffer_info->rect[2].h = D_88012600;
     
-    buffer_info->unk_2C = temp; 
-    buffer_info->unk_24 = temp;
-    buffer_info->unk_1C = temp;
-    
-    buffer_info->unk_2E = D_88012600;
-    buffer_info->unk_26 = D_88012600;
-    buffer_info->unk_1E = D_88012600;
-    buffer_info->unk_3A = D_88012600;
+    buffer_info->slice.h = D_88012600;
     
     return buffer;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_88000B04);
+void func_88000B04(BufferInfo *bufferInfo, int mode)
+{
+    volatile int count;
+
+    (void)mode;
+
+    count = 0x800000;
+
+    while (bufferInfo->unk_3C == 0)
+    {
+        if (--count == 0)
+        {
+            bufferInfo->unk_3C = 1;
+            bufferInfo->unk_32 = bufferInfo->unk_30;
+
+            func_88000794(bufferInfo);
+
+            bufferInfo->slice.x = bufferInfo->rect[bufferInfo->unk_30].x;
+            bufferInfo->slice.y = bufferInfo->rect[bufferInfo->unk_30].y;
+        }
+    }
+
+    bufferInfo->unk_3C = 0;
+}
 
 void func_88000BB8(CdlLOC *fp)
 {
@@ -247,33 +290,55 @@ void func_880000C4()
     ClearImage(&rect, 0, 0, 0);
 }
 
-void func_88000138(void) {};
+void func_88000138(void)
+{
+    DISPENV disp;
+
+    if (D_880125B8.unk_32 != -1)
+    {
+        SetDefDispEnv(&disp, D_880125B8.rect[D_880125B8.unk_32].x, D_880125B8.rect[D_880125B8.unk_32].y, 480, 240);
+
+        disp.isrgb24 = 1;
+        
+        disp.disp.w = (disp.disp.w * 2) / 3;
+
+        PutDispEnv(&disp);
+
+        SetDispMask(1);
+    }
+}
 
 int func_880001C4(char *strfile, unsigned short mask, int buffers) {};
 
 void func_880006C0(char *buff1, char *buff2, char *buff3, char *buff4, BufferInfo *bufferInfo)
 {
-    bufferInfo->unk_22 = 256;
-    bufferInfo->unk_28 = 480;
+    bufferInfo->rect[1].y = 256;
+    bufferInfo->rect[2].x = 480;
 
     bufferInfo->unk_32 = -1;
 
-    bufferInfo->buffer[0] = buff1;
-    bufferInfo->buffer[1] = buff2;
-    bufferInfo->buffer[2] = NULL;
+    bufferInfo->vlcbuf[0] = buff1;
+    bufferInfo->vlcbuf[1] = buff2;
 
-    bufferInfo->buffer[3] = buff3;
-    bufferInfo->buffer[4] = buff4;
-    bufferInfo->buffer[5] = NULL;
+    bufferInfo->vlcid = 0;
 
-    bufferInfo->unk_18 = 0;
-    bufferInfo->unk_1A = 0;
-    bufferInfo->unk_20 = 0;
-    bufferInfo->unk_2A = 0;
+    bufferInfo->imgbuf[0] = buff3;
+    bufferInfo->imgbuf[1] = buff4;
+
+    bufferInfo->imgid = 0;
+
+    bufferInfo->rect[0].x = 0;
+    bufferInfo->rect[0].y = 0;
+
+    bufferInfo->rect[1].x = 0;
+    bufferInfo->rect[2].y = 0;
+
     bufferInfo->unk_30 = 0;
-    bufferInfo->unk_34 = 0;
-    bufferInfo->unk_36 = 0;
-    bufferInfo->unk_38 = 24;
+
+    bufferInfo->slice.x = 0;
+    bufferInfo->slice.y = 0;
+    bufferInfo->slice.w = 24;
+
     bufferInfo->unk_3C = 0;
 }
 
@@ -289,9 +354,9 @@ void func_88000720(char *buffer, CdlLOC *fp, void (*func)())
     func_88000BB8(fp);
 }
 
-void func_88000794(void) {};
+void func_88000794(BufferInfo *bufferInfo) {}
 
-void func_880007C8(void) {};
+void func_880007C8(void) {}
 
 int func_88000904(BufferInfo *bufferInfo)
 {
@@ -315,9 +380,9 @@ int func_88000904(BufferInfo *bufferInfo)
 
     if (buffer != NULL)
     {
-        bufferInfo->buffer[2] = (char*)(intptr_t)!bufferInfo->buffer[2];
+        bufferInfo->vlcid = !bufferInfo->vlcid;
         
-        DecDCTvlc((unsigned long*)buffer, (unsigned long*)bufferInfo->buffer[(intptr_t)bufferInfo->buffer[2]]);
+        DecDCTvlc((unsigned long*)buffer, (unsigned long*)bufferInfo->vlcbuf[bufferInfo->vlcid]);
         
         StFreeRing((unsigned long*)buffer);
         
@@ -333,7 +398,6 @@ char *func_880009B4(BufferInfo *buffer_info)
 	char* buffer;
 	StHEADER* header; 
     unsigned int mult;
-    int temp;
 
     for (i = 14000; i != 0; ) 
     {
@@ -384,21 +448,38 @@ char *func_880009B4(BufferInfo *buffer_info)
 
     mult = D_880125FC * 3;
     
-    temp = (int)(mult + (mult >> 31)) >> 1;
+    buffer_info->rect[0].w = buffer_info->rect[1].w = buffer_info->rect[2].w = (int)(mult + (mult >> 31)) >> 1; 
+    buffer_info->rect[0].h = buffer_info->rect[1].h = buffer_info->rect[2].h = D_88012600;
     
-    buffer_info->unk_2C = temp; 
-    buffer_info->unk_24 = temp;
-    buffer_info->unk_1C = temp;
-    
-    buffer_info->unk_2E = D_88012600;
-    buffer_info->unk_26 = D_88012600;
-    buffer_info->unk_1E = D_88012600;
-    buffer_info->unk_3A = D_88012600;
+    buffer_info->slice.h = D_88012600;
     
     return buffer;
 }
 
-void func_88000B04(void) {};
+void func_88000B04(BufferInfo *bufferInfo, int mode)
+{
+    volatile int count;
+
+    (void)mode;
+
+    count = 0x800000;
+
+    while (bufferInfo->unk_3C == 0)
+    {
+        if (--count == 0)
+        {
+            bufferInfo->unk_3C = 1;
+            bufferInfo->unk_32 = bufferInfo->unk_30;
+
+            func_88000794(bufferInfo);
+
+            bufferInfo->slice.x = bufferInfo->rect[bufferInfo->unk_30].x;
+            bufferInfo->slice.y = bufferInfo->rect[bufferInfo->unk_30].y;
+        }
+    }
+
+    bufferInfo->unk_3C = 0;
+}
 
 void func_88000BB8(CdlLOC *fp)
 {
