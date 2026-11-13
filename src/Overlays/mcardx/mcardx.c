@@ -109,7 +109,44 @@ void func_8800053C(mcpsx_t *mcpsx, mcpsx_err_t err)
 
 INCLUDE_RODATA("asm/nonmatchings/Overlays/mcardx/mcardx", D_88000000);
 
+// matches, except for the jump table
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_8800055C);
+#else
+void func_8800055C(mcpsx_t *mcpsx)
+{
+	switch ((int)mcpsx->state.func)
+	{
+	case func_exist:
+		func_88000528(mcpsx, MemCardExist(mcpsx->params.channel));
+		break;
+	case func_accept:
+		func_88000528(mcpsx, MemCardAccept(mcpsx->params.channel));
+		break;
+	case func_read_file:
+		func_88000528(mcpsx, MemCardReadFile(mcpsx->params.channel, mcpsx->params.filename, mcpsx->params.buffer, mcpsx->params.offset, mcpsx->params.nbytes));
+		break;
+	case func_write_file:
+		func_88000528(mcpsx, MemCardWriteFile(mcpsx->params.channel, mcpsx->params.filename, mcpsx->params.buffer, mcpsx->params.offset, mcpsx->params.nbytes));
+		break;
+	case func_create_file:
+		func_8800053C(mcpsx, MemCardCreateFile(mcpsx->params.channel, mcpsx->params.filename, mcpsx->params.nblocks));
+		break;
+	case func_delete_file:
+		func_8800053C(mcpsx, MemCardDeleteFile(mcpsx->params.channel, mcpsx->params.filename)); 
+		break;
+	case func_format:
+		func_8800053C(mcpsx, MemCardFormat(mcpsx->params.channel));
+		break;
+	case func_unformat:
+		func_8800053C(mcpsx, MemCardUnformat(mcpsx->params.channel)); 
+		break;
+	case func_directory:
+		func_8800053C(mcpsx, func_88000A90(mcpsx->params.channel, mcpsx->params.directory, mcpsx->params.nfilesptr));
+		break;
+	}
+}
+#endif
 
 void func_880006B8(mcpsx_t *mcpsx)
 {
@@ -884,7 +921,39 @@ void func_8800053C(mcpsx_t *mcpsx, mcpsx_err_t err)
     func_88000510(mcpsx, err);
 }
 
-void func_8800055C(mcpsx_t *mcpsx) {};
+void func_8800055C(mcpsx_t *mcpsx)
+{
+	switch ((int)mcpsx->state.func)
+	{
+	case func_exist:
+		func_88000528(mcpsx, MemCardExist(mcpsx->params.channel));
+		break;
+	case func_accept:
+		func_88000528(mcpsx, MemCardAccept(mcpsx->params.channel));
+		break;
+	case func_read_file:
+		func_88000528(mcpsx, MemCardReadFile(mcpsx->params.channel, mcpsx->params.filename, mcpsx->params.buffer, mcpsx->params.offset, mcpsx->params.nbytes));
+		break;
+	case func_write_file:
+		func_88000528(mcpsx, MemCardWriteFile(mcpsx->params.channel, mcpsx->params.filename, mcpsx->params.buffer, mcpsx->params.offset, mcpsx->params.nbytes));
+		break;
+	case func_create_file:
+		func_8800053C(mcpsx, MemCardCreateFile(mcpsx->params.channel, mcpsx->params.filename, mcpsx->params.nblocks));
+		break;
+	case func_delete_file:
+		func_8800053C(mcpsx, MemCardDeleteFile(mcpsx->params.channel, mcpsx->params.filename)); 
+		break;
+	case func_format:
+		func_8800053C(mcpsx, MemCardFormat(mcpsx->params.channel));
+		break;
+	case func_unformat:
+		func_8800053C(mcpsx, MemCardUnformat(mcpsx->params.channel)); 
+		break;
+	case func_directory:
+		func_8800053C(mcpsx, func_88000A90(mcpsx->params.channel, mcpsx->params.directory, mcpsx->params.nfilesptr));
+		break;
+	}
+}
 
 void func_880006B8(mcpsx_t *mcpsx)
 {
