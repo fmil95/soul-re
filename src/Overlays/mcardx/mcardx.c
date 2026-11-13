@@ -209,7 +209,22 @@ int func_88000820(mcpsx_t *mcpsx, char *filename, void *buffer, long nbytes)
 	return 0;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000890);
+int func_88000890(mcpsx_t *mcpsx, char *filename, void *buffer, long nbytes)
+{
+	if (func_88000700(mcpsx) != 0)
+	{
+		func_88000790(mcpsx, func_write_file);
+
+		mcpsx->params.filename = filename;
+		mcpsx->params.buffer   = buffer;
+
+		mcpsx->params.nbytes = nbytes;
+
+		return 1;
+	}
+
+	return 0;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000900);
 
