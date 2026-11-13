@@ -407,7 +407,15 @@ void func_88000F30(mcard_t *mcard, char *filename)
 	mcard->params.filename = filename;
 }
 
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000F40);
+void func_88000F40(mcard_t *mcard, char *filename, void *buffer, int nbytes)
+{
+	mcard->state.fsm = fsmcard_write;
+
+	mcard->params.filename = filename;
+	mcard->params.buffer   = buffer;
+
+	mcard->params.nbytes = nbytes;
+}
 
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000F58);
 
@@ -932,7 +940,15 @@ void func_88000F30(mcard_t *mcard, char *filename)
 	mcard->params.filename = filename;
 }
 
-void func_88000F40(void) {};
+void func_88000F40(mcard_t *mcard, char *filename, void *buffer, int nbytes)
+{
+	mcard->state.fsm = fsmcard_write;
+
+	mcard->params.filename = filename;
+	mcard->params.buffer   = buffer;
+    
+	mcard->params.nbytes = nbytes;
+}
 
 void func_88000F58(void) {};
 
