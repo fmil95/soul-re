@@ -2,14 +2,15 @@
 #include "Game/CINEMA/CINEPSX.h"
 #include "Game/MEMPACK.h"
 
+int D_88001434 = 0;
+
+BufferInfo D_880125B8;
 unsigned int D_880125F8;
 int D_880125FC;
 int D_88012600;
 int D_88012604;
 int D_88012608;
-
-extern BufferInfo D_880125B8;
-extern int D_8801260C;
+int D_8801260C;
 
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM

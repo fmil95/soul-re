@@ -181,6 +181,7 @@ $(BUILD_DIR)/src/Overlays/walbosb/walbosb.c.o: CFLAGS += -funsigned-char
 
 $(BUILD_DIR)/src/Overlays/cinemax/cinemax.c.o: CFLAGS += -G0
 $(BUILD_DIR)/src/Overlays/mcardx/mcardx.c.o: CFLAGS += -G0
+$(BUILD_DIR)/src/Overlays/mcardx/mcardx_table.c.o: CFLAGS += -G0
 $(BUILD_DIR)/src/Overlays/hunter/hunter.c.o: CFLAGS += -G0
 $(BUILD_DIR)/src/Overlays/skinner/skinner.c.o: CFLAGS += -G0
 $(BUILD_DIR)/src/Overlays/wallcr/wallcr.c.o: CFLAGS += -G0
@@ -203,6 +204,9 @@ $(BUILD_DIR)/src/Game/SOUND.c.o: COMM_SBSS := gSramLargestFree soundEffectChanne
 $(BUILD_DIR)/src/Game/STREAM.c.o: COMM_SBSS := WarpGateLoadInfo MORPH_SavedLevel MORPH_Component MORPH_Track StreamTracker MORPH_SavedFace
 $(BUILD_DIR)/src/Game/EVENT.c.o: COMM_SBSS := WaitingToLoadSound eventListNumInstances MoviePlayed MovieToPlay ResetSignalArray WaitingToLoadSFX WaitingForVoiceNumber gHintSystem eventListArray
 $(BUILD_DIR)/src/Game/VRAM.c.o: COMM_SBSS := vramBlockList M_TrackClutUpdate numOfBlocksUsed TerrainVramBlock usedVramBlocks openVramBlocks
+$(BUILD_DIR)/src/Overlays/cinemax/cinemax.c.o: COMM_SBSS := D_880125B8 D_880125F8 D_880125FC D_88012600 D_88012604 D_88012608 D_8801260C
+
+$(BUILD_DIR)/src/Overlays/mcardx/mcardx.c.o: RODATA_ALIGN := 4
 
 $(BUILD_DIR)/src/Overlays/aluka/aluka.c.o: CFLAGS += -fsigned-char
 $(BUILD_DIR)/src/Overlays/alukabss/alukabss.c.o: CFLAGS += -fsigned-char
@@ -278,7 +282,8 @@ $(BUILD_DIR)/%.c.o: %.c
 ifeq ($(CHECK),1)
 	@$(CC_HOST) $(CFLAGS_CHECK) $(CHECK_WARNINGS) $(CPPFLAGS) $(PSYQ_INC_HOST) -UTARGET_PSX $<
 endif
-	$(V)$(CPP) $(CPPFLAGS) $(PSYQ_INC_PSX) -ffreestanding -MMD -MP -MT $@ -MF $@.d $< | $(CC) $(CFLAGS) | $(MASPSX) $(if $(findstring Overlays,$@),--expand-div,) $(if $(COMM_SBSS),| $(COMM_TO_SBSS) $(COMM_SBSS),) | $(AS) $(ASFLAGS) -o $@
+	$(V)$(CPP) $(CPPFLAGS) $(PSYQ_INC_PSX) -ffreestanding -MMD -MP -MT $@ -MF $@.d $< | $(CC) $(CFLAGS) | $(MASPSX) $(if $(findstring Overlays,$@),--expand-div -G0,) $(if $(COMM_SBSS),| $(COMM_TO_SBSS) $(COMM_SBSS),) | $(AS) $(ASFLAGS) -o $@
+	$(if $(RODATA_ALIGN),$(V)$(OBJCOPY) --set-section-alignment .rodata=$(RODATA_ALIGN) $@,)
 
 # Compile .s files
 $(BUILD_DIR)/%.s.o: %.s

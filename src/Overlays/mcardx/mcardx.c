@@ -26,6 +26,64 @@ extern long MemCardUnformat(long chan);
 extern long MemCardGetDirentry(long chan, char *name, struct DIRENTRY *dir, long *files, long ofs, long max);
 
 
+mcard_err_entry_t D_8800571C[] = {
+    { mcpsx_err_none, fsmcard_error, mcard_status_error },
+    { mcpsx_err_card_not_exist, fsmcard_card_not_exist, mcard_status_card_not_exist },
+    { mcpsx_err_card_invalid, fsmcard_card_invalid, mcard_status_card_invalid },
+    { mcpsx_err_new_card, fsmcard_new_card, mcard_status_new_card },
+    { mcpsx_err_not_format, fsmcard_not_format, mcard_status_not_format },
+    { mcpsx_err_file_not_exist, fsmcard_error, mcard_status_error },
+    { mcpsx_err_already_exists, fsmcard_error, mcard_status_error },
+    { mcpsx_err_block_full, fsmcard_error, mcard_status_error },
+};
+
+// unused
+char D_8800577C[3][16] = { "soul reaver a", "soul reaver b", "soul reaver c" };
+
+mcmenu_fsm_entry_t D_880057AC[] = {
+    { mcard_status_card_not_exist, fsm_card_not_exist },
+    { mcard_status_card_invalid, fsm_card_invalid },
+    { mcard_status_not_format, fsm_not_format },
+    { mcard_status_new_card, fsm_new_card },
+    { mcard_status_ready, fsm_ready },
+};
+
+mcardx_ascii_t D_880057D4[3] = {
+    { 0x824F, '0' },
+    { 0x8260, 'A' },
+    { 0x8281, 'a' },
+};
+
+unsigned short D_880057E0[] = {
+    0x8140, 0x8149, 0x8168, 0x8194, 0x8190, 0x8193, 0x8195, 0x8166,
+    0x8169, 0x816A, 0x8196, 0x817B, 0x8143, 0x817C, 0x8144, 0x815E,
+    0x8146, 0x8147, 0x8171, 0x8181, 0x8172, 0x8148, 0x8197, 0x816D,
+    0x818F, 0x816E, 0x814F, 0x8151, 0x8165, 0x816F, 0x8162, 0x8170,
+    0x8150, 0x0000,
+};
+
+char D_88005824[5][13] = { "BASLUS-00708", "BESLES-02024", "BESLES-02025", "BESLES-02026", "BESLES-02027" };
+
+mcardx_icon_t D_88005868[] = {
+    {
+        "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"
+        "\x00\x00\x10\x11\x02\x00\x00\x00\x00\x00\x31\x12\x24\x00\x00\x00"
+        "\x00\x00\x35\x15\x64\x01\x00\x00\x00\x10\x75\x25\x44\x02\x00\x00"
+        "\x00\x30\x75\x28\x86\x04\x00\x00\x00\x10\x77\x92\x5A\x05\xAA\xAA"
+        "\x00\x00\x87\x9B\xAA\xA3\xCA\xCC\x00\x00\x8A\xED\xAC\xA7\xCC\xCC"
+        "\x00\x00\xDA\xE8\xA9\x3A\xCC\xCC\x00\x00\xBE\xB8\xCE\xAA\xC3\xCC"
+        "\x00\x00\xB9\xD8\x9E\xAA\xC6\xCC\x00\x00\xEB\x89\xEB\xAC\x3A\xCC"
+        "\x00\xE0\xDD\x6E\xE8\xAC\xAA\xC6\x00\xDE\xDD\xBD\xB8\xC9\xAA\x6A"
+    },
+};
+
+mcardx_clut_t D_880058E8[] = {
+    {
+        "\x00\x80\x61\x10\xA4\x18\x10\x32\x87\x35\x06\x21\x2A\x1D\x14\x47"
+        "\xDE\x5F\x0C\x09\x43\x08\x16\x1E\x65\x08\x59\x22\x70\x0D\xFF\x7F"
+    },
+};
+
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
 
@@ -107,12 +165,6 @@ void func_8800053C(mcpsx_t *mcpsx, mcpsx_err_t err)
     func_88000510(mcpsx, err);
 }
 
-INCLUDE_RODATA("asm/nonmatchings/Overlays/mcardx/mcardx", D_88000000);
-
-// matches, except for the jump table
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_8800055C);
-#else
 void func_8800055C(mcpsx_t *mcpsx)
 {
 	switch ((int)mcpsx->state.func)
@@ -146,7 +198,6 @@ void func_8800055C(mcpsx_t *mcpsx)
 		break;
 	}
 }
-#endif
 
 void func_880006B8(mcpsx_t *mcpsx)
 {
@@ -417,10 +468,6 @@ void func_88000C68(mcard_t *mcard)
 	func_880004DC(mcard->mcpsx);
 }
 
-// matches, except for the jump table
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_88000C8C);
-#else
 mcard_status_t func_88000C8C(mcard_t *mcard)
 {
 	mcpsx_err_t err;
@@ -563,7 +610,6 @@ mcard_status_t func_88000C8C(mcard_t *mcard)
 
 	return mcard->state.status;
 }
-#endif
 
 void func_88000EF8(mcard_t *mcard)
 {
@@ -798,7 +844,7 @@ int func_880012E8(mcmenu_t *mcmenu, int nfiles, int index, char *title, char *su
 	return index;
 }
 
-// near match, but it has regalloc and also diffing jumptable
+// differs only in register allocation and some instruction scheduling
 #ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Overlays/mcardx/mcardx", func_880013DC);
 #else
@@ -812,6 +858,7 @@ int func_880013DC(mcmenu_t *mcmenu, int index, int load)
 	int nused;
 	int nblocks;
 	int slots;
+	mcpsx_directory_t *e2;
 
 	gt = GAMELOOP_GetGT();
 
@@ -838,23 +885,28 @@ again:
 	case fsm_card_not_exist:
 		if (load != 0)
 		{
-			return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_no_card), localstr_get(LOCALSTR_warning_one));
+			index = func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_no_card), localstr_get(LOCALSTR_warning_one));
+			break;
 		}
 
-		return func_880012E8(mcmenu, 0, index, localstr_get(LOCALSTR_no_card), localstr_get(LOCALSTR_insert_card));
+		index = func_880012E8(mcmenu, 0, index, localstr_get(LOCALSTR_no_card), localstr_get(LOCALSTR_insert_card));
+		break;
 	case fsm_card_invalid:
-		return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_invalid_card), localstr_get(LOCALSTR_try_card_again));
+		index = func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_invalid_card), localstr_get(LOCALSTR_try_card_again));
+		break;
 	case fsm_not_format:
 		if (load != 0)
 		{
-			return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_unformatted_card), localstr_get(LOCALSTR_warning_one));
+			index = func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_unformatted_card), localstr_get(LOCALSTR_warning_one));
+			break;
 		}
 
 		memcard_item(mcmenu->opaque, NULL,          0,          4, localstr_get(LOCALSTR_unformatted_card));
 		memcard_item(mcmenu->opaque, func_88001148, fsm_format, 0, localstr_get(LOCALSTR_format_card));
 		memcard_item(mcmenu->opaque, func_880010DC, 0,          0, localstr_get(LOCALSTR_go_back));
 
-		return (index < 0) ? 2 : index;
+		index = (index < 0) ? 2 : index;
+		break;
 	case fsm_format:
 		memcard_item(mcmenu->opaque, NULL, 0, 4, localstr_get(LOCALSTR_formatting));
 		memcard_item(mcmenu->opaque, NULL, 0, 0, localstr_get(LOCALSTR_do_not_remove_card));
@@ -894,6 +946,8 @@ again:
 		for (i = 0; i < mcmenu->params.nfiles; i++)
 		{
 			entry = &mcmenu->params.directory[i];
+			
+			e2 = entry;
 
 			nblocks += (entry->nbytes + 8191) / 8192;
 
@@ -904,7 +958,7 @@ again:
 					memcard_item(mcmenu->opaque, NULL, 0, 4, localstr_get((load != 0) ? LOCALSTR_choose_load_file : LOCALSTR_choose_save_file));
 				}
 
-				memcard_item(mcmenu->opaque, (load != 0) ? func_880011CC : func_8800125C, i, 0, D_8800516C[((unsigned char *)entry->name)[17]]);
+				memcard_item(mcmenu->opaque, (load != 0) ? func_880011CC : func_8800125C, i, 0, D_8800516C[((unsigned char *)e2->name)[17]]);
 
 				nused++;
 
@@ -937,12 +991,14 @@ again:
 		{
 			if (nblocks == (mcmenu->params.nblocks + 15))
 			{
-				return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_card_full), localstr_get(LOCALSTR_insert_card_free));
+				index = func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_card_full), localstr_get(LOCALSTR_insert_card_free));
+				break;
 			}
 
 			if (nblocks >= 16)
 			{
-				return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_card_not_enough_blocks), localstr_get(LOCALSTR_insert_card_free));
+				index = func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_card_not_enough_blocks), localstr_get(LOCALSTR_insert_card_free));
+				break;
 			}
 
 			if (load != 0)
@@ -961,13 +1017,14 @@ again:
 	go_back:
 		memcard_item(mcmenu->opaque, func_880010DC, 0, 0, localstr_get(LOCALSTR_go_back));
 
-		return index;
+		break;
 	case fsm_start:
 		memcard_item(mcmenu->opaque, NULL, 0, 0, " ");
 
 		memcard_start(mcmenu->opaque);
 
-		return -1;
+		index = -1;
+		break;
 	case fsm_loading:
 		memcard_item(mcmenu->opaque, NULL, 0, 4, localstr_get(LOCALSTR_loading));
 		memcard_item(mcmenu->opaque, NULL, 0, 0, localstr_get(LOCALSTR_do_not_remove_card));
@@ -980,7 +1037,7 @@ again:
 
 			memcard_load(mcmenu->opaque);
 
-			return index;
+			break;
 		}
 
 		break;
@@ -990,7 +1047,8 @@ again:
 		memcard_item(mcmenu->opaque, func_88001148, fsm_overwrite, 0, localstr_get(LOCALSTR_overwrite_game));
 		memcard_item(mcmenu->opaque, func_88001148, fsm_ready,     0, localstr_get(LOCALSTR_go_back));
 
-		return (index < 0) ? 3 : index;
+		index = (index < 0) ? 3 : index;
+		break;
 	case fsm_overwrite:
 		func_880021D0(mcmenu->params.directory[mcmenu->params.nfiles].name, mcmenu->state.slot);
 
@@ -1023,6 +1081,14 @@ again:
 		}
 
 		break;
+	case fsm_save_complete:
+		memcard_item(mcmenu->opaque, NULL,          0, 4, localstr_get(LOCALSTR_save_ok));
+		memcard_item(mcmenu->opaque, func_880010DC, 0, 0, localstr_get(LOCALSTR_continue));
+
+		index = 1;
+
+		gt->gameFlags &= ~0x800;
+		break;
 	case fsm_create:
 		entry = &mcmenu->params.directory[mcmenu->params.nfiles];
 
@@ -1044,14 +1110,6 @@ again:
 		gt->gameFlags |= 0x20000800;
 
 		mcmenu->state.fsm = fsm_saving;
-		break;
-	case fsm_save_complete:
-		memcard_item(mcmenu->opaque, NULL,          0, 4, localstr_get(LOCALSTR_save_ok));
-		memcard_item(mcmenu->opaque, func_880010DC, 0, 0, localstr_get(LOCALSTR_continue));
-
-		index = 1;
-
-		gt->gameFlags &= ~0x800;
 		break;
 	default:
 		gt->gameFlags |= 0x20000000;
@@ -2021,6 +2079,7 @@ int func_880013DC(mcmenu_t *mcmenu, int index, int load)
 	int nused;
 	int nblocks;
 	int slots;
+	mcpsx_directory_t *e2;
 
 	gt = GAMELOOP_GetGT();
 
@@ -2047,23 +2106,28 @@ again:
 	case fsm_card_not_exist:
 		if (load != 0)
 		{
-			return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_no_card), localstr_get(LOCALSTR_warning_one));
+			index = func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_no_card), localstr_get(LOCALSTR_warning_one));
+			break;
 		}
 
-		return func_880012E8(mcmenu, 0, index, localstr_get(LOCALSTR_no_card), localstr_get(LOCALSTR_insert_card));
+		index = func_880012E8(mcmenu, 0, index, localstr_get(LOCALSTR_no_card), localstr_get(LOCALSTR_insert_card));
+		break;
 	case fsm_card_invalid:
-		return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_invalid_card), localstr_get(LOCALSTR_try_card_again));
+		index = func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_invalid_card), localstr_get(LOCALSTR_try_card_again));
+		break;
 	case fsm_not_format:
 		if (load != 0)
 		{
-			return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_unformatted_card), localstr_get(LOCALSTR_warning_one));
+			index = func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_unformatted_card), localstr_get(LOCALSTR_warning_one));
+			break;
 		}
 
 		memcard_item(mcmenu->opaque, NULL,          0,          4, localstr_get(LOCALSTR_unformatted_card));
 		memcard_item(mcmenu->opaque, func_88001148, fsm_format, 0, localstr_get(LOCALSTR_format_card));
 		memcard_item(mcmenu->opaque, func_880010DC, 0,          0, localstr_get(LOCALSTR_go_back));
 
-		return (index < 0) ? 2 : index;
+		index = (index < 0) ? 2 : index;
+		break;
 	case fsm_format:
 		memcard_item(mcmenu->opaque, NULL, 0, 4, localstr_get(LOCALSTR_formatting));
 		memcard_item(mcmenu->opaque, NULL, 0, 0, localstr_get(LOCALSTR_do_not_remove_card));
@@ -2103,6 +2167,7 @@ again:
 		for (i = 0; i < mcmenu->params.nfiles; i++)
 		{
 			entry = &mcmenu->params.directory[i];
+			e2 = entry;
 
 			nblocks += (entry->nbytes + 8191) / 8192;
 
@@ -2113,7 +2178,7 @@ again:
 					memcard_item(mcmenu->opaque, NULL, 0, 4, localstr_get((load != 0) ? LOCALSTR_choose_load_file : LOCALSTR_choose_save_file));
 				}
 
-				memcard_item(mcmenu->opaque, (load != 0) ? func_880011CC : func_8800125C, i, 0, D_8800516C[((unsigned char *)entry->name)[17]]);
+				memcard_item(mcmenu->opaque, (load != 0) ? func_880011CC : func_8800125C, i, 0, D_8800516C[((unsigned char *)e2->name)[17]]);
 
 				nused++;
 
@@ -2146,12 +2211,14 @@ again:
 		{
 			if (nblocks == (mcmenu->params.nblocks + 15))
 			{
-				return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_card_full), localstr_get(LOCALSTR_insert_card_free));
+				index = func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_card_full), localstr_get(LOCALSTR_insert_card_free));
+				break;
 			}
 
 			if (nblocks >= 16)
 			{
-				return func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_card_not_enough_blocks), localstr_get(LOCALSTR_insert_card_free));
+				index = func_880012E8(mcmenu, load, index, localstr_get(LOCALSTR_card_not_enough_blocks), localstr_get(LOCALSTR_insert_card_free));
+				break;
 			}
 
 			if (load != 0)
@@ -2170,13 +2237,14 @@ again:
 	go_back:
 		memcard_item(mcmenu->opaque, func_880010DC, 0, 0, localstr_get(LOCALSTR_go_back));
 
-		return index;
+		break;
 	case fsm_start:
 		memcard_item(mcmenu->opaque, NULL, 0, 0, " ");
 
 		memcard_start(mcmenu->opaque);
 
-		return -1;
+		index = -1;
+		break;
 	case fsm_loading:
 		memcard_item(mcmenu->opaque, NULL, 0, 4, localstr_get(LOCALSTR_loading));
 		memcard_item(mcmenu->opaque, NULL, 0, 0, localstr_get(LOCALSTR_do_not_remove_card));
@@ -2189,7 +2257,7 @@ again:
 
 			memcard_load(mcmenu->opaque);
 
-			return index;
+			break;
 		}
 
 		break;
@@ -2199,7 +2267,8 @@ again:
 		memcard_item(mcmenu->opaque, func_88001148, fsm_overwrite, 0, localstr_get(LOCALSTR_overwrite_game));
 		memcard_item(mcmenu->opaque, func_88001148, fsm_ready,     0, localstr_get(LOCALSTR_go_back));
 
-		return (index < 0) ? 3 : index;
+		index = (index < 0) ? 3 : index;
+		break;
 	case fsm_overwrite:
 		func_880021D0(mcmenu->params.directory[mcmenu->params.nfiles].name, mcmenu->state.slot);
 
@@ -2232,6 +2301,14 @@ again:
 		}
 
 		break;
+	case fsm_save_complete:
+		memcard_item(mcmenu->opaque, NULL,          0, 4, localstr_get(LOCALSTR_save_ok));
+		memcard_item(mcmenu->opaque, func_880010DC, 0, 0, localstr_get(LOCALSTR_continue));
+
+		index = 1;
+
+		gt->gameFlags &= ~0x800;
+		break;
 	case fsm_create:
 		entry = &mcmenu->params.directory[mcmenu->params.nfiles];
 
@@ -2253,14 +2330,6 @@ again:
 		gt->gameFlags |= 0x20000800;
 
 		mcmenu->state.fsm = fsm_saving;
-		break;
-	case fsm_save_complete:
-		memcard_item(mcmenu->opaque, NULL,          0, 4, localstr_get(LOCALSTR_save_ok));
-		memcard_item(mcmenu->opaque, func_880010DC, 0, 0, localstr_get(LOCALSTR_continue));
-
-		index = 1;
-
-		gt->gameFlags &= ~0x800;
 		break;
 	default:
 		gt->gameFlags |= 0x20000000;
