@@ -33,7 +33,7 @@ const MonsterFunctionTable HUNTER_FunctionTable = {
 // this conditional is for the objdiff report
 #ifndef SKIP_ASM
 
-void FX_MakeHitFlame(SVector *startpos, int zpos, int angle, int dist, int size, int q)
+void FX_MakeHitFlame(SVector *startpos, int zpos, int angle, int dist, int size)
 {
 
     SVector position;
@@ -41,7 +41,6 @@ void FX_MakeHitFlame(SVector *startpos, int zpos, int angle, int dist, int size,
     int sin; // not from debug symbols
     FX_PRIM *prim; // not from debug symbols
 
-    (void)q;
     prim = FX_GetPrim(gFXT);
 
     if (prim != NULL)
@@ -273,7 +272,7 @@ void HUNTER_Projectile(Instance *instance)
 
 #else
 
-void FX_MakeHitFlame(SVector *startpos, int zpos, int angle, int dist, int size, int q)
+void FX_MakeHitFlame(SVector *startpos, int zpos, int angle, int dist, int size)
 {
 
     SVector position;
