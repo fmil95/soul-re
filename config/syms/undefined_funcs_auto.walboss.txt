@@ -1,3 +1,4 @@
+COLLIDE_GetNormal = 0x8001EB08;
 COLLIDE_SegmentCollisionOn = 0x80024BB0;
 INSTANCE_BirthObject = 0x80033EB0;
 INSTANCE_Query = 0x80034648;

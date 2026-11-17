@@ -20,5 +20,8 @@ void WCBEGG_ExplodeProcess(Instance *instance, GameTracker *gameTracker);
 void WCBEGG_SplitProcess(Instance *instance, GameTracker *gameTracker);
 void WCBEGG_CommonPostProcess(Instance *instance, GameTracker *gameTracker);
 void WCBEGG_Collide(Instance *instance, GameTracker *gameTracker);
+void WCBEGG_Message(Instance *instance, unsigned long message, unsigned long data);
+long WALBOSC_AnimCallback(G2Anim *anim, int sectionID, G2AnimCallbackMsg message, long messageDataA, long messageDataB, Instance *instance);
+void WALBOSC_Collide(Instance *instance, GameTracker *gameTracker);
 
 #endif

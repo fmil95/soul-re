@@ -49,6 +49,6 @@ segments:
     bss_contains_common: True
     subsegments:
       - [0x000000, .rodata, Overlays/walboss/walboss]
-      - [0x000194, _c, Overlays/walboss/walboss]
-      - [0x002280, data, Overlays/walboss/walboss]
+      - [0x000060, _c, Overlays/walboss/walboss]
+      - [0x002280, .data, Overlays/walboss/walboss]
   - [0x002310]

@@ -135,4 +135,36 @@ typedef struct _AlukaVars {
     short junk;
 } AlukaVars;
 
+void ALUKA_AttackEntry(Instance *instance);
+void ALUKA_Attack(Instance *instance);
+void ALUKA_PursueEntry(Instance *instance);
+void ALUKA_Pursue(Instance *instance);
+void ALUKA_IdleEntry(Instance *instance);
+void ALUKA_Idle(Instance *instance);
+void ALUKA_WanderEntry(Instance *instance);
+void ALUKA_Wander(Instance *instance);
+void ALUKA_LandInWaterEntry(Instance *instance);
+void ALUKA_LandInWater(Instance *instance);
+void ALUKA_FleeEntry(Instance *instance);
+void ALUKA_Flee(Instance *instance);
+void ALUKA_HitEntry(Instance *instance);
+void ALUKA_Hit(Instance *instance);
+void ALUKA_ProjectileEntry(Instance *instance);
+void ALUKA_Projectile(Instance *instance);
+void ALUKA_StunnedEntry(Instance *instance);
+void ALUKA_Stunned(Instance *instance);
+void ALUKA_SurpriseAttackEntry(Instance *instance);
+void ALUKA_SurpriseAttack(Instance *instance);
+void ALUKA_EmbraceEntry(Instance *instance);
+void ALUKA_Embrace(Instance *instance);
+void ALUKA_NoticeEntry(Instance *instance);
+void ALUKA_Notice(Instance *instance);
+void ALUKA_SurprisedEntry(Instance *instance);
+void ALUKA_Surprised(Instance *instance);
+void ALUKA_GeneralDeathEntry(Instance *instance);
+void ALUKA_GeneralDeath(Instance *instance);
+void ALUKA_Init(Instance *instance);
+void ALUKA_CleanUp(Instance *instance);
+void ALUKA_Message(Instance *instance, unsigned long message, unsigned long data);
+
 #endif

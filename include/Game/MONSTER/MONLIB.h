@@ -90,5 +90,6 @@ int MON_ShouldIFireAtTarget(Instance *instance, MonsterIR *target);
 int MON_ShouldIAttack(Instance *instance, MonsterIR *enemy, MonsterAttackAttributes *attack);
 MonsterAttackAttributes *MON_ChooseAttack(Instance *instance, MonsterIR *enemy);
 int MON_ChooseCombatMove(Instance *instance, int reason);
+void MON_MoveToPosition(Instance *instance, Position *position, short turnSpeed);
 
 #endif

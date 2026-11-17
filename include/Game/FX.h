@@ -90,6 +90,8 @@ void FX_DrawRing(MATRIX *wcTransform, SVector *position, MATRIX *matrix, int rad
 void FX_UpdraftPrimModify(FX_PRIM *fxPrim, Instance *instance, FXParticle *particle, FXTracker *fxTracker);
 void FX_StartGenericRibbon(Instance *instance, int num, int segOverride, int endOverride, int InitFlag);
 void FX_StartGenericGlow(Instance *instance, int num, int segOverride, int seg2Override, int InitFlag);
+FXLightning *FX_CreateLightning(Instance *instance, int lifeTime, int deg, int deg_inc, int width, int small_width, int segs, int sine_size, int variation, unsigned long color, unsigned long glow_color);
+void FX_SetLightingPos(FXLightning *zap, Instance *startInstance, int startSeg, Position *startOffset, Instance *endInstance, int endSeg, Position *endOffset, int matrixSeg);
 FXLightning *FX_StartGenericLightning(Instance *instance, int num, int segOverride, int endSegOverride);
 FXBlastringEffect *FX_StartGenericBlastring(Instance *instance, int num, int segOverride, int matrixSegOverride);
 void FX_Build(Instance *instance, SVECTOR *center, SVECTOR *vel, SVECTOR *accl, FXTracker *fxTracker, void (*fxSetup)(), void (*fxProcess)());

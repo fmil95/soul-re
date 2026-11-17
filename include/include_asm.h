@@ -40,6 +40,29 @@
 #endif
 
 __asm__(".include \"include/macro.inc\"\n");
+#elif defined(SKIP_ASM) && !defined(SPLAT) && !defined(__CTX__) && !defined(PERMUTER)
+/*
+ * SKIP_ASM builds (used for the objdiff progress report) leave out the original asm,
+ * but still emit an empty stub under each function's name, so every function shows
+ * up in the report as an unmatched symbol instead of vanishing from the object.
+ */
+#define INCLUDE_ASM(FOLDER, NAME) \
+   __asm__( \
+        ".section .text\n" \
+        "\t.set noreorder\n" \
+        "\t.align\t2\n" \
+        "\t.globl\t"#NAME"\n" \
+        "\t.type "#NAME", @function\n" \
+        "\t.ent\t"#NAME"\n" \
+        #NAME ":\n" \
+        "\tjr\t$ra\n" \
+        "\tnop\n" \
+        "\t.set reorder\n" \
+        "\t.end\t"#NAME"\n" \
+        "\t.size\t"#NAME",.-"#NAME \
+    )
+#define INCLUDE_RODATA(FOLDER, NAME)
+#define FORCE_RODATA_ALIGNMENT
 #else
 #define INCLUDE_ASM(FOLDER, NAME)
 #define INCLUDE_RODATA(FOLDER, NAME)

@@ -5,6 +5,7 @@
 
 void GAMELOOP_SetGameTime(long timeOfDay);
 int GAMELOOP_GetTimeOfDay();
+int GAMELOOP_GetTimeOfDayIdx(int timeOfDay);
 MATRIX *GAMELOOP_GetMatrices(int numMatrices);
 void GAMELOOP_Set_Pause_Redraw();
 void GAMELOOP_StreamLevelLoadAndInit(char *baseAreaName, GameTracker *gameTracker, int toSignalNum, int fromSignalNum);

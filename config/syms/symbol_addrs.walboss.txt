@@ -1,3 +1,4 @@
+FX_StartInstanceBurrow                                = 0x88000060; // type:func
 WALBOSS_SetSegmentYaw                                 = 0x88000194; // type:func
 WALBOSS_InterpSegmentYaw                              = 0x88000224; // type:func
 WALBOSS_TurnToPosition                                = 0x880002EC; // type:func

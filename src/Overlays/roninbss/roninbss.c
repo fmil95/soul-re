@@ -16,8 +16,10 @@
 #include "Game/SOUND.h"
 #include "Game/STATE.h"
 #include "Game/STREAM.h"
+#include "Game/CAMERA.h"
 
-MonsterStateChoice RONINBSS_StateChoiceTable[] = {
+MonsterStateChoice RONINBSS_StateChoiceTable[] = 
+{
     {MONSTER_STATE_PURSUE, {RONINBSS_PursueEntry, RONINBSS_Pursue}},
     {MONSTER_STATE_HIT, {RONINBSS_HitEntry, RONINBSS_Hit}},
     {MONSTER_STATE_COMBAT, {RONINBSS_CombatEntry, RONINBSS_Combat}},
@@ -35,7 +37,8 @@ MonsterStateChoice RONINBSS_StateChoiceTable[] = {
 
 burntTuneType roninbssBurntTune = {300, 2}; // no canon name in symbols
 
-const MonsterFunctionTable RONINBSS_FunctionTable = {
+const MonsterFunctionTable RONINBSS_FunctionTable = 
+{
     RONINBSS_Init,
     RONINBSS_CleanUp,
     RONINBSS_DamageEffect,
@@ -45,9 +48,6 @@ const MonsterFunctionTable RONINBSS_FunctionTable = {
     monVersion,
     "Jul 14 1999"
 };
-
-// this conditional is for the objdiff report
-#ifndef SKIP_ASM
 
 void RONINBSS_StartBand(Instance *instance)
 {
@@ -1262,7 +1262,211 @@ void RONINBSS_PursueEntry(Instance *instance)
     }
 }
 
+#ifndef NON_MATCHING
 INCLUDE_ASM("asm/nonmatchings/Overlays/roninbss/roninbss", RONINBSS_Pursue);
+#else
+void RONINBSS_Pursue(Instance *instance) {
+    Position pos;
+    
+    // short enemy->distance;
+    int var_s5;
+    int enemyDist; // not from debug symbols
+    MonsterIR* enemy;
+    MonsterVars *mv;
+    RoninbssVars *vars;
+    RoninbssAttributes* attrs;
+    Instance* valve;
+    
+
+    mv = (MonsterVars *)instance->extraData;
+    vars = (RoninbssVars *)mv->extraVars;
+    enemy = mv->enemy;
+    attrs = (RoninbssAttributes *)((MonsterAttributes *)instance->data)->tunData;
+    
+    if (vars == NULL || attrs == NULL) {
+        return;
+    }
+    
+    if (mv->mvFlags & 4) {
+        MON_Pursue(instance);
+        return;
+    }
+
+    MON_DefaultQueueHandler(instance);
+
+    if (mv->auxFlags & 2) {
+        if (MON_AnimPlayingFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 3) || MON_AnimPlayingFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 8)) {
+            switch (mv->attackState) {
+            case 0:     
+                if (instance->flags2 & 0x10) {
+                    vars->armstomp_time = MON_GetTime(instance) + (attrs->armstompPauseTime * 33);
+                    mv->attackState++;
+                    return;
+                }
+                break;
+            case 1:         
+                if (MON_GetTime(instance) >= (unsigned long)vars->armstomp_time) {
+                    MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 8, 1);
+                    mv->attackState++;
+                    return;
+                }
+                break;
+            case 2:   
+                
+                if (G2EmulationInstanceQueryPassedFrame(instance, 0, attrs->stomp_shake_frame)) {
+                    INSTANCE_Post(gameTrackerX.playerInstance, 0x40005, (attrs->raz_stumble_time * 4096) / 30);
+                    vars->stumble_time = MON_GetTime(instance) + (attrs->time_between_armstomps * 33);
+                    CAMERA_SetShake(&theCamera, 0x3C, 0x800);
+                    INSTANCE_Post(gameTrackerX.playerInstance, 0x100016, 0x3C);
+                    return;
+                }
+                
+                if (instance->flags2 & 0x10) {
+                    mv->auxFlags &= ~2;
+                }
+            }
+        } else {
+            mv->auxFlags &= ~2;
+        }
+        
+        return;
+    }
+        
+    var_s5 = -1;
+    
+    if (mv->auxFlags & 0x40) {
+        if (mv->auxFlags & 0x800) {
+
+            valve = RONINBSS_FindValve(instance);
+            
+            if (valve != NULL) {
+                valve->object->oflags2 |= 0x4000000;
+                mv->auxFlags &= ~0x40;
+                mv->auxFlags &= ~0x800;
+            }
+        } else if (mv->auxFlags & 0x80) {
+
+            switch (RONINBSS_Constrict(instance)) {
+            case 2:
+                mv->auxFlags &= ~0x80;
+                mv->auxFlags &= ~0x400;
+                break;
+            case 3:
+            case 1:
+                
+                valve = RONINBSS_FindValve(instance);
+                
+                if (valve != NULL) {
+                    valve->constrictAngle = vars->total_constrict_angle;
+                    valve->object->oflags2 &= ~0x4000000;
+                }
+
+                mv->auxFlags |= 0x800;
+                mv->auxFlags &= ~0x80;
+                mv->auxFlags &= ~0x400;
+            }
+        } else if (mv->auxFlags & 0x400) {
+            if (MATH3D_LengthXY(instance->position.x - mv->destination.x, instance->position.y - mv->destination.y) < (var_s5 = attrs->valve_constrict_dist)) {
+                RONINBSS_InitConstrict(instance, &mv->destination);
+                mv->auxFlags |= 0x80;
+            }
+        } else {
+
+            valve = RONINBSS_FindValve(instance);
+            
+            if (valve != NULL) {
+                COPY_SVEC(Position, &mv->destination, Position, &valve->position);
+                mv->auxFlags |= 0x400;
+            } else {
+                mv->auxFlags &= ~0x40;
+            }
+        }
+    } else if (enemy != NULL) {
+
+        MonsterCombatAttributes *combat;
+        
+        combat = mv->subAttr->combatAttributes;
+        mv->destination = enemy->instance->position;
+        mv->lookAtPos = &mv->destination;
+        var_s5 = combat->combatRange;
+        enemyDist = enemy->distance;
+
+        if (enemyDist < var_s5) {
+            MON_SwitchState(instance, 0xD);
+            var_s5 = -1;
+        } else if (attrs->stomp_min_range < enemyDist && enemyDist < attrs->stomp_max_range && MON_GetTime(instance) >= (unsigned long)vars->stumble_time) {
+            mv->mvFlags &= ~0x20000;
+            MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 3, 1);
+            mv->attackState = 0;
+            mv->auxFlags |= 2;
+            var_s5 = -1;
+        } else if (!(mv->auxFlags & 4 || MON_ValidUnit(instance, enemy->instance->currentStreamUnitID))) {
+            mv->mvFlags &= ~0x20000;
+            MON_PlayAnimIfNotPlaying(instance, 0xA, 2);
+            MON_SwitchState(instance, 5);
+            var_s5 = -1;
+        }
+    } else {
+        MON_SwitchState(instance, 2);
+    }
+
+    if (var_s5 < 0) {
+        return;
+    }
+    
+    
+    switch (ENMYPLAN_MoveToTargetFinal(instance, &pos, mv->pathSlotID, &mv->destination, 0x1F)) {
+        case 3:
+            MON_GetPlanSlot(mv);
+    label:
+            MON_PlayAnimIfNotPlaying(instance, 0xA, 2);
+            mv->mvFlags &= ~0x20000;
+            MON_TurnToPosition(instance, &pos, mv->subAttr->speedPivotTurn);
+            break;
+        case 0:
+            goto label;
+        case 1:
+        case 2:
+        {
+
+            int speed;
+            int anim;
+            int dist;
+            MonsterAnim *mAnim;
+            
+            dist = MATH3D_LengthXY(instance->position.x - mv->destination.x, instance->position.y - mv->destination.y);
+            anim = 3;
+
+            // mAnim = MON_GetAnim(instance, mv->subAttr->animList, 2);
+            
+            if (dist < var_s5 + MON_GetAnim(instance, mv->subAttr->animList, 2)->distance) {
+                anim = 2;
+            }
+            
+            if (anim == 2) {
+                speed = mv->subAttr->speedWalkTurn;
+            } else {
+                speed = mv->subAttr->speedRunTurn;
+            }
+
+            mAnim = MON_GetAnim(instance, mv->subAttr->animList, anim);
+
+            
+            if (dist * 3 < (mAnim->velocity * 4096) / speed) {
+                speed *= 3;
+            }
+
+            if (MON_TurnToPosition(instance, &pos, speed) != 0) {
+                if (!(mv->mvFlags & 0x20000) || instance->flags2 & 2) {
+                    mv->mvFlags |= 0x20000;
+                    MON_PlayAnimIfNotPlaying(instance, anim, 2);
+                }
+            }
+        }
+    }
+    
+}
+#endif
 
 void RONINBSS_DoNothingEntry(Instance *instance)
 {
@@ -1320,1276 +1524,3 @@ void RONINBSS_Dead(Instance *instance)
 
     while (DeMessageQueue(&mv->messageQueue) != NULL);
 }
-
-#else
-
-void RONINBSS_StartBand(Instance *instance)
-{
-
-    MonsterVars *mv; // not from debug symbols
-    MonsterAttributes *ma; // not from debug symbols
-    RoninbssVars *vars; // not from debug symbols
-    RoninbssAttributes *attrs; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    ma = (MonsterAttributes *)instance->data;
-    vars = (RoninbssVars *)mv->extraVars;
-    attrs = (RoninbssAttributes *)ma->tunData;
-
-    if (!(mv->auxFlags & 0x20))
-    {
-        FX_StartConstrict(instance, (SVector *)&vars->current_constrict_pos, attrs->constrict_start_seg, attrs->constrict_end_seg);
-        mv->auxFlags |= 0x20;
-    }
-}
-
-void RONINBSS_StopBand(Instance *instance, int flash)
-{
-
-    MonsterVars *mv; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-
-    if (mv->auxFlags & 0x20)
-    {
-        FX_EndConstrict(flash, NULL);
-        mv->auxFlags &= ~0x20;
-    }
-}
-
-void RONINBSS_InitConstrict(Instance *instance, Position *target)
-{
-
-    MonsterVars *mv; // not from debug symbols
-    mv = (MonsterVars *)instance->extraData;
-
-    if (mv != NULL)
-    {
-
-        RoninbssVars *vars; // not from debug symbols
-        vars = (RoninbssVars *)mv->extraVars;
-
-        if (vars != NULL)
-        {
-            COPY_SVEC(Position, &vars->current_constrict_pos, Position, target);
-            vars->anim_state = 0;
-            COPY_SVEC(Position, &vars->last_rb_pos, Position, &instance->position);
-        }
-    }
-}
-
-int RONINBSS_Constrict(Instance *instance)
-{
-
-    Position vec;
-    Position zero;
-
-    int diff; // not from debug symbols
-    int angle; // not from debug symbols
-    int rc; // not from debug symbols
-    MonsterVars *mv; // not from debug symbols
-    MonsterAttributes *ma; // not from debug symbols
-    RoninbssVars *vars; // not from debug symbols
-    RoninbssAttributes *attrs; // not from debug symbols
-    int didTurn; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    ma = (MonsterAttributes *)instance->data;
-    vars = (RoninbssVars *)mv->extraVars;
-    attrs = (RoninbssAttributes *)ma->tunData;
-
-    memset(&zero, 0, sizeof(Position));
-    rc = 0;
-
-    switch (vars->anim_state)
-    {
-    case 0:
-        mv->mvFlags &= ~0x20000;
-        MON_PlayAnim(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
-
-        SUB_SVEC(Position, &vec, Position, &instance->position, Position, &vars->current_constrict_pos);
-
-        vars->old_constrict_angle = MATH3D_AngleFromPosToPos(&zero, &vec);
-        vars->total_constrict_angle = 0;
-        vars->constrict_time = MON_GetTime(instance) + (attrs->allowed_stop_constrict_time * 33);
-        vars->anim_state++;
-        break;
-    case 1:
-        instance->rotation.z -= 1024;
-        didTurn = MON_TurnToPosition(instance, &vars->current_constrict_pos, attrs->constrict_turn_rate);
-        instance->rotation.z += 1024;
-        instance->rotation.z &= 0xFFF;
-
-        if (didTurn)
-        {
-            MON_PlayAnim(instance, MONSTER_ANIM_RUN, 2);
-            mv->mvFlags |= 0x20000;
-            vars->anim_state++;
-            RONINBSS_StartBand(instance);
-        }
-
-        break;
-    case 2:
-        instance->rotation.z -= 1024;
-        MON_TurnToPosition(instance, &vars->current_constrict_pos, attrs->constrict_turn_rate);
-        instance->rotation.z += 1024;
-        instance->rotation.z &= 0xFFF;
-
-        SUB_SVEC(Position, &vec, Position, &instance->position, Position, &vars->current_constrict_pos);
-
-        angle = MATH3D_AngleFromPosToPos(&zero, &vec);
-        diff = AngleDiff(vars->old_constrict_angle, angle);
-
-        vars->old_constrict_angle = angle;
-        vars->total_constrict_angle = vars->total_constrict_angle + diff;
-
-        if (vars->total_constrict_angle <= -0x1000)
-        {
-            instance->rotation.z -= 1024;
-            MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 0, 1);
-            RONINBSS_StopBand(instance, 1);
-            rc = 1;
-            vars->anim_state++;
-        }
-        else if (mv->auxFlags & 0x2000 || diff >= 0)
-        {
-            if (MON_GetTime(instance) >= (unsigned long)vars->constrict_time)
-            {
-                vars->anim_state = 5;
-                RONINBSS_StopBand(instance, 0);
-                rc = 2;
-            }
-        }
-        else if (ENMYPLAN_PathClear(&vars->last_rb_pos, &instance->position))
-        {
-            vars->constrict_time += (gameTrackerX.timeMult * 33) / 4096;
-        }
-        else
-        {
-            vars->anim_state = 5;
-            RONINBSS_StopBand(instance, 0);
-            rc = 2;
-        }
-        break;
-    case 3:
-        if (instance->flags2 & 0x10)
-        {
-            mv->mvFlags &= ~0x20000;
-            vars->anim_state++;
-        }
-        break;
-    case 4:
-    case 5:
-        rc = 2;
-        break;
-    }
-
-    mv->auxFlags &= ~0x2000;
-    COPY_SVEC(Position, &vars->last_rb_pos, Position, &instance->position);
-
-    return rc;
-}
-
-void RONINBSS_StopSoulSuck(Instance *instance)
-{
-
-    MonsterVars *mv; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    RONINBSS_StopBand(instance, 0);
-    mv->auxFlags &= ~1;
-    mv->auxFlags &= ~2;
-}
-
-void RONINBSS_FadeMove(Instance *instance, int to_what_plane)
-{
-
-    MonsterVars *mv; // not from debug symbols
-    MonsterAttributes *ma;// not from debug symbols
-    RoninbssAttributes *attrs;// not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    ma = (MonsterAttributes *)instance->data;
-    attrs = (RoninbssAttributes *)ma->tunData;
-
-    if (attrs == NULL)
-    {
-        return;
-    }
-
-    switch (to_what_plane)
-    {
-    case 0:
-        mv->targetFade = 4096;
-        break;
-    case 1:
-        mv->targetFade = 0;
-        break;
-    }
-
-    mv->auxFlags &= ~0x1000;
-
-    if (!(mv->auxFlags & 4))
-    {
-        switch (to_what_plane)
-        {
-        case 0:
-            PLANAPI_FindNodePositionInUnit(STREAM_GetStreamUnitWithID(instance->currentStreamUnitID), &instance->position, attrs->stand_marker, 5);
-            MON_OnGround(instance);
-            MON_PlayAnim(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
-            break;
-        case 1:
-            COPY_SVEC(Position, &instance->position, Position, &instance->intro->position);
-            MON_PlayAnimFromList(instance, ma->auxAnimList, 4, 1);
-            break;
-        }
-
-        COPY_SVEC(Rotation, &instance->rotation, Rotation, &instance->intro->rotation);
-    }
-}
-
-MonsterAttackAttributes *RONINBSS_ChooseAttack(Instance *instance, MonsterIR *enemy)
-{
-
-    int dist; // not from debug symbols
-    int shortestDist; // not from debug symbols
-    int i; // not from debug symbols
-    char *attackIndex; // not from debug symbols
-    MonsterVars *mv; // not from debug symbols
-    MonsterAttributes *ma; // not from debug symbols
-    MonsterCombatAttributes *combatAttrs; // not from debug symbols
-    MonsterAttackAttributes *chosenAttack; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    ma = (MonsterAttributes *)instance->data;
-
-    chosenAttack = NULL;
-    combatAttrs = mv->subAttr->combatAttributes;
-    shortestDist = 99999;
-
-    if (mv->mvFlags & 4 || enemy->mirFlags & 8)
-    {
-        dist = 0;
-    }
-    else
-    {
-        dist = enemy->distance;
-    }
-
-    for (i = combatAttrs->numAttacks, attackIndex = combatAttrs->attackList; i != 0; i--, attackIndex++)
-    {
-
-        MonsterAttackAttributes *attack; // not from debug symbols
-        int effectiveRange; // not from debug symbols
-        int attackDist; // not from debug symbols
-
-        attack = &ma->attackAttributesList[(int)*attackIndex];
-        effectiveRange = attack->attackRange * mv->subAttr->scale;
-        attackDist = (effectiveRange / 4096) - dist;
-
-        if (abs(attackDist) < abs(shortestDist))
-        {
-            chosenAttack = attack;
-            shortestDist = attackDist;
-        }
-    }
-
-    mv->attackType = chosenAttack;
-    mv->attackState = 0;
-    return chosenAttack;
-}
-
-void RONINBSS_Collide(Instance *instance, GameTracker *gameTracker)
-{
-
-    MonsterVars *mv; // not from debug symbols
-    MonsterAttributes *ma; // not from debug symbols
-    RoninbssAttributes *attrs; // not from debug symbols
-    CollideInfo *collideInfo; // not from debug symbols
-    HSphere *prim0; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    ma = (MonsterAttributes *)instance->data;
-    attrs = (RoninbssAttributes *)ma->tunData;
-    collideInfo = (CollideInfo *)instance->collideInfo;
-    prim0 = (HSphere *)collideInfo->prim0;
-
-    if (attrs != NULL)
-    {
-        if (prim0->id == 9)
-        {
-            if ((unsigned char)collideInfo->type1 == 1 && ((HSphere *)collideInfo->prim1)->id == 8)
-            {
-
-                Instance *collideInst; // not from debug symbols
-                collideInst = collideInfo->inst1;
-
-                if (INSTANCE_Query(collideInst, queryWhatAmI) == 1)
-                {
-                    INSTANCE_Post(gameTrackerX.playerInstance, 0x40005, (attrs->raz_hit_stumble_time * 4096) / 30);
-                    RONINBSS_InitConstrict(instance, &collideInst->position);
-                    mv->auxFlags |= 1;
-                }
-            }
-        }
-        else
-        {
-            if ((unsigned char)collideInfo->type1 == 2 || (unsigned char)collideInfo->type1 == 3 || (unsigned char)collideInfo->type1 == 5)
-            {
-                mv->auxFlags |= 0x2000;
-            }
-        }
-    }
-    MonsterCollide(instance, gameTracker);
-}
-
-void RONINBSS_Message(Instance *instance, unsigned long message, unsigned long data)
-{
-
-    int time; // not from debug symbols
-    MonsterVars *mv; // not from debug symbols
-    RoninbssVars *vars; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-
-    if (mv == NULL)
-    {
-        return;
-    }
-
-    vars = (RoninbssVars *)mv->extraVars;
-
-    if (vars == NULL)
-    {
-        return;
-    }
-
-    switch (message)
-    {
-    case 0x100008:
-        ADD_SVEC(Position, &vars->current_constrict_pos, Position, &vars->current_constrict_pos, Position, (Position *)data);
-        ADD_SVEC(Position, &vars->last_rb_pos, Position, &vars->last_rb_pos, Position, (Position *)data);
-        MonsterMessage(instance, message, data);
-        break;
-    case 0x1000023:
-        if (data != 0x1000)
-        {
-            break;
-        }
-
-        time = MON_GetTime(instance);
-
-        if (vars->hit_timer < time)
-        {
-            vars->hit_timer = time + 4950;
-            MonsterMessage(instance, 0x0100001F, SetMonsterHitData(gameTrackerX.playerInstance, instance, 4096, 0, 0));
-        }
-        break;
-    case 0x1000000:
-    case 0x100001F:
-    case 0x1000021:
-        time = MON_GetTime(instance);
-
-        if (vars->hit_timer < time)
-        {
-            ((evMonsterHitData *)data)->power = 4096;
-            vars->hit_timer = time + 4950;
-            MonsterMessage(instance, message, data);
-        }
-        break;
-    case 0x1000020:
-        RONINBSS_StopSoulSuck(instance);
-        vars->to_what_plane = data;
-        vars->faded_state = 0;
-        mv->auxFlags |= 0x1100;
-        MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
-        break;
-    case 0x100007:
-        mv->auxFlags = ((MonsterSaveInfo *)((evControlSaveDataData *)data)->data)->mvFlags & 0x44;
-
-        if (mv->auxFlags & 4)
-        {
-            mv->validUnits[0] = 0;
-            STREAM_NoMonsters();
-        }
-        break;
-    case 0x1000017:
-        switch (data)
-        {
-        case 1:
-            mv->auxFlags |= 8;
-            break;
-        case 2:
-            mv->auxFlags &= ~0x8;
-            mv->auxFlags |= 0x10;
-            vars->anim_state = 0;
-            break;
-        case 3:
-            mv->auxFlags |= 0x40;
-            mv->auxFlags &= ~0x80;
-            MON_SwitchStateDoEntry(instance, MONSTER_STATE_PURSUE);
-            break;
-        case 0:
-            RONINBSS_StopSoulSuck(instance);
-            mv->damageType = 0x20;
-            MON_SwitchStateDoEntry(instance, MONSTER_STATE_GENERALDEATH);
-            RONINBSS_DamageEffect(instance, (evFXHitData *)SetFXHitData(0, 0, 0, 32));
-            break;
-        case 4:
-            mv->validUnits[0] = 0;
-            mv->auxFlags |= 4;
-            STREAM_NoMonsters();
-            break;
-        case 5:
-            mv->auxFlags |= 0x200;
-            break;
-        }
-    case 0x80001:
-    case 0x80002:
-    case 0x80003:
-    case 0x80004:
-    case 0x80005:
-    case 0x80006:
-    case 0x40009:
-        break;
-    default:
-        MonsterMessage(instance, message, data);
-    }
-}
-
-uintptr_t RONINBSS_Query(Instance *instance, unsigned long query)
-{
-
-    uintptr_t ret; // not from debug symbols
-    RoninbssSaveInfo *saveInfo; // not from debug symbols
-    MonsterVars *mv; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    switch (query)
-    {
-    case queryHitState:
-        ret = 0x1000000;
-
-        if (!(mv->auxFlags & 4))
-        {
-            ret = 0x40000000;
-        }
-        break;
-    case queryLookatMatrix:
-        ret = (uintptr_t)&instance->matrix[2];
-        break;
-    case querySaveData:
-        if (mv == NULL)
-        {
-            ret = 0;
-            break;
-        }
-
-        saveInfo = (RoninbssSaveInfo *)CIRC_Alloc(sizeof(RoninbssSaveInfo));
-        saveInfo->forRoninbss = mv->auxFlags & 4;
-        ret = SetControlSaveDataData(sizeof(RoninbssSaveInfo), saveInfo);
-        break;
-    case querySpecialInfo:
-        if (mv->auxFlags & 4)
-        {
-            ret = 1;
-        }
-        else
-        {
-            ret = 0;
-        }
-        break;
-    default:
-        ret = MonsterQuery(instance, query);
-        break;
-    }
-
-    return ret;
-}
-
-void RONINBSS_Init(Instance *instance)
-{
-
-    MonsterVars *mv; // not from debug symbols
-    GameTrackerASMData *data; // not from debug symbols
-
-    MON_DefaultInit(instance);
-    mv = (MonsterVars *)instance->extraData;
-    instance->collideFunc = &RONINBSS_Collide;
-
-    if (mv != NULL)
-    {
-        RoninbssVars *vars; // not from debug symbols
-
-        vars = (RoninbssVars *)MEMPACK_Malloc(sizeof(RoninbssVars), MEMORY_TYPE_RONINBSSDATA);
-
-        if (vars == NULL)
-        {
-            mv->extraVars = NULL;
-        }
-        else
-        {
-            mv->extraVars = vars;
-            vars->stumble_time = 0;
-            vars->hit_timer = 0;
-        }
-    }
-
-    mv->validUnits[0] = instance->currentStreamUnitID;
-    mv->validUnits[1] = 0;
-
-    data = &gameTrackerX.gameData.asmData;
-
-    if ((data->MorphTime == 1000 && data->MorphType == 0) || (data->MorphType == 1 && data->MorphTime != 1000))
-    {
-        RONINBSS_FadeMove(instance, 1);
-    }
-    else
-    {
-        RONINBSS_FadeMove(instance, 0);
-    }
-
-    mv->auxFlags |= 0x20000000;
-    MON_SwitchState(instance, MONSTER_STATE_IDLE);
-    instance->flags2 |= 4;
-    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 1);
-}
-
-void RONINBSS_CleanUp(Instance *instance)
-{
-
-    MonsterVars *mv; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    RAZIEL_SetInteractiveMusic(SOUND_MODIFIER_BOSS_LOADED, 0);
-    STREAM_YesMonsters();
-
-    if (mv != NULL && mv->extraVars != NULL)
-    {
-        MEMPACK_Free(mv->extraVars);
-    }
-
-    MON_CleanUp(instance);
-}
-
-void RONINBSS_DamageEffect(Instance *instance, evFXHitData *data)
-{
-
-    SVector localloc;
-    MonsterVars *mv; // not from debug symbols
-    MonsterAttributes *ma; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    ma = (MonsterAttributes *)instance->data;
-
-    if (data == NULL)
-    {
-        if (mv->mvFlags & 0x400000)
-        {
-            if (objectAccess[10].object != NULL)
-            {
-                Model *model; // not from debug symbols
-
-                model = ((Object *)objectAccess[10].object)->modelList[0];
-                FX_MakeSpark(instance, model, ma->leftShoulderSegment);
-                FX_MakeSpark(instance, model, ma->rightShoulderSegment);
-                FX_MakeSpark(instance, model, ma->waistSegment);
-                FX_MakeSpark(instance, model, ma->leftKneeSegment);
-                FX_MakeSpark(instance, model, ma->rightKneeSegment);
-            }
-            MONSTER_VertexBurnt(instance, &roninbssBurntTune);
-        }
-        return;
-    }
-
-    localloc = data->location;
-
-    if (data->type == 32)
-    {
-        if (data->amount != 0)
-        {
-            MONSTER_StartVertexBurnt(instance, &data->location, &roninbssBurntTune);
-        }
-        else
-        {
-            MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &roninbssBurntTune);
-        }
-    }
-    else if (data->type == 16)
-    {
-        MONSTER_StartVertexBurnt(instance, (SVector *)&instance->position, &roninbssBurntTune);
-    }
-    else
-    {
-        SOUND_Play3dSound(&instance->position, 21, 650, 80, 15500);
-        FX_MakeHitFX(&localloc);
-    }
-}
-
-int RONINBSS_FindClosestMarkerInUnit(Instance *instance, StreamUnit *su)
-{
-
-    PlanMkr *planMkr; // not from debug symbols
-    int dist; // not from debug symbols
-    int closest; // not from debug symbols
-    int i; // not from debug symbols
-    int rc; // not from debug symbols
-    Level *level; // not from debug symbols
-    MonsterVars *mv; // not from debug symbols
-    RoninbssVars *vars; // not from debug symbols
-
-    closest = 0x7FFFFFFF;
-    rc = 0;
-    mv = (MonsterVars *)instance->extraData;
-    vars = (RoninbssVars *)mv->extraVars;
-
-    if (su != NULL)
-    {
-
-        level = su->level;
-        planMkr = level->PlanMarkerList;
-        vars->current_marker_id = -1;
-        i = level->NumberOfPlanMarkers;
-
-        for (; i > 0; i--, planMkr++)
-        {
-            if (!((planMkr->id & 0x8000) | (planMkr->id & 0x4000) | (planMkr->id & 0x2000) | (planMkr->id & 0x1000)))
-            {
-                closest = MATH3D_LengthXY(planMkr->pos.x - instance->position.x, planMkr->pos.y - instance->position.y);
-                vars->current_marker_id = planMkr->id;
-
-                rc = 1;
-                i++;
-                planMkr++;
-                break;
-            }
-
-        }
-
-        for (; i > 0; i--, planMkr++)
-        {
-            if (!((planMkr->id & 0x8000) | (planMkr->id & 0x4000) | (planMkr->id & 0x2000) | (planMkr->id & 0x1000)))
-            {
-                dist = MATH3D_LengthXY(planMkr->pos.x - instance->position.x, planMkr->pos.y - instance->position.y);
-
-                if (dist < closest)
-                {
-                    closest = dist;
-                    vars->current_marker_id = planMkr->id;
-                }
-            }
-        }
-    }
-
-    return rc;
-}
-
-int RONINBSS_GetNextMarkerInSeries(Instance *instance, StreamUnit *su, Position *markerPos)
-{
-
-    int temp; // not from debug symbols
-    int dist; // not from debug symbols
-    RoninbssVars *vars; // not from debug symbols
-    MonsterVars *mv; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    vars = (RoninbssVars *)mv->extraVars;
-
-    if (su == NULL || vars->current_marker_id == -1)
-    {
-        return NO_MARKER;
-    }
-
-    if (PLANAPI_FindNodePositionInUnit(su, markerPos, vars->current_marker_id, 4) != 0)
-    {
-
-        dist = MATH3D_LengthXY(markerPos->x - instance->position.x, markerPos->y - instance->position.y);
-
-        if (dist > 100)
-        {
-            return FAR_SEEK;
-        }
-
-        if (dist > 50)
-        {
-            return CLOSE_SEEK;
-        }
-
-        temp = vars->current_marker_id - 1;
-
-        if (temp <= 0)
-        {
-            return NO_MARKER;
-        }
-
-        vars->current_marker_id = temp;
-
-        if (PLANAPI_FindNodePositionInUnit(su, markerPos, temp, 4) != 0)
-        {
-            return FAR_SEEK;
-        }
-    }
-
-    return NO_MARKER;
-}
-
-Instance *RONINBSS_FindValve(Instance *instance)
-{
-
-    MonsterAttributes *ma; // not from debug symbols
-    RoninbssAttributes *attrs; // not from debug symbols
-
-    ma = (MonsterAttributes *)instance->data;
-    attrs = (RoninbssAttributes *)ma->tunData;
-
-    if (attrs != NULL)
-    {
-
-        Instance *inst; // not from debug symbols
-
-        for (inst = gameTrackerX.instanceList->first; inst != NULL; inst = inst->next)
-        {
-            if (((int *)inst->object->name)[0] == ((int *)attrs->valve_name)[0] && ((int *)inst->object->name)[1] == ((int *)attrs->valve_name)[1])
-            {
-                return inst;
-            }
-        }
-    }
-
-    return NULL;
-}
-
-void RONINBSS_IdleEntry(Instance *instance)
-{
-
-    MonsterVars *mv; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-
-    if (mv->extraVars != NULL)
-    {
-
-        if (mv->mvFlags & 4)
-        {
-            MON_IdleEntry(instance);
-            return;
-        }
-
-        mv->mvFlags &= ~0x20000;
-
-        if (mv->auxFlags & 4)
-        {
-            MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
-            return;
-        }
-
-        if (gameTrackerX.gameData.asmData.MorphType == 1 && (gameTrackerX.gameData.asmData.MorphTime == 1000 || mv->auxFlags & 0x100))
-        {
-            MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
-        }
-        else
-        {
-            MON_PlayAnimFromListIfNotPlaying(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 4, 1);
-        }
-    }
-}
-
-void RONINBSS_Idle(Instance *instance)
-{
-
-    MonsterVars *mv; // not from debug symbols
-    MonsterAttributes *ma; // not from debug symbols
-    RoninbssVars *vars; // not from debug symbols
-    RoninbssAttributes *attrs; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    ma = (MonsterAttributes *)instance->data;
-    vars = (RoninbssVars *)mv->extraVars;
-    attrs = (RoninbssAttributes *)ma->tunData;
-
-    if (vars == NULL || attrs == NULL)
-    {
-        return;
-    }
-
-    if (mv->mvFlags & 4)
-    {
-        MON_Idle(instance);
-        return;
-    }
-
-    if (mv->auxFlags & 0x100)
-    {
-        if (instance->fadeValue == 4096 && mv->auxFlags & 0x1000)
-        {
-            RONINBSS_FadeMove(instance, vars->to_what_plane);
-        }
-
-        if (gameTrackerX.gameData.asmData.MorphTime == 1000)
-        {
-            mv->auxFlags &= ~0x100;
-        }
-    }
-    else if (mv->auxFlags & 4 || (gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 1 && mv->auxFlags & 0x200))
-    {
-        MON_SwitchState(instance, MONSTER_STATE_WANDER);
-    }
-    else
-    {
-        if (mv->auxFlags & 8)
-        {
-            MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 5, 1);
-            mv->auxFlags &= ~8;
-        }
-        else if (mv->auxFlags & 0x10)
-        {
-            switch (vars->anim_state)
-            {
-            case 0:
-                MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 6, 1);
-                vars->anim_state++;
-                break;
-            case 1:
-                if (instance->flags2 & 0x10)
-                {
-                    MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 7, 1);
-                    vars->anim_state++;
-                }
-                break;
-            case 2:
-                if (instance->flags2 & 0x10)
-                {
-                    mv->validUnits[0] = 0;
-                    mv->auxFlags |= 4;
-                }
-                break;
-            }
-        }
-    }
-
-    MON_DefaultQueueHandler(instance);
-}
-
-void RONINBSS_WanderEntry(Instance *instance)
-{
-
-    MonsterVars *mv; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-
-    if (mv->extraVars != NULL)
-    {
-        if (mv->mvFlags & 4)
-        {
-            MON_WanderEntry(instance);
-        }
-        else
-        {
-            RONINBSS_FindClosestMarkerInUnit(instance, STREAM_GetStreamUnitWithID(instance->currentStreamUnitID));
-        }
-    }
-}
-
-void RONINBSS_Wander(Instance *instance)
-{
-
-    Position localloc;
-    RoninbssAttributes *attrs; // not from debug symbols
-    StreamUnit *su; // not from debug symbols
-    RoninbssVars *vars; // not from debug symbols
-    MonsterVars *mv; // not from debug symbols
-    MonsterAttributes *ma; // not from debug symbols
-    Instance *enemyInst; // not from debug symbols
-    MonsterIR *enemy; // not from debug symbols
-    int temp; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    ma = (MonsterAttributes *)instance->data;
-    vars = (RoninbssVars *)mv->extraVars;
-    attrs = (RoninbssAttributes *)ma->tunData;
-
-    if (vars == NULL)
-    {
-        return;
-    }
-
-    if (mv->mvFlags & 4)
-    {
-        MON_Wander(instance);
-        return;
-    }
-
-    enemy = mv->enemy;
-    temp = 1;
-
-    if (enemy != NULL && (mv->auxFlags & 4 || MON_ValidUnit(instance, enemy->instance->currentStreamUnitID)))
-    {
-        enemyInst = mv->enemy->instance;
-        if (MATH3D_LengthXYZ(enemyInst->position.x - instance->position.x, enemyInst->position.y - instance->position.y, enemyInst->position.z - instance->position.z) < attrs->resume_chase_range)
-        {
-            temp = 0;
-            MON_SwitchState(instance, MONSTER_STATE_PURSUE);
-        }
-    }
-
-    if (!temp)
-    {
-        MON_DefaultQueueHandler(instance);
-        return;
-    }
-
-    su = STREAM_GetStreamUnitWithID(instance->currentStreamUnitID);
-
-    if (instance->currentStreamUnitID != vars->markerStreamUnitID)
-    {
-        RONINBSS_FindClosestMarkerInUnit(instance, su);
-        vars->markerStreamUnitID = instance->currentStreamUnitID;
-    }
-
-    temp = RONINBSS_GetNextMarkerInSeries(instance, su, &localloc);
-
-    switch (temp)
-    {
-    case NO_MARKER:
-        AngleMoveToward(&instance->rotation.z, instance->intro->rotation.z, mv->subAttr->speedRunTurn);
-        mv->mvFlags &= ~0x20000;
-        MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
-        break;
-    case CLOSE_SEEK:
-        if (MON_TurnToPosition(instance, &localloc, mv->subAttr->speedRunTurn) == 0)
-        {
-            MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_STANCE_HEALTHY, 2);
-            break;
-        }
-    case FAR_SEEK:
-        MON_TurnToPosition(instance, &localloc, mv->subAttr->speedRunTurn);
-        MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_WALK, 2);
-        break;
-    }
-
-    MON_DefaultQueueHandler(instance);
-}
-
-void RONINBSS_AttackEntry(Instance *instance)
-{
-    MonsterVars *mv; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    MON_AttackEntry(instance);
-
-    if (mv->auxFlags & 1)
-    {
-        mv->auxFlags &= ~1;
-    }
-}
-
-void RONINBSS_Attack(Instance *instance)
-{
-    MON_Attack(instance);
-}
-
-void RONINBSS_CombatEntry(Instance *instance)
-{
-    MonsterVars *mv; // not from debug symbols
-    RoninbssVars *vars; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    vars = (RoninbssVars *)mv->extraVars;
-
-    if (vars != NULL)
-    {
-        MON_CombatEntry(instance);
-        mv->attackState = 0;
-        COPY_SVEC(Position, &vars->last_rb_pos, Position, &instance->position);
-    }
-}
-
-void RONINBSS_Combat(Instance *instance)
-{
-
-    int delta; // not from debug symbols
-    MonsterVars *mv; // not from debug symbols
-    MonsterIR *enemy; // not from debug symbols
-    RoninbssVars *vars; // not from debug symbols
-    RoninbssAttributes *attrs; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    enemy = mv->enemy;
-    vars = (RoninbssVars *)mv->extraVars;
-    attrs = (RoninbssAttributes *)((MonsterAttributes *)instance->data)->tunData;
-
-    if (vars == NULL)
-    {
-        return;
-    }
-
-    if (mv->auxFlags & 1)
-    {
-        switch (RONINBSS_Constrict(instance))
-        {
-        case 1:
-            if (MATH3D_LengthXY(vars->current_constrict_pos.x - gameTrackerX.playerInstance->position.x, vars->current_constrict_pos.y - gameTrackerX.playerInstance->position.y) < 320)
-            {
-                INSTANCE_Post(gameTrackerX.playerInstance, 0x1000000, SetMonsterHitData(instance, 0, attrs->initialDrain * 256, 0, 0));
-            }
-            break;
-        case 2:
-        case 3:
-            switch (mv->attackState)
-            {
-            case 0:
-                mv->mvFlags &= ~0x20000;
-                MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 1, 1);
-                mv->attackState++;
-                break;
-            case 1:
-                if (enemy != NULL)
-                {
-                    MON_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedRunTurn);
-                }
-
-                if (instance->flags2 & 0x10)
-                {
-                    mv->attackState++;
-                    MON_PlayAnimFromList(instance, ((MonsterAttributes *)instance->data)->auxAnimList, 2, 2);
-                }
-                break;
-            case 2:
-                if (enemy == NULL)
-                {
-                    mv->auxFlags &= ~1;
-                    break;
-                }
-
-                delta = MATH3D_LengthXYZ(gameTrackerX.playerInstance->position.x - instance->position.x, gameTrackerX.playerInstance->position.y - instance->position.y, gameTrackerX.playerInstance->position.z - instance->position.z);
-
-                if (!(enemy->mirFlags & 0x20) || attrs->soul_suck_range < delta)
-                {
-                    mv->auxFlags &= ~1;
-                    break;
-                }
-
-                MON_TurnToPosition(instance, &gameTrackerX.playerInstance->position, 0x1000);
-                INSTANCE_Post(gameTrackerX.playerInstance, 0x40006, attrs->constrictDrain * 256);
-                MON_DoDrainEffects(instance, gameTrackerX.playerInstance);
-                break;
-            }
-        }
-    }
-    else
-    {
-        if (enemy == NULL || mv->mvFlags & 4)
-        {
-            MON_SwitchState(instance, MONSTER_STATE_IDLE);
-        }
-        else
-        {
-
-            MonsterCombatAttributes *combat; // not from debug symbols
-
-            combat = mv->subAttr->combatAttributes;
-            mv->lookAtPos = &enemy->instance->position;
-
-            if (enemy->distance < combat->combatRange)
-            {
-                if (ENMYPLAN_PathClear(&vars->last_rb_pos, &instance->position))
-                {
-
-                    int reason; // not from debug symbols
-
-                    reason = MON_ShouldIAttack(instance, enemy, RONINBSS_ChooseAttack(instance, enemy));
-
-                    if (reason == MONSTER_ATTACKRESULT_TOOCLOSE || reason == MONSTER_ATTACKRESULT_TOOFAR)
-                    {
-                        mv->mvFlags |= 0x20000;
-                        MON_PlayAnimIfNotPlaying(instance, MONSTER_ANIM_WALK, 2);
-                    }
-                    else if (reason == MONSTER_ATTACKRESULT_SUCCESS)
-                    {
-                        MON_SwitchState(instance, MONSTER_STATE_ATTACK);
-                    }
-                    else
-                    {
-                        mv->mvFlags &= ~0x20000;
-                        MON_PlayCombatIdle(instance, 2);
-                    }
-                }
-                else
-                {
-                    mv->mvFlags &= ~0x20000;
-                    MON_PlayCombatIdle(instance, 2);
-                }
-
-                MON_TurnToPosition(instance, &enemy->instance->position, mv->subAttr->speedPivotTurn);
-            }
-            else
-            {
-                MON_SwitchState(instance, MONSTER_STATE_PURSUE);
-            }
-        }
-    }
-
-    MON_DefaultQueueHandler(instance);
-    COPY_SVEC(Position, &vars->last_rb_pos, Position, &instance->position);
-}
-
-void RONINBSS_HitEntry(Instance *instance)
-{
-
-    MonsterVars *mv; // not from debug symbols
-    MonsterIR *enemy; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    enemy = mv->enemy;
-
-    RONINBSS_StopSoulSuck(instance);
-
-    mv->mvFlags &= ~0x20000;
-
-    if (mv->auxFlags & 4 || (gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 1))
-    {
-
-        short temp; // not from debug symbols
-
-        if (mv->auxFlags & 0x40)
-        {
-            MON_SwitchStateDoEntry(instance, MONSTER_STATE_PURSUE);
-            return;
-        }
-
-        mv->enemy->mirConditions |= 0x400;
-        mv->enemy->mirFlags &= ~0x1000;
-
-        temp = ((instance->rotation.z - MATH3D_AngleFromPosToPos(&instance->position, &enemy->instance->position)) + 1024) & 0xFFF;
-
-        if (temp < 2048)
-        {
-            MON_TurnToPosition(instance, &enemy->instance->position, 4096);
-            MON_PlayAnim(instance, MONSTER_ANIM_HIT1, 1);
-        }
-        else
-        {
-            MON_PlayAnim(instance, MONSTER_ANIM_HIT2, 1);
-        }
-
-        mv->mode = 0x8000;
-        return;
-    }
-
-    MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
-}
-
-void RONINBSS_Hit(Instance *instance)
-{
-    if (instance->flags2 & 0x10)
-    {
-        MON_SwitchState(instance, MONSTER_STATE_COMBAT);
-    }
-
-    MON_DefaultQueueHandler(instance);
-}
-
-void RONINBSS_FallEntry(Instance *instance)
-{
-
-    MonsterVars *mv; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    RONINBSS_StopSoulSuck(instance);
-
-    if (!(mv->mvFlags & 4))
-    {
-        MON_FallEntry(instance);
-    }
-    else
-    {
-        MON_OnGround(instance);
-        MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
-    }
-}
-
-void RONINBSS_Fall(Instance *instance)
-{
-    MON_Fall(instance);
-}
-
-
-void RONINBSS_PursueEntry(Instance *instance)
-{
-
-    MonsterVars *mv; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    RONINBSS_StopSoulSuck(instance);
-
-    if (mv->auxFlags & 4)
-    {
-        MON_PursueEntry(instance);
-    }
-    else if ((gameTrackerX.gameData.asmData.MorphTime == 1000 && gameTrackerX.gameData.asmData.MorphType == 1) && mv->auxFlags & 0x200)
-    {
-        MON_PursueEntry(instance);
-    }
-    else
-    {
-        MON_SwitchStateDoEntry(instance, MONSTER_STATE_IDLE);
-    }
-}
-
-void RONINBSS_Pursue(Instance *instance) {};
-
-void RONINBSS_DoNothingEntry(Instance *instance)
-{
-    MonsterVars *mv; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    RONINBSS_StopSoulSuck(instance);
-    MON_SwitchStateDoEntry(instance, mv->previousMainState);
-}
-
-
-void RONINBSS_DoNothing(Instance *instance) {};
-
-void RONINBSS_DeadEntry(Instance *instance)
-{
-    MonsterVars *mv; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-    mv->soulJuice = 0;
-    MON_DeadEntry(instance);
-}
-
-
-void RONINBSS_Dead(Instance *instance)
-{
-
-    MonsterVars *mv; // not from debug symbols
-
-    mv = (MonsterVars *)instance->extraData;
-
-    if (mv->causeOfDeath == MONSTER_CAUSEOFDEATH_FIRE && instance->perVertexColor == NULL)
-    {
-
-        CVECTOR *ptr; // not from debug symbols
-        Model *model; // not from debug symbols
-        int i; // not from debug symbols
-
-        model = instance->object->modelList[instance->currentModel];
-        instance->perVertexColor = (CVECTOR *)MEMPACK_Malloc(model->numVertices * sizeof(CVECTOR), MEMORY_TYPE_INSTVTXCOLOR);
-
-        for (ptr = instance->perVertexColor, i = model->numVertices; i != 0; i--, ptr++)
-        {
-            *(long *)ptr = 0x101010;
-        }
-    }
-
-    if (mv->mvFlags & 0x400000 && mv->effectTimer < MON_GetTime(instance))
-    {
-        mv->mvFlags &= ~0x400000;
-        FX_StopAllGlowEffects(instance, 64);
-    }
-
-    while (DeMessageQueue(&mv->messageQueue) != NULL);
-}
-
-#endif
