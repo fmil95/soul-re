@@ -8,7 +8,7 @@
 
 Once its fully overhauled, the source code could then be used for many different purposes, including but not limited to: porting the game to other platforms, improving its performance on console hardware, and developing tools for it such as a level editor.
 
-For the decompilation of the next game in the series, check the [Soul Reaver 2 decompilation project](https://github.com/fmil95/soul-re2).
+If you're looking for the PC port, that's [Rewraithed](https://github.com/fmil95/rewraithed). For the decomp of the next game, check the [Soul Reaver 2 decompilation project](https://github.com/fmil95/soul-re2).
 
 ## Progress
 
