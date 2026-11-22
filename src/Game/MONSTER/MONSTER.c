@@ -1162,11 +1162,7 @@ void MON_ImpaleDeath(Instance *instance)
     }
 }
 
-// Close match, the impaler local gets checked for NULL twice a row in the target ASM (96.41%)
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/MONSTER/MONSTER", MON_TerrainImpaleDeathEntry);
-#else
-void MON_TerrainImpaleDeathEntry(Instance *instance) 
+void MON_TerrainImpaleDeathEntry(Instance *instance)
 {
     MonsterVars *mv;
     MonsterAttributes *ma;
@@ -1210,6 +1206,11 @@ void MON_TerrainImpaleDeathEntry(Instance *instance)
     {
         impaler->flags &= ~0x8000;
     }
+    else
+    {
+        // redundant, but makes the compiler keep the second NULL check below like the target ASM does
+        impaler = NULL;
+    }
 
     if (impaler == NULL)
     {
@@ -1221,18 +1222,17 @@ void MON_TerrainImpaleDeathEntry(Instance *instance)
         {
             if ((impaler->rotation.x & 0xFFF) < 682)
             {
-                MON_PlayAnim(instance, MONSTER_ANIM_IMPALEVERT, 1);
-            } 
-            else 
-            {
-                MON_PlayAnim(instance, MONSTER_ANIM_IMPALEHORZ, 1);
+                goto vert;
             }
-        } 
+
+            MON_PlayAnim(instance, MONSTER_ANIM_IMPALEHORZ, 1);
+        }
         else if (abs((impaler->rotation.x & 0xFFF) - 4096) < 682)
         {
+        vert:
             MON_PlayAnim(instance, MONSTER_ANIM_IMPALEVERT, 1);
-        } 
-        else 
+        }
+        else
         {
             MON_PlayAnim(instance, MONSTER_ANIM_IMPALEHORZ, 1);
         }
@@ -1240,7 +1240,6 @@ void MON_TerrainImpaleDeathEntry(Instance *instance)
 
     mv->causeOfDeath = 0;
 }
-#endif
 
 void MON_TerrainImpaleDeath(Instance *instance)
 {
