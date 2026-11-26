@@ -101,15 +101,13 @@ void WALLCR_SetFlex(Instance *instance, short flex)
     G2Anim_SetController_Vector(&instance->anim, 18, 14, (G2SVector3 *)&vec);
 }
 
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Overlays/wallcr/wallcr", WALLCR_CollideFace);
-#else
 void *WALLCR_CollideFace(Level *level, Position *start, Position *end, Position *hit, Normal *norm)
 {
     PCollideInfo pcollideInfo;
     SVECTOR oldVector;
     SVECTOR newVector;
     void *result; // not from debug symbols
+    short endZ; // not from debug symbols
 
     result = NULL;
 
@@ -119,6 +117,7 @@ void *WALLCR_CollideFace(Level *level, Position *start, Position *end, Position 
 
     newVector.vx = end->x;
     newVector.vy = end->y;
+    endZ         = end->z;
 
     pcollideInfo.oldPoint = &oldVector;
     pcollideInfo.newPoint = &newVector;
@@ -126,7 +125,7 @@ void *WALLCR_CollideFace(Level *level, Position *start, Position *end, Position 
     pcollideInfo.collideType = 1;
     pcollideInfo.instance = NULL;
 
-    newVector.vz = end->z;
+    newVector.vz = endZ;
 
     COLLIDE_PointAndWorld(&pcollideInfo, level);
 
@@ -151,7 +150,6 @@ void *WALLCR_CollideFace(Level *level, Position *start, Position *end, Position 
 
     return result;
 }
-#endif
 
 int WALLCR_NearFloor(Instance *instance)
 {
