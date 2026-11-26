@@ -207,9 +207,6 @@ int ALUKA_NotDaylight(Level *level)
 
 }
 
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Overlays/aluka/aluka", ALUKA_CapDepth);
-#else
 int ALUKA_CapDepth(Instance *instance, Level *level)
 {
     AlukaAttributes *attrs; // not from debug symbols
@@ -217,6 +214,7 @@ int ALUKA_CapDepth(Instance *instance, Level *level)
     int time; // not from debug symbols
     int minutes; // not from debug symbols
     int duration; // not from debug symbols
+    int hours; // not from debug symbols
 
     attrs = (AlukaAttributes *)((MonsterAttributes *)instance->data)->tunData;
 
@@ -229,7 +227,9 @@ int ALUKA_CapDepth(Instance *instance, Level *level)
         switch (GAMELOOP_GetTimeOfDayIdx(time))
         {
         case 1:
-            minutes = ((time % 100) + ((time / 100) * 60)) - 360;
+            hours   = time / 100;
+            minutes = ((hours * 60) + (time % 100)) - 360;
+
             duration = 60;
 
             depth = attrs->min_swim_depth + (((attrs->daylight_depth - attrs->min_swim_depth) * minutes) / duration);
@@ -238,7 +238,9 @@ int ALUKA_CapDepth(Instance *instance, Level *level)
             depth = attrs->daylight_depth;
             break;
         case 3:
-            minutes = ((time % 100) + ((time / 100) * 60)) - 1080;
+            hours   = time / 100;
+            minutes = ((hours * 60) + (time % 100)) - 1080;
+
             duration = 60;
 
             depth = attrs->daylight_depth + (((attrs->min_swim_depth - attrs->daylight_depth) * minutes) / duration);
@@ -255,7 +257,6 @@ int ALUKA_CapDepth(Instance *instance, Level *level)
 
     return depth;
 }
-#endif
 
 int ALUKA_AngleTooWide(Position *first, Position *second, int cosmult, int cosshift)
 {
