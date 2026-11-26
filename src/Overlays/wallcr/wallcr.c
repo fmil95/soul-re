@@ -175,9 +175,6 @@ int WALLCR_NearFloor(Instance *instance)
     return 0;
 }
 
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Overlays/wallcr/wallcr", WALLCR_FindJumpOnPoint);
-#else
 int WALLCR_FindJumpOnPoint(Instance *instance, Position *point, Normal *norm)
 {
     Position start; // not from debug symbols
@@ -192,10 +189,10 @@ int WALLCR_FindJumpOnPoint(Instance *instance, Position *point, Normal *norm)
 
     level = STREAM_GetLevelWithID(instance->currentStreamUnitID);
 
-    i = 0;
-
     if (level != NULL)
     {
+        i = 0;
+
         COPY_SVEC(Position, &center, Position, point);
 
         offset.x = 320;
@@ -207,9 +204,10 @@ int WALLCR_FindJumpOnPoint(Instance *instance, Position *point, Normal *norm)
         do
         {
             start.x = center.x - offset.x;
-            end.y = center.y + offset.y;
             start.y = center.y - offset.y;
+            
             end.x = center.x + offset.x;
+            end.y = center.y + offset.y;
 
             result = WALLCR_CollideFace(level, &start, &end, point, norm);
 
@@ -230,7 +228,6 @@ int WALLCR_FindJumpOnPoint(Instance *instance, Position *point, Normal *norm)
 
     return (int)(intptr_t)result;
 }
-#endif
 
 int WALLCR_AngleFromPosToPos(Position *from, Position *to, Rotation *rot)
 {
