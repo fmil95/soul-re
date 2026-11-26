@@ -205,7 +205,7 @@ int WALLCR_FindJumpOnPoint(Instance *instance, Position *point, Normal *norm)
         {
             start.x = center.x - offset.x;
             start.y = center.y - offset.y;
-            
+
             end.x = center.x + offset.x;
             end.y = center.y + offset.y;
 
@@ -904,9 +904,6 @@ int WALLCR_ShouldSurpriseAttack(Instance *instance)
     return 0;
 }
 
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Overlays/wallcr/wallcr", WALLCR_MoveToDestination);
-#else
 int WALLCR_MoveToDestination(Instance *instance, Position *target)
 {
     Position pos;
@@ -959,7 +956,7 @@ int WALLCR_MoveToDestination(Instance *instance, Position *target)
             }
         }
 
-        return 1;
+        goto exit;
     }
 
     result = WALLCR_SeekPath(instance, &pos, &mv->destination, 0, 0x181A1F);
@@ -992,8 +989,10 @@ int WALLCR_MoveToDestination(Instance *instance, Position *target)
     }
 
     return 0;
+
+exit:
+    return 1;
 }
-#endif
 
 void WALLCR_Message(Instance *instance, unsigned long message, unsigned long data)
 {
