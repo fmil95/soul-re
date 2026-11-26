@@ -12,7 +12,12 @@
 #include "Game/G2/QUATG2.h"
 #include "Game/PSX/MAIN.h"
 
-int D_800D0D10 = 0x34FFFFFF;
+// int D_800D0D10 = 0x34FFFFFF;
+
+// declared without a size first so that GCC doesn't treat it as small data and addresses it with %hi and %lo relatives instead of accessing $gp
+extern int D_800D0D10[]; 
+
+int D_800D0D10[] __attribute__((section(".sdata"))) = { 0x34FFFFFF };
 
 void PIPE3D_AspectAdjustMatrix(MATRIX *matrix)
 {
@@ -613,15 +618,12 @@ void PIPE3D_CalcWorldToSplitPlaneTransform(MATRIX *wpTransform, SVector *normal,
     wpTransform->t[2] = vector.z;
 }
 
-// Close match, has an ordering issue with the globals (95.71%) 
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/PIPE3D", PIPE3D_TransformAnimatedSplitInstanceVertices);
-#else
 long PIPE3D_TransformAnimatedSplitInstanceVertices(MVertex *vertexList, PVertex *poolVertex, Model *model, MATRIX *wcTransform, MATRIX *matrixPool, Mirror *mirror, MATRIX *lm, CVECTOR *vertexColor, CVECTOR *vertexSrcCol)
 {
     TransformAnimatedInstanceVerticesWork_t *w = (TransformAnimatedInstanceVerticesWork_t *)getScratchAddr(0);
     MATRIX *segMatrix;
     long i;
+    Normal *normalList; // not from decls.h
     Segment *segment = model->segmentList;
     CVECTOR defaultRGBCD = *(CVECTOR *)&D_800D0D10; // TODO: this line needs proper assignment of the values 
 
@@ -665,6 +667,8 @@ long PIPE3D_TransformAnimatedSplitInstanceVertices(MVertex *vertexList, PVertex 
 
             vtxcolflgs = 0;
 
+            normalList = gNormalList;
+
             firstVertex = &vertexList[segment->firstVertex];
 
             white = *(CVECTOR *)&D_800D0D10; // ???
@@ -690,9 +694,9 @@ long PIPE3D_TransformAnimatedSplitInstanceVertices(MVertex *vertexList, PVertex 
                 gte_ldv0(&modelVertex[0]);
                 gte_nrtv0tr();
 
-                n0 = &gNormalList[modelVertex[0].normal];
-                n1 = &gNormalList[modelVertex[1].normal];
-                n2 = &gNormalList[modelVertex[2].normal];
+                n0 = &normalList[modelVertex[0].normal];
+                n1 = &normalList[modelVertex[1].normal];
+                n2 = &normalList[modelVertex[2].normal];
 
                 gte_stlvnl(&w->vector);
 
@@ -802,7 +806,7 @@ long PIPE3D_TransformAnimatedSplitInstanceVertices(MVertex *vertexList, PVertex 
                 gte_ldv0(modelVertex);
                 gte_nrtv0tr();
 
-                n0 = &gNormalList[modelVertex->normal];
+                n0 = &normalList[modelVertex->normal];
 
                 gte_stlvnl(&w->vector);
 
@@ -842,7 +846,6 @@ long PIPE3D_TransformAnimatedSplitInstanceVertices(MVertex *vertexList, PVertex 
 
     return 0;
 }
-#endif 
 
 void PIPE3D_TransformSplitInstanceVertices(MVertex *vertexList, PVertex *pvertex, Model *model, MATRIX *wpTransform, MATRIX *matrixPool, Mirror *mirror)
 {
