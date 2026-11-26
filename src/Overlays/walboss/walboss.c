@@ -1256,9 +1256,6 @@ void WALBOSS_Combat(Instance *instance)
 }
 #endif
 
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Overlays/walboss/walboss", WALBOSS_AttackEntry);
-#else
 void WALBOSS_AttackEntry(Instance *instance)
 {
     MonsterVars *mv; // not from debug symbols
@@ -1267,11 +1264,12 @@ void WALBOSS_AttackEntry(Instance *instance)
     mv = (MonsterVars *)instance->extraData;
     attack = mv->attackType;
 
+    do {} while (0); // garbage code for reordering
+
     mv->mode = 0x200000;
 
     MON_PlayAnimFromList(instance, attack->animList, 0, 1);
 }
-#endif
 
 void WALBOSS_Attack(Instance *instance)
 {
@@ -1282,6 +1280,7 @@ void WALBOSS_Attack(Instance *instance)
 
     mv = (MonsterVars *)instance->extraData;
     extraVars = mv->extraVars;
+    
     enemy = mv->enemy;
     attack = mv->attackType;
 
