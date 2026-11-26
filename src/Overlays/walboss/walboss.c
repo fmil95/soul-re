@@ -1273,20 +1273,19 @@ void WALBOSS_AttackEntry(Instance *instance)
 }
 #endif
 
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Overlays/walboss/walboss", WALBOSS_Attack);
-#else
 void WALBOSS_Attack(Instance *instance)
 {
     MonsterVars *mv; // not from debug symbols
     MonsterIR *enemy; // not from debug symbols
     MonsterAttackAttributes *attack; // not from debug symbols
+    void *extraVars; // not from debug symbols
 
     mv = (MonsterVars *)instance->extraData;
+    extraVars = mv->extraVars;
     enemy = mv->enemy;
     attack = mv->attackType;
 
-    if (mv->extraVars != NULL)
+    if (extraVars != NULL)
     {
         if (mv->mvFlags & 0x4)
         {
@@ -1333,7 +1332,6 @@ void WALBOSS_Attack(Instance *instance)
         MON_DefaultQueueHandler(instance);
     }
 }
-#endif
 
 void WALBOSS_HitEntry(Instance *instance)
 {
