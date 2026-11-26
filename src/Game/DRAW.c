@@ -794,10 +794,6 @@ unsigned long *DRAW_DrawGlowPoint(Instance *instance, long seg1, PrimPool *primP
     return primPool->nextPrim;
 }
 
-// Close match, but the block merging isn't accurate (99.38%)
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Game/DRAW", DRAW_DisplayTFace_zclipped_C);
-#else
 int DRAW_DisplayTFace_zclipped_C(SVECTOR *vertex0, SVECTOR *vertex1, SVECTOR *vertex2, UVTYPE *uv0, UVTYPE *uv1, UVTYPE *uv2, long color0, long color1, long color2, PrimPool *primPool, unsigned long **ot, int ndiv)
 {
     SP_SUBDIV_STRUCT *sp;
@@ -1017,126 +1013,125 @@ int DRAW_DisplayTFace_zclipped_C(SVECTOR *vertex0, SVECTOR *vertex1, SVECTOR *ve
 
     maxz >>= 2;
 
-    if (maxz < 3072)
-    {
-        if (ndiv == 0)
-        {
-            int next;
-            int flag;
-
-            flag = 0;
-
-            for (n = 0; n < point; n++)
-            {
-                next = n + 1;
-
-                if (next >= point)
-                {
-                    next = 0;
-                }
-
-                if ((abs_diff(sp->sxy[n].vx, sp->sxy[next].vx) >= 1024) || (abs_diff(sp->sxy[n].vy, sp->sxy[next].vy) >= 512))
-                {
-                    flag = 1;
-                    break;
-                }
-            }
-
-            if ((flag == 0) && (point == 4))
-            {
-                if ((abs_diff(sp->sxy[3].vx, sp->sxy[1].vx) >= 1024) || (abs_diff(sp->sxy[3].vy, sp->sxy[1].vy) >= 512))
-                {
-                    flag = 1;
-                }
-            }
-
-            if (flag != 0)
-            {
-                gte_ldv3(vertex0, vertex1, vertex2);
-
-                ((ColorType *)&sp->color[2])->code = ((ColorType *)&sp->color[0])->code;
-
-                gte_ldrgb3(&sp->color[0], &sp->color[1], &sp->color[2]);
-
-                *(long *)&prim->u0 = *(long *)uv0;
-                *(long *)&prim->u1 = *(long *)uv1;
-                *(long *)&prim->u2 = *(long *)uv2;
-
-                DRAW_Zclip_subdiv((POLY_GT3 *)prim, ot, 1);
-
-                return 1;
-            }
-        }
-
-        {
-        long opz;
-
-        gte_ldsxy3(*(long *)&prim->x0, *(long *)&prim->x1, *(long *)&prim->x2);
-        gte_nclip();
-
-        prim->clut  = ((unsigned short *)&sp->texinfo[0])[1];
-        prim->tpage = ((unsigned short *)&sp->texinfo[1])[1];
-
-        gte_stopz(&opz);
-
-        if (opz > 0)
-        {
-            return 4;
-        }
-        }
-
-        if (point == 3)
-        {
-            prim->code = color0 >> 24;
-
-            // addPrim(ot[maxz], prim);
-
-            prim->tag = getaddr(&ot[maxz]) | 0x9000000;
-            ot[maxz]  = (unsigned long *)((intptr_t)prim & 0xFFFFFF);
-
-            primPool->nextPrim += sizeof(POLY_GT3) / sizeof(unsigned long);
-            primPool->numPrims++;
-
-            return 1;
-        }
-
-        if (point == 4)
-        {
-            long temp1;
-            long temp2;
-            long temp3;
-
-            temp1 = *(long *)&prim->r2;
-            temp2 = *(long *)&prim->x2;
-            temp3 = *(long *)&prim->u2;
-
-            prim->code = (color0 >> 24) | 0x8;
-
-            *(long *)&prim->r2 = *(long *)&prim->r3;
-            *(long *)&prim->x2 = *(long *)&prim->x3;
-            *(long *)&prim->u2 = *(long *)&prim->u3;
-
-            *(long *)&prim->r3 = temp1;
-            *(long *)&prim->x3 = temp2;
-            *(long *)&prim->u3 = temp3;
-
-            // addPrim(ot[maxz], prim);
-
-            prim->tag = getaddr(&ot[maxz]) | 0xC000000;
-            ot[maxz]  = (unsigned long *)((intptr_t)prim & 0xFFFFFF);
-
-            primPool->nextPrim += sizeof(POLY_GT4) / sizeof(unsigned long);
-            primPool->numPrims++;
-
-            return 1;
-        }
-    }
-    else
+    if (maxz >= 3072)
     {
         return 2;
     }
+
+    if (ndiv == 0)
+    {
+        int next;
+        int flag;
+
+        flag = 0;
+
+        for (n = 0; n < point; n++)
+        {
+            next = n + 1;
+
+            if (next >= point)
+            {
+                next = 0;
+            }
+
+            if ((abs_diff(sp->sxy[n].vx, sp->sxy[next].vx) >= 1024) || (abs_diff(sp->sxy[n].vy, sp->sxy[next].vy) >= 512))
+            {
+                flag = 1;
+                break;
+            }
+        }
+
+        if ((flag == 0) && (point == 4))
+        {
+            if ((abs_diff(sp->sxy[3].vx, sp->sxy[1].vx) >= 1024) || (abs_diff(sp->sxy[3].vy, sp->sxy[1].vy) >= 512))
+            {
+                flag = 1;
+            }
+        }
+
+        if (flag != 0)
+        {
+            gte_ldv3(vertex0, vertex1, vertex2);
+
+            ((ColorType *)&sp->color[2])->code = ((ColorType *)&sp->color[0])->code;
+
+            gte_ldrgb3(&sp->color[0], &sp->color[1], &sp->color[2]);
+
+            *(long *)&prim->u0 = *(long *)uv0;
+            *(long *)&prim->u1 = *(long *)uv1;
+            *(long *)&prim->u2 = *(long *)uv2;
+
+            DRAW_Zclip_subdiv((POLY_GT3 *)prim, ot, 1);
+
+            return 1;
+        }
+    }
+
+    {
+    long opz;
+
+    gte_ldsxy3(*(long *)&prim->x0, *(long *)&prim->x1, *(long *)&prim->x2);
+    gte_nclip();
+
+    prim->clut  = ((unsigned short *)&sp->texinfo[0])[1];
+    prim->tpage = ((unsigned short *)&sp->texinfo[1])[1];
+
+    gte_stopz(&opz);
+
+    if (opz > 0)
+    {
+        return 4;
+    }
+    }
+
+    if (point == 3)
+    {
+        prim->code = color0 >> 24;
+
+        // addPrim(ot[maxz], prim);
+
+        prim->tag = getaddr(&ot[maxz]) | 0x9000000;
+        ot[maxz]  = (unsigned long *)((intptr_t)prim & 0xFFFFFF);
+
+        primPool->nextPrim += sizeof(POLY_GT3) / sizeof(unsigned long);
+        primPool->numPrims++;
+
+        return 1;
+    }
+
+    if (point == 4)
+    {
+        long temp1;
+        long temp2;
+        long temp3;
+
+        temp1 = *(long *)&prim->r2;
+        temp2 = *(long *)&prim->x2;
+        temp3 = *(long *)&prim->u2;
+
+        prim->code = (color0 >> 24) | 0x8;
+
+        *(long *)&prim->r2 = *(long *)&prim->r3;
+        *(long *)&prim->x2 = *(long *)&prim->x3;
+        *(long *)&prim->u2 = *(long *)&prim->u3;
+
+        *(long *)&prim->r3 = temp1;
+        *(long *)&prim->x3 = temp2;
+        *(long *)&prim->u3 = temp3;
+
+        // addPrim(ot[maxz], prim);
+
+        prim->tag = getaddr(&ot[maxz]) | 0xC000000;
+        ot[maxz]  = (unsigned long *)((intptr_t)prim & 0xFFFFFF);
+
+        primPool->nextPrim += sizeof(POLY_GT4) / sizeof(unsigned long);
+        primPool->numPrims++;
+
+        return 1;
+    }
+
+    return 2;
 }
-#endif
 
 long *DRAW_Zclip_subdiv(POLY_GT3 *texture, unsigned long **ot, int ndiv)
 {
