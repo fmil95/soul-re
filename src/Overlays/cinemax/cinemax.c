@@ -71,10 +71,6 @@ void func_88000138()
     }
 }
 
-// Damn near match, but has $s7 and $s8 registers swapped (99.94%!)
-#ifndef NON_MATCHING
-INCLUDE_ASM("asm/nonmatchings/Overlays/cinemax/cinemax", func_880001C4);
-#else
 int func_880001C4(char* strfile, unsigned short mask, int buffers) 
 {
     CdlFILE sp18;
@@ -93,13 +89,13 @@ int func_880001C4(char* strfile, unsigned short mask, int buffers)
     int var_s5;
     unsigned short temp_a1;
     unsigned short temp_s0;
-    unsigned short var_fp;
     unsigned short var_s7;
+    unsigned short var_fp;
     unsigned int temp_lo;
 
     var_s5 = 0;
-    var_fp = 0;
     var_s7 = 0;
+    var_fp = 0;
     
     D_880125F8 = 1;
     D_8801260C = buffers;
@@ -222,13 +218,12 @@ int func_880001C4(char* strfile, unsigned short mask, int buffers)
             var_s5 = temp_v0 & mask;
         }
         
-        var_s7 = temp_s0;
-        
         if (temp_a0 & mask) 
         {
             var_s5 = temp_a0 & mask;
         }
         
+        var_s7 = temp_s0;
         var_fp = temp_a1;
         
         if (var_s5 != 0) 
@@ -273,7 +268,6 @@ int func_880001C4(char* strfile, unsigned short mask, int buffers)
     
     return D_88012604 != 0;
 }
-#endif 
 
 void func_880006C0(char *buff1, char *buff2, char *buff3, char *buff4, BufferInfo *bufferInfo)
 {
